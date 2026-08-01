@@ -33,6 +33,10 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.LeavittFamily.compressedHom_commutes_cornerHom
 #print axioms NonsoficGroupsExist.LeavittFamily.compressedHom_eq_cornerHom_iff
 #print axioms NonsoficGroupsExist.hammingDistance
+#print axioms NonsoficGroupsExist.hammingDistance_eq_zero_iff
+#print axioms NonsoficGroupsExist.hammingDistance_left_invariant
+#print axioms NonsoficGroupsExist.hammingDistance_right_invariant
+#print axioms NonsoficGroupsExist.hammingDistance_triangle
 #print axioms NonsoficGroupsExist.SoficApproximation
 #print axioms NonsoficGroupsExist.IsSofic
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
