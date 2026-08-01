@@ -110,6 +110,8 @@ theorem characteristicTwo_involution
   have htwo : (1 : A) + 1 = 0 := CharTwo.add_self_eq_zero 1
   have hcorner : (1 : A) + L.p1 = L.p0 := by
     exact CharTwo.add_eq_iff_eq_add.mpr L.p0_add_p1.symm
+  change !![1, L.s1; 0, 1] * !![1, 0; L.t1, 1] * !![1, L.s1; 0, 1] =
+    !![L.p0, L.s1; L.t1, 0]
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;>
@@ -125,7 +127,11 @@ theorem characteristicTwo_compressor
   have hcorner : L.p0 + (1 : A) = L.p1 := by
     rw [add_comm]
     apply CharTwo.add_eq_iff_eq_add.mpr
-    simpa [add_comm] using L.p0_add_p1.symm
+    rw [add_comm]
+    exact L.p0_add_p1.symm
+  change !![1, 0; 1 + L.t0, 1] * !![1, 1; 0, 1] *
+      !![1, 0; 1 + L.s0, 1] * !![1, L.t0; 0, 1] =
+    !![L.s0, L.s1 * L.t1; 0, L.t0]
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;>
@@ -141,7 +147,7 @@ theorem z_sq : L.z * L.z = 1 := by
   rw [Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [L.p0_add_p1]
+    simp [p1, L.p0_add_p1, L.t1_s1]
 
 end LeavittFamily
 end NonsoficGroupsExist
