@@ -41,6 +41,8 @@ def p1 : A := L.s1 * L.t1
 
 @[simp] theorem p0_add_p1 : L.p0 + L.p1 = 1 := L.sum_range
 
+@[simp] theorem p0_add_s1t1 : L.p0 + L.s1 * L.t1 = 1 := L.sum_range
+
 @[simp] theorem p0_mul_p0 : L.p0 * L.p0 = L.p0 := by
   calc
     (L.s0 * L.t0) * (L.s0 * L.t0) = L.s0 * ((L.t0 * L.s0) * L.t0) := by
@@ -135,10 +137,12 @@ theorem characteristicTwo_compressor
   have hcancel (a : A) : 1 + a + 1 = a := by
     rw [add_comm 1 a]
     exact CharTwo.add_cancel_right a 1
+  have hzero (a : A) : 1 + a + (a + 1) = 0 := by
+    rw [add_assoc, CharTwo.add_cancel_left a 1, CharTwo.add_self_eq_zero]
   unfold x12 x21
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp [hcancel, mul_add]
+  fin_cases i <;> fin_cases j <;> simp [hcancel, hzero, mul_add]
 
 /-- The two-by-two matrix called `z` in both the adjacent-rank and rank-two
 constructions. -/
@@ -149,7 +153,7 @@ theorem z_sq : L.z * L.z = 1 := by
   change !![L.p0, L.s1; L.t1, 0] * !![L.p0, L.s1; L.t1, 0] = 1
   rw [Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp [p0, L.sum_range]
+  fin_cases i <;> fin_cases j <;> simp
 
 end LeavittFamily
 end NonsoficGroupsExist
