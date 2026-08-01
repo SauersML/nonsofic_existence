@@ -5,6 +5,7 @@ import NonsoficGroupsExist.Selection
 import NonsoficGroupsExist.MedianNormalization
 import NonsoficGroupsExist.LEF
 import NonsoficGroupsExist.ThompsonObstruction
+import NonsoficGroupsExist.Scheme
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -36,6 +37,8 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.exists_local_word_control
 #print axioms NonsoficGroupsExist.ThompsonObstruction.finite_commute_of_two_relations
 #print axioms NonsoficGroupsExist.ThompsonObstruction.not_isLEF_of_two_relations
+#print axioms NonsoficGroupsExist.LeavittFamily.compressed_inf_corner
+#print axioms NonsoficGroupsExist.LeavittFamily.not_isLEF_cornerSubgroup
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
 #print axioms NonsoficGroupsExist.permutation_conservation
