@@ -27,3 +27,6 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.LeavittFamily.binaryUnitsEquiv
 #print axioms NonsoficGroupsExist.LeavittFamily.cornerHom
 #print axioms NonsoficGroupsExist.LeavittFamily.cornerHom_injective
+#print axioms NonsoficGroupsExist.LeavittFamily.compressedHom
+#print axioms NonsoficGroupsExist.LeavittFamily.compressedHom_commutes_cornerHom
+#print axioms NonsoficGroupsExist.LeavittFamily.compressedHom_eq_cornerHom_iff
