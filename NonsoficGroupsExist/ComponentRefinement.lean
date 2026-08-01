@@ -142,5 +142,21 @@ theorem image_sdiff_target_card (R : ComponentRefinement X P Q q y) :
   congr 1
   rw [Finset.inter_comm]
 
+/-- The refinement estimate expressed directly as a leakage cardinality. -/
+theorem cheeger_mul_leakage_le_crossing (R : ComponentRefinement X P Q q y) :
+    R.cheeger * (((P.block y).image q \ R.target).card : ℝ) ≤
+      4 * ((X.transport (blockModel P y) R.vertexEquiv).crossingEdges
+        (componentTargetLabel P Q q y)).card := by
+  rw [R.image_sdiff_target_card]
+  have hcell :
+      ((X.transport (blockModel P y) R.vertexEquiv).cell
+        (componentTargetLabel P Q q y) {R.target}).card ≤ (P.block y).card := by
+    calc
+      _ ≤ Fintype.card (X.transport (blockModel P y) R.vertexEquiv).vertex :=
+        Finset.card_le_univ _
+      _ = (P.block y).card := by simp
+  rw [Nat.cast_sub hcell]
+  exact R.leakage_bound
+
 end ComponentRefinement
 end NonsoficGroupsExist
