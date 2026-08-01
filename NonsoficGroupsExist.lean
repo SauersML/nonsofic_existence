@@ -1,4 +1,10 @@
 import NonsoficGroupsExist.Asymptotics
+import NonsoficGroupsExist.Pinning
+import NonsoficGroupsExist.Refinement
+import NonsoficGroupsExist.Selection
+import NonsoficGroupsExist.MedianNormalization
+import NonsoficGroupsExist.LEF
+import NonsoficGroupsExist.ThompsonObstruction
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -21,6 +27,15 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.Vanishing.sum
 #print axioms NonsoficGroupsExist.Negligible.mono
 #print axioms NonsoficGroupsExist.Negligible.sum
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.median_pinning
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.exists_dominant_cell
+#print axioms NonsoficGroupsExist.exists_selection_diverging
+#print axioms NonsoficGroupsExist.medianNormalize_loss
+#print axioms NonsoficGroupsExist.medianNormalize_ratio
+#print axioms NonsoficGroupsExist.card_symmDiff_le
+#print axioms NonsoficGroupsExist.exists_local_word_control
+#print axioms NonsoficGroupsExist.ThompsonObstruction.finite_commute_of_two_relations
+#print axioms NonsoficGroupsExist.ThompsonObstruction.not_isLEF_of_two_relations
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
 #print axioms NonsoficGroupsExist.permutation_conservation
