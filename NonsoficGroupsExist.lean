@@ -3,6 +3,7 @@ import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.ExternalInputs
 import NonsoficGroupsExist.LocalCriterion
+import NonsoficGroupsExist.LocalizedApproximation
 import NonsoficGroupsExist.Pinning
 import NonsoficGroupsExist.Refinement
 import NonsoficGroupsExist.Selection
@@ -74,6 +75,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.KunTheorem
 #print axioms NonsoficGroupsExist.KunThomTheorem
 #print axioms NonsoficGroupsExist.CompressionSetup.ambientGenerators_generate
+#print axioms NonsoficGroupsExist.LocalizedApproximationData.completedMap_disagreement_vanishing
 #print axioms NonsoficGroupsExist.Vanishing.add
 #print axioms NonsoficGroupsExist.Vanishing.sum
 #print axioms NonsoficGroupsExist.Negligible.mono
