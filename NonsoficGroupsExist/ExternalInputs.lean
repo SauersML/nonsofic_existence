@@ -7,8 +7,8 @@ import Mathlib.GroupTheory.Finiteness
 
 The cited results are propositions supplied to the final assembly theorem, not
 new constants.  Consequently a proof depending on one of these interfaces
-records that proposition in its ordinary hypotheses; it never acquires a
-user-defined kernel axiom.
+records that proposition in its ordinary hypotheses; it never adds a primitive
+logical assumption to the environment.
 -/
 
 namespace NonsoficGroupsExist
