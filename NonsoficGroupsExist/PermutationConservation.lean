@@ -60,4 +60,17 @@ theorem permutation_conservation_abs {Y : Type*} [Fintype Y]
             rw [Finset.sum_add_distrib]
     _ = 2 * ∑ y, max (f y - f (π y)) 0 := by rw [← h]; ring
 
+/-- Lemma `lem:conserve` in exactly the chained form stated in the manuscript. -/
+theorem permutation_conservation_full {Y : Type*} [Fintype Y]
+    (π : Y ≃ Y) (f : Y → ℝ) :
+    (∑ y, max (f y - f (π y)) 0) =
+        ∑ y, max (f (π y) - f y) 0 ∧
+      (∑ y, max (f (π y) - f y) 0) =
+        (1 / 2 : ℝ) * ∑ y, |f (π y) - f y| := by
+  have h := permutation_conservation π f
+  constructor
+  · exact h
+  · rw [← h, permutation_conservation_abs]
+    ring
+
 end NonsoficGroupsExist
