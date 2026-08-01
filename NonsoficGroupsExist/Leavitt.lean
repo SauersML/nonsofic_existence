@@ -124,7 +124,7 @@ theorem characteristicTwo_involution
   unfold x12 x21
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp
+  fin_cases i <;> fin_cases j <;> simp [p0, mul_assoc]
 
 /-- Lemma `lem:chartwo` (b): the two-by-two compressor block is an explicit
 product of four elementary matrices. -/
@@ -132,10 +132,13 @@ theorem characteristicTwo_compressor
     [CharP A 2] :
     x21 (1 + L.t0) * x12 1 * x21 (1 + L.s0) * x12 L.t0 =
       !![L.s0, L.s1 * L.t1; 0, L.t0] := by
+  have hcancel (a : A) : 1 + a + 1 = a := by
+    rw [add_comm 1 a]
+    exact CharTwo.add_cancel_right a 1
   unfold x12 x21
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp
+  fin_cases i <;> fin_cases j <;> simp [hcancel, mul_add]
 
 /-- The two-by-two matrix called `z` in both the adjacent-rank and rank-two
 constructions. -/
@@ -146,7 +149,7 @@ theorem z_sq : L.z * L.z = 1 := by
   change !![L.p0, L.s1; L.t1, 0] * !![L.p0, L.s1; L.t1, 0] = 1
   rw [Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp
+  fin_cases i <;> fin_cases j <;> simp [p0, L.sum_range]
 
 end LeavittFamily
 end NonsoficGroupsExist
