@@ -21,6 +21,7 @@ import NonsoficGroupsExist.Localization
 import NonsoficGroupsExist.MatrixSelfSimilarity
 import NonsoficGroupsExist.PermutationConservation
 import NonsoficGroupsExist.Sofic
+import NonsoficGroupsExist.SoficErrors
 import NonsoficGroupsExist.Whitehead
 import NonsoficGroupsExist.TableCover
 import NonsoficGroupsExist.LeavittWords
@@ -126,6 +127,8 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.SoficApproximation
 #print axioms NonsoficGroupsExist.SoficApproximation.map_one_close
 #print axioms NonsoficGroupsExist.SoficApproximation.word_close
+#print axioms NonsoficGroupsExist.SoficApproximation.multiplicationError_negligible
+#print axioms NonsoficGroupsExist.SoficApproximation.fixedError_negligible
 #print axioms NonsoficGroupsExist.IsSofic
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.transport_boundaryCard
