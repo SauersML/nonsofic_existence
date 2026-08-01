@@ -121,6 +121,9 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.ComponentRefinement.cheeger_mul_leakage_le_crossing
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.refineAt_leakage
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.refineBlock_leakage
+#print axioms NonsoficGroupsExist.ExpanderDecomposition.cheeger_mul_totalLeakage_le_crossings
+#print axioms NonsoficGroupsExist.ExpanderDecomposition.sum_componentCrossingCount
+#print axioms NonsoficGroupsExist.ExpanderDecomposition.cheeger_mul_totalLeakage_le_globalCrossing
 #print axioms NonsoficGroupsExist.compression_centralizer
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq

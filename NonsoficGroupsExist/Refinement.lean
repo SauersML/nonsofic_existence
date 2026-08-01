@@ -23,6 +23,11 @@ variable {ι : Type*} [DecidableEq ι]
 def crossingEdges (X : FiniteMultiGraph) (part : X.vertex → ι) : Finset X.edge :=
   Finset.univ.filter fun e ↦ part (X.first e) ≠ part (X.second e)
 
+@[simp] theorem mem_crossingEdges (X : FiniteMultiGraph) (part : X.vertex → ι)
+    (e : X.edge) :
+    e ∈ X.crossingEdges part ↔ part (X.first e) ≠ part (X.second e) := by
+  simp [crossingEdges]
+
 /-- The union of the parts labelled by `T`. -/
 def cell (X : FiniteMultiGraph) (part : X.vertex → ι) (T : Finset ι) :
     Finset X.vertex :=
