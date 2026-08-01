@@ -1,3 +1,4 @@
+
 name: Build and commit PDF
 
 on:
@@ -22,19 +23,18 @@ env:
 
 jobs:
   build-pdf:
-    name: Build PDF
+    name: Build and validate PDF
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
-      - name: Check out main
+      - name: Check out repository
         uses: actions/checkout@v5
         with:
-          ref: main
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Install TeX Live
+      - name: Install TeX and PDF validation tools
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -42,79 +42,128 @@ jobs:
           sudo apt-get install --yes --no-install-recommends \
             latexmk \
             lmodern \
+            poppler-utils \
+            qpdf \
             texlive-fonts-recommended \
             texlive-latex-base \
             texlive-latex-extra \
             texlive-latex-recommended \
             texlive-science
 
-      - name: Build PDF
+      - name: Compile, normalize, and validate PDF
         shell: bash
         run: |
           set -euo pipefail
 
           test -f "$TEX_FILE"
 
-          # Keep PDF metadata reproducible for an unchanged TeX source.
+          base_name="${TEX_FILE%.tex}"
+          raw_pdf="build/${base_name}.pdf"
+          log_file="build/${base_name}.log"
+          temporary_pdf="${PDF_FILE}.tmp"
+
+          rm -rf build pdf-render-check
+          rm -f "$temporary_pdf"
+          mkdir -p build pdf-render-check
+
+          # Keep the direct LaTeX output stable when the TeX source is unchanged.
           export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct -- "$TEX_FILE")"
           export FORCE_SOURCE_DATE=1
           export TZ=UTC
 
-          latexmk -C "$TEX_FILE"
           latexmk \
             -pdf \
+            -outdir=build \
             -interaction=nonstopmode \
             -halt-on-error \
             -file-line-error \
             "$TEX_FILE"
 
-          test -s "$PDF_FILE"
+          test -s "$raw_pdf"
+          test -s "$log_file"
 
-          # Fail rather than committing a PDF with unresolved citations or references.
+          # Do not publish a document whose final LaTeX pass still needs reruns
+          # or contains unresolved references or citations.
           if grep -Eq \
-            'LaTeX Warning: (There were undefined references|Citation .* undefined|Reference .* undefined)' \
-            "${TEX_FILE%.tex}.log"; then
-            echo "The final LaTeX run contains unresolved citations or references." >&2
+            'LaTeX Warning: (Citation .* undefined|Reference .* undefined|There were undefined references|Label\(s\) may have changed)|Rerun to get cross-references right' \
+            "$log_file"; then
+            echo "The final LaTeX pass still has unresolved references or citations." >&2
             exit 1
           fi
 
+          # Rewrite the pdfTeX output into a conservative format that GitHub,
+          # browser PDF.js viewers, and older PDF readers handle reliably:
+          # linearized PDF 1.4 with no PDF 1.5 object streams.
+          qpdf \
+            --linearize \
+            --object-streams=disable \
+            --force-version=1.4 \
+            --deterministic-id \
+            "$raw_pdf" "$temporary_pdf"
+
+          mv -- "$temporary_pdf" "$PDF_FILE"
+          test -s "$PDF_FILE"
+
+          # Structural validation.
+          qpdf --check "$PDF_FILE"
+          pdfinfo "$PDF_FILE"
+
+          pdf_header="$(head -c 8 "$PDF_FILE")"
+          if [[ "$pdf_header" != '%PDF-1.4' ]]; then
+            echo "Unexpected PDF header: $pdf_header" >&2
+            exit 1
+          fi
+
+          # Rendering validation: this catches files that are structurally
+          # readable but fail in an actual PDF renderer.
+          pdftoppm \
+            -f 1 \
+            -l 1 \
+            -singlefile \
+            -png \
+            -r 96 \
+            "$PDF_FILE" \
+            pdf-render-check/page-1
+
+          test -s pdf-render-check/page-1.png
+
       - name: Commit and push updated PDF
         shell: bash
+        env:
+          START_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-
-          build_base="$(git rev-parse HEAD)"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -- "$PDF_FILE"
 
-          if git diff --cached --quiet; then
-            echo "PDF is already up to date."
+          if git diff --cached --quiet -- "$PDF_FILE"; then
+            echo "The committed PDF is already current."
+            exit 0
+          fi
+
+          # Never attach a PDF built from old TeX to a newer main branch.
+          git fetch origin main
+          remote_main="$(git rev-parse origin/main)"
+          if [[ "$remote_main" != "$START_SHA" ]]; then
+            echo "main advanced during this build; the newer push will build its own PDF."
             exit 0
           fi
 
           git commit -m "build: update compiled PDF [skip ci]"
 
-          # Do not push a PDF built from stale TeX if main advanced during the job.
-          git fetch origin main
-          remote_main="$(git rev-parse origin/main)"
+          if ! git push origin HEAD:main; then
+            git fetch origin main
+            remote_main="$(git rev-parse origin/main)"
 
-          if [[ "$remote_main" != "$build_base" ]]; then
-            if ! git diff --quiet "$build_base" "$remote_main" -- \
-              "$TEX_FILE" \
-              .github/workflows/build-pdf.yml; then
-              echo "Main changed while this PDF was building; skipping the stale push."
+            if [[ "$remote_main" != "$START_SHA" ]]; then
+              echo "main advanced before the push completed; skipping stale PDF push."
               exit 0
             fi
 
-            if ! git rebase origin/main; then
-              git rebase --abort || true
-              echo "A newer conflicting PDF already exists; skipping this push."
-              exit 0
-            fi
+            echo "The push failed even though main did not advance." >&2
+            exit 1
           fi
-
-          git push origin HEAD:main
 
