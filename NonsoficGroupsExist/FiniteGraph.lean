@@ -1,4 +1,6 @@
 import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.Ring
+import Mathlib.Algebra.BigOperators.Ring.Finset
 import NonsoficGroupsExist.Sofic
 
 /-!
@@ -30,12 +32,180 @@ def boundary (X : FiniteMultiGraph) (U : Finset X.vertex) : Finset X.edge :=
 def boundaryCard (X : FiniteMultiGraph) (U : Finset X.vertex) : ℕ :=
   (X.boundary U).card
 
+/-- Strict superlevel set of a function on the vertices. -/
+noncomputable def superlevel (X : FiniteMultiGraph) (g : X.vertex → ℝ) (t : ℝ) :
+    Finset X.vertex :=
+  Finset.univ.filter fun x ↦ t < g x
+
+/-- Total absolute variation over edge occurrences. -/
+def edgeVariation (X : FiniteMultiGraph) (g : X.vertex → ℝ) : ℝ :=
+  ∑ e, |g (X.first e) - g (X.second e)|
+
+/-- Remove the bottom positive layer of height `m`. -/
+def peel (m x : ℝ) : ℝ := max (x - m) 0
+
+theorem peel_nonnegative (m x : ℝ) : 0 ≤ peel m x := by
+  exact le_max_right _ _
+
+theorem value_eq_layer_add_peel {m x : ℝ} (hx : 0 ≤ x)
+    (hm : 0 ≤ m) (hmin : 0 < x → m ≤ x) :
+    x = (if 0 < x then m else 0) + peel m x := by
+  by_cases hpos : 0 < x
+  · rw [if_pos hpos, peel, max_eq_left (sub_nonneg.mpr (hmin hpos))]
+    ring
+  · have hx0 : x = 0 := le_antisymm (not_lt.mp hpos) hx
+    subst x
+    simp [peel, hm]
+
+/-- Peeling a common bottom layer decomposes the variation of one edge into
+its boundary contribution and its residual variation. -/
+theorem abs_sub_eq_layer_add_peel {m a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hm : 0 ≤ m) (hma : 0 < a → m ≤ a) (hmb : 0 < b → m ≤ b) :
+    |a - b| =
+      m * (if (0 < a ∧ ¬ 0 < b) ∨ (0 < b ∧ ¬ 0 < a) then 1 else 0) +
+        |peel m a - peel m b| := by
+  by_cases hapos : 0 < a <;> by_cases hbpos : 0 < b
+  · rw [if_neg (by simp [hapos, hbpos]), peel, peel,
+      max_eq_left (sub_nonneg.mpr (hma hapos)),
+      max_eq_left (sub_nonneg.mpr (hmb hbpos))]
+    simp only [mul_zero, zero_add]
+    congr 1
+    ring
+  · have hb0 : b = 0 := le_antisymm (not_lt.mp hbpos) hb
+    subst b
+    have hpa : peel m a = a - m := max_eq_left (sub_nonneg.mpr (hma hapos))
+    have hp0 : peel m 0 = 0 := by simp [peel, hm]
+    rw [hpa, hp0]
+    simp [hapos, abs_of_nonneg ha, abs_of_nonneg (sub_nonneg.mpr (hma hapos))]
+  · have ha0 : a = 0 := le_antisymm (not_lt.mp hapos) ha
+    subst a
+    have hp0 : peel m 0 = 0 := by simp [peel, hm]
+    have hpb : peel m b = b - m := max_eq_left (sub_nonneg.mpr (hmb hbpos))
+    rw [hp0, hpb]
+    simp [hbpos, abs_of_nonneg hb, abs_of_nonpos (sub_nonpos.mpr (hmb hbpos))]
+  · have ha0 : a = 0 := le_antisymm (not_lt.mp hapos) ha
+    have hb0 : b = 0 := le_antisymm (not_lt.mp hbpos) hb
+    subst a
+    subst b
+    simp [peel, hm]
+
+theorem sum_eq_layer_add_peel (X : FiniteMultiGraph) (g : X.vertex → ℝ) (m : ℝ)
+    (hg : ∀ x, 0 ≤ g x) (hm : 0 ≤ m) (hmin : ∀ x, 0 < g x → m ≤ g x) :
+    ∑ x, g x = m * (X.superlevel g 0).card + ∑ x, peel m (g x) := by
+  calc
+    ∑ x, g x = ∑ x, ((if 0 < g x then m else 0) + peel m (g x)) := by
+      apply Finset.sum_congr rfl
+      intro x _
+      exact value_eq_layer_add_peel (hg x) hm (hmin x)
+    _ = (∑ x, if 0 < g x then m else 0) + ∑ x, peel m (g x) :=
+      Finset.sum_add_distrib
+    _ = m * (X.superlevel g 0).card + ∑ x, peel m (g x) := by
+      congr 1
+      rw [← Finset.sum_filter]
+      simp [superlevel, mul_comm]
+
+theorem edgeVariation_eq_layer_add_peel (X : FiniteMultiGraph) (g : X.vertex → ℝ)
+    (m : ℝ) (hg : ∀ x, 0 ≤ g x) (hm : 0 ≤ m)
+    (hmin : ∀ x, 0 < g x → m ≤ g x) :
+    X.edgeVariation g = m * X.boundaryCard (X.superlevel g 0) +
+      X.edgeVariation (fun x ↦ peel m (g x)) := by
+  calc
+    X.edgeVariation g = ∑ e, (m *
+        (if (0 < g (X.first e) ∧ ¬ 0 < g (X.second e)) ∨
+          (0 < g (X.second e) ∧ ¬ 0 < g (X.first e)) then 1 else 0) +
+        |peel m (g (X.first e)) - peel m (g (X.second e))|) := by
+      apply Finset.sum_congr rfl
+      intro e _
+      exact abs_sub_eq_layer_add_peel (hg _) (hg _) hm (hmin _) (hmin _)
+    _ = m * (∑ e, if (0 < g (X.first e) ∧ ¬ 0 < g (X.second e)) ∨
+          (0 < g (X.second e) ∧ ¬ 0 < g (X.first e)) then 1 else 0) +
+        X.edgeVariation (fun x ↦ peel m (g x)) := by
+      rw [Finset.sum_add_distrib, ← Finset.mul_sum]
+      rfl
+    _ = m * X.boundaryCard (X.superlevel g 0) +
+        X.edgeVariation (fun x ↦ peel m (g x)) := by
+      congr 2
+      simp [boundaryCard, boundary, superlevel]
+
 /-- The explicit quantitative assertion that every nonempty set of at most
 half the vertices has boundary ratio at least `h`. -/
 def HasCheegerLowerBound (X : FiniteMultiGraph) (h : ℝ) : Prop :=
   0 < h ∧ ∀ U : Finset X.vertex, U.Nonempty →
     2 * U.card ≤ Fintype.card X.vertex →
       h * U.card ≤ X.boundaryCard U
+
+/-- Finite combinatorial layer-cake inequality.  The proof recursively peels
+the least positive function value, so it requires no measure theory. -/
+theorem nonnegative_coarea (X : FiniteMultiGraph) {h : ℝ}
+    (hcheeger : X.HasCheegerLowerBound h) (g : X.vertex → ℝ)
+    (hg : ∀ x, 0 ≤ g x)
+    (hsmall : ∀ t, 0 ≤ t →
+      2 * (X.superlevel g t).card ≤ Fintype.card X.vertex) :
+    h * ∑ x, g x ≤ X.edgeVariation g := by
+  classical
+  let U := X.superlevel g 0
+  by_cases hU : U.Nonempty
+  · let values := U.image g
+    have hvalues : values.Nonempty := hU.image g
+    let m := values.min' hvalues
+    have hm_mem : m ∈ values := Finset.min'_mem values hvalues
+    obtain ⟨x₀, hx₀U, hx₀m⟩ := Finset.mem_image.mp hm_mem
+    have hx₀pos : 0 < g x₀ := by simpa [U, superlevel] using hx₀U
+    have hmpos : 0 < m := by simpa [hx₀m] using hx₀pos
+    have hm : 0 ≤ m := hmpos.le
+    have hmin : ∀ x, 0 < g x → m ≤ g x := by
+      intro x hx
+      apply Finset.min'_le values (g x)
+      exact Finset.mem_image.mpr ⟨x, by simpa [U, superlevel] using hx, rfl⟩
+    let g' : X.vertex → ℝ := fun x ↦ peel m (g x)
+    have hg' : ∀ x, 0 ≤ g' x := fun x ↦ peel_nonnegative _ _
+    have hlevels (t : ℝ) (ht : 0 ≤ t) :
+        X.superlevel g' t = X.superlevel g (t + m) := by
+      ext x
+      simp [g', superlevel, peel, ht, lt_sub_iff_add_lt]
+    have hsmall' : ∀ t, 0 ≤ t →
+        2 * (X.superlevel g' t).card ≤ Fintype.card X.vertex := by
+      intro t ht
+      rw [hlevels t ht]
+      exact hsmall (t + m) (add_nonneg ht hm)
+    have hsupport_subset : X.superlevel g' 0 ⊆ U := by
+      intro x hx
+      have hx' : 0 < g x - m := by
+        simpa [g', superlevel, peel] using hx
+      have hxpos : 0 < g x := hm.trans_lt ((sub_pos.mp hx'))
+      simpa [U, superlevel] using hxpos
+    have hx₀_not : x₀ ∉ X.superlevel g' 0 := by
+      simp [g', superlevel, peel, hx₀m]
+    have hsupport_ne : X.superlevel g' 0 ≠ U := by
+      intro heq
+      exact hx₀_not (heq.symm ▸ hx₀U)
+    have hdecrease : (X.superlevel g' 0).card < U.card :=
+      Finset.card_lt_card (Finset.ssubset_iff_subset_ne.mpr
+        ⟨hsupport_subset, hsupport_ne⟩)
+    have hinduction : h * ∑ x, g' x ≤ X.edgeVariation g' :=
+      nonnegative_coarea X hcheeger g' hg' hsmall'
+    have hboundary : h * U.card ≤ X.boundaryCard U :=
+      hcheeger.2 U hU (by simpa [U] using hsmall 0 le_rfl)
+    have hlayer : m * (h * U.card) ≤ m * X.boundaryCard U :=
+      mul_le_mul_of_nonneg_left hboundary hm
+    rw [sum_eq_layer_add_peel X g m hg hm hmin,
+      edgeVariation_eq_layer_add_peel X g m hg hm hmin]
+    change h * (m * U.card + ∑ x, g' x) ≤
+      m * X.boundaryCard U + X.edgeVariation g'
+    calc
+      h * (m * U.card + ∑ x, g' x) =
+          m * (h * U.card) + h * ∑ x, g' x := by ring
+      _ ≤ m * X.boundaryCard U + X.edgeVariation g' :=
+        add_le_add hlayer hinduction
+  · have hgzero : ∀ x, g x = 0 := by
+      intro x
+      have hnot : ¬ 0 < g x := by
+        intro hx
+        exact hU ⟨x, by simpa [U, superlevel] using hx⟩
+      exact le_antisymm (not_lt.mp hnot) (hg x)
+    simp [hgzero, edgeVariation]
+termination_by (X.superlevel g 0).card
+decreasing_by simpa [U] using hdecrease
 
 /-- A finite-sample median, stated without division so singleton and empty
 edge cases remain explicit. -/
@@ -105,6 +275,81 @@ theorem positivePart_edge_add_negativePart_edge (x y : ℝ) :
     simp only [sub_self, abs_zero, zero_add, sub_eq_add_neg, neg_neg]
     have hneg : -x + y = -(x + -y) := by simp [add_comm]
     rw [hneg, abs_neg]
+
+/-- The manuscript's `ℓ1` co-area estimate, in denominator-free form. -/
+theorem coarea_mul (X : FiniteMultiGraph) {h : ℝ}
+    (hcheeger : X.HasCheegerLowerBound h) (f : X.vertex → ℝ) (c : ℝ)
+    (hc : IsMedian f c) :
+    h * ∑ x, |f x - c| ≤ X.edgeVariation f := by
+  let gp : X.vertex → ℝ := fun x ↦ positivePart (f x - c)
+  let gn : X.vertex → ℝ := fun x ↦ negativePart (f x - c)
+  have hgp : ∀ x, 0 ≤ gp x := fun x ↦ le_max_right _ _
+  have hgn : ∀ x, 0 ≤ gn x := fun x ↦ le_max_right _ _
+  have hsmallp : ∀ t, 0 ≤ t →
+      2 * (X.superlevel gp t).card ≤ Fintype.card X.vertex := by
+    intro t ht
+    have hsubset : X.superlevel gp t ⊆
+        Finset.univ.filter (fun x ↦ c < f x) := by
+      intro x hx
+      have htx : t < f x - c := by
+        have hx' : t < max (f x - c) 0 := by
+          simpa [gp, positivePart, superlevel] using hx
+        exact (lt_max_iff.mp hx').resolve_right (not_lt_of_ge ht)
+      have hcx : c < f x := by
+        have : t + c < f x := (lt_sub_iff_add_lt.mp htx)
+        exact (le_add_of_nonneg_left ht).trans_lt (by simpa [add_comm] using this)
+      simpa using hcx
+    exact (Nat.mul_le_mul_left 2 (Finset.card_le_card hsubset)).trans hc.1
+  have hsmalln : ∀ t, 0 ≤ t →
+      2 * (X.superlevel gn t).card ≤ Fintype.card X.vertex := by
+    intro t ht
+    have hsubset : X.superlevel gn t ⊆
+        Finset.univ.filter (fun x ↦ f x < c) := by
+      intro x hx
+      have htx : t < -(f x - c) := by
+        have hx' : t < max (-(f x - c)) 0 := by
+          simpa [gn, negativePart, superlevel] using hx
+        exact (lt_max_iff.mp hx').resolve_right (not_lt_of_ge ht)
+      have hxc : f x < c := by
+        have : t + f x < c := by
+          rw [neg_sub] at htx
+          exact lt_sub_iff_add_lt.mp htx
+        exact (le_add_of_nonneg_left ht).trans_lt (by simpa [add_comm] using this)
+      simpa using hxc
+    exact (Nat.mul_le_mul_left 2 (Finset.card_le_card hsubset)).trans hc.2
+  have hp := nonnegative_coarea X hcheeger gp hgp hsmallp
+  have hn := nonnegative_coarea X hcheeger gn hgn hsmalln
+  have hsum : (∑ x, |f x - c|) = (∑ x, gp x) + ∑ x, gn x := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro x _
+    exact abs_eq_positivePart_add_negativePart (f x - c)
+  have hedge : X.edgeVariation gp + X.edgeVariation gn = X.edgeVariation f := by
+    rw [edgeVariation, edgeVariation, edgeVariation, ← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro e _
+    rw [show gp (X.first e) = positivePart (f (X.first e) - c) by rfl,
+      show gp (X.second e) = positivePart (f (X.second e) - c) by rfl,
+      show gn (X.first e) = negativePart (f (X.first e) - c) by rfl,
+      show gn (X.second e) = negativePart (f (X.second e) - c) by rfl,
+      positivePart_edge_add_negativePart_edge]
+    congr 1
+    ring
+  calc
+    h * ∑ x, |f x - c| = h * ((∑ x, gp x) + ∑ x, gn x) := by rw [hsum]
+    _ = h * ∑ x, gp x + h * ∑ x, gn x := by ring
+    _ ≤ X.edgeVariation gp + X.edgeVariation gn := add_le_add hp hn
+    _ = X.edgeVariation f := hedge
+
+/-- The displayed co-area inequality from the manuscript. -/
+theorem coarea (X : FiniteMultiGraph) {h : ℝ}
+    (hcheeger : X.HasCheegerLowerBound h) (f : X.vertex → ℝ) (c : ℝ)
+    (hc : IsMedian f c) :
+    ∑ x, |f x - c| ≤ (1 / h) * X.edgeVariation f := by
+  have hmul := coarea_mul X hcheeger f c hc
+  rw [one_div, mul_comm, ← div_eq_mul_inv]
+  apply (le_div_iff₀ hcheeger.1).2
+  simpa [mul_comm] using hmul
 
 end FiniteMultiGraph
 end NonsoficGroupsExist
