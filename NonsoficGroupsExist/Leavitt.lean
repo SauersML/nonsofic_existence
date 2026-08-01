@@ -1,4 +1,5 @@
 import Mathlib.Data.Matrix.Basic
+import Mathlib.Algebra.CharP.Two
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Tactic.FinCases
 
@@ -140,9 +141,7 @@ theorem z_sq : L.z * L.z = 1 := by
   rw [Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [z, p0, p1,
-      L.t0_s0, L.t0_s1, L.t1_s0, L.t1_s1, L.sum_range,
-      mul_assoc]
+    simp [L.p0_add_p1]
 
 end LeavittFamily
 end NonsoficGroupsExist
