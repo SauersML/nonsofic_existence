@@ -1,7 +1,6 @@
 import Mathlib.Data.Matrix.Basic
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Tactic.FinCases
-import Mathlib.Tactic.NoncommRing
 
 /-!
 # The finite Leavitt-algebra calculations
@@ -107,11 +106,9 @@ theorem characteristicTwo_involution
     [CharP A 2] :
     x12 L.s1 * x21 L.t1 * x12 L.s1 =
       !![L.p0, L.s1; L.t1, 0] := by
-  have hneg : -(1 : A) = 1 := CharTwo.neg_eq 1
   have htwo : (1 : A) + 1 = 0 := CharTwo.add_self_eq_zero 1
   have hcorner : (1 : A) + L.p1 = L.p0 := by
-    rw [← hneg, ← L.p0_add_p1]
-    noncomm_ring
+    exact CharTwo.add_eq_iff_eq_add.mpr L.p0_add_p1.symm
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;>
@@ -123,16 +120,15 @@ theorem characteristicTwo_compressor
     [CharP A 2] :
     x21 (1 + L.t0) * x12 1 * x21 (1 + L.s0) * x12 L.t0 =
       !![L.s0, L.s1 * L.t1; 0, L.t0] := by
-  have hneg : -(1 : A) = 1 := CharTwo.neg_eq 1
   have htwo : (1 : A) + 1 = 0 := CharTwo.add_self_eq_zero 1
   have hcorner : L.p0 + (1 : A) = L.p1 := by
-    rw [← hneg, ← L.p0_add_p1]
-    noncomm_ring
+    rw [add_comm]
+    apply CharTwo.add_eq_iff_eq_add.mpr
+    simpa [add_comm] using L.p0_add_p1.symm
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;>
     simp [x12, x21, p0, p1, htwo, hcorner, L.t0_s0, mul_assoc]
-  all_goals noncomm_ring
 
 /-- The two-by-two matrix called `z` in both the adjacent-rank and rank-two
 constructions. -/
