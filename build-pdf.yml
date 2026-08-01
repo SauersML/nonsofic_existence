@@ -1,0 +1,77 @@
+name: Build and commit PDF
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - nonsofic_groups_exist.tex
+      - .github/workflows/build-pdf.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-nonsofic-pdf-main
+  cancel-in-progress: true
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            latexmk \
+            lmodern \
+            texlive-fonts-recommended \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-latex-recommended \
+            texlive-science
+
+      - name: Build PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Make repeated builds reproducible when the TeX source is unchanged.
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct -- nonsofic_groups_exist.tex)"
+          export FORCE_SOURCE_DATE=1
+          export TZ=UTC
+
+          latexmk \
+            -pdf \
+            -interaction=nonstopmode \
+            -halt-on-error \
+            -file-line-error \
+            nonsofic_groups_exist.tex
+
+          test -s nonsofic_groups_exist.pdf
+
+      - name: Commit updated PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- nonsofic_groups_exist.pdf
+
+          if git diff --cached --quiet; then
+            echo "PDF is already up to date."
+            exit 0
+          fi
+
+          git commit -m "build: update compiled PDF [skip ci]"
+          git push origin HEAD:main
