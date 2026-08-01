@@ -4,6 +4,7 @@ import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.ExternalInputs
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation
+import NonsoficGroupsExist.SelectionOutput
 import NonsoficGroupsExist.Pinning
 import NonsoficGroupsExist.Refinement
 import NonsoficGroupsExist.Selection
@@ -77,6 +78,8 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.CompressionSetup.ambientGenerators_generate
 #print axioms NonsoficGroupsExist.LocalizedApproximationData.completedMap_disagreement_vanishing
 #print axioms NonsoficGroupsExist.LocalizedApproximationData.toSoficApproximation
+#print axioms NonsoficGroupsExist.SelectionOutput.toMatchingCertificate
+#print axioms NonsoficGroupsExist.SelectionOutput.isLEF
 #print axioms NonsoficGroupsExist.Vanishing.add
 #print axioms NonsoficGroupsExist.Vanishing.sum
 #print axioms NonsoficGroupsExist.Negligible.mono
