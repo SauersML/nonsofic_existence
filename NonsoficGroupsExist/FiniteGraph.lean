@@ -34,7 +34,7 @@ def boundaryCard (X : FiniteMultiGraph) (U : Finset X.vertex) : ℕ :=
 
 /-- Transport a multigraph along a vertex equivalence.  The edge-occurrence
 type is unchanged, so multiplicities are preserved definitionally. -/
-def transport (X : FiniteMultiGraph) (Z : FiniteModel) (e : X.vertex ≃ Z) :
+abbrev transport (X : FiniteMultiGraph) (Z : FiniteModel) (e : X.vertex ≃ Z) :
     FiniteMultiGraph where
   vertex := Z
   edge := X.edge
@@ -64,7 +64,6 @@ theorem transport_boundaryCard (X : FiniteMultiGraph) (Z : FiniteModel)
     (e : X.vertex ≃ Z) (U : Finset X.vertex) :
     (X.transport Z e).boundaryCard (U.map e.toEmbedding) = X.boundaryCard U := by
   rw [boundaryCard, boundaryCard, transport_boundary]
-  rfl
 
 /-- Strict superlevel set of a function on the vertices. -/
 noncomputable def superlevel (X : FiniteMultiGraph) (g : X.vertex → ℝ) (t : ℝ) :
@@ -167,6 +166,25 @@ def HasCheegerLowerBound (X : FiniteMultiGraph) (h : ℝ) : Prop :=
   0 < h ∧ ∀ U : Finset X.vertex, U.Nonempty →
     2 * U.card ≤ Fintype.card X.vertex →
       h * U.card ≤ X.boundaryCard U
+
+theorem transport_hasCheegerLowerBound (X : FiniteMultiGraph) (Z : FiniteModel)
+    (e : X.vertex ≃ Z) {h : ℝ} (hX : X.HasCheegerLowerBound h) :
+    (X.transport Z e).HasCheegerLowerBound h := by
+  refine ⟨hX.1, ?_⟩
+  intro W hW hhalf
+  let U : Finset X.vertex := W.map e.symm.toEmbedding
+  have hmap : U.map e.toEmbedding = W := by
+    ext z
+    simp [U]
+  have hU : U.Nonempty := by simpa [U] using hW
+  have hhalfU : 2 * U.card ≤ Fintype.card X.vertex := by
+    simpa [U, Fintype.card_congr e] using hhalf
+  have hb := hX.2 U hU hhalfU
+  calc
+    h * W.card = h * U.card := by simp [U]
+    _ ≤ X.boundaryCard U := hb
+    _ = (X.transport Z e).boundaryCard W := by
+      rw [← hmap, transport_boundaryCard]
 
 /-- Finite combinatorial layer-cake inequality.  The proof recursively peels
 the least positive function value, so it requires no measure theory. -/

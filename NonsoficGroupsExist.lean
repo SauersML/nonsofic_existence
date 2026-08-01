@@ -1,3 +1,4 @@
+import NonsoficGroupsExist.Asymptotics
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -16,6 +17,10 @@ This is the root of the Lean development accompanying
 -/
 
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_involution
+#print axioms NonsoficGroupsExist.Vanishing.add
+#print axioms NonsoficGroupsExist.Vanishing.sum
+#print axioms NonsoficGroupsExist.Negligible.mono
+#print axioms NonsoficGroupsExist.Negligible.sum
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
 #print axioms NonsoficGroupsExist.permutation_conservation
@@ -44,6 +49,7 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.IsSofic
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.transport_boundaryCard
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.transport_hasCheegerLowerBound
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.IsMedian.eq_of_subsingleton
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.positivePart_edge_add_negativePart_edge
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.nonnegative_coarea
