@@ -22,6 +22,7 @@ import NonsoficGroupsExist.BlockTransport
 import NonsoficGroupsExist.ComponentRefinement
 import NonsoficGroupsExist.DecompositionRefinement
 import NonsoficGroupsExist.EdgeEditing
+import NonsoficGroupsExist.GeneratorCrossing
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -126,6 +127,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.sum_componentCrossingCount
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.cheeger_mul_totalLeakage_le_globalCrossing
 #print axioms NonsoficGroupsExist.EdgeEditWitness.targetCrossing_card_le_unmatchedCount
+#print axioms NonsoficGroupsExist.SoficApproximation.generatorGraph_crossing_card_le
 #print axioms NonsoficGroupsExist.compression_centralizer
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
