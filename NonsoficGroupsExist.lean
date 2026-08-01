@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Leavitt
+import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittSelfSimilarity
 import NonsoficGroupsExist.MatrixSelfSimilarity
 import NonsoficGroupsExist.PermutationConservation
@@ -24,3 +25,5 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.CompleteMatrixFamily.unitsEquiv
 #print axioms NonsoficGroupsExist.LeavittFamily.binaryMatrixRingEquiv
 #print axioms NonsoficGroupsExist.LeavittFamily.binaryUnitsEquiv
+#print axioms NonsoficGroupsExist.LeavittFamily.cornerHom
+#print axioms NonsoficGroupsExist.LeavittFamily.cornerHom_injective
