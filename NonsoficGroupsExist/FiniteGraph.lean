@@ -65,6 +65,25 @@ theorem transport_boundaryCard (X : FiniteMultiGraph) (Z : FiniteModel)
     (X.transport Z e).boundaryCard (U.map e.toEmbedding) = X.boundaryCard U := by
   rw [boundaryCard, boundaryCard, transport_boundary]
 
+/-- Multiplicity of the unordered endpoint pair `{x,y}`.  Since graphs are
+loopless, every occurrence is counted at exactly its two distinct endpoints. -/
+def edgeMultiplicity (X : FiniteMultiGraph) (x y : X.vertex) : ℕ :=
+  (Finset.univ.filter fun a ↦
+    (X.first a = x ∧ X.second a = y) ∨
+      (X.first a = y ∧ X.second a = x)).card
+
+/-- Occurrence-sensitive edit distance after identifying the vertex sets.
+Summing over ordered endpoint pairs counts every undirected occurrence twice;
+this fixed factor is harmless for all negligible-density statements. -/
+def editDistance (X Z : FiniteMultiGraph) (e : X.vertex ≃ Z.vertex) : ℕ :=
+  ∑ x, ∑ y,
+    ((X.edgeMultiplicity x y - Z.edgeMultiplicity (e x) (e y)) +
+      (Z.edgeMultiplicity (e x) (e y) - X.edgeMultiplicity x y))
+
+@[simp] theorem editDistance_self (X : FiniteMultiGraph) :
+    X.editDistance X (Equiv.refl X.vertex) = 0 := by
+  simp [editDistance]
+
 /-- Strict superlevel set of a function on the vertices. -/
 noncomputable def superlevel (X : FiniteMultiGraph) (g : X.vertex → ℝ) (t : ℝ) :
     Finset X.vertex :=
