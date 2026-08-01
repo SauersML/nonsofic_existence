@@ -3,6 +3,7 @@ import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittSelfSimilarity
 import NonsoficGroupsExist.MatrixSelfSimilarity
 import NonsoficGroupsExist.PermutationConservation
+import NonsoficGroupsExist.Sofic
 import NonsoficGroupsExist.Whitehead
 
 /-!
@@ -30,3 +31,6 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.LeavittFamily.compressedHom
 #print axioms NonsoficGroupsExist.LeavittFamily.compressedHom_commutes_cornerHom
 #print axioms NonsoficGroupsExist.LeavittFamily.compressedHom_eq_cornerHom_iff
+#print axioms NonsoficGroupsExist.hammingDistance
+#print axioms NonsoficGroupsExist.SoficApproximation
+#print axioms NonsoficGroupsExist.IsSofic
