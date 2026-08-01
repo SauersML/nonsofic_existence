@@ -107,6 +107,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.matching_injective
 #print axioms NonsoficGroupsExist.BlockStructure.sum_card_blocksFinset
 #print axioms NonsoficGroupsExist.SoficApproximation.smallBlockVertices_negligible
+#print axioms NonsoficGroupsExist.ExpanderDecomposition.smallBlockVertices_negligible
 #print axioms NonsoficGroupsExist.exists_generator_word
 #print axioms NonsoficGroupsExist.SoficApproximation.all_wordCrossing_negligible
 #print axioms NonsoficGroupsExist.compression_centralizer

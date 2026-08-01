@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.BlockEnumeration
+import NonsoficGroupsExist.BlockWordCrossing
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficErrors
 
@@ -147,4 +148,32 @@ theorem smallBlockVertices_negligible
   positivity
 
 end SoficApproximation
+
+namespace ExpanderDecomposition
+
+variable {G : Type} [Group G]
+variable {S : SoficApproximation G} {T : Finset G}
+
+/-- Equation `eq:gamma-inv` propagated from generators to every fixed group
+element. -/
+theorem all_almost_invariant (D : ExpanderDecomposition S T)
+    (hsymm : ∀ g ∈ T, g⁻¹ ∈ T)
+    (hgen : Subgroup.closure (T : Set G) = ⊤) (g : G) :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((wordCrossing (D.blocks n) (S.map n g)).card : ℝ) := by
+  apply S.all_wordCrossing_negligible D.blocks T hsymm hgen
+  intro t ht
+  simpa [wordCrossing] using D.almost_invariant t ht
+
+/-- Lemma `lem:diverge` specialized to the component partition supplied by
+Kun's decomposition. -/
+theorem smallBlockVertices_negligible [Infinite G]
+    (D : ExpanderDecomposition S T)
+    (hsymm : ∀ g ∈ T, g⁻¹ ∈ T)
+    (hgen : Subgroup.closure (T : Set G) = ⊤) (M : ℕ) :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((smallBlockVertices (D.blocks n) M).card : ℝ) :=
+  S.smallBlockVertices_negligible D.blocks (D.all_almost_invariant hsymm hgen) M
+
+end ExpanderDecomposition
 end NonsoficGroupsExist
