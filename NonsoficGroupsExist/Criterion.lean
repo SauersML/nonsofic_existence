@@ -200,6 +200,13 @@ structure ExpanderDecomposition {G : Type} [Group G]
   edit_negligible : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
     fun n ↦ ((generatorGraph (S.model n) T (S.map n)).editDistance
       ((graph n).transport (S.model n) (vertexEquiv n)) (Equiv.refl _) : ℕ)
+  /-- Occurrence-level realization of the edge edits, preserving every kept
+  parallel occurrence and its unordered endpoint pair. -/
+  editWitness : ∀ n, EdgeEditWitness
+    (generatorGraph (S.model n) T (S.map n))
+      ((graph n).transport (S.model n) (vertexEquiv n)) (Equiv.refl _)
+  unmatched_negligible : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    fun n ↦ ((editWitness n).unmatchedCount : ℝ)
   /-- Every edited edge stays inside one block. -/
   edge_inside : ∀ n (e : ((graph n).transport (S.model n) (vertexEquiv n)).edge),
     (blocks n).block (((graph n).transport (S.model n) (vertexEquiv n)).first e) =

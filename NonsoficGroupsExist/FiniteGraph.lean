@@ -21,6 +21,37 @@ structure FiniteMultiGraph where
   second : edge → vertex
   loopless : ∀ e, first e ≠ second e
 
+/-- An occurrence-level witness that two finite multigraphs differ by edge
+edits.  Kept occurrences are bijected and preserve their unordered endpoint
+pair; parallel occurrences therefore remain distinct throughout. -/
+structure EdgeEditWitness (X Z : FiniteMultiGraph) (e : X.vertex ≃ Z.vertex) where
+  sourceKept : Finset X.edge
+  targetKept : Finset Z.edge
+  edgeEquiv : sourceKept ≃ targetKept
+  preservesEndpoints : ∀ a : sourceKept,
+    (e (X.first a.1) = Z.first (edgeEquiv a).1 ∧
+      e (X.second a.1) = Z.second (edgeEquiv a).1) ∨
+    (e (X.first a.1) = Z.second (edgeEquiv a).1 ∧
+      e (X.second a.1) = Z.first (edgeEquiv a).1)
+
+namespace EdgeEditWitness
+
+variable {X Z : FiniteMultiGraph} {e : X.vertex ≃ Z.vertex}
+
+/-- Deleted source occurrences. -/
+def sourceUnmatched (W : EdgeEditWitness X Z e) : Finset X.edge :=
+  Finset.univ \ W.sourceKept
+
+/-- Inserted target occurrences. -/
+def targetUnmatched (W : EdgeEditWitness X Z e) : Finset Z.edge :=
+  Finset.univ \ W.targetKept
+
+/-- Total number of occurrence edits represented by the witness. -/
+def unmatchedCount (W : EdgeEditWitness X Z e) : ℕ :=
+  W.sourceUnmatched.card + W.targetUnmatched.card
+
+end EdgeEditWitness
+
 namespace FiniteMultiGraph
 
 /-- The occurrence-sensitive subgraph induced by a finite vertex set. -/
