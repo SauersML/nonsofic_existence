@@ -1,0 +1,396 @@
+\documentclass[10pt,openany]{book}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage[letterpaper,top=0.55in,bottom=0.55in,left=0.62in,right=0.62in]{geometry}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+\setlength{\parindent}{1.25em}
+\setlength{\parskip}{0pt}
+\setlength{\abovedisplayskip}{5pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{5pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{3pt plus 2pt}
+\setlength{\belowdisplayshortskip}{3pt plus 2pt}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries}
+  {\large Chapter \thechapter}
+  {0.35em}
+  {\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{0.75em}
+
+\titleformat{\section}
+  {\normalfont\large\bfseries}
+  {\thesection}
+  {0.9em}
+  {}
+\titlespacing*{\section}{0pt}{0.85em}{0.25em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Chapter 3. Constructing a Non-Sofic Group}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\newcommand{\refnum}[1]{\textnormal{[#1]}}
+\newcommand{\EL}{\operatorname{EL}}
+\newcommand{\Var}{\operatorname{Var}}
+
+\begin{document}
+\setcounter{page}{10}
+\setcounter{chapter}{2}
+\chapter{Constructing a Non-Sofic Group}
+
+\section{Finite permutation models and the missing obstruction}
+
+We begin by asking whether every finitely presented group is sofic. A negative answer requires one finite multiplication table and a fixed $\varepsilon>0$ for which no permutations simultaneously satisfy
+\[
+ d_Y\bigl(\sigma(gh),\sigma(g)\sigma(h)\bigr)<\varepsilon,
+ \qquad
+ d_Y\bigl(\sigma(g),1\bigr)>1-\varepsilon.
+\]
+The degree $|Y|$ is unrestricted, so defects may disappear into larger and larger approximate actions \refnum{20}.
+
+The eventual counterexample combines a binary Leavitt algebra, property (T), two self-similar compressions, and Thompson's group $V$. Its central difficulty is extracting one usable expander from many expanding components.
+
+The early shortcuts fail for revealingly different reasons. A nonembeddable tracial algebra need not be a group factor with its canonical trace; projecting a linear-system group onto a central eigenspace does not preserve approximate multiplication; and undecidability provides no uniform bound on the size of permutation witnesses. Even stability and ascending HNN constructions leave the defect free to escape between sheets. What we need is an explicit combinatorial amplifier, not an indirect pathology.
+
+\section{Expanders with a forbidden centralizer}
+
+If a sofic approximation of $K\times J$ has a single uniformly expanding $K$-generator graph, Kun and Thom prove that $J$ is locally embeddable into finite groups, or LEF \refnum{21}. Expansion separates approximately central permutations into Hamming clusters, and repairing products turns those clusters into a finite multiplication table.
+
+If approximately central permutations have commuting defect at most $\delta|Y|$, their agreement set has small boundary. Expansion forces their Hamming distance to be either at most $4\delta/\lambda$ or at least $1-4\delta/\lambda$; repairing these separated clusters produces a finite multiplication table.
+
+We therefore want $K$ to commute with an infinite finitely presented simple group $J$, which cannot be LEF. The difficulty is obtaining \emph{one} expander carrying the $J$ action rather than a disjoint union of unrelated expanders \refnum{22, 21}.
+
+\section{Why a self-similar ring became the right playground}
+
+Central extensions and one-sided inverses did not prevent permutation defects from escaping among many sheets. Elementary matrices suggested something stronger: their commutators encode ring multiplication, their groups can have property (T), and a self-similar coefficient ring can compress the entire configuration into a proper corner.
+
+Choose the binary Leavitt algebra over $\mathbb{F}_2$,
+\[
+ R=\mathbb{F}_2\langle s_0,s_1,t_0,t_1\rangle/
+ \bigl(t_i s_j=\delta_{ij},\quad s_0t_0+s_1t_1=1\bigr).
+\]
+For a binary prefix $a$, put $e_a=s_at_a$. Incomparable prefixes satisfy $t_as_b=0$, while $t_as_a=1$, so $s_art_b$ behave as matrix units in the corresponding cylinder corners. A complete prefix family makes that corner the whole ring; in particular,
+\[
+ R\cong M_2(R),
+ \qquad
+ r\longmapsto (t_i r s_j)_{i,j\in\{0,1\}}.
+\]
+Leavitt introduced rings with exactly this kind of nonclassical module type \refnum{23}. Its decisive feature is that an entire elementary group compresses into a proper corner without losing any coefficients.
+
+\section{Putting property (T) and Thompson's group into the same ring}
+
+For a prefix family $E$, write
+\[
+ \EL_E(R)
+\]
+for the elementary group in its corresponding matrix corner. An elementary root has the concrete form
+\[
+ 1+s_art_b,
+ \qquad
+ a,b\in E,
+ \qquad
+ a\ne b,
+ \qquad
+ r\in R.
+\]
+When the corner is proper, extend its units by the identity on the complement. Since $R$ is generated by four elements as a unital ring, the theorem of Ershov and Jaikin-Zapirain applies to the elementary groups of ranks at least three and supplies property (T) \refnum{24}.
+
+The same ring also contains the prefix-table model of Thompson's group $V$. Given a bijection between two complete binary prefix codes,
+\[
+ a_i\longmapsto b_i,
+\]
+the corresponding ring unit is
+\[
+ w=\sum_i s_{b_i}t_{a_i}.
+\]
+Composition of prefix tables agrees with multiplication of these units, and refining a table does not change the represented element. Acting on infinite binary strings shows that this copy of $V$ is faithful.
+
+Characteristic two gives an elegant bridge. For incomparable prefixes, $P=s_at_b$ and $Q=s_bt_a$ satisfy $P^2=Q^2=0$, $PQ=e_a$, and $QP=e_b$; hence their cylinder transposition factors as
+\[
+ \tau_{a,b}=(1+P)(1+Q)(1+P).
+\]
+An auxiliary cylinder handles transpositions within one block. Thus the property-(T) elementary group and local Thompson group interact inside the same explicit algebra.
+
+The relevance of $V$ is that it is infinite, simple, and finitely presented \refnum{25, 26, 27}; a finitely presented LEF group is residually finite, so
+\[
+ V\text{ is not LEF}.
+\]
+We now have a concrete candidate for the forbidden centralizing group $J$.
+
+\section{The nine cylinders and the two compressions}
+
+To combine property (T), proper compression, a commuting local copy of $V$, and ambient generation, use the complete prefix code
+\[
+ \begin{aligned}
+ \alpha&=(000,001,01),\\
+ \beta&=(1000,1001,101),\\
+ \nu&=(1100,1101,111),\\
+ D&=(\alpha_1,\alpha_2,\alpha_3,\beta_1,\beta_2,\beta_3,\nu_1,\nu_2,\nu_3).
+ \end{aligned}
+\]
+Its nine cylinders partition Cantor space. Set
+\[
+ G=\EL_D(R)\cong\EL_9(R),
+ \qquad
+ \Gamma=\EL_{(\alpha_1,\alpha_2,\alpha_3)}(R).
+\]
+Both are finitely generated and have property (T).
+
+To build the compressors, introduce the auxiliary code
+\[
+ \eta=(100,101,11)
+\]
+and defined two prefix-table units by
+\[
+ \begin{array}{c|ccc}
+   & \alpha_i & \beta_i & \nu_i \\
+ \hline
+ u & \alpha_i0 & \alpha_i1 & \eta_i \\
+ v & \alpha_i0 & \eta_i & \alpha_i1
+ \end{array}.
+\]
+Both maps send the $\alpha_i$ cylinder into its left child. Therefore
+\[
+ u\Gamma u^{-1}=v\Gamma v^{-1}
+ =\EL_{(\alpha_10,\alpha_20,\alpha_30)}(R)=:K\subseteq\Gamma.
+\]
+The difference $v^{-1}u$ centralizes $\Gamma$. This shared compression was the structural reason for introducing \emph{two} units rather than one: they realize the same copy of $\Gamma$ while exposing different complementary cylinders.
+
+The ambient generation statement $G=\langle\Gamma,u,v\rangle$ requires a real coefficient calculation. Conjugating an $\alpha$-root by $u^{-1}$ produces the full matrix
+\[
+ \begin{pmatrix}
+ t_0rs_0 & t_0rs_1\\
+ t_1rs_0 & t_1rs_1
+ \end{pmatrix}
+\]
+as $r$ ranges through $R\cong M_2(R)$. Thus $u$ generates the combined $\alpha,\beta$ blocks; $v$ generates the $\alpha,\nu$ blocks; and a commutator through an $\alpha$ cylinder supplies the missing $\beta,\nu$ roots.
+
+Inside the right child of the first $\alpha$ cylinder, place
+\[
+ l=0001,
+ \qquad
+ J=V_l\cong V.
+\]
+The group $K$ lives entirely on the left-child cylinders $\alpha_i0$, whereas $J$ lives on the disjoint cylinder $\alpha_11$. Consequently
+\[
+ [K,J]=1,
+ \qquad
+ K\cap J=\{1\},
+ \qquad
+ K\times J\hookrightarrow G.
+\]
+At this point every required algebraic feature had a transparent geometric meaning: compression acts on left children, the forbidden Thompson group lives on a right child, and the two compressors together recover the full ambient elementary group.
+
+\section{The many-expander obstruction}
+
+Suppose, toward a contradiction, that $G$ has sofic models $Y_n$, with $N_n=|Y_n|\to\infty$. Kun's theorem edits $o(N_n)$ generator edges to decompose a property-(T) model into uniform expanders \refnum{22}. Applying it to $\Gamma$ and $G$ gives component partitions $\mathcal{Q}_n$ and $\mathcal{A}_n$; transporting $\mathcal{Q}_n$ through $t_1=\sigma_n(u)$ and $t_2=\sigma_n(v)$ gives the $K$-component partitions $\mathcal{P}_{i,n}$.
+
+One sustained detour tried to convert property (T) directly into mixing. That requires a lazy or anti-bipartite averaging set: a bipartite graph can have spectrum near $-1$ despite a Kazhdan gap at $1$. Correcting the averaging cures this spectral problem without choosing a component. The crucial mismatch is that Kun gives \emph{many} expanders, whereas Kun--Thom requires \emph{one}. On $Q\sqcup Q$, for example, the swap commutes exactly with identical expanding $K$ actions but preserves neither component. The self-similar configuration must overcome this specific obstruction.
+
+\section{The first comparison: component mass cannot drift freely}
+
+For a $\Gamma$ component $Q\in\mathcal{Q}_n$, define the size function
+\[
+ M(x)=|Q|
+ \qquad (x\in Q).
+\]
+Because $u\Gamma u^{-1}$ and $v\Gamma v^{-1}$ both lie in $\Gamma$, the transported generators correspond to fixed $\Gamma$-words. Their edges therefore cross the original $\Gamma$ partition on few vertices, provided all relevant cleaning and transport errors are controlled in the same finite model.
+
+For a transported component $P\in\mathcal{P}_{i,n}$, let $D(P)$ be an original component maximizing $|P\cap D(P)|$, and put
+\[
+ L(P)=|P|-|P\cap D(P)|.
+\]
+Expansion bounds the unmatched mass by crossing edges:
+\[
+ \sum_{P\in\mathcal{P}_{i,n}}L(P)=o(N_n).
+\]
+Because a transported component has the same size as its source, a large intersection implies the one-sided inequality
+\[
+ M(t_i x)\ge (1-\eta_n)M(x)
+\]
+for most $x$, with $\eta_n\to0$. The $\Gamma$ generators preserve $M$, but iteration does not suffice: $M$ is unbounded, and small relative losses may accumulate.
+
+\section{From logarithmic midranks to a bounded median}
+
+A substantial intermediate approach binned $\log M$ on a randomly shifted grid. Random shifting makes crossings of bin boundaries rare even when component sizes vary widely; replacing the resulting classes by bounded midranks then converts almost-monotonicity into concentration. The identity
+\[
+ \Var(\text{midrank})=\frac{1-\sum_j p_j^3}{12}
+\]
+revealed the essential principle: average a bounded monotone function of component size, never the unbounded size itself.
+
+The final argument implements that principle more cleanly. In each ambient expanding component $A$, choose a vertex-weighted median $m_A$ of the original sizes $M(x)$ and define
+\[
+ f(x)=\frac{M(x)}{M(x)+m_A},
+ \qquad
+ x\in A.
+\]
+Then $0<f<1$, and $1/2$ is a median on every $A$. The elementary inequality
+\[
+ \frac{(1-\eta)x}{(1-\eta)x+a}
+ \ge
+ \frac{x}{x+a}-\eta
+ \qquad (x,a>0)
+\]
+converts the one-sided transport estimate into
+\[
+ f(sx)\ge f(x)-\eta_n
+\]
+away from $o(N_n)$ vertices for every positive ambient generator $s$. Because $s$ is a permutation,
+\[
+ \sum_x\bigl(f(sx)-f(x)\bigr)=0.
+\]
+The boundedness of $f$ therefore makes both its positive and negative variation $o(N_n)$. On the edited ambient expander,
+\[
+ \sum_{\{x,y\}\in E(L_G)}|f(x)-f(y)|=o(N_n).
+\]
+
+The finite coarea identity gives
+\[
+ \int_0^1\left|\partial_A\{x:f(x)>t\}\right|\,dt
+ =
+ \sum_{\{x,y\}\in E(L_G[A])}|f(x)-f(y)|.
+\]
+Splitting at the median and applying expansion to the smaller side of each cut yields
+\[
+ \gamma_G\sum_{x\in A}\left|f(x)-\frac12\right|
+ \le
+ \sum_{\{x,y\}\in E(L_G[A])}|f(x)-f(y)|.
+\]
+Thus, outside a set $E_n$ of $o(N_n)$ vertices,
+\[
+ \left|f(x)-\frac12\right|\le\delta_n,
+ \qquad
+ \delta_n\longrightarrow0.
+\]
+For nonexceptional $x,y$ in the same ambient component,
+\[
+ \rho_n^{-1}\le\frac{M(y)}{M(x)}\le\rho_n,
+ \qquad
+ \rho_n=\left(\frac{1+2\delta_n}{1-2\delta_n}\right)^2\longrightarrow1.
+\]
+This deterministic median argument is the final substitute for the earlier randomized grid: it compares component sizes precisely where the transport endpoints meet inside one ambient expander.
+
+\section{From median concentration to component matching}
+
+Consider a transported component
+\[
+ P=t_iQ
+\]
+that meets an original component $D(P)$ on at least
+\[
+ (1-\eta_n)|P|
+\]
+vertices. Suppose further that there is a witness $x\in Q$ such that
+\[
+ t_ix\in P\cap D(P),
+ \qquad
+ x,t_ix\notin E_n,
+\]
+and $x,t_ix$ belong to the same ambient component. The first condition compares the source component $Q$ with its target $D(P)$; median concentration then gives
+\[
+ \rho_n^{-1}|P|\le |D(P)|\le\rho_n|P|,
+\]
+and hence
+\[
+ |P\triangle D(P)|
+ \le(\rho_n-1+2\eta_n)|P|
+ =o(|P|).
+\]
+For sufficiently large $n$, the intersection contains more than half of $D(P)$. Since distinct transported components are disjoint, they cannot both have majority intersection with the same original component. The assignment
+\[
+ P\longmapsto D(P)
+\]
+is therefore injective on the good components. This is stronger than merely showing that the two partitions have approximately the same block sizes: it identifies actual blocks inside the same finite model.
+
+Transport crossings, exceptional sets, and nondominant components occupy only $o(N_n)$ vertices, so the matched intersections cover $N_n-o(N_n)$ vertices.
+
+Every fixed $\Gamma$-word preserves the original partition outside $o(N_n)$ vertices. On matched intersections, injectivity forces it to preserve the transported partition as well:
+\[
+ \#\{x:P(x)\ne P(wx)\}=o(N_n).
+\]
+This resolves the factor-crossing difficulty without asserting that a compressor preserves the original components just because its central ratio does. The preserved objects are the matched transported components, obtained through the common ambient median and majority intersection.
+
+\section{Selecting one component carrying every relevant word test}
+
+For a fixed radius, collect into one exceptional set all failed word equalities, failed distinctness tests, generator exits, edited edges, and nonretained components. Each such set has size $o(N_n)$. Choose the word radius
+\[
+ r_n\longrightarrow\infty
+\]
+slowly enough that the combined global exceptional proportion $e_n$ still tends to zero. Averaging over retained components with weights $|P|$ supplies one transported block satisfying
+\[
+ |P_n\cap B_n|\le2e_n|P_n|.
+\]
+Therefore every $K\times J$ relation, commutation test, and freeness test of radius $r_n$ holds simultaneously on this same component. A good vertex distinguishes all relevant $K$ words, so infinitude of $K$ implies
+\[
+ |P_n|\longrightarrow\infty.
+\]
+
+The generators of $K$ and $J$ act on most of $P_n$, but their restrictions are only partial permutations. Their missing domains and ranges have the same size, so complete each partial bijection by matching the missing points arbitrarily. This changes only the controlled boundary vertices. The resulting full permutations continue to satisfy each fixed product, commutation, and freeness test asymptotically.
+
+However, completing permutations can destroy expansion on a tiny set. The correct intermediate conclusion is an \emph{additive} Cheeger inequality,
+\[
+ |\partial X|\ge\gamma\min\bigl(|X|,|P_n\setminus X|\bigr)-a_n|P_n|,
+ \qquad
+ a_n\longrightarrow0.
+\]
+We cannot discard the additive error: for a small set $X$, it may be larger than the desired lower bound. Instead, fix
+\[
+ 0<\lambda<\gamma
+\]
+and choose a maximal set
+\[
+ B_n\subseteq P_n,
+ \qquad
+ |B_n|\le\frac12|P_n|,
+\]
+for which
+\[
+ |\partial B_n|<\lambda|B_n|.
+\]
+The additive inequality forces
+\[
+ |B_n|\le\frac{a_n}{\gamma-\lambda}|P_n|=o(|P_n|).
+\]
+Maximality then shows that the induced graph on
+\[
+ Z_n=P_n\setminus B_n
+\]
+has a genuine uniform expansion constant, with the near-half-size case handled separately using the same additive inequality. Completing the remaining partial permutations on $Z_n$ preserves this expansion and changes only $o(|P_n|)$ vertices.
+
+The outcome is precisely the object needed by the Kun--Thom theorem: an approximation of $K\times J$ on one expanding $K$ component. That theorem therefore implies that $J$ is LEF, contradicting
+\[
+ J\cong V.
+\]
+The maximal-cut repair is essential: it turns many loosely compatible expanding components into the single expander required by the centralizer obstruction. Since $V$ is infinite, simple, and finitely presented, it cannot be LEF: finitely presented LEF groups are residually finite \refnum{28}. Thus $G$, and consequently the full unit group $L_{\mathbb{F}_2}(1,2)^\times$, are not sofic.
+
+\section{Extracting an infinite finitely presented counterexample}
+
+The finite-presentation step applies to the established counterexample. If $G$ fails the finite test $(F,\varepsilon)$, put $T=\{1\}\cup F\cup F^2$ and form
+\[
+ H_F=
+ \left\langle
+ X_a\ (a\in T)
+ \ \middle|\ 
+ X_1=1,\quad X_{gh}=X_gX_h\ (g,h\in F)
+ \right\rangle.
+\]
+Evaluation $X_a\mapsto a$ preserves the nontrivial tested generators. If $H_F$ were sofic, its defining relations would give exactly the forbidden approximation of $F$ with the same tolerance. Enlarging $F$ to contain generators of $G$ also makes $H_F\twoheadrightarrow G$, hence $H_F$ infinite. Thus one obtains an infinite finitely presented non-sofic group.
+
+For a free presentation $F_d\twoheadrightarrow G$ with kernel $N$, soficity of $G$ is equivalent to co-soficity of the invariant random subgroup $\delta_N$. Thus the example also gives a non-co-sofic normal point mass \refnum{29}, without asserting non-hyperlinearity.
+
+The decisive progression is from $R\cong M_2(R)$ to two compatible compressions, then from logarithmic midranks to bounded-median matching. Simultaneous word tests and maximal-cut repair finally produce the single expander that forces $V$ to be LEF. Its contradiction establishes both non-soficity and the infinite finitely presented counterexample.
+
+\end{document}
