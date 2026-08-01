@@ -17,6 +17,7 @@ import NonsoficGroupsExist.BlockEnumeration
 import NonsoficGroupsExist.ComponentDivergence
 import NonsoficGroupsExist.GeneratorWords
 import NonsoficGroupsExist.BlockWordCrossing
+import NonsoficGroupsExist.BlockTransport
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -110,6 +111,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.smallBlockVertices_negligible
 #print axioms NonsoficGroupsExist.exists_generator_word
 #print axioms NonsoficGroupsExist.SoficApproximation.all_wordCrossing_negligible
+#print axioms NonsoficGroupsExist.BlockStructure.transport_blocksFinset
 #print axioms NonsoficGroupsExist.compression_centralizer
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
