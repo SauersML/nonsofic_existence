@@ -16,21 +16,30 @@ concurrency:
   group: build-nonsofic-pdf-main
   cancel-in-progress: true
 
+env:
+  TEX_FILE: nonsofic_groups_exist.tex
+  PDF_FILE: nonsofic_groups_exist.pdf
+
 jobs:
   build-pdf:
+    name: Build PDF
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Check out main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Install TeX Live
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update
-          sudo apt-get install --yes \
+          sudo apt-get install --yes --no-install-recommends \
             latexmk \
             lmodern \
             texlive-fonts-recommended \
@@ -44,29 +53,42 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Make repeated builds reproducible when the TeX source is unchanged.
-          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct -- nonsofic_groups_exist.tex)"
+          test -f "$TEX_FILE"
+
+          # Keep PDF metadata reproducible for an unchanged TeX source.
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct -- "$TEX_FILE")"
           export FORCE_SOURCE_DATE=1
           export TZ=UTC
 
+          latexmk -C "$TEX_FILE"
           latexmk \
             -pdf \
             -interaction=nonstopmode \
             -halt-on-error \
             -file-line-error \
-            nonsofic_groups_exist.tex
+            "$TEX_FILE"
 
-          test -s nonsofic_groups_exist.pdf
+          test -s "$PDF_FILE"
 
-      - name: Commit updated PDF
+          # Fail rather than committing a PDF with unresolved citations or references.
+          if grep -Eq \
+            'LaTeX Warning: (There were undefined references|Citation .* undefined|Reference .* undefined)' \
+            "${TEX_FILE%.tex}.log"; then
+            echo "The final LaTeX run contains unresolved citations or references." >&2
+            exit 1
+          fi
+
+      - name: Commit and push updated PDF
         shell: bash
         run: |
           set -euo pipefail
 
+          build_base="$(git rev-parse HEAD)"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -- nonsofic_groups_exist.pdf
+          git add -- "$PDF_FILE"
 
           if git diff --cached --quiet; then
             echo "PDF is already up to date."
@@ -74,4 +96,25 @@ jobs:
           fi
 
           git commit -m "build: update compiled PDF [skip ci]"
+
+          # Do not push a PDF built from stale TeX if main advanced during the job.
+          git fetch origin main
+          remote_main="$(git rev-parse origin/main)"
+
+          if [[ "$remote_main" != "$build_base" ]]; then
+            if ! git diff --quiet "$build_base" "$remote_main" -- \
+              "$TEX_FILE" \
+              .github/workflows/build-pdf.yml; then
+              echo "Main changed while this PDF was building; skipping the stale push."
+              exit 0
+            fi
+
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "A newer conflicting PDF already exists; skipping this push."
+              exit 0
+            fi
+          fi
+
           git push origin HEAD:main
+
