@@ -2,6 +2,7 @@ import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittSelfSimilarity
+import NonsoficGroupsExist.Localization
 import NonsoficGroupsExist.MatrixSelfSimilarity
 import NonsoficGroupsExist.PermutationConservation
 import NonsoficGroupsExist.Sofic
@@ -45,3 +46,6 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.nonnegative_coarea
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.coarea_mul
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.coarea
+#print axioms NonsoficGroupsExist.Localization.exists_completion_with_bound
+#print axioms NonsoficGroupsExist.Localization.involutiveCompletion_sq
+#print axioms NonsoficGroupsExist.Localization.involutiveCompletion_disagreement_bound
