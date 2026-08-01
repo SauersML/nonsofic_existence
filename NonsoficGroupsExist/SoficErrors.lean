@@ -26,6 +26,15 @@ noncomputable def fixedError (n : ℕ) (g : G) : Finset (S.model n) :=
 noncomputable def movedVertices (n : ℕ) (g : G) : Finset (S.model n) :=
   Finset.univ.filter fun x ↦ S.map n g x ≠ x
 
+/-- Vertices where the permutation assigned to the identity is not the actual
+identity permutation. -/
+noncomputable def identityError (n : ℕ) : Finset (S.model n) :=
+  S.movedVertices n 1
+
+/-- Vertices where two assigned group elements collide. -/
+noncomputable def collisionError (n : ℕ) (g h : G) : Finset (S.model n) :=
+  Finset.univ.filter fun x ↦ S.map n g x = S.map n h x
+
 private theorem hammingDistance_mul (n : ℕ) (g h : G) :
     hammingDistance (S.model n) (S.map n (g * h)) (S.map n g * S.map n h) =
       ((S.multiplicationError n g h).card : ℝ) / Fintype.card (S.model n) := by
@@ -88,6 +97,87 @@ theorem fixedError_negligible (g : G) (hg : g ≠ 1) :
   change |((S.fixedError n g).card : ℝ) / Fintype.card (S.model n)| < ε
   rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))]
   exact hratio
+
+theorem identityError_negligible :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((S.identityError n).card : ℝ) := by
+  intro ε hε
+  obtain ⟨N, hN⟩ := S.map_one_close ε hε
+  refine ⟨N, fun n hn ↦ ?_⟩
+  change |((S.identityError n).card : ℝ) / Fintype.card (S.model n)| < ε
+  rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))]
+  simpa only [identityError, ← S.hammingDistance_one] using hN n hn
+
+private theorem collision_subset (n : ℕ) (g h : G) :
+    S.collisionError n g h ⊆
+      S.multiplicationError n (h⁻¹) g ∪
+        S.multiplicationError n (h⁻¹) h ∪ S.identityError n ∪
+          S.fixedError n (h⁻¹ * g) := by
+  classical
+  intro x hx
+  simp only [collisionError, multiplicationError, identityError, movedVertices,
+    fixedError, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union] at hx ⊢
+  by_cases hg : S.map n (h⁻¹ * g) x ≠ S.map n h⁻¹ (S.map n g x)
+  · exact Or.inl (Or.inl (Or.inl hg))
+  by_cases hh : S.map n (h⁻¹ * h) x ≠ S.map n h⁻¹ (S.map n h x)
+  · exact Or.inl (Or.inl (Or.inr hh))
+  by_cases h1 : S.map n 1 x ≠ x
+  · exact Or.inl (Or.inr h1)
+  right
+  calc
+    S.map n (h⁻¹ * g) x = S.map n h⁻¹ (S.map n g x) := not_ne_iff.mp hg
+    _ = S.map n h⁻¹ (S.map n h x) := congrArg (S.map n h⁻¹) hx
+    _ = S.map n (h⁻¹ * h) x := (not_ne_iff.mp hh).symm
+    _ = S.map n 1 x := by simp
+    _ = x := not_ne_iff.mp h1
+
+private theorem collision_card_le (n : ℕ) (g h : G) :
+    (S.collisionError n g h).card ≤
+      (S.multiplicationError n (h⁻¹) g).card +
+        (S.multiplicationError n (h⁻¹) h).card + (S.identityError n).card +
+          (S.fixedError n (h⁻¹ * g)).card := by
+  classical
+  have hs := Finset.card_le_card (S.collision_subset n g h)
+  have h1 := Finset.card_union_le (S.multiplicationError n (h⁻¹) g)
+    (S.multiplicationError n (h⁻¹) h)
+  have h2 := Finset.card_union_le
+    (S.multiplicationError n (h⁻¹) g ∪ S.multiplicationError n (h⁻¹) h)
+    (S.identityError n)
+  have h3 := Finset.card_union_le
+    (S.multiplicationError n (h⁻¹) g ∪ S.multiplicationError n (h⁻¹) h ∪
+      S.identityError n) (S.fixedError n (h⁻¹ * g))
+  omega
+
+theorem collisionError_negligible (g h : G) (hgh : g ≠ h) :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((S.collisionError n g h).card : ℝ) := by
+  have hne : h⁻¹ * g ≠ 1 := by
+    intro heq
+    apply hgh
+    exact (inv_mul_eq_one.mp heq).symm
+  have hsum := Negligible.add
+    (Negligible.add
+      (S.multiplicationError_negligible (h⁻¹) g)
+      (S.multiplicationError_negligible (h⁻¹) h))
+    (Negligible.add S.identityError_negligible
+      (S.fixedError_negligible (h⁻¹ * g) hne))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  calc
+    ((S.collisionError n g h).card : ℝ) / Fintype.card (S.model n) ≤
+        (((S.multiplicationError n (h⁻¹) g).card +
+          (S.multiplicationError n (h⁻¹) h).card + (S.identityError n).card +
+          (S.fixedError n (h⁻¹ * g)).card : ℕ) : ℝ) /
+            Fintype.card (S.model n) := by
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      exact_mod_cast S.collision_card_le n g h
+    _ =
+        (((S.multiplicationError n (h⁻¹) g).card : ℝ) +
+          (S.multiplicationError n (h⁻¹) h).card +
+          (((S.identityError n).card : ℝ) + (S.fixedError n (h⁻¹ * g)).card)) /
+            Fintype.card (S.model n) := by
+      push_cast
+      ring
 
 end SoficApproximation
 end NonsoficGroupsExist
