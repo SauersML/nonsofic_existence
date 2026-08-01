@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Leavitt
+import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittSelfSimilarity
 import NonsoficGroupsExist.MatrixSelfSimilarity
@@ -34,3 +35,5 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.hammingDistance
 #print axioms NonsoficGroupsExist.SoficApproximation
 #print axioms NonsoficGroupsExist.IsSofic
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.IsMedian.eq_of_subsingleton
