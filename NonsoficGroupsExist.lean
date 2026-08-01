@@ -13,6 +13,7 @@ import NonsoficGroupsExist.LEF
 import NonsoficGroupsExist.ThompsonObstruction
 import NonsoficGroupsExist.Scheme
 import NonsoficGroupsExist.Criterion
+import NonsoficGroupsExist.BlockEnumeration
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -101,6 +102,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.card_ratio_of_pinned
 #print axioms NonsoficGroupsExist.symmDiff_le_of_pinned
 #print axioms NonsoficGroupsExist.matching_injective
+#print axioms NonsoficGroupsExist.BlockStructure.sum_card_blocksFinset
 #print axioms NonsoficGroupsExist.compression_centralizer
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
