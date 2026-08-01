@@ -1,4 +1,5 @@
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.Group.Units.Equiv
 import Mathlib.Data.Matrix.Basic
 
 /-!
@@ -99,11 +100,19 @@ def ringEquivMatrix : A ≃+* Matrix ι ι A where
 /-- Proposition `prop:selfsim` in the orientation displayed in the manuscript. -/
 def matrixRingEquiv : Matrix ι ι A ≃+* A := F.ringEquivMatrix.symm
 
+/-- The unit-group isomorphism `GLᵣ(A) ≃* Aˣ` stated in
+Proposition `prop:selfsim`. -/
+def unitsEquiv : (Matrix ι ι A)ˣ ≃* Aˣ :=
+  Units.mapEquiv F.matrixRingEquiv.toMulEquiv
+
 @[simp] theorem matrixRingEquiv_apply (M : Matrix ι ι A) :
     F.matrixRingEquiv M = ∑ i, ∑ j, F.left i * M i j * F.right j := rfl
 
 @[simp] theorem matrixRingEquiv_symm_apply (x : A) (i j : ι) :
     F.matrixRingEquiv.symm x i j = F.right i * x * F.left j := rfl
+
+@[simp] theorem unitsEquiv_apply_val (M : (Matrix ι ι A)ˣ) :
+    ↑(F.unitsEquiv M) = F.matrixRingEquiv (↑M) := rfl
 
 end CompleteMatrixFamily
 end NonsoficGroupsExist

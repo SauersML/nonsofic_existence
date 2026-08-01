@@ -20,3 +20,4 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.Whitehead.whitehead_commutator
 #print axioms NonsoficGroupsExist.Whitehead.whitehead_commutator_mem
 #print axioms NonsoficGroupsExist.CompleteMatrixFamily.matrixRingEquiv
+#print axioms NonsoficGroupsExist.CompleteMatrixFamily.unitsEquiv
