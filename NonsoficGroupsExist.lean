@@ -37,3 +37,4 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.IsSofic
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.IsMedian.eq_of_subsingleton
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.positivePart_edge_add_negativePart_edge

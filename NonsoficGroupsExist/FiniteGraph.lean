@@ -70,5 +70,41 @@ theorem IsMedian.eq_of_subsingleton {Y : FiniteModel} [Nonempty Y] [Subsingleton
     norm_num at h
   exact le_antisymm (not_lt.mp hnotGreater) (not_lt.mp hnotLess)
 
+/-- Positive part of a real number. -/
+def positivePart (x : ℝ) : ℝ := max x 0
+
+/-- Negative part of a real number, recorded as a nonnegative number. -/
+def negativePart (x : ℝ) : ℝ := max (-x) 0
+
+theorem abs_eq_positivePart_add_negativePart (x : ℝ) :
+    |x| = positivePart x + negativePart x := by
+  rcases le_total 0 x with hx | hx
+  · simp [positivePart, negativePart, hx, abs_of_nonneg hx]
+  · simp [positivePart, negativePart, hx, abs_of_nonpos hx]
+
+/-- The pointwise edge identity used when the positive and negative co-area
+bounds are added. -/
+theorem positivePart_edge_add_negativePart_edge (x y : ℝ) :
+    |positivePart x - positivePart y| + |negativePart x - negativePart y| = |x - y| := by
+  rcases le_total 0 x with hx | hx <;> rcases le_total 0 y with hy | hy
+  · simp [positivePart, negativePart, hx, hy]
+  · have hxy : 0 ≤ x - y := sub_nonneg.mpr (hy.trans hx)
+    simp [positivePart, negativePart, hx, hy, abs_of_nonneg hx, abs_of_nonpos hy,
+      sub_eq_add_neg]
+    exact (abs_of_nonneg hxy).symm
+  · have hxy : x - y ≤ 0 := sub_nonpos.mpr (hx.trans hy)
+    simp [positivePart, negativePart, hx, hy, abs_of_nonpos hx, abs_of_nonneg hy,
+      sub_eq_add_neg, add_comm]
+    have hxy' : x + -y ≤ 0 := by simpa [sub_eq_add_neg] using hxy
+    rw [abs_of_nonpos hxy']
+    simp
+  · rw [show positivePart x = 0 by simp [positivePart, hx],
+      show positivePart y = 0 by simp [positivePart, hy],
+      show negativePart x = -x by simp [negativePart, hx],
+      show negativePart y = -y by simp [negativePart, hy]]
+    simp only [sub_self, abs_zero, zero_add, sub_eq_add_neg, neg_neg]
+    have hneg : -x + y = -(x + -y) := by simp [add_comm]
+    rw [hneg, abs_neg]
+
 end FiniteMultiGraph
 end NonsoficGroupsExist
