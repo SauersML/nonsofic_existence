@@ -111,5 +111,69 @@ theorem generatorGraph_crossing_card_le (n : ℕ) (q : G) :
   exact (Finset.card_le_card (S.generator_crossing_pairs_subset P n q)).trans
     (S.generatorErrorPairs_card_le P n q)
 
+/-- The generator-graph crossings have negligible density whenever every
+fixed target element almost preserves the target block structure. -/
+theorem generatorGraph_crossing_negligible
+    (hall : ∀ g : G, Negligible
+      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((wordCrossing (P n) (S.map n g)).card : ℝ))
+    (q : G) : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ (((generatorGraph (S.model n) T (S.map n)).crossingEdges
+        (S.compressorLabel P n q)).card : ℝ) := by
+  let I : Finset T := Finset.univ
+  have hsum : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ∑ t ∈ I,
+        (((S.conjugacyError n q t.1).card : ℝ) +
+          ((wordCrossing (P n) (S.map n (q * t.1 * q⁻¹))).card : ℝ)) := by
+    apply Negligible.sum I
+    intro t _
+    exact Negligible.add (S.conjugacyError_negligible q t.1)
+      (hall (q * t.1 * q⁻¹))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  have hcard := S.generatorGraph_crossing_card_le (T := T) P n q
+  have hcast :
+      (((generatorGraph (S.model n) T (S.map n)).crossingEdges
+        (S.compressorLabel P n q)).card : ℝ) ≤
+      ∑ t : T,
+        (((S.conjugacyError n q t.1).card : ℝ) +
+          ((wordCrossing (P n) (S.map n (q * t.1 * q⁻¹))).card : ℝ)) := by
+    exact_mod_cast hcard
+  apply div_le_div_of_nonneg_right
+  simpa [I] using hcast
+  positivity
+
 end SoficApproximation
+
+namespace ExpanderDecomposition
+
+variable {G : Type} [Group G] {S : SoficApproximation G} {T : Finset G}
+
+/-- The edited decomposition graph has negligible compressor crossings.  The
+two contributions are the occurrence edits and the generator-arc errors. -/
+theorem globalCrossing_negligible (D : ExpanderDecomposition S T)
+    (hall : ∀ g : G, Negligible
+      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((wordCrossing (D.blocks n) (S.map n g)).card : ℝ))
+    (q : G) : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ (((D.modelGraph n).crossingEdges
+        (transportedTargetLabel (D.blocks n) (S.map n q))).card : ℝ) := by
+  have hgenerator := S.generatorGraph_crossing_negligible (T := T) D.blocks hall q
+  have hsum := Negligible.add D.unmatched_negligible hgenerator
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  have hcard := (D.editWitness n).targetCrossing_card_le_unmatchedCount
+    (S.compressorLabel D.blocks n q)
+    (transportedTargetLabel (D.blocks n) (S.map n q)) (fun _ ↦ rfl)
+  have hcast :
+      (((D.modelGraph n).crossingEdges
+        (transportedTargetLabel (D.blocks n) (S.map n q))).card : ℝ) ≤
+      ((D.editWitness n).unmatchedCount : ℝ) +
+        (((generatorGraph (S.model n) T (S.map n)).crossingEdges
+          (S.compressorLabel D.blocks n q)).card : ℝ) := by
+    exact_mod_cast hcard
+  apply div_le_div_of_nonneg_right hcast
+  positivity
+
+end ExpanderDecomposition
 end NonsoficGroupsExist
