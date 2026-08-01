@@ -1,0 +1,979 @@
+\documentclass[10pt]{article}
+
+\usepackage[a4paper,left=0.92in,right=0.92in,top=0.90in,bottom=0.90in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{array,booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc}
+\usepackage{url}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Sym}{\operatorname{Sym}}
+\newcommand{\GL}{\operatorname{GL}}
+\newcommand{\EL}{\operatorname{EL}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\id}{\operatorname{id}}
+\newcommand{\LEF}{\mathrm{LEF}}
+\newcommand{\sofic}{sofic}
+\newcommand{\subhead}[1]{\par\medskip\noindent\textbf{#1}\par\smallskip}
+\newcommand{\stephead}[1]{\par\medskip\noindent\textbf{#1}\par\smallskip}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\angles}[1]{\left\langle #1\right\rangle}
+
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0pt}
+\allowdisplaybreaks
+
+\begin{document}
+\setcounter{page}{77}
+
+\begin{center}
+{\scshape Chapter 3\par}
+\vspace{1.4em}
+{\Large\bfseries A Counterexample to the Soficity Conjecture\par}
+\end{center}
+
+\vspace{1.2em}
+\begin{quote}
+\small
+\textbf{Abstract.} A countable group is sofic if finite pieces of its multiplication table can be faithfully approximated by permutations of finite sets. We prove that the unit group $L_{\F_2}(1,2)^\times$ of the binary Leavitt algebra is not sofic, disproving the soficity conjecture. The proof starts from Kun's expander decomposition for property-(T) groups and the Kun--Thom centralizer obstruction. A general expander-matching argument recovers a single expanding component from a union of expanders. Elementary groups over the Leavitt algebra then force Thompson's group $V$ to be locally embeddable into finite groups, a contradiction.
+\end{quote}
+
+\vspace{1.8em}
+\begin{center}
+\textsc{Contents}
+\end{center}
+\noindent
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llr}
+1. & Introduction & 2\\
+2. & An expander-matching criterion & 5\\
+3. & The binary Leavitt configuration & 12\\
+& References & 17
+\end{tabular*}
+
+\newpage
+\section{Introduction}
+
+A countable group is sofic if every finite portion of its multiplication table can be approximated by permutations of a finite set: multiplication must hold at almost every point, and every nonidentity element must move almost every point. Gromov introduced this approximation property in his work on symbolic dynamics \cite{Gro99}; Weiss subsequently named sofic groups and asked whether a nonsofic group exists \cite[p.~351]{Wei00}. The question became known as the soficity conjecture: is every countable group sofic \cite[Open Question~3.8]{Pes08}?
+
+Let $\F_2$ be the field with two elements. The noncommutative binary Leavitt algebra \cite{Lea62} is
+\begin{equation}
+R=L_{\F_2}(1,2)=\F_2\angles{s_0,s_1,t_0,t_1\mid t_i s_j=\delta_{ij},\ s_0t_0+s_1t_1=1}.
+\tag{1}
+\end{equation}
+For example, $t_0s_0=1$, whereas $s_0t_0$ is a proper idempotent. Write $R^\times$ for its group of invertible elements: $x\in R^\times$ means that some $y\in R$ satisfies $xy=yx=1$. Since $R$ is finitely generated over the finite field $\F_2$, both $R$ and $R^\times$ are countable.
+
+\begin{theorem}
+The unit group $L_{\F_2}(1,2)^\times$ is not sofic.
+\end{theorem}
+
+\subhead{Related work}
+Earlier work gave several conditional routes to nonsofic groups. Bowen and Burton showed that flexible permutation stability of $\mathrm{PSL}_d(\Z)$ for some $d\geq 5$ would produce such a group \cite{BB20}. Gohla and Thom showed that suitable central extensions of $p$-adic lattices would be nonsofic under a permutation-stability hypothesis; Chapman, Dikstein, and Lubotzky gave an algebraic and combinatorial treatment of this implication \cite{GT24,CDL24}. Theorem~1.1 requires no unproved stability hypothesis.
+
+The Aldous--Lyons conjecture asked whether every unimodular random rooted network is a local weak limit of finite networks \cite[Question~10.1]{AL07}. It was disproved in companion papers by Bowen, Chapman, Lubotzky, and Vidick and by Bowen, Chapman, and Vidick \cite{BCLV24,BCV25}. Their tour-de-force argument combines subgroup tests with a refinement of the compression techniques behind the breakthrough $\mathrm{MIP}^{\ast}=\mathrm{RE}$ of Ji, Natarajan, Vidick, Wright, and Yuen, which also disproved Connes's embedding conjecture \cite{JNVWY20}. The second companion paper also gives another proof that Connes's embedding conjecture is false \cite{BCV25}. To explain the relationship with soficity, let $F_d$ be a free group of finite rank $d\geq 2$. An invariant random subgroup of $F_d$ is a conjugation-invariant probability distribution on its subgroups. It is co-sofic if it is a weak limit of the stabilizer distributions associated with uniformly chosen points of finite $F_d$-sets. The Aldous--Lyons conjecture was equivalent to the assertion that, for every finite rank $d\geq 2$, every invariant random subgroup of $F_d$ is co-sofic \cite[Section~6]{Gel18}.
+
+The soficity conjecture is precisely the restriction of this assertion to invariant random subgroups concentrated on a single normal subgroup. Indeed, if $N\trianglelefteq F_d$ and $\delta_N$ denotes the point mass at $N$, then
+\[
+F_d/N\text{ is sofic}\quad\Longleftrightarrow\quad \delta_N\text{ is a co-sofic invariant random subgroup of }F_d;
+\]
+see \cite[Section~6, Proposition~6.1]{Gel18}. Every finitely generated group is a quotient of some $F_d$, and soficity is detected on finitely generated subgroups. Therefore, the soficity conjecture asks exactly whether every such $\delta_N$ is co-sofic.
+
+Our proof constructs a finitely generated nonsofic subgroup $G\leq R^\times$. For any surjection $F_d\twoheadrightarrow G$, its kernel $N$ therefore gives a non-co-sofic point mass $\delta_N$. Equivalently, the generator-marked Cayley diagram of $G$ is a deterministic unimodular network that is not a local weak limit of finite networks with the same markings. This makes no assertion about the underlying unmarked Cayley graph. In contrast, a general non-co-sofic invariant random subgroup need not be supported on a normal subgroup and therefore need not produce a nonsofic quotient.
+
+The original motivation for soficity was Gottschalk's surjunctivity conjecture. A group $H$ is surjunctive if, for every finite alphabet $A$, every injective $H$-equivariant continuous map $A^H\to A^H$ is surjective. Gromov and Weiss proved that every sofic group is surjunctive \cite{Gro99,Wei00}. Bowen and Chapman constructed a surjunctive non-co-sofic invariant random subgroup \cite{BC25}, but their example is not concentrated on a normal subgroup and therefore does not produce a surjunctive nonsofic group. We do not know whether $R^\times$ is surjunctive. A positive answer would produce a surjunctive nonsofic group, while a negative answer would disprove Gottschalk's conjecture. Since surjunctivity passes to subgroups \cite[Lemma~1.1]{Wei00}, a positive answer would also establish surjunctivity of the copy $V\leq R^\times$ constructed below.
+
+A group is hyperlinear if finite pieces of its multiplication table admit asymptotically faithful models by finite-dimensional unitary matrices in normalized Hilbert--Schmidt distance. The conjecture that every discrete group is hyperlinear, known as Connes's embedding conjecture for groups, remains a major open problem \cite[Open Question~3.9]{Pes08}: no nonhyperlinear discrete group is known. For permutations $\sigma,\tau$ of $n$ points, their permutation matrices satisfy
+\[
+\lVert P_\sigma-P_\tau\rVert_{2,n}^2=2d_H(\sigma,\tau),
+\]
+where $\lVert\cdot\rVert_{2,n}$ is the normalized Hilbert--Schmidt norm and $d_H$ is normalized Hamming distance. Thus every sofic group is hyperlinear \cite[Theorem~3.3]{Pes08}, but Theorem~1.1 does not determine whether $L_{\F_2}(1,2)^\times$ is hyperlinear. Hyperlinearity is equivalent to Connes embeddability of the group von Neumann algebra \cite[Theorem~8.5]{Pes08}. Although $\mathrm{MIP}^{\ast}=\mathrm{RE}$ disproved Connes's embedding conjecture for general von Neumann algebras \cite{JNVWY20}, it does not produce a nonembeddable group von Neumann algebra.
+
+The corresponding approximation problem for the unnormalized Frobenius norm has a different answer. De Chiffre, Glebsky, Lubotzky, and Thom \cite{DCGLT20} constructed central extensions of arithmetic lattices that are not approximable by finite-dimensional unitaries in this norm. Because hyperlinearity uses the normalized Hilbert--Schmidt norm, their examples do not produce a nonhyperlinear group.
+
+There are also conditional approaches to nonhyperlinear groups. Dogon showed that flexible Hilbert--Schmidt stability of certain property-(T) groups would make nonsplit central extensions nonhyperlinear; his examples include extensions of $\mathrm{Sp}_{2g}(\Z)$ with $g\geq 2$ \cite{Dog23}. Dogon and Vigdorovich showed that if $\mathrm{SL}_2(\Z[1/p])$ is flexibly Hilbert--Schmidt stable for some prime $p$, then a finite central extension of that group is nonhyperlinear \cite{DV26}. Both stability hypotheses remain open.
+
+Two further conjectures hold for sofic groups. Lück's determinant conjecture asserts that the modified Fuglede--Kadison determinant of every matrix over $\Z[H]$ is at least one \cite{ES05}. The algebraic eigenvalue conjecture asserts that every eigenvalue of such a matrix acting on $\ell^2(H)^n$ is an algebraic integer \cite{Tho08}. Neither is settled for $R^\times$. Manzoor constructed an invariant random subgroup satisfying the determinant conjecture that is not co-hyperlinear \cite{Man25}, but this does not determine the conjecture for $R^\times$. The Kervaire--Laudenbach conjecture asks whether every one-variable equation with coefficients in a group and nonzero total exponent of the variable has a solution in some larger group. It holds for every hyperlinear group \cite[Theorem~1.3]{NT22}. Consequently, it would hold for $R^\times$ if that group were hyperlinear, whereas its failure would exhibit a nonhyperlinear group.
+
+Kaplansky's direct-finiteness conjecture asks whether $ab=1$ in a group algebra always implies $ba=1$. The superficially similar relation $t_0s_0=1\neq s_0t_0$ does not disprove this conjecture: neither $s_0$ nor $t_0$ belongs to $R^\times$, so their relation holds in $R$, not in $\F_2[R^\times]$. For every group $H$, the rings $\Z[H]$ and $k[H]$ for fields $k$ of characteristic zero are already stably finite \cite[Theorem~3.4 and Corollary~3.5]{BFF24}. Thus only positive-characteristic fields remain open for $R^\times$. If $R^\times$ were surjunctive, then $k[R^\times]$ would be stably finite for every field \cite[Corollary~3.25]{BFF24}.
+
+\subhead{Binary self-similarity}
+The defining relations of $R$ can be written as rectangular-matrix identities:
+\[
+S=\begin{bmatrix}s_0&s_1\end{bmatrix},\qquad
+T=\begin{bmatrix}t_0\\t_1\end{bmatrix},\qquad
+ST=1,\qquad TS=I_2.
+\]
+Thus $S:R^2\to R$ and $T:R\to R^2$ are inverse right $R$-module maps, and
+\[
+R\cong R^2\qquad\text{as right $R$-modules}.
+\]
+This is an isomorphism of modules, not of unital rings.
+
+The same relations connect the Leavitt algebra with Thompson's group. The Cuntz algebra $\mathcal O_2$ is generated by two isometries and their adjoints subject to the same formal relations as $s_i,t_i$. It is the universal $C^\ast$-completion of the complex Leavitt $\ast$-algebra $L_{\mathbb C}(1,2)$; our algebra $R$ has the same relations in characteristic two. Replacing initial binary words realizes Thompson's group $V$ both in the unitary group of $\mathcal O_2$ \cite[Section~4]{HO17} and in the unit group of the binary Leavitt algebra over any field \cite[Section~2.2]{BS16}.
+
+For a finite binary word $a$, let $[a]$ denote the cylinder consisting of infinite binary strings beginning with $a$. A complete prefix code is a finite set of pairwise prefix-incomparable words whose cylinders partition all infinite binary strings. Repeatedly splitting a cylinder into its two children produces complete prefix codes with any prescribed number $n\geq 1$ of words. After ordering its $n$ words, every such code $E$ determines a unital ring isomorphism
+\begin{equation}
+\Theta_E:M_n(R)\xrightarrow{\sim}R.
+\tag{2}
+\end{equation}
+Write $\EL_n(R)$ for the subgroup of $\GL_n(R)$ generated by the elementary matrices $I_n+rE_{ij}$, where $i\neq j$ and $r\in R$. Its image
+\[
+\EL_E(R):=\Theta_E(\EL_n(R))\leq R^\times
+\]
+is the same elementary group realized inside $R^\times$ through the binary prefix decomposition. Since $R$ is a finitely generated ring, the Ershov--Jaikin-Zapirain theorem gives these elementary groups property (T) when $n\geq 3$ \cite[Theorem~1.1]{EJ10}. For the specific nine-word code $D$ constructed in Equation~(14), put
+\[
+G:=\EL_D(R)=\Theta_D(\EL_9(R))\leq R^\times.
+\]
+Hence $G\cong\EL_9(R)$. The number nine is useful for the later prefix construction; the matrix isomorphism (2) holds in every rank. Because soficity passes to subgroups, it suffices to prove that $G$ is not sofic. In fact, the stronger identity $G=R^\times$ is independently known \cite[Corollary~4.4]{KT26}, but the proof does not require it.
+
+\subhead{Proof overview}
+A family of finite graphs of uniformly bounded degree is an expander family if there exists $\gamma>0$ such that, in every graph, each vertex set $U$ containing at most half the vertices has at least $\gamma\abs{U}$ edges to its complement. Given permutations modeling a finite generating set, their generator graph joins each point of the model set to its image under each generator. Kazhdan's property (T) is a uniform spectral-gap condition on unitary representations. Kun's theorem says that the generator graph of a sofic approximation to a property-(T) group becomes a disjoint union of uniformly expanding graphs after changing a proportion of edges that tends to zero along the approximation \cite[Theorem~1]{Kun19}. The expansion constant is uniform, but the number of components can grow without bound: taking increasingly many disjoint copies preserves a sofic approximation.
+
+The Kun--Thom obstruction requires a stronger hypothesis: if $K$ has property (T), $J$ is finitely generated, and a sofic approximation of $K\times J$ has a single uniformly expanding $K$-generator graph on the whole approximation set, then $J$ is locally embeddable into finite groups, or LEF \cite[Theorem~1.1]{KT19}. This means that every finite portion of the multiplication table of $J$ embeds exactly into a finite group.
+
+The single-expander hypothesis in the Kun--Thom theorem cannot be replaced by an arbitrary union of expanders: a commuting group may move between components without being LEF. For example, set
+\[
+\Lambda=\mathrm{SL}_3(\Z),\qquad B=\mathrm{BS}(2,3)=\angles{a,b\mid ab^2a^{-1}=b^3}.
+\]
+The group $\Lambda$ has property (T) and is residually finite, hence sofic. The group $B$ is finitely presented and sofic but not residually finite \cite[Example~4.6]{Pes08}; hence it is not LEF \cite[Theorem~2.2]{VG97}. Nevertheless, $\Lambda\times B$ is sofic \cite[Theorem~1(1)]{ES06}. Thus the expanding $\Lambda$-components alone cannot force their commuting group $B$ to be LEF.
+
+Proposition~2.3 bridges this gap without assuming that Kun's decomposition has only one component. It is a general group-theoretic criterion; the Leavitt algebra enters later, when we construct an example satisfying its hypotheses. Suppose that $G$ and its subgroup $\Gamma\leq G$ both have property (T), and that
+\[
+G=\angles{\Gamma,t_1,\ldots,t_m},\qquad t_i\Gamma t_i^{-1}\leq\Gamma\quad(1\leq i\leq m).
+\]
+Suppose further that a finitely generated subgroup $J\leq G$ satisfies
+\[
+[\Gamma,J]=1,\qquad \Gamma\cap J=\{1\},\qquad t_1Jt_1^{-1}\leq\Gamma.
+\]
+Thus $\Gamma\times J$ embeds in $G$, and the same conjugation moves both commuting factors inside $\Gamma$:
+\[
+t_1(\Gamma\times J)t_1^{-1}=(t_1\Gamma t_1^{-1})\times(t_1Jt_1^{-1})\leq\Gamma.
+\]
+This additional nesting is absent from the direct-product example above. Under these assumptions, Proposition~2.3 proves that soficity of $G$ would force $J$ to be LEF.
+
+To prove this implication, suppose that $G$ has a sofic approximation on a finite set $Y$. Apply Kun's theorem separately to the generator graphs for $\Gamma$ and $G$, obtaining two generally different partitions of $Y$ into expanding components. Call their respective parts $\Gamma$-components and $G$-components. For each $i$, let $p_i$ be the permutation approximating $t_i$. Since $t_i\Gamma t_i^{-1}\leq\Gamma$, expansion implies that, apart from components containing $o(\abs{Y})$ vertices altogether, each transported component $p_i(C)$ lies almost entirely inside some $\Gamma$-component $D$. Different transported components may, however, initially select the same $D$.
+
+For $z\in Y$, let $C(z)$ be its $\Gamma$-component and define $M(z)=\abs{C(z)}$. If $A$ is a $G$-component, let $m_A$ be a median of the values $M(z)$ for $z\in A$, and define
+\[
+f(z)=\frac{M(z)}{M(z)+m_A},\qquad z\in A.
+\]
+The inclusions $t_i\Gamma t_i^{-1}\leq\Gamma$ imply that $f$ is almost nondecreasing along each $p_i$, while the $\Gamma$-generators almost preserve $f$. Since every generator acts by a permutation, the total increase of $f$ equals its total decrease. Expansion of the $G$-components therefore forces $f$ to remain close to its median $1/2$ outside $o(\abs{Y})$ vertices. It follows that a transported component $p_i(C)$ and its target $D$ have approximately the same size. Since $p_i(C)$ already lies almost entirely in $D$, it occupies more than half of $D$. Distinct transported components are disjoint and therefore cannot select the same target.
+
+For $i=1$, this injective matching makes every fixed $\Gamma$-word preserve the transported components $p_1(C)$ at almost every vertex. Since $t_1Jt_1^{-1}\leq\Gamma$, each $J$-generator is the conjugate by $t_1^{-1}$ of an element of $\Gamma$. Conjugating the component-preservation statement by $p_1^{-1}$ therefore shows that the $J$-generators preserve the original $\Gamma$-components at almost every vertex. The $\Gamma$-generators already preserve these components. We can consequently select one original expanding component on which the required multiplication, commutation, and distinctness tests all hold outside a negligible set. Restrict the $\Gamma$- and $J$-generator actions to that component, complete their partial permutations, discard a negligible set to restore uniform expansion, and complete the permutations once more. The result is a sofic approximation of $\Gamma\times J$ on a single expander, so the Kun--Thom theorem implies that $J$ is LEF.
+
+It remains to realize the hypotheses of Proposition~2.3 inside the concrete group $G=\EL_D(R)$. In Section~3, we verify that $G$ has property (T), construct a property-(T) subgroup $\Gamma\leq G$, two units $u,v\in G$, and a subgroup $J\leq G$, and prove that
+\[
+G=\angles{\Gamma,u,v},\qquad u\Gamma u^{-1},\ v\Gamma v^{-1}\leq\Gamma,
+\]
+\[
+\Gamma\times J\leq G,\qquad uJu^{-1}\leq\Gamma,\qquad J\cong V.
+\]
+Here $\Gamma$ acts inside the cylinder $[0]$, whereas $J\cong V$ acts inside the disjoint cylinder $[1000]$; conjugation by $u$ moves $J$ into the cylinder $[0001]\subseteq[0]$. Thompson's group $V$ is finitely presented, infinite, and simple \cite{CFP96}, so it is not LEF \cite[Theorem~2.2]{VG97}. If $G$ were sofic, Proposition~2.3 applied with $t_1=u$ and $t_2=v$ would nevertheless force $J$ to be LEF. This contradiction proves that $G$, and hence $R^\times$, is not sofic.
+
+\section{An expander-matching criterion}
+
+We first isolate the part of the proof that does not depend on the binary Leavitt algebra. Its purpose is to turn a sofic approximation consisting of many expanding components into an approximation of a commuting direct product on one expanding component.
+
+For a nonempty finite set $Y$, write
+\[
+d_H(p,q)=\frac{\abs{\set{z\in Y:pz\neq qz}}}{\abs{Y}}\qquad(p,q\in\Sym(Y)).
+\]
+A sofic approximation of a countable group $H$ consists of maps $p_n:H\to\Sym(Y_n)$ satisfying
+\[
+p_n(1)=1,\qquad d_H\bigl(p_n(gh),p_n(g)p_n(h)\bigr)\longrightarrow0,\qquad d_H\bigl(p_n(g),1\bigr)\longrightarrow1\quad(g\neq1).
+\]
+Here the multiplication condition holds for every $g,h\in H$. By taking disjoint copies, we may assume that $\abs{Y_n}\to\infty$.
+
+A group $J$ is locally embeddable into finite groups, or LEF, if, for every finite $F\subseteq J$, there are a finite group $B$ and an injection $\phi:F\to B$ such that
+\[
+\phi(xy)=\phi(x)\phi(y)\qquad(x,y,xy\in F).
+\]
+Thus the multiplication table of $F$ embeds exactly, although the finite group $B$ may depend on $F$.
+
+For a graph $L$ and $U\subseteq V(L)$, let $\partial_LU$ be the set of edges joining $U$ to $V(L)\setminus U$. If $C$ is a connected component of $L$, we also write $\partial_CU$ for the boundary of $U\subseteq C$ in the induced graph on $C$. Parallel edges are counted with multiplicity, while loops contribute nothing. Edge symmetric differences are likewise counted with multiplicity. We call $C$ a $\gamma$-expander if
+\begin{equation}
+\abs{\partial_CU}\geq\gamma\min\{\abs{U},\abs{C\setminus U}\}\qquad(U\subseteq C).
+\tag{3}
+\end{equation}
+
+Throughout this section, a finite symmetric generating set $S=S^{-1}\subseteq H$ includes the identity. Normalize inverse labels to be inverse permutations, with the identity label acting exactly as the identity. The corresponding $S$-labelled generator graph has vertex set $Y_n$ and an arc from $z$ to $p_n(s)z$ for every $s\in S$. Pair inverse arcs to obtain an undirected multigraph; fixed points, including the identity label, give loops. Parallel edges retain their multiplicities. All such graphs have uniformly bounded degree. Adding identity loops does not change their edge boundaries, but makes the associated random walk lazy, as in Kun's property-(T) argument.
+
+The two external inputs differ in a crucial respect: Kun's theorem produces possibly many expanders; the Kun--Thom theorem requires one expander on the entire approximation set.
+
+\begin{theorem}[Kun's expander decomposition]
+Let $H$ be an infinite finitely generated group with property (T), let $S=S^{-1}\subseteq H$ be a finite generating set containing $1$, and let $p_n:H\to\Sym(Y_n)$ be a sofic approximation with $\abs{Y_n}\to\infty$. Write $X_n$ for its $S$-generator multigraph. There are a constant $\gamma>0$ and unlabelled, uniformly bounded-degree multigraphs $L_n$ on the same vertex sets such that
+\[
+\abs{E(X_n)\mathbin{\triangle}E(L_n)}=o(\abs{Y_n})
+\]
+and every connected component of $L_n$ is a $\gamma$-expander.
+\end{theorem}
+
+This is the expander-decomposition conclusion of \cite[Theorem~1]{Kun19}, stated with the identity-inclusive generator and multigraph conventions used in its property-(T) argument. If a graph convention suppresses identity loops, adjoin the same identity loop at every vertex of both graphs; this changes neither their boundaries nor their edge symmetric difference. The reference graphs are unlabelled: their edges need not retain the original generator labels, and decompositions for different generating families need not be compatible.
+
+\begin{theorem}[Kun--Thom's expander-centralizer theorem]
+Let $K$ be a group with property (T), let $J$ be a finitely generated group, and fix a finite symmetric generating set $S_K\subseteq K$ of $K$ containing $1$. Suppose that $K\times J$ has a sofic approximation $p_n:K\times J\to\Sym(Y_n)$. Write $X_{K,n}$ for its $S_K$-generator multigraph, and suppose that, for some $\lambda>0$,
+\[
+\abs{\partial_{X_{K,n}}U}\geq\lambda\min\{\abs{U},\abs{Y_n\setminus U}\}\qquad(U\subseteq Y_n)
+\]
+for every $n$. Then $J$ is LEF.
+\end{theorem}
+
+We use the permutation-multigraph version of \cite[Theorem~1.1 and Section~4]{KT19}; its boundary counts repeated edges with multiplicity.
+
+\begin{proposition}
+Let $\Gamma\leq G$ be infinite finitely generated groups with property (T). Suppose that
+\[
+G=\angles{\Gamma,t_1,\ldots,t_m},\qquad t_i\Gamma t_i^{-1}\leq\Gamma\quad(1\leq i\leq m),\qquad m\geq1.
+\]
+If a finitely generated subgroup $J\leq G$ satisfies
+\[
+[\Gamma,J]=1,\qquad \Gamma\cap J=\{1\},\qquad t_1Jt_1^{-1}\leq\Gamma,
+\]
+then soficity of $G$ implies that $J$ is LEF.
+\end{proposition}
+
+\begin{proof}
+Assume that $G$ is sofic, and fix one approximation $p_n:G\to\Sym(Y_n)$. By disjoint amplification, arrange that
+\[
+N=\abs{Y_n}\longrightarrow\infty.
+\]
+All $o(N)$ estimates refer to this same approximation. For readability, write $p_g=p_n(g)$ and suppress $n$ from the graphs and partitions.
+
+The hypotheses identify $\Gamma J$ with $\Gamma\times J$ and imply $t_1(\Gamma J)t_1^{-1}\leq\Gamma$. Our goal is to extract a sofic approximation of $\Gamma\times J$ whose $\Gamma$-generator graph is one expander. We first compare the expander decompositions for $\Gamma$ and $G$, then show that $J$ almost preserves the $\Gamma$-components. Finally, we select one such component and repair the restricted generator actions.
+
+\stephead{Step 1: Locate a dominant original component inside each transported component.}
+Choose a finite symmetric generating set $S_\Gamma$ for $\Gamma$ containing $1$. Adjoin the distinct nonidentity elements among $t_i^{\pm1}$ to obtain a symmetric generating set $S_G$ for $G$. For every inverse pair added in this way, choose one of the original $t_i$ as its positive representative. Thus each positive nonidentity $G$-generator either belongs to $\Gamma$ or is one of the given compressing elements. Normalize inverse labels to be inverse permutations and nonidentity involutive labels to be exact involutions, allowing their $o(N)$ fixed points; this changes only $o(N)$ vertices \cite[Lemma~2.1]{ES06}.
+
+Apply Theorem~2.1 first to the restricted sofic approximation of $\Gamma$, using $S_\Gamma$, and then to the sofic approximation of $G$, using $S_G$. Denote the resulting reference graphs, component partitions, and expansion constants by
+\[
+\begin{array}{c|c|c}
+\text{reference graph}&\text{connected components}&\text{expansion constant}\\ \hline
+L_\Gamma&\mathcal Q&\gamma_\Gamma>0\\
+L_G&\mathcal A&\gamma_G>0.
+\end{array}
+\]
+We call members of $\mathcal Q$ original components and members of $\mathcal A$ ambient components. Both partitions concern the same vertex set, but neither is assumed to refine the other. Each reference graph differs from its corresponding generator graph in $o(N)$ edges. Since $L_\Gamma$ has no edges between original components, an $S_\Gamma$-generator crosses between them on only $o(N)$ vertices. If $w=s_1\cdots s_r$ is a fixed $\Gamma$-word, write $p_w=p_{s_1}\cdots p_{s_r}$. The same crossing estimate then holds for $p_w$.
+
+Set $\tau_i=p_{t_i}$. Transport the vertices and edges of $L_\Gamma$ through $\tau_i$, obtaining
+\[
+I_i=\tau_iL_\Gamma,\qquad \mathcal P_i=\{\tau_iC:C\in\mathcal Q\}.
+\]
+Each member of $\mathcal P_i$ is a $\gamma_\Gamma$-expanding connected component of $I_i$. Apart from $o(N)$ edited edges, the edges of $I_i$ follow the permutations $\tau_ip_s\tau_i^{-1}$, $s\in S_\Gamma$. Approximate multiplicativity identifies each such permutation, outside $o(N)$ vertices, with a fixed $\Gamma$-word representing $t_ist_i^{-1}$. Since these words almost preserve the original components, we obtain
+\begin{equation}
+\#\{I_i\text{-edges joining different members of }\mathcal Q\}=o(N)\qquad(1\leq i\leq m).
+\tag{4}
+\end{equation}
+
+For $P\in\mathcal P_i$, choose $Q(P)\in\mathcal Q$ maximizing $\abs{P\cap Q(P)}$, and define its unmatched mass by
+\[
+L(P)=\abs{P}-\abs{P\cap Q(P)}.
+\]
+Partition $P$ into the sets $P\cap Q$, $Q\in\mathcal Q$. If the largest part has more than half the vertices, apply expansion to all other parts, whose total size is $L(P)$. Otherwise, every part has at most half the vertices, so apply expansion to all of them. Each edge between different parts is counted at most twice, giving
+\[
+\gamma_\Gamma L(P)\leq2\#\{I_i[P]\text{-edges joining different members of }\mathcal Q\}.
+\]
+Together with (4), this gives $\sum_{P\in\mathcal P_i}L(P)=o(N)$. Choose $\eta_n\downarrow0$ sufficiently slowly that, simultaneously for every $i$,
+\begin{equation}
+\sum_{\substack{P\in\mathcal P_i\\L(P)>\eta_n\abs{P}}}\abs{P}=o(N).
+\tag{5}
+\end{equation}
+For each $i$, all but $o(N)$ vertices belong to components of $\mathcal P_i$ whose unmatched mass is at most $\eta_n$ times their size. It remains to rule out several transported components selecting the same original component.
+
+\stephead{Step 2: Use a bounded median normalization to compare component sizes.}
+For each vertex $z$, let $C(z)\in\mathcal Q$ be its original component and set
+\[
+M(z)=\abs{C(z)}.
+\]
+Suppose that $P=\tau_iC$ satisfies $L(P)\leq\eta_n\abs{P}$. For every $z\in C$ with $\tau_iz\in P\cap Q(P)$,
+\[
+M(\tau_iz)=\abs{Q(P)}\geq(1-\eta_n)\abs{P}=(1-\eta_n)M(z).
+\]
+By (5), the discarded components and the unmatched portions of the remaining components occupy $o(N)$ vertices. Consequently,
+\begin{equation}
+M(\tau_iz)\geq(1-\eta_n)M(z)\quad\text{outside $o(N)$ vertices}\qquad(1\leq i\leq m).
+\tag{6}
+\end{equation}
+For each $s\in S_\Gamma$, we likewise have $M(p_sz)=M(z)$ outside $o(N)$ vertices.
+
+The values of $M$ need not be uniformly bounded, so these exceptional sets cannot control its total variation. For each ambient component $A\in\mathcal A$, let $m_A>0$ be a median of the vertex-indexed multiset
+\[
+\bigl(M(z):z\in A\bigr).
+\]
+Thus at least half of these values are at most $m_A$, and at least half are at least $m_A$. In particular, an original component $C$ contributes $\abs{C\cap A}$ copies of $\abs{C}$. Define
+\[
+f(z)=\frac{M(z)}{M(z)+m_A},\qquad z\in A.
+\]
+Then $0<f<1$, and $1/2$ is a median of $f$ on every $A$.
+
+Every $G$-generator crosses between components of $L_G$ on only $o(N)$ vertices. On each remaining generator arc, both endpoints use the same normalizing median $m_A$. For $s\in S_\Gamma$, this gives $f(p_sz)=f(z)$ outside $o(N)$ vertices. For a positive compressing generator $t_i$, use (6) and
+\[
+\frac{(1-\eta)x}{(1-\eta)x+a}\geq\frac{x}{x+a}-\eta\qquad(x,a>0,\ 0\leq\eta<1).
+\]
+Thus every positive $G$-generator $s$ satisfies
+\[
+f(p_sz)\geq f(z)-\eta_n\quad\text{outside $o(N)$ vertices}.
+\]
+Because $p_s$ is a permutation,
+\[
+\sum_{z\in Y_n}\bigl(f(p_sz)-f(z)\bigr)=0.
+\]
+The total decrease of $f$ is at most $\eta_nN+o(N)=o(N)$: the inequality above controls the nonexceptional vertices, and $0<f<1$ controls the exceptional ones. Since the displayed sum is zero, the total increase equals the total decrease. Hence
+\[
+\sum_{z\in Y_n}\abs{f(p_sz)-f(z)}=o(N).
+\]
+The same estimate holds for inverse generators. Summing over $S_G$, and noting that changing one edge affects the total variation by at most one, therefore gives
+\begin{equation}
+\sum_{\{z,w\}\in E(L_G)}\abs{f(z)-f(w)}=o(N).
+\tag{7}
+\end{equation}
+
+Expansion now forces $f$ to concentrate near its median $1/2$. Fix $A\in\mathcal A$. The finite coarea identity says that
+\[
+\int_0^1\abs{\partial_A\{z\in A:f(z)>t\}}\,dt
+=\sum_{\{z,w\}\in E(L_G[A])}\abs{f(z)-f(w)}.
+\]
+Indeed, an edge $\{z,w\}$ crosses the displayed level set precisely for levels between $f(z)$ and $f(w)$. For $0<t<1/2$, the set $\{z\in A:f(z)\leq t\}$ contains at most $\abs{A}/2$ vertices; for $1/2<t<1$, the same holds for $\{z\in A:f(z)>t\}$. Apply (3) to these sublevel and superlevel sets, use that complementary sets have the same boundary, and split the coarea integral at $1/2$. This yields
+\[
+\gamma_G\sum_{z\in A}\abs{f(z)-\tfrac12}
+\leq\sum_{\{z,w\}\in E(L_G[A])}\abs{f(z)-f(w)}.
+\]
+Summing over $A$ and using (7), we obtain
+\[
+\sum_{z\in Y_n}\abs{f(z)-\tfrac12}=o(N).
+\]
+Choose $\delta_n\downarrow0$ sufficiently slowly that
+\[
+E_n=\{z:\abs{f(z)-\tfrac12}>\delta_n\}\qquad\text{satisfies}\qquad\abs{E_n}=o(N).
+\]
+Since
+\[
+M(z)=m_A\frac{f(z)}{1-f(z)}\qquad(z\in A),
+\]
+any $z,w\in A\setminus E_n$ satisfy
+\begin{equation}
+\rho_n^{-1}\leq\frac{M(w)}{M(z)}\leq\rho_n,
+\qquad
+\rho_n=\left(\frac{1+2\delta_n}{1-2\delta_n}\right)^2\longrightarrow1.
+\tag{8}
+\end{equation}
+We have therefore shown that the sizes of original components meeting the same set $A\setminus E_n$ differ by a factor tending uniformly to one.
+
+\stephead{Step 3: Match the first transported partition almost bijectively.}
+All $t_i$ were needed to control the full $G$-generator graph. To show that $J$ preserves the original components, however, we need only the first transport. Set
+\[
+\tau=\tau_1,\qquad \mathcal P=\mathcal P_1.
+\]
+Retain a component $P=\tau C\in\mathcal P$ precisely when
+\[
+L(P)\leq\eta_n\abs{P}
+\]
+and there exists $z\in C$ such that
+\begin{equation}
+\tau z\in P\cap Q(P),\qquad z,\tau z\notin E_n,\qquad z,\tau z\text{ belong to the same }A\in\mathcal A.
+\tag{9}
+\end{equation}
+The last condition means that both vertices have the same median $m_A$.
+
+The vertices for which $\tau$ crosses between ambient components form a set
+\[
+H_n=\{z:z\text{ and }\tau z\text{ belong to different members of }\mathcal A\}
+\]
+of size $o(N)$. Indeed, $t_1$ is a fixed word in $S_G$, and each generator crosses $\mathcal A$ on only $o(N)$ vertices. If $P$ satisfies the loss bound but has no vertex as in (9), then
+\[
+\tau^{-1}\bigl(P\cap Q(P)\bigr)\subseteq H_n\cup E_n\cup\tau^{-1}(E_n).
+\]
+The sets $\tau^{-1}(P\cap Q(P))$ are disjoint as $P$ varies, and each has at least $(1-\eta_n)\abs{P}$ vertices when the loss bound holds. Thus the components satisfying the loss bound but having no witness contribute only $o(N)$ vertices. The components failing the loss bound contribute another $o(N)$ vertices by (5). Therefore all nonretained components together contain $o(N)$ vertices.
+
+For a retained $P$, choose $z$ as in (9). Then
+\[
+M(z)=\abs{C}=\abs{P},\qquad M(\tau z)=\abs{Q(P)}.
+\]
+The size comparison (8) gives
+\[
+\rho_n^{-1}\abs{P}\leq\abs{Q(P)}\leq\rho_n\abs{P}.
+\]
+Since at most $\eta_n\abs{P}$ vertices of $P$ lie outside $Q(P)$, it follows that
+\[
+\abs{P\mathbin{\triangle}Q(P)}\leq(\rho_n-1+2\eta_n)\abs{P}=o(\abs{P}).
+\]
+In particular, for all sufficiently large $n$,
+\[
+\abs{P\cap Q(P)}>\frac12\abs{Q(P)}.
+\]
+Distinct transported components are disjoint, so they cannot both occupy a strict majority of the same original component. Therefore $P\mapsto Q(P)$ is injective on retained components. The nonretained components and unmatched portions of retained components together contain $o(N)$ vertices, so the matched intersections cover $N-o(N)$ vertices.
+
+Fix a $\Gamma$-word $w$. Discard vertices outside the matched intersections, vertices whose $p_w$-images lie outside those intersections, and vertices for which $p_w$ crosses between original components. Each discarded set has size $o(N)$. For every remaining vertex $z$, the vertices $z$ and $p_wz$ lie in matched intersections belonging to the same original component. Injectivity of the matching therefore puts them in the same transported component. Thus
+\begin{equation}
+\#\{z:z\text{ and }p_wz\text{ lie in different members of }\mathcal P\}=o(N).
+\tag{10}
+\end{equation}
+For each $j\in J$, choose a fixed $\Gamma$-word $w_j$ representing $t_1jt_1^{-1}$, and put
+\[
+q_j=\tau^{-1}p_{w_j}\tau.
+\]
+Approximate multiplicativity shows that $q_j$ agrees with $p_j$ outside $o(N)$ vertices. Moreover, $\tau q_jz=p_{w_j}\tau z$, and the transported component containing $\tau z$ is $\tau C(z)$. Hence $z$ and $q_jz$ belong to the same original component exactly when $\tau z$ and $p_{w_j}\tau z$ belong to the same transported component. Applying (10) to $w_j$ therefore gives
+\begin{equation}
+\#\{z:C(q_jz)\neq C(z)\}=o(N).
+\tag{11}
+\end{equation}
+Thus, for every fixed generator of either $\Gamma$ or $J$, its approximating permutation preserves the original-component partition outside $o(N)$ vertices. It remains to select one original component and turn the restricted actions into an expanding approximation of $\Gamma\times J$.
+
+\stephead{Step 4: Select one component carrying all required word tests.}
+Choose finite symmetric generating sets
+\[
+T_\Gamma=S_\Gamma,\qquad T_J\subseteq J\setminus\{1\},\qquad T=T_\Gamma\cup T_J.
+\]
+Thus $1\in T_\Gamma\subseteq T$; its generator permutation is the identity. The set $T_J$ may be empty when $J$ is trivial. For $s\in T_\Gamma$, define
+\[
+q_s=p_s.
+\]
+For $j\in T_J$, use the permutation $q_j$ constructed in Step~3. Normalize inverse labels and make involutive $J$-labels exact by replacing all cycles of length greater than two with fixed points. These changes affect $o(N)$ vertices and can alter any fixed word test at only $o(N)$ starting vertices. Since $[\Gamma,J]=1$ and $\Gamma\cap J=\{1\}$, multiplication identifies $\Gamma\times J$ with its subgroup of $G$, and the permutations $q_t$ satisfy its fixed equality and distinctness tests outside $o(N)$ vertices.
+
+For $z\in Y_n$, recall that $C(z)$ is its original component. Define the set of generator exits by
+\[
+\mathcal C_n=\{z:C(q_tz)\neq C(z)\text{ for some }t\in T\}.
+\]
+Every $\Gamma$-generator preserves the original components outside $o(N)$ vertices, while (11) applies to every $J$-generator. Hence $\abs{\mathcal C_n}=o(N)$. Let $\Delta_n$ consist of vertices incident to the edge-multiset difference between the $\Gamma$-generator graph and $L_\Gamma$. Then $\abs{\Delta_n}=o(N)$.
+
+For $\ell\geq0$, let $W_\ell$ be the finite set of formal words in the alphabet $T$ of length at most $\ell$, including the empty word. Different formal words may represent the same group element. For $w\in W_\ell$, write $q_w$ for the corresponding product of permutations and $\overline w\in\Gamma\times J$ for the represented group element. Words representing the same element should have the same endpoint, whereas words representing distinct elements should have distinct endpoints. The vertices where either requirement fails form
+\[
+F_{n,\ell}=
+\bigcup_{\substack{w,w'\in W_\ell\\\overline w=\overline{w'}}}
+\{z:q_wz\neq q_{w'}z\}
+\ \cup\!
+\bigcup_{\substack{w,w'\in W_\ell\\\overline w\neq\overline{w'}}}
+\{z:q_wz=q_{w'}z\}.
+\]
+For $\ell\geq1$, collect all exceptional vertices in the explicitly defined set
+\[
+B_{n,\ell}=\Delta_n\cup F_{n,\ell}\cup\bigcup_{w\in W_{\ell-1}}q_w^{-1}(\mathcal C_n).
+\]
+The last term records word paths for which some generator step crosses between original components. For each fixed $\ell$, we have $\abs{B_{n,\ell}}=o(N)$. Choose $\ell_n\to\infty$ sufficiently slowly that
+\[
+e_n=\frac{\abs{B_{n,\ell_n}}}{N}\longrightarrow0,\qquad B_n=B_{n,\ell_n}.
+\]
+Averaging over all original components with weights $\abs{Q}$ yields a component $Q_n\in\mathcal Q$ satisfying
+\begin{equation}
+\abs{Q_n\cap B_n}\leq e_n\abs{Q_n}
+\tag{12}
+\end{equation}
+for every $n$. For each element of the word-metric ball in $\Gamma$, with generating set $T_\Gamma$ and radius $\lfloor\ell_n/2\rfloor$, choose a formal word of that length or shorter representing it. At any $z\in Q_n\setminus B_n$, the exit tests keep every such word path inside $Q_n$, and the distinctness tests give different endpoints for different elements. Evaluating the chosen words at $z$ therefore injects the entire word-metric ball into $Q_n$. Since $\Gamma$ is infinite, we have
+\[
+\abs{Q_n}\longrightarrow\infty.
+\]
+
+\stephead{Step 5: Complete the partial actions and remove the additive expansion error.}
+We first restrict the generator actions to the selected component and complete them to permutations. The resulting generator graph is close to an expander but may fail to expand on very small sets. Removing a small exceptional set and completing the restricted permutations a second time will produce one uniformly expanding generator graph.
+
+Set $P=Q_n$, now an original component rather than a transported component. For one representative of every nonidentity inverse pair in $T$, restrict $q_t$ to its internal arcs:
+\[
+A_t=\{z\in P:q_tz\in P\},\qquad q_t:A_t\longrightarrow q_t(A_t).
+\]
+The omitted sets $P\setminus A_t$ and $P\setminus q_t(A_t)$ have the same cardinality. Choose a bijection between them to extend this partial bijection to a permutation $\widehat q_t\in\Sym(P)$. For an involution, the missing domain equals the missing range, and we complete it by fixed points. Use $\widehat q_t^{-1}$ for the inverse label and $\widehat q_1=\id_P$ for the identity label. Because
+\[
+P\setminus A_t\subseteq\mathcal C_n\cap P\subseteq B_n\cap P,
+\]
+(12) shows that only $O(e_n\abs{P})$ values are changed. Every word path of length at most $\ell_n$ starting in $P\setminus B_n$ remains in $P$, so its equality, commutation, and distinctness tests are preserved. To obtain maps on the whole group, choose once and for all a formal representative word $w_g$ for every $g\in\Gamma\times J$, with $w_1$ empty and $w_t=t$ for every nonidentity $t\in T$, and set
+\[
+\widehat p_n(g)=\widehat q_{w_g}\in\Sym(Q_n).
+\]
+For fixed $g,h$, the equality tests compare $w_{gh}$ with the concatenation $w_gw_h$, and the distinctness tests compare $w_g$ with the empty word when $g\neq1$. Since $\ell_n\to\infty$, these tests eventually apply, and their exceptional proportions tend to zero. Therefore $\widehat p_n$ is a sofic approximation of $\Gamma\times J$ on $Q_n$.
+
+Let $I_0$ be the $T_\Gamma$-generator multigraph of $\widehat p_n$. Since $\Delta_n\cup\mathcal C_n\subseteq B_n$,
+\[
+\abs{E(I_0)\mathbin{\triangle}E(L_\Gamma[P])}=O_{\abs{S_\Gamma}}(e_n\abs{P}).
+\]
+Here $L_\Gamma[P]$ is precisely the original $\gamma_\Gamma$-expanding component on $P$. Consequently, for some $a_n\to0$,
+\begin{equation}
+\abs{\partial_{I_0}X}\geq\gamma_\Gamma\min\{\abs{X},\abs{P\setminus X}\}-a_n\abs{P}\qquad(X\subseteq P).
+\tag{13}
+\end{equation}
+The additive error does not control small sets, so the current graph need not yet be an expander.
+
+Fix $0<\lambda<\gamma_\Gamma$. If there is a nonempty $B_{\mathrm{cut}}\subseteq P$ with
+\[
+\abs{B_{\mathrm{cut}}}\leq\frac{\abs{P}}2,\qquad \abs{\partial_{I_0}B_{\mathrm{cut}}}<\lambda\abs{B_{\mathrm{cut}}},
+\]
+choose such a set of maximum cardinality; otherwise, set $B_{\mathrm{cut}}=\varnothing$. Equation~(13) implies
+\[
+\abs{B_{\mathrm{cut}}}\leq\frac{a_n}{\gamma_\Gamma-\lambda}\abs{P}=o(\abs{P}).
+\]
+Put $Z=P\setminus B_{\mathrm{cut}}$. We claim that, for all sufficiently large $n$, the induced graph $I_0[Z]$ is a $\lambda$-expander.
+
+Let $X\subseteq Z$ satisfy $0<\abs{X}\leq\abs{Z}/2$. If $\abs{X}+\abs{B_{\mathrm{cut}}}\leq\abs{P}/2$, maximality of $B_{\mathrm{cut}}$ gives
+\[
+\lambda(\abs{X}+\abs{B_{\mathrm{cut}}})
+\leq\abs{\partial_{I_0}(X\cup B_{\mathrm{cut}})}
+\leq\abs{\partial_{I_0[Z]}X}+\abs{\partial_{I_0}B_{\mathrm{cut}}}.
+\]
+It follows that $\abs{\partial_{I_0[Z]}X}\geq\lambda\abs{X}$. Otherwise,
+\[
+\abs{X}>\frac{\abs{P}}2-\abs{B_{\mathrm{cut}}}.
+\]
+If $d$ bounds the degrees of $I_0$, (13) yields
+\[
+\abs{\partial_{I_0[Z]}X}\geq\gamma_\Gamma\abs{X}-a_n\abs{P}-d\abs{B_{\mathrm{cut}}}\geq\lambda\abs{X}
+\]
+for all sufficiently large $n$, because $\abs{B_{\mathrm{cut}}}=o(\abs{P})$ and $\abs{X}=(\tfrac12-o(1))\abs{P}$. If $B_{\mathrm{cut}}$ is empty, the same conclusion is immediate from its defining maximality condition. This proves the claim.
+
+The permutations $\widehat q_t$ still act on $P$, not on $Z$. Restrict each one to
+\[
+\widehat q_t:\{z\in Z:\widehat q_tz\in Z\}\longrightarrow
+\widehat q_t\bigl(\{z\in Z:\widehat q_tz\in Z\}\bigr).
+\]
+The omitted domain and range inside $Z$ again have equal cardinality, so extend this partial bijection to a permutation of $Z$. Again use fixed points for an involution and inverse permutations for inverse labels. The resulting $\widetilde q_t\in\Sym(Z)$ differs from the restriction of $\widehat q_t$ on at most
+\[
+\abs{B_{\mathrm{cut}}}=o(\abs{P})=o(\abs{Z})
+\]
+vertices per generator. Every internal $\Gamma$-edge of $I_0[Z]$ is retained. Thus the $\Gamma$-generator multigraph of $(\widetilde q_t)_{t\in T}$ contains $I_0[Z]$ as a spanning submultigraph. The additional completion edges cannot decrease any edge boundary, so this generator graph is a $\lambda$-expander on the whole of $Z$.
+
+For each fixed word $w$, compare its path under the permutations $\widehat q_t$ on $P$ with its path under $\widetilde q_t$ on $Z$. These paths can first differ only when a prefix encounters a repaired generator value. Since each prefix acts by a permutation,
+\[
+\abs{\{z\in Z:\widetilde q_wz\neq\widehat q_wz\}}\leq\abs{w}\,\abs{B_{\mathrm{cut}}}.
+\]
+Thus every fixed equality, distinctness, and commutation test still fails on only $o(\abs{Z})$ vertices. As
+\[
+\abs{Z}=(1-o(1))\abs{P}\longrightarrow\infty,
+\]
+the maps $g\mapsto\widetilde q_{w_g}$ give a sofic approximation of $\Gamma\times J$ whose $\Gamma$-generator graph is one uniform expander. Theorem~2.2 implies that $J$ is LEF.
+\end{proof}
+
+\section{The binary Leavitt configuration}
+
+We apply Proposition~2.3 inside the unit group of the noncommutative binary Leavitt algebra $R$ from (1). Its binary prefix structure supplies the contracting conjugations and the commuting copy of Thompson's group, while the Ershov--Jaikin-Zapirain theorem supplies property (T) for the elementary groups used in the construction. We construct these groups and then verify the hypotheses of Proposition~2.3.
+
+\subsection{Prefix codes and elementary groups}
+Let $W$ be the $\F_2$-vector space with one basis vector $e_\omega$ for every infinite binary string $\omega\in\{0,1\}^{\N}$. The formulas
+\[
+s_i e_\omega=e_{i\omega},\qquad t_i e_{j\omega}=\delta_{ij}e_\omega
+\]
+satisfy the defining relations of $R$. Thus $s_i$ prefixes a string by $i$, whereas $t_i$ deletes that prefix when present and otherwise gives zero. The operators $s_0^k$ are distinct, so $R$ is infinite.
+
+For a finite binary word $a=i_1\cdots i_r$, set
+\[
+s_a=s_{i_1}\cdots s_{i_r},\qquad t_a=t_{i_r}\cdots t_{i_1},\qquad e_a=s_at_a.
+\]
+For the empty word, both products are $1$. The cylinder $[a]$ consists of the infinite binary strings beginning with $a$. A prefix code $E=(a_1,\ldots,a_q)$ is a list of words no one of which is a prefix of another. It is complete if the cylinders $[a_i]$ partition all infinite binary strings. Write $e_E=\sum_i e_{a_i}$. The prefix-code identities
+\[
+t_{a_i}s_{a_j}=\delta_{ij},\qquad
+(s_{a_i}t_{a_j})(s_{a_k}t_{a_l})=\delta_{jk}s_{a_i}t_{a_l}
+\]
+follow from the incomparability of its words. Moreover, the Leavitt relation gives
+\[
+e_a=s_a(s_0t_0+s_1t_1)t_a=e_{a0}+e_{a1}.
+\]
+Every finite complete prefix code is obtained from the one-word code consisting of the empty word by repeatedly replacing a word $a$ with its children $a0,a1$. The displayed identity therefore shows that $e_E=1$ whenever $E$ is complete. The prefix-code identities also give a ring isomorphism
+\[
+\Theta_E:M_q(R)\xrightarrow{\sim}e_ERe_E,
+\qquad
+(r_{ij})\longmapsto\sum_{i,j}s_{a_i}r_{ij}t_{a_j}.
+\]
+Its inverse sends $x\in e_ERe_E$ to $(t_{a_i}xs_{a_j})_{i,j}$. If $E$ is complete, this identifies $M_q(R)$ with $R$. Otherwise, a unit $h$ in the corner extends to a unit of $R$ as $h+1-e_E$, acting identically outside the cylinders in $E$.
+
+In particular, define the elementary prefix group
+\[
+\EL_E(R)=\angles{1+s_{a_i}rt_{a_j}:i\neq j,\ r\in R}\leq R^\times.
+\]
+Indeed, the corner-unit extension satisfies
+\[
+(1-e_E)+\Theta_E(I_q+rE_{ij})=1+s_{a_i}rt_{a_j}\qquad(i\neq j),
+\]
+so $\EL_E(R)$ is the copy of $\EL_q(R)$ acting identically outside the cylinders of $E$. We call its displayed generators elementary $E$-roots.
+
+Take the three prefix blocks
+\begin{equation}
+\begin{aligned}
+\alpha&=(000,001,01),\\
+\beta&=(1000,1001,101),\\
+\nu&=(1100,1101,111),\\
+D&=(\alpha_1,\alpha_2,\alpha_3,\beta_1,\beta_2,\beta_3,\nu_1,\nu_2,\nu_3).
+\end{aligned}
+\tag{14}
+\end{equation}
+Their cylinders partition $[0]$, $[10]$, and $[11]$, respectively. Therefore $D$ is a complete nine-leaf code, whereas $\alpha$ covers only $[0]$. Set
+\[
+G=\EL_D(R)\cong\EL_9(R),\qquad \Gamma=\EL_\alpha(R)\cong\EL_3(R).
+\]
+Since $e_\alpha=e_0$, these identifications give
+\[
+\Gamma=\{1-e_0+\Theta_\alpha(A):A\in\EL_3(R)\}
+=\{\Theta_D(\diag(A,I_6)):A\in\EL_3(R)\}.
+\]
+Thus the corner action is extended by the identity on the six complementary leaves, and every elementary $\alpha$-root is also a $D$-root. Consequently,
+\[
+\Gamma\leq G\leq R^\times.
+\]
+Both groups are infinite: for distinct code leaves, the map
+\[
+r\longmapsto1+s_{a_i}rt_{a_j}
+\]
+embeds the infinite additive group of $R$ into their corresponding elementary root subgroup.
+
+The ring $R$ is generated by $\{1,s_0,s_1,t_0,t_1\}$. For $x_{ij}(r)=I_q+rE_{ij}$, the identities
+\[
+x_{ij}(r+r')=x_{ij}(r)x_{ij}(r'),\qquad
+[x_{ij}(r),x_{jk}(r')]=x_{ik}(rr')\quad(i,j,k\text{ distinct})
+\]
+show that the elementary roots with these five coefficients generate $\EL_q(R)$ whenever $q\geq3$. Thus $G$ and $\Gamma$ are finitely generated. Both have property (T) by the Ershov--Jaikin-Zapirain theorem \cite[Theorem~1.1]{EJ10}.
+
+\subsection{Copies of Thompson's group}
+To define Thompson's group $V$ \cite{CFP96}, take two complete prefix codes
+\[
+E=(a_1,\ldots,a_q),\qquad E'=(b_1,\ldots,b_q),
+\]
+together with a bijection $a_i\mapsto b_i$. Every infinite binary string has a unique expression $a_i\omega$, where $a_i\in E$ and $\omega$ is its remaining infinite tail. The corresponding prefix replacement acts by
+\[
+g(a_i\omega)=b_i\omega.
+\]
+Thus it replaces the initial word $a_i$ by $b_i$ and leaves the infinite tail unchanged. Since $E'$ is also complete, this map is a bijection; its inverse replaces each $b_i$ by $a_i$. Thompson's group $V$ consists of all such prefix replacements.
+
+For example, the complete codes
+\[
+E=(0,10,11),\qquad E'=(10,0,11)
+\]
+give the replacement
+\[
+g(0\omega)=10\omega,\qquad g(10\omega)=0\omega,\qquad g(11\omega)=11\omega.
+\]
+It exchanges the cylinders $[0]$ and $[10]$ while fixing $[11]$.
+
+We next realize $V$ inside $G$, together with smaller copies inside $\Gamma$. In the standard Leavitt-algebra realization \cite[Section~2.2]{BS16}, a prefix-replacement table $g:E\to E'$ gives the element
+\[
+U_g=\sum_{a\in E}s_{g(a)}t_a,\qquad
+U_{g^{-1}}=\sum_{a\in E}s_at_{g(a)}.
+\]
+Because both codes are complete, the prefix-code identities give
+\[
+U_gU_{g^{-1}}=U_{g^{-1}}U_g=1.
+\]
+To see that this construction depends only on the represented prefix replacement, observe that
+\[
+s_bt_a=s_{b0}t_{a0}+s_{b1}t_{a1}.
+\]
+Thus replacing one table entry $a\mapsto b$ by the two entries $a0\mapsto b0$ and $a1\mapsto b1$ does not change $U_g$. Any two tables representing the same prefix replacement have a common refinement. Likewise, given two replacements $g$ and $h$, refine the range code of $g$ and the domain code of $h$ until they agree. The prefix-code identities then give
+\[
+U_hU_g=U_{h\circ g},\qquad U_{\id}=1.
+\]
+Hence $g\mapsto U_g$ is a well-defined homomorphism. Moreover, $U_g$ sends $e_{a\omega}$ to $e_{g(a)\omega}$. Distinct prefix replacements act differently on some basis vector, so their units are distinct. We therefore obtain a faithful copy $V\leq R^\times$. For a binary word $l$, write $V_l\cong V$ for the copy acting by prefix replacements inside $[l]$ and fixing its complement. Its tables can be chosen to leave every complementary cylinder unchanged, so
+\begin{equation}
+g-1\in e_lRe_l\qquad(g\in V_l).
+\tag{15}
+\end{equation}
+
+\begin{lemma}
+We have $V\leq G$. If $l$ extends one of the three words $\alpha_i$, then $V_l\leq\Gamma$.
+\end{lemma}
+
+\begin{proof}
+For incomparable words $\rho,\sigma$, the unit
+\[
+\tau_{\rho,\sigma}=1+e_\rho+e_\sigma+s_\rho t_\sigma+s_\sigma t_\rho
+\]
+exchanges the cylinders $[\rho]$ and $[\sigma]$ and fixes their complement. These cylinder swaps generate $V$ \cite[Theorem~1.1]{BQ17}.
+
+Fix any prefix code $E=(a_1,\ldots,a_q)$ with $q\geq2$. Suppose first that $\rho=a_iw$ and $\sigma=a_jw'$ extend different leaves of this code. Then
+\[
+P=s_\rho t_\sigma=s_{a_i}(s_wt_{w'})t_{a_j},\qquad
+Q=s_\sigma t_\rho=s_{a_j}(s_{w'}t_w)t_{a_i}
+\]
+make $1+P$ and $1+Q$ elementary $E$-roots. Since the coefficient field has characteristic two,
+\[
+\tau_{\rho,\sigma}=(1+P)(1+Q)(1+P)\in\EL_E(R).
+\]
+If instead both words extend the same leaf $a_i$, choose a different leaf $a_j$. The transposition identity
+\[
+\tau_{\rho,\sigma}=\tau_{\rho,a_j}\tau_{\sigma,a_j}\tau_{\rho,a_j}
+\]
+again puts $\tau_{\rho,\sigma}$ in $\EL_E(R)$.
+
+For the complete code $D$, choose $k$ large enough that every $\rho w$ and $\sigma w$, $w\in\{0,1\}^k$, extends a leaf of $D$. Then
+\[
+\tau_{\rho,\sigma}=\prod_{w\in\{0,1\}^k}\tau_{\rho w,\sigma w}\in\EL_D(R).
+\]
+Hence $V\leq G$. If $l$ extends $\alpha_i$, the same-leaf argument with $E=\alpha$ puts every cylinder swap supported on $[l]$ in $\Gamma$, proving $V_l\leq\Gamma$.
+\end{proof}
+
+\subsection{Two contractions and a commuting obstruction}
+We construct two prefix replacements that send $\Gamma$ into the same subgroup and together recover $G$. The three prefixes $\zeta=(100,101,11)$ partition $[1]$. Define $u,v\in V\leq G$ by the tables
+\begin{equation}
+\begin{array}{c|ccc}
+&\alpha_i&\beta_i&\nu_i\\ \hline
+u&\alpha_i0&\alpha_i1&\zeta_i\\
+v&\alpha_i0&\zeta_i&\alpha_i1
+\end{array}
+\qquad(1\leq i\leq3).
+\tag{16}
+\end{equation}
+Each column lists a source prefix, and an entry $b$ below a source prefix $a$ means that the replacement sends $a\omega$ to $b\omega$. The notation $\alpha_i0$ and $\alpha_i1$ means appending the indicated bit. In either row, the six target cylinders $[\alpha_i0]$, $[\alpha_i1]$ partition $[0]$, and the three cylinders $[\zeta_i]$ partition $[1]$. Thus both rows are complete prefix replacements.
+
+Both $u$ and $v$ send $[\alpha_i]$ to $[\alpha_i0]$. Their other prefix images are
+\[
+u([\beta_i])=[\alpha_i1],\qquad u([\nu_i])=[\zeta_i],\qquad
+v([\beta_i])=[\zeta_i],\qquad v([\nu_i])=[\alpha_i1].
+\]
+Define the obstruction group on the first leaf of the $\beta$-block:
+\[
+J=V_{\beta_1}=V_{1000}\leq G.
+\]
+The group $\Gamma$ acts only on $[0]$, whereas $J$ acts only on the disjoint cylinder $[1000]$. Figure~1 displays these two supports inside the nine-leaf code.
+
+\definecolor{blueblock}{RGB}{50,89,160}
+\definecolor{tealblock}{RGB}{37,139,145}
+\definecolor{ochreblock}{RGB}{196,126,37}
+\definecolor{violetblock}{RGB}{122,74,173}
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  x=1.2cm,y=1.0cm,
+  every node/.style={font=\small},
+  dot/.style={circle,fill=gray!70,inner sep=1.5pt},
+  leaf/.style={rounded corners=2pt,draw,align=center,inner xsep=5pt,inner ysep=2pt}
+]
+\node[dot] (r) at (0,0) {};
+\node[dot] (n0) at (-2,-0.8) {};
+\node[dot] (n1) at (2,-0.8) {};
+\draw[blueblock] (r)--(n0);
+\draw[gray!70] (r)--(n1);
+\node[blueblock] at (-0.9,-0.23) {$0$};
+\node[gray!70] at (0.9,-0.23) {$1$};
+\node[blueblock] at (-3.7,0.2) {$\Gamma$ acts on $[0]$};
+
+\node[dot] (n00) at (-3,-1.65) {};
+\node[leaf,draw=blueblock] (a3) at (-1.5,-2.25) {$01$\\$\alpha_3$};
+\draw[blueblock] (n0)--(n00);
+\draw[blueblock] (n0)--(a3.north);
+\node[leaf,draw=blueblock] (a1) at (-3.5,-3.0) {$000$\\$\alpha_1$};
+\node[leaf,draw=blueblock] (a2) at (-2.5,-3.0) {$001$\\$\alpha_2$};
+\draw[blueblock] (n00)--(a1.north);
+\draw[blueblock] (n00)--(a2.north);
+
+\node[dot] (n10) at (1.0,-1.65) {};
+\node[dot] (n11) at (3.0,-1.65) {};
+\draw[tealblock] (n1)--(n10);
+\draw[ochreblock] (n1)--(n11);
+\node[dot] (n100) at (0.4,-2.5) {};
+\node[leaf,draw=tealblock] (b3) at (1.5,-3.0) {$101$\\$\beta_3$};
+\draw[tealblock] (n10)--(n100);
+\draw[tealblock] (n10)--(b3.north);
+\node[leaf,draw=violetblock] (b1) at (-0.1,-3.85) {$1000$\\$\beta_1$};
+\node[leaf,draw=tealblock] (b2) at (0.8,-3.85) {$1001$\\$\beta_2$};
+\draw[violetblock] (n100)--(b1.north);
+\draw[tealblock] (n100)--(b2.north);
+
+\node[dot] (n110) at (2.5,-2.5) {};
+\node[leaf,draw=ochreblock] (v3) at (3.5,-3.0) {$111$\\$\nu_3$};
+\draw[ochreblock] (n11)--(n110);
+\draw[ochreblock] (n11)--(v3.north);
+\node[leaf,draw=ochreblock] (v1) at (2.0,-3.85) {$1100$\\$\nu_1$};
+\node[leaf,draw=ochreblock] (v2) at (2.9,-3.85) {$1101$\\$\nu_2$};
+\draw[ochreblock] (n110)--(v1.north);
+\draw[ochreblock] (n110)--(v2.north);
+\node[violetblock] at (0.1,-4.45) {$J=V_{\beta_1}=V_{1000}$};
+\end{tikzpicture}
+
+\medskip
+\begin{minipage}{0.83\textwidth}
+\small\textsc{Figure 1.} The nine-leaf prefix code. The blue, teal, and ochre blocks partition $[0]$, $[10]$, and $[11]$, respectively. The group $\Gamma$ acts only on the blue block, while $J$ acts only on the violet leaf $\beta_1$ in the teal block. Their supports are disjoint.
+\end{minipage}
+\end{figure}
+
+To verify the direct-product structure algebraically, the incomparability of $0$ and $1000$ gives
+\[
+e_0e_{1000}=e_{1000}e_0=0.
+\]
+Every $g\in\Gamma$ satisfies $g-1\in e_0Re_0$, while (15) gives $j-1\in e_{1000}Re_{1000}$ for every $j\in J$. Orthogonality therefore implies
+\[
+(g-1)(j-1)=(j-1)(g-1)=0.
+\]
+Thus $g$ and $j$ commute. Moreover, if $g=j$, then their common difference from $1$ belongs to both orthogonal corners and is therefore zero. Hence
+\[
+[\Gamma,J]=1,\qquad \Gamma\cap J=\{1\},\qquad \Gamma\times J\leq G.
+\]
+Thompson's group $V$ is finitely presented, infinite, and simple \cite{CFP96}. Every finitely presented LEF group is residually finite \cite[Theorem~2.2]{VG97}, whereas an infinite simple group has no nontrivial finite quotient. Thus $J\cong V$ is finitely generated but not LEF.
+
+\begin{proposition}
+The prefix replacements in (16) satisfy
+\begin{equation}
+u\Gamma u^{-1}=v\Gamma v^{-1}=\EL_{(\alpha_10,\alpha_20,\alpha_30)}(R)\leq\Gamma,
+\qquad uJu^{-1}=V_{0001}\leq\Gamma
+\tag{17}
+\end{equation}
+and
+\begin{equation}
+G=\angles{\Gamma,u,v}.
+\tag{18}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+For $g=u,v$, conjugating an elementary $\alpha$-root gives
+\[
+g(1+s_{\alpha_i}rt_{\alpha_j})g^{-1}=1+s_{\alpha_i0}rt_{\alpha_j0},\qquad i\neq j,\quad r\in R.
+\]
+Thus both conjugates equal $\EL_{(\alpha_10,\alpha_20,\alpha_30)}(R)$. This elementary prefix group lies in $\Gamma$, since
+\[
+s_{\alpha_i0}rt_{\alpha_j0}=s_{\alpha_i}(s_0rt_0)t_{\alpha_j}.
+\]
+Moreover, $u$ sends $\beta_1=1000$ to $\alpha_11=0001$, so
+\[
+uJu^{-1}=V_{0001}\leq\Gamma
+\]
+by Lemma~3.1. This proves (17).
+
+To recover $G$, partition its six $\alpha$- and $\beta$-leaves into three two-leaf blocks
+\[
+C_i=\{\alpha_i,\beta_i\}\qquad(1\leq i\leq3).
+\]
+Set
+\[
+X_i=s_{\alpha_i}t_0+s_{\beta_i}t_1,\qquad
+Y_j=s_0t_{\alpha_j}+s_1t_{\beta_j}.
+\]
+The inverse prefix table for $u$ gives
+\[
+u^{-1}(1+s_{\alpha_i}rt_{\alpha_j})u=1+X_irY_j\qquad(i\neq j).
+\]
+Write $\ell_{i,0}=\alpha_i$ and $\ell_{i,1}=\beta_i$. Given a matrix $B=(b_{pq})\in M_2(R)$, take
+\[
+r=\sum_{p,q\in\{0,1\}}s_pb_{pq}t_q.
+\]
+Since $t_prs_q=b_{pq}$, we obtain
+\[
+X_irY_j=\sum_{p,q\in\{0,1\}}s_{\ell_{i,p}}b_{pq}t_{\ell_{j,q}}.
+\]
+Taking a matrix with one nonzero entry produces every elementary root whose source and target lie in different blocks $C_i$ and $C_j$. For any three distinct code leaves $a,b,c$, the elementary commutator identity
+\[
+[1+s_art_c,1+s_ct_b]=1+s_art_b
+\]
+also supplies the roots between two leaves in the same block: choose $c$ in any different block, so that both roots on the left join distinct blocks. Consequently,
+\[
+\EL_{(\alpha,\beta)}(R)\leq\angles{\Gamma,u}.
+\]
+The same argument with $v$ and the three blocks $\{\alpha_i,\nu_i\}$ gives
+\[
+\EL_{(\alpha,\nu)}(R)\leq\angles{\Gamma,v}.
+\]
+It remains to connect a $\beta$-leaf to a $\nu$-leaf. For any such leaves $a,b$, choose an $\alpha$-leaf $c$. Both factors on the left-hand side of
+\[
+[1+s_art_c,1+s_ct_b]=1+s_art_b
+\]
+belong to the six-leaf groups just obtained. Interchanging $a$ and $b$ also gives the reverse elementary root. Thus $\angles{\Gamma,u,v}$ contains every elementary $D$-root, proving (18).
+\end{proof}
+
+\begin{proof}[Proof of Theorem~1.1]
+Proposition~3.2 shows that $\Gamma\leq G$, $J=V_{1000}$, $t_1=u$, and $t_2=v$ satisfy the hypotheses of Proposition~2.3. If $G$ were sofic, Proposition~2.3 would make $J$ LEF, which it is not. Therefore $G$ is not sofic. Since $G\leq R^\times$ and soficity passes to subgroups, $R^\times$ is not sofic either.
+\end{proof}
+
+\subhead{Acknowledgments.}
+We thank Henry Bradford, Michael Chapman, Alon Dogon, and Francesco Fournier-Facio for helpful comments on the manuscript.
+
+\begin{thebibliography}{BCLV24}
+
+\bibitem[AL07]{AL07}
+D. Aldous and R. Lyons, \emph{Processes on unimodular random networks}, Electron. J. Probab. 12 (2007), 1454--1508, \url{arXiv:math/0603062}.
+
+\bibitem[BQ17]{BQ17}
+C. Bleak and M. Quick, \emph{The infinite simple group $V$ of Richard J. Thompson: presentations by permutations}, Groups Geom. Dyn. 11 (2017), 1401--1436, \url{arXiv:1511.02123}.
+
+\bibitem[BB20]{BB20}
+L. Bowen and P. Burton, \emph{Flexible stability and nonsoficity}, Trans. Amer. Math. Soc. 373 (2020), 4469--4481, \url{doi:10.1090/tran/8047}.
+
+\bibitem[BC25]{BC25}
+L. Bowen and M. Chapman, \emph{Surjunctivity does not characterize cosoficity of invariant random subgroups}, preprint, 2025, \url{arXiv:2511.06586}.
+
+\bibitem[BCLV24]{BCLV24}
+L. Bowen, M. Chapman, A. Lubotzky, and T. Vidick, \emph{The Aldous--Lyons conjecture I: Subgroup tests}, preprint, 2024, \url{arXiv:2408.00110}.
+
+\bibitem[BCV25]{BCV25}
+L. Bowen, M. Chapman, and T. Vidick, \emph{The Aldous--Lyons conjecture II: Undecidability}, preprint, 2025, \url{arXiv:2501.00173}.
+
+\bibitem[BFF24]{BFF24}
+H. Bradford and F. Fournier-Facio, \emph{Hopfian wreath products and the stable finiteness conjecture}, Math. Z. 308 (2024), article no. 58, \url{doi:10.1007/s00209-024-03589-3}.
+
+\bibitem[BS16]{BS16}
+N. Brownlowe and A. P. W. Sørensen, \emph{$L_{2,\Z}\otimes L_{2,\Z}$ does not embed in $L_{2,\Z}$}, J. Algebra 456 (2016), 1--22, \url{doi:10.1016/j.jalgebra.2016.01.040}.
+
+\bibitem[CFP96]{CFP96}
+J. W. Cannon, W. J. Floyd, and W. R. Parry, \emph{Introductory notes on Richard Thompson's groups}, Enseign. Math. (2) 42 (1996), no. 3--4, 215--256, available online.
+
+\bibitem[CDL24]{CDL24}
+M. Chapman, Y. Dikstein, and A. Lubotzky, \emph{Conditional non-soficity of $p$-adic Deligne extensions: On a theorem of Gohla and Thom}, preprint, 2024, \url{arXiv:2410.02913}.
+
+\bibitem[DCGLT20]{DCGLT20}
+M. De Chiffre, L. Glebsky, A. Lubotzky, and A. Thom, \emph{Stability, cohomology vanishing, and nonapproximable groups}, Forum Math. Sigma 8 (2020), article no. e18, \url{doi:10.1017/fms.2020.5}.
+
+\bibitem[Dog23]{Dog23}
+A. Dogon, \emph{Flexible Hilbert--Schmidt stability versus hyperlinearity for property (T) groups}, Math. Z. 305 (2023), article no. 58, \url{doi:10.1007/s00209-023-03387-3}.
+
+\bibitem[DV26]{DV26}
+A. Dogon and I. Vigdorovich, \emph{Hyperlinearity, stability and asymptotic spectral gap of higher rank lattices}, preprint, 2026, \url{arXiv:2506.20843v2}.
+
+\bibitem[ES05]{ES05}
+G. Elek and E. Szabó, \emph{Hyperlinearity, essentially free actions and $L^2$-invariants: The sofic property}, Math. Ann. 332 (2005), 421--441, \url{arXiv:math/0408400}.
+
+\bibitem[ES06]{ES06}
+G. Elek and E. Szabó, \emph{On sofic groups}, J. Group Theory 9 (2006), 161--171, \url{arXiv:math/0305352}.
+
+\bibitem[EJ10]{EJ10}
+M. Ershov and A. Jaikin-Zapirain, \emph{Property (T) for noncommutative universal lattices}, Invent. Math. 179 (2010), 303--347, \url{arXiv:0809.4095}.
+
+\bibitem[Gel18]{Gel18}
+T. Gelander, \emph{A view on invariant random subgroups and lattices}, in \emph{Proceedings of the International Congress of Mathematicians---Rio de Janeiro 2018}, vol. II, World Scientific, 2018, 1339--1362, \url{arXiv:1807.06979}.
+
+\bibitem[GT24]{GT24}
+L. Gohla and A. Thom, \emph{High-dimensional expansion and soficity of groups}, preprint, 2024, \url{arXiv:2403.09582}.
+
+\bibitem[Gro99]{Gro99}
+M. Gromov, \emph{Endomorphisms of symbolic algebraic varieties}, J. Eur. Math. Soc. 1 (1999), 109--197.
+
+\bibitem[HO17]{HO17}
+U. Haagerup and K. K. Olesen, \emph{Non-inner amenability of the Thompson groups $T$ and $V$}, J. Funct. Anal. 272 (2017), 4838--4852, \url{doi:10.1016/j.jfa.2017.02.003}.
+
+\bibitem[JNVWY20]{JNVWY20}
+Z. Ji, A. Natarajan, T. Vidick, J. Wright, and H. Yuen, \emph{$\mathrm{MIP}^{\ast}=\mathrm{RE}$}, preprint, 2020, \url{arXiv:2001.04383}.
+
+\bibitem[KT26]{KT26}
+H. V. Khanh and V. H. Thanh, \emph{Matrix generators for the unit groups of $L_K(1,d)$}, preprint, 2026, \url{arXiv:2607.10351}.
+
+\bibitem[Kun19]{Kun19}
+G. Kun, \emph{On sofic approximations of property (T) groups}, preprint, 2019, \url{arXiv:1606.04471v5}.
+
+\bibitem[KT19]{KT19}
+G. Kun and A. Thom, \emph{Inapproximability of actions and Kazhdan's property (T)}, preprint, 2019, \url{arXiv:1901.03963}.
+
+\bibitem[Lea62]{Lea62}
+W. G. Leavitt, \emph{The module type of a ring}, Trans. Amer. Math. Soc. 103 (1962), 113--130, \url{doi:10.1090/S0002-9947-1962-0132764-X}.
+
+\bibitem[Man25]{Man25}
+A. Manzoor, \emph{Invariant random subgroups, soficity, and Lück's determinant conjecture}, preprint, 2025, \url{arXiv:2508.15154}.
+
+\bibitem[NT22]{NT22}
+M. Nitsche and A. Thom, \emph{Universal solvability of group equations}, J. Group Theory 25 (2022), 1--10, \url{arXiv:1811.07737}.
+
+\bibitem[Pes08]{Pes08}
+V. G. Pestov, \emph{Hyperlinear and sofic groups: A brief guide}, Bull. Symbolic Logic 14 (2008), 449--480, \url{arXiv:0804.3968}.
+
+\bibitem[Tho08]{Tho08}
+A. Thom, \emph{Sofic groups and diophantine approximation}, Comm. Pure Appl. Math. 61 (2008), 1155--1171, \url{arXiv:math/0701294}.
+
+\bibitem[VG97]{VG97}
+A. M. Vershik and E. I. Gordon, \emph{Groups that are locally embeddable in the class of finite groups}, Algebra i Analiz 9 (1997), no. 1, 71--97; English transl., St. Petersburg Math. J. 9 (1998), 49--67, Math-Net.Ru aa751.
+
+\bibitem[Wei00]{Wei00}
+B. Weiss, \emph{Sofic groups and dynamical systems}, Sankhyā Ser. A 62 (2000), 350--359.
+
+\end{thebibliography}
+
+\end{document}
