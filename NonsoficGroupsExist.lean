@@ -139,6 +139,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.SoficApproximation.multiplicationError_negligible
 #print axioms NonsoficGroupsExist.SoficApproximation.fixedError_negligible
 #print axioms NonsoficGroupsExist.SoficApproximation.collisionError_negligible
+#print axioms NonsoficGroupsExist.SoficApproximation.conjugacyError_negligible
 #print axioms NonsoficGroupsExist.IsSofic
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.transport_boundaryCard

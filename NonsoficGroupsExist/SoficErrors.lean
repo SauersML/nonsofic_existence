@@ -35,6 +35,11 @@ noncomputable def identityError (n : ℕ) : Finset (S.model n) :=
 noncomputable def collisionError (n : ℕ) (g h : G) : Finset (S.model n) :=
   Finset.univ.filter fun x ↦ S.map n g x = S.map n h x
 
+/-- Failures of the approximate conjugacy identity used on compressor arcs. -/
+noncomputable def conjugacyError (n : ℕ) (q g : G) : Finset (S.model n) :=
+  Finset.univ.filter fun x ↦
+    S.map n q (S.map n g x) ≠ S.map n (q * g * q⁻¹) (S.map n q x)
+
 private theorem hammingDistance_mul (n : ℕ) (g h : G) :
     hammingDistance (S.model n) (S.map n (g * h)) (S.map n g * S.map n h) =
       ((S.multiplicationError n g h).card : ℝ) / Fintype.card (S.model n) := by
@@ -178,6 +183,42 @@ theorem collisionError_negligible (g h : G) (hgh : g ≠ h) :
             Fintype.card (S.model n) := by
       push_cast
       ring
+
+private theorem conjugacyError_subset (n : ℕ) (q g : G) :
+    S.conjugacyError n q g ⊆
+      S.multiplicationError n q g ∪
+        S.multiplicationError n (q * g * q⁻¹) q := by
+  classical
+  intro x hx
+  simp only [conjugacyError, multiplicationError, Finset.mem_filter,
+    Finset.mem_univ, true_and, Finset.mem_union] at hx ⊢
+  by_cases hleft : S.map n (q * g) x ≠ S.map n q (S.map n g x)
+  · exact Or.inl hleft
+  by_cases hright : S.map n ((q * g * q⁻¹) * q) x ≠
+      S.map n (q * g * q⁻¹) (S.map n q x)
+  · exact Or.inr hright
+  exfalso
+  apply hx
+  rw [← not_ne_iff.mp hleft, ← not_ne_iff.mp hright]
+  congr 2
+  group
+
+theorem conjugacyError_negligible (q g : G) :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((S.conjugacyError n q g).card : ℝ) := by
+  have hsum := Negligible.add (S.multiplicationError_negligible q g)
+    (S.multiplicationError_negligible (q * g * q⁻¹) q)
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  have hs := Finset.card_le_card (S.conjugacyError_subset n q g)
+  have hu := Finset.card_union_le (S.multiplicationError n q g)
+    (S.multiplicationError n (q * g * q⁻¹) q)
+  have hcast : ((S.conjugacyError n q g).card : ℝ) ≤
+      ((S.multiplicationError n q g).card : ℝ) +
+        (S.multiplicationError n (q * g * q⁻¹) q).card := by
+    exact_mod_cast hs.trans hu
+  apply div_le_div_of_nonneg_right hcast
+  positivity
 
 end SoficApproximation
 end NonsoficGroupsExist
