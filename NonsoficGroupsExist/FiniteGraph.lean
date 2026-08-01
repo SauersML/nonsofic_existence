@@ -23,6 +23,22 @@ structure FiniteMultiGraph where
 
 namespace FiniteMultiGraph
 
+/-- The occurrence-sensitive subgraph induced by a finite vertex set. -/
+def induce (X : FiniteMultiGraph) (U : Finset X.vertex) : FiniteMultiGraph where
+  vertex :=
+    { carrier := ↑U
+      fintype := inferInstance
+      decidableEq := inferInstance }
+  edge :=
+    { carrier := {e : X.edge // X.first e ∈ U ∧ X.second e ∈ U}
+      fintype := inferInstance
+      decidableEq := inferInstance }
+  first e := ⟨X.first e.1, e.2.1⟩
+  second e := ⟨X.second e.1, e.2.2⟩
+  loopless e := by
+    intro h
+    exact X.loopless e.1 (congrArg Subtype.val h)
+
 /-- Boundary edge occurrences of a vertex finset. -/
 def boundary (X : FiniteMultiGraph) (U : Finset X.vertex) : Finset X.edge :=
   Finset.univ.filter fun e ↦

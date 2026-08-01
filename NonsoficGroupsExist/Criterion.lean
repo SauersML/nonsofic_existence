@@ -4,6 +4,7 @@ import NonsoficGroupsExist.Selection
 import NonsoficGroupsExist.Localization
 import NonsoficGroupsExist.PermutationConservation
 import NonsoficGroupsExist.LEF
+import NonsoficGroupsExist.Kazhdan
 import Mathlib.Data.Fintype.Prod
 
 /-!
@@ -188,15 +189,25 @@ noncomputable def generatorGraphVertexEquiv {G : Type} [Group G]
 Section `subsec:partitions`: after `o(|Yₙ|)` edge edits the generator graphs
 split into uniformly expanding components, and the resulting block partition is
 almost invariant under every generator. -/
-structure ExpanderDecomposition {G : Type*} [Group G]
+structure ExpanderDecomposition {G : Type} [Group G]
     (S : SoficApproximation G) (T : Finset G) where
   blocks : ∀ n, BlockStructure (S.model n)
   cheeger : ℝ
   cheeger_pos : 0 < cheeger
-  /-- Each block is a component of a graph all of whose cuts expand. -/
-  component : ∀ n, ∀ y : S.model n, ∃ X : FiniteMultiGraph,
-    Nonempty (X.vertex ≃ ↥((blocks n).block y)) ∧
-      X.HasCheegerLowerBound cheeger
+  graph : ℕ → FiniteMultiGraph
+  vertexEquiv : ∀ n, (graph n).vertex ≃ S.model n
+  /-- The edited graph is occurrence-close to the actual generator graph. -/
+  edit_negligible : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    fun n ↦ ((generatorGraph (S.model n) T (S.map n)).editDistance
+      ((graph n).transport (S.model n) (vertexEquiv n)) (Equiv.refl _) : ℕ)
+  /-- Every edited edge stays inside one block. -/
+  edge_inside : ∀ n (e : ((graph n).transport (S.model n) (vertexEquiv n)).edge),
+    (blocks n).block (((graph n).transport (S.model n) (vertexEquiv n)).first e) =
+      (blocks n).block (((graph n).transport (S.model n) (vertexEquiv n)).second e)
+  /-- Each induced component has the uniform Cheeger bound. -/
+  component_expands : ∀ n (y : S.model n),
+    (((graph n).transport (S.model n) (vertexEquiv n)).induce
+      ((blocks n).block y)).HasCheegerLowerBound cheeger
   /-- Almost invariance, equation `eq:gamma-inv`. -/
   almost_invariant : ∀ t ∈ T, Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
     fun n ↦ ((Finset.univ.filter fun y : S.model n ↦
@@ -228,13 +239,14 @@ fixed groups `K,J`.  Property `(T)` of `K` is deliberately kept in this named
 external hypothesis; every finite and asymptotic premise consumed by the
 theorem is explicit in `MatchingCertificate`. -/
 def KunThomHypothesis (K J : Type) [Group K] [Group J] : Prop :=
-  ∀ _ : MatchingCertificate K J, IsLEF J
+  HasKazhdanPropertyT K → ∀ _ : MatchingCertificate K J, IsLEF J
 
 /-- **Theorem `thm:D`, relative to the two cited external theorems.**  Given the
 Kun--Thom obstruction and the matching certificate manufactured by the
 compression mechanism, the commuting subgroup is LEF. -/
 theorem compression_centralizer (K J : Type) [Group K] [Group J]
-    (hKT : KunThomHypothesis K J) (cert : MatchingCertificate K J) : IsLEF J :=
-  hKT cert
+    (hKT : KunThomHypothesis K J) (hT : HasKazhdanPropertyT K)
+    (cert : MatchingCertificate K J) : IsLEF J :=
+  hKT hT cert
 
 end NonsoficGroupsExist

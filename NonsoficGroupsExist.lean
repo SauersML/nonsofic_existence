@@ -1,6 +1,8 @@
 import NonsoficGroupsExist.Asymptotics
 import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.CompressionSetup
+import NonsoficGroupsExist.ExternalInputs
+import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.Pinning
 import NonsoficGroupsExist.Refinement
 import NonsoficGroupsExist.Selection
@@ -69,6 +71,9 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_involution
 #print axioms NonsoficGroupsExist.HasKazhdanPropertyT.mulEquiv_iff
 #print axioms NonsoficGroupsExist.CompressionSetup.productEmbedding_injective
+#print axioms NonsoficGroupsExist.KunTheorem
+#print axioms NonsoficGroupsExist.KunThomTheorem
+#print axioms NonsoficGroupsExist.CompressionSetup.ambientGenerators_generate
 #print axioms NonsoficGroupsExist.Vanishing.add
 #print axioms NonsoficGroupsExist.Vanishing.sum
 #print axioms NonsoficGroupsExist.Negligible.mono
