@@ -2,6 +2,7 @@ import Mathlib.Data.Matrix.Basic
 import Mathlib.Algebra.CharP.Two
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.NoncommRing
 
 /-!
 # The finite Leavitt-algebra calculations
@@ -107,15 +108,12 @@ theorem characteristicTwo_involution
     [CharP A 2] :
     x12 L.s1 * x21 L.t1 * x12 L.s1 =
       !![L.p0, L.s1; L.t1, 0] := by
-  have htwo : (1 : A) + 1 = 0 := CharTwo.add_self_eq_zero 1
-  have hcorner : (1 : A) + L.p1 = L.p0 := by
-    exact CharTwo.add_eq_iff_eq_add.mpr L.p0_add_p1.symm
-  change !![1, L.s1; 0, 1] * !![1, 0; L.t1, 1] * !![1, L.s1; 0, 1] =
-    !![L.p0, L.s1; L.t1, 0]
+  unfold x12 x21 p0
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [x12, x21, p0, p1, hcorner, htwo, L.t1_s1, mul_assoc]
+  fin_cases i <;> fin_cases j <;> simp
+  all_goals noncomm_ring [L.sum_range, L.t0_s1, L.t1_s1,
+    CharTwo.add_self_eq_zero (1 : A)]
 
 /-- Lemma `lem:chartwo` (b): the two-by-two compressor block is an explicit
 product of four elementary matrices. -/
@@ -123,19 +121,12 @@ theorem characteristicTwo_compressor
     [CharP A 2] :
     x21 (1 + L.t0) * x12 1 * x21 (1 + L.s0) * x12 L.t0 =
       !![L.s0, L.s1 * L.t1; 0, L.t0] := by
-  have htwo : (1 : A) + 1 = 0 := CharTwo.add_self_eq_zero 1
-  have hcorner : L.p0 + (1 : A) = L.p1 := by
-    rw [add_comm]
-    apply CharTwo.add_eq_iff_eq_add.mpr
-    rw [add_comm]
-    exact L.p0_add_p1.symm
-  change !![1, 0; 1 + L.t0, 1] * !![1, 1; 0, 1] *
-      !![1, 0; 1 + L.s0, 1] * !![1, L.t0; 0, 1] =
-    !![L.s0, L.s1 * L.t1; 0, L.t0]
+  unfold x12 x21
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [x12, x21, p0, p1, htwo, hcorner, L.t0_s0, mul_assoc]
+  fin_cases i <;> fin_cases j <;> simp
+  all_goals noncomm_ring [L.sum_range, L.t0_s0,
+    CharTwo.add_self_eq_zero (1 : A)]
 
 /-- The two-by-two matrix called `z` in both the adjacent-rank and rank-two
 constructions. -/
@@ -146,8 +137,9 @@ theorem z_sq : L.z * L.z = 1 := by
   change !![L.p0, L.s1; L.t1, 0] * !![L.p0, L.s1; L.t1, 0] = 1
   rw [Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [p1, L.p0_add_p1, L.t1_s1]
+  fin_cases i <;> fin_cases j <;> simp
+  all_goals noncomm_ring [L.sum_range, L.t0_s0, L.t0_s1,
+    L.t1_s0, L.t1_s1]
 
 end LeavittFamily
 end NonsoficGroupsExist
