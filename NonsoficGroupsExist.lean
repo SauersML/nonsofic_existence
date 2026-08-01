@@ -25,6 +25,7 @@ import NonsoficGroupsExist.EdgeEditing
 import NonsoficGroupsExist.GeneratorCrossing
 import NonsoficGroupsExist.ExternalCompressorCrossing
 import NonsoficGroupsExist.CompressionRefinement
+import NonsoficGroupsExist.FiniteMedian
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -133,6 +134,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.globalCrossing_negligible
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.externalGlobalCrossing_negligible
 #print axioms NonsoficGroupsExist.CompressionSetup.compressorLeakage_negligible
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.natMedian_isMedian
 #print axioms NonsoficGroupsExist.compression_centralizer
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
