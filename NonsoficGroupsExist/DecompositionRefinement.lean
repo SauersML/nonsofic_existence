@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.ComponentRefinement
+import NonsoficGroupsExist.BlockIndex
 
 /-!
 # Refinement supplied by an expander decomposition
@@ -53,6 +54,38 @@ theorem refineAt_leakage (Q : BlockStructure (S.model n))
         (D.componentVertexEquiv n y)).crossingEdges
           (componentTargetLabel (D.blocks n) Q q y)).card :=
   (D.refineAt Q q y).cheeger_mul_leakage_le_crossing
+
+/-! ### Refinement indexed once per distinct source component -/
+
+/-- The distinct source components at index `n`. -/
+abbrev componentIndex (n : ℕ) := BlockIndex (D.blocks n)
+
+/-- A representative vertex chosen only to access the vertex-indexed graph
+interface.  The associated block is exactly the indexed component. -/
+noncomputable def componentRepresentative (n : ℕ) (C : D.componentIndex n) :
+    S.model n :=
+  BlockIndex.representative (D.blocks n) C
+
+@[simp] theorem componentRepresentative_block (n : ℕ)
+    (C : D.componentIndex n) :
+    (D.blocks n).block (D.componentRepresentative n C) = C.block :=
+  BlockIndex.block_representative (D.blocks n) C
+
+/-- Dominant target for one distinctly indexed source component. -/
+noncomputable def refineBlock (Q : BlockStructure (S.model n))
+    (q : Equiv.Perm (S.model n)) (C : D.componentIndex n) :=
+  D.refineAt Q q (D.componentRepresentative n C)
+
+/-- The leakage estimate, now indexed over each source component exactly once. -/
+theorem refineBlock_leakage (Q : BlockStructure (S.model n))
+    (q : Equiv.Perm (S.model n)) (C : D.componentIndex n) :
+    D.cheeger * ((C.block.image q \ (D.refineBlock Q q C).target).card : ℝ) ≤
+      4 * (((D.componentGraph n (D.componentRepresentative n C)).transport
+        (blockModel (D.blocks n) (D.componentRepresentative n C))
+          (D.componentVertexEquiv n (D.componentRepresentative n C))).crossingEdges
+            (componentTargetLabel (D.blocks n) Q q
+              (D.componentRepresentative n C))).card := by
+  simpa [refineBlock] using D.refineAt_leakage Q q (D.componentRepresentative n C)
 
 end ExpanderDecomposition
 end NonsoficGroupsExist
