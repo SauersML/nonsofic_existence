@@ -2,7 +2,6 @@ import Mathlib.Data.Matrix.Basic
 import Mathlib.Algebra.CharP.Two
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Tactic.FinCases
-import Mathlib.Tactic.NoncommRing
 
 /-!
 # The finite Leavitt-algebra calculations
@@ -32,6 +31,10 @@ structure LeavittFamily (A : Type*) [NonAssocRing A] where
 namespace LeavittFamily
 
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
+
+open scoped CharTwo
+
+attribute [simp] t0_s0 t0_s1 t1_s0 t1_s1
 
 def p0 : A := L.s0 * L.t0
 def p1 : A := L.s1 * L.t1
@@ -63,7 +66,7 @@ def p1 : A := L.s1 * L.t1
     _ = 0 := by rw [L.t1_s0, zero_mul, mul_zero]
 
 @[simp] theorem p0_mul_s1 : L.p0 * L.s1 = 0 := by
-  simp [p0, mul_assoc, L.t0_s1]
+  simp [p0, mul_assoc]
 
 @[simp] theorem t1_mul_p0 : L.t1 * L.p0 = 0 := by
   calc
@@ -71,7 +74,7 @@ def p1 : A := L.s1 * L.t1
     _ = 0 := by rw [L.t1_s0, zero_mul]
 
 @[simp] theorem p1_mul_s0 : L.p1 * L.s0 = 0 := by
-  simp [p1, mul_assoc, L.t1_s0]
+  simp [p1, mul_assoc]
 
 @[simp] theorem t0_mul_p1 : L.t0 * L.p1 = 0 := by
   calc
@@ -79,16 +82,26 @@ def p1 : A := L.s1 * L.t1
     _ = 0 := by rw [L.t0_s1, zero_mul]
 
 @[simp] theorem p0_mul_s0 : L.p0 * L.s0 = L.s0 := by
-  simp [p0, mul_assoc, L.t0_s0]
+  simp [p0, mul_assoc]
 
 @[simp] theorem t0_mul_p0 : L.t0 * L.p0 = L.t0 := by
-  simp [p0, ← mul_assoc, L.t0_s0]
+  simp [p0, ← mul_assoc]
 
 @[simp] theorem p1_mul_s1 : L.p1 * L.s1 = L.s1 := by
-  simp [p1, mul_assoc, L.t1_s1]
+  simp [p1, mul_assoc]
 
 @[simp] theorem t1_mul_p1 : L.t1 * L.p1 = L.t1 := by
-  simp [p1, ← mul_assoc, L.t1_s1]
+  simp [p1, ← mul_assoc]
+
+@[simp] theorem one_add_s1t1 [CharP A 2] :
+    (1 : A) + L.s1 * L.t1 = L.s0 * L.t0 := by
+  rw [← L.sum_range]
+  exact CharTwo.add_cancel_right (L.s0 * L.t0) (L.s1 * L.t1)
+
+@[simp] theorem s0t0_add_one [CharP A 2] :
+    L.s0 * L.t0 + (1 : A) = L.s1 * L.t1 := by
+  rw [← L.sum_range]
+  exact CharTwo.add_cancel_left (L.s0 * L.t0) (L.s1 * L.t1)
 
 /-- The elementary upper transvection used in Lemma `lem:chartwo`. -/
 def x12 (a : A) : Matrix (Fin 2) (Fin 2) A := !![1, a; 0, 1]
@@ -108,12 +121,10 @@ theorem characteristicTwo_involution
     [CharP A 2] :
     x12 L.s1 * x21 L.t1 * x12 L.s1 =
       !![L.p0, L.s1; L.t1, 0] := by
-  unfold x12 x21 p0
+  unfold x12 x21
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;> simp
-  all_goals noncomm_ring [L.sum_range, L.t0_s1, L.t1_s1,
-    CharTwo.add_self_eq_zero (1 : A)]
 
 /-- Lemma `lem:chartwo` (b): the two-by-two compressor block is an explicit
 product of four elementary matrices. -/
@@ -125,8 +136,6 @@ theorem characteristicTwo_compressor
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;> simp
-  all_goals noncomm_ring [L.sum_range, L.t0_s0,
-    CharTwo.add_self_eq_zero (1 : A)]
 
 /-- The two-by-two matrix called `z` in both the adjacent-rank and rank-two
 constructions. -/
@@ -138,8 +147,6 @@ theorem z_sq : L.z * L.z = 1 := by
   rw [Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;> simp
-  all_goals noncomm_ring [L.sum_range, L.t0_s0, L.t0_s1,
-    L.t1_s0, L.t1_s1]
 
 end LeavittFamily
 end NonsoficGroupsExist
