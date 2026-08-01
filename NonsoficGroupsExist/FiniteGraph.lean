@@ -32,6 +32,40 @@ def boundary (X : FiniteMultiGraph) (U : Finset X.vertex) : Finset X.edge :=
 def boundaryCard (X : FiniteMultiGraph) (U : Finset X.vertex) : ℕ :=
   (X.boundary U).card
 
+/-- Transport a multigraph along a vertex equivalence.  The edge-occurrence
+type is unchanged, so multiplicities are preserved definitionally. -/
+def transport (X : FiniteMultiGraph) (Z : FiniteModel) (e : X.vertex ≃ Z) :
+    FiniteMultiGraph where
+  vertex := Z
+  edge := X.edge
+  first a := e (X.first a)
+  second a := e (X.second a)
+  loopless a h := X.loopless a (e.injective h)
+
+@[simp] theorem transport_first (X : FiniteMultiGraph) (Z : FiniteModel)
+    (e : X.vertex ≃ Z) (a : X.edge) :
+    (X.transport Z e).first a = e (X.first a) := rfl
+
+@[simp] theorem transport_second (X : FiniteMultiGraph) (Z : FiniteModel)
+    (e : X.vertex ≃ Z) (a : X.edge) :
+    (X.transport Z e).second a = e (X.second a) := rfl
+
+/-- Every edge occurrence belongs to the transported boundary exactly when
+the original occurrence belongs to the original boundary. -/
+theorem transport_boundary (X : FiniteMultiGraph) (Z : FiniteModel)
+    (e : X.vertex ≃ Z) (U : Finset X.vertex) :
+    (X.transport Z e).boundary (U.map e.toEmbedding) = X.boundary U := by
+  have hmem (x : X.vertex) : e x ∈ U.map e.toEmbedding ↔ x ∈ U := by simp
+  unfold boundary transport
+  refine Finset.filter_congr fun a _ ↦ ?_
+  rw [hmem (X.first a), hmem (X.second a)]
+
+theorem transport_boundaryCard (X : FiniteMultiGraph) (Z : FiniteModel)
+    (e : X.vertex ≃ Z) (U : Finset X.vertex) :
+    (X.transport Z e).boundaryCard (U.map e.toEmbedding) = X.boundaryCard U := by
+  rw [boundaryCard, boundaryCard, transport_boundary]
+  rfl
+
 /-- Strict superlevel set of a function on the vertices. -/
 noncomputable def superlevel (X : FiniteMultiGraph) (g : X.vertex → ℝ) (t : ℝ) :
     Finset X.vertex :=
