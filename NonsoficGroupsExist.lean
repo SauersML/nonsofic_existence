@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Leavitt
+import NonsoficGroupsExist.LeavittSelfSimilarity
 import NonsoficGroupsExist.MatrixSelfSimilarity
 import NonsoficGroupsExist.PermutationConservation
 import NonsoficGroupsExist.Whitehead
@@ -21,3 +22,5 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.Whitehead.whitehead_commutator_mem
 #print axioms NonsoficGroupsExist.CompleteMatrixFamily.matrixRingEquiv
 #print axioms NonsoficGroupsExist.CompleteMatrixFamily.unitsEquiv
+#print axioms NonsoficGroupsExist.LeavittFamily.binaryMatrixRingEquiv
+#print axioms NonsoficGroupsExist.LeavittFamily.binaryUnitsEquiv
