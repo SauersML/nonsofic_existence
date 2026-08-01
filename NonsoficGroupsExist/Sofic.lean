@@ -141,6 +141,72 @@ structure SoficApproximation (G : Type*) [Group G] where
     ∀ (g : G), g ≠ 1 → ∀ (ε : ℝ), 0 < ε → ∃ N : ℕ, ∀ n ≥ N,
       1 - ε < hammingDistance (model n) (map n g) 1
 
+namespace SoficApproximation
+
+variable {G : Type*} [Group G]
+
+/-- Evaluate a fixed group word using the permutation assigned to each
+letter, without assuming that the assignment is a homomorphism. -/
+def evaluateWord {Y : Type*} (τ : G → Equiv.Perm Y) : List G → Equiv.Perm Y
+  | [] => 1
+  | g :: w => τ g * evaluateWord τ w
+
+/-- Approximate multiplicativity forces the assigned identity permutation to
+approach the actual identity. -/
+theorem map_one_close (S : SoficApproximation G) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      hammingDistance (S.model n) (S.map n 1) 1 < ε := by
+  obtain ⟨N, hN⟩ := S.asymptoticallyMultiplicative 1 1 ε hε
+  refine ⟨N, ?_⟩
+  intro n hn
+  have h := hN n hn
+  simp only [one_mul] at h
+  calc
+    hammingDistance (S.model n) (S.map n 1) 1 =
+        hammingDistance (S.model n) 1 (S.map n 1) :=
+      hammingDistance_comm _ _ _
+    _ = hammingDistance (S.model n) ((S.map n 1)⁻¹ * S.map n 1)
+        ((S.map n 1)⁻¹ * (S.map n 1 * S.map n 1)) := by simp
+    _ = hammingDistance (S.model n) (S.map n 1) (S.map n 1 * S.map n 1) :=
+      hammingDistance_left_invariant _ _ _ _
+    _ < ε := h
+
+/-- Lemma `lem:word`: every fixed word evaluated letter-by-letter agrees
+asymptotically with the permutation assigned to its group value. -/
+theorem word_close (S : SoficApproximation G) (w : List G) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      hammingDistance (S.model n) (S.map n w.prod) (evaluateWord (S.map n) w) < ε := by
+  induction w generalizing ε with
+  | nil =>
+      simpa [evaluateWord] using S.map_one_close ε hε
+  | cons g w ih =>
+      have hhalf : 0 < ε / 2 := half_pos hε
+      obtain ⟨N₁, hN₁⟩ := S.asymptoticallyMultiplicative g w.prod (ε / 2) hhalf
+      obtain ⟨N₂, hN₂⟩ := ih (ε / 2) hhalf
+      refine ⟨max N₁ N₂, ?_⟩
+      intro n hn
+      have hn₁ : N₁ ≤ n := (le_max_left N₁ N₂).trans hn
+      have hn₂ : N₂ ≤ n := (le_max_right N₁ N₂).trans hn
+      have hmul := hN₁ n hn₁
+      have hword := hN₂ n hn₂
+      calc
+        hammingDistance (S.model n) (S.map n (g :: w).prod)
+            (evaluateWord (S.map n) (g :: w)) ≤
+          hammingDistance (S.model n) (S.map n (g * w.prod))
+              (S.map n g * S.map n w.prod) +
+            hammingDistance (S.model n) (S.map n g * S.map n w.prod)
+              (S.map n g * evaluateWord (S.map n) w) := by
+                simpa [evaluateWord] using hammingDistance_triangle (S.model n)
+                  (S.map n (g * w.prod)) (S.map n g * S.map n w.prod)
+                  (S.map n g * evaluateWord (S.map n) w)
+        _ < ε / 2 + ε / 2 := by
+          apply add_lt_add hmul
+          rw [hammingDistance_left_invariant]
+          exact hword
+        _ = ε := by ring
+
+end SoficApproximation
+
 /-- A countable group is sofic exactly when it has a sofic approximation. -/
 def IsSofic (G : Type*) [Group G] [Countable G] : Prop :=
   Nonempty (SoficApproximation G)

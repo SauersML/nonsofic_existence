@@ -39,6 +39,8 @@ This is the root of the Lean development accompanying
 #print axioms NonsoficGroupsExist.hammingDistance_right_invariant
 #print axioms NonsoficGroupsExist.hammingDistance_triangle
 #print axioms NonsoficGroupsExist.SoficApproximation
+#print axioms NonsoficGroupsExist.SoficApproximation.map_one_close
+#print axioms NonsoficGroupsExist.SoficApproximation.word_close
 #print axioms NonsoficGroupsExist.IsSofic
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.HasCheegerLowerBound
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.IsMedian.eq_of_subsingleton
