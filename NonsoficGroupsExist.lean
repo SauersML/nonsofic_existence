@@ -76,6 +76,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.KunThomTheorem
 #print axioms NonsoficGroupsExist.CompressionSetup.ambientGenerators_generate
 #print axioms NonsoficGroupsExist.LocalizedApproximationData.completedMap_disagreement_vanishing
+#print axioms NonsoficGroupsExist.LocalizedApproximationData.toSoficApproximation
 #print axioms NonsoficGroupsExist.Vanishing.add
 #print axioms NonsoficGroupsExist.Vanishing.sum
 #print axioms NonsoficGroupsExist.Negligible.mono

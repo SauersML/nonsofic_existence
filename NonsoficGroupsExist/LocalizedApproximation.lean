@@ -131,5 +131,149 @@ private theorem completedMultiplicationBad_card_le (n : ℕ) (g h : H) :
   rw [D.disagreementPreimage_card n g h] at h2
   omega
 
+theorem completedMultiplication_vanishing (g h : H) : Vanishing fun n ↦
+    ((D.completedMultiplicationBad n g h).card : ℝ) / (D.subset n).card := by
+  have hsum := Vanishing.add
+    (Vanishing.add
+      (D.completedMap_disagreement_vanishing (g * h))
+      (D.completedMap_disagreement_vanishing h))
+    (Vanishing.add
+      (D.completedMap_disagreement_vanishing g)
+      (D.multiplicative g h))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  calc
+    ((D.completedMultiplicationBad n g h).card : ℝ) / (D.subset n).card ≤
+        (((D.disagreement n (g * h)).card + (D.disagreement n h).card +
+          (D.disagreement n g).card + (D.ambientMultiplicationBad n g h).card : ℕ) : ℝ) /
+            (D.subset n).card := by
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      exact_mod_cast D.completedMultiplicationBad_card_le n g h
+    _ =
+        ((D.disagreement n (g * h)).card : ℝ) / (D.subset n).card +
+          ((D.disagreement n h).card : ℝ) / (D.subset n).card +
+        (((D.disagreement n g).card : ℝ) / (D.subset n).card +
+          ((D.ambientMultiplicationBad n g h).card : ℝ) / (D.subset n).card) := by
+      push_cast
+      ring
+
+private noncomputable def completedFixed (n : ℕ) (g : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦ D.completedMap n g x = x
+
+private noncomputable def completedMoved (n : ℕ) (g : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦ D.completedMap n g x ≠ x
+
+private noncomputable def ambientFixed (n : ℕ) (g : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦ D.act n g (x : D.ambient n) = x
+
+private theorem completedFixed_subset (n : ℕ) (g : H) :
+    D.completedFixed n g ⊆ D.disagreement n g ∪ D.ambientFixed n g := by
+  classical
+  intro x hx
+  simp only [completedFixed, disagreement, ambientFixed, Finset.mem_filter,
+    Finset.mem_univ, true_and, Finset.mem_union] at hx ⊢
+  by_cases hd : (D.completedMap n g x : D.ambient n) ≠ D.act n g x
+  · exact Or.inl hd
+  · right
+    rw [← not_ne_iff.mp hd]
+    exact congrArg Subtype.val hx
+
+private theorem completedFixed_card_le (n : ℕ) (g : H) :
+    (D.completedFixed n g).card ≤
+      (D.disagreement n g).card + (D.ambientFixed n g).card := by
+  exact (Finset.card_le_card (D.completedFixed_subset n g)).trans
+    (Finset.card_union_le _ _)
+
+theorem completedFixed_vanishing (g : H) (hg : g ≠ 1) : Vanishing fun n ↦
+    ((D.completedFixed n g).card : ℝ) / (D.subset n).card := by
+  have hsum := Vanishing.add (D.completedMap_disagreement_vanishing g) (D.faithful g hg)
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  calc
+    ((D.completedFixed n g).card : ℝ) / (D.subset n).card ≤
+        (((D.disagreement n g).card + (D.ambientFixed n g).card : ℕ) : ℝ) /
+          (D.subset n).card := by
+      apply div_le_div_of_nonneg_right _ (by positivity)
+      exact_mod_cast D.completedFixed_card_le n g
+    _ = ((D.disagreement n g).card : ℝ) / (D.subset n).card +
+        ((D.ambientFixed n g).card : ℝ) / (D.subset n).card := by
+      push_cast
+      ring
+
+/-- The finite model carried by the selected subset. -/
+abbrev localizedModel (n : ℕ) : FiniteModel where
+  carrier := D.subset n
+  fintype := inferInstance
+  decidableEq := inferInstance
+
+@[simp] theorem card_localizedModel (n : ℕ) :
+    Fintype.card (D.localizedModel n) = (D.subset n).card := by
+  simp [localizedModel]
+
+private theorem hammingDistance_completed_mul (n : ℕ) (g h : H) :
+    hammingDistance (D.localizedModel n) (D.completedMap n (g * h))
+        (D.completedMap n g * D.completedMap n h) =
+      ((D.completedMultiplicationBad n g h).card : ℝ) / (D.subset n).card := by
+  unfold hammingDistance
+  rw [D.card_localizedModel]
+  congr 2
+
+private theorem hammingDistance_completed_one (n : ℕ) (g : H) :
+    hammingDistance (D.localizedModel n) (D.completedMap n g) 1 =
+      ((D.completedMoved n g).card : ℝ) / (D.subset n).card := by
+  unfold hammingDistance
+  rw [D.card_localizedModel]
+  congr 2
+
+/-- Lemma `lem:complete`: completion turns the selected ambient restrictions
+into a genuine sofic approximation. -/
+noncomputable def toSoficApproximation : SoficApproximation H where
+  model := D.localizedModel
+  map := D.completedMap
+  card_tendsToInfinity := by
+    intro M
+    obtain ⟨N, hN⟩ := D.card_diverges M
+    refine ⟨N, fun n hn ↦ ?_⟩
+    rw [D.card_localizedModel]
+    have h := hN n hn
+    change (M : ℝ) ≤ (D.subset n).card at h
+    exact_mod_cast h
+  asymptoticallyMultiplicative := by
+    intro g h ε hε
+    obtain ⟨N, hN⟩ := D.completedMultiplication_vanishing g h ε hε
+    refine ⟨N, fun n hn ↦ ?_⟩
+    have hv := lt_of_abs_lt (hN n hn)
+    rw [D.hammingDistance_completed_mul]
+    exact hv
+  asymptoticallyFaithful := by
+    intro g hg ε hε
+    obtain ⟨N₁, hN₁⟩ := D.completedFixed_vanishing g hg ε hε
+    obtain ⟨N₂, hN₂⟩ := D.card_diverges 1
+    refine ⟨max N₁ N₂, fun n hn ↦ ?_⟩
+    have hn₁ : N₁ ≤ n := (le_max_left _ _).trans hn
+    have hn₂ : N₂ ≤ n := (le_max_right _ _).trans hn
+    have hsmall := lt_of_abs_lt (hN₁ n hn₁)
+    have hcardR : (0 : ℝ) < (D.subset n).card := by
+      have := hN₂ n hn₂
+      positivity
+    have hpartition :
+        (D.completedMoved n g).card + (D.completedFixed n g).card =
+          (D.subset n).card := by
+      simpa [completedMoved, completedFixed] using
+        (Finset.card_filter_add_card_filter_not (s := Finset.univ)
+          (fun x ↦ D.completedMap n g x ≠ x))
+    have heq :
+        ((D.completedMoved n g).card : ℝ) / (D.subset n).card =
+          1 - ((D.completedFixed n g).card : ℝ) / (D.subset n).card := by
+      have hpartitionR :
+          ((D.completedMoved n g).card : ℝ) + ((D.completedFixed n g).card : ℝ) =
+            (D.subset n).card := by
+        exact_mod_cast hpartition
+      field_simp
+      linarith
+    rw [D.hammingDistance_completed_one]
+    rw [heq]
+    linarith
+
 end LocalizedApproximationData
 end NonsoficGroupsExist
