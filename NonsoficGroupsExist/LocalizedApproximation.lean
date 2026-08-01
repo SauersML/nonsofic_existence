@@ -55,5 +55,81 @@ theorem completedMap_disagreement_vanishing (g : H) : Vanishing fun n ↦
   apply div_le_div_of_nonneg_right _ (by positivity)
   exact_mod_cast D.completedMap_disagreement_bound n g
 
+private noncomputable def disagreement (n : ℕ) (g : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦
+    (D.completedMap n g x : D.ambient n) ≠ D.act n g x
+
+private noncomputable def ambientMultiplicationBad (n : ℕ) (g h : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦
+    D.act n (g * h) (x : D.ambient n) ≠ D.act n g (D.act n h x)
+
+private noncomputable def completedMultiplicationBad (n : ℕ) (g h : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦
+    D.completedMap n (g * h) x ≠ D.completedMap n g (D.completedMap n h x)
+
+private noncomputable def disagreementPreimage (n : ℕ) (g h : H) : Finset (D.subset n) :=
+  Finset.univ.filter fun x ↦ D.completedMap n h x ∈ D.disagreement n g
+
+private theorem completedMultiplicationBad_subset (n : ℕ) (g h : H) :
+    D.completedMultiplicationBad n g h ⊆
+      D.disagreement n (g * h) ∪ D.disagreement n h ∪
+        D.disagreementPreimage n g h ∪ D.ambientMultiplicationBad n g h := by
+  classical
+  intro x hx
+  simp only [completedMultiplicationBad, disagreement, disagreementPreimage,
+    ambientMultiplicationBad, Finset.mem_filter, Finset.mem_univ, true_and,
+    Finset.mem_union] at hx ⊢
+  by_cases hgh : (D.completedMap n (g * h) x : D.ambient n) ≠ D.act n (g * h) x
+  · exact Or.inl (Or.inl (Or.inl hgh))
+  by_cases hh : (D.completedMap n h x : D.ambient n) ≠ D.act n h x
+  · exact Or.inl (Or.inl (Or.inr hh))
+  by_cases hg :
+      (D.completedMap n g (D.completedMap n h x) : D.ambient n) ≠
+        D.act n g (D.completedMap n h x : D.ambient n)
+  · exact Or.inl (Or.inr hg)
+  by_cases hamb : D.act n (g * h) (x : D.ambient n) ≠
+      D.act n g (D.act n h x)
+  · exact Or.inr hamb
+  exfalso
+  apply hx
+  apply Subtype.ext
+  rw [not_ne_iff.mp hgh, not_ne_iff.mp hg, not_ne_iff.mp hh,
+    not_ne_iff.mp hamb]
+
+private theorem disagreementPreimage_card (n : ℕ) (g h : H) :
+    (D.disagreementPreimage n g h).card = (D.disagreement n g).card := by
+  classical
+  let p := D.completedMap n h
+  have himage : D.disagreementPreimage n g h =
+      (D.disagreement n g).image p.symm := by
+    ext x
+    simp only [disagreementPreimage, Finset.mem_filter, Finset.mem_univ, true_and,
+      Finset.mem_image]
+    constructor
+    · intro hx
+      exact ⟨p x, hx, p.symm_apply_apply x⟩
+    · rintro ⟨y, hy, hxy⟩
+      have hyx : y = p x := by
+        have := congrArg p hxy
+        simpa using this
+      rw [← hyx]
+      exact hy
+  rw [himage, Finset.card_image_of_injective _ p.symm.injective]
+
+private theorem completedMultiplicationBad_card_le (n : ℕ) (g h : H) :
+    (D.completedMultiplicationBad n g h).card ≤
+      (D.disagreement n (g * h)).card + (D.disagreement n h).card +
+        (D.disagreement n g).card + (D.ambientMultiplicationBad n g h).card := by
+  classical
+  have hs := Finset.card_le_card (D.completedMultiplicationBad_subset n g h)
+  have h1 := Finset.card_union_le (D.disagreement n (g * h)) (D.disagreement n h)
+  have h2 := Finset.card_union_le
+    (D.disagreement n (g * h) ∪ D.disagreement n h) (D.disagreementPreimage n g h)
+  have h3 := Finset.card_union_le
+    (D.disagreement n (g * h) ∪ D.disagreement n h ∪ D.disagreementPreimage n g h)
+      (D.ambientMultiplicationBad n g h)
+  rw [D.disagreementPreimage_card n g h] at h2
+  omega
+
 end LocalizedApproximationData
 end NonsoficGroupsExist
