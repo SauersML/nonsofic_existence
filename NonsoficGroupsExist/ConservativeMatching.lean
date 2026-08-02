@@ -24,8 +24,10 @@ noncomputable def selectionOutput : SelectionOutput D where
   cheeger_pos := D.gammaDecomposition.cheeger_pos
   expands := D.selectedGraph_expands
   edit_negligible := by
-    simpa [selectedLocalization, LocalizedApproximationData.localizedModel,
-      generatorGraphVertexEquiv] using D.selectedGraph_edit_negligible
+    simpa [selectedCard, localizedSelectedEdit, localizedGammaGraph,
+      localizedGammaAct, selectedLocalization,
+      LocalizedApproximationData.localizedModel, generatorGraphVertexEquiv] using
+        D.selectedGraph_edit_negligible
 
 end LocalCriterionData
 
