@@ -32,9 +32,13 @@ noncomputable def transportEquiv {Z : FiniteModel} (q : Y ≃ Z) : BlockStructur
 noncomputable def transport (q : Equiv.Perm Y) : BlockStructure Y :=
   P.transportEquiv q
 
+@[simp] theorem transportEquiv_block {Z : FiniteModel} (q : Y ≃ Z) (y : Y) :
+    (P.transportEquiv q).block (q y) = (P.block y).image q := by
+  simp [transportEquiv]
+
 @[simp] theorem transport_block (q : Equiv.Perm Y) (y : Y) :
     (P.transport q).block (q y) = (P.block y).image q := by
-  simp [transport, transportEquiv]
+  simp [transport]
 
 @[simp] theorem transport_size (q : Equiv.Perm Y) (y : Y) :
     (P.transport q).size (q y) = P.size y := by
