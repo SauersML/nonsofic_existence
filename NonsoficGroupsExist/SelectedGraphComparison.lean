@@ -578,22 +578,32 @@ theorem localizedDisagreementSum_negligible :
     (fun t n ↦ ((Finset.univ.filter fun y : D.selectedSubset n ↦
       D.localizedGammaAct n t.1 y ≠ D.transportedGammaCompletion n t.1 y).card : ℝ))
     (fun t _ ↦ D.localized_to_completed_disagreement_negligible t.1 t.2)
-  simpa only [selectedCard, localizedDisagreementSum] using hsum
+  unfold selectedCard localizedDisagreementSum
+  exact hsum
+
+theorem selectedCard_pos (n : ℕ) : 0 < D.selectedCard n := by
+  unfold selectedCard
+  rw [D.selectedSubset_card]
+  exact_mod_cast (BlockIndex.block_nonempty
+    (D.gammaDecomposition.blocks (D.matchingIndex n))
+    (D.selectedComponent n)).card_pos
+
+theorem localizedCompletedEdit_nonneg (n : ℕ) :
+    0 ≤ D.localizedCompletedEdit n := by
+  unfold localizedCompletedEdit
+  positivity
+
+theorem localizedCompletedEdit_le (n : ℕ) :
+    D.localizedCompletedEdit n ≤ 4 * D.localizedDisagreementSum n := by
+  unfold localizedCompletedEdit localizedGammaGraph localizedDisagreementSum
+  exact_mod_cast GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
+    (D.localizedGammaAct n) (D.transportedGammaCompletion n)
 
 theorem localized_to_completed_edit_negligible :
     Negligible D.selectedCard D.localizedCompletedEdit := by
-  refine Negligible.mono (fun n ↦ by
-      unfold selectedCard
-      rw [D.selectedSubset_card]
-      exact_mod_cast (BlockIndex.block_nonempty
-        (D.gammaDecomposition.blocks (D.matchingIndex n))
-        (D.selectedComponent n)).card_pos)
-    (fun n ↦ by unfold localizedCompletedEdit; positivity) (fun n ↦ ?_)
+  exact Negligible.mono D.selectedCard_pos D.localizedCompletedEdit_nonneg
+    D.localizedCompletedEdit_le
       (Negligible.const_mul 4 D.localizedDisagreementSum_negligible)
-  unfold localizedCompletedEdit localizedGammaGraph
-  unfold localizedDisagreementSum
-  exact_mod_cast GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
-    (D.localizedGammaAct n) (D.transportedGammaCompletion n)
 
 theorem completed_to_selected_edit_negligible :
     Negligible D.selectedCard D.completedSelectedEdit := by
