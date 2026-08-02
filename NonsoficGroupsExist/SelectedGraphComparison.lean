@@ -30,10 +30,10 @@ noncomputable def gammaCompletion (n : ℕ) (g : Γ) :
 
 theorem gammaCompletion_disagreement_bound (n : ℕ) (g : Γ) :
     (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-      (D.gammaCompletion n g x : D.approximation.model (D.matchingIndex n)) ≠
-        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g) x).card ≤
+      (D.gammaCompletion n g x).1 ≠
+        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g) x.1).card ≤
     (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-      D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g) x ∉
+      D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g) x.1 ∉
         (D.selectedComponent n).block).card :=
   Classical.choose_spec (Localization.exists_completion_with_bound
     (D.selectedComponent n).block
@@ -67,18 +67,19 @@ noncomputable def transportedInducedGammaGraph (n : ℕ) : FiniteMultiGraph :=
 theorem selected_gammaBoundary_le_graphError (n : ℕ) :
     (∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x ∉
+        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x.1 ∉
           (D.selectedComponent n).block).card : ℝ) ≤
       D.localGraphBaseError n (D.selectedComponent n) := by
   have hterm : (∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x ∉
+        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x.1 ∉
           (D.selectedComponent n).block).card : ℝ) =
       D.localGammaBoundaryError n (D.selectedComponent n) := by
     unfold localGammaBoundaryError
     apply Finset.sum_congr rfl
     intro t _
-    congr 1
+    norm_cast
+    apply congrArg Finset.card
     ext x
     simp only [Finset.mem_filter, Finset.mem_univ, true_and]
     constructor
@@ -103,7 +104,13 @@ theorem selected_gammaBoundary_le_graphError (n : ℕ) :
       exact hmem
   rw [hterm]
   unfold localGraphBaseError
-  positivity
+  have hedit : 0 ≤ D.localGammaEditError n (D.selectedComponent n) := by
+    unfold localGammaEditError
+    positivity
+  have hconj : 0 ≤ D.localConjugacyGraphError n (D.selectedComponent n) := by
+    unfold localConjugacyGraphError
+    positivity
+  linarith
 
 theorem completed_to_induced_edit_le (n : ℕ) :
     (D.completedGammaGraph n).editDistance (D.transportedInducedGammaGraph n)
@@ -115,11 +122,11 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     (D.gammaCompletion n)
   have hcompletion : (∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        (D.gammaCompletion n t.1 x : D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x).card) ≤
+        (D.gammaCompletion n t.1 x).1 ≠
+          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x.1).card) ≤
       ∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x ∉
+        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x.1 ∉
           (D.selectedComponent n).block).card := by
     apply Finset.sum_le_sum
     intro t _
@@ -135,18 +142,18 @@ theorem completed_to_induced_edit_le (n : ℕ) :
       fintype := inferInstance
       decidableEq := inferInstance }
     (Equiv.refl _) (D.selectedImageEquiv n)
-  change (D.completedGammaGraph n).editDistance (D.transportedInducedGammaGraph n)
-      (Equiv.refl _) ≤ _
+  change (((D.completedGammaGraph n).editDistance (D.transportedInducedGammaGraph n)
+      (Equiv.refl _) : ℕ) : ℝ) ≤ _
   rw [htransport]
   calc
     _ ≤ 4 * ∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        (D.gammaCompletion n t.1 x : D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x).card := by
+        (D.gammaCompletion n t.1 x).1 ≠
+          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x.1).card := by
       exact_mod_cast hbase
     _ ≤ 4 * ∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x ∉
+        D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x.1 ∉
           (D.selectedComponent n).block).card := by
       exact_mod_cast Nat.mul_le_mul_left 4 hcompletion
     _ ≤ 4 * D.localGraphBaseError n (D.selectedComponent n) := by
@@ -169,6 +176,7 @@ theorem induced_to_selected_edit_le (n : ℕ) :
       fintype := inferInstance
       decidableEq := inferInstance }
     (Equiv.refl _) (D.selectedImageEquiv n)
+  unfold transportedInducedGammaGraph selectedGraph
   rw [htransport]
   calc
     _ ≤ 2 * WI.unmatchedCount := by exact_mod_cast hw
@@ -188,32 +196,32 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
   have hA := D.selectedLocalization.completedMap_disagreement_vanishing (t, 1)
   have hsource : Vanishing fun n ↦
       ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        (D.gammaCompletion n t x : D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x).card : ℝ) /
+        (D.gammaCompletion n t x).1 ≠
+          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x.1).card : ℝ) /
         (D.selectedComponent n).block.card := by
     refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
       (fun n ↦ ?_) (D.selectedComponent_error 0)
     apply div_le_div_of_nonneg_right
     · have h := D.gammaCompletion_disagreement_bound n t
       have hReal : ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-          (D.gammaCompletion n t x : D.approximation.model (D.matchingIndex n)) ≠
-            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x).card : ℝ) ≤
+          (D.gammaCompletion n t x).1 ≠
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x.1).card : ℝ) ≤
           ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x ∉
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x.1 ∉
               (D.selectedComponent n).block).card : ℝ) := by
         exact_mod_cast h
       have hsingleNat : (Finset.univ.filter
           (fun x : (D.selectedComponent n).block ↦
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x ∉
+          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x.1 ∉
             (D.selectedComponent n).block)).card ≤
             ∑ g : D.setup.generatorsΓ,
               (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-                D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g.1) x ∉
+                D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g.1) x.1 ∉
                   (D.selectedComponent n).block).card :=
           Finset.single_le_sum (fun _ _ ↦ by positivity) (Finset.mem_attach _ ht)
       have hsingle : ((Finset.univ.filter
           (fun x : (D.selectedComponent n).block ↦
-            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x ∉
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x.1 ∉
               (D.selectedComponent n).block)).card : ℝ) ≤
           D.localGraphBaseError n (D.selectedComponent n) := by
         exact (by exact_mod_cast hsingleNat).trans
@@ -222,24 +230,22 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
     · positivity
   have hsource' : Vanishing fun n ↦
       ((Finset.univ.filter fun y : D.selectedSubset n ↦
-        (D.transportedGammaCompletion n t y : D.approximation.model (D.matchingIndex n)) ≠
+        (D.transportedGammaCompletion n t y).1 ≠
           D.distinguishedPerm (D.matchingIndex n)
             (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-              ((D.selectedImageEquiv n).symm y))).card : ℝ) /
+              ((D.selectedImageEquiv n).symm y).1)).card : ℝ) /
         (D.selectedSubset n).card := by
     apply Vanishing.congr hsource
     intro n
     have hcard :
         (Finset.univ.filter fun y : D.selectedSubset n ↦
-          (D.transportedGammaCompletion n t y :
-              D.approximation.model (D.matchingIndex n)) ≠
+          (D.transportedGammaCompletion n t y).1 ≠
             D.distinguishedPerm (D.matchingIndex n)
               (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-                ((D.selectedImageEquiv n).symm y))).card =
+                ((D.selectedImageEquiv n).symm y).1)).card =
         (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-          (D.gammaCompletion n t x :
-              D.approximation.model (D.matchingIndex n)) ≠
-            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x).card := by
+          (D.gammaCompletion n t x).1 ≠
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x.1).card := by
       apply Finset.card_bij
         (fun y _ ↦ (D.selectedImageEquiv n).symm y)
       · intro y hy
@@ -257,7 +263,7 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
     rw [hcard, D.selectedSubset_card]
   have hconj : Vanishing fun n ↦
       ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        (x : D.approximation.model (D.matchingIndex n)) ∈
+        x.1 ∈
           D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t)).card : ℝ) /
         (D.selectedComponent n).block.card := by
@@ -266,18 +272,18 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
     apply div_le_div_of_nonneg_right
     · have htermNat : (Finset.univ.filter
           (fun x : (D.selectedComponent n).block ↦
-            (x : D.approximation.model (D.matchingIndex n)) ∈
+            x.1 ∈
               D.approximation.conjugacyError (D.matchingIndex n)
                 D.setup.distinguished (D.setup.embedΓ t))).card ≤
             ∑ g : D.setup.generatorsΓ,
               (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-                (x : D.approximation.model (D.matchingIndex n)) ∈
+                x.1 ∈
                   D.approximation.conjugacyError (D.matchingIndex n)
                     D.setup.distinguished (D.setup.embedΓ g.1)).card :=
         Finset.single_le_sum (fun _ _ ↦ by positivity) (Finset.mem_attach _ ht)
       have hterm : ((Finset.univ.filter
           (fun x : (D.selectedComponent n).block ↦
-            (x : D.approximation.model (D.matchingIndex n)) ∈
+            x.1 ∈
               D.approximation.conjugacyError (D.matchingIndex n)
                 D.setup.distinguished (D.setup.embedΓ t))).card : ℝ) ≤
           D.localConjugacyGraphError n (D.selectedComponent n) := by
@@ -292,22 +298,19 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
   refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
     (fun n ↦ ?_) hall
   let E₀ := Finset.univ.filter fun y : D.selectedSubset n ↦
-        (D.localizedGammaAct n t y :
-            D.approximation.model (D.matchingIndex n)) ≠
-          D.localizedProductAct n (t, 1) y
+        (D.localizedGammaAct n t y).1 ≠
+          D.localizedProductAct n (t, 1) y.1
   let E₁ := Finset.univ.filter fun y : D.selectedSubset n ↦
-        (D.transportedGammaCompletion n t y :
-            D.approximation.model (D.matchingIndex n)) ≠
+        (D.transportedGammaCompletion n t y).1 ≠
           D.distinguishedPerm (D.matchingIndex n)
             (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-              ((D.selectedImageEquiv n).symm y))
+              ((D.selectedImageEquiv n).symm y).1)
   let E₂ := Finset.univ.filter fun y : D.selectedSubset n ↦
-        ((D.selectedImageEquiv n).symm y :
-            D.approximation.model (D.matchingIndex n)) ∈
+        ((D.selectedImageEquiv n).symm y).1 ∈
           D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t)
   let EΓ := Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        (x : D.approximation.model (D.matchingIndex n)) ∈
+        x.1 ∈
           D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t)
   have hsubset : (Finset.univ.filter fun y : D.selectedSubset n ↦
@@ -315,14 +318,13 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
         E₀ ∪ (E₁ ∪ E₂) := by
       intro y hy
       simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy ⊢
-      by_cases hloc : (D.localizedGammaAct n t y :
-          D.approximation.model (D.matchingIndex n)) ≠ D.localizedProductAct n (t, 1) y
+      by_cases hloc : (D.localizedGammaAct n t y).1 ≠
+          D.localizedProductAct n (t, 1) y.1
       · exact Or.inl hloc
-      by_cases hsrc : (D.transportedGammaCompletion n t y :
-          D.approximation.model (D.matchingIndex n)) ≠
+      by_cases hsrc : (D.transportedGammaCompletion n t y).1 ≠
           D.distinguishedPerm (D.matchingIndex n)
             (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-              ((D.selectedImageEquiv n).symm y))
+              ((D.selectedImageEquiv n).symm y).1)
       · exact Or.inr (Or.inl hsrc)
       · exact Or.inr (Or.inr (by
           simp only [SoficApproximation.conjugacyError, Finset.mem_filter,
@@ -337,8 +339,7 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
             simpa using D.setup.compressedEnd_spec D.setup.distinguished
               D.setup.distinguished_mem t
           have hyq : D.distinguishedPerm (D.matchingIndex n)
-              ((D.selectedImageEquiv n).symm y) =
-              (y : D.approximation.model (D.matchingIndex n)) := by
+              ((D.selectedImageEquiv n).symm y).1 = y.1 := by
             exact congrArg Subtype.val
               ((D.selectedImageEquiv n).apply_symm_apply y)
           rw [hyq] at hgood
@@ -363,7 +364,7 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
     ((Finset.univ.filter fun y : D.selectedSubset n ↦
         D.localizedGammaAct n t y ≠ D.transportedGammaCompletion n t y).card : ℝ) /
         (D.selectedSubset n).card ≤
-        ((E₀.card + E₁.card + EΓ.card : ℕ) : ℝ) /
+        ((E₀.card + (E₁.card + EΓ.card) : ℕ) : ℝ) /
           (D.selectedSubset n).card := by
       apply div_le_div_of_nonneg_right
       · exact_mod_cast hcard
