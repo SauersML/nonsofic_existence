@@ -884,35 +884,6 @@ noncomputable def selectedImageEquiv (n : ℕ) :
       D.distinguishedPerm (D.matchingIndex n) x.1 := by
   rfl
 
-/-- The vertex equivalence used to transport the edited selected component. -/
-noncomputable def selectedGraphEquiv (n : ℕ) :
-    (((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-      (D.selectedComponent n).block).vertex) ≃ D.selectedFiniteModel n :=
-  (Equiv.refl _).symm.trans (D.selectedImageEquiv n)
-
-noncomputable def selectedGraph (n : ℕ) : FiniteMultiGraph :=
-  ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-    (D.selectedComponent n).block).transport
-      (D.selectedFiniteModel n)
-      (D.selectedGraphEquiv n)
-
-theorem selectedGraph_expands (n : ℕ) :
-    (D.selectedGraph n).HasCheegerLowerBound D.gammaDecomposition.cheeger := by
-  exact FiniteMultiGraph.transport_hasCheegerLowerBound
-    ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-      (D.selectedComponent n).block)
-    (D.selectedFiniteModel n)
-    (D.selectedGraphEquiv n)
-    (by
-      let y := BlockIndex.representative
-        (D.gammaDecomposition.blocks (D.matchingIndex n)) (D.selectedComponent n)
-      have h := D.gammaDecomposition.component_expands (D.matchingIndex n) y
-      change ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-        ((D.gammaDecomposition.blocks (D.matchingIndex n)).block y)).HasCheegerLowerBound
-          D.gammaDecomposition.cheeger at h
-      rw [BlockIndex.block_representative] at h
-      exact h)
-
 end LocalCriterionData
 
 end NonsoficGroupsExist
