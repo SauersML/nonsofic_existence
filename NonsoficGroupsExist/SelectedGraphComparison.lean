@@ -155,7 +155,7 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     (Z := D.selectedFiniteModel n)
     D.setup.generatorsΓ (D.selectedImageEquiv n) (D.gammaCompletion n)
     (D.transportedInducedGammaGraph n) (Equiv.refl (D.selectedSubset n))
-  have haction : GeneratorGraphEditing.conjugateAction
+  have haction : GeneratorGraphEditing.conjugateAction (G := Γ)
       (D.selectedImageEquiv n) (D.gammaCompletion n) =
         D.transportedGammaCompletion n := by
     funext g
@@ -223,15 +223,22 @@ theorem induced_to_selected_edit_le (n : ℕ) :
     ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
     (D.selectedFiniteModel n)
     (Equiv.refl _) (D.selectedImageEquiv n)
+  dsimp only [B] at htransport
   have hequiv : (Equiv.refl (D.inducedGammaGraph n).vertex).symm.trans
       (D.selectedImageEquiv n) = D.selectedGraphEquiv n := by
     rfl
-  have hgraph : ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B).transport
+  have hgraph₀ : ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
+      (D.selectedComponent n).block).transport
+      (D.selectedFiniteModel n) (D.selectedGraphEquiv n) = D.selectedGraph n := rfl
+  have hgraph : ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
+      (D.selectedComponent n).block).transport
       (D.selectedFiniteModel n)
       ((Equiv.refl (D.inducedGammaGraph n).vertex).symm.trans
         (D.selectedImageEquiv n)) = D.selectedGraph n := by
-    rw [hequiv]
-    rfl
+    exact (congrArg (fun e ↦
+      ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
+        (D.selectedComponent n).block).transport (D.selectedFiniteModel n) e)
+      hequiv).trans hgraph₀
   rw [hgraph] at htransport
   have htransport' :
       (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
