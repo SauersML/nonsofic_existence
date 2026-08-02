@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.BlockEnumeration
+import NonsoficGroupsExist.BlockIndex
 import NonsoficGroupsExist.BlockWordCrossing
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficErrors
