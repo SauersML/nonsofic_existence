@@ -566,12 +566,22 @@ noncomputable def localizedSelectedEdit (n : ℕ) : ℝ :=
   (D.localizedGammaGraph n).editDistance (D.selectedGraph n)
     (Equiv.refl (D.selectedFiniteModel n))
 
-theorem localized_to_completed_edit_negligible :
-    Negligible D.selectedCard D.localizedCompletedEdit := by
+noncomputable def localizedDisagreementSum (n : ℕ) : ℝ :=
+  ∑ t : D.setup.generatorsΓ,
+    ((Finset.univ.filter fun y : D.selectedSubset n ↦
+      D.localizedGammaAct n t.1 y ≠
+        D.transportedGammaCompletion n t.1 y).card : ℝ)
+
+theorem localizedDisagreementSum_negligible :
+    Negligible D.selectedCard D.localizedDisagreementSum := by
   have hsum := Negligible.sum (Finset.univ : Finset D.setup.generatorsΓ)
     (fun t n ↦ ((Finset.univ.filter fun y : D.selectedSubset n ↦
       D.localizedGammaAct n t.1 y ≠ D.transportedGammaCompletion n t.1 y).card : ℝ))
     (fun t _ ↦ D.localized_to_completed_disagreement_negligible t.1 t.2)
+  simpa only [selectedCard, localizedDisagreementSum] using hsum
+
+theorem localized_to_completed_edit_negligible :
+    Negligible D.selectedCard D.localizedCompletedEdit := by
   refine Negligible.mono (fun n ↦ by
       unfold selectedCard
       rw [D.selectedSubset_card]
@@ -579,8 +589,9 @@ theorem localized_to_completed_edit_negligible :
         (D.gammaDecomposition.blocks (D.matchingIndex n))
         (D.selectedComponent n)).card_pos)
     (fun n ↦ by unfold localizedCompletedEdit; positivity) (fun n ↦ ?_)
-      (Negligible.const_mul 4 hsum)
+      (Negligible.const_mul 4 D.localizedDisagreementSum_negligible)
   unfold localizedCompletedEdit localizedGammaGraph
+  unfold localizedDisagreementSum
   exact_mod_cast GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
     (D.localizedGammaAct n) (D.transportedGammaCompletion n)
 
@@ -602,11 +613,6 @@ theorem completed_to_selected_edit_negligible :
       positivity)
     (fun n ↦ ?_) hbound
   unfold completedSelectedEdit selectedCard
-  change (((D.completedGammaGraph n).editDistance (D.selectedGraph n)
-      (Equiv.refl (D.selectedFiniteModel n)) : ℕ) : ℝ) /
-        ((D.selectedSubset n).card : ℝ) ≤
-      6 * (D.localGraphBaseError n (D.selectedComponent n) /
-        ((D.selectedComponent n).block.card : ℝ))
   rw [D.selectedSubset_card]
   calc
     ((D.completedGammaGraph n).editDistance (D.selectedGraph n)
