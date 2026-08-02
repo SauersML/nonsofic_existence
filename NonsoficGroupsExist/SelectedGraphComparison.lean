@@ -554,9 +554,12 @@ noncomputable def localizedGammaGraph (n : ℕ) : FiniteMultiGraph :=
 noncomputable def selectedCard (n : ℕ) : ℝ :=
   (D.selectedSubset n).card
 
-noncomputable def localizedCompletedEdit (n : ℕ) : ℝ :=
+noncomputable def localizedCompletedEditNat (n : ℕ) : ℕ :=
   (D.localizedGammaGraph n).editDistance (D.completedGammaGraph n)
     (Equiv.refl (D.selectedFiniteModel n))
+
+noncomputable def localizedCompletedEdit (n : ℕ) : ℝ :=
+  D.localizedCompletedEditNat n
 
 noncomputable def completedSelectedEdit (n : ℕ) : ℝ :=
   (D.completedGammaGraph n).editDistance (D.selectedGraph n)
@@ -566,11 +569,14 @@ noncomputable def localizedSelectedEdit (n : ℕ) : ℝ :=
   (D.localizedGammaGraph n).editDistance (D.selectedGraph n)
     (Equiv.refl (D.selectedFiniteModel n))
 
-noncomputable def localizedDisagreementSum (n : ℕ) : ℝ :=
+noncomputable def localizedDisagreementSumNat (n : ℕ) : ℕ :=
   ∑ t : D.setup.generatorsΓ,
-    ((Finset.univ.filter fun y : D.selectedSubset n ↦
+    (Finset.univ.filter fun y : D.selectedSubset n ↦
       D.localizedGammaAct n t.1 y ≠
-        D.transportedGammaCompletion n t.1 y).card : ℝ)
+        D.transportedGammaCompletion n t.1 y).card
+
+noncomputable def localizedDisagreementSum (n : ℕ) : ℝ :=
+  D.localizedDisagreementSumNat n
 
 theorem localizedDisagreementSum_negligible :
     Negligible D.selectedCard D.localizedDisagreementSum := by
@@ -578,8 +584,8 @@ theorem localizedDisagreementSum_negligible :
     (fun t n ↦ ((Finset.univ.filter fun y : D.selectedSubset n ↦
       D.localizedGammaAct n t.1 y ≠ D.transportedGammaCompletion n t.1 y).card : ℝ))
     (fun t _ ↦ D.localized_to_completed_disagreement_negligible t.1 t.2)
-  unfold selectedCard localizedDisagreementSum
-  exact hsum
+  simpa only [selectedCard, localizedDisagreementSum, localizedDisagreementSumNat,
+    Nat.cast_sum] using hsum
 
 theorem selectedCard_pos (n : ℕ) : 0 < D.selectedCard n := by
   unfold selectedCard
@@ -593,11 +599,16 @@ theorem localizedCompletedEdit_nonneg (n : ℕ) :
   unfold localizedCompletedEdit
   positivity
 
+theorem localizedCompletedEditNat_le (n : ℕ) :
+    D.localizedCompletedEditNat n ≤ 4 * D.localizedDisagreementSumNat n := by
+  unfold localizedCompletedEditNat localizedGammaGraph localizedDisagreementSumNat
+  exact GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
+    (D.localizedGammaAct n) (D.transportedGammaCompletion n)
+
 theorem localizedCompletedEdit_le (n : ℕ) :
     D.localizedCompletedEdit n ≤ 4 * D.localizedDisagreementSum n := by
-  unfold localizedCompletedEdit localizedGammaGraph localizedDisagreementSum
-  exact_mod_cast GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
-    (D.localizedGammaAct n) (D.transportedGammaCompletion n)
+  unfold localizedCompletedEdit localizedDisagreementSum
+  exact_mod_cast D.localizedCompletedEditNat_le n
 
 theorem localized_to_completed_edit_negligible :
     Negligible D.selectedCard D.localizedCompletedEdit := by
