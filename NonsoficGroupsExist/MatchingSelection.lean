@@ -198,6 +198,23 @@ theorem componentSelectionError_nonneg (r n : ℕ)
   unfold componentSelectionError
   linarith [D.localGraphBaseError_nonneg n B]
 
+theorem localGraphBaseError_le_componentSelectionError (r n : ℕ)
+    (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) :
+    D.localGraphBaseError n B ≤ D.componentSelectionError r n B := by
+  have hmatch : 0 ≤ ((D.matchImage (D.matchingIndex n) B ∆
+      D.matchTarget (D.matchingIndex n) B).card : ℝ) := by positivity
+  have hinvariant : 0 ≤ ∑ i ∈ Finset.range (r + 1),
+      D.localInvariantError n i B :=
+    Finset.sum_nonneg fun i _ ↦ D.localInvariantError_nonneg n i B
+  have hmultiplication : 0 ≤ ∑ i ∈ Finset.range (r + 1),
+      ∑ j ∈ Finset.range (r + 1), D.localMultiplicationError n i j B :=
+    Finset.sum_nonneg fun i _ ↦ Finset.sum_nonneg fun j _ ↦
+      D.localMultiplicationError_nonneg n i j B
+  have hfixed : 0 ≤ ∑ i ∈ Finset.range (r + 1), D.localFixedError n i B :=
+    Finset.sum_nonneg fun i _ ↦ D.localFixedError_nonneg n i B
+  unfold componentSelectionError
+  linarith
+
 theorem componentSelectionError_mono {r r' : ℕ} (hrr : r ≤ r') (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) :
     D.componentSelectionError r n B ≤ D.componentSelectionError r' n B := by

@@ -307,7 +307,9 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
           D.localGraphBaseError n (D.selectedComponent n) := by
         exact (by exact_mod_cast hsingleNat).trans
           (D.selected_gammaBoundary_le_graphError n)
-      exact hReal.trans (hsingle.trans (by unfold componentSelectionError; positivity))
+      exact hReal.trans (hsingle.trans
+        (D.localGraphBaseError_le_componentSelectionError 0 n
+          (D.selectedComponent n)))
     · positivity
   have hsource' : Vanishing fun n ↦
       ((Finset.univ.filter fun y : D.selectedSubset n ↦
@@ -379,9 +381,20 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
           D.localConjugacyGraphError n (D.selectedComponent n) := by
         unfold localConjugacyGraphError
         exact_mod_cast htermNat
-      exact hterm.trans (by
-        unfold componentSelectionError localGraphBaseError
-        positivity)
+      have hconjugacyBase : D.localConjugacyGraphError n (D.selectedComponent n) ≤
+          D.localGraphBaseError n (D.selectedComponent n) := by
+        unfold localGraphBaseError
+        have hgamma : 0 ≤ D.localGammaEditError n (D.selectedComponent n) := by
+          unfold localGammaEditError
+          positivity
+        have hboundary : 0 ≤
+            D.localGammaBoundaryError n (D.selectedComponent n) := by
+          unfold localGammaBoundaryError
+          positivity
+        linarith
+      exact hterm.trans (hconjugacyBase.trans
+        (D.localGraphBaseError_le_componentSelectionError 0 n
+          (D.selectedComponent n)))
     · positivity
   have hall := Vanishing.add hA (Vanishing.add hsource' (by
     simpa [D.selectedSubset_card] using hconj))
@@ -492,11 +505,12 @@ theorem completed_to_selected_edit_negligible :
   have hbase : Vanishing fun n ↦
       D.localGraphBaseError n (D.selectedComponent n) /
         (D.selectedComponent n).block.card := by
-    refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    refine Vanishing.squeeze (fun n ↦ div_nonneg
+      (D.localGraphBaseError_nonneg n (D.selectedComponent n)) (by positivity))
       (fun n ↦ ?_) (D.selectedComponent_error 0)
     apply div_le_div_of_nonneg_right
-    · unfold componentSelectionError
-      positivity
+    · exact D.localGraphBaseError_le_componentSelectionError 0 n
+        (D.selectedComponent n)
     · positivity
   have hbound := Vanishing.const_mul 6 hbase
   refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
@@ -538,7 +552,11 @@ theorem selectedGraph_edit_negligible :
           (D.selectedGraph n) (Equiv.refl _) : ℕ) := by
   have hsum := Negligible.add D.localized_to_completed_edit_negligible
     D.completed_to_selected_edit_negligible
-  refine Negligible.mono (fun n ↦ by positivity) (fun n ↦ by positivity)
+  refine Negligible.mono (fun n ↦ by
+      rw [D.selectedSubset_card]
+      exact_mod_cast (BlockIndex.block_nonempty
+        (D.gammaDecomposition.blocks (D.matchingIndex n))
+        (D.selectedComponent n)).card_pos) (fun n ↦ by positivity)
     (fun n ↦ ?_) hsum
   exact_mod_cast FiniteMultiGraph.editDistance_triangle
     (generatorGraph
