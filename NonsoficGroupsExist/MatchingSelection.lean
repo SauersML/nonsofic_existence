@@ -589,6 +589,12 @@ noncomputable def selectedFiniteModel (n : ℕ) : FiniteModel where
   fintype := inferInstance
   decidableEq := inferInstance
 
+/-- The selected source component, bundled once as a finite model. -/
+noncomputable def selectedSourceFiniteModel (n : ℕ) : FiniteModel where
+  carrier := (D.selectedComponent n).block
+  fintype := inferInstance
+  decidableEq := inferInstance
+
 theorem componentPredicateCount_selected (n : ℕ)
     (p : D.approximation.model (D.matchingIndex n) → Prop) [DecidablePred p] :
     D.componentPredicateCount n (D.selectedComponent n) p =
