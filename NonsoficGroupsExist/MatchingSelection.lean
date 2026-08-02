@@ -878,6 +878,12 @@ noncomputable def selectedImageEquiv (n : ℕ) :
     apply Subtype.ext
     exact (D.distinguishedTransport (D.matchingIndex n)).apply_symm_apply y.1
 
+@[simp] theorem selectedImageEquiv_apply (n : ℕ)
+    (x : (D.selectedComponent n).block) :
+    (D.selectedImageEquiv n x).1 =
+      D.distinguishedPerm (D.matchingIndex n) x.1 := by
+  rfl
+
 /-- The vertex equivalence used to transport the edited selected component. -/
 noncomputable def selectedGraphEquiv (n : ℕ) :
     (((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
