@@ -155,7 +155,8 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     (Z := D.selectedFiniteModel n)
     D.setup.generatorsΓ (D.selectedImageEquiv n) (D.gammaCompletion n)
     (D.transportedInducedGammaGraph n) (Equiv.refl (D.selectedSubset n))
-  have haction : GeneratorGraphEditing.conjugateAction (G := Γ)
+  have haction : GeneratorGraphEditing.conjugateAction
+      (G := Γ) (Y := D.selectedSourceFiniteModel n) (Z := D.selectedFiniteModel n)
       (D.selectedImageEquiv n) (D.gammaCompletion n) =
         D.transportedGammaCompletion n := by
     funext g
@@ -239,13 +240,13 @@ theorem induced_to_selected_edit_le (n : ℕ) :
       ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
         (D.selectedComponent n).block).transport (D.selectedFiniteModel n) e)
       hequiv).trans hgraph₀
-  rw [hgraph] at htransport
   have htransport' :
       (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
           (Equiv.refl (D.selectedSubset n)) =
         (D.inducedGammaGraph n).editDistance
           ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
           (Equiv.refl _) := by
+    rw [← hgraph]
     simpa only [transportedInducedGammaGraph] using htransport
   rw [htransport']
   have hlocalReal : (WI.unmatchedCount : ℝ) ≤
