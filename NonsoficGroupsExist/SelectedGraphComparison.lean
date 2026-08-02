@@ -113,7 +113,6 @@ theorem selected_gammaBoundary_le_graphError (n : ℕ) :
           (BlockIndex.representative _ (D.selectedComponent n)) x.1 hxrep).trans
             (BlockIndex.block_representative _ _)
       apply (D.gammaDecomposition.blocks (D.matchingIndex n)).eq_of_mem
-      unfold gammaAct at hmem
       simpa only [hxblock] using hmem
   rw [hterm]
   unfold localGraphBaseError
@@ -153,10 +152,12 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     (D.inducedGammaGraph n)
     (D.selectedFiniteModel n)
     (Equiv.refl _) (D.selectedImageEquiv n)
-  have hconjugate := GeneratorGraphEditing.conjugateAction_editDistance
-    (Y := { carrier := (D.selectedComponent n).block
+  let U : FiniteModel :=
+    { carrier := (D.selectedComponent n).block
       fintype := inferInstance
-      decidableEq := inferInstance })
+      decidableEq := inferInstance }
+  have hconjugate := GeneratorGraphEditing.conjugateAction_editDistance
+    (Y := U)
     (Z := D.selectedFiniteModel n)
     D.setup.generatorsΓ (D.selectedImageEquiv n) (D.gammaCompletion n)
     (D.transportedInducedGammaGraph n) (Equiv.refl (D.selectedSubset n))
@@ -217,18 +218,14 @@ theorem induced_to_selected_edit_le (n : ℕ) :
     ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
     (D.selectedFiniteModel n)
     (Equiv.refl _) (D.selectedImageEquiv n)
-  have hequiv : (Equiv.refl (D.inducedGammaGraph n).vertex).symm.trans
-      (D.selectedImageEquiv n) = D.selectedImageEquiv n := by
-    ext x
-    rfl
-  rw [hequiv] at htransport
   have htransport' :
       (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
           (Equiv.refl (D.selectedSubset n)) =
         (D.inducedGammaGraph n).editDistance
           ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
           (Equiv.refl _) := by
-    simpa [transportedInducedGammaGraph, selectedGraph] using htransport
+    simpa only [transportedInducedGammaGraph, selectedGraph, selectedGraphEquiv]
+      using htransport
   rw [htransport']
   calc
     _ ≤ (2 * WI.unmatchedCount : ℝ) := by exact_mod_cast hw

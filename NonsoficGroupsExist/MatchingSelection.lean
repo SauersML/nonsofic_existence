@@ -855,11 +855,17 @@ noncomputable def selectedImageEquiv (n : ℕ) :
     apply Subtype.ext
     exact (D.distinguishedTransport (D.matchingIndex n)).apply_symm_apply y.1
 
+/-- The vertex equivalence used to transport the edited selected component. -/
+noncomputable def selectedGraphEquiv (n : ℕ) :
+    (((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
+      (D.selectedComponent n).block).vertex) ≃ D.selectedFiniteModel n :=
+  (Equiv.refl _).symm.trans (D.selectedImageEquiv n)
+
 noncomputable def selectedGraph (n : ℕ) : FiniteMultiGraph :=
   ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
     (D.selectedComponent n).block).transport
       (D.selectedFiniteModel n)
-      (D.selectedImageEquiv n)
+      (D.selectedGraphEquiv n)
 
 theorem selectedGraph_expands (n : ℕ) :
     (D.selectedGraph n).HasCheegerLowerBound D.gammaDecomposition.cheeger := by
@@ -867,7 +873,7 @@ theorem selectedGraph_expands (n : ℕ) :
     ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
       (D.selectedComponent n).block)
     (D.selectedFiniteModel n)
-    (D.selectedImageEquiv n)
+    (D.selectedGraphEquiv n)
     (by
       let y := BlockIndex.representative
         (D.gammaDecomposition.blocks (D.matchingIndex n)) (D.selectedComponent n)
