@@ -28,9 +28,9 @@ theorem productEnumeration_surjective : Function.Surjective D.productEnumeration
 
 noncomputable def componentPredicateCount (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n))
-    (p : D.approximation.model (D.matchingIndex n) → Prop) : ℕ := by
-  classical
-  exact (Finset.univ.filter fun x : indexedBlockModel
+    (p : D.approximation.model (D.matchingIndex n) → Prop)
+    [DecidablePred p] : ℕ :=
+  (Finset.univ.filter fun x : indexedBlockModel
     (D.gammaDecomposition.blocks (D.matchingIndex n)) B ↦
       p (D.distinguishedPerm (D.matchingIndex n) x.1)).card
 
@@ -40,28 +40,22 @@ theorem sum_componentPredicateCount_le (n : ℕ)
       (D.matchingThreshold (D.matchingIndex n)),
       (D.componentPredicateCount n B p : ℝ)) ≤
         ((Finset.univ.filter p).card : ℝ) := by
-  classical
   let P := D.gammaDecomposition.blocks (D.matchingIndex n)
   let q := D.distinguishedPerm (D.matchingIndex n)
   have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)),
       (D.componentPredicateCount n B p : ℝ)) ≤
       ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p (q x.1)).card : ℝ) := by
+        (D.componentPredicateCount n B p : ℝ) :=
+    Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+      (fun _ _ _ ↦ by positivity)
+  have hpartition :
+      (∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
+        (D.componentPredicateCount n B p : ℝ)) =
+        ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) := by
     unfold componentPredicateCount
-    simpa only [q] using
-      (Finset.sum_le_sum_of_subset_of_nonneg
-        (Finset.subset_univ (D.acceptableComponents (D.matchingIndex n)
-          (D.matchingThreshold (D.matchingIndex n))))
-        (fun _ _ _ ↦ by positivity) :
-          (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
-            (D.matchingThreshold (D.matchingIndex n)),
-              ((Finset.univ.filter fun x : indexedBlockModel P B ↦
-                p (D.distinguishedPerm (D.matchingIndex n) x.1)).card : ℝ)) ≤
-          ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-            ((Finset.univ.filter fun x : indexedBlockModel P B ↦
-              p (D.distinguishedPerm (D.matchingIndex n) x.1)).card : ℝ))
-  have hpartition := BlockIndex.sum_card_filter P (fun x ↦ p (q x))
+    simpa only [q] using BlockIndex.sum_card_filter P
+      (fun x ↦ p (D.distinguishedPerm (D.matchingIndex n) x))
   have hpreimage : ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) =
       ((Finset.univ.filter p).card : ℝ) := by
     let A : Finset (D.approximation.model (D.matchingIndex n)) :=
@@ -72,7 +66,7 @@ theorem sum_componentPredicateCount_le (n : ℕ)
     rw [heq, permutationPreimage_card]
   calc
     _ ≤ ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p (q x.1)).card : ℝ) := hsub
+        (D.componentPredicateCount n B p : ℝ) := hsub
     _ = ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) := hpartition
     _ = ((Finset.univ.filter p).card : ℝ) := hpreimage
 
@@ -115,9 +109,10 @@ noncomputable def localGammaEditError (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) : ℝ :=
   (((D.gammaDecomposition.editWitness (D.matchingIndex n)).sourceUnmatched.filter
     fun e ↦ (generatorGraph
-      ((D.setup.gammaApproximation D.approximation).model (D.matchingIndex n))
+      (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
+        (D.matchingIndex n)
       D.setup.generatorsΓ
-      ((D.setup.gammaApproximation D.approximation).map
+      ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
         (D.matchingIndex n))).first e ∈
         B.block).card : ℝ) +
   (((D.gammaDecomposition.editWitness (D.matchingIndex n)).targetUnmatched.filter
@@ -138,7 +133,7 @@ noncomputable def localGammaBoundaryError (n : ℕ)
     ((Finset.univ.filter fun x : indexedBlockModel
       (D.gammaDecomposition.blocks (D.matchingIndex n)) B ↦
       (D.gammaDecomposition.blocks (D.matchingIndex n)).block
-          ((D.setup.gammaApproximation D.approximation).map
+          ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
             (D.matchingIndex n) t.1 x.1) ≠
             (D.gammaDecomposition.blocks (D.matchingIndex n)).block x.1).card : ℝ)
 
@@ -308,7 +303,7 @@ theorem localGraphBaseError_sum_negligible :
   have hboundary := Negligible.sum (Finset.univ : Finset D.setup.generatorsΓ)
     (fun t n ↦ ((wordCrossing
       (D.gammaDecomposition.blocks (D.matchingIndex n))
-      ((D.setup.gammaApproximation D.approximation).map
+      ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
         (D.matchingIndex n) t.1)).card : ℝ))
     (fun t _ ↦ by
       have ht := hboundaryEach t
@@ -321,9 +316,10 @@ theorem localGraphBaseError_sum_negligible :
   let W := D.gammaDecomposition.editWitness (D.matchingIndex n)
   have hsourceAll := BlockIndex.sum_card_filter_mem_block P W.sourceUnmatched
     (fun e ↦ (generatorGraph
-      ((D.setup.gammaApproximation D.approximation).model (D.matchingIndex n))
+      (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
+        (D.matchingIndex n)
       D.setup.generatorsΓ
-      ((D.setup.gammaApproximation D.approximation).map
+      ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
         (D.matchingIndex n))).first e)
   have htargetAll := BlockIndex.sum_card_filter_mem_block P W.targetUnmatched
     (fun e ↦ (D.gammaDecomposition.modelGraph (D.matchingIndex n)).first e)
@@ -341,9 +337,10 @@ theorem localGraphBaseError_sum_negligible :
     have hsourceReal : (∑ C : BlockIndex P,
         ((W.sourceUnmatched.filter fun e ↦
           (generatorGraph
-            ((D.setup.gammaApproximation D.approximation).model (D.matchingIndex n))
+            (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
+              (D.matchingIndex n)
             D.setup.generatorsΓ
-            ((D.setup.gammaApproximation D.approximation).map
+            ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
               (D.matchingIndex n))).first e ∈ C.block).card : ℝ)) ≤
         (W.sourceUnmatched.card : ℝ) := by
       exact_mod_cast hsourceAll
@@ -353,6 +350,7 @@ theorem localGraphBaseError_sum_negligible :
             C.block).card : ℝ)) ≤ (W.targetUnmatched.card : ℝ) := by
       exact_mod_cast htargetAll
     unfold EdgeEditWitness.unmatchedCount
+    push_cast
     exact hsub.trans (add_le_add hsourceReal htargetReal)
   have hconjLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localConjugacyGraphError n B) ≤
@@ -378,21 +376,27 @@ theorem localGraphBaseError_sum_negligible :
       let E := D.approximation.conjugacyError (D.matchingIndex n)
         D.setup.distinguished (D.setup.embedΓ t.1)
       have hpartition := BlockIndex.sum_card_filter P (fun x ↦ x ∈ E)
-      simpa only [E] using hpartition)
+      have hpartition' : (∑ B : D.gammaDecomposition.componentIndex
+          (D.matchingIndex n),
+          ((Finset.univ.filter fun x : indexedBlockModel P B ↦ x.1 ∈ E).card : ℝ)) =
+          ((D.approximation.conjugacyError (D.matchingIndex n)
+            D.setup.distinguished (D.setup.embedΓ t.1)).card : ℝ) := by
+        simpa only [E] using hpartition
+      exact hpartition'.le)
   have hboundaryLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localGammaBoundaryError n B) ≤
       ∑ t : D.setup.generatorsΓ,
         ((wordCrossing (D.gammaDecomposition.blocks (D.matchingIndex n))
-          ((D.setup.gammaApproximation D.approximation).map
+          ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
             (D.matchingIndex n) t.1)).card : ℝ) := by
     simp_rw [localGammaBoundaryError]
     rw [Finset.sum_comm]
     apply Finset.sum_le_sum
     intro t _
-    let p : (D.setup.gammaApproximation D.approximation).model
+    let p : (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
         (D.matchingIndex n) → Prop := fun x ↦
       (D.gammaDecomposition.blocks (D.matchingIndex n)).block
-        ((D.setup.gammaApproximation D.approximation).map
+        ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
           (D.matchingIndex n) t.1 x) ≠
           (D.gammaDecomposition.blocks (D.matchingIndex n)).block x
     have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
@@ -402,9 +406,22 @@ theorem localGraphBaseError_sum_negligible :
           ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ) :=
       Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ by positivity)
-    rw [BlockIndex.sum_card_filter P] at hsub
-    unfold wordCrossing
-    exact hsub
+    have hpartition := BlockIndex.sum_card_filter P p
+    have hfilter : Finset.univ.filter p =
+        wordCrossing (D.gammaDecomposition.blocks (D.matchingIndex n))
+          ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
+            (D.matchingIndex n) t.1) := by
+      ext x
+      simp only [p, wordCrossing, Finset.mem_filter, Finset.mem_univ, true_and]
+    have htotal : (∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
+        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ)) =
+        ((wordCrossing (D.gammaDecomposition.blocks (D.matchingIndex n))
+          ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
+            (D.matchingIndex n) t.1)).card : ℝ) := by
+      calc
+        _ = ((Finset.univ.filter p).card : ℝ) := hpartition
+        _ = _ := by rw [hfilter]
+    exact hsub.trans htotal.le
   unfold localGraphBaseError
   simp_rw [Finset.sum_add_distrib]
   exact add_le_add (add_le_add heditLocal hconjLocal) hboundaryLocal
@@ -552,21 +569,22 @@ theorem componentPredicateCount_selected (n : ℕ)
     (p : D.approximation.model (D.matchingIndex n) → Prop) [DecidablePred p] :
     D.componentPredicateCount n (D.selectedComponent n) p =
       ((D.selectedSubset n).filter p).card := by
-  classical
   unfold componentPredicateCount
   refine Finset.card_bij
     (fun x _ ↦ D.distinguishedTransport (D.matchingIndex n) x.1) ?_ ?_ ?_
   · intro x hx
     rw [Finset.mem_filter] at hx ⊢
-    exact ⟨Finset.mem_image.mpr ⟨x.1, x.2, rfl⟩,
-      by simpa using hx.2⟩
+    refine ⟨Finset.mem_image.mpr ⟨x.1, x.2, rfl⟩, ?_⟩
+    rw [D.distinguishedTransport_apply]
+    exact hx.2
   · intro x _ y _ hxy
     exact Subtype.ext ((D.distinguishedTransport (D.matchingIndex n)).injective hxy)
   · intro y hy
     obtain ⟨hyU, hyp⟩ := Finset.mem_filter.mp hy
     obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp hyU
     refine ⟨⟨x, hx⟩, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩, rfl⟩
-    simpa using hyp
+    rw [D.distinguishedTransport_apply] at hyp
+    exact hyp
 
 theorem selectedSubset_filter_card (n : ℕ)
     (p : D.approximation.model (D.matchingIndex n) → Prop) [DecidablePred p] :
@@ -612,14 +630,15 @@ theorem localInvariantError_selected (n i : ℕ) :
     rw [mem_wordCrossing] at hcross
     intro hmem
     apply hcross
+    apply (D.transportedBlocks n).eq_of_mem
     rw [D.selectedSubset_is_transportedBlock n ⟨y, hy⟩]
-    exact (D.transportedBlocks n).eq_of_mem y _ hmem
+    exact hmem
   · rintro ⟨hy, hout⟩
     refine ⟨hy, ?_⟩
     rw [mem_wordCrossing]
     intro heq
     apply hout
-    rw [← D.selectedSubset_is_transportedBlock n ⟨y, hy⟩, heq]
+    rw [← D.selectedSubset_is_transportedBlock n ⟨y, hy⟩, ← heq]
     exact (D.transportedBlocks n).self_mem _
 
 theorem localMultiplicationError_selected (n i j : ℕ) :
