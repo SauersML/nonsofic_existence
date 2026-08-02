@@ -229,27 +229,16 @@ theorem induced_to_selected_edit_le (n : ℕ) :
   dsimp only [B] at htransport
   have hequiv : (Equiv.refl (D.inducedGammaGraph n).vertex).symm.trans
       (D.selectedImageEquiv n) = D.selectedGraphEquiv n := by
+    ext x
     rfl
-  have hgraph₀ : ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-      (D.selectedComponent n).block).transport
-      (D.selectedFiniteModel n) (D.selectedGraphEquiv n) = D.selectedGraph n := rfl
-  have hgraph : ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-      (D.selectedComponent n).block).transport
-      (D.selectedFiniteModel n)
-      ((Equiv.refl (D.inducedGammaGraph n).vertex).symm.trans
-        (D.selectedImageEquiv n)) = D.selectedGraph n := by
-    exact (congrArg (fun e ↦
-      ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
-        (D.selectedComponent n).block).transport (D.selectedFiniteModel n) e)
-      hequiv).trans hgraph₀
+  rw [hequiv] at htransport
   have htransport' :
       (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
           (Equiv.refl (D.selectedSubset n)) =
         (D.inducedGammaGraph n).editDistance
           ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
           (Equiv.refl _) := by
-    cases hgraph
-    simpa only [transportedInducedGammaGraph] using htransport
+    simpa only [transportedInducedGammaGraph, selectedGraph] using htransport
   rw [htransport']
   have hlocalReal : (WI.unmatchedCount : ℝ) ≤
       D.localGammaEditError n (D.selectedComponent n) := by
