@@ -584,8 +584,11 @@ theorem localizedDisagreementSum_negligible :
     (fun t n ↦ ((Finset.univ.filter fun y : D.selectedSubset n ↦
       D.localizedGammaAct n t.1 y ≠ D.transportedGammaCompletion n t.1 y).card : ℝ))
     (fun t _ ↦ D.localized_to_completed_disagreement_negligible t.1 t.2)
-  simpa only [selectedCard, localizedDisagreementSum, localizedDisagreementSumNat,
-    Nat.cast_sum] using hsum
+  unfold selectedCard localizedDisagreementSum localizedDisagreementSumNat
+  refine Negligible.congr hsum ?_
+  intro n
+  push_cast
+  rfl
 
 theorem selectedCard_pos (n : ℕ) : 0 < D.selectedCard n := by
   unfold selectedCard
@@ -602,7 +605,8 @@ theorem localizedCompletedEdit_nonneg (n : ℕ) :
 theorem localizedCompletedEditNat_le (n : ℕ) :
     D.localizedCompletedEditNat n ≤ 4 * D.localizedDisagreementSumNat n := by
   unfold localizedCompletedEditNat localizedGammaGraph localizedDisagreementSumNat
-  exact GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
+  exact GeneratorGraphEditing.editDistance_le (G := Γ)
+    (Y := D.selectedFiniteModel n) D.setup.generatorsΓ
     (D.localizedGammaAct n) (D.transportedGammaCompletion n)
 
 theorem localizedCompletedEdit_le (n : ℕ) :
