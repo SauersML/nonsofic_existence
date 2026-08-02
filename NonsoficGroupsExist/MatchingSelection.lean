@@ -367,7 +367,7 @@ theorem acceptable_small_mass_negligible (M : ℕ) :
       (D.matchingThreshold (D.matchingIndex n)),
       (if (B.block.card : ℝ) ≤ M then (B.block.card : ℝ) else 0)) ≤
       ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-        (if B.block.card ≤ M then (B.block.card : ℝ) else 0) := by
+        (if (B.block.card : ℝ) ≤ M then (B.block.card : ℝ) else 0) := by
     apply Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
     intro B _ _
     split_ifs <;> positivity
@@ -378,8 +378,9 @@ theorem acceptable_small_mass_negligible (M : ℕ) :
         (fun x ↦ (D.gammaDecomposition.blocks (D.matchingIndex n)).size x ≤ M)]
       apply Finset.sum_congr rfl
       intro B _
-      by_cases hB : B.block.card ≤ M
+      by_cases hB : (B.block.card : ℝ) ≤ M
       · simp only [if_pos hB]
+        have hBnat : B.block.card ≤ M := by exact_mod_cast hB
         have hall : Finset.univ.filter (fun x : indexedBlockModel
             (D.gammaDecomposition.blocks (D.matchingIndex n)) B ↦
               (D.gammaDecomposition.blocks (D.matchingIndex n)).size x ≤ M) =
@@ -394,10 +395,11 @@ theorem acceptable_small_mass_negligible (M : ℕ) :
                 (BlockIndex.representative _ B) x (by
                   simpa only [BlockIndex.block_representative] using x.2) |>.trans
                 (BlockIndex.block_representative _ B))
-          simpa [hx]
+          simpa [hx] using hBnat
         rw [hall]
         simp [indexedBlockModel]
       · simp only [if_neg hB]
+        have hBnat : ¬ B.block.card ≤ M := by exact_mod_cast hB
         apply Nat.cast_eq_zero.mpr
         rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
         intro x _
@@ -409,7 +411,7 @@ theorem acceptable_small_mass_negligible (M : ℕ) :
               (BlockIndex.representative _ B) x (by
                 simpa only [BlockIndex.block_representative] using x.2) |>.trans
               (BlockIndex.block_representative _ B))
-        simpa [hx] using hB
+        simpa [hx] using hBnat
 
 theorem exists_selectedComponent :
     ∃ sel : ∀ n, D.gammaDecomposition.componentIndex (D.matchingIndex n),

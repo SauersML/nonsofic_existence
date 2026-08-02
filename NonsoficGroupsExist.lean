@@ -111,18 +111,18 @@ This is the root of the Lean development accompanying
 | Lemma `lem:whitehead`, `EL_ι(M_κ(R)) ≅ EL_{ι×κ}(R)` | `Whitehead`, `ElementaryGroup` |
 | Proposition `prop:vnotlef` (explicit `V`-witness) | `ThompsonWitness` |
 | Section `subsec:selection` matched-component bookkeeping | `MatchedComponents` |
+| conservative matching and diagonal localization | `MatchingPreparation`, `MatchingSelection` |
+| occurrence restriction and final graph comparison | `EdgeWitnessDistance`, `EdgeWitnessRestriction`, `SelectedGraphComparison` |
 | restriction of `σₙ` to a subgroup | `SoficTransfer` |
 | Section `sec:fp`, Theorem `thm:table` | `TableCover` |
 
-Two external theorems of the manuscript -- Kun's expander decomposition
-(Theorem `thm:kun`) and the Kun--Thom centralizer obstruction
-(Theorem `thm:kunthom`) -- are isolated as the named interfaces
-`ExpanderDecomposition` and `KunThomHypothesis` in `Criterion`.  Nothing else is
-assumed: in particular the manuscript's appeal to simplicity and finite
+The cited inputs are isolated as ordinary proposition parameters:
+`KunTheorem`, `KunThomTheorem`, and `ErshovJaikinTheorem`.  The algebraic
+hypotheses of the general criterion are recorded without omission in
+`CompressionSetup`.  The manuscript's appeal to simplicity and finite
 presentation of Thompson's group `V` is replaced by the elementary two-relator
-argument of `ThompsonObstruction`, whose hypotheses are discharged
-unconditionally by the explicit pair of cylinder units built in
-`ThompsonWitness`.
+argument of `ThompsonObstruction`, whose hypotheses are discharged by the
+explicit pair of cylinder units built in `ThompsonWitness`.
 -/
 
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_involution
@@ -185,7 +185,14 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.LocalCriterionData.modelGraphVariation_negligible
 #print axioms NonsoficGroupsExist.LocalCriterionData.normalizedDeviation_negligible
 #print axioms NonsoficGroupsExist.LocalCriterionData.acceptable_symmDiff_sum_negligible
+#print axioms NonsoficGroupsExist.threshold_mul_card_le_sum
+#print axioms NonsoficGroupsExist.threshold_mul_badBlockMass_le
+#print axioms NonsoficGroupsExist.error_div_slowThreshold_vanishing
+#print axioms NonsoficGroupsExist.FiniteMultiGraph.editDistance_triangle
+#print axioms NonsoficGroupsExist.EdgeEditWitness.editDistance_le_two_mul_unmatchedCount
+#print axioms NonsoficGroupsExist.EdgeEditWitness.induce_unmatchedCount_le_filters
 #print axioms NonsoficGroupsExist.LocalCriterionData.selectedLocalization
+#print axioms NonsoficGroupsExist.LocalCriterionData.localized_to_completed_disagreement_negligible
 #print axioms NonsoficGroupsExist.LocalCriterionData.selectedGraph_edit_negligible
 #print axioms NonsoficGroupsExist.conservativeMatchingTheorem
 #print axioms NonsoficGroupsExist.not_isSofic_of_kazhdan_compression

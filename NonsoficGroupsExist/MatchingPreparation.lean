@@ -309,7 +309,7 @@ noncomputable def acceptableComponents (n : ℕ) (η : ℝ) :
   Finset.univ.filter fun B ↦ D.ComponentAcceptable n η B
 
 noncomputable def discardedComponentMass (n : ℕ) (η : ℝ) : ℝ :=
-  ∑ B in (Finset.univ  D.acceptableComponents n η), (B.block.card : ℝ)
+  ∑ B in (Finset.univ \ D.acceptableComponents n η), (B.block.card : ℝ)
 
 theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
     (hη : 0 ≤ η) (hηone : η ≤ 1) :
