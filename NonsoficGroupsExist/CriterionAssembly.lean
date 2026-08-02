@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.CompressionRefinement
 import NonsoficGroupsExist.SelectionOutput
 import NonsoficGroupsExist.ExternalInputs
+import NonsoficGroupsExist.ConservativeMatching
 
 /-!
 # Assembly of the compression--centralizer criterion
@@ -13,28 +14,20 @@ of Kun's theorem, localization, and the Kun--Thom conclusion.
 
 namespace NonsoficGroupsExist
 
-/-- Exact conclusion of the internal conservative component-matching
-argument.  This proposition is not an axiom: the subsequent matching module
-constructs its witness from the fields of `LocalCriterionData`. -/
-def ConservativeMatchingTheorem : Prop :=
-  ∀ (G Γ J : Type) [Group G] [Group Γ] [Group J],
-    ∀ D : LocalCriterionData G Γ J, Nonempty (SelectionOutput D)
-
 /-- The local compression--centralizer theorem after conservative matching. -/
 theorem local_compression_centralizer
-    (hmatch : ConservativeMatchingTheorem)
     (hKT : KunThomTheorem)
     {G Γ J : Type} [Group G] [Group Γ] [Group J]
+    [Countable Γ] [Countable J]
     (hT : HasKazhdanPropertyT Γ) (D : LocalCriterionData G Γ J) :
     IsLEF J := by
-  obtain ⟨O⟩ := hmatch G Γ J D
+  obtain ⟨O⟩ := conservativeMatchingTheorem G Γ J D
   exact O.isLEF hT (hKT Γ J)
 
 /-- Corollary `cor:kazhdan`, with both cited theorems and the internal matching
 theorem supplied explicitly. -/
 theorem kazhdan_compression_centralizer
     (hKun : KunTheorem) (hKT : KunThomTheorem)
-    (hmatch : ConservativeMatchingTheorem)
     {G Γ J : Type} [Group G] [Group Γ] [Group J]
     [Countable G] [Countable Γ]
     (C : CompressionSetup G Γ J)
@@ -47,6 +40,7 @@ theorem kazhdan_compression_centralizer
       C.ambientGenerators_generate⟩
   letI : Infinite Γ := C.infiniteΓ
   letI : Infinite G := Infinite.of_injective C.embedΓ C.embedΓ_injective
+  letI : Countable J := C.embedJ_injective.countable
   obtain ⟨S⟩ := hsofic
   obtain ⟨DΓ⟩ := hKun Γ hTΓ C.infiniteΓ
     (S.comap C.embedΓ C.embedΓ_injective) C.generatorsΓ
@@ -58,18 +52,17 @@ theorem kazhdan_compression_centralizer
       approximation := S
       gammaDecomposition := DΓ
       ambientDecomposition := DG }
-  exact local_compression_centralizer hmatch hKT hTΓ D
+  exact local_compression_centralizer hKT hTΓ D
 
 /-- Contrapositive form used by every Leavitt instantiation. -/
 theorem not_isSofic_of_kazhdan_compression
     (hKun : KunTheorem) (hKT : KunThomTheorem)
-    (hmatch : ConservativeMatchingTheorem)
     {G Γ J : Type} [Group G] [Group Γ] [Group J]
     [Countable G] [Countable Γ]
     (C : CompressionSetup G Γ J)
     (hTG : HasKazhdanPropertyT G) (hTΓ : HasKazhdanPropertyT Γ)
     (hJ : ¬ IsLEF J) : ¬ IsSofic G := by
   intro hG
-  exact hJ (kazhdan_compression_centralizer hKun hKT hmatch C hTG hTΓ hG)
+  exact hJ (kazhdan_compression_centralizer hKun hKT C hTG hTΓ hG)
 
 end NonsoficGroupsExist

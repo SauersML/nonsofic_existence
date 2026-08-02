@@ -88,5 +88,30 @@ theorem sum_card_filter (p : Y → Prop) [DecidablePred p] :
     _ = ∑ y : Y, f y := hpartition
     _ = ((Finset.univ.filter p).card : ℝ) := by simp [f]
 
+/-- Restricting a finite family of objects according to the block containing
+their marked vertex never counts an object more than once. -/
+theorem sum_card_filter_mem_block {E : Type*} [DecidableEq E]
+    (s : Finset E) (v : E → Y) :
+    ∑ C : BlockIndex P, (s.filter fun e ↦ v e ∈ C.block).card ≤ s.card := by
+  classical
+  let cells : BlockIndex P → Finset E := fun C ↦ s.filter fun e ↦ v e ∈ C.block
+  have hpair : (↑(Finset.univ : Finset (BlockIndex P)) : Set (BlockIndex P)).PairwiseDisjoint
+      cells := by
+    intro C _ D _ hCD
+    apply Finset.disjoint_left.mpr
+    intro e heC heD
+    have hblocks := pairwise_disjoint P (Finset.mem_univ C) (Finset.mem_univ D) hCD
+    exact Finset.disjoint_left.mp hblocks
+      (Finset.mem_filter.mp heC).2 (Finset.mem_filter.mp heD).2
+  calc
+    ∑ C : BlockIndex P, (s.filter fun e ↦ v e ∈ C.block).card =
+        ((Finset.univ : Finset (BlockIndex P)).biUnion cells).card := by
+      rw [Finset.card_biUnion hpair]
+    _ ≤ s.card := by
+      apply Finset.card_le_card
+      intro e he
+      obtain ⟨C, _, heC⟩ := Finset.mem_biUnion.mp he
+      exact (Finset.mem_filter.mp heC).1
+
 end BlockIndex
 end NonsoficGroupsExist

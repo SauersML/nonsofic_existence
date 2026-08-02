@@ -34,6 +34,13 @@ def Diverges (a : ℕ → ℝ) : Prop :=
 
 namespace Vanishing
 
+/-- Removing finitely many initial terms preserves convergence to zero. -/
+theorem shift {a : ℕ → ℝ} (ha : Vanishing a) (k : ℕ) :
+    Vanishing fun n ↦ a (n + k) := by
+  intro ε hε
+  obtain ⟨N, hN⟩ := ha ε hε
+  exact ⟨N, fun n hn ↦ hN (n + k) (hn.trans (Nat.le_add_right n k))⟩
+
 theorem zero : Vanishing (fun _ ↦ (0 : ℝ)) := by
   intro ε hε
   exact ⟨0, fun n _ ↦ by simpa using hε⟩
@@ -124,11 +131,28 @@ theorem sum {ι : Type*} (s : Finset ι) (a : ι → ℕ → ℝ)
 
 end Vanishing
 
+namespace Diverges
+
+/-- Removing finitely many initial terms preserves divergence. -/
+theorem shift {a : ℕ → ℝ} (ha : Diverges a) (k : ℕ) :
+    Diverges fun n ↦ a (n + k) := by
+  intro M
+  obtain ⟨N, hN⟩ := ha M
+  exact ⟨N, fun n hn ↦ hN (n + k) (hn.trans (Nat.le_add_right n k))⟩
+
+end Diverges
+
 /-- `e n = o(N n)`: the normalized quantity vanishes. -/
 def Negligible (N : ℕ → ℝ) (e : ℕ → ℝ) : Prop :=
   Vanishing fun n ↦ e n / N n
 
 namespace Negligible
+
+/-- Removing finitely many initial terms preserves a negligible-density
+estimate, with numerator and denominator shifted together. -/
+theorem shift {N e : ℕ → ℝ} (h : Negligible N e) (k : ℕ) :
+    Negligible (fun n ↦ N (n + k)) (fun n ↦ e (n + k)) := by
+  exact Vanishing.shift h k
 
 variable {N e f : ℕ → ℝ}
 

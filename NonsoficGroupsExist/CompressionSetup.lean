@@ -109,5 +109,13 @@ theorem productEmbedding_injective : Function.Injective C.productEmbedding := by
   · have hj : j' = j := mul_inv_eq_one.mp htrivial.2
     exact hj.symm
 
+/-- The localized product lies inside the original `Γ` copy. -/
+theorem productEmbedding_eq_embedΓ (p : Γ × J) :
+    C.productEmbedding p =
+      C.embedΓ (C.compressedEnd C.distinguished C.distinguished_mem p.1 *
+        C.embedJ p.2) := by
+  rw [map_mul, C.compressedEnd_spec]
+  rfl
+
 end CompressionSetup
 end NonsoficGroupsExist

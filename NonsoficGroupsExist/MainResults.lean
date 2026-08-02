@@ -25,7 +25,6 @@ def NonsoficGroupExists : Prop := Nonempty NonsoficGroupWitness
 witness.  All three non-elementary inputs are ordinary theorem hypotheses. -/
 theorem nonsofic_groups_exist
     (hKun : KunTheorem) (hKT : KunThomTheorem)
-    (hmatch : ConservativeMatchingTheorem)
     {G Γ J : Type} [Group G] [Group Γ] [Group J]
     [Countable G] [Countable Γ]
     (C : CompressionSetup G Γ J)
@@ -36,14 +35,13 @@ theorem nonsofic_groups_exist
       group := inferInstance
       countable := inferInstance
       notSofic := not_isSofic_of_kazhdan_compression
-        hKun hKT hmatch C hTG hTΓ hJ }
+        hKun hKT C hTG hTΓ hJ }
   exact ⟨W⟩
 
 /-- Theorem `thm:spine` after the finite Leavitt matrix calculation has been
 packaged as its exact `CompressionSetup`. -/
 theorem explicit_spine_not_sofic
     (hKun : KunTheorem) (hKT : KunThomTheorem)
-    (hmatch : ConservativeMatchingTheorem)
     {A J : Type} [Ring A] [Countable A] [Group J]
     [Algebra (ZMod 2) A] [Algebra.FiniteType (ZMod 2) A]
     [Countable (elementaryGroup (Fin 4) A)]
@@ -56,7 +54,7 @@ theorem explicit_spine_not_sofic
     hEJZ A 4 (by omega)
   have hT3 : HasKazhdanPropertyT (elementaryGroup (Fin 3) A) :=
     hEJZ A 3 (by omega)
-  exact not_isSofic_of_kazhdan_compression hKun hKT hmatch C hT4 hT3 hJ
+  exact not_isSofic_of_kazhdan_compression hKun hKT C hT4 hT3 hJ
 
 /-- The finite-table theorem supplies a concrete finitely presented cover in
 the exact `PresentedGroup` sense used by Mathlib. -/
@@ -74,7 +72,6 @@ theorem finitelyPresented_nonsofic_cover
 construction and the finite multiplication-table cover. -/
 theorem finitely_presented_nonsofic_groups_exist
     (hKun : KunTheorem) (hKT : KunThomTheorem)
-    (hmatch : ConservativeMatchingTheorem)
     {G Γ J : Type} [Group G] [Group Γ] [Group J]
     [Countable G] [Countable Γ] [Nonempty G]
     (C : CompressionSetup G Γ J)
@@ -87,6 +84,6 @@ theorem finitely_presented_nonsofic_groups_exist
     ⟨C.ambientGenerators.card, C.ambientGenerators, rfl,
       C.ambientGenerators_generate⟩
   apply finitelyPresented_nonsofic_cover
-  exact not_isSofic_of_kazhdan_compression hKun hKT hmatch C hTG hTΓ hJ
+  exact not_isSofic_of_kazhdan_compression hKun hKT C hTG hTΓ hJ
 
 end NonsoficGroupsExist

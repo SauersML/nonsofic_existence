@@ -29,6 +29,18 @@ import NonsoficGroupsExist.FiniteMedian
 import NonsoficGroupsExist.NormalizedComponents
 import NonsoficGroupsExist.ComponentPinning
 import NonsoficGroupsExist.NormalizedVariation
+import NonsoficGroupsExist.InverseNormalization
+import NonsoficGroupsExist.GlobalVariation
+import NonsoficGroupsExist.SlowThreshold
+import NonsoficGroupsExist.FiniteMarkov
+import NonsoficGroupsExist.MatchingPreparation
+import NonsoficGroupsExist.MatchingSelection
+import NonsoficGroupsExist.EdgeWitnessDistance
+import NonsoficGroupsExist.EdgeWitnessRestriction
+import NonsoficGroupsExist.GeneratorGraphEditing
+import NonsoficGroupsExist.CompletionGraphEditing
+import NonsoficGroupsExist.SelectedGraphComparison
+import NonsoficGroupsExist.ConservativeMatching
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.MainResults
 import NonsoficGroupsExist.Leavitt
@@ -54,6 +66,30 @@ import NonsoficGroupsExist.SoficTransfer
 
 This is the root of the Lean development accompanying
 `nonsofic_groups_exist.tex`.  The modules follow the manuscript:
+
+## Concise proof plan
+
+1. Main idea: apply Kun's expander decomposition to the subgroup and ambient
+   sofic approximations; use compressor conjugacy, permutation conservation,
+   co-area pinning, conservative component matching, diagonal selection, and
+   localization to obtain an essentially expanding approximation of `Γ × J`.
+   Kun--Thom then forces `J` to be LEF, contradicting the supplied non-LEF
+   corner witness.  A finite multiplication-table quotient gives the finitely
+   presented consequence.
+2. Main declarations and tactics: `FiniteMultiGraph.median_pinning`,
+   `FiniteMultiGraph.exists_dominant_cell`, `permutation_conservation_abs`,
+   `exists_selection_diverging`, `Localization.exists_completion_with_bound`,
+   `FiniteMultiGraph.editDistance_triangle`, finite `Finset` sum/cardinality
+   lemmas, and `linarith`/`nlinarith`/`positivity`/`omega` for numerical bounds.
+3. Intermediate facts: negligible total compressor variation; a slowly
+   vanishing threshold; negligible discarded component mass; injectivity of
+   acceptable target matching; a selected component whose error ratio vanishes
+   and whose size diverges; localized multiplicativity, faithfulness, and
+   invariance; and negligible edit distance to the selected expander graph.
+4. Coercion and rewriting points: cardinalities move between `ℕ` and `ℝ`;
+   vertices of induced graphs are subtypes; transported permutations require
+   explicit `Equiv` coercions; block equality is recovered from membership;
+   and normalized estimates require positive finite-cardinality denominators.
 
 | manuscript | module |
 | --- | --- |
@@ -144,6 +180,14 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.natMedian_isMedian
 #print axioms NonsoficGroupsExist.normalizedSize_isMedian_on_block
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.normalized_pinning_global
+#print axioms NonsoficGroupsExist.SoficApproximation.inverseError_negligible
+#print axioms NonsoficGroupsExist.inverse_variation_eq
+#print axioms NonsoficGroupsExist.LocalCriterionData.modelGraphVariation_negligible
+#print axioms NonsoficGroupsExist.LocalCriterionData.normalizedDeviation_negligible
+#print axioms NonsoficGroupsExist.LocalCriterionData.acceptable_symmDiff_sum_negligible
+#print axioms NonsoficGroupsExist.LocalCriterionData.selectedLocalization
+#print axioms NonsoficGroupsExist.LocalCriterionData.selectedGraph_edit_negligible
+#print axioms NonsoficGroupsExist.conservativeMatchingTheorem
 #print axioms NonsoficGroupsExist.not_isSofic_of_kazhdan_compression
 #print axioms NonsoficGroupsExist.nonsofic_groups_exist
 #print axioms NonsoficGroupsExist.explicit_spine_not_sofic

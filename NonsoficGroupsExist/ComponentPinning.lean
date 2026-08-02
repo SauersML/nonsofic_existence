@@ -66,6 +66,17 @@ noncomputable abbrev indexedComponentGraph (D : ExpanderDecomposition S T)
     (indexedBlockModel (D.blocks n) B)
     (representativeBlockEquiv (D.blocks n) B)
 
+theorem indexedComponentGraph_expands (D : ExpanderDecomposition S T)
+    (n : ℕ) (B : D.componentIndex n) :
+    (D.indexedComponentGraph n B).HasCheegerLowerBound D.cheeger := by
+  exact FiniteMultiGraph.transport_hasCheegerLowerBound
+    ((D.componentGraph n (D.componentRepresentative n B)).transport
+      (blockModel (D.blocks n) (D.componentRepresentative n B))
+      (D.componentVertexEquiv n (D.componentRepresentative n B)))
+    (indexedBlockModel (D.blocks n) B)
+    (representativeBlockEquiv (D.blocks n) B)
+    (D.componentGraph_expands n (D.componentRepresentative n B))
+
 /-- Componentwise co-area pinning of the normalized inner-block sizes. -/
 theorem normalized_pinning_mul (D : ExpanderDecomposition S T)
     (P : ∀ n, BlockStructure (S.model n)) (n : ℕ) :
