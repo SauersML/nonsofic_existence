@@ -30,8 +30,7 @@ noncomputable def componentPredicateCount (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n))
     (p : D.approximation.model (D.matchingIndex n) → Prop)
     [DecidablePred p] : ℕ :=
-  (Finset.univ.filter fun x : indexedBlockModel
-    (D.gammaDecomposition.blocks (D.matchingIndex n)) B ↦
+  (Finset.univ.filter fun x : B.block ↦
       p (D.distinguishedPerm (D.matchingIndex n) x.1)).card
 
 theorem sum_componentPredicateCount_le (n : ℕ)
@@ -109,8 +108,8 @@ noncomputable def localGammaEditError (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) : ℝ :=
   (((D.gammaDecomposition.editWitness (D.matchingIndex n)).sourceUnmatched.filter
     fun e ↦ (generatorGraph
-      (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
-        (D.matchingIndex n)
+      ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
+        (D.matchingIndex n))
       D.setup.generatorsΓ
       ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
         (D.matchingIndex n))).first e ∈
@@ -307,7 +306,13 @@ theorem localGraphBaseError_sum_negligible :
         (D.matchingIndex n) t.1)).card : ℝ))
     (fun t _ ↦ by
       have ht := hboundaryEach t
-      simpa only [matchingIndex, wordCrossing] using ht)
+      apply Negligible.congr ht
+      intro n
+      norm_cast
+      apply congrArg Finset.card
+      ext x
+      simp only [matchingIndex, wordCrossing, Finset.mem_filter,
+        Finset.mem_univ, true_and])
   have hbound := Negligible.add (Negligible.add hedit hconj) hboundary
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
     (fun n ↦ Finset.sum_nonneg fun B _ ↦ D.localGraphBaseError_nonneg n B)
@@ -316,8 +321,8 @@ theorem localGraphBaseError_sum_negligible :
   let W := D.gammaDecomposition.editWitness (D.matchingIndex n)
   have hsourceAll := BlockIndex.sum_card_filter_mem_block P W.sourceUnmatched
     (fun e ↦ (generatorGraph
-      (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
-        (D.matchingIndex n)
+      ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
+        (D.matchingIndex n))
       D.setup.generatorsΓ
       ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
         (D.matchingIndex n))).first e)
@@ -337,8 +342,8 @@ theorem localGraphBaseError_sum_negligible :
     have hsourceReal : (∑ C : BlockIndex P,
         ((W.sourceUnmatched.filter fun e ↦
           (generatorGraph
-            (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
-              (D.matchingIndex n)
+            ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model
+              (D.matchingIndex n))
             D.setup.generatorsΓ
             ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
               (D.matchingIndex n))).first e ∈ C.block).card : ℝ)) ≤
