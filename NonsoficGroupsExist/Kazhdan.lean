@@ -36,5 +36,14 @@ theorem mulEquiv_iff (e : G ≃* H) :
     HasKazhdanPropertyT G ↔ HasKazhdanPropertyT H :=
   ⟨fun hG ↦ of_mulEquiv e.symm hG, fun hH ↦ of_mulEquiv e hH⟩
 
+/-- Property `(T)` passes to quotients. -/
+theorem of_surjective (f : G →* H) (hf : Function.Surjective f)
+    (hG : HasKazhdanPropertyT G) : HasKazhdanPropertyT H := by
+  intro E _ _ _ ρ
+  obtain ⟨x, hx⟩ := hG E (ρ.comp f)
+  refine ⟨x, fun h ↦ ?_⟩
+  obtain ⟨g, rfl⟩ := hf h
+  exact hx g
+
 end HasKazhdanPropertyT
 end NonsoficGroupsExist

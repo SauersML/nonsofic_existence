@@ -12,7 +12,7 @@ approximation into the `Negligible` form used by `Selection`.
 namespace NonsoficGroupsExist
 namespace SoficApproximation
 
-variable {G : Type} [Group G] (S : SoficApproximation G)
+variable {G : Type*} [Group G] (S : SoficApproximation G)
 
 /-- Vertices where the assigned product law fails. -/
 noncomputable def multiplicationError (n : ℕ) (g h : G) : Finset (S.model n) :=
@@ -183,6 +183,26 @@ theorem collisionError_negligible (g h : G) (hgh : g ≠ h) :
             Fintype.card (S.model n) := by
       push_cast
       ring
+
+/-- Hamming separation is the complement of the collision density. -/
+theorem hammingDistance_eq_one_sub_collision (n : ℕ) (g h : G)
+    (hcard : 0 < Fintype.card (S.model n)) :
+    hammingDistance (S.model n) (S.map n g) (S.map n h) =
+      1 - ((S.collisionError n g h).card : ℝ) /
+        Fintype.card (S.model n) := by
+  classical
+  unfold hammingDistance collisionError
+  have hpartition := Finset.card_filter_add_card_filter_not
+    (s := (Finset.univ : Finset (S.model n)))
+    (fun x : S.model n ↦ S.map n g x = S.map n h x)
+  have hcast :
+      ((Finset.univ.filter fun x : S.model n ↦ S.map n g x = S.map n h x).card : ℝ) +
+        ((Finset.univ.filter fun x : S.model n ↦ S.map n g x ≠ S.map n h x).card : ℝ) =
+          Fintype.card (S.model n) := by
+    exact_mod_cast hpartition
+  have hcardR : (0 : ℝ) < Fintype.card (S.model n) := by exact_mod_cast hcard
+  field_simp
+  linarith
 
 private theorem conjugacyError_subset (n : ℕ) (q g : G) :
     S.conjugacyError n q g ⊆

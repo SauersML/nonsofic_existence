@@ -160,6 +160,14 @@ theorem mono (hN : ∀ n, 0 < N n) (hnonneg : ∀ n, 0 ≤ f n)
   · exact div_nonneg (hnonneg n) (hN n).le
   · exact div_le_div_of_nonneg_right (hle n) (hN n).le
 
+/-- Monotonicity when the normalizing sequence is merely nonnegative.  This
+version also covers finitely many empty finite models, where division by zero
+is defined to be zero. -/
+theorem mono_nonneg (hN : ∀ n, 0 ≤ N n) (hnonneg : ∀ n, 0 ≤ f n)
+    (hle : ∀ n, f n ≤ e n) (he : Negligible N e) : Negligible N f := by
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (hnonneg n) (hN n))
+    (fun n ↦ div_le_div_of_nonneg_right (hle n) (hN n)) he
+
 theorem sum {ι : Type*} (s : Finset ι) (e : ι → ℕ → ℝ)
     (he : ∀ i ∈ s, Negligible N (e i)) :
     Negligible N (fun n ↦ ∑ i ∈ s, e i n) := by

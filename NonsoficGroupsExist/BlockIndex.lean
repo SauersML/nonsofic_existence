@@ -52,5 +52,41 @@ theorem sum_card :
   exact (P.blocksFinset.sum_subtype (p := fun C : Finset Y ↦ C ∈ P.blocksFinset)
     (fun _ ↦ Iff.rfl) (fun C ↦ C.card)).symm
 
+/-- Summation over the distinct blocks is summation over all vertices exactly
+once. -/
+theorem sum_sum (f : Y → ℝ) :
+    ∑ C : BlockIndex P, ∑ y : C.block, f (y : Y) = ∑ y, f y := by
+  classical
+  calc
+    ∑ C : BlockIndex P, ∑ y : C.block, f (y : Y) =
+        ∑ C : BlockIndex P, ∑ y ∈ C.block, f y := by
+      apply Finset.sum_congr rfl
+      intro C _
+      simpa using (Finset.sum_attach C.block fun y ↦ f y)
+    _ =
+        ∑ C ∈ P.blocksFinset, ∑ y ∈ C, f y := by
+      exact (P.blocksFinset.sum_subtype (p := fun C : Finset Y ↦ C ∈ P.blocksFinset)
+        (fun _ ↦ Iff.rfl) (fun C ↦ ∑ y ∈ C, f y)).symm
+    _ = ∑ y ∈ P.blocksFinset.biUnion id, f y := by
+      exact (Finset.sum_biUnion P.blocksFinset_pairwise_disjoint).symm
+    _ = ∑ y, f y := by rw [P.blocksFinset_biUnion]
+
+/-- Cardinalities of vertex filters may be summed componentwise. -/
+theorem sum_card_filter (p : Y → Prop) [DecidablePred p] :
+    ∑ C : BlockIndex P,
+        ((Finset.univ.filter fun x : C.block ↦ p (x : Y)).card : ℝ) =
+      ((Finset.univ.filter p).card : ℝ) := by
+  let f : Y → ℝ := fun y ↦ if p y then 1 else 0
+  have hpartition :
+      ∑ C : BlockIndex P, ∑ x : C.block, f (x : Y) = ∑ y : Y, f y :=
+    sum_sum P f
+  calc
+    _ = ∑ C : BlockIndex P, ∑ x : C.block, f (x : Y) := by
+      apply Finset.sum_congr rfl
+      intro C _
+      simp only [f, Finset.sum_boole]
+    _ = ∑ y : Y, f y := hpartition
+    _ = ((Finset.univ.filter p).card : ℝ) := by simp [f]
+
 end BlockIndex
 end NonsoficGroupsExist

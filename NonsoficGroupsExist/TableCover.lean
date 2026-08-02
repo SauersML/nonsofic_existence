@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.Sofic
+import NonsoficGroupsExist.SoficErrors
 import Mathlib.GroupTheory.PresentedGroup
 import Mathlib.GroupTheory.Finiteness
 import Mathlib.SetTheory.Cardinal.Free
@@ -29,15 +29,47 @@ open scoped BigOperators
 
 variable {G : Type*} [Group G]
 
+/-- The exact domain `F ∪ F·F` of a finite multiplication-table model. -/
+noncomputable def tableDomain (F : Finset G) : Finset G := by
+  classical
+  exact F ∪ (F ×ˢ F).image fun x : G × G ↦ x.1 * x.2
+
+theorem mem_tableDomain_of_mem {F : Finset G} {g : G} (hg : g ∈ F) :
+    g ∈ tableDomain F := by
+  classical
+  simp [tableDomain, hg]
+
+theorem mul_mem_tableDomain {F : Finset G} {g h : G} (hg : g ∈ F) (hh : h ∈ F) :
+    g * h ∈ tableDomain F := by
+  classical
+  apply Finset.mem_union_right
+  exact Finset.mem_image.mpr ⟨(g, h), Finset.mem_product.mpr ⟨hg, hh⟩, rfl⟩
+
+theorem tableDomain_mono {F F' : Finset G} (hFF : F ⊆ F') :
+    tableDomain F ⊆ tableDomain F' := by
+  classical
+  intro g hg
+  simp only [tableDomain, Finset.mem_union, Finset.mem_image,
+    Finset.mem_product] at hg ⊢
+  rcases hg with hg | ⟨⟨a, b⟩, ⟨ha, hb⟩, rfl⟩
+  · exact Or.inl (hFF hg)
+  · exact Or.inr ⟨(a, b), ⟨hFF ha, hFF hb⟩, rfl⟩
+
 /-- Definition `def:model`: a finite permutation model of the finite table `F`,
 accurate to within `ε`. -/
 structure TableModel (G : Type*) [Group G] (F : Finset G) (ε : ℝ) where
   carrier : FiniteModel
   nonempty : 0 < Fintype.card carrier
-  act : G → Equiv.Perm carrier
-  multiplicative : ∀ g ∈ F, ∀ h ∈ F,
-    hammingDistance carrier (act (g * h)) (act g * act h) < ε
-  separated : ∀ g ∈ F, g ≠ 1 → 1 - ε < hammingDistance carrier (act g) 1
+  act : ↥(tableDomain F) → Equiv.Perm carrier
+  multiplicative : ∀ (g : G) (hg : g ∈ F) (h : G) (hh : h ∈ F),
+    hammingDistance carrier
+      (act ⟨g * h, mul_mem_tableDomain hg hh⟩)
+      (act ⟨g, mem_tableDomain_of_mem hg⟩ *
+        act ⟨h, mem_tableDomain_of_mem hh⟩) ≤ ε
+  separated : ∀ (g : G) (hg : g ∈ F) (h : G) (hh : h ∈ F), g ≠ h →
+    1 - ε ≤ hammingDistance carrier
+      (act ⟨g, mem_tableDomain_of_mem hg⟩)
+      (act ⟨h, mem_tableDomain_of_mem hh⟩)
 
 /-! ### Amplification -/
 
@@ -93,21 +125,19 @@ def TableModel.amplify {F : Finset G} {ε : ℝ} (M : TableModel G F ε) (k : �
     simpa using Nat.mul_pos hk M.nonempty
   act g := amplifyPerm k (M.act g)
   multiplicative g hg h hh := by
-    have hmul : amplifyPerm k (M.act g) * amplifyPerm k (M.act h) =
-        amplifyPerm k (M.act g * M.act h) := by
+    have hmul :
+        amplifyPerm k (M.act ⟨g, mem_tableDomain_of_mem hg⟩) *
+          amplifyPerm k (M.act ⟨h, mem_tableDomain_of_mem hh⟩) =
+        amplifyPerm k (M.act ⟨g, mem_tableDomain_of_mem hg⟩ *
+          M.act ⟨h, mem_tableDomain_of_mem hh⟩) := by
       apply Equiv.ext
       intro z
       rfl
     rw [hmul, hammingDistance_amplify hk]
     exact M.multiplicative g hg h hh
-  separated g hg hne := by
-    have hone : (1 : Equiv.Perm (M.carrier.amplify k)) =
-        amplifyPerm k (1 : Equiv.Perm M.carrier) := by
-      apply Equiv.ext
-      intro z
-      rfl
-    rw [hone, hammingDistance_amplify hk]
-    exact M.separated g hg hne
+  separated g hg h hh hne := by
+    rw [hammingDistance_amplify hk]
+    exact M.separated g hg h hh hne
 
 theorem TableModel.card_amplify {F : Finset G} {ε : ℝ} (M : TableModel G F ε)
     (k : ℕ) (hk : 0 < k) : k ≤ Fintype.card (M.amplify k hk).carrier := by
@@ -122,32 +152,45 @@ theorem tableModel_of_isSofic [Countable G] (h : IsSofic G) (F : Finset G)
     (ε : ℝ) (hε : 0 < ε) : Nonempty (TableModel G F ε) := by
   classical
   obtain ⟨S⟩ := h
-  -- choose one index at which all finitely many constraints hold
+  -- Choose one index at which all finitely many multiplication and pairwise
+  -- separation constraints hold.
   have hpairs : ∃ N : ℕ, ∀ n ≥ N,
       (0 < Fintype.card (S.model n)) ∧
       (∀ g ∈ F, ∀ h ∈ F,
-        hammingDistance (S.model n) (S.map n (g * h)) (S.map n g * S.map n h) < ε) ∧
-      (∀ g ∈ F, g ≠ 1 → 1 - ε < hammingDistance (S.model n) (S.map n g) 1) := by
+        hammingDistance (S.model n) (S.map n (g * h))
+          (S.map n g * S.map n h) ≤ ε) ∧
+      (∀ g ∈ F, ∀ h ∈ F, g ≠ h →
+        1 - ε ≤ hammingDistance (S.model n) (S.map n g) (S.map n h)) := by
     obtain ⟨N₀, hN₀⟩ := S.card_tendsToInfinity 1
-    -- finitely many multiplicativity constraints
     have hmul : ∀ p : G × G, ∃ N : ℕ, ∀ n ≥ N,
         hammingDistance (S.model n) (S.map n (p.1 * p.2))
-          (S.map n p.1 * S.map n p.2) < ε := fun p ↦
-      S.asymptoticallyMultiplicative p.1 p.2 ε hε
-    have hfaith : ∀ g : G, ∃ N : ℕ, ∀ n ≥ N,
-        g ≠ 1 → 1 - ε < hammingDistance (S.model n) (S.map n g) 1 := by
-      intro g
-      by_cases hg : g = 1
-      · exact ⟨0, fun n _ hne ↦ absurd hg hne⟩
-      · obtain ⟨N, hN⟩ := S.asymptoticallyFaithful g hg ε hε
-        exact ⟨N, fun n hn _ ↦ hN n hn⟩
+          (S.map n p.1 * S.map n p.2) ≤ ε := by
+      intro p
+      obtain ⟨N, hN⟩ := S.asymptoticallyMultiplicative p.1 p.2 ε hε
+      exact ⟨N, fun n hn ↦ (hN n hn).le⟩
+    have hsep : ∀ p : G × G, ∃ N : ℕ, ∀ n ≥ N,
+        p.1 ≠ p.2 → 1 - ε ≤
+          hammingDistance (S.model n) (S.map n p.1) (S.map n p.2) := by
+      intro p
+      by_cases hp : p.1 = p.2
+      · exact ⟨0, fun _ _ hne ↦ absurd hp hne⟩
+      · have hcol :=
+          @SoficApproximation.collisionError_negligible G _ S p.1 p.2 hp
+        obtain ⟨Ne, hNe⟩ := hcol ε hε
+        refine ⟨max N₀ Ne, fun n hn _ ↦ ?_⟩
+        have hcard : 0 < Fintype.card (S.model n) :=
+          lt_of_lt_of_le Nat.zero_lt_one
+            (hN₀ n ((le_max_left N₀ Ne).trans hn))
+        have herr := lt_of_abs_lt (hNe n ((le_max_right N₀ Ne).trans hn))
+        rw [S.hammingDistance_eq_one_sub_collision n p.1 p.2 hcard]
+        linarith
     choose Nmul hNmul using hmul
-    choose Nfaith hNfaith using hfaith
+    choose Nsep hNsep using hsep
     set Bm : Finset ℕ := insert 0 ((F ×ˢ F).image fun p ↦ Nmul p) with hBm
-    set Bf : Finset ℕ := insert 0 (F.image fun g ↦ Nfaith g) with hBf
+    set Bs : Finset ℕ := insert 0 ((F ×ˢ F).image fun p ↦ Nsep p) with hBs
     set Nm : ℕ := Bm.max' (Finset.insert_nonempty 0 _) with hNm
-    set Nf : ℕ := Bf.max' (Finset.insert_nonempty 0 _) with hNf
-    refine ⟨max N₀ (max Nm Nf), fun n hn ↦ ⟨?_, ?_, ?_⟩⟩
+    set Ns : ℕ := Bs.max' (Finset.insert_nonempty 0 _) with hNs
+    refine ⟨max N₀ (max Nm Ns), fun n hn ↦ ⟨?_, ?_, ?_⟩⟩
     · exact hN₀ n ((le_max_left _ _).trans hn)
     · intro g hg h hh
       have hle : Nmul (g, h) ≤ Nm := by
@@ -156,21 +199,22 @@ theorem tableModel_of_isSofic [Countable G] (h : IsSofic G) (F : Finset G)
         apply Finset.mem_insert_of_mem
         exact Finset.mem_image.mpr
           ⟨(g, h), Finset.mem_product.mpr ⟨hg, hh⟩, rfl⟩
-      exact hNmul (g, h) n (hle.trans ((le_max_left Nm Nf).trans
+      exact hNmul (g, h) n (hle.trans ((le_max_left Nm Ns).trans
         ((le_max_right N₀ _).trans hn)))
-    · intro g hg hne
-      have hle : Nfaith g ≤ Nf := by
-        apply Bf.le_max'
-        rw [hBf]
+    · intro g hg h hh hne
+      have hle : Nsep (g, h) ≤ Ns := by
+        apply Bs.le_max'
+        rw [hBs]
         apply Finset.mem_insert_of_mem
-        exact Finset.mem_image.mpr ⟨g, hg, rfl⟩
-      exact hNfaith g n (hle.trans ((le_max_right Nm Nf).trans
+        exact Finset.mem_image.mpr
+          ⟨(g, h), Finset.mem_product.mpr ⟨hg, hh⟩, rfl⟩
+      exact hNsep (g, h) n (hle.trans ((le_max_right Nm Ns).trans
         ((le_max_right N₀ _).trans hn))) hne
   obtain ⟨N, hN⟩ := hpairs
   obtain ⟨hcard, hmul, hfaith⟩ := hN N le_rfl
   exact ⟨{ carrier := S.model N
            nonempty := hcard
-           act := S.map N
+           act := fun g ↦ S.map N g.1
            multiplicative := hmul
            separated := hfaith }⟩
 
@@ -182,16 +226,20 @@ theorem isSofic_of_tableModels [Countable G] [Nonempty G]
   classical
   obtain ⟨enum, henum⟩ : ∃ e : ℕ → G, Function.Surjective e :=
     exists_surjective_nat G
-  set F : ℕ → Finset G := fun n ↦ (Finset.range (n + 1)).image enum with hF
+  set F : ℕ → Finset G := fun n ↦ insert 1 ((Finset.range (n + 1)).image enum) with hF
   have hmono : ∀ m n : ℕ, m ≤ n → F m ⊆ F n := by
-    intro m n hmn
-    apply Finset.image_subset_image
-    exact Finset.range_mono (Nat.add_le_add_right hmn 1)
+    intro m n hmn g hg
+    simp only [hF, Finset.mem_insert] at hg ⊢
+    rcases hg with rfl | hg
+    · exact Or.inl rfl
+    · exact Or.inr (Finset.image_subset_image
+        (Finset.range_mono (Nat.add_le_add_right hmn 1)) hg)
   have hmem : ∀ g : G, ∃ N : ℕ, ∀ n ≥ N, g ∈ F n := by
     intro g
     obtain ⟨i, rfl⟩ := henum g
     refine ⟨i, fun n hn ↦ ?_⟩
-    exact Finset.mem_image.mpr ⟨i, Finset.mem_range.mpr (by omega), rfl⟩
+    exact Finset.mem_insert_of_mem
+      (Finset.mem_image.mpr ⟨i, Finset.mem_range.mpr (by omega), rfl⟩)
   set eps : ℕ → ℝ := fun n ↦ 1 / (n + 2) with heps
   have heps_pos : ∀ n, 0 < eps n := by
     intro n
@@ -201,8 +249,11 @@ theorem isSofic_of_tableModels [Countable G] [Nonempty G]
   refine ⟨{
     model := fun n ↦ ((h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
       (Nat.succ_pos n)).carrier
-    map := fun n g ↦ ((h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
-      (Nat.succ_pos n)).act g
+    map := fun n g ↦
+      if hg : g ∈ tableDomain (F n) then
+        ((h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
+          (Nat.succ_pos n)).act ⟨g, hg⟩
+      else 1
     card_tendsToInfinity := ?_
     asymptoticallyMultiplicative := ?_
     asymptoticallyFaithful := ?_ }⟩
@@ -214,7 +265,7 @@ theorem isSofic_of_tableModels [Countable G] [Nonempty G]
   · intro g hg ε hε
     obtain ⟨N₁, hN₁⟩ := hmem g
     obtain ⟨N₂, hN₂⟩ := hmem hg
-    obtain ⟨N₃, hN₃⟩ : ∃ N : ℕ, ∀ n ≥ N, eps n ≤ ε := by
+    obtain ⟨N₃, hN₃⟩ : ∃ N : ℕ, ∀ n ≥ N, eps n < ε := by
       obtain ⟨k, hk⟩ := exists_nat_one_div_lt hε
       refine ⟨k, fun n hn ↦ ?_⟩
       have hle : (1 : ℝ) / (n + 2) ≤ 1 / (k + 1) := by
@@ -222,40 +273,65 @@ theorem isSofic_of_tableModels [Countable G] [Nonempty G]
         have : (k : ℝ) ≤ n := by exact_mod_cast hn
         linarith
       simp only [heps]
-      linarith [hk]
+      exact hle.trans_lt hk
     refine ⟨max N₁ (max N₂ N₃), fun n hn ↦ ?_⟩
     have h₁ := hN₁ n ((le_max_left _ _).trans hn)
     have h₂ := hN₂ n ((le_max_left N₂ N₃).trans ((le_max_right N₁ _).trans hn))
     have h₃ := hN₃ n ((le_max_right N₂ N₃).trans ((le_max_right N₁ _).trans hn))
-    exact lt_of_lt_of_le
-      (((h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
-        (Nat.succ_pos n)).multiplicative g h₁ hg h₂) h₃
+    rw [dif_pos (mul_mem_tableDomain h₁ h₂), dif_pos (mem_tableDomain_of_mem h₁),
+      dif_pos (mem_tableDomain_of_mem h₂)]
+    exact (((h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
+      (Nat.succ_pos n)).multiplicative g h₁ hg h₂).trans_lt h₃
   · intro g hne ε hε
     obtain ⟨N₁, hN₁⟩ := hmem g
-    obtain ⟨N₃, hN₃⟩ : ∃ N : ℕ, ∀ n ≥ N, eps n ≤ ε := by
-      obtain ⟨k, hk⟩ := exists_nat_one_div_lt hε
+    obtain ⟨N₃, hN₃⟩ : ∃ N : ℕ, ∀ n ≥ N, eps n < ε / 2 := by
+      obtain ⟨k, hk⟩ := exists_nat_one_div_lt (half_pos hε)
       refine ⟨k, fun n hn ↦ ?_⟩
       have hle : (1 : ℝ) / (n + 2) ≤ 1 / (k + 1) := by
         apply one_div_le_one_div_of_le (by positivity)
         have : (k : ℝ) ≤ n := by exact_mod_cast hn
         linarith
       simp only [heps]
-      linarith [hk]
+      exact hle.trans_lt hk
     refine ⟨max N₁ N₃, fun n hn ↦ ?_⟩
     have h₁ := hN₁ n ((le_max_left _ _).trans hn)
     have h₃ := hN₃ n ((le_max_right N₁ N₃).trans hn)
-    have hsep := ((h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
-      (Nat.succ_pos n)).separated g h₁ hne
-    linarith
+    have hone : (1 : G) ∈ F n := by simp [hF]
+    rw [dif_pos (mem_tableDomain_of_mem h₁)]
+    let M := (h (F n) (eps n) (heps_pos n)).some.amplify (n + 1)
+      (Nat.succ_pos n)
+    have hdomOne : (1 : G) ∈ tableDomain (F n) := mem_tableDomain_of_mem hone
+    have hsep := M.separated g h₁ 1 hone hne
+    have hmodelOne := M.multiplicative 1 hone 1 hone
+    have hmodelOne' : hammingDistance M.carrier
+        (M.act ⟨1, hdomOne⟩)
+        (M.act ⟨1, hdomOne⟩ * M.act ⟨1, hdomOne⟩) ≤ eps n := by
+      simpa using hmodelOne
+    have honeclose : hammingDistance M.carrier (M.act ⟨1, hdomOne⟩) 1 ≤ eps n := by
+      have hinv := hammingDistance_right_invariant M.carrier
+        (1 : Equiv.Perm M.carrier) (M.act ⟨1, hdomOne⟩) (M.act ⟨1, hdomOne⟩)
+      have heq : hammingDistance M.carrier
+          (M.act ⟨1, hdomOne⟩) (M.act ⟨1, hdomOne⟩ * M.act ⟨1, hdomOne⟩) =
+            hammingDistance M.carrier 1 (M.act ⟨1, hdomOne⟩) := by
+        simpa using hinv
+      rw [hammingDistance_comm]
+      rw [← heq]
+      exact hmodelOne'
+    have honeclose' :
+        hammingDistance M.carrier 1 (M.act ⟨1, hdomOne⟩) ≤ eps n := by
+      simpa [hammingDistance_comm] using honeclose
+    have htriangle := hammingDistance_triangle M.carrier
+      (M.act ⟨g, mem_tableDomain_of_mem h₁⟩) 1 (M.act ⟨1, hdomOne⟩)
+    linarith [honeclose']
 
 /-- Restricting the table only weakens the requirements on a model. -/
 def TableModel.restrict {F F' : Finset G} {ε : ℝ} (M : TableModel G F' ε)
     (hFF : F ⊆ F') : TableModel G F ε where
   carrier := M.carrier
   nonempty := M.nonempty
-  act := M.act
+  act := fun g ↦ M.act ⟨g.1, tableDomain_mono hFF g.2⟩
   multiplicative g hg h hh := M.multiplicative g (hFF hg) h (hFF hh)
-  separated g hg hne := M.separated g (hFF hg) hne
+  separated g hg h hh hne := M.separated g (hFF hg) h (hFF hh) hne
 
 /-- A forbidden table remains forbidden after adjoining more named elements. -/
 theorem tableModel_isEmpty_mono {F F' : Finset G} {ε : ℝ}
@@ -288,8 +364,7 @@ variable (F : Finset G)
 
 /-- The finite set of group elements named by the table. -/
 noncomputable def multiplicationTable : Finset G := by
-  classical
-  exact F ∪ (F ×ˢ F).image fun x : G × G ↦ x.1 * x.2
+  exact tableDomain F
 
 noncomputable instance multiplicationTableFintype : Fintype ↥(multiplicationTable F) := by
   classical
@@ -297,14 +372,11 @@ noncomputable instance multiplicationTableFintype : Fintype ↥(multiplicationTa
 
 theorem mem_multiplicationTable_of_mem {g : G} (hg : g ∈ F) :
     g ∈ multiplicationTable F := by
-  classical
-  simp [multiplicationTable, hg]
+  exact mem_tableDomain_of_mem hg
 
 theorem mul_mem_multiplicationTable {g h : G} (hg : g ∈ F) (hh : h ∈ F) :
     g * h ∈ multiplicationTable F := by
-  classical
-  apply Finset.mem_union_right
-  exact Finset.mem_image.mpr ⟨(g, h), Finset.mem_product.mpr ⟨hg, hh⟩, rfl⟩
+  exact mul_mem_tableDomain hg hh
 
 variable (h₁ : 1 ∈ F)
 
@@ -401,6 +473,14 @@ theorem tableGenerator_ne_one {g : G} (hg : g ∈ F) (hne : g ≠ 1) :
   apply hne
   simpa using congrArg (tableEvaluation F h₁) h
 
+theorem tableGenerator_ne {g h : G}
+    (hg : g ∈ multiplicationTable F) (hh : h ∈ multiplicationTable F)
+    (hne : g ≠ h) :
+    tableGenerator F h₁ ⟨g, hg⟩ ≠ tableGenerator F h₁ ⟨h, hh⟩ := by
+  intro heq
+  apply hne
+  simpa using congrArg (tableEvaluation F h₁) heq
+
 /-- The finite table inside the table group. -/
 noncomputable def tableTestSet : Finset (tableGroup F h₁) := by
   classical
@@ -413,6 +493,23 @@ theorem tableGenerator_mem_tableTestSet {g : G} (hg : g ∈ F) :
   classical
   exact Finset.mem_image.mpr ⟨⟨g, hg⟩, Finset.mem_attach _ _, rfl⟩
 
+/-- Every named element of `F ∪ F·F` maps into the exact model domain of the
+presented table. -/
+theorem tableGenerator_mem_testDomain (g : ↥(multiplicationTable F)) :
+    tableGenerator F h₁ g ∈ tableDomain (tableTestSet F h₁) := by
+  classical
+  have hgDomain : g.1 ∈ tableDomain F := by simp [multiplicationTable]
+  simp only [tableDomain, Finset.mem_union, Finset.mem_image,
+    Finset.mem_product] at hgDomain
+  rcases hgDomain with hg | ⟨⟨a, b⟩, ⟨ha, hb⟩, hab⟩
+  · exact mem_tableDomain_of_mem (tableGenerator_mem_tableTestSet F h₁ hg)
+  · have geq : g = ⟨a * b, mul_mem_multiplicationTable F ha hb⟩ :=
+      Subtype.ext hab.symm
+    rw [geq]
+    rw [← tableGenerator_mul F h₁ ha hb]
+    exact mul_mem_tableDomain (tableGenerator_mem_tableTestSet F h₁ ha)
+      (tableGenerator_mem_tableTestSet F h₁ hb)
+
 /-- Pulling a model of the table group back along the naming map produces a
 model of the original table. -/
 noncomputable def pullbackTableModel {ε : ℝ}
@@ -422,22 +519,39 @@ noncomputable def pullbackTableModel {ε : ℝ}
   refine
     { carrier := M.carrier
       nonempty := M.nonempty
-      act := fun g ↦
-        if hg : g ∈ multiplicationTable F then
-          M.act (tableGenerator F h₁ ⟨g, hg⟩) else 1
+      act := fun g ↦ M.act
+        ⟨tableGenerator F h₁ ⟨g.1, by simp [multiplicationTable, g.2]⟩,
+          tableGenerator_mem_testDomain F h₁ _⟩
       multiplicative := ?_
       separated := ?_ }
   · intro g hg h hh
-    rw [dif_pos (mul_mem_multiplicationTable F hg hh),
-      dif_pos (mem_multiplicationTable_of_mem F hg),
-      dif_pos (mem_multiplicationTable_of_mem F hh),
-      ← tableGenerator_mul F h₁ hg hh]
-    exact M.multiplicative _ (tableGenerator_mem_tableTestSet F h₁ hg) _
+    let xg := tableGenerator F h₁
+      ⟨g, mem_multiplicationTable_of_mem F hg⟩
+    let xh := tableGenerator F h₁
+      ⟨h, mem_multiplicationTable_of_mem F hh⟩
+    have hxg : xg ∈ tableTestSet F h₁ := tableGenerator_mem_tableTestSet F h₁ hg
+    have hxh : xh ∈ tableTestSet F h₁ := tableGenerator_mem_tableTestSet F h₁ hh
+    have heq :
+        (⟨tableGenerator F h₁
+            ⟨g * h, mul_mem_multiplicationTable F hg hh⟩,
+              tableGenerator_mem_testDomain F h₁ _⟩ :
+            ↥(tableDomain (tableTestSet F h₁))) =
+          ⟨xg * xh, mul_mem_tableDomain hxg hxh⟩ := by
+      apply Subtype.ext
+      exact (tableGenerator_mul F h₁ hg hh).symm
+    change hammingDistance M.carrier
+      (M.act ⟨tableGenerator F h₁
+        ⟨g * h, mul_mem_multiplicationTable F hg hh⟩,
+          tableGenerator_mem_testDomain F h₁ _⟩)
+      (M.act ⟨xg, mem_tableDomain_of_mem hxg⟩ *
+        M.act ⟨xh, mem_tableDomain_of_mem hxh⟩) ≤ ε
+    rw [heq]
+    exact M.multiplicative xg hxg xh hxh
+  · intro g hg h hh hne
+    exact M.separated _ (tableGenerator_mem_tableTestSet F h₁ hg) _
       (tableGenerator_mem_tableTestSet F h₁ hh)
-  · intro g hg hne
-    rw [dif_pos (mem_multiplicationTable_of_mem F hg)]
-    exact M.separated _ (tableGenerator_mem_tableTestSet F h₁ hg)
-      (tableGenerator_ne_one F h₁ hg hne)
+      (tableGenerator_ne F h₁ (mem_multiplicationTable_of_mem F hg)
+        (mem_multiplicationTable_of_mem F hh) hne)
 
 /-- **Theorem `thm:table`.**  If a finite table of `G` admits no `ε`-accurate
 model, then the finitely presented group defined by that table admits no

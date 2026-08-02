@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Refinement
+import Mathlib.Algebra.Order.BigOperators.Group.Finset
 
 /-!
 # Occurrence-level edge edit accounting
@@ -99,6 +100,58 @@ theorem targetCrossing_card_le_unmatchedCount (partX : X.vertex → ι)
   have h := W.targetCrossing_card_le partX partZ hpart
   simp only [unmatchedCount]
   omega
+
+/-- Edge edits change the variation of a function valued in `[0,1]` by at
+most the number of unmatched edge occurrences. -/
+theorem targetVariation_le_unmatchedCount (fX : X.vertex → ℝ)
+    (fZ : Z.vertex → ℝ) (hfun : ∀ x, fX x = fZ (e x))
+    (hZnonneg : ∀ z, 0 ≤ fZ z) (hZone : ∀ z, fZ z ≤ 1) :
+    Z.edgeVariation fZ ≤ X.edgeVariation fX + W.unmatchedCount := by
+  classical
+  let weightX : X.edge → ℝ := fun a ↦ |fX (X.first a) - fX (X.second a)|
+  let weightZ : Z.edge → ℝ := fun b ↦ |fZ (Z.first b) - fZ (Z.second b)|
+  have hkept : ∑ b ∈ W.targetKept, weightZ b =
+      ∑ a ∈ W.sourceKept, weightX a := by
+    have hequiv : (∑ a : W.sourceKept, weightX a.1) =
+        ∑ b : W.targetKept, weightZ b.1 := by
+      apply Fintype.sum_equiv W.edgeEquiv
+      intro a
+      rcases W.preservesEndpoints a with h | h
+      · dsimp only [weightX, weightZ]
+        rw [hfun (X.first a.1), hfun (X.second a.1), h.1, h.2]
+      · dsimp only [weightX, weightZ]
+        rw [hfun (X.first a.1), hfun (X.second a.1), h.1, h.2,
+          abs_sub_comm]
+    calc
+      ∑ b ∈ W.targetKept, weightZ b = ∑ b : W.targetKept, weightZ b.1 := by
+        simpa using (Finset.sum_attach W.targetKept weightZ).symm
+      _ = ∑ a : W.sourceKept, weightX a.1 := hequiv.symm
+      _ = ∑ a ∈ W.sourceKept, weightX a := by
+        simpa using Finset.sum_attach W.sourceKept weightX
+  have hunmatched : ∑ b ∈ W.targetUnmatched, weightZ b ≤ W.targetUnmatched.card := by
+    calc
+      ∑ b ∈ W.targetUnmatched, weightZ b ≤
+          ∑ _b ∈ W.targetUnmatched, (1 : ℝ) := by
+        apply Finset.sum_le_sum
+        intro b _
+        dsimp only [weightZ]
+        rw [abs_sub_le_iff]
+        constructor <;> linarith [hZnonneg (Z.first b), hZnonneg (Z.second b),
+          hZone (Z.first b), hZone (Z.second b)]
+      _ = W.targetUnmatched.card := by simp
+  have hsource : ∑ a ∈ W.sourceKept, weightX a ≤ X.edgeVariation fX := by
+    unfold FiniteMultiGraph.edgeVariation
+    exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+      (fun _ _ _ ↦ abs_nonneg _)
+  have hsplit : ∑ b ∈ W.targetUnmatched, weightZ b +
+      ∑ b ∈ W.targetKept, weightZ b = Z.edgeVariation fZ := by
+    unfold EdgeEditWitness.targetUnmatched FiniteMultiGraph.edgeVariation
+    exact Finset.sum_sdiff (Finset.subset_univ W.targetKept)
+  unfold EdgeEditWitness.unmatchedCount
+  rw [← hsplit, hkept]
+  push_cast
+  have hsourceUnmatched : (0 : ℝ) ≤ W.sourceUnmatched.card := by positivity
+  linarith
 
 end EdgeEditWitness
 end NonsoficGroupsExist

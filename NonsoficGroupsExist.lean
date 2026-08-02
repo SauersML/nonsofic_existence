@@ -26,6 +26,11 @@ import NonsoficGroupsExist.GeneratorCrossing
 import NonsoficGroupsExist.ExternalCompressorCrossing
 import NonsoficGroupsExist.CompressionRefinement
 import NonsoficGroupsExist.FiniteMedian
+import NonsoficGroupsExist.NormalizedComponents
+import NonsoficGroupsExist.ComponentPinning
+import NonsoficGroupsExist.NormalizedVariation
+import NonsoficGroupsExist.CriterionAssembly
+import NonsoficGroupsExist.MainResults
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
@@ -89,6 +94,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.CompressionSetup.productEmbedding_injective
 #print axioms NonsoficGroupsExist.KunTheorem
 #print axioms NonsoficGroupsExist.KunThomTheorem
+#print axioms NonsoficGroupsExist.ErshovJaikinTheorem
 #print axioms NonsoficGroupsExist.CompressionSetup.ambientGenerators_generate
 #print axioms NonsoficGroupsExist.LocalizedApproximationData.completedMap_disagreement_vanishing
 #print axioms NonsoficGroupsExist.LocalizedApproximationData.toSoficApproximation
@@ -116,6 +122,7 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.matching_injective
 #print axioms NonsoficGroupsExist.BlockStructure.sum_card_blocksFinset
 #print axioms NonsoficGroupsExist.BlockIndex.sum_card
+#print axioms NonsoficGroupsExist.BlockIndex.sum_sum
 #print axioms NonsoficGroupsExist.SoficApproximation.smallBlockVertices_negligible
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.smallBlockVertices_negligible
 #print axioms NonsoficGroupsExist.exists_generator_word
@@ -135,6 +142,13 @@ unconditionally by the explicit pair of cylinder units built in
 #print axioms NonsoficGroupsExist.ExpanderDecomposition.externalGlobalCrossing_negligible
 #print axioms NonsoficGroupsExist.CompressionSetup.compressorLeakage_negligible
 #print axioms NonsoficGroupsExist.FiniteMultiGraph.natMedian_isMedian
+#print axioms NonsoficGroupsExist.normalizedSize_isMedian_on_block
+#print axioms NonsoficGroupsExist.ExpanderDecomposition.normalized_pinning_global
+#print axioms NonsoficGroupsExist.not_isSofic_of_kazhdan_compression
+#print axioms NonsoficGroupsExist.nonsofic_groups_exist
+#print axioms NonsoficGroupsExist.explicit_spine_not_sofic
+#print axioms NonsoficGroupsExist.finitelyPresented_nonsofic_cover
+#print axioms NonsoficGroupsExist.finitely_presented_nonsofic_groups_exist
 #print axioms NonsoficGroupsExist.compression_centralizer
 #print axioms NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor
 #print axioms NonsoficGroupsExist.LeavittFamily.z_sq
