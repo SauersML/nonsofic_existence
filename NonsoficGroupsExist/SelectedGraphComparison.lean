@@ -85,7 +85,7 @@ theorem selected_gammaBoundary_le_graphError (n : ℕ) :
     norm_cast
     apply congrArg Finset.card
     ext x
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    simp only [gammaAct, Finset.mem_filter, Finset.mem_univ, true_and]
     constructor
     · intro hout hblock
       apply hout
@@ -150,9 +150,37 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     (D.inducedGammaGraph n)
     (D.selectedFiniteModel n)
     (Equiv.refl _) (D.selectedImageEquiv n)
-  change (((D.completedGammaGraph n).editDistance (D.transportedInducedGammaGraph n)
-      (Equiv.refl _) : ℕ) : ℝ) ≤ _
-  rw [htransport]
+  have hconjugate := GeneratorGraphEditing.conjugateAction_editDistance
+    D.setup.generatorsΓ (D.selectedImageEquiv n) (D.gammaCompletion n)
+    (D.transportedInducedGammaGraph n) (Equiv.refl (D.selectedSubset n))
+  have hconjugate' :
+      (D.completedGammaGraph n).editDistance (D.transportedInducedGammaGraph n)
+          (Equiv.refl (D.selectedSubset n)) =
+        ((generatorGraph
+          { carrier := (D.selectedComponent n).block
+            fintype := inferInstance
+            decidableEq := inferInstance }
+          D.setup.generatorsΓ (D.gammaCompletion n)).transport
+            (D.selectedFiniteModel n) (D.selectedImageEquiv n)).editDistance
+          (D.transportedInducedGammaGraph n) (Equiv.refl (D.selectedSubset n)) := by
+    simpa only [completedGammaGraph, transportedGammaCompletion,
+      GeneratorGraphEditing.conjugateAction] using hconjugate
+  have htransport' :
+      ((generatorGraph
+          { carrier := (D.selectedComponent n).block
+            fintype := inferInstance
+            decidableEq := inferInstance }
+          D.setup.generatorsΓ (D.gammaCompletion n)).transport
+            (D.selectedFiniteModel n) (D.selectedImageEquiv n)).editDistance
+          (D.transportedInducedGammaGraph n) (Equiv.refl (D.selectedSubset n)) =
+        (generatorGraph
+          { carrier := (D.selectedComponent n).block
+            fintype := inferInstance
+            decidableEq := inferInstance }
+          D.setup.generatorsΓ (D.gammaCompletion n)).editDistance
+            (D.inducedGammaGraph n) (Equiv.refl _) := by
+    simpa [transportedInducedGammaGraph] using htransport
+  rw [hconjugate', htransport']
   calc
     _ ≤ 4 * ∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
@@ -182,8 +210,14 @@ theorem induced_to_selected_edit_le (n : ℕ) :
     ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
     (D.selectedFiniteModel n)
     (Equiv.refl _) (D.selectedImageEquiv n)
-  unfold transportedInducedGammaGraph selectedGraph
-  rw [htransport]
+  have htransport' :
+      (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
+          (Equiv.refl (D.selectedSubset n)) =
+        (D.inducedGammaGraph n).editDistance
+          ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
+          (Equiv.refl _) := by
+    simpa [transportedInducedGammaGraph, selectedGraph] using htransport
+  rw [htransport']
   calc
     _ ≤ 2 * WI.unmatchedCount := by exact_mod_cast hw
     _ ≤ 2 * D.localGammaEditError n (D.selectedComponent n) := by

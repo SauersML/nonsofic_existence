@@ -20,6 +20,91 @@ namespace GeneratorGraphEditing
 
 variable (T : Finset G) (a b : G → Equiv.Perm Y)
 
+section Transport
+
+variable {Z : FiniteModel}
+
+/-- Conjugate every permutation in an action along a finite-model
+equivalence. -/
+noncomputable def conjugateAction (e : Y ≃ Z) (a : G → Equiv.Perm Y) :
+    G → Equiv.Perm Z := fun g ↦ e.symm.trans ((a g).trans e)
+
+/-- Edge occurrences of a transported generator graph correspond label by
+label and source by source to those of the conjugated action. -/
+noncomputable def transportEdgeEquiv (e : Y ≃ Z) (a : G → Equiv.Perm Y) :
+    (generatorGraph Y T a).edge ≃
+      (generatorGraph Z T (conjugateAction e a)).edge where
+  toFun u := by
+    let t := u.1.1
+    let x := u.1.2
+    refine ⟨⟨t, e x⟩, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩⟩
+    change e (a t.1 x) ≠ e x
+    exact e.injective.ne (Finset.mem_filter.mp u.2).2
+  invFun u := by
+    let t := u.1.1
+    let x := u.1.2
+    refine ⟨⟨t, e.symm x⟩, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩⟩
+    intro h
+    have he := congrArg e h
+    apply (Finset.mem_filter.mp u.2).2
+    change e (a t.1 (e.symm x)) = x
+    simpa using he
+  left_inv u := by
+    apply Subtype.ext
+    apply Prod.ext rfl
+    exact e.symm_apply_apply u.1.2
+  right_inv u := by
+    apply Subtype.ext
+    apply Prod.ext rfl
+    exact e.apply_symm_apply u.1.2
+
+@[simp] theorem transportEdgeEquiv_first (e : Y ≃ Z) (a : G → Equiv.Perm Y)
+    (u : (generatorGraph Y T a).edge) :
+    (generatorGraph Z T (conjugateAction e a)).first
+        (transportEdgeEquiv T e a u) =
+      e ((generatorGraph Y T a).first u) := rfl
+
+@[simp] theorem transportEdgeEquiv_second (e : Y ≃ Z) (a : G → Equiv.Perm Y)
+    (u : (generatorGraph Y T a).edge) :
+    (generatorGraph Z T (conjugateAction e a)).second
+        (transportEdgeEquiv T e a u) =
+      e ((generatorGraph Y T a).second u) := by
+  change e (a u.1.1.1 u.1.2) = e (a u.1.1.1 u.1.2)
+  rfl
+
+theorem transport_edgeMultiplicity (e : Y ≃ Z) (a : G → Equiv.Perm Y)
+    (x y : Z) :
+    ((generatorGraph Y T a).transport Z e).edgeMultiplicity x y =
+      (generatorGraph Z T (conjugateAction e a)).edgeMultiplicity x y := by
+  unfold FiniteMultiGraph.edgeMultiplicity
+  apply Finset.card_bij (fun u _ ↦ transportEdgeEquiv T e a u)
+  · intro u hu
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+      transportEdgeEquiv_first, transportEdgeEquiv_second] at hu ⊢
+    exact hu
+  · intro u _ v _ huv
+    exact (transportEdgeEquiv T e a).injective huv
+  · intro v hv
+    refine ⟨(transportEdgeEquiv T e a).symm v, ?_,
+      (transportEdgeEquiv T e a).apply_symm_apply v⟩
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hv ⊢
+    simpa using hv
+
+/-- Transporting the graph or conjugating its action gives the same edit
+distance to every graph on the transported vertex model. -/
+theorem conjugateAction_editDistance (e : Y ≃ Z) (a : G → Equiv.Perm Y)
+    (Q : FiniteMultiGraph) (f : Z ≃ Q.vertex) :
+    (generatorGraph Z T (conjugateAction e a)).editDistance Q f =
+      ((generatorGraph Y T a).transport Z e).editDistance Q f := by
+  unfold FiniteMultiGraph.editDistance
+  apply Finset.sum_congr rfl
+  intro x _
+  apply Finset.sum_congr rfl
+  intro y _
+  rw [transport_edgeMultiplicity]
+
+end Transport
+
 private noncomputable def sourceKept :
     Finset (generatorGraph Y T a).edge :=
   Finset.univ.filter fun e ↦ a e.1.1.1 e.1.2 = b e.1.1.1 e.1.2
