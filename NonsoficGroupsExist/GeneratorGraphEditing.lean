@@ -38,17 +38,15 @@ noncomputable def transportEdgeEquiv (e : Y ≃ Z) (a : G → Equiv.Perm Y) :
     let t := u.1.1
     let x := u.1.2
     refine ⟨⟨t, e x⟩, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩⟩
-    change e (a t.1 x) ≠ e x
-    exact e.injective.ne (Finset.mem_filter.mp u.2).2
+    simpa [conjugateAction] using e.injective.ne (Finset.mem_filter.mp u.2).2
   invFun u := by
     let t := u.1.1
     let x := u.1.2
     refine ⟨⟨t, e.symm x⟩, Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩⟩
     intro h
-    have he := congrArg e h
     apply (Finset.mem_filter.mp u.2).2
-    change e (a t.1 (e.symm x)) = x
-    simpa using he
+    have he := congrArg e h
+    simpa [conjugateAction] using he
   left_inv u := by
     apply Subtype.ext
     apply Prod.ext rfl
@@ -62,15 +60,15 @@ noncomputable def transportEdgeEquiv (e : Y ≃ Z) (a : G → Equiv.Perm Y) :
     (u : (generatorGraph Y T a).edge) :
     (generatorGraph Z T (conjugateAction e a)).first
         (transportEdgeEquiv T e a u) =
-      e ((generatorGraph Y T a).first u) := rfl
+      e ((generatorGraph Y T a).first u) := by
+  simp [transportEdgeEquiv]
 
 @[simp] theorem transportEdgeEquiv_second (e : Y ≃ Z) (a : G → Equiv.Perm Y)
     (u : (generatorGraph Y T a).edge) :
     (generatorGraph Z T (conjugateAction e a)).second
         (transportEdgeEquiv T e a u) =
       e ((generatorGraph Y T a).second u) := by
-  change e (a u.1.1.1 u.1.2) = e (a u.1.1.1 u.1.2)
-  rfl
+  simp [transportEdgeEquiv, conjugateAction]
 
 theorem transport_edgeMultiplicity (e : Y ≃ Z) (a : G → Equiv.Perm Y)
     (x y : Z) :
@@ -79,8 +77,16 @@ theorem transport_edgeMultiplicity (e : Y ≃ Z) (a : G → Equiv.Perm Y)
   unfold FiniteMultiGraph.edgeMultiplicity
   apply Finset.card_bij (fun u _ ↦ transportEdgeEquiv T e a u)
   · intro u hu
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and,
-      transportEdgeEquiv_first, transportEdgeEquiv_second] at hu ⊢
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hu ⊢
+    change ((generatorGraph Z T (conjugateAction e a)).first
+          (transportEdgeEquiv T e a u) = x ∧
+        (generatorGraph Z T (conjugateAction e a)).second
+          (transportEdgeEquiv T e a u) = y) ∨
+      ((generatorGraph Z T (conjugateAction e a)).first
+          (transportEdgeEquiv T e a u) = y ∧
+        (generatorGraph Z T (conjugateAction e a)).second
+          (transportEdgeEquiv T e a u) = x)
+    rw [transportEdgeEquiv_first, transportEdgeEquiv_second]
     exact hu
   · intro u _ v _ huv
     exact (transportEdgeEquiv T e a).injective huv
@@ -88,7 +94,10 @@ theorem transport_edgeMultiplicity (e : Y ≃ Z) (a : G → Equiv.Perm Y)
     refine ⟨(transportEdgeEquiv T e a).symm v, ?_,
       (transportEdgeEquiv T e a).apply_symm_apply v⟩
     simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hv ⊢
-    simpa using hv
+    have hv' := hv
+    rw [← (transportEdgeEquiv T e a).apply_symm_apply v] at hv'
+    rw [transportEdgeEquiv_first, transportEdgeEquiv_second] at hv'
+    exact hv'
 
 /-- Transporting the graph or conjugating its action gives the same edit
 distance to every graph on the transported vertex model. -/
