@@ -53,7 +53,8 @@ theorem sum_componentPredicateCount_le (n : ℕ)
         (D.componentPredicateCount n B p : ℝ)) =
         ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) := by
     unfold componentPredicateCount
-    simpa only [q] using BlockIndex.sum_card_filter P
+    simpa only [q] using BlockIndex.sum_card_filter
+      (D.gammaDecomposition.blocks (D.matchingIndex n))
       (fun x ↦ p (D.distinguishedPerm (D.matchingIndex n) x))
   have hpreimage : ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) =
       ((Finset.univ.filter p).card : ℝ) := by
@@ -121,16 +122,14 @@ noncomputable def localGammaEditError (n : ℕ)
 noncomputable def localConjugacyGraphError (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) : ℝ :=
   ∑ t : D.setup.generatorsΓ,
-    ((Finset.univ.filter fun x : indexedBlockModel
-      (D.gammaDecomposition.blocks (D.matchingIndex n)) B ↦
+    ((Finset.univ.filter fun x : B.block ↦
         x.1 ∈ D.approximation.conjugacyError (D.matchingIndex n)
           D.setup.distinguished (D.setup.embedΓ t.1)).card : ℝ)
 
 noncomputable def localGammaBoundaryError (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) : ℝ :=
   ∑ t : D.setup.generatorsΓ,
-    ((Finset.univ.filter fun x : indexedBlockModel
-      (D.gammaDecomposition.blocks (D.matchingIndex n)) B ↦
+    ((Finset.univ.filter fun x : B.block ↦
       (D.gammaDecomposition.blocks (D.matchingIndex n)).block
           ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
             (D.matchingIndex n) t.1 x.1) ≠
@@ -308,11 +307,7 @@ theorem localGraphBaseError_sum_negligible :
       have ht := hboundaryEach t
       apply Negligible.congr ht
       intro n
-      norm_cast
-      apply congrArg Finset.card
-      ext x
-      simp only [matchingIndex, wordCrossing, Finset.mem_filter,
-        Finset.mem_univ, true_and])
+      norm_cast)
   have hbound := Negligible.add (Negligible.add hedit hconj) hboundary
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
     (fun n ↦ Finset.sum_nonneg fun B _ ↦ D.localGraphBaseError_nonneg n B)
@@ -337,8 +332,6 @@ theorem localGraphBaseError_sum_negligible :
           D.localGammaEditError n B :=
       Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ by unfold localGammaEditError; positivity)
-    unfold localGammaEditError at hsub
-    simp_rw [Finset.sum_add_distrib] at hsub
     have hsourceReal : (∑ C : BlockIndex P,
         ((W.sourceUnmatched.filter fun e ↦
           (generatorGraph
@@ -354,9 +347,15 @@ theorem localGraphBaseError_sum_negligible :
           (D.gammaDecomposition.modelGraph (D.matchingIndex n)).first e ∈
             C.block).card : ℝ)) ≤ (W.targetUnmatched.card : ℝ) := by
       exact_mod_cast htargetAll
+    have hall : (∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
+        D.localGammaEditError n B) ≤
+        (W.sourceUnmatched.card : ℝ) + (W.targetUnmatched.card : ℝ) := by
+      unfold localGammaEditError
+      simp_rw [Finset.sum_add_distrib]
+      exact add_le_add hsourceReal htargetReal
     unfold EdgeEditWitness.unmatchedCount
     push_cast
-    exact hsub.trans (add_le_add hsourceReal htargetReal)
+    exact hsub.trans hall
   have hconjLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localConjugacyGraphError n B) ≤
       ∑ t : D.setup.generatorsΓ,
@@ -368,11 +367,11 @@ theorem localGraphBaseError_sum_negligible :
     intro t _
     have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦
+        ((Finset.univ.filter fun x : B.block ↦
           x.1 ∈ D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t.1)).card : ℝ)) ≤
         ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦
+        ((Finset.univ.filter fun x : B.block ↦
           x.1 ∈ D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t.1)).card : ℝ) :=
       Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
@@ -380,13 +379,20 @@ theorem localGraphBaseError_sum_negligible :
     exact hsub.trans (by
       let E := D.approximation.conjugacyError (D.matchingIndex n)
         D.setup.distinguished (D.setup.embedΓ t.1)
-      have hpartition := BlockIndex.sum_card_filter P (fun x ↦ x ∈ E)
+      have hpartition := BlockIndex.sum_card_filter
+        (D.gammaDecomposition.blocks (D.matchingIndex n)) (fun x ↦ x ∈ E)
       have hpartition' : (∑ B : D.gammaDecomposition.componentIndex
           (D.matchingIndex n),
-          ((Finset.univ.filter fun x : indexedBlockModel P B ↦ x.1 ∈ E).card : ℝ)) =
+          ((Finset.univ.filter fun x : B.block ↦ x.1 ∈ E).card : ℝ)) =
           ((D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t.1)).card : ℝ) := by
-        simpa only [E] using hpartition
+        calc
+          _ = ((Finset.univ.filter fun x ↦ x ∈ E).card : ℝ) := hpartition
+          _ = (E.card : ℝ) := by
+            congr 1
+            ext x
+            simp
+          _ = _ := rfl
       exact hpartition'.le)
   have hboundaryLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localGammaBoundaryError n B) ≤
@@ -406,12 +412,13 @@ theorem localGraphBaseError_sum_negligible :
           (D.gammaDecomposition.blocks (D.matchingIndex n)).block x
     have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ)) ≤
+        ((Finset.univ.filter fun x : B.block ↦ p x.1).card : ℝ)) ≤
         ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-          ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ) :=
+          ((Finset.univ.filter fun x : B.block ↦ p x.1).card : ℝ) :=
       Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ by positivity)
-    have hpartition := BlockIndex.sum_card_filter P p
+    have hpartition := BlockIndex.sum_card_filter
+      (D.gammaDecomposition.blocks (D.matchingIndex n)) p
     have hfilter : Finset.univ.filter p =
         wordCrossing (D.gammaDecomposition.blocks (D.matchingIndex n))
           ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
@@ -419,7 +426,7 @@ theorem localGraphBaseError_sum_negligible :
       ext x
       simp only [p, wordCrossing, Finset.mem_filter, Finset.mem_univ, true_and]
     have htotal : (∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ)) =
+        ((Finset.univ.filter fun x : B.block ↦ p x.1).card : ℝ)) =
         ((wordCrossing (D.gammaDecomposition.blocks (D.matchingIndex n))
           ((D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).map
             (D.matchingIndex n) t.1)).card : ℝ) := by
