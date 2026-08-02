@@ -75,6 +75,7 @@ theorem selected_gammaBoundary_le_graphError (n : ℕ) :
         D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x ∉
           (D.selectedComponent n).block).card : ℝ) =
       D.localGammaBoundaryError n (D.selectedComponent n) := by
+    unfold localGammaBoundaryError
     apply Finset.sum_congr rfl
     intro t _
     congr 1
@@ -88,7 +89,7 @@ theorem selected_gammaBoundary_le_graphError (n : ℕ) :
         exact ((D.gammaDecomposition.blocks (D.matchingIndex n)).eq_of_mem
           (BlockIndex.representative _ (D.selectedComponent n)) x x.2).trans
             (BlockIndex.block_representative _ _)
-      rw [← hxblock, hblock]
+      rw [← hxblock, ← hblock]
       exact (D.gammaDecomposition.blocks (D.matchingIndex n)).self_mem _
     · intro hcross hmem
       apply hcross
@@ -97,8 +98,9 @@ theorem selected_gammaBoundary_le_graphError (n : ℕ) :
         exact ((D.gammaDecomposition.blocks (D.matchingIndex n)).eq_of_mem
           (BlockIndex.representative _ (D.selectedComponent n)) x x.2).trans
             (BlockIndex.block_representative _ _)
+      apply (D.gammaDecomposition.blocks (D.matchingIndex n)).eq_of_mem
       rw [hxblock]
-      exact (D.gammaDecomposition.blocks (D.matchingIndex n)).eq_of_mem _ _ hmem
+      exact hmem
   rw [hterm]
   unfold localGraphBaseError
   positivity
@@ -140,14 +142,16 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     _ ≤ 4 * ∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
         (D.gammaCompletion n t.1 x : D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x).card := hbase
+          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x).card := by
+      exact_mod_cast hbase
     _ ≤ 4 * ∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
         D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x ∉
-          (D.selectedComponent n).block).card := Nat.mul_le_mul_left 4 hcompletion
+          (D.selectedComponent n).block).card := by
+      exact_mod_cast Nat.mul_le_mul_left 4 hcompletion
     _ ≤ 4 * D.localGraphBaseError n (D.selectedComponent n) := by
-      exact_mod_cast Nat.mul_le_mul_left 4 (by
-        exact_mod_cast D.selected_gammaBoundary_le_graphError n)
+      exact mul_le_mul_of_nonneg_left
+        (D.selected_gammaBoundary_le_graphError n) (by norm_num)
 
 theorem induced_to_selected_edit_le (n : ℕ) :
     (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
@@ -167,10 +171,9 @@ theorem induced_to_selected_edit_le (n : ℕ) :
     (Equiv.refl _) (D.selectedImageEquiv n)
   rw [htransport]
   calc
-    _ ≤ 2 * WI.unmatchedCount := hw
+    _ ≤ 2 * WI.unmatchedCount := by exact_mod_cast hw
     _ ≤ 2 * D.localGammaEditError n (D.selectedComponent n) := by
-      apply Nat.mul_le_mul_left
-      exact_mod_cast hlocal
+      exact_mod_cast Nat.mul_le_mul_left 2 hlocal
 
 noncomputable def localizedGammaAct (n : ℕ) (g : Γ) :
     Equiv.Perm (D.selectedSubset n) :=
@@ -192,15 +195,30 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
       (fun n ↦ ?_) (D.selectedComponent_error 0)
     apply div_le_div_of_nonneg_right
     · have h := D.gammaCompletion_disagreement_bound n t
-      exact_mod_cast h.trans (by
-        have hsingle : (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+      have hReal : ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+          (D.gammaCompletion n t x : D.approximation.model (D.matchingIndex n)) ≠
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x).card : ℝ) ≤
+          ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x ∉
+              (D.selectedComponent n).block).card : ℝ) := by
+        exact_mod_cast h
+      have hsingleNat : (Finset.univ.filter
+          (fun x : (D.selectedComponent n).block ↦
           D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x ∉
-            (D.selectedComponent n).block).card ≤
-            D.localGammaBoundaryError n (D.selectedComponent n) := by
-          unfold localGammaBoundaryError
-          exact_mod_cast Finset.single_le_sum
-            (fun g _ ↦ by positivity) (Finset.mem_attach _ ht)
-        exact hsingle.trans (by unfold componentSelectionError localGraphBaseError; positivity))
+            (D.selectedComponent n).block)).card ≤
+            ∑ g : D.setup.generatorsΓ,
+              (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+                D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g.1) x ∉
+                  (D.selectedComponent n).block).card :=
+          Finset.single_le_sum (fun _ _ ↦ by positivity) (Finset.mem_attach _ ht)
+      have hsingle : ((Finset.univ.filter
+          (fun x : (D.selectedComponent n).block ↦
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x ∉
+              (D.selectedComponent n).block)).card : ℝ) ≤
+          D.localGraphBaseError n (D.selectedComponent n) := by
+        exact (by exact_mod_cast hsingleNat).trans
+          (D.selected_gammaBoundary_le_graphError n)
+      exact hReal.trans (hsingle.trans (by unfold componentSelectionError; positivity))
     · positivity
   have hsource' : Vanishing fun n ↦
       ((Finset.univ.filter fun y : D.selectedSubset n ↦
@@ -246,32 +264,53 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
     refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
       (fun n ↦ ?_) (D.selectedComponent_error 0)
     apply div_le_div_of_nonneg_right
-    · unfold componentSelectionError localGraphBaseError localConjugacyGraphError
-      have hterm := Finset.single_le_sum
-        (fun g _ ↦ by positivity) (Finset.mem_attach _ ht)
-      positivity
+    · have htermNat : (Finset.univ.filter
+          (fun x : (D.selectedComponent n).block ↦
+            (x : D.approximation.model (D.matchingIndex n)) ∈
+              D.approximation.conjugacyError (D.matchingIndex n)
+                D.setup.distinguished (D.setup.embedΓ t))).card ≤
+            ∑ g : D.setup.generatorsΓ,
+              (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+                (x : D.approximation.model (D.matchingIndex n)) ∈
+                  D.approximation.conjugacyError (D.matchingIndex n)
+                    D.setup.distinguished (D.setup.embedΓ g.1)).card :=
+        Finset.single_le_sum (fun _ _ ↦ by positivity) (Finset.mem_attach _ ht)
+      have hterm : ((Finset.univ.filter
+          (fun x : (D.selectedComponent n).block ↦
+            (x : D.approximation.model (D.matchingIndex n)) ∈
+              D.approximation.conjugacyError (D.matchingIndex n)
+                D.setup.distinguished (D.setup.embedΓ t))).card : ℝ) ≤
+          D.localConjugacyGraphError n (D.selectedComponent n) := by
+        unfold localConjugacyGraphError
+        exact_mod_cast htermNat
+      exact hterm.trans (by
+        unfold componentSelectionError localGraphBaseError
+        positivity)
     · positivity
   have hall := Vanishing.add hA (Vanishing.add hsource' (by
     simpa [D.selectedSubset_card] using hconj))
   refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
     (fun n ↦ ?_) hall
-  apply div_le_div_of_nonneg_right
-  · let E₀ := Finset.univ.filter fun y : D.selectedSubset n ↦
+  let E₀ := Finset.univ.filter fun y : D.selectedSubset n ↦
         (D.localizedGammaAct n t y :
             D.approximation.model (D.matchingIndex n)) ≠
           D.localizedProductAct n (t, 1) y
-    let E₁ := Finset.univ.filter fun y : D.selectedSubset n ↦
+  let E₁ := Finset.univ.filter fun y : D.selectedSubset n ↦
         (D.transportedGammaCompletion n t y :
             D.approximation.model (D.matchingIndex n)) ≠
           D.distinguishedPerm (D.matchingIndex n)
             (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
               ((D.selectedImageEquiv n).symm y))
-    let E₂ := Finset.univ.filter fun y : D.selectedSubset n ↦
+  let E₂ := Finset.univ.filter fun y : D.selectedSubset n ↦
         ((D.selectedImageEquiv n).symm y :
             D.approximation.model (D.matchingIndex n)) ∈
           D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t)
-    have hsubset : (Finset.univ.filter fun y : D.selectedSubset n ↦
+  let EΓ := Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+        (x : D.approximation.model (D.matchingIndex n)) ∈
+          D.approximation.conjugacyError (D.matchingIndex n)
+            D.setup.distinguished (D.setup.embedΓ t)
+  have hsubset : (Finset.univ.filter fun y : D.selectedSubset n ↦
         D.localizedGammaAct n t y ≠ D.transportedGammaCompletion n t y) ⊆
         E₀ ∪ (E₁ ∪ E₂) := by
       intro y hy
@@ -305,11 +344,35 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
           rw [hyq] at hgood
           rw [localizedProductAct, hprod]
           exact hgood.symm))
-    have hcard := (Finset.card_le_card hsubset).trans
-      ((Finset.card_union_le E₀ (E₁ ∪ E₂)).trans
-        (Nat.add_le_add_left (Finset.card_union_le E₁ E₂) E₀.card))
-    exact_mod_cast hcard
-  · positivity
+  have hcard := (Finset.card_le_card hsubset).trans
+    ((Finset.card_union_le E₀ (E₁ ∪ E₂)).trans
+      (Nat.add_le_add_left (Finset.card_union_le E₁ E₂) E₀.card))
+  have hE₂card : E₂.card = EΓ.card := by
+    apply Finset.card_bij (fun y _ ↦ (D.selectedImageEquiv n).symm y)
+    · intro y hy
+      simpa only [E₂, EΓ, Finset.mem_filter, Finset.mem_univ, true_and] using hy
+    · intro y _ z _ hyz
+      exact (D.selectedImageEquiv n).symm.injective hyz
+    · intro x hx
+      refine ⟨D.selectedImageEquiv n x, ?_,
+        (D.selectedImageEquiv n).symm_apply_apply x⟩
+      simpa only [E₂, EΓ, Finset.mem_filter, Finset.mem_univ, true_and,
+        Equiv.symm_apply_apply] using hx
+  rw [hE₂card] at hcard
+  calc
+    ((Finset.univ.filter fun y : D.selectedSubset n ↦
+        D.localizedGammaAct n t y ≠ D.transportedGammaCompletion n t y).card : ℝ) /
+        (D.selectedSubset n).card ≤
+        ((E₀.card + E₁.card + EΓ.card : ℕ) : ℝ) /
+          (D.selectedSubset n).card := by
+      apply div_le_div_of_nonneg_right
+      · exact_mod_cast hcard
+      · positivity
+    _ = (E₀.card : ℝ) / (D.selectedSubset n).card +
+        ((E₁.card : ℝ) / (D.selectedSubset n).card +
+          (EΓ.card : ℝ) / (D.selectedSubset n).card) := by
+      push_cast
+      ring
 
 theorem localized_to_completed_edit_negligible :
     Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦
@@ -346,20 +409,35 @@ theorem completed_to_selected_edit_negligible :
     · positivity
   have hbound := Vanishing.const_mul 6 hbase
   refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
-    (fun n ↦ ?_) (by simpa [D.selectedSubset_card] using hbound)
-  apply div_le_div_of_nonneg_right
-  · have htri := FiniteMultiGraph.editDistance_triangle
-      (D.completedGammaGraph n) (D.transportedInducedGammaGraph n)
-      (D.selectedGraph n) (Equiv.refl _) (Equiv.refl _)
-    have h₁ := D.completed_to_induced_edit_le n
-    have h₂ := D.induced_to_selected_edit_le n
-    exact_mod_cast htri.trans (by
-      have : D.localGammaEditError n (D.selectedComponent n) ≤
-          D.localGraphBaseError n (D.selectedComponent n) := by
-        unfold localGraphBaseError
-        positivity
-      linarith)
-  · positivity
+    (fun n ↦ ?_) hbound
+  rw [D.selectedSubset_card]
+  calc
+    ((D.completedGammaGraph n).editDistance (D.selectedGraph n)
+        (Equiv.refl _) : ℝ) / (D.selectedComponent n).block.card ≤
+        (6 * D.localGraphBaseError n (D.selectedComponent n)) /
+          (D.selectedComponent n).block.card := by
+      apply div_le_div_of_nonneg_right
+      · have htri := FiniteMultiGraph.editDistance_triangle
+          (D.completedGammaGraph n) (D.transportedInducedGammaGraph n)
+          (D.selectedGraph n) (Equiv.refl _) (Equiv.refl _)
+        have h₁ := D.completed_to_induced_edit_le n
+        have h₂ := D.induced_to_selected_edit_le n
+        have htriReal :
+            ((D.completedGammaGraph n).editDistance (D.selectedGraph n)
+              (Equiv.refl _) : ℝ) ≤
+              ((D.completedGammaGraph n).editDistance
+                (D.transportedInducedGammaGraph n) (Equiv.refl _) : ℝ) +
+              ((D.transportedInducedGammaGraph n).editDistance
+                (D.selectedGraph n) (Equiv.refl _) : ℝ) := by
+          exact_mod_cast htri
+        have hedit : D.localGammaEditError n (D.selectedComponent n) ≤
+            D.localGraphBaseError n (D.selectedComponent n) := by
+          unfold localGraphBaseError
+          positivity
+        linarith
+      · positivity
+    _ = 6 * (D.localGraphBaseError n (D.selectedComponent n) /
+        (D.selectedComponent n).block.card) := by ring
 
 theorem selectedGraph_edit_negligible :
     Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦

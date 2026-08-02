@@ -23,6 +23,43 @@ def smallBlockVertices {Y : FiniteModel} (P : BlockStructure Y) (M : ℕ) :
     Finset Y :=
   Finset.univ.filter fun x ↦ P.size x ≤ M
 
+/-- The cardinality of the bounded-block locus is the sum of the sizes of
+the distinct bounded blocks. -/
+theorem sum_smallBlock_card {Y : FiniteModel} (P : BlockStructure Y) (M : ℕ) :
+    (∑ B : BlockIndex P,
+      if (B.block.card : ℝ) ≤ M then (B.block.card : ℝ) else 0) =
+      ((smallBlockVertices P M).card : ℝ) := by
+  classical
+  unfold smallBlockVertices
+  rw [← BlockIndex.sum_card_filter P (fun x ↦ P.size x ≤ M)]
+  apply Finset.sum_congr rfl
+  intro B _
+  have hsize (x : indexedBlockModel P B) : P.size x.1 = B.block.card := by
+    unfold BlockStructure.size
+    exact congrArg Finset.card
+      ((P.eq_of_mem (BlockIndex.representative P B) x.1 (by
+        simpa only [BlockIndex.block_representative] using x.2)).trans
+        (BlockIndex.block_representative P B))
+  by_cases hB : (B.block.card : ℝ) ≤ M
+  · have hBnat : B.block.card ≤ M := by exact_mod_cast hB
+    rw [if_pos hB]
+    have hall : Finset.univ.filter (fun x : indexedBlockModel P B ↦
+        P.size x.1 ≤ M) = Finset.univ := by
+      apply Finset.filter_eq_self.mpr
+      intro x _
+      simpa only [hsize x] using hBnat
+    rw [hall]
+    simp only [Finset.card_univ, Fintype.card_coe]
+  · have hBnat : ¬ B.block.card ≤ M := by exact_mod_cast hB
+    rw [if_neg hB]
+    have hempty : Finset.univ.filter (fun x : indexedBlockModel P B ↦
+        P.size x.1 ≤ M) = ∅ := by
+      rw [Finset.filter_eq_empty_iff]
+      intro x _
+      simpa only [hsize x] using hBnat
+    rw [hempty]
+    simp
+
 namespace SoficApproximation
 
 variable (S : SoficApproximation G)

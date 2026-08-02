@@ -133,6 +133,12 @@ end Vanishing
 
 namespace Diverges
 
+theorem congr {a b : ℕ → ℝ} (ha : Diverges a) (hab : ∀ n, a n = b n) :
+    Diverges b := by
+  intro M
+  obtain ⟨N, hN⟩ := ha M
+  exact ⟨N, fun n hn ↦ by rw [← hab n]; exact hN n hn⟩
+
 /-- Removing finitely many initial terms preserves divergence. -/
 theorem shift {a : ℕ → ℝ} (ha : Diverges a) (k : ℕ) :
     Diverges fun n ↦ a (n + k) := by

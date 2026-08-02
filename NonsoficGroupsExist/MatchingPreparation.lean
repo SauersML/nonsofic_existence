@@ -34,6 +34,11 @@ noncomputable def distinguishedTransport (n : ℕ) :
   change D.approximation.model n ≃ D.approximation.model n
   exact D.distinguishedPerm n
 
+@[simp] theorem distinguishedTransport_apply (n : ℕ)
+    (x : (D.approximation.comap D.setup.embedΓ D.setup.embedΓ_injective).model n) :
+    D.distinguishedTransport n x = D.distinguishedPerm n x := by
+  rfl
+
 noncomputable abbrev matchTarget (n : ℕ)
   (B : D.gammaDecomposition.componentIndex n) :
     Finset (D.approximation.model n) :=
