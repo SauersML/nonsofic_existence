@@ -263,11 +263,15 @@ theorem induced_to_selected_edit_le (n : ℕ) :
       (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
           (Equiv.refl (D.selectedFiniteModel n)) =
         (D.inducedGammaGraph n).editDistance
-          ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
+          ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
+            (D.selectedComponent n).block)
           (Equiv.refl _) := by
     simpa only [transportedInducedGammaGraph, selectedGraph, selectedGraphEquiv]
       using htransport
   rw [htransport']
+  change ((D.inducedGammaGraph n).editDistance
+      ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
+        (Equiv.refl _) : ℝ) ≤ _
   have hlocalReal : (WI.unmatchedCount : ℝ) ≤
       D.localGammaEditError n (D.selectedComponent n) := by
     unfold localGammaEditError
@@ -285,23 +289,31 @@ noncomputable def gammaCompletionDisagreement (n : ℕ) (t : Γ) :
   Finset.univ.filter fun x ↦
     (D.gammaCompletion n t x).1 ≠ D.gammaAct n t x.1
 
+noncomputable def gammaBoundaryDisagreement (n : ℕ) (t : Γ) :
+    Finset (D.selectedComponent n).block :=
+  Finset.univ.filter fun x ↦
+    D.gammaAct n t x.1 ∉ (D.selectedComponent n).block
+
 noncomputable def selectedConjugacyError (n : ℕ) (t : Γ) :
     Finset (D.selectedComponent n).block :=
   Finset.univ.filter fun x ↦
     x.1 ∈ D.approximation.conjugacyError (D.matchingIndex n)
       D.setup.distinguished (D.setup.embedΓ t)
 
-theorem gammaCompletion_disagreement_le_selectionError (n : ℕ) (t : Γ)
-    (ht : t ∈ D.setup.generatorsΓ) :
+noncomputable def selectedError (n : ℕ) : ℝ :=
+  D.componentSelectionError 0 n (D.selectedComponent n)
+
+theorem gammaCompletionDisagreement_card_le (n : ℕ) (t : Γ) :
     (D.gammaCompletionDisagreement n t).card ≤
-      D.componentSelectionError 0 n (D.selectedComponent n) := by
-  unfold gammaCompletionDisagreement
-  have h := D.gammaCompletion_disagreement_bound n t
-  have hReal : ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-        (D.gammaCompletion n t x).1 ≠ D.gammaAct n t x.1).card : ℝ) ≤
-        ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
-          D.gammaAct n t x.1 ∉ (D.selectedComponent n).block).card : ℝ) := by
-    exact_mod_cast h
+      (D.gammaBoundaryDisagreement n t).card := by
+  unfold gammaCompletionDisagreement gammaBoundaryDisagreement
+  exact D.gammaCompletion_disagreement_bound n t
+
+theorem gammaBoundaryDisagreement_le_graphError (n : ℕ) (t : Γ)
+    (ht : t ∈ D.setup.generatorsΓ) :
+    ((D.gammaBoundaryDisagreement n t).card : ℝ) ≤
+      D.localGraphBaseError n (D.selectedComponent n) := by
+  unfold gammaBoundaryDisagreement
   have hsingleNat : (Finset.univ.filter
       (fun x : (D.selectedComponent n).block ↦
         D.gammaAct n t x.1 ∉ (D.selectedComponent n).block)).card ≤
@@ -313,13 +325,18 @@ theorem gammaCompletion_disagreement_le_selectionError (n : ℕ) (t : Γ)
         (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
           D.gammaAct n g.1 x.1 ∉ (D.selectedComponent n).block).card)
       (fun _ _ ↦ Nat.zero_le _) (Finset.mem_attach _ ht)
-  have hsingle : ((Finset.univ.filter
-      (fun x : (D.selectedComponent n).block ↦
-        D.gammaAct n t x.1 ∉ (D.selectedComponent n).block)).card : ℝ) ≤
-      D.localGraphBaseError n (D.selectedComponent n) := by
-    exact (by exact_mod_cast hsingleNat).trans
-      (D.selected_gammaBoundary_le_graphError n)
-  exact hReal.trans (hsingle.trans
+  exact (by exact_mod_cast hsingleNat).trans
+    (D.selected_gammaBoundary_le_graphError n)
+
+theorem gammaCompletion_disagreement_le_selectionError (n : ℕ) (t : Γ)
+    (ht : t ∈ D.setup.generatorsΓ) :
+    (D.gammaCompletionDisagreement n t).card ≤
+      D.selectedError n := by
+  unfold selectedError
+  have hcompletion : ((D.gammaCompletionDisagreement n t).card : ℝ) ≤
+      (D.gammaBoundaryDisagreement n t).card := by
+    exact_mod_cast D.gammaCompletionDisagreement_card_le n t
+  exact hcompletion.trans ((D.gammaBoundaryDisagreement_le_graphError n t ht).trans
     (D.localGraphBaseError_le_componentSelectionError 0 n
       (D.selectedComponent n)))
 
@@ -331,7 +348,7 @@ theorem gammaCompletion_disagreement_negligible (t : Γ)
   refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
     (fun n ↦ div_le_div_of_nonneg_right
       (D.gammaCompletion_disagreement_le_selectionError n t ht) (by positivity))
-    (D.selectedComponent_error 0)
+    (by simpa only [selectedError] using D.selectedComponent_error 0)
 
 theorem transportedGammaCompletion_source_disagreement_negligible (t : Γ)
     (ht : t ∈ D.setup.generatorsΓ) :
@@ -373,7 +390,8 @@ theorem transportedGammaCompletion_source_disagreement_negligible (t : Γ)
 theorem selected_conjugacyError_le_selectionError (n : ℕ) (t : Γ)
     (ht : t ∈ D.setup.generatorsΓ) :
     (D.selectedConjugacyError n t).card ≤
-      D.componentSelectionError 0 n (D.selectedComponent n) := by
+      D.selectedError n := by
+  unfold selectedError
   unfold selectedConjugacyError
   have htermNat : (Finset.univ.filter
       (fun x : (D.selectedComponent n).block ↦
@@ -419,7 +437,7 @@ theorem selected_conjugacyError_negligible (t : Γ)
   refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
     (fun n ↦ div_le_div_of_nonneg_right
       (D.selected_conjugacyError_le_selectionError n t ht) (by positivity))
-    (D.selectedComponent_error 0)
+    (by simpa only [selectedError] using D.selectedComponent_error 0)
 
 theorem localized_to_completed_disagreement_negligible (t : Γ)
     (ht : t ∈ D.setup.generatorsΓ) :
@@ -527,11 +545,13 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
       dsimp only [E₀, E₁, EΓ, localizedGammaAct]
       exact le_rfl
 
+noncomputable def localizedGammaGraph (n : ℕ) : FiniteMultiGraph :=
+  generatorGraph (D.selectedFiniteModel n) D.setup.generatorsΓ
+    (D.localizedGammaAct n)
+
 theorem localized_to_completed_edit_negligible :
     Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦
-      ((generatorGraph
-        (D.selectedFiniteModel n)
-        D.setup.generatorsΓ (D.localizedGammaAct n)).editDistance
+      ((D.localizedGammaGraph n).editDistance
           (D.completedGammaGraph n) (Equiv.refl (D.selectedFiniteModel n)) : ℕ) := by
   have hsum := Negligible.sum (Finset.univ : Finset D.setup.generatorsΓ)
     (fun t n ↦ ((Finset.univ.filter fun y : D.selectedSubset n ↦
@@ -581,12 +601,15 @@ theorem completed_to_selected_edit_negligible :
             (Equiv.refl (D.selectedFiniteModel n))
         have h₁ := D.completed_to_induced_edit_le n
         have h₂ := D.induced_to_selected_edit_le n
-        have hrefl : (Equiv.refl (D.selectedFiniteModel n)).trans
-            (Equiv.refl (D.selectedFiniteModel n)) =
-              Equiv.refl (D.selectedFiniteModel n) := by
-          ext x
-          rfl
-        rw [hrefl] at htri
+        have htri' :
+            (D.completedGammaGraph n).editDistance (D.selectedGraph n)
+                (Equiv.refl (D.selectedFiniteModel n)) ≤
+              (D.completedGammaGraph n).editDistance
+                  (D.transportedInducedGammaGraph n)
+                    (Equiv.refl (D.selectedFiniteModel n)) +
+                (D.transportedInducedGammaGraph n).editDistance
+                  (D.selectedGraph n) (Equiv.refl (D.selectedFiniteModel n)) := by
+          convert htri using 1 <;> ext x <;> rfl
         have htriReal :
             ((D.completedGammaGraph n).editDistance (D.selectedGraph n)
               (Equiv.refl _) : ℝ) ≤
@@ -594,7 +617,7 @@ theorem completed_to_selected_edit_negligible :
                 (D.transportedInducedGammaGraph n) (Equiv.refl _) : ℝ) +
               ((D.transportedInducedGammaGraph n).editDistance
                 (D.selectedGraph n) (Equiv.refl _) : ℝ) := by
-          exact_mod_cast htri
+          exact_mod_cast htri'
         have h₁' :
             ((D.completedGammaGraph n).editDistance
               (D.transportedInducedGammaGraph n)
@@ -626,9 +649,7 @@ theorem completed_to_selected_edit_negligible :
 
 theorem selectedGraph_edit_negligible :
     Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦
-      ((generatorGraph
-        (D.selectedFiniteModel n)
-        D.setup.generatorsΓ (fun g ↦ D.selectedLocalization.completedMap n (g, 1))).editDistance
+      ((D.localizedGammaGraph n).editDistance
           (D.selectedGraph n) (Equiv.refl (D.selectedFiniteModel n)) : ℕ) := by
   have hsum := Negligible.add D.localized_to_completed_edit_negligible
     D.completed_to_selected_edit_negligible
@@ -639,9 +660,7 @@ theorem selectedGraph_edit_negligible :
         (D.selectedComponent n)).card_pos) (fun n ↦ by positivity)
     (fun n ↦ ?_) hsum
   exact_mod_cast FiniteMultiGraph.editDistance_triangle
-    (generatorGraph
-      (D.selectedFiniteModel n)
-      D.setup.generatorsΓ (D.localizedGammaAct n))
+    (D.localizedGammaGraph n)
     (D.completedGammaGraph n) (D.selectedGraph n) (Equiv.refl _) (Equiv.refl _)
 
 end LocalCriterionData
