@@ -190,9 +190,10 @@ theorem completed_to_induced_edit_le (n : ℕ) :
     have hgraph : (D.inducedGammaGraph n).transport (D.selectedFiniteModel n)
         ((Equiv.refl (D.selectedSourceFiniteModel n)).symm.trans
           (D.selectedImageEquiv n)) = D.transportedInducedGammaGraph n := by
-      rw [hequiv]
-      rfl
-    rw [hgraph] at htransport
+      exact (congrArg (fun e ↦
+        (D.inducedGammaGraph n).transport (D.selectedFiniteModel n) e)
+        hequiv).trans rfl
+    cases hgraph
     exact htransport
   rw [hconjugate', htransport']
   calc
@@ -207,8 +208,9 @@ theorem completed_to_induced_edit_le (n : ℕ) :
           (D.selectedComponent n).block).card : ℕ) : ℝ) := by
       exact_mod_cast Nat.mul_le_mul_left 4 hcompletion
     _ ≤ 4 * D.localGraphBaseError n (D.selectedComponent n) := by
-      exact mul_le_mul_of_nonneg_left
-        (D.selected_gammaBoundary_le_graphError n) (by norm_num)
+      apply mul_le_mul_of_nonneg_left _ (by norm_num)
+      push_cast
+      exact D.selected_gammaBoundary_le_graphError n
 
 theorem induced_to_selected_edit_le (n : ℕ) :
     (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
@@ -246,7 +248,7 @@ theorem induced_to_selected_edit_le (n : ℕ) :
         (D.inducedGammaGraph n).editDistance
           ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
           (Equiv.refl _) := by
-    rw [← hgraph]
+    cases hgraph
     simpa only [transportedInducedGammaGraph] using htransport
   rw [htransport']
   have hlocalReal : (WI.unmatchedCount : ℝ) ≤
