@@ -415,6 +415,7 @@ theorem selected_conjugacyError_le_selectionError (n : ℕ) (t : Γ)
       D.localConjugacyGraphError n (D.selectedComponent n) := by
     unfold localConjugacyGraphError
     simp only [selectedConjugacyCount, selectedConjugacyError]
+    exact le_rfl
   have hconjugacyBase : D.localConjugacyGraphError n (D.selectedComponent n) ≤
       D.localGraphBaseError n (D.selectedComponent n) := by
     unfold localGraphBaseError
@@ -550,27 +551,41 @@ noncomputable def localizedGammaGraph (n : ℕ) : FiniteMultiGraph :=
   generatorGraph (D.selectedFiniteModel n) D.setup.generatorsΓ
     (D.localizedGammaAct n)
 
+noncomputable def selectedCard (n : ℕ) : ℝ :=
+  (D.selectedSubset n).card
+
+noncomputable def localizedCompletedEdit (n : ℕ) : ℝ :=
+  (D.localizedGammaGraph n).editDistance (D.completedGammaGraph n)
+    (Equiv.refl (D.selectedFiniteModel n))
+
+noncomputable def completedSelectedEdit (n : ℕ) : ℝ :=
+  (D.completedGammaGraph n).editDistance (D.selectedGraph n)
+    (Equiv.refl (D.selectedFiniteModel n))
+
+noncomputable def localizedSelectedEdit (n : ℕ) : ℝ :=
+  (D.localizedGammaGraph n).editDistance (D.selectedGraph n)
+    (Equiv.refl (D.selectedFiniteModel n))
+
 theorem localized_to_completed_edit_negligible :
-    Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦
-      ((D.localizedGammaGraph n).editDistance
-          (D.completedGammaGraph n) (Equiv.refl (D.selectedFiniteModel n)) : ℕ) := by
+    Negligible D.selectedCard D.localizedCompletedEdit := by
   have hsum := Negligible.sum (Finset.univ : Finset D.setup.generatorsΓ)
     (fun t n ↦ ((Finset.univ.filter fun y : D.selectedSubset n ↦
       D.localizedGammaAct n t.1 y ≠ D.transportedGammaCompletion n t.1 y).card : ℝ))
     (fun t _ ↦ D.localized_to_completed_disagreement_negligible t.1 t.2)
   refine Negligible.mono (fun n ↦ by
+      unfold selectedCard
       rw [D.selectedSubset_card]
       exact_mod_cast (BlockIndex.block_nonempty
         (D.gammaDecomposition.blocks (D.matchingIndex n))
         (D.selectedComponent n)).card_pos)
-    (fun n ↦ by positivity) (fun n ↦ ?_) (Negligible.const_mul 4 hsum)
+    (fun n ↦ by unfold localizedCompletedEdit; positivity) (fun n ↦ ?_)
+      (Negligible.const_mul 4 hsum)
+  unfold localizedCompletedEdit localizedGammaGraph
   exact_mod_cast GeneratorGraphEditing.editDistance_le D.setup.generatorsΓ
     (D.localizedGammaAct n) (D.transportedGammaCompletion n)
 
 theorem completed_to_selected_edit_negligible :
-    Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦
-      ((D.completedGammaGraph n).editDistance (D.selectedGraph n)
-        (Equiv.refl (D.selectedFiniteModel n)) : ℕ) := by
+    Negligible D.selectedCard D.completedSelectedEdit := by
   have hbase : Vanishing fun n ↦
       D.localGraphBaseError n (D.selectedComponent n) /
         (D.selectedComponent n).block.card := by
@@ -582,8 +597,11 @@ theorem completed_to_selected_edit_negligible :
         (D.selectedComponent n)
     · positivity
   have hbound := Vanishing.const_mul 6 hbase
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ by
+      unfold completedSelectedEdit selectedCard
+      positivity)
     (fun n ↦ ?_) hbound
+  unfold completedSelectedEdit selectedCard
   change (((D.completedGammaGraph n).editDistance (D.selectedGraph n)
       (Equiv.refl (D.selectedFiniteModel n)) : ℕ) : ℝ) /
         ((D.selectedSubset n).card : ℝ) ≤
@@ -660,17 +678,19 @@ theorem completed_to_selected_edit_negligible :
         (D.selectedComponent n).block.card) := by ring
 
 theorem selectedGraph_edit_negligible :
-    Negligible (fun n ↦ ((D.selectedSubset n).card : ℝ)) fun n ↦
-      ((D.localizedGammaGraph n).editDistance
-          (D.selectedGraph n) (Equiv.refl (D.selectedFiniteModel n)) : ℕ) := by
+    Negligible D.selectedCard D.localizedSelectedEdit := by
   have hsum := Negligible.add D.localized_to_completed_edit_negligible
     D.completed_to_selected_edit_negligible
   refine Negligible.mono (fun n ↦ by
+      unfold selectedCard
       rw [D.selectedSubset_card]
       exact_mod_cast (BlockIndex.block_nonempty
         (D.gammaDecomposition.blocks (D.matchingIndex n))
-        (D.selectedComponent n)).card_pos) (fun n ↦ by positivity)
+        (D.selectedComponent n)).card_pos) (fun n ↦ by
+          unfold localizedSelectedEdit
+          positivity)
     (fun n ↦ ?_) hsum
+  unfold localizedSelectedEdit localizedCompletedEdit completedSelectedEdit
   exact_mod_cast FiniteMultiGraph.editDistance_triangle
     (D.localizedGammaGraph n)
     (D.completedGammaGraph n) (D.selectedGraph n) (Equiv.refl _) (Equiv.refl _)
