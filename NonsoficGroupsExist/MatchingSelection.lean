@@ -49,8 +49,18 @@ theorem sum_componentPredicateCount_le (n : ℕ)
       ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
         ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p (q x.1)).card : ℝ) := by
     unfold componentPredicateCount
-    exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
-      (fun _ _ _ ↦ by positivity)
+    simpa only [q] using
+      (Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.subset_univ (D.acceptableComponents (D.matchingIndex n)
+          (D.matchingThreshold (D.matchingIndex n))))
+        (fun _ _ _ ↦ by positivity) :
+          (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
+            (D.matchingThreshold (D.matchingIndex n)),
+              ((Finset.univ.filter fun x : indexedBlockModel P B ↦
+                p (D.distinguishedPerm (D.matchingIndex n) x.1)).card : ℝ)) ≤
+          ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
+            ((Finset.univ.filter fun x : indexedBlockModel P B ↦
+              p (D.distinguishedPerm (D.matchingIndex n) x.1)).card : ℝ))
   have hpartition := BlockIndex.sum_card_filter P (fun x ↦ p (q x))
   have hpreimage : ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) =
       ((Finset.univ.filter p).card : ℝ) := by
@@ -166,6 +176,7 @@ theorem localFixedError_nonneg (n i : ℕ)
   unfold localFixedError componentPredicateCount
   split_ifs <;> positivity
 
+omit [Countable Γ] [Countable J] in
 theorem localGraphBaseError_nonneg (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) :
     0 ≤ D.localGraphBaseError n B := by
@@ -233,7 +244,8 @@ theorem sum_localInvariantError_negligible (i : ℕ) :
       ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), D.localInvariantError n i B := by
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
-    (fun n ↦ by positivity) (fun n ↦ ?_)
+    (fun n ↦ Finset.sum_nonneg fun B _ ↦ D.localInvariantError_nonneg n i B)
+    (fun n ↦ ?_)
     (D.transportedBlocks_almost_invariant (D.productEnumeration i))
   simpa only [localInvariantError] using D.sum_componentPredicateCount_mem_le n
     (wordCrossing (D.transportedBlocks n)
@@ -249,7 +261,8 @@ theorem sum_localMultiplicationError_negligible (i j : ℕ) :
   have hglobal := Negligible.shift
     (D.approximation.multiplicationError_negligible gi gj) D.matchingStart
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
-    (fun n ↦ by positivity) (fun n ↦ ?_) hglobal
+    (fun n ↦ Finset.sum_nonneg fun B _ ↦
+      D.localMultiplicationError_nonneg n i j B) (fun n ↦ ?_) hglobal
   simpa only [localMultiplicationError, gi, gj, matchingIndex] using
     D.sum_componentPredicateCount_mem_le n
       (D.approximation.multiplicationError (D.matchingIndex n) gi gj)
@@ -268,12 +281,14 @@ theorem sum_localFixedError_negligible (i : ℕ) :
       (D.approximation.fixedError_negligible
         (D.setup.productEmbedding (D.productEnumeration i)) himage) D.matchingStart
     refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
-      (fun n ↦ by positivity) (fun n ↦ ?_) hglobal
+      (fun n ↦ Finset.sum_nonneg fun B _ ↦ D.localFixedError_nonneg n i B)
+      (fun n ↦ ?_) hglobal
     simpa only [localFixedError, hi, if_false, matchingIndex] using
       D.sum_componentPredicateCount_mem_le n
         (D.approximation.fixedError (D.matchingIndex n)
           (D.setup.productEmbedding (D.productEnumeration i)))
 
+omit [Countable Γ] [Countable J] in
 theorem localGraphBaseError_sum_negligible :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
       ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
@@ -297,10 +312,11 @@ theorem localGraphBaseError_sum_negligible :
         (D.matchingIndex n) t.1)).card : ℝ))
     (fun t _ ↦ by
       have ht := hboundaryEach t
-      simpa only [matchingIndex] using ht)
+      simpa only [matchingIndex, wordCrossing] using ht)
   have hbound := Negligible.add (Negligible.add hedit hconj) hboundary
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
-    (fun n ↦ by positivity) (fun n ↦ ?_) hbound
+    (fun n ↦ Finset.sum_nonneg fun B _ ↦ D.localGraphBaseError_nonneg n B)
+    (fun n ↦ ?_) hbound
   let P := D.gammaDecomposition.blocks (D.matchingIndex n)
   let W := D.gammaDecomposition.editWitness (D.matchingIndex n)
   have hsourceAll := BlockIndex.sum_card_filter_mem_block P W.sourceUnmatched
@@ -318,12 +334,12 @@ theorem localGraphBaseError_sum_negligible :
         (D.matchingThreshold (D.matchingIndex n)), D.localGammaEditError n B) ≤
         ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
           D.localGammaEditError n B :=
-      Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ by unfold localGammaEditError; positivity)
     unfold localGammaEditError at hsub
     simp_rw [Finset.sum_add_distrib] at hsub
-    have hsourceReal : (∑ C,
-        (((W.sourceUnmatched.filter fun e ↦
+    have hsourceReal : (∑ C : BlockIndex P,
+        ((W.sourceUnmatched.filter fun e ↦
           (generatorGraph
             ((D.setup.gammaApproximation D.approximation).model (D.matchingIndex n))
             D.setup.generatorsΓ
@@ -331,8 +347,8 @@ theorem localGraphBaseError_sum_negligible :
               (D.matchingIndex n))).first e ∈ C.block).card : ℝ)) ≤
         (W.sourceUnmatched.card : ℝ) := by
       exact_mod_cast hsourceAll
-    have htargetReal : (∑ C,
-        (((W.targetUnmatched.filter fun e ↦
+    have htargetReal : (∑ C : BlockIndex P,
+        ((W.targetUnmatched.filter fun e ↦
           (D.gammaDecomposition.modelGraph (D.matchingIndex n)).first e ∈
             C.block).card : ℝ)) ≤ (W.targetUnmatched.card : ℝ) := by
       exact_mod_cast htargetAll
@@ -356,7 +372,7 @@ theorem localGraphBaseError_sum_negligible :
         ((Finset.univ.filter fun x : indexedBlockModel P B ↦
           x.1 ∈ D.approximation.conjugacyError (D.matchingIndex n)
             D.setup.distinguished (D.setup.embedΓ t.1)).card : ℝ) :=
-      Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ by positivity)
     exact hsub.trans (by
       let E := D.approximation.conjugacyError (D.matchingIndex n)
@@ -384,7 +400,7 @@ theorem localGraphBaseError_sum_negligible :
         ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ)) ≤
         ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
           ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x.1).card : ℝ) :=
-      Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ by positivity)
     rw [BlockIndex.sum_card_filter P] at hsub
     unfold wordCrossing
@@ -449,8 +465,10 @@ theorem componentSelectionError_sum_negligible (r : ℕ) :
     rw [Finset.sum_comm]
   unfold componentSelectionError
   simp_rw [Finset.sum_add_distrib]
-  rw [hinvariant, hmultiplication, hfixed] <;> ring
+  rw [hinvariant, hmultiplication, hfixed]
+  ring
 
+omit [Countable Γ] [Countable J] in
 theorem acceptable_small_mass_negligible (M : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
       ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
@@ -536,12 +554,8 @@ theorem componentPredicateCount_selected (n : ℕ)
       ((D.selectedSubset n).filter p).card := by
   classical
   unfold componentPredicateCount
-  apply Finset.card_bij
-    (s := Finset.univ.filter fun x : indexedBlockModel
-      (D.gammaDecomposition.blocks (D.matchingIndex n)) (D.selectedComponent n) ↦
-        p (D.distinguishedPerm (D.matchingIndex n) x.1))
-    (t := (D.selectedSubset n).filter p)
-    (fun x _ ↦ D.distinguishedTransport (D.matchingIndex n) x.1)
+  refine Finset.card_bij
+    (fun x _ ↦ D.distinguishedTransport (D.matchingIndex n) x.1) ?_ ?_ ?_
   · intro x hx
     rw [Finset.mem_filter] at hx ⊢
     exact ⟨Finset.mem_image.mpr ⟨x.1, x.2, rfl⟩,
@@ -589,6 +603,7 @@ theorem localInvariantError_selected (n i : ℕ) :
         D.localizedProductAct n (D.productEnumeration i) y ∉ D.selectedSubset n).card := by
   rw [localInvariantError, D.componentPredicateCount_selected]
   norm_cast
+  apply congrArg Finset.card
   ext y
   simp only [Finset.mem_filter]
   constructor
@@ -615,6 +630,7 @@ theorem localMultiplicationError_selected (n i j : ℕ) :
             (D.localizedProductAct n (D.productEnumeration j) y)).card := by
   rw [localMultiplicationError, D.componentPredicateCount_selected]
   norm_cast
+  apply congrArg Finset.card
   ext y
   simp [SoficApproximation.multiplicationError, localizedProductAct, map_mul]
 
@@ -625,6 +641,7 @@ theorem localFixedError_selected (n i : ℕ)
         D.localizedProductAct n (D.productEnumeration i) y = y).card := by
   rw [localFixedError, if_neg hi, D.componentPredicateCount_selected]
   norm_cast
+  apply congrArg Finset.card
   ext y
   simp [SoficApproximation.fixedError, localizedProductAct]
 
@@ -685,9 +702,15 @@ theorem multiplicationError_le_selectionError {i j r : ℕ}
   have hj : j ∈ Finset.range (r + 1) := Finset.mem_range.mpr (by omega)
   have hjterm := Finset.single_le_sum
     (fun k _ ↦ D.localMultiplicationError_nonneg n i k (D.selectedComponent n)) hj
-  have hiterm := Finset.single_le_sum
-    (fun k _ ↦ Finset.sum_nonneg fun l _ ↦
-      D.localMultiplicationError_nonneg n k l (D.selectedComponent n)) hi
+  have hiterm : (∑ l ∈ Finset.range (r + 1),
+      D.localMultiplicationError n i l (D.selectedComponent n)) ≤
+      ∑ k ∈ Finset.range (r + 1), ∑ l ∈ Finset.range (r + 1),
+        D.localMultiplicationError n k l (D.selectedComponent n) :=
+    Finset.single_le_sum
+      (f := fun k ↦ ∑ l ∈ Finset.range (r + 1),
+        D.localMultiplicationError n k l (D.selectedComponent n))
+      (fun k _ ↦ Finset.sum_nonneg fun l _ ↦
+        D.localMultiplicationError_nonneg n k l (D.selectedComponent n)) hi
   have hterm := hjterm.trans (by simpa using hiterm)
   have hmatch : 0 ≤ ((D.matchImage (D.matchingIndex n) (D.selectedComponent n) ∆
       D.matchTarget (D.matchingIndex n) (D.selectedComponent n)).card : ℝ) := by
