@@ -582,6 +582,13 @@ theorem selectedSubset_card (n : ℕ) :
   Finset.card_image_of_injective _
     (D.distinguishedTransport (D.matchingIndex n)).injective
 
+/-- The selected transported component, bundled once as a finite model so all
+graph transports use the same structure and instances. -/
+noncomputable def selectedFiniteModel (n : ℕ) : FiniteModel where
+  carrier := D.selectedSubset n
+  fintype := inferInstance
+  decidableEq := inferInstance
+
 theorem componentPredicateCount_selected (n : ℕ)
     (p : D.approximation.model (D.matchingIndex n) → Prop) [DecidablePred p] :
     D.componentPredicateCount n (D.selectedComponent n) p =
@@ -829,8 +836,7 @@ noncomputable def selectedLocalization : LocalizedApproximationData (Γ × J) wh
     positivity
 
 noncomputable def selectedImageEquiv (n : ℕ) :
-    indexedBlockModel (D.gammaDecomposition.blocks (D.matchingIndex n))
-      (D.selectedComponent n) ≃ D.selectedSubset n where
+    (D.selectedComponent n).block ≃ D.selectedSubset n where
   toFun x := ⟨D.distinguishedTransport (D.matchingIndex n) x.1,
     Finset.mem_image.mpr ⟨x.1, x.2, rfl⟩⟩
   invFun y := by
@@ -852,9 +858,7 @@ noncomputable def selectedImageEquiv (n : ℕ) :
 noncomputable def selectedGraph (n : ℕ) : FiniteMultiGraph :=
   ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
     (D.selectedComponent n).block).transport
-      { carrier := D.selectedSubset n
-        fintype := inferInstance
-        decidableEq := inferInstance }
+      (D.selectedFiniteModel n)
       (D.selectedImageEquiv n)
 
 theorem selectedGraph_expands (n : ℕ) :
@@ -862,9 +866,7 @@ theorem selectedGraph_expands (n : ℕ) :
   exact FiniteMultiGraph.transport_hasCheegerLowerBound
     ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
       (D.selectedComponent n).block)
-    { carrier := D.selectedSubset n
-      fintype := inferInstance
-      decidableEq := inferInstance }
+    (D.selectedFiniteModel n)
     (D.selectedImageEquiv n)
     (by
       let y := BlockIndex.representative
