@@ -53,9 +53,16 @@ theorem sum_componentPredicateCount_le (n : ℕ)
         (D.componentPredicateCount n B p : ℝ)) =
         ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) := by
     unfold componentPredicateCount
-    simpa only [q] using BlockIndex.sum_card_filter
+    have hpartition := BlockIndex.sum_card_filter
       (D.gammaDecomposition.blocks (D.matchingIndex n))
       (fun x ↦ p (D.distinguishedPerm (D.matchingIndex n) x))
+    convert hpartition using 1
+    · apply Finset.sum_congr rfl
+      intro B _
+      norm_cast
+      apply congrArg Finset.card
+      ext x
+      simp
   have hpreimage : ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) =
       ((Finset.univ.filter p).card : ℝ) := by
     let A : Finset (D.approximation.model (D.matchingIndex n)) :=
@@ -389,7 +396,8 @@ theorem localGraphBaseError_sum_negligible :
         calc
           _ = ((Finset.univ.filter fun x ↦ x ∈ E).card : ℝ) := hpartition
           _ = (E.card : ℝ) := by
-            congr 1
+            norm_cast
+            apply congrArg Finset.card
             ext x
             simp
           _ = _ := rfl
