@@ -57,12 +57,10 @@ theorem sum_componentPredicateCount_le (n : ℕ)
       (D.gammaDecomposition.blocks (D.matchingIndex n))
       (fun x ↦ p (D.distinguishedPerm (D.matchingIndex n) x))
     convert hpartition using 1
-    · apply Finset.sum_congr rfl
-      intro B _
-      norm_cast
-      apply congrArg Finset.card
-      ext x
-      simp
+    norm_cast
+    apply congrArg Finset.card
+    ext x
+    simp [q]
   have hpreimage : ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) =
       ((Finset.univ.filter p).card : ℝ) := by
     let A : Finset (D.approximation.model (D.matchingIndex n)) :=
