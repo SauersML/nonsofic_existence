@@ -882,7 +882,7 @@ noncomputable def selectedImageEquiv (n : ℕ) :
 noncomputable def selectedGraphEquiv (n : ℕ) :
     (((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
       (D.selectedComponent n).block).vertex) ≃ D.selectedFiniteModel n :=
-  D.selectedImageEquiv n
+  (Equiv.refl _).symm.trans (D.selectedImageEquiv n)
 
 noncomputable def selectedGraph (n : ℕ) : FiniteMultiGraph :=
   ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce

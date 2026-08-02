@@ -227,18 +227,14 @@ theorem induced_to_selected_edit_le (n : ℕ) :
     (D.selectedFiniteModel n)
     (Equiv.refl _) (D.selectedImageEquiv n)
   dsimp only [B] at htransport
-  have hequiv : (Equiv.refl (D.inducedGammaGraph n).vertex).symm.trans
-      (D.selectedImageEquiv n) = D.selectedGraphEquiv n := by
-    ext x
-    rfl
-  rw [hequiv] at htransport
   have htransport' :
       (D.transportedInducedGammaGraph n).editDistance (D.selectedGraph n)
           (Equiv.refl (D.selectedSubset n)) =
         (D.inducedGammaGraph n).editDistance
           ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce B)
           (Equiv.refl _) := by
-    simpa only [transportedInducedGammaGraph, selectedGraph] using htransport
+    simpa only [transportedInducedGammaGraph, selectedGraph, selectedGraphEquiv]
+      using htransport
   rw [htransport']
   have hlocalReal : (WI.unmatchedCount : ℝ) ≤
       D.localGammaEditError n (D.selectedComponent n) := by
