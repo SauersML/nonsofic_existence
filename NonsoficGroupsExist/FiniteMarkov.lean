@@ -17,11 +17,12 @@ variable {Y : FiniteModel}
 
 /-- Finite Markov inequality, with real-valued weights. -/
 theorem threshold_mul_card_le_sum (f : Y → ℝ) (hf : ∀ x, 0 ≤ f x)
-    {η : ℝ} (hη : 0 ≤ η) :
+    {η : ℝ} (_hη : 0 ≤ η) :
     η * ((Finset.univ.filter fun x ↦ η < f x).card : ℝ) ≤ ∑ x, f x := by
   calc
     η * ((Finset.univ.filter fun x ↦ η < f x).card : ℝ) =
-        (Finset.univ.filter fun x ↦ η < f x).sum (fun _ ↦ η) := by simp
+        (Finset.univ.filter fun x ↦ η < f x).sum (fun _ ↦ η) := by
+      simp [mul_comm]
     _ ≤ (Finset.univ.filter fun x ↦ η < f x).sum f := by
       apply Finset.sum_le_sum
       intro x hx
@@ -34,7 +35,7 @@ theorem threshold_mul_card_le_sum (f : Y → ℝ) (hf : ∀ x, 0 ≤ f x)
 of their size carry at most `totalError / η` mass. -/
 theorem threshold_mul_badBlockMass_le
     (P : BlockStructure Y) (e : BlockIndex P → ℝ)
-    (he : ∀ B, 0 ≤ e B) {η : ℝ} (hη : 0 ≤ η) :
+    (he : ∀ B, 0 ≤ e B) {η : ℝ} (_hη : 0 ≤ η) :
     η * (Finset.univ.filter (fun B : BlockIndex P ↦
         η * B.block.card ≤ e B)).sum (fun B ↦ (B.block.card : ℝ)) ≤
       ∑ B, e B := by

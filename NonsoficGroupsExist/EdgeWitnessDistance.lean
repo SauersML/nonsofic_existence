@@ -36,27 +36,65 @@ theorem edgeSetMultiplicity_union {E F : Finset X.edge} (hEF : Disjoint E F)
 theorem sum_edgeSetMultiplicity (E : Finset X.edge) :
     ∑ x, ∑ y, X.edgeSetMultiplicity E x y = 2 * E.card := by
   classical
-  unfold edgeSetMultiplicity
-  simp_rw [Finset.card_eq_sum_ones, Finset.sum_filter]
   calc
-    ∑ x, ∑ y, ∑ a in E,
+    ∑ x, ∑ y, X.edgeSetMultiplicity E x y =
+        ∑ x, ∑ y, E.sum (fun a ↦
         if (X.first a = x ∧ X.second a = y) ∨
-          (X.first a = y ∧ X.second a = x) then 1 else 0 =
-        ∑ x, ∑ a in E, ∑ y,
+          (X.first a = y ∧ X.second a = x) then (1 : ℕ) else 0) := by
+      apply Finset.sum_congr rfl
+      intro x _
+      apply Finset.sum_congr rfl
+      intro y _
+      unfold edgeSetMultiplicity
+      rw [Finset.card_eq_sum_ones, Finset.sum_filter]
+    _ =
+        ∑ x, E.sum (fun a ↦ ∑ y,
           if (X.first a = x ∧ X.second a = y) ∨
-            (X.first a = y ∧ X.second a = x) then 1 else 0 := by
+            (X.first a = y ∧ X.second a = x) then (1 : ℕ) else 0) := by
       apply Finset.sum_congr rfl
       intro x _
       exact Finset.sum_comm
-    _ = ∑ a in E, ∑ x, ∑ y,
+    _ = E.sum (fun a ↦ ∑ x, ∑ y,
           if (X.first a = x ∧ X.second a = y) ∨
-            (X.first a = y ∧ X.second a = x) then 1 else 0 :=
+            (X.first a = y ∧ X.second a = x) then (1 : ℕ) else 0) :=
       Finset.sum_comm
-    _ = ∑ _a in E, 2 := by
+    _ = E.sum (fun _a ↦ (2 : ℕ)) := by
       apply Finset.sum_congr rfl
       intro a _
-      have hne := X.loopless a
-      simp [hne, ne_comm]
+      have hne : X.first a ≠ X.second a := X.loopless a
+      have hpoint (x y : X.vertex) :
+          (if (X.first a = x ∧ X.second a = y) ∨
+              (X.first a = y ∧ X.second a = x) then (1 : ℕ) else 0) =
+            (if X.first a = x ∧ X.second a = y then 1 else 0) +
+              (if X.first a = y ∧ X.second a = x then 1 else 0) := by
+        by_cases hxy : X.first a = x ∧ X.second a = y
+        · by_cases hyx : X.first a = y ∧ X.second a = x
+          · exact (hne (hxy.1.trans hyx.2.symm)).elim
+          · rw [if_pos (Or.inl hxy), if_pos hxy, if_neg hyx, Nat.add_zero]
+        · by_cases hyx : X.first a = y ∧ X.second a = x
+          · rw [if_pos (Or.inr hyx), if_neg hxy, if_pos hyx, Nat.zero_add]
+          · rw [if_neg (not_or_intro hxy hyx), if_neg hxy, if_neg hyx,
+              Nat.zero_add]
+      have hfirst :
+          (∑ x, ∑ y, if X.first a = x ∧ X.second a = y then (1 : ℕ) else 0) =
+            1 := by
+        calc
+          _ = ∑ x, if X.first a = x then (1 : ℕ) else 0 := by
+            apply Finset.sum_congr rfl
+            intro x _
+            by_cases hx : X.first a = x <;> simp [hx]
+          _ = 1 := by simp
+      have hsecond :
+          (∑ x, ∑ y, if X.first a = y ∧ X.second a = x then (1 : ℕ) else 0) =
+            1 := by
+        calc
+          _ = ∑ x, if X.second a = x then (1 : ℕ) else 0 := by
+            apply Finset.sum_congr rfl
+            intro x _
+            by_cases hx : X.second a = x <;> simp [hx]
+          _ = 1 := by simp
+      simp_rw [hpoint, Finset.sum_add_distrib]
+      rw [hfirst, hsecond]
     _ = 2 * E.card := by simp [mul_comm]
 
 /-- Transporting vertices preserves every unordered-pair multiplicity. -/
@@ -84,7 +122,7 @@ theorem editDistance_triangle (X Z W : FiniteMultiGraph)
       intro x _
       apply Finset.sum_le_sum
       intro y _
-      simpa only [Nat.dist] using Nat.dist.triangle_inequality
+      simpa only [Nat.dist, Equiv.trans_apply] using Nat.dist.triangle_inequality
         (X.edgeMultiplicity x y) (Z.edgeMultiplicity (e x) (e y))
           (W.edgeMultiplicity (f (e x)) (f (e y)))
     _ = (∑ x, ∑ y,
@@ -112,18 +150,46 @@ theorem editDistance_transport_right (X Z : FiniteMultiGraph)
   apply Finset.sum_congr rfl
   intro y _
   have h := Z.transport_edgeMultiplicity X.vertex e.symm (e x) (e y)
-  simpa using h
+  have h' : (Z.transport X.vertex e.symm).edgeMultiplicity x y =
+      Z.edgeMultiplicity (e x) (e y) := by simpa using h
+  simp only [Equiv.refl_apply]
+  rw [h']
 
 theorem editDistance_transport_both (X Z : FiniteMultiGraph)
     (W : FiniteModel) (e : X.vertex ≃ Z.vertex) (f : X.vertex ≃ W) :
     (X.transport W f).editDistance (Z.transport W (e.symm.trans f))
       (Equiv.refl W) = X.editDistance Z e := by
   unfold editDistance
-  exact Fintype.sum_equiv f _ _ fun x ↦
-    Fintype.sum_equiv f _ _ fun y ↦ by
+  let F : W → W → ℕ := fun x y ↦
+    ((X.transport W f).edgeMultiplicity x y -
+        (Z.transport W (e.symm.trans f)).edgeMultiplicity x y) +
+      ((Z.transport W (e.symm.trans f)).edgeMultiplicity x y -
+        (X.transport W f).edgeMultiplicity x y)
+  have hsum : (∑ x : W, ∑ y : W, F x y) =
+      ∑ x : X.vertex, ∑ y : X.vertex, F (f x) (f y) := by
+    symm
+    calc
+      (∑ x : X.vertex, ∑ y : X.vertex, F (f x) (f y)) =
+          ∑ x : X.vertex, ∑ y : W, F (f x) y := by
+        apply Finset.sum_congr rfl
+        intro x _
+        exact Fintype.sum_equiv f _ _ fun y ↦ rfl
+      _ = ∑ x : W, ∑ y : W, F x y :=
+        Fintype.sum_equiv f _ _ fun x ↦ rfl
+  change (∑ x : W, ∑ y : W, F x y) = _
+  calc
+    _ = ∑ x : X.vertex, ∑ y : X.vertex, F (f x) (f y) := hsum
+    _ = _ := by
+      apply Finset.sum_congr rfl
+      intro x _
+      apply Finset.sum_congr rfl
+      intro y _
+      dsimp only [F]
       rw [X.transport_edgeMultiplicity W f x y]
       have h := Z.transport_edgeMultiplicity W (e.symm.trans f) (e x) (e y)
-      simpa using h
+      have h' : (Z.transport W (e.symm.trans f)).edgeMultiplicity (f x) (f y) =
+          Z.edgeMultiplicity (e x) (e y) := by simpa using h
+      rw [h']
 
 end FiniteMultiGraph
 
@@ -228,7 +294,6 @@ theorem editDistance_le_two_mul_unmatchedCount :
     _ = (∑ x, ∑ y, X.edgeSetMultiplicity W.sourceUnmatched x y) +
         ∑ x, ∑ y, Z.edgeSetMultiplicity W.targetUnmatched (e x) (e y) := by
       simp_rw [Finset.sum_add_distrib]
-      ring
     _ = 2 * W.sourceUnmatched.card + 2 * W.targetUnmatched.card := by
       rw [X.sum_edgeSetMultiplicity]
       have htransport : (∑ x, ∑ y,

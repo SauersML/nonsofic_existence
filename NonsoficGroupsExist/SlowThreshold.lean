@@ -62,7 +62,8 @@ theorem error_div_slowThreshold_vanishing (r : ℕ → ℝ)
   · let a : ℝ := (slowLevel r n : ℝ) + 1
     have ha : 1 ≤ a := by
       dsimp only [a]
-      positivity
+      have hlevel : (0 : ℝ) ≤ slowLevel r n := by positivity
+      linarith
     have hcube : a ≤ a ^ 3 := by nlinarith [sq_nonneg a]
     calc
       r n / slowThreshold r n = a * r n := by

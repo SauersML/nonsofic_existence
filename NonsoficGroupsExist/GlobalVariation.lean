@@ -65,11 +65,10 @@ theorem normalizedVariation_le_crossings (P Q : BlockStructure Y)
           rw [normalizedSize_eq_of_block_eq P Q hpblock hqblock]
           simp [hP, hQ]
     _ = ((wordCrossing P p).card : ℝ) + (wordCrossing Q p).card := by
-      rw [Finset.sum_add_distrib]
-      simp only [Finset.sum_ite_irrel, Finset.filter_mem_eq_inter,
-        Finset.inter_eq_right.mpr (Finset.subset_univ (wordCrossing P p)),
-        Finset.inter_eq_right.mpr (Finset.subset_univ (wordCrossing Q p))]
-      norm_cast
+      have hcard (A : Finset Y) :
+          (∑ x : Y, if x ∈ A then (1 : ℝ) else 0) = A.card := by
+        simp
+      rw [Finset.sum_add_distrib, hcard, hcard]
 
 /-- Generator-graph variation is bounded by the sum of the variations of its
 labeled permutation arcs.  Removing fixed-point loops changes nothing. -/
@@ -79,19 +78,28 @@ theorem generatorGraph_edgeVariation_le {G : Type} [Group G]
       ∑ t : T, ∑ x : Y, |f (act t.1 x) - f x| := by
   classical
   letI : Fintype T := Fintype.ofFinset T (fun _ ↦ Iff.rfl)
-  let arcs : Finset (T × Y) :=
-    Finset.univ.filter fun p ↦ act p.1.1 p.2 ≠ p.2
-  change (∑ a : ↑arcs, |f (act a.1.1.1 a.1.2) - f a.1.2|) ≤ _
+  let arcs : Finset (T × Y) := Finset.univ.filter fun p ↦ act p.1.1 p.2 ≠ p.2
+  unfold FiniteMultiGraph.edgeVariation
+  dsimp only [generatorGraph]
+  change (∑ a : ↑(Finset.univ.filter fun p : T × Y ↦
+    act p.1.1 p.2 ≠ p.2), |f a.1.2 - f (act a.1.1.1 a.1.2)|) ≤ _
   calc
-    (∑ a : ↑arcs, |f (act a.1.1.1 a.1.2) - f a.1.2|) =
-        ∑ a in arcs, |f (act a.1.1 a.2) - f a.2| := by
-      simpa using Finset.sum_attach arcs
-        (fun a : T × Y ↦ |f (act a.1.1 a.2) - f a.2|)
-    _ ≤ ∑ a : T × Y, |f (act a.1.1 a.2) - f a.2| := by
+    (∑ a : ↑(Finset.univ.filter fun p : T × Y ↦
+      act p.1.1 p.2 ≠ p.2), |f a.1.2 - f (act a.1.1.1 a.1.2)|) =
+        arcs.sum (fun a ↦ |f a.2 - f (act a.1.1 a.2)|) := by
+      simpa [arcs] using Finset.sum_attach arcs
+        (fun a : T × Y ↦ |f a.2 - f (act a.1.1 a.2)|)
+    _ ≤ ∑ a : T × Y, |f a.2 - f (act a.1.1 a.2)| := by
       exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
         (fun _ _ _ ↦ abs_nonneg _)
-    _ = ∑ t : T, ∑ x : Y, |f (act t.1 x) - f x| := by
+    _ = ∑ t : T, ∑ x : Y, |f x - f (act t.1 x)| := by
       rw [Fintype.sum_prod_type]
+    _ = ∑ t : T, ∑ x : Y, |f (act t.1 x) - f x| := by
+      apply Finset.sum_congr rfl
+      intro t _
+      apply Finset.sum_congr rfl
+      intro x _
+      exact abs_sub_comm _ _
 
 namespace LocalCriterionData
 
@@ -99,6 +107,9 @@ variable {G Γ J : Type} [Group G] [Group Γ] [Group J]
 variable (D : LocalCriterionData G Γ J)
 
 abbrev N (n : ℕ) : ℝ := Fintype.card (D.approximation.model n)
+
+theorem N_nonneg (n : ℕ) : 0 ≤ D.N n := by
+  exact_mod_cast Nat.zero_le (Fintype.card (D.approximation.model n))
 
 noncomputable abbrev observable (n : ℕ) : D.approximation.model n → ℝ :=
   normalizedSize (D.gammaDecomposition.blocks n) (D.ambientDecomposition.blocks n)
@@ -112,21 +123,26 @@ theorem embeddedGeneratorVariation_negligible (t : Γ)
   have hinner : Negligible D.N fun n ↦
       ((wordCrossing (D.gammaDecomposition.blocks n)
         (D.approximation.map n (D.setup.embedΓ t))).card : ℝ) := by
-    simpa [CompressionSetup.gammaApproximation] using
-      D.gammaDecomposition.almost_invariant t ht
+    have h := D.gammaDecomposition.almost_invariant t ht
+    change Negligible D.N (fun n ↦
+      ((wordCrossing (D.gammaDecomposition.blocks n)
+        (D.approximation.map n (D.setup.embedΓ t))).card : ℝ)) at h
+    exact h
   have hembed : D.setup.embedΓ t ∈ D.setup.ambientGenerators := by
     classical
-    simp [CompressionSetup.ambientGenerators, ht]
+    unfold CompressionSetup.ambientGenerators
+    exact Finset.mem_union_left _
+      (Finset.mem_union_left _ (Finset.mem_image.mpr ⟨t, ht, rfl⟩))
   have houter : Negligible D.N fun n ↦
       ((wordCrossing (D.ambientDecomposition.blocks n)
         (D.approximation.map n (D.setup.embedΓ t))).card : ℝ) :=
     D.ambientDecomposition.almost_invariant _ hembed
   have hsum := Negligible.add hinner houter
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (D.N_nonneg n))
     (fun n ↦ ?_) hsum
   apply div_le_div_of_nonneg_right
   · exact normalizedVariation_le_crossings _ _ _
-  · positivity
+  · exact D.N_nonneg n
 
 /-- Variation along a compressor is negligible. -/
 theorem compressorVariation_negligible (q : G) (hq : q ∈ D.setup.compressors) :
@@ -139,12 +155,12 @@ theorem compressorVariation_negligible (q : G) (hq : q ∈ D.setup.compressors) 
   have hcross := hall q
   have hbound := Negligible.add (Negligible.const_mul 4 hleak)
     (Negligible.const_mul 2 hcross)
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (D.N_nonneg n))
     (fun n ↦ ?_) hbound
   apply div_le_div_of_nonneg_right
   · exact D.gammaDecomposition.compressorVariation_le
       (D.ambientDecomposition.blocks n) (D.approximation.map n q)
-  · positivity
+  · exact D.N_nonneg n
 
 /-- Variation along an inverse compressor is negligible without modifying the
 approximation. -/
@@ -155,7 +171,7 @@ theorem inverseCompressorVariation_negligible (q : G)
   have hcompressor := D.compressorVariation_negligible q hq
   have hinverse := D.approximation.inverseError_negligible q
   have hsum := Negligible.add hcompressor hinverse
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (D.N_nonneg n))
     (fun n ↦ ?_) hsum
   apply div_le_div_of_nonneg_right
   · have hv := variation_le_of_disagreement
@@ -168,7 +184,7 @@ theorem inverseCompressorVariation_negligible (q : G)
         simpa [SoficApproximation.inverseError] using hx)
     rw [inverse_variation_eq] at hv
     exact hv
-  · positivity
+  · exact D.N_nonneg n
 
 /-- Every label of the ambient generator set has negligible variation. -/
 theorem ambientGeneratorVariation_negligible (g : G)
@@ -197,12 +213,14 @@ theorem generatorGraphVariation_negligible :
     apply Negligible.sum I
     intro g _
     exact D.ambientGeneratorVariation_negligible g.1 g.2
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by
+      unfold FiniteMultiGraph.edgeVariation
+      positivity) (D.N_nonneg n))
     (fun n ↦ ?_) hsum
   apply div_le_div_of_nonneg_right
   · simpa [I] using generatorGraph_edgeVariation_le
       D.setup.ambientGenerators (D.approximation.map n) (D.observable n)
-  · positivity
+  · exact D.N_nonneg n
 
 /-- Edge editing transfers the variation estimate to the ambient expander
 decomposition. -/
@@ -211,14 +229,16 @@ theorem modelGraphVariation_negligible :
       (D.ambientDecomposition.modelGraph n).edgeVariation (D.observable n) := by
   have hsum := Negligible.add D.generatorGraphVariation_negligible
     D.ambientDecomposition.unmatched_negligible
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by
+      unfold FiniteMultiGraph.edgeVariation
+      positivity) (D.N_nonneg n))
     (fun n ↦ ?_) hsum
   apply div_le_div_of_nonneg_right
   · exact (D.ambientDecomposition.editWitness n).targetVariation_le_unmatchedCount
       (D.observable n) (D.observable n) (fun _ ↦ rfl)
       (fun x ↦ normalizedSize_nonneg _ _ x)
       (fun x ↦ (normalizedSize_lt_one _ _ x).le)
-  · positivity
+  · exact D.N_nonneg n
 
 /-- The normalized component-size observable is globally pinned at `1/2`. -/
 theorem normalizedDeviation_negligible :
