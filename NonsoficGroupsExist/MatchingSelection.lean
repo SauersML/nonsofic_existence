@@ -33,6 +33,7 @@ noncomputable def componentPredicateCount (n : ℕ)
   (Finset.univ.filter fun x : B.block ↦
       p (D.distinguishedPerm (D.matchingIndex n) x.1)).card
 
+omit [Countable Γ] [Countable J] in
 theorem sum_componentPredicateCount_le (n : ℕ)
     (p : D.approximation.model (D.matchingIndex n) → Prop) [DecidablePred p] :
     (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
@@ -72,6 +73,7 @@ theorem sum_componentPredicateCount_le (n : ℕ)
     _ = ((Finset.univ.filter fun x ↦ p (q x)).card : ℝ) := hpartition
     _ = ((Finset.univ.filter p).card : ℝ) := hpreimage
 
+omit [Countable Γ] [Countable J] in
 theorem sum_componentPredicateCount_mem_le (n : ℕ)
     (E : Finset (D.approximation.model (D.matchingIndex n))) :
     (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
