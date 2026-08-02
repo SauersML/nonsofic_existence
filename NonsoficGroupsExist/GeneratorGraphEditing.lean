@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.EdgeWitnessDistance
+import NonsoficGroupsExist.Criterion
 
 /-!
 # Editing generator graphs when actions disagree
@@ -21,11 +22,11 @@ variable (T : Finset G) (a b : G → Equiv.Perm Y)
 
 private noncomputable def sourceKept :
     Finset (generatorGraph Y T a).edge :=
-  Finset.univ.filter fun e ↦ a e.1.1.1 e.1.1.2 = b e.1.1.1 e.1.1.2
+  Finset.univ.filter fun e ↦ a e.1.1.1 e.1.2 = b e.1.1.1 e.1.2
 
 private noncomputable def targetKept :
     Finset (generatorGraph Y T b).edge :=
-  Finset.univ.filter fun e ↦ a e.1.1.1 e.1.1.2 = b e.1.1.1 e.1.1.2
+  Finset.univ.filter fun e ↦ a e.1.1.1 e.1.2 = b e.1.1.1 e.1.2
 
 private noncomputable def edgeEquiv :
     sourceKept T a b ≃ targetKept T a b where
@@ -55,35 +56,49 @@ noncomputable def witness : EdgeEditWitness
   edgeEquiv := edgeEquiv T a b
   preservesEndpoints := by
     intro e
-    have hab : a e.1.1.1.1 e.1.1.1.2 = b e.1.1.1.1 e.1.1.1.2 :=
+    have hab : a e.1.1.1.1 e.1.1.2 = b e.1.1.1.1 e.1.1.2 :=
       (Finset.mem_filter.mp e.2).2
     exact Or.inl ⟨rfl, hab⟩
 
 theorem sourceUnmatched_card_le :
     (witness T a b).sourceUnmatched.card ≤
       ∑ t : T, (Finset.univ.filter fun x : Y ↦ a t.1 x ≠ b t.1 x).card := by
-  apply Finset.card_le_card_of_injOn (fun e ↦ e.1.1)
+  classical
+  let bad : Finset (T × Y) := Finset.univ.filter fun p ↦ a p.1.1 p.2 ≠ b p.1.1 p.2
+  have hcard : bad.card =
+      ∑ t : T, (Finset.univ.filter fun x : Y ↦ a t.1 x ≠ b t.1 x).card := by
+    unfold bad
+    rw [Finset.card_eq_sum_ones, Finset.sum_filter, Fintype.sum_prod_type]
+    apply Finset.sum_congr rfl
+    intro t _
+    rw [Finset.card_eq_sum_ones, Finset.sum_filter]
+  rw [← hcard]
+  apply Finset.card_le_card_of_injOn (fun e ↦ e.1)
   · intro e he
-    have hnot : e ∉ sourceKept T a b := (Finset.mem_sdiff.mp he).2
-    have hab : a e.1.1.1 e.1.1.2 ≠ b e.1.1.1 e.1.1.2 := by
-      simpa [sourceKept] using hnot
-    rw [Fintype.sum_subtype]
-    exact Finset.mem_biUnion.mpr ⟨e.1.1.1,
-      ⟨Finset.mem_univ _, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hab⟩⟩⟩
+    have hab : a e.1.1.1 e.1.2 ≠ b e.1.1.1 e.1.2 := by
+      simpa [EdgeEditWitness.sourceUnmatched, witness, sourceKept] using he
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hab⟩
   · intro e _ f _ hef
     exact Subtype.ext hef
 
 theorem targetUnmatched_card_le :
     (witness T a b).targetUnmatched.card ≤
       ∑ t : T, (Finset.univ.filter fun x : Y ↦ a t.1 x ≠ b t.1 x).card := by
-  apply Finset.card_le_card_of_injOn (fun e ↦ e.1.1)
+  classical
+  let bad : Finset (T × Y) := Finset.univ.filter fun p ↦ a p.1.1 p.2 ≠ b p.1.1 p.2
+  have hcard : bad.card =
+      ∑ t : T, (Finset.univ.filter fun x : Y ↦ a t.1 x ≠ b t.1 x).card := by
+    unfold bad
+    rw [Finset.card_eq_sum_ones, Finset.sum_filter, Fintype.sum_prod_type]
+    apply Finset.sum_congr rfl
+    intro t _
+    rw [Finset.card_eq_sum_ones, Finset.sum_filter]
+  rw [← hcard]
+  apply Finset.card_le_card_of_injOn (fun e ↦ e.1)
   · intro e he
-    have hnot : e ∉ targetKept T a b := (Finset.mem_sdiff.mp he).2
-    have hab : a e.1.1.1 e.1.1.2 ≠ b e.1.1.1 e.1.1.2 := by
-      simpa [targetKept] using hnot
-    rw [Fintype.sum_subtype]
-    exact Finset.mem_biUnion.mpr ⟨e.1.1.1,
-      ⟨Finset.mem_univ _, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hab⟩⟩⟩
+    have hab : a e.1.1.1 e.1.2 ≠ b e.1.1.1 e.1.2 := by
+      simpa [EdgeEditWitness.targetUnmatched, witness, targetKept] using he
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hab⟩
   · intro e _ f _ hef
     exact Subtype.ext hef
 
@@ -95,9 +110,11 @@ theorem editDistance_le :
   have hu : (witness T a b).unmatchedCount ≤
       2 * ∑ t : T,
         (Finset.univ.filter fun x : Y ↦ a t.1 x ≠ b t.1 x).card := by
+    have hs := sourceUnmatched_card_le T a b
+    have ht := targetUnmatched_card_le T a b
     unfold EdgeEditWitness.unmatchedCount
     omega
-  omega
+  exact hw.trans (by omega)
 
 end GeneratorGraphEditing
 end NonsoficGroupsExist

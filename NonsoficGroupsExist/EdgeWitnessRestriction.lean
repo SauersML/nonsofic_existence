@@ -17,7 +17,7 @@ variable {X Z : FiniteMultiGraph} {e : X.vertex ≃ Z.vertex}
 noncomputable def inducedVertexEquiv (U : Finset X.vertex) (V : Finset Z.vertex)
     (hUV : ∀ x, x ∈ U ↔ e x ∈ V) : (X.induce U).vertex ≃ (Z.induce V).vertex where
   toFun x := ⟨e x.1, (hUV x.1).mp x.2⟩
-  invFun z := ⟨e.symm z.1, (hUV (e.symm z.1)).mpr (by simpa using z.2)⟩
+  invFun z := ⟨e.symm z.1, (hUV (e.symm z.1)).mpr (by simp [z.2])⟩
   left_inv x := by apply Subtype.ext; simp
   right_inv z := by apply Subtype.ext; simp
 
@@ -79,14 +79,20 @@ private noncomputable def inducedEdgeEquiv :
       invFun := backward
       left_inv := by
         intro a
+        let a' : W.sourceKept :=
+          ⟨a.1.1, (Finset.mem_filter.mp a.2).2⟩
         apply Subtype.ext
         apply Subtype.ext
-        exact W.edgeEquiv.symm_apply_apply _
+        change (W.edgeEquiv.symm (W.edgeEquiv a')).1 = a'.1
+        exact congrArg Subtype.val (W.edgeEquiv.symm_apply_apply a')
       right_inv := by
         intro b
+        let b' : W.targetKept :=
+          ⟨b.1.1, (Finset.mem_filter.mp b.2).2⟩
         apply Subtype.ext
         apply Subtype.ext
-        exact W.edgeEquiv.apply_symm_apply _ }
+        change (W.edgeEquiv (W.edgeEquiv.symm b')).1 = b'.1
+        exact congrArg Subtype.val (W.edgeEquiv.apply_symm_apply b') }
 
 /-- Restriction of an occurrence witness to corresponding induced subgraphs. -/
 noncomputable def induce : EdgeEditWitness (X.induce U) (Z.induce V)
@@ -96,11 +102,25 @@ noncomputable def induce : EdgeEditWitness (X.induce U) (Z.induce V)
   edgeEquiv := W.inducedEdgeEquiv U V hUV
   preservesEndpoints := by
     intro a
-    let a' : W.sourceKept := ⟨a.1.1.1, (Finset.mem_filter.mp a.2).2⟩
+    let a' : W.sourceKept := ⟨a.1.1, (Finset.mem_filter.mp a.2).2⟩
     have hp := W.preservesEndpoints a'
     rcases hp with hp | hp
-    · exact Or.inl ⟨Subtype.ext hp.1, Subtype.ext hp.2⟩
-    · exact Or.inr ⟨Subtype.ext hp.1, Subtype.ext hp.2⟩
+    · left
+      constructor
+      · apply Subtype.ext
+        change e (X.first a'.1) = Z.first (W.edgeEquiv a').1
+        exact hp.1
+      · apply Subtype.ext
+        change e (X.second a'.1) = Z.second (W.edgeEquiv a').1
+        exact hp.2
+    · right
+      constructor
+      · apply Subtype.ext
+        change e (X.first a'.1) = Z.second (W.edgeEquiv a').1
+        exact hp.1
+      · apply Subtype.ext
+        change e (X.second a'.1) = Z.first (W.edgeEquiv a').1
+        exact hp.2
 
 theorem induce_sourceUnmatched_card_le :
     ((W.induce U V hUV).sourceUnmatched).card ≤ W.sourceUnmatched.card := by
