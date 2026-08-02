@@ -34,7 +34,7 @@ theorem sum_smallBlock_card {Y : FiniteModel} (P : BlockStructure Y) (M : ℕ) :
   rw [← BlockIndex.sum_card_filter P (fun x ↦ P.size x ≤ M)]
   apply Finset.sum_congr rfl
   intro B _
-  have hsize (x : indexedBlockModel P B) : P.size x.1 = B.block.card := by
+  have hsize (x : B.block) : P.size x.1 = B.block.card := by
     unfold BlockStructure.size
     exact congrArg Finset.card
       ((P.eq_of_mem (BlockIndex.representative P B) x.1 (by
@@ -43,7 +43,7 @@ theorem sum_smallBlock_card {Y : FiniteModel} (P : BlockStructure Y) (M : ℕ) :
   by_cases hB : (B.block.card : ℝ) ≤ M
   · have hBnat : B.block.card ≤ M := by exact_mod_cast hB
     rw [if_pos hB]
-    have hall : Finset.univ.filter (fun x : indexedBlockModel P B ↦
+    have hall : Finset.univ.filter (fun x : B.block ↦
         P.size x.1 ≤ M) = Finset.univ := by
       apply Finset.filter_eq_self.mpr
       intro x _
@@ -52,7 +52,7 @@ theorem sum_smallBlock_card {Y : FiniteModel} (P : BlockStructure Y) (M : ℕ) :
     simp only [Finset.card_univ, Fintype.card_coe]
   · have hBnat : ¬ B.block.card ≤ M := by exact_mod_cast hB
     rw [if_neg hB]
-    have hempty : Finset.univ.filter (fun x : indexedBlockModel P B ↦
+    have hempty : Finset.univ.filter (fun x : B.block ↦
         P.size x.1 ≤ M) = ∅ := by
       rw [Finset.filter_eq_empty_iff]
       intro x _
