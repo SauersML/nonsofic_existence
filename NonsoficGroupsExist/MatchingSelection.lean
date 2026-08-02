@@ -35,13 +35,13 @@ noncomputable def componentPredicateCount (n : ℕ)
 
 theorem sum_componentPredicateCount_le (n : ℕ)
     (p : D.approximation.model (D.matchingIndex n) → Prop) [DecidablePred p] :
-    (∑ B in D.acceptableComponents (D.matchingIndex n)
+    (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)),
       (D.componentPredicateCount n B p : ℝ)) ≤
         ((Finset.univ.filter p).card : ℝ) := by
   let P := D.gammaDecomposition.blocks (D.matchingIndex n)
   let q := D.distinguishedPerm (D.matchingIndex n)
-  have hsub : (∑ B in D.acceptableComponents (D.matchingIndex n)
+  have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)),
       (D.componentPredicateCount n B p : ℝ)) ≤
       ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
@@ -118,10 +118,10 @@ noncomputable def componentSelectionError (r n : ℕ)
   ((D.matchImage (D.matchingIndex n) B ∆
     D.matchTarget (D.matchingIndex n) B).card : ℝ) +
   D.localGraphBaseError n B +
-  (∑ i in Finset.range (r + 1), D.localInvariantError n i B) +
-  (∑ i in Finset.range (r + 1), ∑ j in Finset.range (r + 1),
+  (∑ i ∈ Finset.range (r + 1), D.localInvariantError n i B) +
+  (∑ i ∈ Finset.range (r + 1), ∑ j ∈ Finset.range (r + 1),
     D.localMultiplicationError n i j B) +
-  ∑ i in Finset.range (r + 1), D.localFixedError n i B
+  ∑ i ∈ Finset.range (r + 1), D.localFixedError n i B
 
 theorem componentSelectionError_nonneg (r n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) :
@@ -138,24 +138,24 @@ theorem componentSelectionError_mono {r r' : ℕ} (hrr : r ≤ r') (n : ℕ)
   have hrange : Finset.range (r + 1) ⊆ Finset.range (r' + 1) :=
     Finset.range_mono (Nat.add_le_add_right hrr 1)
   have hinvariant :
-      (∑ i in Finset.range (r + 1), D.localInvariantError n i B) ≤
-        ∑ i in Finset.range (r' + 1), D.localInvariantError n i B :=
+      (∑ i ∈ Finset.range (r + 1), D.localInvariantError n i B) ≤
+        ∑ i ∈ Finset.range (r' + 1), D.localInvariantError n i B :=
     Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
       unfold localInvariantError componentPredicateCount
       positivity)
   have hmultiplicationInner (i : ℕ) :
-      (∑ j in Finset.range (r + 1), D.localMultiplicationError n i j B) ≤
-        ∑ j in Finset.range (r' + 1), D.localMultiplicationError n i j B :=
+      (∑ j ∈ Finset.range (r + 1), D.localMultiplicationError n i j B) ≤
+        ∑ j ∈ Finset.range (r' + 1), D.localMultiplicationError n i j B :=
     Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
       unfold localMultiplicationError componentPredicateCount
       positivity)
   have hmultiplication :
-      (∑ i in Finset.range (r + 1), ∑ j in Finset.range (r + 1),
+      (∑ i ∈ Finset.range (r + 1), ∑ j ∈ Finset.range (r + 1),
         D.localMultiplicationError n i j B) ≤
-      ∑ i in Finset.range (r' + 1), ∑ j in Finset.range (r' + 1),
+      ∑ i ∈ Finset.range (r' + 1), ∑ j ∈ Finset.range (r' + 1),
         D.localMultiplicationError n i j B := by
     calc
-      _ ≤ ∑ i in Finset.range (r + 1), ∑ j in Finset.range (r' + 1),
+      _ ≤ ∑ i ∈ Finset.range (r + 1), ∑ j ∈ Finset.range (r' + 1),
           D.localMultiplicationError n i j B :=
         Finset.sum_le_sum fun i _ ↦ hmultiplicationInner i
       _ ≤ _ := Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦
@@ -163,8 +163,8 @@ theorem componentSelectionError_mono {r r' : ℕ} (hrr : r ≤ r') (n : ℕ)
           unfold localMultiplicationError componentPredicateCount
           positivity)
   have hfixed :
-      (∑ i in Finset.range (r + 1), D.localFixedError n i B) ≤
-        ∑ i in Finset.range (r' + 1), D.localFixedError n i B :=
+      (∑ i ∈ Finset.range (r + 1), D.localFixedError n i B) ≤
+        ∑ i ∈ Finset.range (r' + 1), D.localFixedError n i B :=
     Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
       unfold localFixedError componentPredicateCount
       split_ifs <;> positivity)
@@ -176,7 +176,7 @@ theorem componentSelectionError_mono {r r' : ℕ} (hrr : r ≤ r') (n : ℕ)
 
 theorem sum_localInvariantError_negligible (i : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), D.localInvariantError n i B := by
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
     (fun n ↦ by positivity) (fun n ↦ ?_)
@@ -187,7 +187,7 @@ theorem sum_localInvariantError_negligible (i : ℕ) :
 
 theorem sum_localMultiplicationError_negligible (i j : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         D.localMultiplicationError n i j B := by
   let gi := D.setup.productEmbedding (D.productEnumeration i)
@@ -201,7 +201,7 @@ theorem sum_localMultiplicationError_negligible (i j : ℕ) :
 
 theorem sum_localFixedError_negligible (i : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), D.localFixedError n i B := by
   by_cases hi : D.productEnumeration i = 1
   · simpa [localFixedError, hi] using
@@ -220,7 +220,7 @@ theorem sum_localFixedError_negligible (i : ℕ) :
 
 theorem localGraphBaseError_sum_negligible :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), D.localGraphBaseError n B := by
   have hedit0 := D.gammaDecomposition.unmatched_negligible
   have hedit := Negligible.shift hedit0 D.matchingStart
@@ -250,10 +250,10 @@ theorem localGraphBaseError_sum_negligible :
       (fun g ↦ D.approximation.map (D.matchingIndex n) (D.setup.embedΓ g))).first e)
   have htargetAll := BlockIndex.sum_card_filter_mem_block P W.targetUnmatched
     (fun e ↦ (D.gammaDecomposition.modelGraph (D.matchingIndex n)).first e)
-  have heditLocal : (∑ B in D.acceptableComponents (D.matchingIndex n)
+  have heditLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localGammaEditError n B) ≤
       (W.unmatchedCount : ℝ) := by
-    have hsub : (∑ B in D.acceptableComponents (D.matchingIndex n)
+    have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), D.localGammaEditError n B) ≤
         ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
           D.localGammaEditError n B :=
@@ -263,7 +263,7 @@ theorem localGraphBaseError_sum_negligible :
     simp_rw [Finset.sum_add_distrib] at hsub
     unfold EdgeEditWitness.unmatchedCount
     exact hsub.trans (by exact_mod_cast add_le_add hsourceAll htargetAll)
-  have hconjLocal : (∑ B in D.acceptableComponents (D.matchingIndex n)
+  have hconjLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localConjugacyGraphError n B) ≤
       ∑ t : D.setup.generatorsΓ,
         ((D.approximation.conjugacyError (D.matchingIndex n)
@@ -271,7 +271,7 @@ theorem localGraphBaseError_sum_negligible :
     rw [Finset.sum_comm]
     apply Finset.sum_le_sum
     intro t _
-    have hsub : (∑ B in D.acceptableComponents (D.matchingIndex n)
+    have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         ((Finset.univ.filter fun x : indexedBlockModel P B ↦
           (x : D.approximation.model (D.matchingIndex n)) ∈
@@ -287,7 +287,7 @@ theorem localGraphBaseError_sum_negligible :
     exact hsub.trans (by
       rw [BlockIndex.sum_card_filter P]
       rfl)
-  have hboundaryLocal : (∑ B in D.acceptableComponents (D.matchingIndex n)
+  have hboundaryLocal : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localGammaBoundaryError n B) ≤
       ∑ t : D.setup.generatorsΓ,
         ((wordCrossing (D.gammaDecomposition.blocks (D.matchingIndex n))
@@ -299,7 +299,7 @@ theorem localGraphBaseError_sum_negligible :
       (D.gammaDecomposition.blocks (D.matchingIndex n)).block
         (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t.1) x) ≠
           (D.gammaDecomposition.blocks (D.matchingIndex n)).block x
-    have hsub : (∑ B in D.acceptableComponents (D.matchingIndex n)
+    have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p x).card : ℝ)) ≤
         ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),
@@ -314,26 +314,26 @@ theorem localGraphBaseError_sum_negligible :
 
 theorem componentSelectionError_sum_negligible (r : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         D.componentSelectionError r n B := by
   have hinv := Negligible.sum (Finset.range (r + 1))
-    (fun i n ↦ ∑ B in D.acceptableComponents (D.matchingIndex n)
+    (fun i n ↦ ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localInvariantError n i B)
     (fun i _ ↦ D.sum_localInvariantError_negligible i)
   have hmulInner (i : ℕ) := Negligible.sum (Finset.range (r + 1))
-    (fun j n ↦ ∑ B in D.acceptableComponents (D.matchingIndex n)
+    (fun j n ↦ ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)),
       D.localMultiplicationError n i j B)
     (fun j _ ↦ D.sum_localMultiplicationError_negligible i j)
   have hmul := Negligible.sum (Finset.range (r + 1))
-    (fun i n ↦ ∑ j in Finset.range (r + 1),
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+    (fun i n ↦ ∑ j ∈ Finset.range (r + 1),
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         D.localMultiplicationError n i j B)
     (fun i _ ↦ hmulInner i)
   have hfixed := Negligible.sum (Finset.range (r + 1))
-    (fun i n ↦ ∑ B in D.acceptableComponents (D.matchingIndex n)
+    (fun i n ↦ ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)), D.localFixedError n i B)
     (fun i _ ↦ D.sum_localFixedError_negligible i)
   have hall := Negligible.add
@@ -355,7 +355,7 @@ theorem componentSelectionError_sum_negligible (r : ℕ) :
 
 theorem acceptable_small_mass_negligible (M : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         (if (B.block.card : ℝ) ≤ M then (B.block.card : ℝ) else 0) := by
   have hsmall0 := D.gammaDecomposition.smallBlockVertices_negligible
@@ -363,7 +363,7 @@ theorem acceptable_small_mass_negligible (M : ℕ) :
   have hsmall := Negligible.shift hsmall0 D.matchingStart
   refine Negligible.mono (fun n ↦ D.matchingIndex_card_pos n)
     (fun n ↦ by positivity) (fun n ↦ ?_) hsmall
-  have hsub : (∑ B in D.acceptableComponents (D.matchingIndex n)
+  have hsub : (∑ B ∈ D.acceptableComponents (D.matchingIndex n)
       (D.matchingThreshold (D.matchingIndex n)),
       (if (B.block.card : ℝ) ≤ M then (B.block.card : ℝ) else 0)) ≤
       ∑ B : D.gammaDecomposition.componentIndex (D.matchingIndex n),

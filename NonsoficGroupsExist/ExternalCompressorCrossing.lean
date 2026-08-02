@@ -138,6 +138,35 @@ namespace ExpanderDecomposition
 
 variable {G : Type} [Group G] {S : SoficApproximation G} {T : Finset G}
 
+theorem externalGlobalCrossing_negligible_to (D : ExpanderDecomposition S T)
+    (P : ∀ n, BlockStructure (S.model n))
+    (q : ∀ n, Equiv.Perm (S.model n)) (c : G → G)
+    (herr : ∀ g ∈ T, Negligible
+      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((S.externalConjugacyError n (q n) c g).card : ℝ))
+    (hall : ∀ g : G, Negligible
+      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((wordCrossing (P n) (S.map n g)).card : ℝ)) :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ (((D.modelGraph n).crossingEdges
+        (transportedTargetLabel (P n) (q n))).card : ℝ) := by
+  have hgenerator := S.externalGeneratorGraph_crossing_negligible
+    (T := T) P q c herr hall
+  have hsum := Negligible.add D.unmatched_negligible hgenerator
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  have hcard := (D.editWitness n).targetCrossing_card_le_unmatchedCount
+    (S.externalCompressorLabel P n (q n))
+    (transportedTargetLabel (P n) (q n)) (fun _ ↦ rfl)
+  have hcast : (((D.modelGraph n).crossingEdges
+      (transportedTargetLabel (P n) (q n))).card : ℝ) ≤
+      ((D.editWitness n).unmatchedCount : ℝ) +
+        (((generatorGraph (S.model n) T (S.map n)).crossingEdges
+          (S.externalCompressorLabel P n (q n))).card : ℝ) := by
+    exact_mod_cast hcard
+  apply div_le_div_of_nonneg_right hcast
+  positivity
+
 theorem externalGlobalCrossing_negligible (D : ExpanderDecomposition S T)
     (q : ∀ n, Equiv.Perm (S.model n)) (c : G → G)
     (herr : ∀ g ∈ T, Negligible
@@ -148,23 +177,8 @@ theorem externalGlobalCrossing_negligible (D : ExpanderDecomposition S T)
       fun n ↦ ((wordCrossing (D.blocks n) (S.map n g)).card : ℝ)) :
     Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
       fun n ↦ (((D.modelGraph n).crossingEdges
-        (transportedTargetLabel (D.blocks n) (q n))).card : ℝ) := by
-  have hgenerator := S.externalGeneratorGraph_crossing_negligible
-    (T := T) D.blocks q c herr hall
-  have hsum := Negligible.add D.unmatched_negligible hgenerator
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
-    (fun n ↦ ?_) hsum
-  have hcard := (D.editWitness n).targetCrossing_card_le_unmatchedCount
-    (S.externalCompressorLabel D.blocks n (q n))
-    (transportedTargetLabel (D.blocks n) (q n)) (fun _ ↦ rfl)
-  have hcast : (((D.modelGraph n).crossingEdges
-      (transportedTargetLabel (D.blocks n) (q n))).card : ℝ) ≤
-      ((D.editWitness n).unmatchedCount : ℝ) +
-        (((generatorGraph (S.model n) T (S.map n)).crossingEdges
-          (S.externalCompressorLabel D.blocks n (q n))).card : ℝ) := by
-    exact_mod_cast hcard
-  apply div_le_div_of_nonneg_right hcast
-  positivity
+        (transportedTargetLabel (D.blocks n) (q n))).card : ℝ) :=
+  D.externalGlobalCrossing_negligible_to D.blocks q c herr hall
 
 end ExpanderDecomposition
 end NonsoficGroupsExist

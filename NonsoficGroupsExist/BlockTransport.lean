@@ -14,8 +14,8 @@ namespace BlockStructure
 
 variable {Y : FiniteModel} (P : BlockStructure Y)
 
-/-- Transport a block partition by a permutation. -/
-noncomputable def transport (q : Equiv.Perm Y) : BlockStructure Y where
+/-- Transport a block partition along an equivalence of finite vertex types. -/
+noncomputable def transportEquiv {Z : FiniteModel} (q : Y ≃ Z) : BlockStructure Z where
   block y := (P.block (q.symm y)).image q
   self_mem y := by
     classical
@@ -28,9 +28,13 @@ noncomputable def transport (q : Equiv.Perm Y) : BlockStructure Y where
       simp
     rw [← hzq, P.eq_of_mem (q.symm x) z hz]
 
+/-- Transport a block partition by a permutation. -/
+noncomputable def transport (q : Equiv.Perm Y) : BlockStructure Y :=
+  P.transportEquiv q
+
 @[simp] theorem transport_block (q : Equiv.Perm Y) (y : Y) :
     (P.transport q).block (q y) = (P.block y).image q := by
-  simp [transport]
+  simp [transport, transportEquiv]
 
 @[simp] theorem transport_size (q : Equiv.Perm Y) (y : Y) :
     (P.transport q).size (q y) = P.size y := by
@@ -47,9 +51,9 @@ theorem transport_blocksFinset (q : Equiv.Perm Y) :
   constructor
   · rintro ⟨y, rfl⟩
     refine ⟨P.block (q.symm y), ⟨q.symm y, rfl⟩, ?_⟩
-    simp [transport]
+    simp [transport, transportEquiv]
   · rintro ⟨B, ⟨y, rfl⟩, rfl⟩
-    exact ⟨q y, by simp⟩
+    exact ⟨q y, by simp [transport, transportEquiv]⟩
 
 theorem image_block_card (q : Equiv.Perm Y) (y : Y) :
     ((P.block y).image q).card = (P.block y).card :=

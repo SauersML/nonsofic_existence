@@ -27,9 +27,9 @@ noncomputable abbrev distinguishedPerm (n : ℕ) :
   D.approximation.map n D.setup.distinguished
 
 noncomputable abbrev matchTarget (n : ℕ)
-    (B : D.gammaDecomposition.componentIndex n) :
+  (B : D.gammaDecomposition.componentIndex n) :
     Finset (D.approximation.model n) :=
-  (D.gammaDecomposition.refineBlock (D.ambientDecomposition.blocks n)
+  (D.gammaDecomposition.refineBlock (D.gammaDecomposition.blocks n)
     (D.distinguishedPerm n) B).target
 
 noncomputable abbrev matchImage (n : ℕ)
@@ -41,7 +41,7 @@ noncomputable def totalMatchingError (n : ℕ) : ℝ :=
   (∑ y : D.approximation.model n, |D.observable n y - 1 / 2|) +
   (∑ B : D.gammaDecomposition.componentIndex n,
     (D.gammaDecomposition.componentLeakage
-      (D.ambientDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ)) +
+      (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ)) +
   ((wordCrossing (D.ambientDecomposition.blocks n)
     (D.distinguishedPerm n)).card : ℝ)
 
@@ -54,10 +54,21 @@ theorem totalMatchingError_negligible :
   have hdev := D.normalizedDeviation_negligible
   have hleak := D.setup.compressorLeakage_negligible D.approximation
     D.gammaDecomposition D.setup.distinguished D.setup.distinguished_mem
+  change Negligible D.N (fun n ↦
+    ∑ B : D.gammaDecomposition.componentIndex n,
+      (D.gammaDecomposition.componentLeakage
+        (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ)) at hleak
   have hcross := D.ambientDecomposition.all_almost_invariant
     D.setup.ambientGenerators_symmetric D.setup.ambientGenerators_generate
     D.setup.distinguished
-  simpa only [totalMatchingError] using Negligible.add (Negligible.add hdev hleak) hcross
+  change Negligible D.N (fun n ↦
+    (∑ y : D.approximation.model n, |D.observable n y - 1 / 2|) +
+    (∑ B : D.gammaDecomposition.componentIndex n,
+      (D.gammaDecomposition.componentLeakage
+        (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ)) +
+    ((wordCrossing (D.ambientDecomposition.blocks n)
+      (D.distinguishedPerm n)).card : ℝ))
+  exact Negligible.add (Negligible.add hdev hleak) hcross
 
 noncomputable def matchingErrorDensity (n : ℕ) : ℝ :=
   D.totalMatchingError n / D.N n
@@ -68,7 +79,8 @@ theorem matchingErrorDensity_nonneg (n : ℕ) :
 
 theorem matchingErrorDensity_vanishing :
     Vanishing D.matchingErrorDensity := by
-  simpa only [matchingErrorDensity] using D.totalMatchingError_negligible
+  change Vanishing (fun n ↦ D.totalMatchingError n / D.N n)
+  exact D.totalMatchingError_negligible
 
 noncomputable def matchingThreshold (n : ℕ) : ℝ :=
   slowThreshold D.matchingErrorDensity n
@@ -78,8 +90,8 @@ theorem matchingThreshold_pos (n : ℕ) : 0 < D.matchingThreshold n :=
 
 theorem matchingThreshold_le_one (n : ℕ) : D.matchingThreshold n ≤ 1 := by
   unfold matchingThreshold slowThreshold
-  apply div_le_one (by positivity)
-  positivity
+  apply (div_le_one (by positivity)).2
+  norm_num
 
 theorem matchingThreshold_vanishing : Vanishing D.matchingThreshold :=
   slowThreshold_vanishing D.matchingErrorDensity D.matchingErrorDensity_vanishing
@@ -90,7 +102,8 @@ theorem scaledMatchingError_vanishing :
     D.matchingErrorDensity_nonneg D.matchingErrorDensity_vanishing
   apply Vanishing.congr h
   intro n
-  unfold matchingErrorDensity matchingThreshold
+  rw [matchingThreshold]
+  rw [matchingErrorDensity]
   ring
 
 /-- Bad points inside one source component. -/
@@ -98,18 +111,18 @@ noncomputable def localMatchingBad (n : ℕ) (η : ℝ)
     (B : D.gammaDecomposition.componentIndex n) :
     Finset (indexedBlockModel (D.gammaDecomposition.blocks n) B) :=
   Finset.univ.filter fun x ↦
-    η < |D.observable n (x : D.approximation.model n) - 1 / 2| ∨
-    η < |D.observable n (D.distinguishedPerm n x) - 1 / 2| ∨
-    D.distinguishedPerm n x ∉ D.matchTarget n B ∨
-    (D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x) ≠
-      (D.ambientDecomposition.blocks n).block (x : D.approximation.model n)
+    η < |D.observable n x.1 - 1 / 2| ∨
+    η < |D.observable n (D.distinguishedPerm n x.1) - 1 / 2| ∨
+    D.distinguishedPerm n x.1 ∉ D.matchTarget n B ∨
+    (D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x.1) ≠
+      (D.ambientDecomposition.blocks n).block x.1
 
 /-- A source component is acceptable when its total leakage is below the
 threshold fraction and at least one point satisfies all pointwise estimates. -/
 def ComponentAcceptable (n : ℕ) (η : ℝ)
     (B : D.gammaDecomposition.componentIndex n) : Prop :=
   (D.gammaDecomposition.componentLeakage
-      (D.ambientDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ) ≤
+      (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ) ≤
       η * B.block.card ∧
     (D.localMatchingBad n η B).card < B.block.card
 
@@ -117,12 +130,11 @@ theorem exists_goodPoint {n : ℕ} {η : ℝ}
     {B : D.gammaDecomposition.componentIndex n}
     (hB : D.ComponentAcceptable n η B) :
     ∃ x : indexedBlockModel (D.gammaDecomposition.blocks n) B,
-      |
-        D.observable n (x : D.approximation.model n) - 1 / 2| ≤ η ∧
-      |D.observable n (D.distinguishedPerm n x) - 1 / 2| ≤ η ∧
-      D.distinguishedPerm n x ∈ D.matchTarget n B ∧
-      (D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x) =
-        (D.ambientDecomposition.blocks n).block (x : D.approximation.model n) := by
+      |D.observable n x.1 - 1 / 2| ≤ η ∧
+      |D.observable n (D.distinguishedPerm n x.1) - 1 / 2| ≤ η ∧
+      D.distinguishedPerm n x.1 ∈ D.matchTarget n B ∧
+      (D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x.1) =
+        (D.ambientDecomposition.blocks n).block x.1 := by
   classical
   have hproper : D.localMatchingBad n η B ⊂ Finset.univ := by
     refine Finset.ssubset_iff_subset_ne.mpr ⟨Finset.subset_univ _, ?_⟩
@@ -131,6 +143,7 @@ theorem exists_goodPoint {n : ℕ} {η : ℝ}
     have huniv : (Finset.univ : Finset
       (indexedBlockModel (D.gammaDecomposition.blocks n) B)).card = B.block.card := by
       simp [indexedBlockModel]
+    have hlt := hB.2
     omega
   obtain ⟨x, _, hx⟩ := Finset.exists_of_ssubset hproper
   simp only [localMatchingBad, Finset.mem_filter, Finset.mem_univ, true_and,
@@ -141,55 +154,56 @@ private theorem source_observable_eq {n : ℕ}
     (B : D.gammaDecomposition.componentIndex n)
     (x : indexedBlockModel (D.gammaDecomposition.blocks n) B) :
     let A : BlockIndex (D.ambientDecomposition.blocks n) :=
-      ⟨(D.ambientDecomposition.blocks n).block (x : D.approximation.model n),
-        (D.ambientDecomposition.blocks n).block_mem_blocksFinset x⟩
-    D.observable n x = medianNormalize
+      ⟨(D.ambientDecomposition.blocks n).block x.1,
+        (D.ambientDecomposition.blocks n).block_mem_blocksFinset x.1⟩
+    D.observable n x.1 = medianNormalize
       (componentMedian (D.gammaDecomposition.blocks n)
         (D.ambientDecomposition.blocks n) A : ℝ) B.block.card := by
   classical
   dsimp only [observable, normalizedSize]
   congr 1
-  change (D.gammaDecomposition.blocks n).size (x : D.approximation.model n) =
-    B.block.card
-  have hmem : (x : D.approximation.model n) ∈
+  have hmem : x.1 ∈
       (D.gammaDecomposition.blocks n).block
         (BlockIndex.representative (D.gammaDecomposition.blocks n) B) := by
     simpa only [BlockIndex.block_representative] using x.2
-  exact congrArg Finset.card
+  exact_mod_cast congrArg Finset.card
     (((D.gammaDecomposition.blocks n).eq_of_mem _ _ hmem).trans
       (BlockIndex.block_representative (D.gammaDecomposition.blocks n) B))
 
 private theorem target_observable_eq {n : ℕ}
     (B : D.gammaDecomposition.componentIndex n)
     (x : indexedBlockModel (D.gammaDecomposition.blocks n) B)
-    (htarget : D.distinguishedPerm n x ∈ D.matchTarget n B)
-    (hamb : (D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x) =
-      (D.ambientDecomposition.blocks n).block (x : D.approximation.model n)) :
+    (htarget : D.distinguishedPerm n x.1 ∈ D.matchTarget n B)
+    (hamb : (D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x.1) =
+      (D.ambientDecomposition.blocks n).block x.1) :
     let A : BlockIndex (D.ambientDecomposition.blocks n) :=
-      ⟨(D.ambientDecomposition.blocks n).block (x : D.approximation.model n),
-        (D.ambientDecomposition.blocks n).block_mem_blocksFinset x⟩
-    D.observable n (D.distinguishedPerm n x) = medianNormalize
+      ⟨(D.ambientDecomposition.blocks n).block x.1,
+        (D.ambientDecomposition.blocks n).block_mem_blocksFinset x.1⟩
+    D.observable n (D.distinguishedPerm n x.1) = medianNormalize
       (componentMedian (D.gammaDecomposition.blocks n)
         (D.ambientDecomposition.blocks n) A : ℝ) (D.matchTarget n B).card := by
   classical
   obtain ⟨z, hz⟩ :=
-    (D.gammaDecomposition.refineBlock (D.ambientDecomposition.blocks n)
+    (D.gammaDecomposition.refineBlock (D.gammaDecomposition.blocks n)
       (D.distinguishedPerm n) B).target_isBlock
-  have hP : (D.gammaDecomposition.blocks n).block (D.distinguishedPerm n x) =
+  have hP : (D.gammaDecomposition.blocks n).block (D.distinguishedPerm n x.1) =
       D.matchTarget n B := by
+    change (D.gammaDecomposition.blocks n).block (D.distinguishedPerm n x.1) =
+      (D.gammaDecomposition.refineBlock (D.gammaDecomposition.blocks n)
+        (D.distinguishedPerm n) B).target
     rw [hz]
     exact ((D.gammaDecomposition.blocks n).eq_of_mem z _ (by simpa [hz] using htarget))
   let Aq : BlockIndex (D.ambientDecomposition.blocks n) :=
-    ⟨(D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x),
+    ⟨(D.ambientDecomposition.blocks n).block (D.distinguishedPerm n x.1),
       (D.ambientDecomposition.blocks n).block_mem_blocksFinset _⟩
   let A : BlockIndex (D.ambientDecomposition.blocks n) :=
-    ⟨(D.ambientDecomposition.blocks n).block (x : D.approximation.model n),
+    ⟨(D.ambientDecomposition.blocks n).block x.1,
       (D.ambientDecomposition.blocks n).block_mem_blocksFinset _⟩
   have hA : Aq = A := Subtype.ext hamb
   change medianNormalize
       (componentMedian (D.gammaDecomposition.blocks n)
         (D.ambientDecomposition.blocks n) Aq : ℝ)
-      ((D.gammaDecomposition.blocks n).size (D.distinguishedPerm n x) : ℝ) = _
+      ((D.gammaDecomposition.blocks n).size (D.distinguishedPerm n x.1) : ℝ) = _
   rw [hA]
   congr 1
   exact_mod_cast congrArg Finset.card hP
@@ -203,8 +217,8 @@ theorem acceptable_symmDiff_le {n : ℕ} {η : ℝ}
       (2 * η + 8 * η / (1 - 2 * η) ^ 2) * B.block.card := by
   obtain ⟨x, hxsource, hxtarget, hxmem, hxambient⟩ := D.exists_goodPoint hB
   let A : BlockIndex (D.ambientDecomposition.blocks n) :=
-    ⟨(D.ambientDecomposition.blocks n).block (x : D.approximation.model n),
-      (D.ambientDecomposition.blocks n).block_mem_blocksFinset x⟩
+    ⟨(D.ambientDecomposition.blocks n).block x.1,
+      (D.ambientDecomposition.blocks n).block_mem_blocksFinset x.1⟩
   have hm : (0 : ℝ) < componentMedian (D.gammaDecomposition.blocks n)
       (D.ambientDecomposition.blocks n) A := by
     exact_mod_cast componentMedian_pos _ _ A
@@ -214,7 +228,7 @@ theorem acceptable_symmDiff_le {n : ℕ} {η : ℝ}
   · simpa [A, D.source_observable_eq B x] using hxsource
   · simpa [A, D.target_observable_eq B x hxmem hxambient] using hxtarget
   · change ((D.gammaDecomposition.componentLeakage
-        (D.ambientDecomposition.blocks n) (D.distinguishedPerm n) B : ℕ) : ℝ) ≤
+        (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B : ℕ) : ℝ) ≤
       η * B.block.card
     exact hB.1
 
@@ -231,13 +245,41 @@ theorem pinBad_markov (n : ℕ) {η : ℝ} (hη : 0 ≤ η) :
     (fun x : D.approximation.model n ↦ |D.observable n x - 1 / 2|)
     (fun _ ↦ abs_nonneg _) hη
 
+/-- Points in one source component which miss the target selected using the
+ambient component partition. -/
+noncomputable def localLeakageBad (n : ℕ)
+    (B : D.gammaDecomposition.componentIndex n) :
+    Finset (indexedBlockModel (D.gammaDecomposition.blocks n) B) :=
+  Finset.univ.filter fun x ↦
+    D.distinguishedPerm n x.1 ∉ D.matchTarget n B
+
+theorem localLeakageBad_card (n : ℕ)
+    (B : D.gammaDecomposition.componentIndex n) :
+    (D.localLeakageBad n B).card =
+      D.gammaDecomposition.componentLeakage
+        (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B := by
+  classical
+  unfold localLeakageBad ExpanderDecomposition.componentLeakage matchTarget
+  apply Finset.card_bij (fun x _ ↦ D.distinguishedPerm n x.1)
+  · intro x hx
+    rw [Finset.mem_filter] at hx
+    exact Finset.mem_sdiff.mpr
+      ⟨Finset.mem_image.mpr ⟨x.1, x.2, rfl⟩, hx.2⟩
+  · intro x _ y _ hxy
+    exact Subtype.ext ((D.distinguishedPerm n).injective hxy)
+  · intro y hy
+    obtain ⟨hyimage, hytarget⟩ := Finset.mem_sdiff.mp hy
+    obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp hyimage
+    refine ⟨⟨x, hx⟩, ?_, rfl⟩
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hytarget⟩
+
 theorem sum_localMatchingBad_le (n : ℕ) (η : ℝ) :
     (∑ B : D.gammaDecomposition.componentIndex n,
       ((D.localMatchingBad n η B).card : ℝ)) ≤
       2 * (D.pinBad n η).card +
       ∑ B : D.gammaDecomposition.componentIndex n,
         (D.gammaDecomposition.componentLeakage
-          (D.ambientDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ) +
+          (D.gammaDecomposition.blocks n) (D.distinguishedPerm n) B : ℝ) +
       ((wordCrossing (D.ambientDecomposition.blocks n)
         (D.distinguishedPerm n)).card : ℝ) := by
   classical
@@ -252,33 +294,33 @@ theorem sum_localMatchingBad_le (n : ℕ) (η : ℝ) :
     fun x ↦ Q.block (q x) ≠ Q.block x
   have hblock (B : D.gammaDecomposition.componentIndex n) :
       ((D.localMatchingBad n η B).card : ℝ) ≤
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x).card : ℝ) +
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x).card : ℝ) +
-        ((D.gammaDecomposition.blockLeakageVertices q B).card : ℝ) +
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₄ x).card : ℝ) := by
+        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x.1).card : ℝ) +
+        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x.1).card : ℝ) +
+        ((D.localLeakageBad n B).card : ℝ) +
+        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₄ x.1).card : ℝ) := by
+    let F₁ : Finset (indexedBlockModel P B) :=
+      Finset.univ.filter fun x ↦ p₁ x.1
+    let F₂ : Finset (indexedBlockModel P B) :=
+      Finset.univ.filter fun x ↦ p₂ x.1
+    let F₃ : Finset (indexedBlockModel P B) :=
+      Finset.univ.filter fun x ↦ q x.1 ∉ D.matchTarget n B
+    let F₄ : Finset (indexedBlockModel P B) :=
+      Finset.univ.filter fun x ↦ p₄ x.1
+    have hunion : (F₁ ∪ (F₂ ∪ (F₃ ∪ F₄))).card ≤
+        F₁.card + F₂.card + F₃.card + F₄.card := by
+      have h₁ := Finset.card_union_le F₁ (F₂ ∪ (F₃ ∪ F₄))
+      have h₂ := Finset.card_union_le F₂ (F₃ ∪ F₄)
+      have h₃ := Finset.card_union_le F₃ F₄
+      omega
     have hnat : (D.localMatchingBad n η B).card ≤
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x).card +
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x).card +
-        (D.gammaDecomposition.blockLeakageVertices q B).card +
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₄ x).card := by
-      unfold localMatchingBad ExpanderDecomposition.blockLeakageVertices
+        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x.1).card +
+        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x.1).card +
+        (D.localLeakageBad n B).card +
+        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₄ x.1).card := by
+      unfold localMatchingBad localLeakageBad
       simp only [p₁, p₂, p₄, P, Q, q]
       rw [Finset.filter_or, Finset.filter_or, Finset.filter_or]
-      have h₁ := Finset.card_union_le
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x)
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x)
-      have h₂ := Finset.card_union_le
-        ((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x) ∪
-          (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x))
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦
-          q (x : D.approximation.model n) ∉ D.matchTarget n B)
-      have h₃ := Finset.card_union_le
-        (((Finset.univ.filter fun x : indexedBlockModel P B ↦ p₁ x) ∪
-          (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₂ x)) ∪
-          (Finset.univ.filter fun x : indexedBlockModel P B ↦
-            q (x : D.approximation.model n) ∉ D.matchTarget n B))
-        (Finset.univ.filter fun x : indexedBlockModel P B ↦ p₄ x)
-      omega
+      simpa only [F₁, F₂, F₃, F₄] using hunion
     exact_mod_cast hnat
   have hsum := Finset.sum_le_sum fun B (_ : B ∈ (Finset.univ : Finset _)) ↦ hblock B
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib] at hsum
@@ -290,26 +332,39 @@ theorem sum_localMatchingBad_le (n : ℕ) (η : ℝ) :
       simp [p₂, permutationPreimage, pinBad]
     rw [heq, permutationPreimage_card]
   have hleak : (∑ B : D.gammaDecomposition.componentIndex n,
-      ((D.gammaDecomposition.blockLeakageVertices q B).card : ℝ)) =
+      ((D.localLeakageBad n B).card : ℝ)) =
       ∑ B : D.gammaDecomposition.componentIndex n,
-        (D.gammaDecomposition.componentLeakage Q q B : ℝ) := by
+        (D.gammaDecomposition.componentLeakage P q B : ℝ) := by
     apply Finset.sum_congr rfl
     intro B _
-    rw [D.gammaDecomposition.card_blockLeakageVertices q B]
+    rw [D.localLeakageBad_card n B]
   have hp₄ := BlockIndex.sum_card_filter P p₄
   have hp₁card : ((Finset.univ.filter p₁).card : ℝ) = (D.pinBad n η).card := by
     rfl
   have hp₄card : ((Finset.univ.filter p₄).card : ℝ) =
       ((wordCrossing Q q).card : ℝ) := by rfl
-  rw [hp₁, hp₂, hleak, hp₄, hp₁card, hp₂card, hp₄card] at hsum
-  simpa [P, Q, q] using hsum
+  rw [hp₁, hp₂, hleak, hp₄] at hsum
+  calc
+    _ ≤ ((Finset.univ.filter p₁).card : ℝ) +
+        ((Finset.univ.filter p₂).card : ℝ) +
+        (∑ B : D.gammaDecomposition.componentIndex n,
+          (D.gammaDecomposition.componentLeakage P q B : ℝ)) +
+        ((Finset.univ.filter p₄).card : ℝ) := hsum
+    _ = _ := by rw [hp₁card, hp₂card, hp₄card]; ring
 
 noncomputable def acceptableComponents (n : ℕ) (η : ℝ) :
-    Finset (D.gammaDecomposition.componentIndex n) :=
-  Finset.univ.filter fun B ↦ D.ComponentAcceptable n η B
+    Finset (D.gammaDecomposition.componentIndex n) := by
+  classical
+  exact Finset.univ.filter fun B ↦ D.ComponentAcceptable n η B
+
+theorem mem_acceptableComponents {n : ℕ} {η : ℝ}
+    {B : D.gammaDecomposition.componentIndex n} :
+    B ∈ D.acceptableComponents n η ↔ D.ComponentAcceptable n η B := by
+  classical
+  simp [acceptableComponents]
 
 noncomputable def discardedComponentMass (n : ℕ) (η : ℝ) : ℝ :=
-  ∑ B in (Finset.univ \ D.acceptableComponents n η), (B.block.card : ℝ)
+  ∑ B ∈ (Finset.univ \ D.acceptableComponents n η), (B.block.card : ℝ)
 
 theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
     (hη : 0 ≤ η) (hηone : η ≤ 1) :
@@ -319,7 +374,7 @@ theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
   let Q := D.ambientDecomposition.blocks n
   let q := D.distinguishedPerm n
   let leak : D.gammaDecomposition.componentIndex n → ℝ := fun B ↦
-    D.gammaDecomposition.componentLeakage Q q B
+    D.gammaDecomposition.componentLeakage P q B
   let bad : D.gammaDecomposition.componentIndex n → ℝ := fun B ↦
     (D.localMatchingBad n η B).card
   let L : Finset (D.gammaDecomposition.componentIndex n) :=
@@ -328,32 +383,51 @@ theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
     Finset.univ.filter fun B ↦ B.block.card ≤ bad B
   have hdiscard : Finset.univ \ D.acceptableComponents n η ⊆ L ∪ V := by
     intro B hB
-    simp only [acceptableComponents, Finset.mem_sdiff, Finset.mem_univ,
-      Finset.mem_filter, true_and, ComponentAcceptable, not_and_or, not_le,
-      not_lt, L, V, Finset.mem_union] at hB ⊢
-    exact hB.2
+    rcases Finset.mem_sdiff.mp hB with ⟨_, hnotmem⟩
+    have hnot : ¬D.ComponentAcceptable n η B := by
+      exact fun hacc ↦ hnotmem (D.mem_acceptableComponents.mpr hacc)
+    rw [Finset.mem_union]
+    by_cases hle : leak B ≤ η * B.block.card
+    · right
+      rw [Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      by_contra hbad
+      apply hnot
+      constructor
+      · simpa [leak, P, q] using hle
+      · have hbad' : bad B < B.block.card := lt_of_not_ge hbad
+        exact_mod_cast hbad'
+    · left
+      rw [Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, by simpa [L] using lt_of_not_ge hle⟩
   have hmass : D.discardedComponentMass n η ≤
-      (∑ B in L, (B.block.card : ℝ)) + ∑ B in V, (B.block.card : ℝ) := by
+      (∑ B ∈ L, (B.block.card : ℝ)) + ∑ B ∈ V, (B.block.card : ℝ) := by
     unfold discardedComponentMass
     calc
-      _ ≤ ∑ B in L ∪ V, (B.block.card : ℝ) :=
+      _ ≤ ∑ B ∈ L ∪ V, (B.block.card : ℝ) :=
         Finset.sum_le_sum_of_subset_of_nonneg hdiscard (fun _ _ _ ↦ by positivity)
       _ ≤ _ := by
-        exact Finset.sum_union_le (f := fun B ↦ (B.block.card : ℝ))
-          (fun _ _ ↦ by positivity)
-  have hL : η * (∑ B in L, (B.block.card : ℝ)) ≤ ∑ B, leak B := by
+        have hdecomp : L ∪ V = L ∪ (V \ L) := by ext B; simp
+        have hdisj : Disjoint L (V \ L) := Finset.disjoint_left.mpr (by
+          intro B hBL hBV
+          exact (Finset.mem_sdiff.mp hBV).2 hBL)
+        rw [hdecomp, Finset.sum_union hdisj]
+        apply add_le_add_left
+        exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.sdiff_subset _ _)
+          (fun _ _ _ ↦ by positivity)
+  have hL : η * (∑ B ∈ L, (B.block.card : ℝ)) ≤ ∑ B, leak B := by
     rw [Finset.mul_sum]
     calc
-      _ ≤ ∑ B in L, leak B := by
+      _ ≤ ∑ B ∈ L, leak B := by
         apply Finset.sum_le_sum
         intro B hB
         exact (Finset.mem_filter.mp hB).2.le
       _ ≤ ∑ B, leak B :=
         Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
           (fun _ _ _ ↦ by positivity)
-  have hV : (∑ B in V, (B.block.card : ℝ)) ≤ ∑ B, bad B := by
+  have hV : (∑ B ∈ V, (B.block.card : ℝ)) ≤ ∑ B, bad B := by
     calc
-      _ ≤ ∑ B in V, bad B := by
+      _ ≤ ∑ B ∈ V, bad B := by
         apply Finset.sum_le_sum
         intro B hB
         exact (Finset.mem_filter.mp hB).2
@@ -362,10 +436,12 @@ theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
           (fun _ _ _ ↦ by positivity)
   have hlocal := D.sum_localMatchingBad_le n η
   have hpin := D.pinBad_markov n hη
-  have hnonnegMass : 0 ≤ D.discardedComponentMass n η := by positivity
+  have hnonnegMass : 0 ≤ D.discardedComponentMass n η := by
+    unfold discardedComponentMass
+    positivity
   calc
     η * D.discardedComponentMass n η ≤
-        η * ((∑ B in L, (B.block.card : ℝ)) + ∑ B in V, (B.block.card : ℝ)) :=
+        η * ((∑ B ∈ L, (B.block.card : ℝ)) + ∑ B ∈ V, (B.block.card : ℝ)) :=
       mul_le_mul_of_nonneg_left hmass hη
     _ ≤ (∑ B, leak B) + η * ∑ B, bad B := by
       rw [mul_add]
@@ -373,8 +449,9 @@ theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
     _ ≤ (∑ B, leak B) +
         η * (2 * (D.pinBad n η).card + ∑ B, leak B +
           ((wordCrossing Q q).card : ℝ)) := by
-      apply add_le_add_left
-      exact mul_le_mul_of_nonneg_left (by simpa [bad, leak, P, Q, q] using hlocal) hη
+      have hbadbound := mul_le_mul_of_nonneg_left
+        (by simpa [bad, leak, P, Q, q] using hlocal) hη
+      linarith
     _ ≤ 2 * D.totalMatchingError n := by
       have hetaPin : η * (2 * ((D.pinBad n η).card : ℝ)) ≤
           2 * ∑ x : D.approximation.model n, |D.observable n x - 1 / 2| := by
@@ -384,13 +461,15 @@ theorem threshold_mul_discardedComponentMass_le (n : ℕ) {η : ℝ}
         apply mul_le_of_le_one_left (by positivity)
         exact hηone
       unfold totalMatchingError
-      dsimp only [leak, Q, q]
+      dsimp only [leak, P, Q, q]
       nlinarith
 
 theorem discardedComponentMass_negligible :
     Negligible D.N fun n ↦ D.discardedComponentMass n (D.matchingThreshold n) := by
   have hscaled := Vanishing.const_mul 2 D.scaledMatchingError_vanishing
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by
+      unfold discardedComponentMass
+      positivity) (D.N_nonneg n))
     (fun n ↦ ?_) hscaled
   have hη := D.matchingThreshold_pos n
   have hbound := D.threshold_mul_discardedComponentMass_le n hη.le
@@ -403,9 +482,12 @@ theorem discardedComponentMass_negligible :
     _ = 2 * (D.totalMatchingError n / D.matchingThreshold n / D.N n) := by ring
 
 theorem acceptableComponentMass_eq (n : ℕ) (η : ℝ) :
-    (∑ B in D.acceptableComponents n η, (B.block.card : ℝ)) +
+    (∑ B ∈ D.acceptableComponents n η, (B.block.card : ℝ)) +
       D.discardedComponentMass n η = D.N n := by
+  classical
   unfold discardedComponentMass
+  change (∑ B ∈ D.acceptableComponents n η, (B.block.card : ℝ)) +
+    ∑ B ∈ (D.acceptableComponents n η)ᶜ, (B.block.card : ℝ) = D.N n
   rw [Finset.sum_add_sum_compl]
   exact_mod_cast BlockIndex.sum_card (D.gammaDecomposition.blocks n)
 
@@ -414,7 +496,7 @@ theorem eventually_acceptableComponentMass :
       0 < D.N n ∧
       D.matchingThreshold n < 1 / 256 ∧
       (1 / 2 : ℝ) * D.N n ≤
-        ∑ B in D.acceptableComponents n (D.matchingThreshold n),
+        ∑ B ∈ D.acceptableComponents n (D.matchingThreshold n),
           (B.block.card : ℝ) := by
   obtain ⟨Ne, hNe⟩ := D.discardedComponentMass_negligible (1 / 2) (by norm_num)
   obtain ⟨Nc, hNc⟩ := D.approximation.card_tendsToInfinity 1
@@ -444,7 +526,7 @@ theorem matchingStart_spec (n : ℕ) (hn : D.matchingStart ≤ n) :
     0 < D.N n ∧
     D.matchingThreshold n < 1 / 256 ∧
     (1 / 2 : ℝ) * D.N n ≤
-      ∑ B in D.acceptableComponents n (D.matchingThreshold n),
+      ∑ B ∈ D.acceptableComponents n (D.matchingThreshold n),
         (B.block.card : ℝ) :=
   Classical.choose_spec D.eventually_acceptableComponentMass n hn
 
@@ -463,7 +545,7 @@ theorem matchingIndex_threshold_small (n : ℕ) :
 
 theorem matchingIndex_mass (n : ℕ) :
     (1 / 2 : ℝ) * D.N (D.matchingIndex n) ≤
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), (B.block.card : ℝ) :=
   (D.matchingStart_spec _ (D.matchingIndex_ge_start n)).2.2
 
@@ -507,7 +589,7 @@ theorem matchingCoefficient_vanishing :
 
 theorem acceptable_symmDiff_sum_negligible :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         ((D.matchImage (D.matchingIndex n) B ∆
           D.matchTarget (D.matchingIndex n) B).card : ℝ) := by
@@ -521,30 +603,30 @@ theorem acceptable_symmDiff_sum_negligible :
     have := D.matchingIndex_threshold_small n
     dsimp only [η, k] at *
     linarith
-  have hsum : (∑ B in D.acceptableComponents k η,
+  have hsum : (∑ B ∈ D.acceptableComponents k η,
       ((D.matchImage k B ∆ D.matchTarget k B).card : ℝ)) ≤
       matchingCoefficient η * D.N k := by
     calc
-      _ ≤ ∑ B in D.acceptableComponents k η,
+      _ ≤ ∑ B ∈ D.acceptableComponents k η,
           matchingCoefficient η * B.block.card := by
         apply Finset.sum_le_sum
         intro B hB
         simpa only [matchingCoefficient] using D.acceptable_symmDiff_le hη hηsmall B
-          (Finset.mem_filter.mp hB).2
+          (D.mem_acceptableComponents.mp hB)
       _ = matchingCoefficient η *
-          ∑ B in D.acceptableComponents k η, (B.block.card : ℝ) := by
+          ∑ B ∈ D.acceptableComponents k η, (B.block.card : ℝ) := by
         rw [Finset.mul_sum]
       _ ≤ matchingCoefficient η * D.N k := by
         apply mul_le_mul_of_nonneg_left _ (matchingCoefficient_nonneg hη)
-        have hsub : ∑ B in D.acceptableComponents k η, B.block.card ≤
+        have hsub : ∑ B ∈ D.acceptableComponents k η, B.block.card ≤
             ∑ B : D.gammaDecomposition.componentIndex k, B.block.card :=
-          Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+          Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
             (fun _ _ _ ↦ by positivity)
         rw [BlockIndex.sum_card] at hsub
         exact_mod_cast hsub
   have hN : 0 < D.N k := D.matchingIndex_card_pos n
   calc
-    (∑ B in D.acceptableComponents k η,
+    (∑ B ∈ D.acceptableComponents k η,
         ((D.matchImage k B ∆ D.matchTarget k B).card : ℝ)) / D.N k ≤
       (matchingCoefficient η * D.N k) / D.N k :=
         div_le_div_of_nonneg_right hsum hN.le
@@ -561,7 +643,7 @@ theorem acceptable_target_dominates (n : ℕ)
     have hnsmall := (D.matchingStart_spec n hstart).2.1
     linarith
   have hsym := D.acceptable_symmDiff_le heta hetasmall B
-    (Finset.mem_filter.mp hB).2
+    (D.mem_acceptableComponents.mp hB)
   have hcoeff : matchingCoefficient (D.matchingThreshold n) < 1 / 6 := by
     have hsmall := (D.matchingStart_spec n hstart).2.1
     have hle := matchingCoefficient_le heta (le_trans hsmall.le (by norm_num))
@@ -606,14 +688,17 @@ theorem acceptableTargets_injOn (n : ℕ) :
     intro z hzB hzC
     obtain ⟨x, hxB, rfl⟩ := Finset.mem_image.mp hzB
     obtain ⟨y, hyC, hxy⟩ := Finset.mem_image.mp hzC
-    have hxy' : x = y := (D.distinguishedPerm (D.matchingIndex n)).injective hxy
+    have hxy' : x = y := (D.distinguishedPerm (D.matchingIndex n)).injective hxy.symm
     subst y
-    exact (D.gammaDecomposition.blocks (D.matchingIndex n)).block_disjoint
-      (Subtype.coe_injective.ne hBC) hxB hyC
-  exact matching_injective _ _ (D.matchTarget (D.matchingIndex n) B) hsource
-    (D.acceptable_target_dominates _ B (D.matchingIndex_ge_start n) hB)
-    (by simpa [htarget] using D.acceptable_target_dominates _ C
-      (D.matchingIndex_ge_start n) hC)
+    have hd : Disjoint B.block C.block :=
+      (BlockIndex.pairwise_disjoint
+        (D.gammaDecomposition.blocks (D.matchingIndex n)))
+        (Finset.mem_univ B) (Finset.mem_univ C) (Subtype.coe_injective.ne hBC)
+    exact Finset.disjoint_left.mp hd hxB hyC
+  have hdomB := D.acceptable_target_dominates _ B (D.matchingIndex_ge_start n) hB
+  have hdomC := D.acceptable_target_dominates _ C (D.matchingIndex_ge_start n) hC
+  rw [← htarget] at hdomC
+  exact matching_injective _ _ (D.matchTarget (D.matchingIndex n) B) hsource hdomB hdomC
 
 noncomputable def matchImageEmbedding (n : ℕ) :
     D.gammaDecomposition.componentIndex n ↪
@@ -622,11 +707,9 @@ noncomputable def matchImageEmbedding (n : ℕ) :
   inj' := by
     intro B C h
     apply Subtype.ext
-    ext x
-    have himage := congrArg
-      (fun U : Finset (D.approximation.model n) ↦
-        x ∈ U.image (D.distinguishedPerm n).symm) h
-    simpa [matchImage] using himage
+    change B.block.image (D.distinguishedPerm n) =
+      C.block.image (D.distinguishedPerm n) at h
+    exact Finset.image_injective (D.distinguishedPerm n).injective h
 
 noncomputable def acceptableImages (n : ℕ) :
     Finset (Finset (D.approximation.model (D.matchingIndex n))) :=
@@ -637,6 +720,8 @@ noncomputable def acceptableImages (n : ℕ) :
 noncomputable def sourceOfImage (n : ℕ)
     (U : Finset (D.approximation.model (D.matchingIndex n))) :
     D.gammaDecomposition.componentIndex (D.matchingIndex n) :=
+  let B := Classical.choose (D.matchingIndex_candidates_nonempty n)
+  letI : Nonempty (D.gammaDecomposition.componentIndex (D.matchingIndex n)) := ⟨B⟩
   Function.invFun (D.matchImageEmbedding (D.matchingIndex n)) U
 
 noncomputable def targetOfImage (n : ℕ)
@@ -647,6 +732,8 @@ noncomputable def targetOfImage (n : ℕ)
 theorem sourceOfImage_matchImage (n : ℕ)
     (B : D.gammaDecomposition.componentIndex (D.matchingIndex n)) :
     D.sourceOfImage n (D.matchImage (D.matchingIndex n) B) = B := by
+  let B₀ := Classical.choose (D.matchingIndex_candidates_nonempty n)
+  letI : Nonempty (D.gammaDecomposition.componentIndex (D.matchingIndex n)) := ⟨B₀⟩
   exact Function.leftInverse_invFun (D.matchImageEmbedding (D.matchingIndex n)).injective B
 
 theorem acceptableImages_source (n : ℕ) {U}
@@ -659,14 +746,17 @@ theorem acceptableImages_source (n : ℕ) {U}
 
 theorem acceptableImages_are_blocks (n : ℕ) :
     ∀ U ∈ D.acceptableImages n, ∃ y,
-      U = ((D.gammaDecomposition.blocks (D.matchingIndex n)).transport
+      U = ((D.gammaDecomposition.blocks (D.matchingIndex n)).transportEquiv
         (D.distinguishedPerm (D.matchingIndex n))).block y := by
   intro U hU
   obtain ⟨B, _, rfl, _⟩ := D.acceptableImages_source n hU
   refine ⟨D.distinguishedPerm (D.matchingIndex n)
     (BlockIndex.representative (D.gammaDecomposition.blocks (D.matchingIndex n)) B), ?_⟩
-  rw [BlockStructure.transport_block, BlockIndex.block_representative]
-  rfl
+  change D.matchImage (D.matchingIndex n) B =
+    ((D.gammaDecomposition.blocks (D.matchingIndex n)).block
+      (BlockIndex.representative (D.gammaDecomposition.blocks (D.matchingIndex n)) B)).image
+        (D.distinguishedPerm (D.matchingIndex n))
+  rw [BlockIndex.block_representative]
 
 theorem targetOfImage_isBlock (n : ℕ) :
     ∀ U ∈ D.acceptableImages n, ∃ y,
@@ -676,7 +766,7 @@ theorem targetOfImage_isBlock (n : ℕ) :
   rw [targetOfImage, hsource]
   obtain ⟨y, hy⟩ :=
     (D.gammaDecomposition.refineBlock
-      (D.ambientDecomposition.blocks (D.matchingIndex n))
+      (D.gammaDecomposition.blocks (D.matchingIndex n))
       (D.distinguishedPerm (D.matchingIndex n)) B).target_isBlock
   exact ⟨y, hy⟩
 
@@ -698,28 +788,31 @@ theorem acceptableImages_discarded_card (n : ℕ) :
       D.discardedComponentMass (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)) := by
   classical
-  let P := (D.gammaDecomposition.blocks (D.matchingIndex n)).transport
+  let P : BlockStructure (D.approximation.model (D.matchingIndex n)) :=
+    (D.gammaDecomposition.blocks (D.matchingIndex n)).transportEquiv
     (D.distinguishedPerm (D.matchingIndex n))
   have hret := matchedRetainedSupport_card P (D.acceptableImages n)
     (D.acceptableImages_are_blocks n)
   have hsumMap : (∑ U ∈ D.acceptableImages n, U.card) =
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)), B.block.card := by
     unfold acceptableImages
     rw [Finset.sum_map]
     apply Finset.sum_congr rfl
     intro B hB
+    change (D.matchImage (D.matchingIndex n) B).card = B.block.card
     rw [Finset.card_image_of_injective _
       (D.distinguishedPerm (D.matchingIndex n)).injective]
-  rw [hsumMap] at hret
+    rfl
+  have hret' := hret.trans hsumMap
   have huniv := Finset.card_sdiff_add_card_eq_card
     (Finset.subset_univ (matchedRetainedSupport (D.acceptableImages n)))
-  rw [hret] at huniv
+  rw [hret'] at huniv
   have hunivReal :
       ((((Finset.univ : Finset
           (D.approximation.model (D.matchingIndex n))) \
         matchedRetainedSupport (D.acceptableImages n)).card : ℝ) +
-        ∑ B in D.acceptableComponents (D.matchingIndex n)
+        ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
           (D.matchingThreshold (D.matchingIndex n)), (B.block.card : ℝ)) =
         D.N (D.matchingIndex n) := by
     exact_mod_cast huniv
@@ -739,7 +832,7 @@ theorem acceptableImages_discarded_negligible :
 
 theorem acceptableImages_defect_sum_eq (n : ℕ) :
     (∑ U ∈ D.acceptableImages n, (U ∆ D.targetOfImage n U).card) =
-      ∑ B in D.acceptableComponents (D.matchingIndex n)
+      ∑ B ∈ D.acceptableComponents (D.matchingIndex n)
         (D.matchingThreshold (D.matchingIndex n)),
         (D.matchImage (D.matchingIndex n) B ∆
           D.matchTarget (D.matchingIndex n) B).card := by
@@ -748,6 +841,8 @@ theorem acceptableImages_defect_sum_eq (n : ℕ) :
   rw [Finset.sum_map]
   apply Finset.sum_congr rfl
   intro B hB
+  change (D.matchImage (D.matchingIndex n) B ∆
+    D.targetOfImage n (D.matchImage (D.matchingIndex n) B)).card = _
   rw [targetOfImage, D.sourceOfImage_matchImage]
 
 theorem acceptableImages_defect_negligible :
@@ -757,7 +852,7 @@ theorem acceptableImages_defect_negligible :
   apply Negligible.congr D.acceptable_symmDiff_sum_negligible
   intro n
   push_cast
-  rw [D.acceptableImages_defect_sum_eq]
+  exact_mod_cast (D.acceptableImages_defect_sum_eq n).symm
 
 theorem matchedCore_missing_negligible :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦
@@ -766,14 +861,14 @@ theorem matchedCore_missing_negligible :
   exact NonsoficGroupsExist.matchedCore_missing_negligible
     (fun n ↦ D.N (D.matchingIndex n))
     (fun n ↦ D.matchingIndex_card_pos n)
-    (fun n ↦ (D.gammaDecomposition.blocks (D.matchingIndex n)).transport
+    (fun n ↦ (D.gammaDecomposition.blocks (D.matchingIndex n)).transportEquiv
       (D.distinguishedPerm (D.matchingIndex n)))
     D.acceptableImages D.acceptableImages_are_blocks D.targetOfImage
     D.acceptableImages_discarded_negligible D.acceptableImages_defect_negligible
 
 noncomputable abbrev transportedBlocks (n : ℕ) :
     BlockStructure (D.approximation.model (D.matchingIndex n)) :=
-  (D.gammaDecomposition.blocks (D.matchingIndex n)).transport
+  (D.gammaDecomposition.blocks (D.matchingIndex n)).transportEquiv
     (D.distinguishedPerm (D.matchingIndex n))
 
 noncomputable abbrev localizedProductAct (n : ℕ) (g : Γ × J) :
@@ -802,7 +897,7 @@ theorem transportedBlocks_almost_invariant (g : Γ × J) :
     D.transportedBlocks
     (fun n ↦ D.gammaDecomposition.blocks (D.matchingIndex n))
     D.acceptableImages D.acceptableImages_are_blocks D.targetOfImage
-    D.targetOfImage_isBlock D.targetOfImage_injOn D.localizedProductAct
+    D.targetOfImage_isBlock D.targetOfImage_injOn (fun n ↦ D.localizedProductAct n g)
     D.matchedCore_missing_negligible htarget
 
 end LocalCriterionData
