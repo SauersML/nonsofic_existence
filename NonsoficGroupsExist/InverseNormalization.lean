@@ -98,8 +98,8 @@ theorem variation_le_of_disagreement (p q : Equiv.Perm Y) (f : Y → ℝ)
       apply Finset.sum_le_sum
       intro x _
       by_cases hpq : p x = q x
-      · simp only [hpq, sub_self, abs_zero, zero_le_add_iff_nonneg_left]
-        split_ifs <;> positivity
+      · rw [hpq]
+        exact le_add_of_nonneg_right (by split_ifs <;> positivity)
       · have hdiff : |f (p x) - f x| ≤ 1 := by
           rw [abs_sub_le_iff]
           constructor <;> linarith [hnonneg (p x), hnonneg x, hone (p x), hone x]
@@ -108,8 +108,7 @@ theorem variation_le_of_disagreement (p q : Equiv.Perm Y) (f : Y → ℝ)
     _ = (∑ x : Y, |f (q x) - f x|) + E.card := by
       rw [Finset.sum_add_distrib]
       congr 1
-      simp only [Finset.sum_boole]
-      norm_cast
+      simp
 
 end PermutationVariation
 

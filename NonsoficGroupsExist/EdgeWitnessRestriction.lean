@@ -113,7 +113,7 @@ theorem induce_sourceUnmatched_card_le :
       apply ha'
       exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hkept⟩⟩
   · intro a _ b _ hab
-      exact Subtype.ext hab
+    exact Subtype.ext hab
 
 theorem induce_sourceUnmatched_card_le_filter :
     ((W.induce U V hUV).sourceUnmatched).card ≤
@@ -140,7 +140,7 @@ theorem induce_targetUnmatched_card_le :
       apply hb'
       exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hkept⟩⟩
   · intro a _ b _ hab
-      exact Subtype.ext hab
+    exact Subtype.ext hab
 
 theorem induce_targetUnmatched_card_le_filter :
     ((W.induce U V hUV).targetUnmatched).card ≤

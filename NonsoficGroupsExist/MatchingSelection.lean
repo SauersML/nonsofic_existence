@@ -137,23 +137,42 @@ theorem componentSelectionError_mono {r r' : ℕ} (hrr : r ≤ r') (n : ℕ)
     D.componentSelectionError r n B ≤ D.componentSelectionError r' n B := by
   have hrange : Finset.range (r + 1) ⊆ Finset.range (r' + 1) :=
     Finset.range_mono (Nat.add_le_add_right hrr 1)
-  unfold componentSelectionError
-  gcongr
-  · exact Finset.sum_le_sum_of_subset_of_nonneg hrange
-      (fun _ _ _ ↦ by
-        unfold localInvariantError componentPredicateCount
-        positivity)
-  · exact Finset.sum_le_sum_of_subset_of_nonneg hrange (fun i _ _ ↦
-      Finset.sum_nonneg fun _ _ ↦ by
-        unfold localMultiplicationError componentPredicateCount
-        positivity)
-  · intro i hi
-    exact Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
+  have hinvariant :
+      (∑ i in Finset.range (r + 1), D.localInvariantError n i B) ≤
+        ∑ i in Finset.range (r' + 1), D.localInvariantError n i B :=
+    Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
+      unfold localInvariantError componentPredicateCount
+      positivity)
+  have hmultiplicationInner (i : ℕ) :
+      (∑ j in Finset.range (r + 1), D.localMultiplicationError n i j B) ≤
+        ∑ j in Finset.range (r' + 1), D.localMultiplicationError n i j B :=
+    Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
       unfold localMultiplicationError componentPredicateCount
       positivity)
-  · exact Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
+  have hmultiplication :
+      (∑ i in Finset.range (r + 1), ∑ j in Finset.range (r + 1),
+        D.localMultiplicationError n i j B) ≤
+      ∑ i in Finset.range (r' + 1), ∑ j in Finset.range (r' + 1),
+        D.localMultiplicationError n i j B := by
+    calc
+      _ ≤ ∑ i in Finset.range (r + 1), ∑ j in Finset.range (r' + 1),
+          D.localMultiplicationError n i j B :=
+        Finset.sum_le_sum fun i _ ↦ hmultiplicationInner i
+      _ ≤ _ := Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦
+        Finset.sum_nonneg fun _ _ ↦ by
+          unfold localMultiplicationError componentPredicateCount
+          positivity)
+  have hfixed :
+      (∑ i in Finset.range (r + 1), D.localFixedError n i B) ≤
+        ∑ i in Finset.range (r' + 1), D.localFixedError n i B :=
+    Finset.sum_le_sum_of_subset_of_nonneg hrange (fun _ _ _ ↦ by
       unfold localFixedError componentPredicateCount
       split_ifs <;> positivity)
+  unfold componentSelectionError
+  exact add_le_add
+    (add_le_add
+      (add_le_add (add_le_add le_rfl le_rfl) hinvariant) hmultiplication)
+    hfixed
 
 theorem sum_localInvariantError_negligible (i : ℕ) :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦

@@ -715,12 +715,17 @@ theorem acceptableImages_discarded_card (n : ℕ) :
   have huniv := Finset.card_sdiff_add_card_eq_card
     (Finset.subset_univ (matchedRetainedSupport (D.acceptableImages n)))
   rw [hret] at huniv
-  exact_mod_cast (by omega :
-    ((Finset.univ : Finset (D.approximation.model (D.matchingIndex n))) \
-      matchedRetainedSupport (D.acceptableImages n)).card =
-      Fintype.card (D.approximation.model (D.matchingIndex n)) -
+  have hunivReal :
+      ((((Finset.univ : Finset
+          (D.approximation.model (D.matchingIndex n))) \
+        matchedRetainedSupport (D.acceptableImages n)).card : ℝ) +
         ∑ B in D.acceptableComponents (D.matchingIndex n)
-          (D.matchingThreshold (D.matchingIndex n)), B.block.card)
+          (D.matchingThreshold (D.matchingIndex n)), (B.block.card : ℝ)) =
+        D.N (D.matchingIndex n) := by
+    exact_mod_cast huniv
+  have hmass := D.acceptableComponentMass_eq (D.matchingIndex n)
+    (D.matchingThreshold (D.matchingIndex n))
+  linarith
 
 theorem acceptableImages_discarded_negligible :
     Negligible (fun n ↦ D.N (D.matchingIndex n)) fun n ↦

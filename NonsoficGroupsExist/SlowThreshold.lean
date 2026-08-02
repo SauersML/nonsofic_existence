@@ -42,7 +42,7 @@ theorem slowThreshold_vanishing (r : ℕ → ℝ) (hr : Vanishing r) :
     slowThreshold r n ≤ 1 / ((k : ℝ) + 1) := by
       unfold slowThreshold
       apply one_div_le_one_div_of_le (by positivity)
-      exact_mod_cast hN n hn
+      exact_mod_cast Nat.add_le_add_right (hN n hn) 1
     _ < ε := by simpa using hk
 
 theorem error_div_slowThreshold_vanishing (r : ℕ → ℝ)
@@ -56,8 +56,9 @@ theorem error_div_slowThreshold_vanishing (r : ℕ → ℝ)
     intro k
     exact Vanishing.const_mul (((k : ℝ) + 1) ^ 3) hr
   have hdiag := diagonalLevel_error e henonneg hev
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (hrnonneg n)
-      (slowThreshold_pos r n).le) (fun n ↦ ?_) ?_
+  refine Vanishing.squeeze (b := fun n ↦ e n (diagonalLevel e n))
+    (fun n ↦ div_nonneg (hrnonneg n) (slowThreshold_pos r n).le)
+    (fun n ↦ ?_) ?_
   · let a : ℝ := (slowLevel r n : ℝ) + 1
     have ha : 1 ≤ a := by
       dsimp only [a]

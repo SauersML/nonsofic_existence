@@ -205,10 +205,38 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
   have hsource' : Vanishing fun n ↦
       ((Finset.univ.filter fun y : D.selectedSubset n ↦
         (D.transportedGammaCompletion n t y : D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-            ((D.selectedImageEquiv n).symm y)).card : ℝ) /
+          D.distinguishedPerm (D.matchingIndex n)
+            (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
+              ((D.selectedImageEquiv n).symm y))).card : ℝ) /
         (D.selectedSubset n).card := by
-    simpa [transportedGammaCompletion, D.selectedSubset_card] using hsource
+    apply Vanishing.congr hsource
+    intro n
+    have hcard :
+        (Finset.univ.filter fun y : D.selectedSubset n ↦
+          (D.transportedGammaCompletion n t y :
+              D.approximation.model (D.matchingIndex n)) ≠
+            D.distinguishedPerm (D.matchingIndex n)
+              (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
+                ((D.selectedImageEquiv n).symm y))).card =
+        (Finset.univ.filter fun x : (D.selectedComponent n).block ↦
+          (D.gammaCompletion n t x :
+              D.approximation.model (D.matchingIndex n)) ≠
+            D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t) x).card := by
+      apply Finset.card_bij
+        (fun y _ ↦ (D.selectedImageEquiv n).symm y)
+      · intro y hy
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy ⊢
+        intro heq
+        apply hy
+        simpa [transportedGammaCompletion, heq]
+      · intro y _ z _ hyz
+        exact (D.selectedImageEquiv n).symm.injective hyz
+      · intro x hx
+        refine ⟨D.selectedImageEquiv n x, ?_, (D.selectedImageEquiv n).symm_apply_apply x⟩
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx ⊢
+        simpa [transportedGammaCompletion] using
+          (D.distinguishedPerm (D.matchingIndex n)).injective.ne hx
+    rw [hcard, D.selectedSubset_card]
   have hconj : Vanishing fun n ↦
       ((Finset.univ.filter fun x : (D.selectedComponent n).block ↦
         (x : D.approximation.model (D.matchingIndex n)) ∈
@@ -235,8 +263,9 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
     let E₁ := Finset.univ.filter fun y : D.selectedSubset n ↦
         (D.transportedGammaCompletion n t y :
             D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-            ((D.selectedImageEquiv n).symm y)
+          D.distinguishedPerm (D.matchingIndex n)
+            (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
+              ((D.selectedImageEquiv n).symm y))
     let E₂ := Finset.univ.filter fun y : D.selectedSubset n ↦
         ((D.selectedImageEquiv n).symm y :
             D.approximation.model (D.matchingIndex n)) ∈
@@ -252,15 +281,30 @@ theorem localized_to_completed_disagreement_negligible (t : Γ)
       · exact Or.inl hloc
       by_cases hsrc : (D.transportedGammaCompletion n t y :
           D.approximation.model (D.matchingIndex n)) ≠
-          D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
-            ((D.selectedImageEquiv n).symm y)
+          D.distinguishedPerm (D.matchingIndex n)
+            (D.approximation.map (D.matchingIndex n) (D.setup.embedΓ t)
+              ((D.selectedImageEquiv n).symm y))
       · exact Or.inr (Or.inl hsrc)
       · exact Or.inr (Or.inr (by
+          simp only [SoficApproximation.conjugacyError, Finset.mem_filter,
+            Finset.mem_univ, true_and]
           intro hgood
           apply hy
           apply Subtype.ext
           rw [not_ne_iff.mp hloc, not_ne_iff.mp hsrc]
-          exact hgood))
+          have hprod : D.setup.productEmbedding (t, 1) =
+              D.setup.distinguished * D.setup.embedΓ t * D.setup.distinguished⁻¹ := by
+            rw [D.setup.productEmbedding_eq_embedΓ]
+            simpa using D.setup.compressedEnd_spec D.setup.distinguished
+              D.setup.distinguished_mem t
+          have hyq : D.distinguishedPerm (D.matchingIndex n)
+              ((D.selectedImageEquiv n).symm y) =
+              (y : D.approximation.model (D.matchingIndex n)) := by
+            exact congrArg Subtype.val
+              ((D.selectedImageEquiv n).apply_symm_apply y)
+          rw [hyq] at hgood
+          rw [localizedProductAct, hprod]
+          exact hgood.symm))
     have hcard := (Finset.card_le_card hsubset).trans
       ((Finset.card_union_le E₀ (E₁ ∪ E₂)).trans
         (Nat.add_le_add_left (Finset.card_union_le E₁ E₂) E₀.card))

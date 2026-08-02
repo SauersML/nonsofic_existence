@@ -21,8 +21,8 @@ theorem threshold_mul_card_le_sum (f : Y → ℝ) (hf : ∀ x, 0 ≤ f x)
     η * ((Finset.univ.filter fun x ↦ η < f x).card : ℝ) ≤ ∑ x, f x := by
   calc
     η * ((Finset.univ.filter fun x ↦ η < f x).card : ℝ) =
-        ∑ x in Finset.univ.filter (fun x ↦ η < f x), η := by simp
-    _ ≤ ∑ x in Finset.univ.filter (fun x ↦ η < f x), f x := by
+        (Finset.univ.filter fun x ↦ η < f x).sum (fun _ ↦ η) := by simp
+    _ ≤ (Finset.univ.filter fun x ↦ η < f x).sum f := by
       apply Finset.sum_le_sum
       intro x hx
       exact (Finset.mem_filter.mp hx).2.le
@@ -35,16 +35,17 @@ of their size carry at most `totalError / η` mass. -/
 theorem threshold_mul_badBlockMass_le
     (P : BlockStructure Y) (e : BlockIndex P → ℝ)
     (he : ∀ B, 0 ≤ e B) {η : ℝ} (hη : 0 ≤ η) :
-    η * (∑ B in (Finset.univ.filter fun B : BlockIndex P ↦
-        η * B.block.card ≤ e B), (B.block.card : ℝ)) ≤ ∑ B, e B := by
+    η * (Finset.univ.filter (fun B : BlockIndex P ↦
+        η * B.block.card ≤ e B)).sum (fun B ↦ (B.block.card : ℝ)) ≤
+      ∑ B, e B := by
   calc
-    η * (∑ B in (Finset.univ.filter fun B : BlockIndex P ↦
-        η * B.block.card ≤ e B), (B.block.card : ℝ)) =
-      ∑ B in (Finset.univ.filter fun B : BlockIndex P ↦
-        η * B.block.card ≤ e B), η * B.block.card := by
+    η * (Finset.univ.filter (fun B : BlockIndex P ↦
+        η * B.block.card ≤ e B)).sum (fun B ↦ (B.block.card : ℝ)) =
+      (Finset.univ.filter (fun B : BlockIndex P ↦
+        η * B.block.card ≤ e B)).sum (fun B ↦ η * B.block.card) := by
           rw [Finset.mul_sum]
-    _ ≤ ∑ B in (Finset.univ.filter fun B : BlockIndex P ↦
-        η * B.block.card ≤ e B), e B := by
+    _ ≤ (Finset.univ.filter (fun B : BlockIndex P ↦
+        η * B.block.card ≤ e B)).sum e := by
           apply Finset.sum_le_sum
           intro B hB
           exact (Finset.mem_filter.mp hB).2
