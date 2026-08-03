@@ -642,6 +642,251 @@ theorem isLEF_of_product_epsilonRounding
     have hsep := hNsep n hnsep x hx y hy hxy
     linarith
 
+/-! ### Fiber control for repairing a low-boundary relation -/
+
+def rowFiber (U : Finset (Y × Y)) (x : Y) : Finset Y :=
+  Finset.univ.filter fun y ↦ (x, y) ∈ U
+
+def rowDegree (U : Finset (Y × Y)) (x : Y) : ℕ :=
+  (rowFiber Y U x).card
+
+def badRows (U : Finset (Y × Y)) : Finset Y :=
+  Finset.univ.filter fun x ↦ rowDegree Y U x ≠ 1
+
+@[simp] theorem mem_rowFiber (U : Finset (Y × Y)) (x y : Y) :
+    y ∈ rowFiber Y U x ↔ (x, y) ∈ U := by
+  simp [rowFiber]
+
+@[simp] theorem mem_badRows (U : Finset (Y × Y)) (x : Y) :
+    x ∈ badRows Y U ↔ rowDegree Y U x ≠ 1 := by
+  simp [badRows]
+
+theorem exists_extra_in_row_of_bad_of_graph_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (x : Y)
+    (hbad : rowDegree Y U x ≠ 1) (hgraph : (x, c x) ∈ U) :
+    ∃ y : Y, (x, y) ∈ U ∧ y ≠ c x := by
+  by_contra h
+  push Not at h
+  have hfiber : rowFiber Y U x = {c x} := by
+    ext y
+    constructor
+    · intro hy
+      rw [mem_rowFiber] at hy
+      simp [h y hy]
+    · intro hy
+      rw [Finset.mem_singleton] at hy
+      subst y
+      exact (mem_rowFiber Y U x (c x)).2 hgraph
+  apply hbad
+  rw [rowDegree, hfiber]
+  simp
+
+/-- Choose an excess point in a bad row when the original graph point is
+retained; elsewhere use the original graph point as a harmless default. -/
+noncomputable def rowRepairWitness
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (x : Y) : Y := by
+  classical
+  exact if h : rowDegree Y U x ≠ 1 ∧ (x, c x) ∈ U then
+    Classical.choose
+      (exists_extra_in_row_of_bad_of_graph_mem Y U c x h.1 h.2)
+  else c x
+
+theorem rowRepairWitness_mem_of_bad_of_graph_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (x : Y)
+    (hbad : rowDegree Y U x ≠ 1) (hgraph : (x, c x) ∈ U) :
+    (x, rowRepairWitness Y U c x) ∈ U ∧
+      rowRepairWitness Y U c x ≠ c x := by
+  rw [rowRepairWitness, dif_pos ⟨hbad, hgraph⟩]
+  exact Classical.choose_spec
+    (exists_extra_in_row_of_bad_of_graph_mem Y U c x hbad hgraph)
+
+/-- Each non-singleton row is witnessed by a distinct missing or excess point
+relative to the original permutation graph. -/
+noncomputable def badRowEditEmbedding
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    {x // x ∈ badRows Y U} ↪ Y × Y where
+  toFun x := (x.1, if (x.1, c x.1) ∈ U then
+      rowRepairWitness Y U c x.1 else c x.1)
+  inj' := by
+    intro x y hxy
+    apply Subtype.ext
+    exact congrArg Prod.fst hxy
+
+theorem badRowEditEmbedding_apply_of_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y)
+    (x : {x // x ∈ badRows Y U}) (hx : (x.1, c x.1) ∈ U) :
+    badRowEditEmbedding Y U c x =
+      (x.1, rowRepairWitness Y U c x.1) := by
+  simp [badRowEditEmbedding, hx]
+
+theorem badRowEditEmbedding_apply_of_not_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y)
+    (x : {x // x ∈ badRows Y U}) (hx : (x.1, c x.1) ∉ U) :
+    badRowEditEmbedding Y U c x = (x.1, c x.1) := by
+  simp [badRowEditEmbedding, hx]
+
+theorem image_badRowEditEmbedding_subset_edits
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (badRows Y U).attach.map (badRowEditEmbedding Y U c) ⊆
+      (permutationGraph Y c \ U) ∪ (U \ permutationGraph Y c) := by
+  intro p hp
+  rw [Finset.mem_map] at hp
+  obtain ⟨x, _, rfl⟩ := hp
+  have hbad := (mem_badRows Y U x.1).1 x.2
+  by_cases hgraph : (x.1, c x.1) ∈ U
+  · rw [badRowEditEmbedding_apply_of_mem Y U c x hgraph]
+    rw [Finset.mem_union]
+    right
+    rw [Finset.mem_sdiff]
+    have hw := rowRepairWitness_mem_of_bad_of_graph_mem Y U c x.1 hbad hgraph
+    refine ⟨hw.1, ?_⟩
+    rw [mem_permutationGraph]
+    exact hw.2
+  · rw [badRowEditEmbedding_apply_of_not_mem Y U c x hgraph]
+    rw [Finset.mem_union]
+    left
+    rw [Finset.mem_sdiff]
+    refine ⟨?_, hgraph⟩
+    exact (mem_permutationGraph Y c _).2 rfl
+
+theorem card_badRows_le_edits
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (badRows Y U).card ≤
+      (permutationGraph Y c \ U).card +
+        (U \ permutationGraph Y c).card := by
+  have hatt : (badRows Y U).attach.card = (badRows Y U).card :=
+    Finset.card_attach
+  rw [← hatt, ← Finset.card_map (f := badRowEditEmbedding Y U c)]
+  calc
+    ((badRows Y U).attach.map (badRowEditEmbedding Y U c)).card ≤
+        ((permutationGraph Y c \ U) ∪
+          (U \ permutationGraph Y c)).card :=
+      Finset.card_le_card (image_badRowEditEmbedding_subset_edits Y U c)
+    _ ≤ (permutationGraph Y c \ U).card +
+        (U \ permutationGraph Y c).card := Finset.card_union_le _ _
+
+def columnFiber (U : Finset (Y × Y)) (y : Y) : Finset Y :=
+  Finset.univ.filter fun x ↦ (x, y) ∈ U
+
+def columnDegree (U : Finset (Y × Y)) (y : Y) : ℕ :=
+  (columnFiber Y U y).card
+
+def badColumns (U : Finset (Y × Y)) : Finset Y :=
+  Finset.univ.filter fun y ↦ columnDegree Y U y ≠ 1
+
+@[simp] theorem mem_columnFiber (U : Finset (Y × Y)) (x y : Y) :
+    x ∈ columnFiber Y U y ↔ (x, y) ∈ U := by
+  simp [columnFiber]
+
+@[simp] theorem mem_badColumns (U : Finset (Y × Y)) (y : Y) :
+    y ∈ badColumns Y U ↔ columnDegree Y U y ≠ 1 := by
+  simp [badColumns]
+
+theorem exists_extra_in_column_of_bad_of_graph_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (y : Y)
+    (hbad : columnDegree Y U y ≠ 1) (hgraph : (c.symm y, y) ∈ U) :
+    ∃ x : Y, (x, y) ∈ U ∧ x ≠ c.symm y := by
+  by_contra h
+  push Not at h
+  have hfiber : columnFiber Y U y = {c.symm y} := by
+    ext x
+    constructor
+    · intro hx
+      rw [mem_columnFiber] at hx
+      simp [h x hx]
+    · intro hx
+      rw [Finset.mem_singleton] at hx
+      subst x
+      exact (mem_columnFiber Y U (c.symm y) y).2 hgraph
+  apply hbad
+  rw [columnDegree, hfiber]
+  simp
+
+noncomputable def columnRepairWitness
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (y : Y) : Y := by
+  classical
+  exact if h : columnDegree Y U y ≠ 1 ∧ (c.symm y, y) ∈ U then
+    Classical.choose
+      (exists_extra_in_column_of_bad_of_graph_mem Y U c y h.1 h.2)
+  else c.symm y
+
+theorem columnRepairWitness_mem_of_bad_of_graph_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (y : Y)
+    (hbad : columnDegree Y U y ≠ 1) (hgraph : (c.symm y, y) ∈ U) :
+    (columnRepairWitness Y U c y, y) ∈ U ∧
+      columnRepairWitness Y U c y ≠ c.symm y := by
+  rw [columnRepairWitness, dif_pos ⟨hbad, hgraph⟩]
+  exact Classical.choose_spec
+    (exists_extra_in_column_of_bad_of_graph_mem Y U c y hbad hgraph)
+
+noncomputable def badColumnEditEmbedding
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    {y // y ∈ badColumns Y U} ↪ Y × Y where
+  toFun y := (if (c.symm y.1, y.1) ∈ U then
+      columnRepairWitness Y U c y.1 else c.symm y.1, y.1)
+  inj' := by
+    intro x y hxy
+    apply Subtype.ext
+    exact congrArg Prod.snd hxy
+
+theorem badColumnEditEmbedding_apply_of_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y)
+    (y : {y // y ∈ badColumns Y U}) (hy : (c.symm y.1, y.1) ∈ U) :
+    badColumnEditEmbedding Y U c y =
+      (columnRepairWitness Y U c y.1, y.1) := by
+  simp [badColumnEditEmbedding, hy]
+
+theorem badColumnEditEmbedding_apply_of_not_mem
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y)
+    (y : {y // y ∈ badColumns Y U}) (hy : (c.symm y.1, y.1) ∉ U) :
+    badColumnEditEmbedding Y U c y = (c.symm y.1, y.1) := by
+  simp [badColumnEditEmbedding, hy]
+
+theorem image_badColumnEditEmbedding_subset_edits
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (badColumns Y U).attach.map (badColumnEditEmbedding Y U c) ⊆
+      (permutationGraph Y c \ U) ∪ (U \ permutationGraph Y c) := by
+  intro p hp
+  rw [Finset.mem_map] at hp
+  obtain ⟨y, _, rfl⟩ := hp
+  have hbad := (mem_badColumns Y U y.1).1 y.2
+  by_cases hgraph : (c.symm y.1, y.1) ∈ U
+  · rw [badColumnEditEmbedding_apply_of_mem Y U c y hgraph]
+    rw [Finset.mem_union]
+    right
+    rw [Finset.mem_sdiff]
+    have hw := columnRepairWitness_mem_of_bad_of_graph_mem
+      Y U c y.1 hbad hgraph
+    refine ⟨hw.1, ?_⟩
+    rw [mem_permutationGraph]
+    intro heq
+    apply hw.2
+    apply c.injective
+    simpa using heq.symm
+  · rw [badColumnEditEmbedding_apply_of_not_mem Y U c y hgraph]
+    rw [Finset.mem_union]
+    left
+    rw [Finset.mem_sdiff]
+    refine ⟨?_, hgraph⟩
+    rw [mem_permutationGraph]
+    simp
+
+theorem card_badColumns_le_edits
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (badColumns Y U).card ≤
+      (permutationGraph Y c \ U).card +
+        (U \ permutationGraph Y c).card := by
+  have hatt : (badColumns Y U).attach.card = (badColumns Y U).card :=
+    Finset.card_attach
+  rw [← hatt, ← Finset.card_map (f := badColumnEditEmbedding Y U c)]
+  calc
+    ((badColumns Y U).attach.map (badColumnEditEmbedding Y U c)).card ≤
+        ((permutationGraph Y c \ U) ∪
+          (U \ permutationGraph Y c)).card :=
+      Finset.card_le_card (image_badColumnEditEmbedding_subset_edits Y U c)
+    _ ≤ (permutationGraph Y c \ U).card +
+        (U \ permutationGraph Y c).card := Finset.card_union_le _ _
+
 /-- Bad arcs whose graph point and its diagonal translate lie on opposite
 sides of the relation. -/
 def crossingBadArcs (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
