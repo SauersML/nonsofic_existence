@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Asymptotics
+import NonsoficGroupsExist.AlmostAutomorphism
 import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.LocalCriterion
