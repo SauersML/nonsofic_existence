@@ -34,6 +34,53 @@ def badArcs (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
     p ∈ badArcs Y S c ↔ p.1 ∈ S ∧ c (p.1 p.2) ≠ p.1 (c p.2) := by
   simp [badArcs]
 
+/-- Reindex an arc by a permutation on its source vertex. -/
+def inverseDefectEquiv (c : Equiv.Perm Y) : Arc Y ≃ Arc Y where
+  toFun p := (p.1, c p.2)
+  invFun p := (p.1, c⁻¹ p.2)
+  left_inv p := by simp
+  right_inv p := by simp
+
+theorem image_badArcs_inverseDefectEquiv (S : Finset (Equiv.Perm Y))
+    (c : Equiv.Perm Y) :
+    (badArcs Y S c).map (inverseDefectEquiv Y c).toEmbedding =
+      badArcs Y S c⁻¹ := by
+  ext p
+  constructor
+  · intro hp
+    rw [Finset.mem_map] at hp
+    obtain ⟨⟨s, x⟩, hq, rfl⟩ := hp
+    rw [mem_badArcs] at hq ⊢
+    refine ⟨hq.1, ?_⟩
+    dsimp [inverseDefectEquiv]
+    simp only [Equiv.symm_apply_apply]
+    change c⁻¹ (s (c x)) ≠ s x
+    intro heq
+    apply hq.2
+    have hc := congrArg c heq
+    simpa using hc.symm
+  · intro hp
+    rcases p with ⟨s, x⟩
+    rw [mem_badArcs] at hp
+    rw [Finset.mem_map]
+    let q : Arc Y := (s, c⁻¹ x)
+    refine ⟨q, ?_, ?_⟩
+    · rw [mem_badArcs]
+      refine ⟨hp.1, ?_⟩
+      dsimp [q]
+      simp only [Equiv.apply_symm_apply]
+      change c (s (c⁻¹ x)) ≠ s x
+      intro heq
+      apply hp.2
+      have hc := congrArg (c⁻¹ : Equiv.Perm Y) heq
+      simpa using hc.symm
+    · simp [q, inverseDefectEquiv]
+
+theorem card_badArcs_inv (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    (badArcs Y S c⁻¹).card = (badArcs Y S c).card := by
+  rw [← image_badArcs_inverseDefectEquiv]
+  exact Finset.card_map _
+
 /-! ### Defects coming from a product sofic approximation -/
 
 variable {K J : Type} [Group K] [Group J]
