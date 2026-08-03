@@ -147,6 +147,227 @@ def relationBoundary (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
         (p.2 ∉ U ∧ diagonalAction Y p.1 p.2 ∈ U)) := by
   simp [relationBoundary]
 
+/-- Boundary occurrences directed out of a relation. -/
+def leavingRelationBoundary (S : Finset (Equiv.Perm Y))
+    (U : Finset (Y × Y)) : Finset (Equiv.Perm Y × (Y × Y)) :=
+  (relationBoundary Y S U).filter fun p ↦ p.2 ∈ U
+
+/-- Boundary occurrences directed into a relation. -/
+def enteringRelationBoundary (S : Finset (Equiv.Perm Y))
+    (U : Finset (Y × Y)) : Finset (Equiv.Perm Y × (Y × Y)) :=
+  (relationBoundary Y S U).filter fun p ↦ p.2 ∉ U
+
+theorem relationBoundary_subset_leaving_union_entering
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
+    relationBoundary Y S U ⊆
+      leavingRelationBoundary Y S U ∪ enteringRelationBoundary Y S U := by
+  intro p hp
+  by_cases hU : p.2 ∈ U
+  · exact Finset.mem_union_left _ (by simp [leavingRelationBoundary, hp, hU])
+  · exact Finset.mem_union_right _ (by simp [enteringRelationBoundary, hp, hU])
+
+/-- Forget the relation target coordinate and retain the label and source. -/
+def relationSourceArc (p : Equiv.Perm Y × (Y × Y)) : Arc Y :=
+  (p.1, p.2.1)
+
+theorem relationSourceArc_injectiveOn_leaving_graph
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    Set.InjOn (relationSourceArc Y)
+      (leavingRelationBoundary Y S (permutationGraph Y c) :
+        Set (Equiv.Perm Y × (Y × Y))) := by
+  intro p hp q hq heq
+  have hpdata : p ∈ relationBoundary Y S (permutationGraph Y c) ∧
+      p.2 ∈ permutationGraph Y c := by
+    simpa [leavingRelationBoundary] using hp
+  have hqdata : q ∈ relationBoundary Y S (permutationGraph Y c) ∧
+      q.2 ∈ permutationGraph Y c := by
+    simpa [leavingRelationBoundary] using hq
+  have hpgraph := hpdata.2
+  have hqgraph := hqdata.2
+  have hs : p.1 = q.1 :=
+    congrArg (fun r : Arc Y ↦ r.1) heq
+  have hx : p.2.1 = q.2.1 :=
+    congrArg (fun r : Arc Y ↦ r.2) heq
+  have hp2 := (mem_permutationGraph Y c p.2).1 hpgraph
+  have hq2 := (mem_permutationGraph Y c q.2).1 hqgraph
+  apply Prod.ext hs
+  apply Prod.ext hx
+  calc
+    p.2.2 = c p.2.1 := hp2
+    _ = c q.2.1 := congrArg c hx
+    _ = q.2.2 := hq2.symm
+
+theorem image_relationSourceArc_leaving_graph_subset_badArcs
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    (leavingRelationBoundary Y S (permutationGraph Y c)).image
+        (relationSourceArc Y) ⊆ badArcs Y S c := by
+  intro a ha
+  rw [Finset.mem_image] at ha
+  obtain ⟨p, hp, rfl⟩ := ha
+  have hpdata : p ∈ relationBoundary Y S (permutationGraph Y c) ∧
+      p.2 ∈ permutationGraph Y c := by
+    simpa [leavingRelationBoundary] using hp
+  have hboundary := (mem_relationBoundary Y S (permutationGraph Y c) p).1
+    hpdata.1
+  have hleave : diagonalAction Y p.1 p.2 ∉ permutationGraph Y c := by
+    rcases hboundary.2 with hout | hin
+    · exact hout.2
+    · exact (hin.1 hpdata.2).elim
+  rw [mem_badArcs]
+  refine ⟨hboundary.1, ?_⟩
+  have hpgraph := (mem_permutationGraph Y c p.2).1 hpdata.2
+  change c (p.1 p.2.1) ≠ p.1 (c p.2.1)
+  intro heq
+  apply hleave
+  rw [mem_permutationGraph]
+  dsimp [diagonalAction]
+  simpa [hpgraph] using heq.symm
+
+theorem card_leaving_graph_le_badArcs
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    (leavingRelationBoundary Y S (permutationGraph Y c)).card ≤
+      (badArcs Y S c).card := by
+  have himage :
+      ((leavingRelationBoundary Y S (permutationGraph Y c)).image
+        (relationSourceArc Y)).card =
+          (leavingRelationBoundary Y S (permutationGraph Y c)).card :=
+    Finset.card_image_iff.mpr fun p hp q hq heq ↦
+      relationSourceArc_injectiveOn_leaving_graph Y S c hp hq heq
+  rw [← himage]
+  exact Finset.card_le_card
+    (image_relationSourceArc_leaving_graph_subset_badArcs Y S c)
+
+theorem relationSourceArc_injectiveOn_entering_graph
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    Set.InjOn (relationSourceArc Y)
+      (enteringRelationBoundary Y S (permutationGraph Y c) :
+        Set (Equiv.Perm Y × (Y × Y))) := by
+  intro p hp q hq heq
+  have hpdata : p ∈ relationBoundary Y S (permutationGraph Y c) ∧
+      p.2 ∉ permutationGraph Y c := by
+    simpa [enteringRelationBoundary] using hp
+  have hqdata : q ∈ relationBoundary Y S (permutationGraph Y c) ∧
+      q.2 ∉ permutationGraph Y c := by
+    simpa [enteringRelationBoundary] using hq
+  have hs : p.1 = q.1 :=
+    congrArg (fun r : Arc Y ↦ r.1) heq
+  have hx : p.2.1 = q.2.1 :=
+    congrArg (fun r : Arc Y ↦ r.2) heq
+  have hpenter := (mem_relationBoundary Y S (permutationGraph Y c) p).1
+    hpdata.1
+  have hqenter := (mem_relationBoundary Y S (permutationGraph Y c) q).1
+    hqdata.1
+  have hptarget : diagonalAction Y p.1 p.2 ∈ permutationGraph Y c := by
+    rcases hpenter.2 with hout | hin
+    · exact (hpdata.2 hout.1).elim
+    · exact hin.2
+  have hqtarget : diagonalAction Y q.1 q.2 ∈ permutationGraph Y c := by
+    rcases hqenter.2 with hout | hin
+    · exact (hqdata.2 hout.1).elim
+    · exact hin.2
+  have hpEq := (mem_permutationGraph Y c _).1 hptarget
+  have hqEq := (mem_permutationGraph Y c _).1 hqtarget
+  apply Prod.ext hs
+  apply Prod.ext hx
+  apply p.1.injective
+  change p.1 p.2.2 = p.1 q.2.2
+  calc
+    p.1 p.2.2 = c (p.1 p.2.1) := hpEq
+    _ = c (q.1 q.2.1) := by rw [hs, hx]
+    _ = q.1 q.2.2 := hqEq.symm
+    _ = p.1 q.2.2 := by rw [hs]
+
+theorem image_relationSourceArc_entering_graph_subset_badArcs
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    (enteringRelationBoundary Y S (permutationGraph Y c)).image
+        (relationSourceArc Y) ⊆ badArcs Y S c := by
+  intro a ha
+  rw [Finset.mem_image] at ha
+  obtain ⟨p, hp, rfl⟩ := ha
+  have hpdata : p ∈ relationBoundary Y S (permutationGraph Y c) ∧
+      p.2 ∉ permutationGraph Y c := by
+    simpa [enteringRelationBoundary] using hp
+  have hboundary := (mem_relationBoundary Y S (permutationGraph Y c) p).1
+    hpdata.1
+  have htarget : diagonalAction Y p.1 p.2 ∈ permutationGraph Y c := by
+    rcases hboundary.2 with hout | hin
+    · exact (hpdata.2 hout.1).elim
+    · exact hin.2
+  rw [mem_badArcs]
+  refine ⟨hboundary.1, ?_⟩
+  have htargetEq := (mem_permutationGraph Y c _).1 htarget
+  change c (p.1 p.2.1) ≠ p.1 (c p.2.1)
+  intro hgood
+  apply hpdata.2
+  rw [mem_permutationGraph]
+  apply p.1.injective
+  calc
+    p.1 p.2.2 = c (p.1 p.2.1) := htargetEq
+    _ = p.1 (c p.2.1) := hgood
+
+theorem card_entering_graph_le_badArcs
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    (enteringRelationBoundary Y S (permutationGraph Y c)).card ≤
+      (badArcs Y S c).card := by
+  have himage :
+      ((enteringRelationBoundary Y S (permutationGraph Y c)).image
+        (relationSourceArc Y)).card =
+          (enteringRelationBoundary Y S (permutationGraph Y c)).card :=
+    Finset.card_image_iff.mpr fun p hp q hq heq ↦
+      relationSourceArc_injectiveOn_entering_graph Y S c hp hq heq
+  rw [← himage]
+  exact Finset.card_le_card
+    (image_relationSourceArc_entering_graph_subset_badArcs Y S c)
+
+/-- The diagonal boundary of a permutation graph is at most twice the
+permutation's label-commutation defect. -/
+theorem card_relationBoundary_permutationGraph_le
+    (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
+    (relationBoundary Y S (permutationGraph Y c)).card ≤
+      2 * (badArcs Y S c).card := by
+  have hcover := Finset.card_le_card
+    (relationBoundary_subset_leaving_union_entering Y S (permutationGraph Y c))
+  have hunion := Finset.card_union_le
+    (leavingRelationBoundary Y S (permutationGraph Y c))
+    (enteringRelationBoundary Y S (permutationGraph Y c))
+  have hleave := card_leaving_graph_le_badArcs Y S c
+  have henter := card_entering_graph_le_badArcs Y S c
+  omega
+
+/-- A product can fail to preserve a label only where the right factor fails,
+or at the right-factor translate of a defect of the left factor. -/
+theorem badArcs_mul_subset
+    (S : Finset (Equiv.Perm Y)) (a b : Equiv.Perm Y) :
+    badArcs Y S (a * b) ⊆
+      badArcs Y S b ∪
+        (badArcs Y S a).map (inverseDefectEquiv Y b⁻¹).toEmbedding := by
+  intro p hp
+  have hpdata := (mem_badArcs Y S (a * b) p).1 hp
+  by_cases hb : b (p.1 p.2) ≠ p.1 (b p.2)
+  · exact Finset.mem_union_left _ <|
+      (mem_badArcs Y S b p).2 ⟨hpdata.1, hb⟩
+  · apply Finset.mem_union_right
+    rw [Finset.mem_map]
+    let q : Arc Y := (p.1, b p.2)
+    refine ⟨q, ?_, ?_⟩
+    · rw [mem_badArcs]
+      refine ⟨hpdata.1, ?_⟩
+      intro ha
+      apply hpdata.2
+      simp only [Equiv.Perm.coe_mul, Function.comp_apply]
+      rw [not_ne_iff.mp hb, ha]
+    · simp [q, inverseDefectEquiv]
+
+theorem card_badArcs_mul_le
+    (S : Finset (Equiv.Perm Y)) (a b : Equiv.Perm Y) :
+    (badArcs Y S (a * b)).card ≤
+      (badArcs Y S a).card + (badArcs Y S b).card := by
+  have hsubset := Finset.card_le_card (badArcs_mul_subset Y S a b)
+  have hunion := Finset.card_union_le (badArcs Y S b)
+    ((badArcs Y S a).map (inverseDefectEquiv Y b⁻¹).toEmbedding)
+  rw [Finset.card_map] at hunion
+  omega
+
 /-- Bad arcs whose graph point and its diagonal translate lie on opposite
 sides of the relation. -/
 def crossingBadArcs (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
