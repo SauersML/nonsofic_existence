@@ -95,6 +95,58 @@ def p1 : A := L.s1 * L.t1
 @[simp] theorem t1_mul_p1 : L.t1 * L.p1 = L.t1 := by
   simp [p1, ← mul_assoc]
 
+theorem t0_pow_mul_s0_pow (n : ℕ) : L.t0 ^ n * L.s0 ^ n = 1 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      calc
+        L.t0 ^ (n + 1) * L.s0 ^ (n + 1) =
+            (L.t0 ^ n * L.t0) * (L.s0 * L.s0 ^ n) := by
+              rw [pow_succ, pow_succ']
+        _ = L.t0 ^ n * ((L.t0 * L.s0) * L.s0 ^ n) := by
+          simp only [mul_assoc]
+        _ = 1 := by rw [L.t0_s0, one_mul, ih]
+
+theorem t1_mul_s0_pow_succ (n : ℕ) : L.t1 * L.s0 ^ (n + 1) = 0 := by
+  rw [pow_succ']
+  simp only [← mul_assoc, L.t1_s0, zero_mul]
+
+/-- Distinct powers of the first prefix generator remain distinct in every
+nontrivial binary Leavitt family. -/
+theorem s0_pow_injective [Nontrivial A] :
+    Function.Injective (fun n : ℕ ↦ L.s0 ^ n) := by
+  have eq_of_le {n m : ℕ} (hnm : n ≤ m) (hpow : L.s0 ^ n = L.s0 ^ m) : n = m := by
+    obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hnm
+    rw [pow_add] at hpow
+    have hk : (1 : A) = L.s0 ^ k := by
+      calc
+        (1 : A) = L.t0 ^ n * L.s0 ^ n := (L.t0_pow_mul_s0_pow n).symm
+        _ = L.t0 ^ n * (L.s0 ^ n * L.s0 ^ k) := congrArg (L.t0 ^ n * ·) hpow
+        _ = (L.t0 ^ n * L.s0 ^ n) * L.s0 ^ k := by rw [mul_assoc]
+        _ = L.s0 ^ k := by rw [L.t0_pow_mul_s0_pow, one_mul]
+    cases k with
+    | zero => simp
+    | succ k =>
+        have ht1 : L.t1 = 0 := by
+          calc
+            L.t1 = L.t1 * 1 := (mul_one L.t1).symm
+            _ = L.t1 * L.s0 ^ (k + 1) := by rw [hk]
+            _ = 0 := L.t1_mul_s0_pow_succ k
+        have hzero : (1 : A) = 0 := by
+          calc
+            (1 : A) = L.t1 * L.s1 := L.t1_s1.symm
+            _ = 0 := by rw [ht1, zero_mul]
+        exact (one_ne_zero hzero).elim
+  intro n m hpow
+  rcases le_total n m with hnm | hmn
+  · exact eq_of_le hnm hpow
+  · exact (eq_of_le hmn hpow.symm).symm
+
+/-- Every nontrivial ring carrying a binary Leavitt family is infinite. -/
+theorem infinite (L : LeavittFamily A) [Nontrivial A] : Infinite A := by
+  let f : ℕ → A := fun n ↦ L.s0 ^ n
+  exact Infinite.of_injective f (s0_pow_injective L)
+
 @[simp] theorem one_add_s1t1 [CharP A 2] :
     (1 : A) + L.s1 * L.t1 = L.s0 * L.t0 := by
   rw [← L.sum_range]
