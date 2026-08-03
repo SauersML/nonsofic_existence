@@ -67,6 +67,59 @@ def cylinderSwap (a b : List (Fin 2)) (hab : ¬a <+: b) (hba : ¬b <+: a) : Aˣ 
     (↑(L.cylinderSwap a b hab hba) : A) =
       transpositionValue (L.wordS a) (L.wordT a) (L.wordS b) (L.wordT b) := rfl
 
+@[simp] theorem cylinderSwap_inv (a b : List (Fin 2)) (hab : ¬a <+: b)
+    (hba : ¬b <+: a) :
+    (L.cylinderSwap a b hab hba)⁻¹ = L.cylinderSwap a b hab hba := by
+  apply Units.ext
+  rfl
+
+/-- A cylinder transposition is the product of the two transpositions on its
+binary children.  This refinement identity is the finite algebraic mechanism
+behind the perfectness argument used for the corner subgroup. -/
+theorem cylinderSwap_split (a b : List (Fin 2)) (hab : ¬a <+: b)
+    (hba : ¬b <+: a) :
+    L.cylinderSwap a b hab hba =
+      L.cylinderSwap (a ++ [0]) (b ++ [0])
+          (not_prefix_append_right a b [0] [0] hab hba)
+          (not_prefix_append_right b a [0] [0] hba hab) *
+        L.cylinderSwap (a ++ [1]) (b ++ [1])
+          (not_prefix_append_right a b [1] [1] hab hba)
+          (not_prefix_append_right b a [1] [1] hba hab) := by
+  apply Units.ext
+  change transpositionValue (L.wordS a) (L.wordT a) (L.wordS b) (L.wordT b) =
+    transpositionValue (L.wordS (a ++ [0])) (L.wordT (a ++ [0]))
+        (L.wordS (b ++ [0])) (L.wordT (b ++ [0])) *
+      transpositionValue (L.wordS (a ++ [1])) (L.wordT (a ++ [1]))
+        (L.wordS (b ++ [1])) (L.wordT (b ++ [1]))
+  have haa := L.wordT_mul_wordS_of_incomparable (a ++ [0]) (a ++ [1])
+    (not_prefix_append_left a [0] [1] (by decide))
+    (not_prefix_append_left a [1] [0] (by decide))
+  have hab' := L.wordT_mul_wordS_of_incomparable (a ++ [0]) (b ++ [1])
+    (not_prefix_append_right a b [0] [1] hab hba)
+    (not_prefix_append_right b a [1] [0] hba hab)
+  have hba' := L.wordT_mul_wordS_of_incomparable (b ++ [0]) (a ++ [1])
+    (not_prefix_append_right b a [0] [1] hba hab)
+    (not_prefix_append_right a b [1] [0] hab hba)
+  have hbb := L.wordT_mul_wordS_of_incomparable (b ++ [0]) (b ++ [1])
+    (not_prefix_append_left b [0] [1] (by decide))
+    (not_prefix_append_left b [1] [0] (by decide))
+  have haa' (x : A) :
+      L.wordT (a ++ [0]) * (L.wordS (a ++ [1]) * x) = 0 := by
+    rw [← mul_assoc, haa, zero_mul]
+  have hab'' (x : A) :
+      L.wordT (a ++ [0]) * (L.wordS (b ++ [1]) * x) = 0 := by
+    rw [← mul_assoc, hab', zero_mul]
+  have hba'' (x : A) :
+      L.wordT (b ++ [0]) * (L.wordS (a ++ [1]) * x) = 0 := by
+    rw [← mul_assoc, hba', zero_mul]
+  have hbb' (x : A) :
+      L.wordT (b ++ [0]) * (L.wordS (b ++ [1]) * x) = 0 := by
+    rw [← mul_assoc, hbb, zero_mul]
+  unfold transpositionValue
+  rw [L.wordS_mul_wordT_split a a, L.wordS_mul_wordT_split b b,
+    L.wordS_mul_wordT_split a b, L.wordS_mul_wordT_split b a]
+  noncomm_ring [haa, hab', hba', hbb, haa', hab'', hba'', hbb']
+
 /-! ### Prefix insertion -/
 
 /-- The unit `s_l u t_l + (1 - p_l)`, acting as `u` inside the cylinder `l` and
@@ -260,6 +313,32 @@ theorem cylinderSwap_action_fixed (a b w : List (Fin 2)) (hab : ¬a <+: b)
       L.wordT w
     unfold transpositionValue
     noncomm_ring [hwa', hwb', hwa'', hwb'']
+
+/-- Conjugation transports a cylinder transposition along the two word
+actions. -/
+theorem cylinderSwap_conjugate {g : Aˣ} {a b c d : List (Fin 2)}
+    (ha : L.PrefixWordAction g a c) (hb : L.PrefixWordAction g b d)
+    (hab : ¬a <+: b) (hba : ¬b <+: a) (hcd : ¬c <+: d) (hdc : ¬d <+: c) :
+    g * L.cylinderSwap a b hab hba * g⁻¹ = L.cylinderSwap c d hcd hdc := by
+  apply Units.ext
+  have hunit : (↑g : A) * (↑g⁻¹ : A) = 1 := Units.mul_inv g
+  change (↑g : A) *
+      transpositionValue (L.wordS a) (L.wordT a) (L.wordS b) (L.wordT b) *
+        (↑g⁻¹ : A) =
+    transpositionValue (L.wordS c) (L.wordT c) (L.wordS d) (L.wordT d)
+  unfold transpositionValue
+  calc
+    (↑g : A) *
+        (1 - L.wordS a * L.wordT a - L.wordS b * L.wordT b +
+          L.wordS a * L.wordT b + L.wordS b * L.wordT a) * (↑g⁻¹ : A) =
+      1 - ((↑g : A) * L.wordS a) * (L.wordT a * (↑g⁻¹ : A)) -
+        ((↑g : A) * L.wordS b) * (L.wordT b * (↑g⁻¹ : A)) +
+        ((↑g : A) * L.wordS a) * (L.wordT b * (↑g⁻¹ : A)) +
+        ((↑g : A) * L.wordS b) * (L.wordT a * (↑g⁻¹ : A)) := by
+          noncomm_ring [hunit]
+    _ = 1 - L.wordS c * L.wordT c - L.wordS d * L.wordT d +
+        L.wordS c * L.wordT d + L.wordS d * L.wordT c := by
+      rw [ha.prefixing, ha.deletion, hb.prefixing, hb.deletion]
 
 /-- Conjugating a prefix insertion by a unit that carries `a` to `b` moves the
 insertion from the cylinder `a` to the cylinder `b`. -/

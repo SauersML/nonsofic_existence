@@ -137,6 +137,21 @@ theorem cylinder_split (a : List (Fin 2)) :
     _ = L.cylinder (a ++ [0]) + L.cylinder (a ++ [1]) := by
       simp [cylinder, wordS_append, wordT_append, mul_add, add_mul, mul_assoc]
 
+/-- Every prefix matrix coefficient splits simultaneously along its two
+binary children. -/
+theorem wordS_mul_wordT_split (a b : List (Fin 2)) :
+    L.wordS a * L.wordT b =
+      L.wordS (a ++ [0]) * L.wordT (b ++ [0]) +
+        L.wordS (a ++ [1]) * L.wordT (b ++ [1]) := by
+  calc
+    L.wordS a * L.wordT b =
+        L.wordS a * (L.s 0 * L.t 0 + L.s 1 * L.t 1) * L.wordT b := by
+      rw [L.sum_s_mul_t]
+      simp
+    _ = L.wordS (a ++ [0]) * L.wordT (b ++ [0]) +
+        L.wordS (a ++ [1]) * L.wordT (b ++ [1]) := by
+      simp [wordS_append, wordT_append, mul_add, add_mul, mul_assoc]
+
 /-- The splitting of the prefixing operator, used by the compressor identities
 of Section `subsec:compressor`. -/
 theorem wordS_split (a : List (Fin 2)) :
