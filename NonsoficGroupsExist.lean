@@ -47,6 +47,7 @@ import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.ConcreteLeavitt
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
+import NonsoficGroupsExist.LeavittMatrixCompression
 import NonsoficGroupsExist.LeavittSelfSimilarity
 import NonsoficGroupsExist.Localization
 import NonsoficGroupsExist.MatrixSelfSimilarity
