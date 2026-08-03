@@ -8,10 +8,10 @@ import Mathlib.Algebra.CharP.Algebra
 
 This module specializes the proved rank-four matrix calculations to the
 stream-operator algebra.  It constructs the coefficient ring, `EL₃` core,
-`EL₄` ambient group, finite-generation instances, infinitude instances, and
-the two concrete compressor elements.  It does not assert property `(T)`,
-ambient generation by the core and compressors, or the existence of a
-non-LEF subgroup embedded in the core.
+`EL₄` ambient group, finite-generation instances, infinitude instances, the
+two concrete compressor elements, and proves that the core and compressors
+generate the ambient group.  It does not assert property `(T)` or the existence
+of a non-LEF subgroup embedded in the core.
 -/
 
 namespace NonsoficGroupsExist
@@ -125,6 +125,11 @@ noncomputable def compressors : Finset Ambient :=
 theorem compressor_conjugation (q : Ambient) (hq : q ∈ compressors) (g : Core) :
     coreEmbedding (compressionEnd g) = q * coreEmbedding g * q⁻¹ := by
   exact RankFour.compressorSet_conjugation family q hq g
+
+/-- The concrete core and compressor set generate the ambient group. -/
+theorem core_compressors_generate :
+    Subgroup.closure (Set.range coreEmbedding ∪ (compressors : Set Ambient)) = ⊤ := by
+  exact RankFour.coreEmbedding_compressorSet_generate family
 
 /-- The specialized witness is genuinely non-LEF. -/
 theorem witness_not_isLEF : ¬ IsLEF Witness :=

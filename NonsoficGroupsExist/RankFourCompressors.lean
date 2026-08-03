@@ -20,6 +20,8 @@ of the core.  Consequently `compressorSet` is not by itself a constructed
 namespace NonsoficGroupsExist
 namespace RankFour
 
+open scoped commutatorElement
+
 variable {A : Type*} [Ring A]
 
 abbrev Index := Fin 4
@@ -347,6 +349,50 @@ theorem secondCompressor_conjugation [CharP A 2]
   rw [secondCompressor_mul_coreEmbedding]
   group
 
+/-- Conjugation by the involution turns a core root out of coordinate zero
+into a last-row root. -/
+theorem involution_conjugates_lastRow [CharP A 2] (L : LeavittFamily A)
+    (j : Fin 3) (hj : j ≠ 0) (a : A) :
+    involution L *
+        coreEmbedding (coreTransvection 0 j hj.symm (L.s1 * a)) * involution L =
+      transvection lastIndex (coreIndex j) (last_ne_core j) a := by
+  rw [coreEmbedding_coreTransvection]
+  apply Subtype.ext
+  apply Units.ext
+  ext r c
+  fin_cases j
+  · simp at hj
+  · fin_cases r <;> fin_cases c <;>
+      simp [transvection, elementaryUnit, involutionMatrix,
+        Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
+        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+  · fin_cases r <;> fin_cases c <;>
+      simp [transvection, elementaryUnit, involutionMatrix,
+        Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
+        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+
+/-- Conjugation by the involution turns a core root into coordinate zero into
+a last-column root. -/
+theorem involution_conjugates_lastColumn [CharP A 2] (L : LeavittFamily A)
+    (i : Fin 3) (hi : i ≠ 0) (a : A) :
+    involution L *
+        coreEmbedding (coreTransvection i 0 hi (a * L.t1)) * involution L =
+      transvection (coreIndex i) lastIndex (core_ne_last i) a := by
+  rw [coreEmbedding_coreTransvection]
+  apply Subtype.ext
+  apply Units.ext
+  ext r c
+  fin_cases i
+  · simp at hi
+  · fin_cases r <;> fin_cases c <;>
+      simp [transvection, elementaryUnit, involutionMatrix,
+        Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
+        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+  · fin_cases r <;> fin_cases c <;>
+      simp [transvection, elementaryUnit, involutionMatrix,
+        Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
+        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+
 /-- The two-element set of candidate compressor words. -/
 noncomputable def compressorSet (L : LeavittFamily A) : Finset (Ambient A) :=
   by
@@ -372,6 +418,120 @@ theorem compressorSet_conjugation [CharP A 2] (L : LeavittFamily A)
   rcases hq with rfl | rfl
   · exact (compressor_conjugation L g).symm
   · exact (secondCompressor_conjugation L g).symm
+
+/-- The embedded core together with the two explicit compressor words generates
+the complete rank-four elementary group. -/
+theorem coreEmbedding_compressorSet_generate [CharP A 2] (L : LeavittFamily A) :
+    Subgroup.closure
+      (Set.range (coreEmbedding (A := A)) ∪ (compressorSet L : Set (Ambient A))) = ⊤ := by
+  let H : Subgroup (Ambient A) := Subgroup.closure
+    (Set.range (coreEmbedding (A := A)) ∪ (compressorSet L : Set (Ambient A)))
+  have hcore (g : Core A) : coreEmbedding g ∈ H := by
+    apply Subgroup.subset_closure
+    exact Or.inl ⟨g, rfl⟩
+  have hcompressor : compressor L ∈ H := by
+    apply Subgroup.subset_closure
+    exact Or.inr (compressor_mem L)
+  have hsecond : secondCompressor L ∈ H := by
+    apply Subgroup.subset_closure
+    exact Or.inr (secondCompressor_mem L)
+  have hinvolution : involution L ∈ H := by
+    have : secondCompressor L * (compressor L)⁻¹ ∈ H :=
+      H.mul_mem hsecond (H.inv_mem hcompressor)
+    simpa [secondCompressor] using this
+  have hlastRow (j : Fin 3) (hj : j ≠ 0) (a : A) :
+      transvection lastIndex (coreIndex j) (last_ne_core j) a ∈ H := by
+    rw [← involution_conjugates_lastRow L j hj a]
+    exact H.mul_mem (H.mul_mem hinvolution (hcore _)) hinvolution
+  have hlastColumn (i : Fin 3) (hi : i ≠ 0) (a : A) :
+      transvection (coreIndex i) lastIndex (core_ne_last i) a ∈ H := by
+    rw [← involution_conjugates_lastColumn L i hi a]
+    exact H.mul_mem (H.mul_mem hinvolution (hcore _)) hinvolution
+  have hcommutator {x y z : Ambient A} (hx : x ∈ H) (hy : y ∈ H)
+      (heq : ⁅x, y⁆ = z) : z ∈ H := by
+    rw [← heq, commutatorElement_def]
+    exact H.mul_mem (H.mul_mem (H.mul_mem hx hy) (H.inv_mem hx)) (H.inv_mem hy)
+  have hlastZero (a : A) :
+      transvection lastIndex (coreIndex 0) (last_ne_core 0) a ∈ H := by
+    apply hcommutator (x := transvection lastIndex (coreIndex 1) (last_ne_core 1) a)
+      (y := coreEmbedding (coreTransvection 1 0 (by decide) 1))
+      (hlastRow 1 (by decide) a) (hcore _)
+    rw [coreEmbedding_coreTransvection]
+    apply Subtype.ext
+    change ⁅elementaryUnit lastIndex (coreIndex 1) (last_ne_core 1) a,
+        elementaryUnit (coreIndex 1) (coreIndex 0)
+          (coreIndex_injective.ne (by decide)) 1⁆ =
+      elementaryUnit lastIndex (coreIndex 0) (last_ne_core 0) a
+    simpa using elementaryUnit_commutator lastIndex (coreIndex 1) (coreIndex 0)
+      (last_ne_core 1) (coreIndex_injective.ne (by decide)) (last_ne_core 0) a 1
+  have hzeroLast (a : A) :
+      transvection (coreIndex 0) lastIndex (core_ne_last 0) a ∈ H := by
+    apply hcommutator (x := coreEmbedding (coreTransvection 0 1 (by decide) a))
+      (y := transvection (coreIndex 1) lastIndex (core_ne_last 1) 1)
+      (hcore _) (hlastColumn 1 (by decide) 1)
+    rw [coreEmbedding_coreTransvection]
+    apply Subtype.ext
+    change ⁅elementaryUnit (coreIndex 0) (coreIndex 1)
+          (coreIndex_injective.ne (by decide)) a,
+        elementaryUnit (coreIndex 1) lastIndex (core_ne_last 1) 1⁆ =
+      elementaryUnit (coreIndex 0) lastIndex (core_ne_last 0) a
+    simpa using elementaryUnit_commutator (coreIndex 0) (coreIndex 1) lastIndex
+      (coreIndex_injective.ne (by decide)) (core_ne_last 1) (core_ne_last 0) a 1
+  have h01 : (0 : Fin 3) ≠ 1 := by decide
+  have h02 : (0 : Fin 3) ≠ 2 := by decide
+  have h10 : (1 : Fin 3) ≠ 0 := by decide
+  have h12 : (1 : Fin 3) ≠ 2 := by decide
+  have h20 : (2 : Fin 3) ≠ 0 := by decide
+  have h21 : (2 : Fin 3) ≠ 1 := by decide
+  have hall (i j : Index) (hij : i ≠ j) (a : A) :
+      transvection i j hij a ∈ H := by
+    fin_cases i <;> fin_cases j
+    all_goals try simp at hij
+    · change transvection (coreIndex 0) (coreIndex 1)
+        (coreIndex_injective.ne h01) a ∈ H
+      rw [← coreEmbedding_coreTransvection (i := 0) (j := 1) (hij := h01)]
+      exact hcore _
+    · change transvection (coreIndex 0) (coreIndex 2)
+        (coreIndex_injective.ne h02) a ∈ H
+      rw [← coreEmbedding_coreTransvection (i := 0) (j := 2) (hij := h02)]
+      exact hcore _
+    · change transvection (coreIndex 0) lastIndex (core_ne_last 0) a ∈ H
+      exact hzeroLast a
+    · change transvection (coreIndex 1) (coreIndex 0)
+        (coreIndex_injective.ne h10) a ∈ H
+      rw [← coreEmbedding_coreTransvection (i := 1) (j := 0) (hij := h10)]
+      exact hcore _
+    · change transvection (coreIndex 1) (coreIndex 2)
+        (coreIndex_injective.ne h12) a ∈ H
+      rw [← coreEmbedding_coreTransvection (i := 1) (j := 2) (hij := h12)]
+      exact hcore _
+    · change transvection (coreIndex 1) lastIndex (core_ne_last 1) a ∈ H
+      exact hlastColumn 1 h10 a
+    · change transvection (coreIndex 2) (coreIndex 0)
+        (coreIndex_injective.ne h20) a ∈ H
+      rw [← coreEmbedding_coreTransvection (i := 2) (j := 0) (hij := h20)]
+      exact hcore _
+    · change transvection (coreIndex 2) (coreIndex 1)
+        (coreIndex_injective.ne h21) a ∈ H
+      rw [← coreEmbedding_coreTransvection (i := 2) (j := 1) (hij := h21)]
+      exact hcore _
+    · change transvection (coreIndex 2) lastIndex (core_ne_last 2) a ∈ H
+      exact hlastColumn 2 h20 a
+    · change transvection lastIndex (coreIndex 0) (last_ne_core 0) a ∈ H
+      exact hlastZero a
+    · change transvection lastIndex (coreIndex 1) (last_ne_core 1) a ∈ H
+      exact hlastRow 1 h10 a
+    · change transvection lastIndex (coreIndex 2) (last_ne_core 2) a ∈ H
+      exact hlastRow 2 h20 a
+  apply top_unique
+  rintro ⟨g, hg⟩ -
+  induction hg using Subgroup.closure_induction with
+  | mem x hx =>
+      obtain ⟨i, j, hij, a, rfl⟩ := hx
+      exact hall i j hij a
+  | one => exact H.one_mem
+  | mul x y _ _ hx hy => exact H.mul_mem hx hy
+  | inv x _ hx => exact H.inv_mem hx
 
 end RankFour
 end NonsoficGroupsExist
