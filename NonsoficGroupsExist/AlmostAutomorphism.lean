@@ -365,6 +365,13 @@ theorem near_trans {a b c : D.Candidate}
   · exfalso
     linarith [D.radius_pos]
 
+theorem near_of_distance_lt_four {a b : D.Candidate}
+    (h : hammingDistance Y a.1 b.1 < 4 * D.radius) : Near Y D a b := by
+  rcases D.gap a.1 a.2 b.1 b.2 with hnear | hfar
+  · exact hnear
+  · exfalso
+    linarith
+
 def nearSetoid : Setoid D.Candidate where
   r := Near Y D
   iseqv := ⟨near_refl Y D, fun {_ _} h ↦ near_symm Y D h,
@@ -561,6 +568,49 @@ theorem localEmbedding_of_cluster {J : Type*} [Group J]
         regular (q (x * y)) = regular (q x * q y) :=
           congrArg regular (q_mul x hx y hy)
         _ = regular (q x) * regular (q y) := regular_mul _ _
+
+/-- The finite-stage criterion used in the Kun--Thom proof.  It asks only for
+good representatives of `1`, the tested elements, and their tested products;
+the map on every other group element is harmlessly sent to the identity
+candidate. -/
+theorem localEmbedding_of_finite_stage {J : Type*} [Group J]
+    (s : Finset J) (p : J → Equiv.Perm Y)
+    (hmemOne : p 1 ∈ D.candidate)
+    (hmem : ∀ x ∈ s, p x ∈ D.candidate)
+    (hmemMul : ∀ x ∈ s, ∀ y ∈ s, p (x * y) ∈ D.candidate)
+    (hone : hammingDistance Y (p 1) 1 < 4 * D.radius)
+    (hmul : ∀ x ∈ s, ∀ y ∈ s,
+      hammingDistance Y (p (x * y)) (p x * p y) < 3 * D.radius)
+    (hsep : ∀ x ∈ s, ∀ y ∈ s, x ≠ y →
+      4 * D.radius ≤ hammingDistance Y (p x) (p y)) :
+    ∃ (n : ℕ) (φ : J → Equiv.Perm (Fin n)),
+      Set.InjOn φ (s : Set J) ∧ LocalMultiplicativeOn s φ := by
+  let f : J → D.Candidate := fun j ↦
+    if hj : p j ∈ D.candidate then ⟨p j, hj⟩ else ⟨1, D.one_mem⟩
+  have f_one : f 1 = ⟨p 1, hmemOne⟩ := by
+    simp [f, hmemOne]
+  have f_mem (x : J) (hx : x ∈ s) : f x = ⟨p x, hmem x hx⟩ := by
+    simp [f, hmem x hx]
+  have f_mul (x : J) (hx : x ∈ s) (y : J) (hy : y ∈ s) :
+      f (x * y) = ⟨p (x * y), hmemMul x hx y hy⟩ := by
+    simp [f, hmemMul x hx y hy]
+  apply localEmbedding_of_cluster Y D s f
+  · apply near_of_distance_lt_four Y D
+    simpa [f_one] using hone
+  · intro x hx y hy
+    apply near_of_distance_lt_four Y D
+    have hround := D.round_product_close (p x) (hmem x hx) (p y) (hmem y hy)
+    have hmul' := hmul x hx y hy
+    have htri := hammingDistance_triangle Y
+      (p (x * y)) (p x * p y) (D.round (p x * p y))
+    simpa [f_mul x hx y hy, f_mem x hx, f_mem y hy, roundedMul] using
+      (show hammingDistance Y (p (x * y)) (D.round (p x * p y)) <
+          4 * D.radius by linarith)
+  · intro x hx y hy hxy hnear
+    have hnear' : hammingDistance Y (p x) (p y) < D.radius := by
+      simpa [Near, f_mem x hx, f_mem y hy] using hnear
+    have hfar := hsep x hx y hy hxy
+    linarith [D.radius_pos]
 
 /-- Finite-stage cluster models for every finite subset are exactly enough to
 prove that a group is LEF.  Later analytic modules must construct all of this
