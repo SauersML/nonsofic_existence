@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.ConcreteLeavitt
+import NonsoficGroupsExist.DiagonalElementary
 import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ThompsonWitness
 import Mathlib.Algebra.CharP.Algebra
@@ -26,7 +27,7 @@ noncomputable def family : LeavittFamily CoefficientRing :=
   ConcreteLeavitt.family
 
 /-- The concrete two-generated subgroup carrying the finite non-LEF
-obstruction.  No embedding of this group into `Core` is claimed. -/
+obstruction. -/
 noncomputable abbrev Witness := family.cornerWitnessSubgroup
 
 noncomputable instance : CharP CoefficientRing 2 :=
@@ -116,6 +117,24 @@ noncomputable def compressionEnd : Core →* Core :=
 
 theorem compressionEnd_injective : Function.Injective compressionEnd :=
   RankFour.compressionEnd_injective family
+
+/-- Embed the non-LEF corner witness diagonally into `EL₃`.  Membership in
+the elementary group is supplied by the explicit cylinder-commutator and
+Whitehead calculations, rather than by an assumed perfectness theorem. -/
+noncomputable def witnessEmbedding : Witness →* Core :=
+  ((DiagonalElementary.firstDiagonalUnitHom (R := CoefficientRing)).comp
+      family.cornerWitnessSubgroup.subtype).codRestrict
+    (elementaryGroup (Fin 3) CoefficientRing) (by
+      intro j
+      exact DiagonalElementary.firstDiagonalUnit_mem_of_mem_commutator
+        (family.cornerWitnessSubgroup_le_commutator j.property))
+
+theorem witnessEmbedding_injective : Function.Injective witnessEmbedding := by
+  intro x y hxy
+  apply Subtype.ext
+  apply DiagonalElementary.firstDiagonalUnitHom_injective
+  exact congrArg (fun z : Core ↦
+    (z : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ)) hxy
 
 /-- The two explicit ambient compressor words. -/
 noncomputable def compressors : Finset Ambient :=

@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.LeavittWords
 import NonsoficGroupsExist.Scheme
+import Mathlib.GroupTheory.Commutator.Basic
 
 /-!
 # An explicit two-relator non-LEF witness
@@ -27,6 +28,8 @@ claim about the generated subgroup is made.
 
 namespace NonsoficGroupsExist
 namespace LeavittFamily
+
+open scoped commutatorElement
 
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
 
@@ -72,6 +75,15 @@ def cylinderSwap (a b : List (Fin 2)) (hab : ¬a <+: b) (hba : ¬b <+: a) : Aˣ 
     (L.cylinderSwap a b hab hba)⁻¹ = L.cylinderSwap a b hab hba := by
   apply Units.ext
   rfl
+
+theorem cylinderSwap_symm (a b : List (Fin 2)) (hab : ¬a <+: b)
+    (hba : ¬b <+: a) :
+    L.cylinderSwap a b hab hba = L.cylinderSwap b a hba hab := by
+  apply Units.ext
+  change transpositionValue (L.wordS a) (L.wordT a) (L.wordS b) (L.wordT b) =
+    transpositionValue (L.wordS b) (L.wordT b) (L.wordS a) (L.wordT a)
+  unfold transpositionValue
+  noncomm_ring
 
 /-- A cylinder transposition is the product of the two transpositions on its
 binary children.  This refinement identity is the finite algebraic mechanism
@@ -182,6 +194,14 @@ def prefixInsertion (l : List (Fin 2)) : Aˣ →* Aˣ where
 @[simp] theorem prefixInsertion_apply (l : List (Fin 2)) (u : Aˣ) :
     L.prefixInsertion l u = L.prefixInsertionUnit l u := rfl
 
+theorem mem_commutator_of_monoidHom
+    {G H : Type*} [Group G] [Group H] (f : G →* H) {g : G}
+    (hg : g ∈ commutator G) : f g ∈ commutator H := by
+  have hmap : f g ∈ (commutator G).map f := ⟨g, hg, rfl⟩
+  rw [map_commutator_eq] at hmap
+  rw [commutator_def]
+  exact (Subgroup.commutator_mono le_top le_top) hmap
+
 /-! ### Word actions -/
 
 /-- A unit *acts* on words by carrying the cylinder `a` onto the cylinder `b`. -/
@@ -283,13 +303,7 @@ theorem cylinderSwap_action_left (a b : List (Fin 2)) (hab : ¬a <+: b)
 
 theorem cylinderSwap_action_right (a b : List (Fin 2)) (hab : ¬a <+: b)
     (hba : ¬b <+: a) : L.PrefixWordAction (L.cylinderSwap a b hab hba) b a := by
-  have hswap : L.cylinderSwap a b hab hba = L.cylinderSwap b a hba hab := by
-    apply Units.ext
-    change transpositionValue (L.wordS a) (L.wordT a) (L.wordS b) (L.wordT b) =
-      transpositionValue (L.wordS b) (L.wordT b) (L.wordS a) (L.wordT a)
-    unfold transpositionValue
-    noncomm_ring
-  rw [hswap]
+  rw [L.cylinderSwap_symm a b hab hba]
   exact L.cylinderSwap_action_left b a hba hab
 
 theorem cylinderSwap_action_fixed (a b w : List (Fin 2)) (hab : ¬a <+: b)
@@ -339,6 +353,155 @@ theorem cylinderSwap_conjugate {g : Aˣ} {a b c d : List (Fin 2)}
     _ = 1 - L.wordS c * L.wordT c - L.wordS d * L.wordT d +
         L.wordS c * L.wordT d + L.wordS d * L.wordT c := by
       rw [ha.prefixing, ha.deletion, hb.prefixing, hb.deletion]
+
+/-- The braid relation for cylinder transpositions on three pairwise
+incomparable words. -/
+theorem cylinderSwap_braid (a b c : List (Fin 2))
+    (hab : ¬a <+: b) (hba : ¬b <+: a)
+    (hac : ¬a <+: c) (hca : ¬c <+: a)
+    (hbc : ¬b <+: c) (hcb : ¬c <+: b) :
+    L.cylinderSwap a b hab hba * L.cylinderSwap b c hbc hcb *
+        L.cylinderSwap a b hab hba = L.cylinderSwap a c hac hca := by
+  have h := L.cylinderSwap_conjugate
+    (L.cylinderSwap_action_right a b hab hba)
+    (L.cylinderSwap_action_fixed a b c hab hba hac hca hbc hcb)
+    hbc hcb hac hca
+  simpa using h
+
+/-- Cylinder transpositions with disjoint supports commute. -/
+theorem cylinderSwap_commute (a b c d : List (Fin 2))
+    (hab : ¬a <+: b) (hba : ¬b <+: a)
+    (hac : ¬a <+: c) (hca : ¬c <+: a)
+    (had : ¬a <+: d) (hda : ¬d <+: a)
+    (hbc : ¬b <+: c) (hcb : ¬c <+: b)
+    (hbd : ¬b <+: d) (hdb : ¬d <+: b)
+    (hcd : ¬c <+: d) (hdc : ¬d <+: c) :
+    Commute (L.cylinderSwap a b hab hba) (L.cylinderSwap c d hcd hdc) := by
+  have hconj := L.cylinderSwap_conjugate
+    (L.cylinderSwap_action_fixed a b c hab hba hac hca hbc hcb)
+    (L.cylinderSwap_action_fixed a b d hab hba had hda hbd hdb)
+    hcd hdc hcd hdc
+  apply (commute_iff_eq _ _).2
+  calc
+    L.cylinderSwap a b hab hba * L.cylinderSwap c d hcd hdc =
+        (L.cylinderSwap a b hab hba * L.cylinderSwap c d hcd hdc *
+          (L.cylinderSwap a b hab hba)⁻¹) * L.cylinderSwap a b hab hba := by
+            group
+    _ = L.cylinderSwap c d hcd hdc * L.cylinderSwap a b hab hba := by
+      rw [hconj]
+
+/-- Splitting a transposition produces a double transposition, and every such
+double transposition is an explicit commutator of two three-cycles. -/
+theorem cylinderSwap_double_commutator (a b c d : List (Fin 2))
+    (hab : ¬a <+: b) (hba : ¬b <+: a)
+    (hac : ¬a <+: c) (hca : ¬c <+: a)
+    (had : ¬a <+: d) (hda : ¬d <+: a)
+    (hbc : ¬b <+: c) (hcb : ¬c <+: b)
+    (hbd : ¬b <+: d) (hdb : ¬d <+: b)
+    (hcd : ¬c <+: d) (hdc : ¬d <+: c) :
+    let Aab := L.cylinderSwap a b hab hba
+    let Abc := L.cylinderSwap b c hbc hcb
+    let Abd := L.cylinderSwap b d hbd hdb
+    let Acd := L.cylinderSwap c d hcd hdc
+    (Aab * Abc) * (Aab * Abd) * (Aab * Abc)⁻¹ * (Aab * Abd)⁻¹ =
+      Aab * Acd := by
+  let Aab := L.cylinderSwap a b hab hba
+  let Abc := L.cylinderSwap b c hbc hcb
+  let Abd := L.cylinderSwap b d hbd hdb
+  let Aac := L.cylinderSwap a c hac hca
+  let Acd := L.cylinderSwap c d hcd hdc
+  have hAinv : Aab⁻¹ = Aab := by simp [Aab]
+  have hBinv : Abc⁻¹ = Abc := by simp [Abc]
+  have hDinv : Abd⁻¹ = Abd := by simp [Abd]
+  have hEinv : Aac⁻¹ = Aac := by simp [Aac]
+  have hAsq : Aab * Aab = 1 := by
+    calc
+      Aab * Aab = Aab * Aab⁻¹ := congrArg (Aab * ·) hAinv.symm
+      _ = 1 := by simp
+  have hEsq : Aac * Aac = 1 := by
+    calc
+      Aac * Aac = Aac * Aac⁻¹ := congrArg (Aac * ·) hEinv.symm
+      _ = 1 := by simp
+  have hABA : Aab * Abc * Aab = Aac := by
+    simpa [Aab, Abc, Aac] using
+      L.cylinderSwap_braid a b c hab hba hac hca hbc hcb
+  have hEBE : Aac * Abc * Aac = Aab := by
+    simpa [Aab, Abc, Aac, L.cylinderSwap_symm c b hcb hbc] using
+      L.cylinderSwap_braid a c b hac hca hab hba hcb hbc
+  have hDBD : Abd * Abc * Abd = Acd := by
+    simpa [Abc, Abd, Acd, L.cylinderSwap_symm d b hdb hbd,
+      L.cylinderSwap_symm d c hdc hcd] using
+      L.cylinderSwap_braid d b c hdb hbd hdc hcd hbc hcb
+  have hED : Commute Aac Abd := by
+    simpa [Aac, Abd] using
+      L.cylinderSwap_commute a c b d hac hca hab hba had hda hcb hbc hcd hdc hbd hdb
+  have hAC : Commute Aab Acd := by
+    simpa [Aab, Acd] using
+      L.cylinderSwap_commute a b c d hab hba hac hca had hda hbc hcb hbd hdb hcd hdc
+  have hEB : Aac * Abc = Aab * Aac := by
+    calc
+      Aac * Abc = Aac * Abc * (Aac * Aac) := by rw [hEsq, mul_one]
+      _ = (Aac * Abc * Aac) * Aac := by group
+      _ = Aab * Aac := by rw [hEBE]
+  dsimp only
+  calc
+    (Aab * Abc) * (Aab * Abd) * (Aab * Abc)⁻¹ * (Aab * Abd)⁻¹ =
+        Aab * Abc * Aab * Abd * Abc * Aab * Abd * Aab := by
+      rw [mul_inv_rev, mul_inv_rev, hAinv, hBinv, hDinv]
+      group
+    _ = (Aab * Abc * Aab) * Abd * Abc * Aab * Abd * Aab := by group
+    _ = Aac * Abd * Abc * Aab * Abd * Aab := by rw [hABA]
+    _ = Abd * Aac * Abc * Aab * Abd * Aab := by rw [hED.eq]
+    _ = Abd * (Aac * Abc) * Aab * Abd * Aab := by group
+    _ = Abd * (Aab * Aac) * Aab * Abd * Aab := by rw [hEB]
+    _ = Abd * (Aab * Aac * Aab) * Abd * Aab := by group
+    _ = Abd * Abc * Abd * Aab := by
+      rw [show Aab * Aac * Aab = Abc from by
+        calc
+          Aab * Aac * Aab = Aab * (Aab * Abc * Aab) * Aab := by rw [hABA]
+          _ = (Aab * Aab) * Abc * (Aab * Aab) := by group
+          _ = Abc := by rw [hAsq]; simp]
+    _ = Acd * Aab := by rw [hDBD]
+    _ = Aab * Acd := hAC.eq.symm
+
+/-- Every cylinder transposition is a single explicit commutator in the unit
+group. -/
+theorem cylinderSwap_is_commutator (a b : List (Fin 2)) (hab : ¬a <+: b)
+    (hba : ¬b <+: a) :
+    ∃ x y : Aˣ, L.cylinderSwap a b hab hba = x * y * x⁻¹ * y⁻¹ := by
+  let a0 := a ++ [0]
+  let b0 := b ++ [0]
+  let a1 := a ++ [1]
+  let b1 := b ++ [1]
+  have ha0b0 : ¬a0 <+: b0 := not_prefix_append_right a b [0] [0] hab hba
+  have hb0a0 : ¬b0 <+: a0 := not_prefix_append_right b a [0] [0] hba hab
+  have ha0a1 : ¬a0 <+: a1 := not_prefix_append_left a [0] [1] (by decide)
+  have ha1a0 : ¬a1 <+: a0 := not_prefix_append_left a [1] [0] (by decide)
+  have ha0b1 : ¬a0 <+: b1 := not_prefix_append_right a b [0] [1] hab hba
+  have hb1a0 : ¬b1 <+: a0 := not_prefix_append_right b a [1] [0] hba hab
+  have hb0a1 : ¬b0 <+: a1 := not_prefix_append_right b a [0] [1] hba hab
+  have ha1b0 : ¬a1 <+: b0 := not_prefix_append_right a b [1] [0] hab hba
+  have hb0b1 : ¬b0 <+: b1 := not_prefix_append_left b [0] [1] (by decide)
+  have hb1b0 : ¬b1 <+: b0 := not_prefix_append_left b [1] [0] (by decide)
+  have ha1b1 : ¬a1 <+: b1 := not_prefix_append_right a b [1] [1] hab hba
+  have hb1a1 : ¬b1 <+: a1 := not_prefix_append_right b a [1] [1] hba hab
+  let x := L.cylinderSwap a0 b0 ha0b0 hb0a0 *
+    L.cylinderSwap b0 a1 hb0a1 ha1b0
+  let y := L.cylinderSwap a0 b0 ha0b0 hb0a0 *
+    L.cylinderSwap b0 b1 hb0b1 hb1b0
+  refine ⟨x, y, ?_⟩
+  have hsplit := L.cylinderSwap_split a b hab hba
+  have hcomm := L.cylinderSwap_double_commutator a0 b0 a1 b1
+    ha0b0 hb0a0 ha0a1 ha1a0 ha0b1 hb1a0 hb0a1 ha1b0 hb0b1 hb1b0 ha1b1 hb1a1
+  exact hsplit.trans (by simpa [a0, b0, a1, b1, x, y] using hcomm.symm)
+
+theorem cylinderSwap_mem_commutator (a b : List (Fin 2)) (hab : ¬a <+: b)
+    (hba : ¬b <+: a) :
+    L.cylinderSwap a b hab hba ∈ commutator Aˣ := by
+  rw [commutator_eq_closure]
+  apply Subgroup.subset_closure
+  obtain ⟨x, y, hxy⟩ := L.cylinderSwap_is_commutator a b hab hba
+  exact ⟨x, y, by simpa [commutatorElement_def] using hxy.symm⟩
 
 /-- Conjugating a prefix insertion by a unit that carries `a` to `b` moves the
 insertion from the cylinder `a` to the cylinder `b`. -/
@@ -390,6 +553,22 @@ def generatorA : Aˣ := (L.rootRotation)⁻¹
 
 /-- The second generator of the witness. -/
 def generatorB : Aˣ := (L.rightRotation)⁻¹
+
+theorem rootRotation_mem_commutator : L.rootRotation ∈ commutator Aˣ := by
+  unfold rootRotation
+  exact (commutator Aˣ).mul_mem
+    ((commutator Aˣ).mul_mem
+      (L.cylinderSwap_mem_commutator [0] [1, 0] (by decide) (by decide))
+      (L.cylinderSwap_mem_commutator [0] [1, 1] (by decide) (by decide)))
+    (L.cylinderSwap_mem_commutator [0] [1] (by decide) (by decide))
+
+theorem generatorA_mem_commutator : L.generatorA ∈ commutator Aˣ := by
+  exact (commutator Aˣ).inv_mem L.rootRotation_mem_commutator
+
+theorem generatorB_mem_commutator : L.generatorB ∈ commutator Aˣ := by
+  apply (commutator Aˣ).inv_mem
+  exact mem_commutator_of_monoidHom (L.prefixInsertion [1])
+    L.rootRotation_mem_commutator
 
 theorem rootRotation_action_zero_one :
     L.PrefixWordAction L.rootRotation [0, 1] [1, 0] := by
@@ -536,6 +715,23 @@ the unit group of the Leavitt algebra is finitely generated. -/
 def cornerWitnessSubgroup : Subgroup Aˣ :=
   Subgroup.closure
     {L.cornerHom L.generatorA, L.cornerHom L.generatorB}
+
+/-- The two-generated witness lies in the complementary corner image. -/
+theorem cornerWitnessSubgroup_le_cornerSubgroup :
+    L.cornerWitnessSubgroup ≤ L.cornerSubgroup := by
+  rw [cornerWitnessSubgroup, Subgroup.closure_le]
+  rintro x (rfl | rfl)
+  · exact L.mem_cornerSubgroup L.generatorA
+  · exact L.mem_cornerSubgroup L.generatorB
+
+/-- Every unit in the two-generated corner witness is a product of
+commutators in the ambient coefficient unit group. -/
+theorem cornerWitnessSubgroup_le_commutator :
+    L.cornerWitnessSubgroup ≤ commutator Aˣ := by
+  rw [cornerWitnessSubgroup, Subgroup.closure_le]
+  rintro x (rfl | rfl)
+  · exact mem_commutator_of_monoidHom L.cornerHom L.generatorA_mem_commutator
+  · exact mem_commutator_of_monoidHom L.cornerHom L.generatorB_mem_commutator
 
 /-- The first distinguished generator of `cornerWitnessSubgroup`. -/
 def cornerWitnessA : L.cornerWitnessSubgroup :=
