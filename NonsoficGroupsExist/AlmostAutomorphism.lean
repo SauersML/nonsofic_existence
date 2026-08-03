@@ -325,9 +325,12 @@ theorem directedBoundary_compl (S : Finset (Equiv.Perm Y)) (A : Finset Y) :
   simp only [mem_directedBoundary, Finset.mem_sdiff, Finset.mem_univ, true_and]
   by_cases hx : p.2 ∈ A <;> by_cases hsx : p.1 p.2 ∈ A <;> simp [hx, hsx]
 
-/-- Uniform directed edge expansion for a finite labeled permutation graph. -/
-def HasDirectedExpansion (S : Finset (Equiv.Perm Y)) (h : ℝ) : Prop :=
-  0 < h ∧ ∀ A : Finset Y, A.Nonempty →
+/-- Directed expansion only at and above the cluster scale.  This is the exact
+range used in the separation argument and, unlike expansion down to singleton
+sets, is stable under a negligible number of edge edits. -/
+def HasDirectedExpansionAtScale (S : Finset (Equiv.Perm Y)) (h : ℝ)
+    (m : ℕ) : Prop :=
+  0 < h ∧ ∀ A : Finset Y, m ≤ A.card →
     2 * A.card ≤ Fintype.card Y →
       h * A.card ≤ (directedBoundary Y S A).card
 
@@ -335,21 +338,17 @@ def HasDirectedExpansion (S : Finset (Equiv.Perm Y)) (h : ℝ) : Prop :=
 with sufficiently few combined label defects cannot have both a large
 agreement set and a large disagreement set. -/
 theorem agreement_or_disagreement_small
-    (S : Finset (Equiv.Perm Y)) {h : ℝ}
-    (hexp : HasDirectedExpansion Y S h) (c d : Equiv.Perm Y)
-    (m : ℕ) (hm : 0 < m)
+    (S : Finset (Equiv.Perm Y)) {h : ℝ} (c d : Equiv.Perm Y)
+    (m : ℕ)
+    (hexp : HasDirectedExpansionAtScale Y S h m)
     (hbad : (((badArcs Y S c).card + (badArcs Y S d).card : ℕ) : ℝ) <
       h * m) :
     (agreement Y c d).card < m ∨ (disagreement Y c d).card < m := by
   by_contra hsmall
   push Not at hsmall
-  have hagree_nonempty : (agreement Y c d).Nonempty :=
-    Finset.card_pos.mp (hm.trans_le hsmall.1)
-  have hdisagree_nonempty : (disagreement Y c d).Nonempty :=
-    Finset.card_pos.mp (hm.trans_le hsmall.2)
   have hboundary := card_directedBoundary_agreement_le Y S c d
   by_cases hhalf : 2 * (agreement Y c d).card ≤ Fintype.card Y
-  · have hexpand := hexp.2 (agreement Y c d) hagree_nonempty hhalf
+  · have hexpand := hexp.2 (agreement Y c d) hsmall.1 hhalf
     have hmcast : (m : ℝ) ≤ ((agreement Y c d).card : ℝ) := by
       exact_mod_cast hsmall.1
     have hscale : h * m ≤ h * (agreement Y c d).card :=
@@ -361,7 +360,7 @@ theorem agreement_or_disagreement_small
   · have hhalf' : 2 * (disagreement Y c d).card ≤ Fintype.card Y := by
       have hpartition := card_agreement_add_card_disagreement Y c d
       omega
-    have hexpand := hexp.2 (disagreement Y c d) hdisagree_nonempty hhalf'
+    have hexpand := hexp.2 (disagreement Y c d) hsmall.2 hhalf'
     have hmcast : (m : ℝ) ≤ ((disagreement Y c d).card : ℝ) := by
       exact_mod_cast hsmall.2
     have hscale : h * m ≤ h * (disagreement Y c d).card :=
@@ -386,16 +385,16 @@ at least five times the chosen small-set scale, two sufficiently good almost
 automorphisms are either within `m / |Y|` in Hamming distance or at least four
 times that far apart. -/
 theorem hammingDistance_small_or_four_mul_le
-    (S : Finset (Equiv.Perm Y)) {h : ℝ}
-    (hexp : HasDirectedExpansion Y S h) (c d : Equiv.Perm Y)
+    (S : Finset (Equiv.Perm Y)) {h : ℝ} (c d : Equiv.Perm Y)
     (m : ℕ) (hm : 0 < m) (hsize : 5 * m ≤ Fintype.card Y)
+    (hexp : HasDirectedExpansionAtScale Y S h m)
     (hbad : (((badArcs Y S c).card + (badArcs Y S d).card : ℕ) : ℝ) <
       h * m) :
     hammingDistance Y c d < (m : ℝ) / Fintype.card Y ∨
       4 * ((m : ℝ) / Fintype.card Y) ≤ hammingDistance Y c d := by
   have hcardNat : 0 < Fintype.card Y := by omega
   have hcardReal : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardNat
-  rcases agreement_or_disagreement_small Y S hexp c d m hm hbad with
+  rcases agreement_or_disagreement_small Y S c d m hexp hbad with
     hagree | hdisagree
   · right
     have hfourNat : 4 * m ≤ (disagreement Y c d).card := by
@@ -588,8 +587,9 @@ The two rounding assumptions mention only products of good permutations, which
 is the exact scope supplied by the Kun--Thom improvement argument. -/
 noncomputable def clusterData_of_rounding
     (S : Finset (Equiv.Perm Y)) {h : ℝ}
-    (hexp : HasDirectedExpansion Y S h) (m : ℕ) (hm : 0 < m)
+    (m : ℕ) (hm : 0 < m)
     (hsize : 5 * m ≤ Fintype.card Y)
+    (hexp : HasDirectedExpansionAtScale Y S h m)
     (round : Equiv.Perm Y → Equiv.Perm Y)
     (hroundGood : ∀ a, IsGood Y S h m a → ∀ b, IsGood Y S h m b →
       IsGood Y S h m (round (a * b)))
@@ -625,7 +625,7 @@ noncomputable def clusterData_of_rounding
   gap := by
     intro a ha b hb
     rw [mem_goodCandidates] at ha hb
-    apply hammingDistance_small_or_four_mul_le Y S hexp a b m hm hsize
+    apply hammingDistance_small_or_four_mul_le Y S a b m hm hsize hexp
     dsimp [IsGood] at ha hb
     norm_num [Nat.cast_add]
     linarith [ha.1, hb.1]
@@ -933,7 +933,8 @@ in this theorem; the subsequent improvement theorem must prove `hround`. -/
 theorem isLEF_of_product_rounding
     (A : SoficApproximation (K × J)) (T : Finset K) {h : ℝ} (hh : 0 < h)
     (hexp : ∃ Nexp, ∀ n ≥ Nexp,
-      HasDirectedExpansion (A.model n) (productLabels A n T) h)
+      HasDirectedExpansionAtScale (A.model n) (productLabels A n T) h
+        (clusterScale (A.model n)))
     (hround : ∃ Nround, ∀ n ≥ Nround,
       ∃ round : Equiv.Perm (A.model n) → Equiv.Perm (A.model n),
         (∀ a, IsGood (A.model n) (productLabels A n T) h
@@ -973,7 +974,7 @@ theorem isLEF_of_product_rounding
   have hexpn := hNexp n hnexp
   obtain ⟨round, hroundGood, hroundClose⟩ := hNround n hnround
   let D : ClusterData (A.model n) := clusterData_of_rounding (A.model n)
-    (productLabels A n T) hexpn (clusterScale (A.model n)) hm hfive
+    (productLabels A n T) (clusterScale (A.model n)) hm hfive hexpn
       round hroundGood hroundClose
   have hradius : D.radius = clusterRadius (A.model n) := rfl
   have hradiusLower : (1 : ℝ) / 10 ≤ D.radius := by
