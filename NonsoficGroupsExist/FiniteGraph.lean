@@ -1,6 +1,7 @@
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 import Mathlib.Algebra.BigOperators.Ring.Finset
+import Mathlib.Data.Fintype.Prod
 import NonsoficGroupsExist.Sofic
 
 /-!
@@ -79,6 +80,38 @@ def boundary (X : FiniteMultiGraph) (U : Finset X.vertex) : Finset X.edge :=
 def boundaryCard (X : FiniteMultiGraph) (U : Finset X.vertex) : ℕ :=
   (X.boundary U).card
 
+/-- Multiplicity with the stored orientation of an occurrence. -/
+def directedMultiplicity (X : FiniteMultiGraph) (x y : X.vertex) : ℕ :=
+  (Finset.univ.filter fun a ↦ X.first a = x ∧ X.second a = y).card
+
+/-- Ordered endpoint pairs crossing a vertex cut. -/
+def crossingPairs (X : FiniteMultiGraph) (U : Finset X.vertex) :
+    Finset (X.vertex × X.vertex) :=
+  Finset.univ.filter fun p ↦
+    (p.1 ∈ U ∧ p.2 ∉ U) ∨ (p.2 ∈ U ∧ p.1 ∉ U)
+
+theorem sum_directedMultiplicity_crossingPairs
+    (X : FiniteMultiGraph) (U : Finset X.vertex) :
+    ∑ p ∈ X.crossingPairs U, X.directedMultiplicity p.1 p.2 =
+      X.boundaryCard U := by
+  classical
+  have hfiber := Finset.sum_card_fiberwise_eq_card_filter
+    (Finset.univ : Finset X.edge) (X.crossingPairs U)
+    (fun a ↦ (X.first a, X.second a))
+  calc
+    ∑ p ∈ X.crossingPairs U, X.directedMultiplicity p.1 p.2 =
+        ∑ p ∈ X.crossingPairs U,
+          (Finset.univ.filter fun a : X.edge ↦
+            (X.first a, X.second a) = p).card := by
+      apply Finset.sum_congr rfl
+      intro p _
+      unfold directedMultiplicity
+      congr 1
+      ext a
+      simp [Prod.ext_iff]
+    _ = X.boundaryCard U := by
+      simpa [crossingPairs, boundaryCard, boundary] using hfiber
+
 /-- Transport a multigraph along a vertex equivalence.  The edge-occurrence
 type is unchanged, so multiplicities are preserved definitionally. -/
 abbrev transport (X : FiniteMultiGraph) (Z : FiniteModel) (e : X.vertex ≃ Z) :
@@ -118,6 +151,82 @@ def edgeMultiplicity (X : FiniteMultiGraph) (x y : X.vertex) : ℕ :=
   (Finset.univ.filter fun a ↦
     (X.first a = x ∧ X.second a = y) ∨
       (X.first a = y ∧ X.second a = x)).card
+
+theorem edgeMultiplicity_eq_directed_add_reverse
+    (X : FiniteMultiGraph) (x y : X.vertex) :
+    X.edgeMultiplicity x y =
+      X.directedMultiplicity x y + X.directedMultiplicity y x := by
+  classical
+  let F := Finset.univ.filter fun a : X.edge ↦
+    X.first a = x ∧ X.second a = y
+  let R := Finset.univ.filter fun a : X.edge ↦
+    X.first a = y ∧ X.second a = x
+  have hdisj : Disjoint F R := by
+    apply Finset.disjoint_left.mpr
+    intro a haF haR
+    have hF : X.first a = x ∧ X.second a = y := by simpa [F] using haF
+    have hR : X.first a = y ∧ X.second a = x := by simpa [R] using haR
+    exact X.loopless a (hF.1.trans hR.2.symm)
+  calc
+    X.edgeMultiplicity x y = (F ∪ R).card := by
+      unfold edgeMultiplicity
+      congr 1
+      ext a
+      simp [F, R]
+    _ = F.card + R.card := Finset.card_union_of_disjoint hdisj
+    _ = X.directedMultiplicity x y + X.directedMultiplicity y x := by
+      rfl
+
+theorem directedMultiplicity_le_edgeMultiplicity
+    (X : FiniteMultiGraph) (x y : X.vertex) :
+    X.directedMultiplicity x y ≤ X.edgeMultiplicity x y := by
+  apply Finset.card_le_card
+  intro a ha
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ha
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  exact Or.inl ha
+
+theorem sum_reverseDirectedMultiplicity_crossingPairs
+    (X : FiniteMultiGraph) (U : Finset X.vertex) :
+    ∑ p ∈ X.crossingPairs U, X.directedMultiplicity p.2 p.1 =
+      X.boundaryCard U := by
+  classical
+  have hfiber := Finset.sum_card_fiberwise_eq_card_filter
+    (Finset.univ : Finset X.edge) (X.crossingPairs U)
+    (fun a ↦ (X.second a, X.first a))
+  calc
+    ∑ p ∈ X.crossingPairs U, X.directedMultiplicity p.2 p.1 =
+        ∑ p ∈ X.crossingPairs U,
+          (Finset.univ.filter fun a : X.edge ↦
+            (X.second a, X.first a) = p).card := by
+      apply Finset.sum_congr rfl
+      intro p _
+      unfold directedMultiplicity
+      congr 1
+      ext a
+      simp [Prod.ext_iff, and_comm]
+    _ = X.boundaryCard U := by
+      simpa [crossingPairs, boundaryCard, boundary, and_comm, or_comm] using hfiber
+
+theorem sum_edgeMultiplicity_crossingPairs
+    (X : FiniteMultiGraph) (U : Finset X.vertex) :
+    ∑ p ∈ X.crossingPairs U, X.edgeMultiplicity p.1 p.2 =
+      2 * X.boundaryCard U := by
+  calc
+    ∑ p ∈ X.crossingPairs U, X.edgeMultiplicity p.1 p.2 =
+        ∑ p ∈ X.crossingPairs U,
+          (X.directedMultiplicity p.1 p.2 +
+            X.directedMultiplicity p.2 p.1) := by
+      apply Finset.sum_congr rfl
+      intro p _
+      exact X.edgeMultiplicity_eq_directed_add_reverse p.1 p.2
+    _ = (∑ p ∈ X.crossingPairs U, X.directedMultiplicity p.1 p.2) +
+        ∑ p ∈ X.crossingPairs U, X.directedMultiplicity p.2 p.1 := by
+      rw [Finset.sum_add_distrib]
+    _ = 2 * X.boundaryCard U := by
+      rw [X.sum_directedMultiplicity_crossingPairs,
+        X.sum_reverseDirectedMultiplicity_crossingPairs]
+      omega
 
 /-- Occurrence-sensitive edit distance after identifying the vertex sets.
 Summing over ordered endpoint pairs counts every undirected occurrence twice;

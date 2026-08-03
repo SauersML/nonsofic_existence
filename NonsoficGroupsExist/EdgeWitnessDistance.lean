@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.EdgeEditing
 import Mathlib.Data.Nat.Dist
+import Mathlib.Data.Fintype.BigOperators
 
 /-!
 # From occurrence witnesses to edit distance
@@ -190,6 +191,63 @@ theorem editDistance_transport_both (X Z : FiniteMultiGraph)
       have h' : (Z.transport W (e.symm.trans f)).edgeMultiplicity (f x) (f y) =
           Z.edgeMultiplicity (e x) (e y) := by simpa using h
       rw [h']
+
+/-- Boundary size can decrease by at most the edit distance, up to the fixed
+factor two caused by the unordered multiplicity convention. -/
+theorem boundaryCard_transport_le_two_mul_add_editDistance
+    (X Z : FiniteMultiGraph) (e : X.vertex ≃ Z.vertex)
+    (U : Finset X.vertex) :
+    (Z.transport X.vertex e.symm).boundaryCard U ≤
+      2 * X.boundaryCard U + X.editDistance Z e := by
+  let Z' := Z.transport X.vertex e.symm
+  have hdirected (p : X.vertex × X.vertex) :
+      Z'.directedMultiplicity p.1 p.2 ≤ Z'.edgeMultiplicity p.1 p.2 :=
+    Z'.directedMultiplicity_le_edgeMultiplicity p.1 p.2
+  have hpoint (p : X.vertex × X.vertex) :
+      Z'.edgeMultiplicity p.1 p.2 ≤
+        X.edgeMultiplicity p.1 p.2 +
+          (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2) := by
+    omega
+  have hfirst : Z'.boundaryCard U ≤
+      ∑ p ∈ X.crossingPairs U,
+        (X.edgeMultiplicity p.1 p.2 +
+          (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2)) := by
+    rw [← Z'.sum_directedMultiplicity_crossingPairs U]
+    exact Finset.sum_le_sum fun p _ ↦ (hdirected p).trans (hpoint p)
+  have hrestricted :
+      (∑ p ∈ X.crossingPairs U,
+        (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2)) ≤
+      X.editDistance Z' (Equiv.refl X.vertex) := by
+    unfold editDistance
+    calc
+      (∑ p ∈ X.crossingPairs U,
+          (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2)) ≤
+          ∑ p : X.vertex × X.vertex,
+            (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2) := by
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.subset_univ _) (fun _ _ _ ↦ by omega)
+      _ ≤ ∑ p : X.vertex × X.vertex,
+          ((X.edgeMultiplicity p.1 p.2 - Z'.edgeMultiplicity p.1 p.2) +
+            (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2)) := by
+        exact Finset.sum_le_sum fun p _ ↦ by omega
+      _ = ∑ x, ∑ y,
+          ((X.edgeMultiplicity x y - Z'.edgeMultiplicity x y) +
+            (Z'.edgeMultiplicity x y - X.edgeMultiplicity x y)) := by
+        rw [Fintype.sum_prod_type]
+  calc
+    Z'.boundaryCard U ≤
+        ∑ p ∈ X.crossingPairs U,
+          (X.edgeMultiplicity p.1 p.2 +
+            (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2)) := hfirst
+    _ = (∑ p ∈ X.crossingPairs U, X.edgeMultiplicity p.1 p.2) +
+        ∑ p ∈ X.crossingPairs U,
+          (Z'.edgeMultiplicity p.1 p.2 - X.edgeMultiplicity p.1 p.2) := by
+      rw [Finset.sum_add_distrib]
+    _ ≤ 2 * X.boundaryCard U + X.editDistance Z' (Equiv.refl X.vertex) := by
+      rw [X.sum_edgeMultiplicity_crossingPairs]
+      omega
+    _ = 2 * X.boundaryCard U + X.editDistance Z e := by
+      rw [X.editDistance_transport_right Z e]
 
 end FiniteMultiGraph
 

@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.SoficErrors
 import NonsoficGroupsExist.LEF
 import NonsoficGroupsExist.Criterion
+import NonsoficGroupsExist.EdgeWitnessDistance
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Order
 import Mathlib.Algebra.Group.MinimalAxioms
@@ -600,6 +601,15 @@ noncomputable def generatorArcEmbedding
       exact congrArg Prod.fst hab
     · exact congrArg (fun p : Arc (A.model n) ↦ p.2) hab
 
+theorem crossingEdges_decide_mem (X : FiniteMultiGraph) (U : Finset X.vertex) :
+    X.crossingEdges (fun y ↦ decide (y ∈ U)) = X.boundary U := by
+  ext a
+  rw [FiniteMultiGraph.mem_crossingEdges]
+  simp only [FiniteMultiGraph.boundary, Finset.mem_filter, Finset.mem_univ,
+    true_and]
+  by_cases hx : X.first a ∈ U <;> by_cases hy : X.second a ∈ U <;>
+    simp [hx, hy]
+
 /-- Every crossing occurrence in the tagged generator graph gives a distinct
 directed boundary arc after generator labels are known to be distinct. -/
 theorem generatorCrossing_card_le_directedBoundary
@@ -628,6 +638,92 @@ theorem generatorCrossing_card_le_directedBoundary
     by_cases hx : a.1.2 ∈ U <;>
       by_cases hy : A.map n (a.1.1.1, 1) a.1.2 ∈ U <;>
         simp [hx, hy] at hcross ⊢
+
+/-- The essential expander in a matching certificate gives genuine directed
+expansion on all sets at least one fifth of the vertices.  The factor four
+accounts for the unordered edit-distance convention and the negligible edit
+budget. -/
+theorem matchingCertificate_expansionAtScale_eventually
+    (C : MatchingCertificate K J) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      HasDirectedExpansionAtScale (C.approx.model n)
+        (productLabels C.approx n C.generatorsK) (C.cheeger / 4)
+        (clusterScale (C.approx.model n)) := by
+  have hedit := C.edit_negligible
+  obtain ⟨Nedit, hNedit⟩ := hedit (C.cheeger / 20)
+    (div_pos C.cheeger_pos (by norm_num))
+  obtain ⟨Ninj, hNinj⟩ :=
+    firstFactorLabels_injective_eventually C.approx C.generatorsK
+  obtain ⟨Ncard, hNcard⟩ := C.approx.card_tendsToInfinity 10
+  refine ⟨max Nedit (max Ninj Ncard), fun n hn ↦ ?_⟩
+  have hnedit : Nedit ≤ n := by omega
+  have hninj : Ninj ≤ n := by omega
+  have hncard : Ncard ≤ n := by omega
+  have hcard : 10 ≤ Fintype.card (C.approx.model n) := hNcard n hncard
+  have hinj := hNinj n hninj
+  let X := generatorGraph (C.approx.model n) C.generatorsK
+    (fun k ↦ C.approx.map n (k, 1))
+  let e : X.vertex ≃ (C.graphs n).vertex :=
+    (generatorGraphVertexEquiv (C.approx.model n) C.generatorsK
+      (fun k ↦ C.approx.map n (k, 1))).trans (C.vertexEquiv n).symm
+  let Z := (C.graphs n).transport X.vertex e.symm
+  have hZexp : Z.HasCheegerLowerBound C.cheeger :=
+    (C.graphs n).transport_hasCheegerLowerBound X.vertex e.symm (C.expands n)
+  have heditSmall : (X.editDistance (C.graphs n) e : ℝ) /
+      Fintype.card (C.approx.model n) < C.cheeger / 20 := by
+    have habs := hNedit n hnedit
+    exact lt_of_le_of_lt (le_abs_self _) habs
+  have hcardReal : (0 : ℝ) < Fintype.card (C.approx.model n) := by
+    exact_mod_cast (show 0 < Fintype.card (C.approx.model n) by omega)
+  have heditBound : (X.editDistance (C.graphs n) e : ℝ) <
+      C.cheeger / 2 * clusterScale (C.approx.model n) := by
+    rw [div_lt_iff₀ hcardReal] at heditSmall
+    have hfloorNat : Fintype.card (C.approx.model n) ≤
+        10 * clusterScale (C.approx.model n) := by
+      unfold clusterScale
+      omega
+    have hfloorReal : (Fintype.card (C.approx.model n) : ℝ) ≤
+        10 * clusterScale (C.approx.model n) := by exact_mod_cast hfloorNat
+    have hscaled : C.cheeger / 20 * Fintype.card (C.approx.model n) ≤
+        C.cheeger / 20 * (10 * clusterScale (C.approx.model n)) :=
+      mul_le_mul_of_nonneg_left hfloorReal
+        (div_nonneg C.cheeger_pos.le (by norm_num))
+    calc
+      (X.editDistance (C.graphs n) e : ℝ) <
+          C.cheeger / 20 * Fintype.card (C.approx.model n) := heditSmall
+      _ ≤ C.cheeger / 20 * (10 * clusterScale (C.approx.model n)) := hscaled
+      _ = C.cheeger / 2 * clusterScale (C.approx.model n) := by ring
+  refine ⟨div_pos C.cheeger_pos (by norm_num), fun U hm hhalf ↦ ?_⟩
+  have hU : U.Nonempty := Finset.card_pos.mp
+    ((clusterScale_pos _ (by omega)).trans_le hm)
+  have htarget := hZexp.2 U hU hhalf
+  have heditNat := X.boundaryCard_transport_le_two_mul_add_editDistance
+    (C.graphs n) e U
+  have heditReal : (Z.boundaryCard U : ℝ) ≤
+      2 * X.boundaryCard U + X.editDistance (C.graphs n) e := by
+    exact_mod_cast heditNat
+  have hmReal : (clusterScale (C.approx.model n) : ℝ) ≤ U.card := by
+    exact_mod_cast hm
+  have hedgeLower : C.cheeger / 4 * U.card ≤ X.boundaryCard U := by
+    have hbudget : (X.editDistance (C.graphs n) e : ℝ) <
+        C.cheeger / 2 * U.card := by
+      exact lt_of_lt_of_le heditBound
+        (mul_le_mul_of_nonneg_left hmReal
+          (div_nonneg C.cheeger_pos.le (by norm_num)))
+    have htargetReal : C.cheeger * U.card ≤ (Z.boundaryCard U : ℝ) := by
+      exact htarget
+    linarith
+  have hsourceToDirected : X.boundaryCard U ≤
+      (directedBoundary (C.approx.model n)
+        (productLabels C.approx n C.generatorsK) U).card := by
+    rw [FiniteMultiGraph.boundaryCard, ← crossingEdges_decide_mem]
+    exact generatorCrossing_card_le_directedBoundary
+      C.approx n C.generatorsK hinj U
+  have hsourceReal : (X.boundaryCard U : ℝ) ≤
+      ((directedBoundary (C.approx.model n)
+        (productLabels C.approx n C.generatorsK) U).card : ℝ) := by
+    exact_mod_cast hsourceToDirected
+  exact hedgeLower.trans hsourceReal
 
 noncomputable def goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
     (m : ℕ) : Finset (Equiv.Perm Y) := by
