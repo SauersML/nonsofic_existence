@@ -167,6 +167,19 @@ theorem badArcs_productLabels_negligible
   dsimp [errors]
   exact_mod_cast card_badArcs_productLabels_le A n T j
 
+/-- The one-fifth cluster scale used in the original Kun--Thom argument. -/
+def clusterScale (Y : FiniteModel) : ℕ := Fintype.card Y / 5
+
+theorem clusterScale_pos (hcard : 5 ≤ Fintype.card Y) :
+    0 < clusterScale Y := by
+  unfold clusterScale
+  omega
+
+theorem five_mul_clusterScale_le :
+    5 * clusterScale Y ≤ Fintype.card Y := by
+  unfold clusterScale
+  omega
+
 /-- The directed label boundary of a set of vertices.  Both orientations are
 retained when the label set is symmetric. -/
 def directedBoundary (S : Finset (Equiv.Perm Y)) (A : Finset Y) :
@@ -410,6 +423,54 @@ def IsGood (S : Finset (Equiv.Perm Y)) (h : ℝ) (m : ℕ)
     (c : Equiv.Perm Y) : Prop :=
   ((badArcs Y S c).card : ℝ) < h * m / 2 ∧
     ((badArcs Y S c⁻¹).card : ℝ) < h * m / 2
+
+/-- A small normalized centralizer defect puts a permutation and its inverse
+in the symmetric candidate set at the one-fifth scale. -/
+theorem isGood_clusterScale_of_ratio_lt
+    (S : Finset (Equiv.Perm Y)) {h : ℝ} (hh : 0 < h)
+    (c : Equiv.Perm Y) (hcard : 10 ≤ Fintype.card Y)
+    (hratio : ((badArcs Y S c).card : ℝ) / Fintype.card Y < h / 20) :
+    IsGood Y S h (clusterScale Y) c := by
+  have hcardReal : (0 : ℝ) < Fintype.card Y := by
+    exact_mod_cast (show 0 < Fintype.card Y by omega)
+  have hfloorNat : Fintype.card Y ≤ 10 * clusterScale Y := by
+    unfold clusterScale
+    omega
+  have hfloorReal : (Fintype.card Y : ℝ) ≤ 10 * clusterScale Y := by
+    exact_mod_cast hfloorNat
+  have hbad : ((badArcs Y S c).card : ℝ) <
+      h * clusterScale Y / 2 := by
+    rw [div_lt_iff₀ hcardReal] at hratio
+    have hscaled : h / 20 * Fintype.card Y ≤
+        h / 20 * (10 * clusterScale Y) :=
+      mul_le_mul_of_nonneg_left hfloorReal (by positivity)
+    calc
+      ((badArcs Y S c).card : ℝ) < h / 20 * Fintype.card Y := hratio
+      _ ≤ h / 20 * (10 * clusterScale Y) := hscaled
+      _ = h * clusterScale Y / 2 := by ring
+  refine ⟨hbad, ?_⟩
+  rw [card_badArcs_inv]
+  exact hbad
+
+/-- Every fixed second-factor element is eventually a good almost
+automorphism for the first-factor labels. -/
+theorem productMap_isGood_eventually
+    (A : SoficApproximation (K × J)) (T : Finset K) {h : ℝ} (hh : 0 < h)
+    (j : J) : ∃ N : ℕ, ∀ n ≥ N,
+      IsGood (A.model n) (productLabels A n T) h
+        (clusterScale (A.model n)) (A.map n (1, j)) := by
+  have hdefect := badArcs_productLabels_negligible A T j
+  obtain ⟨Ndefect, hNdefect⟩ := hdefect (h / 20) (by positivity)
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 10
+  refine ⟨max Ndefect Ncard, fun n hn ↦ ?_⟩
+  have hnd : Ndefect ≤ n := (le_max_left _ _).trans hn
+  have hnc : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcard := hNcard n hnc
+  apply isGood_clusterScale_of_ratio_lt (A.model n)
+    (productLabels A n T) hh (A.map n (1, j)) hcard
+  have habs := hNdefect n hnd
+  rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))] at habs
+  exact habs
 
 noncomputable def goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
     (m : ℕ) : Finset (Equiv.Perm Y) := by
