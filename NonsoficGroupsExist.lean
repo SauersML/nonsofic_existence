@@ -58,6 +58,7 @@ import NonsoficGroupsExist.TableCover
 import NonsoficGroupsExist.LeavittWords
 import NonsoficGroupsExist.PrefixCode
 import NonsoficGroupsExist.ElementaryGroup
+import NonsoficGroupsExist.ElementaryStabilization
 import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
