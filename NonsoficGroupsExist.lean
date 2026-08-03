@@ -59,6 +59,7 @@ import NonsoficGroupsExist.ElementaryGroup
 import NonsoficGroupsExist.ElementaryStabilization
 import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ConcreteRankFour
+import NonsoficGroupsExist.ConcreteCompressionSetup
 import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
@@ -82,10 +83,11 @@ The concrete stream-operator algebra proves the binary Leavitt relations but
 has not been identified with the universal Leavitt algebra.  The two explicit
 cylinder units prove a genuine finite non-LEF obstruction for their generated
 corner subgroup; the development does not identify that subgroup with
-Thompson's group `V` or embed it into the required elementary subgroup.  The
-rank-four module constructs elementary words and proves that both compressor
-words act by the concrete coefficient-compression endomorphism.  It does not
-yet prove ambient generation or embed the non-LEF witness into the core.
+Thompson's group `V`.  Their generated subgroup is now embedded in `EL₃` by
+explicit cylinder-commutator and Whitehead identities.  The rank-four module
+also proves compressor conjugation, ambient generation, centralization, and
+trivial intersection, and `ConcreteRankFour.compressionSetup` constructs the
+complete algebraic setup rather than accepting it from a caller.
 
 `TableCover` proves only the conditional finite-presentation reduction: from a
 finitely generated nonsofic group it constructs a finitely presented nonsofic

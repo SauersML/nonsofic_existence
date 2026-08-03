@@ -1,5 +1,5 @@
 import NonsoficGroupsExist.ConcreteLeavitt
-import NonsoficGroupsExist.DiagonalElementary
+import NonsoficGroupsExist.DiagonalCornerCompression
 import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ThompsonWitness
 import Mathlib.Algebra.CharP.Algebra
@@ -135,6 +135,71 @@ theorem witnessEmbedding_injective : Function.Injective witnessEmbedding := by
   apply DiagonalElementary.firstDiagonalUnitHom_injective
   exact congrArg (fun z : Core ↦
     (z : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ)) hxy
+
+@[simp] theorem compressionEnd_val (g : Core) :
+    (compressionEnd g : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) =
+      family.matrixCompressionHom
+        (g : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) := rfl
+
+@[simp] theorem witnessEmbedding_val (j : Witness) :
+    (witnessEmbedding j : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) =
+      DiagonalElementary.firstDiagonalUnitHom
+        (j : CoefficientRingˣ) := rfl
+
+/-- The compressed core commutes with the explicitly embedded corner
+witness. -/
+theorem compressionEnd_commutes_witnessEmbedding (g : Core) (j : Witness) :
+    Commute (compressionEnd g) (witnessEmbedding j) := by
+  obtain ⟨u, hu⟩ := family.cornerWitnessSubgroup_le_cornerSubgroup j.property
+  have hj : (j : CoefficientRingˣ) = family.cornerHom u := hu.symm
+  apply (commute_iff_eq _ _).2
+  apply Subtype.ext
+  apply Units.ext
+  change
+    family.matrixCompression
+          (↑(g : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) :
+            Matrix (Fin 3) (Fin 3) CoefficientRing) *
+        (↑(DiagonalElementary.firstDiagonalUnitHom
+              (j : CoefficientRingˣ)) : Matrix (Fin 3) (Fin 3) CoefficientRing) =
+      (↑(DiagonalElementary.firstDiagonalUnitHom
+              (j : CoefficientRingˣ)) : Matrix (Fin 3) (Fin 3) CoefficientRing) *
+        family.matrixCompression
+          (↑(g : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) :
+            Matrix (Fin 3) (Fin 3) CoefficientRing)
+  rw [hj]
+  exact family.matrixCompression_commutes_firstDiagonalCorner _ u
+
+/-- The compressed core and the embedded corner witness have trivial
+intersection. -/
+theorem compressionEnd_eq_witnessEmbedding_iff (g : Core) (j : Witness) :
+    compressionEnd g = witnessEmbedding j ↔ g = 1 ∧ j = 1 := by
+  constructor
+  · intro h
+    obtain ⟨u, hu⟩ := family.cornerWitnessSubgroup_le_cornerSubgroup j.property
+    have hj : (j : CoefficientRingˣ) = family.cornerHom u := hu.symm
+    have hmatrix := congrArg
+      (fun z : Core ↦
+        (↑(z : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) :
+          Matrix (Fin 3) (Fin 3) CoefficientRing)) h
+    change
+      family.matrixCompression
+          (↑(g : (Matrix (Fin 3) (Fin 3) CoefficientRing)ˣ) :
+            Matrix (Fin 3) (Fin 3) CoefficientRing) =
+        (↑(DiagonalElementary.firstDiagonalUnitHom
+              (j : CoefficientRingˣ)) : Matrix (Fin 3) (Fin 3) CoefficientRing)
+      at hmatrix
+    rw [hj] at hmatrix
+    obtain ⟨hg, hu⟩ :=
+      (family.matrixCompression_eq_firstDiagonalCorner_iff _ u).mp hmatrix
+    constructor
+    · apply Subtype.ext
+      apply Units.ext
+      exact hg
+    · apply Subtype.ext
+      change (j : CoefficientRingˣ) = 1
+      rw [hj, hu, map_one]
+  · rintro ⟨rfl, rfl⟩
+    simp
 
 /-- The two explicit ambient compressor words. -/
 noncomputable def compressors : Finset Ambient :=
