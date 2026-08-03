@@ -2072,6 +2072,38 @@ theorem repairRelation_badArcs_mul_le_boundary
   have hmul := mul_le_mul_of_nonneg_left hbaseReal hh
   nlinarith
 
+theorem repairRelation_isEpsilonGood_of_boundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) {h ε : ℝ}
+    (hP : HasL1PoincareAtOne Y S h)
+    (hrows : 2 * (badRows Y U).card ≤ Fintype.card Y)
+    (hcolumns : 2 * (badColumns Y U).card ≤ Fintype.card Y)
+    (hboundary :
+      (h + 7 * S.card) * (relationBoundary Y S U).card <
+        h * (ε * Fintype.card Y)) :
+    IsEpsilonGood Y S ε (repairRelation Y U) := by
+  have hcontrol := repairRelation_badArcs_mul_le_boundary
+    Y S U hP hrows hcolumns
+  have hbad : ((badArcs Y S (repairRelation Y U)).card : ℝ) <
+      ε * Fintype.card Y := by
+    nlinarith [hP.1]
+  refine ⟨hbad, ?_⟩
+  rw [card_badArcs_inv]
+  exact hbad
+
+theorem hammingDistance_repairRelation_lt
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) {r : ℝ}
+    (hcardY : 0 < Fintype.card Y)
+    (hedits :
+      (((permutationGraph Y c \ U).card +
+        2 * ((permutationGraph Y c \ U).card +
+          (U \ permutationGraph Y c).card) : ℕ) : ℝ) <
+            r * Fintype.card Y) :
+    hammingDistance Y (repairRelation Y U) c < r := by
+  refine (hammingDistance_repairRelation_le Y U c).trans_lt ?_
+  have hcardReal : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardY
+  rw [div_lt_iff₀ hcardReal]
+  exact hedits
+
 theorem missingSources_roundRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     missingSources Y U (roundRelation Y U c) ⊆ missingSources Y U c := by
