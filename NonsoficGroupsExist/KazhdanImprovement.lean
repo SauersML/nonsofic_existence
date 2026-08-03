@@ -1807,6 +1807,271 @@ theorem columnFiberDeviation_mul_le_boundary
   have hvariation := columnDegreeVariation_le_relationBoundary Y S U
   exact hcoarea.trans (by exact_mod_cast hvariation)
 
+/-! ### Boundary-only control of the singleton-core repair -/
+
+/-- Relation points lying in a non-singleton row. -/
+def badRowPoints (U : Finset (Y × Y)) : Finset (Y × Y) :=
+  U.filter fun p ↦ p.1 ∈ badRows Y U
+
+/-- Relation points lying in a non-singleton column. -/
+def badColumnPoints (U : Finset (Y × Y)) : Finset (Y × Y) :=
+  U.filter fun p ↦ p.2 ∈ badColumns Y U
+
+theorem card_row_filter (U : Finset (Y × Y)) (x : Y) :
+    (U.filter fun p ↦ p.1 = x).card = rowDegree Y U x := by
+  let e : Y ↪ Y × Y :=
+    ⟨fun y ↦ (x, y), fun _ _ h ↦ congrArg Prod.snd h⟩
+  have hmap : (rowFiber Y U x).map e = U.filter fun p ↦ p.1 = x := by
+    ext p
+    constructor
+    · intro hp
+      rw [Finset.mem_map] at hp
+      obtain ⟨y, hy, rfl⟩ := hp
+      rw [Finset.mem_filter]
+      change (x, y) ∈ U ∧ x = x
+      exact ⟨(mem_rowFiber Y U x y).1 hy, rfl⟩
+    · intro hp
+      rw [Finset.mem_filter] at hp
+      obtain ⟨hpU, hpfirst⟩ := hp
+      rw [Finset.mem_map]
+      refine ⟨p.2, ?_, ?_⟩
+      · rw [mem_rowFiber]
+        rw [← hpfirst]
+        exact hpU
+      · exact Prod.ext hpfirst.symm rfl
+  rw [← hmap, Finset.card_map]
+  rfl
+
+theorem card_column_filter (U : Finset (Y × Y)) (y : Y) :
+    (U.filter fun p ↦ p.2 = y).card = columnDegree Y U y := by
+  let e : Y ↪ Y × Y :=
+    ⟨fun x ↦ (x, y), fun _ _ h ↦ congrArg Prod.fst h⟩
+  have hmap : (columnFiber Y U y).map e = U.filter fun p ↦ p.2 = y := by
+    ext p
+    constructor
+    · intro hp
+      rw [Finset.mem_map] at hp
+      obtain ⟨x, hx, rfl⟩ := hp
+      rw [Finset.mem_filter]
+      change (x, y) ∈ U ∧ y = y
+      exact ⟨(mem_columnFiber Y U x y).1 hx, rfl⟩
+    · intro hp
+      rw [Finset.mem_filter] at hp
+      obtain ⟨hpU, hpsecond⟩ := hp
+      rw [Finset.mem_map]
+      refine ⟨p.1, ?_, ?_⟩
+      · rw [mem_columnFiber]
+        rw [← hpsecond]
+        exact hpU
+      · exact Prod.ext rfl hpsecond.symm
+  rw [← hmap, Finset.card_map]
+  rfl
+
+theorem card_badRowPoints_eq_sum (U : Finset (Y × Y)) :
+    (badRowPoints Y U).card =
+      ∑ x ∈ badRows Y U, rowDegree Y U x := by
+  have hfiber := Finset.sum_card_fiberwise_eq_card_filter U
+    (badRows Y U) Prod.fst
+  rw [show badRowPoints Y U = U.filter (fun p ↦ p.1 ∈ badRows Y U) from rfl,
+    ← hfiber]
+  apply Finset.sum_congr rfl
+  intro x _
+  exact card_row_filter Y U x
+
+theorem card_badColumnPoints_eq_sum (U : Finset (Y × Y)) :
+    (badColumnPoints Y U).card =
+      ∑ y ∈ badColumns Y U, columnDegree Y U y := by
+  have hfiber := Finset.sum_card_fiberwise_eq_card_filter U
+    (badColumns Y U) Prod.snd
+  rw [show badColumnPoints Y U =
+      U.filter (fun p ↦ p.2 ∈ badColumns Y U) from rfl, ← hfiber]
+  apply Finset.sum_congr rfl
+  intro y _
+  exact card_column_filter Y U y
+
+theorem repairRelation_excess_subset_badPoints (U : Finset (Y × Y)) :
+    U \ permutationGraph Y (repairRelation Y U) ⊆
+      badRowPoints Y U ∪ badColumnPoints Y U := by
+  intro p hp
+  rw [Finset.mem_sdiff] at hp
+  by_cases hrow : p.1 ∈ badRows Y U
+  · apply Finset.mem_union_left
+    exact Finset.mem_filter.mpr ⟨hp.1, hrow⟩
+  by_cases hcolumn : p.2 ∈ badColumns Y U
+  · apply Finset.mem_union_right
+    exact Finset.mem_filter.mpr ⟨hp.1, hcolumn⟩
+  exfalso
+  apply hp.2
+  apply core_subset_permutationGraph_repairRelation Y U
+  rw [mem_relationCore]
+  exact ⟨hp.1, (not_ne_iff.mp ((mem_badRows Y U p.1).not.mp hrow)),
+    not_ne_iff.mp ((mem_badColumns Y U p.2).not.mp hcolumn)⟩
+
+theorem card_repairRelation_excess_le_deviation (U : Finset (Y × Y)) :
+    (U \ permutationGraph Y (repairRelation Y U)).card ≤
+      2 * rowFiberDeviation Y U + 2 * columnFiberDeviation Y U := by
+  have hsubset := Finset.card_le_card
+    (repairRelation_excess_subset_badPoints Y U)
+  have hunion := Finset.card_union_le (badRowPoints Y U) (badColumnPoints Y U)
+  rw [card_badRowPoints_eq_sum, card_badColumnPoints_eq_sum] at hunion
+  have hrows := sum_badRows_rowDegree_le Y U
+  have hcolumns := sum_badColumns_columnDegree_le Y U
+  omega
+
+/-- Missing repaired graph sources whose relation row is nevertheless a
+singleton. -/
+noncomputable def goodMissingSources (U : Finset (Y × Y)) : Finset Y :=
+  missingSources Y U (repairRelation Y U) \ badRows Y U
+
+theorem exists_row_point_of_goodMissing (U : Finset (Y × Y))
+    (x : {x // x ∈ goodMissingSources Y U}) :
+    ∃ y : Y, (x.1, y) ∈ U := by
+  have hxgood := (Finset.mem_sdiff.mp x.2).2
+  have hdegree : rowDegree Y U x.1 = 1 :=
+    not_ne_iff.mp ((mem_badRows Y U x.1).not.mp hxgood)
+  have hnonempty : (rowFiber Y U x.1).Nonempty := by
+    apply Finset.card_pos.mp
+    rw [show (rowFiber Y U x.1).card = 1 by simpa [rowDegree] using hdegree]
+    decide
+  obtain ⟨y, hy⟩ := hnonempty
+  exact ⟨y, (mem_rowFiber Y U x.1 y).1 hy⟩
+
+noncomputable def goodMissingTarget (U : Finset (Y × Y))
+    (x : {x // x ∈ goodMissingSources Y U}) : Y :=
+  Classical.choose (exists_row_point_of_goodMissing Y U x)
+
+theorem goodMissingTarget_mem (U : Finset (Y × Y))
+    (x : {x // x ∈ goodMissingSources Y U}) :
+    (x.1, goodMissingTarget Y U x) ∈ U :=
+  Classical.choose_spec (exists_row_point_of_goodMissing Y U x)
+
+noncomputable def goodMissingPointEmbedding (U : Finset (Y × Y)) :
+    {x // x ∈ goodMissingSources Y U} ↪ Y × Y where
+  toFun x := (x.1, goodMissingTarget Y U x)
+  inj' := by
+    intro x y hxy
+    exact Subtype.ext (congrArg Prod.fst hxy)
+
+theorem goodMissingTarget_badColumn (U : Finset (Y × Y))
+    (x : {x // x ∈ goodMissingSources Y U}) :
+    goodMissingTarget Y U x ∈ badColumns Y U := by
+  rw [mem_badColumns]
+  intro hcolumn
+  have hxgood := (Finset.mem_sdiff.mp x.2).2
+  have hrow : rowDegree Y U x.1 = 1 :=
+    not_ne_iff.mp ((mem_badRows Y U x.1).not.mp hxgood)
+  have hcore : (x.1, goodMissingTarget Y U x) ∈ relationCore Y U :=
+    (mem_relationCore Y U _).2
+      ⟨goodMissingTarget_mem Y U x, hrow, hcolumn⟩
+  have hrepair := repairRelation_eq_of_mem_core Y U _ hcore
+  have hmissing := (mem_missingSources Y U (repairRelation Y U) x.1).1
+    (Finset.mem_sdiff.mp x.2).1
+  apply hmissing
+  simpa [hrepair] using goodMissingTarget_mem Y U x
+
+theorem image_goodMissingPointEmbedding_subset_badColumnPoints
+    (U : Finset (Y × Y)) :
+    (goodMissingSources Y U).attach.map (goodMissingPointEmbedding Y U) ⊆
+      badColumnPoints Y U := by
+  intro p hp
+  rw [Finset.mem_map] at hp
+  obtain ⟨x, _, rfl⟩ := hp
+  change (x.1, goodMissingTarget Y U x) ∈ badColumnPoints Y U
+  exact Finset.mem_filter.mpr
+    ⟨goodMissingTarget_mem Y U x, goodMissingTarget_badColumn Y U x⟩
+
+theorem card_goodMissingSources_le_badColumnPoints (U : Finset (Y × Y)) :
+    (goodMissingSources Y U).card ≤ (badColumnPoints Y U).card := by
+  rw [← Finset.card_attach, ← Finset.card_map]
+  exact Finset.card_le_card
+    (image_goodMissingPointEmbedding_subset_badColumnPoints Y U)
+
+theorem missingSources_repair_subset_badRows_union_good (U : Finset (Y × Y)) :
+    missingSources Y U (repairRelation Y U) ⊆
+      badRows Y U ∪ goodMissingSources Y U := by
+  intro x hx
+  by_cases hbad : x ∈ badRows Y U
+  · exact Finset.mem_union_left _ hbad
+  · exact Finset.mem_union_right _ (Finset.mem_sdiff.mpr ⟨hx, hbad⟩)
+
+theorem card_repairRelation_missing_le_deviation (U : Finset (Y × Y)) :
+    (permutationGraph Y (repairRelation Y U) \ U).card ≤
+      rowFiberDeviation Y U + 2 * columnFiberDeviation Y U := by
+  rw [← card_missingSources]
+  have hsubset := Finset.card_le_card
+    (missingSources_repair_subset_badRows_union_good Y U)
+  have hunion := Finset.card_union_le (badRows Y U) (goodMissingSources Y U)
+  have hgood := card_goodMissingSources_le_badColumnPoints Y U
+  rw [card_badColumnPoints_eq_sum] at hgood
+  have hrows := card_badRows_le_rowFiberDeviation Y U
+  have hcolumns := sum_badColumns_columnDegree_le Y U
+  omega
+
+theorem card_repairRelation_edits_le_deviation (U : Finset (Y × Y)) :
+    (permutationGraph Y (repairRelation Y U) \ U).card +
+      (U \ permutationGraph Y (repairRelation Y U)).card ≤
+        3 * rowFiberDeviation Y U + 4 * columnFiberDeviation Y U := by
+  have hmissing := card_repairRelation_missing_le_deviation Y U
+  have hexcess := card_repairRelation_excess_le_deviation Y U
+  omega
+
+theorem repairRelation_edits_mul_le_boundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) {h : ℝ}
+    (hP : HasL1PoincareAtOne Y S h)
+    (hrows : 2 * (badRows Y U).card ≤ Fintype.card Y)
+    (hcolumns : 2 * (badColumns Y U).card ≤ Fintype.card Y) :
+    h * ((permutationGraph Y (repairRelation Y U) \ U).card +
+      (U \ permutationGraph Y (repairRelation Y U)).card) ≤
+        7 * (relationBoundary Y S U).card := by
+  have heditsNat := card_repairRelation_edits_le_deviation Y U
+  have hedits :
+      (((permutationGraph Y (repairRelation Y U) \ U).card +
+        (U \ permutationGraph Y (repairRelation Y U)).card : ℕ) : ℝ) ≤
+          3 * rowFiberDeviation Y U + 4 * columnFiberDeviation Y U := by
+    exact_mod_cast heditsNat
+  have hrow := rowFiberDeviation_mul_le_boundary Y S U hP hrows
+  have hcolumn := columnFiberDeviation_mul_le_boundary Y S U hP hcolumns
+  have hh : 0 ≤ h := hP.1.le
+  have hmul := mul_le_mul_of_nonneg_left hedits hh
+  calc
+    h * ((permutationGraph Y (repairRelation Y U) \ U).card +
+        (U \ permutationGraph Y (repairRelation Y U)).card) =
+        h * (((permutationGraph Y (repairRelation Y U) \ U).card +
+          (U \ permutationGraph Y (repairRelation Y U)).card : ℕ) : ℝ) := by
+            norm_num
+    _ ≤ h * (3 * rowFiberDeviation Y U + 4 * columnFiberDeviation Y U) := hmul
+    _ = 3 * (h * rowFiberDeviation Y U) +
+        4 * (h * columnFiberDeviation Y U) := by ring
+    _ ≤ 3 * (relationBoundary Y S U).card +
+        4 * (relationBoundary Y S U).card := by
+          exact add_le_add
+            (mul_le_mul_of_nonneg_left hrow (by norm_num))
+            (mul_le_mul_of_nonneg_left hcolumn (by norm_num))
+    _ = 7 * (relationBoundary Y S U).card := by ring
+
+/-- Once row and column multiplicities have median one, the repaired
+permutation's commutation defect is controlled solely by the relation
+boundary; no pre-existing nearby permutation appears in this estimate. -/
+theorem repairRelation_badArcs_mul_le_boundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) {h : ℝ}
+    (hP : HasL1PoincareAtOne Y S h)
+    (hrows : 2 * (badRows Y U).card ≤ Fintype.card Y)
+    (hcolumns : 2 * (badColumns Y U).card ≤ Fintype.card Y) :
+    h * (badArcs Y S (repairRelation Y U)).card ≤
+      (h + 7 * S.card) * (relationBoundary Y S U).card := by
+  have hbase := card_badArcs_le_relationBoundary_add_edits Y S U
+    (repairRelation Y U)
+  have hedits := repairRelation_edits_mul_le_boundary Y S U hP hrows hcolumns
+  have hh : 0 ≤ h := hP.1.le
+  have hbaseReal :
+      ((badArcs Y S (repairRelation Y U)).card : ℝ) ≤
+        (relationBoundary Y S U).card +
+          S.card * ((permutationGraph Y (repairRelation Y U) \ U).card +
+            (U \ permutationGraph Y (repairRelation Y U)).card) := by
+    exact_mod_cast hbase
+  have hmul := mul_le_mul_of_nonneg_left hbaseReal hh
+  nlinarith
+
 theorem missingSources_roundRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     missingSources Y U (roundRelation Y U c) ⊆ missingSources Y U c := by
