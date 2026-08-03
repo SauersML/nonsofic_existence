@@ -246,6 +246,24 @@ theorem hammingDistance_eq_one_sub_collision (n : ℕ) (g h : G)
   field_simp
   linarith
 
+/-- Assigned permutations of any two distinct fixed group elements are
+eventually separated by more than nine tenths in normalized Hamming distance. -/
+theorem map_pair_separated_eventually {g h : G} (hgh : g ≠ h) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      9 / 10 < hammingDistance (S.model n) (S.map n g) (S.map n h) := by
+  have hcollision := S.collisionError_negligible g h hgh
+  obtain ⟨Ne, hNe⟩ := hcollision (1 / 10) (by norm_num)
+  obtain ⟨Nc, hNc⟩ := S.card_tendsToInfinity 1
+  refine ⟨max Ne Nc, fun n hn ↦ ?_⟩
+  have hne := hNe n ((le_max_left _ _).trans hn)
+  have hcard := hNc n ((le_max_right _ _).trans hn)
+  have hratio : ((S.collisionError n g h).card : ℝ) /
+      Fintype.card (S.model n) < 1 / 10 :=
+    lt_of_le_of_lt (le_abs_self _) hne
+  rw [S.hammingDistance_eq_one_sub_collision n g h
+    (lt_of_lt_of_le Nat.zero_lt_one hcard)]
+  linarith
+
 private theorem conjugacyError_subset (n : ℕ) (q g : G) :
     S.conjugacyError n q g ⊆
       S.multiplicationError n q g ∪

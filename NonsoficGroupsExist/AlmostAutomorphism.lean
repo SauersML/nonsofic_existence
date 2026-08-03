@@ -541,18 +541,7 @@ theorem productMap_pair_separated_eventually
     ∃ N : ℕ, ∀ n ≥ N,
       9 / 10 < hammingDistance (A.model n) (A.map n (1, x)) (A.map n (1, y)) := by
   have hpneq : ((1 : K), x) ≠ ((1 : K), y) := by simpa using hxy
-  have hcollision := A.collisionError_negligible (1, x) (1, y) hpneq
-  obtain ⟨Ne, hNe⟩ := hcollision (1 / 10) (by norm_num)
-  obtain ⟨Nc, hNc⟩ := A.card_tendsToInfinity 1
-  refine ⟨max Ne Nc, fun n hn ↦ ?_⟩
-  have hne := hNe n ((le_max_left _ _).trans hn)
-  have hcard := hNc n ((le_max_right _ _).trans hn)
-  have hratio : ((A.collisionError n (1, x) (1, y)).card : ℝ) /
-      Fintype.card (A.model n) < 1 / 10 := by
-    exact lt_of_le_of_lt (le_abs_self _) hne
-  rw [A.hammingDistance_eq_one_sub_collision n (1, x) (1, y)
-    (lt_of_lt_of_le Nat.zero_lt_one hcard)]
-  linarith
+  exact A.map_pair_separated_eventually hpneq
 
 /-- Asymptotic faithfulness is uniform over distinct pairs in a fixed finite
 subset of the second factor. -/
@@ -571,6 +560,27 @@ theorem productMap_separated_on_finset_eventually
         exact ⟨Np, fun n hn _ ↦ hNp n hn⟩)
   exact ⟨N, fun n hn x hx y hy hxy ↦
     hN n hn (x, y) (Finset.mem_product.mpr ⟨hx, hy⟩) hxy⟩
+
+/-- Distinct first-factor generators are eventually assigned distinct
+permutations, so forgetting their tags loses no boundary occurrences. -/
+theorem firstFactorLabels_injective_eventually
+    (A : SoficApproximation (K × J)) (T : Finset K) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      Set.InjOn (fun k : K ↦ A.map n (k, 1)) (T : Set K) := by
+  obtain ⟨N, hN⟩ := eventually_finset (T.product T)
+    (fun p n ↦ p.1 ≠ p.2 → A.map n (p.1, 1) ≠ A.map n (p.2, 1)) (by
+      intro p _
+      by_cases hp : p.1 = p.2
+      · exact ⟨0, fun _ _ hne ↦ (hne hp).elim⟩
+      · have hp' : (p.1, (1 : J)) ≠ (p.2, 1) := by simpa using hp
+        obtain ⟨Np, hNp⟩ := A.map_pair_separated_eventually hp'
+        refine ⟨Np, fun n hn _ heq ↦ ?_⟩
+        have hsep := hNp n hn
+        rw [heq, hammingDistance_self] at hsep
+        norm_num at hsep)
+  refine ⟨N, fun n hn x hx y hy hmap ↦ ?_⟩
+  by_contra hxy
+  exact hN n hn (x, y) (Finset.mem_product.mpr ⟨hx, hy⟩) hxy hmap
 
 noncomputable def goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
     (m : ℕ) : Finset (Equiv.Perm Y) := by
