@@ -40,6 +40,12 @@ noncomputable def conjugacyError (n : ℕ) (q g : G) : Finset (S.model n) :=
   Finset.univ.filter fun x ↦
     S.map n q (S.map n g x) ≠ S.map n (q * g * q⁻¹) (S.map n q x)
 
+/-- Vertices where the assigned permutations of two commuting group elements
+fail to commute. -/
+noncomputable def commutationError (n : ℕ) (g h : G) : Finset (S.model n) :=
+  Finset.univ.filter fun x ↦
+    S.map n g (S.map n h x) ≠ S.map n h (S.map n g x)
+
 private theorem hammingDistance_mul (n : ℕ) (g h : G) :
     hammingDistance (S.model n) (S.map n (g * h)) (S.map n g * S.map n h) =
       ((S.multiplicationError n g h).card : ℝ) / Fintype.card (S.model n) := by
@@ -63,6 +69,42 @@ theorem multiplicationError_negligible (g h : G) :
   rw [← S.hammingDistance_mul]
   rw [abs_of_nonneg (hammingDistance_nonnegative _ _ _)]
   exact hN n hn
+
+private theorem commutationError_subset (n : ℕ) (g h : G)
+    (hcomm : Commute g h) :
+    S.commutationError n g h ⊆
+      S.multiplicationError n g h ∪ S.multiplicationError n h g := by
+  classical
+  intro x hx
+  simp only [commutationError, multiplicationError, Finset.mem_filter,
+    Finset.mem_univ, true_and, Finset.mem_union] at hx ⊢
+  by_cases hgh : S.map n (g * h) x ≠ S.map n g (S.map n h x)
+  · exact Or.inl hgh
+  by_cases hhg : S.map n (h * g) x ≠ S.map n h (S.map n g x)
+  · exact Or.inr hhg
+  exfalso
+  apply hx
+  rw [← not_ne_iff.mp hgh, ← not_ne_iff.mp hhg, hcomm.eq]
+
+/-- Approximate multiplicativity makes the assigned permutations of any fixed
+commuting pair commute away from a negligible set of vertices. -/
+theorem commutationError_negligible (g h : G) (hcomm : Commute g h) :
+    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+      fun n ↦ ((S.commutationError n g h).card : ℝ) := by
+  have hsum := Negligible.add
+    (S.multiplicationError_negligible g h)
+    (S.multiplicationError_negligible h g)
+  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+    (fun n ↦ ?_) hsum
+  have hs := Finset.card_le_card (S.commutationError_subset n g h hcomm)
+  have hu := Finset.card_union_le
+    (S.multiplicationError n g h) (S.multiplicationError n h g)
+  have hcast : ((S.commutationError n g h).card : ℝ) ≤
+      ((S.multiplicationError n g h).card : ℝ) +
+        (S.multiplicationError n h g).card := by
+    exact_mod_cast hs.trans hu
+  apply div_le_div_of_nonneg_right hcast
+  positivity
 
 private theorem moved_add_fixed (n : ℕ) (g : G) :
     (S.movedVertices n g).card + (S.fixedError n g).card =
