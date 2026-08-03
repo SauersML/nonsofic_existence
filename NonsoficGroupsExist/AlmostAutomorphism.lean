@@ -190,6 +190,43 @@ theorem agreement_or_disagreement_small
       exact_mod_cast hboundary
     linarith
 
+theorem hammingDistance_eq_disagreement_card (c d : Equiv.Perm Y) :
+    hammingDistance Y c d =
+      ((disagreement Y c d).card : ℝ) / Fintype.card Y := by
+  rfl
+
+/-- Normalized form of the Kun--Thom separation estimate.  If the graph has
+at least five times the chosen small-set scale, two sufficiently good almost
+automorphisms are either within `m / |Y|` in Hamming distance or at least four
+times that far apart. -/
+theorem hammingDistance_small_or_four_mul_le
+    (S : Finset (Equiv.Perm Y)) {h : ℝ}
+    (hexp : HasDirectedExpansion Y S h) (c d : Equiv.Perm Y)
+    (m : ℕ) (hm : 0 < m) (hsize : 5 * m ≤ Fintype.card Y)
+    (hbad : (((badArcs Y S c).card + (badArcs Y S d).card : ℕ) : ℝ) <
+      h * m) :
+    hammingDistance Y c d < (m : ℝ) / Fintype.card Y ∨
+      4 * ((m : ℝ) / Fintype.card Y) ≤ hammingDistance Y c d := by
+  have hcardNat : 0 < Fintype.card Y := by omega
+  have hcardReal : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardNat
+  rcases agreement_or_disagreement_small Y S hexp c d m hm hbad with
+    hagree | hdisagree
+  · right
+    have hfourNat : 4 * m ≤ (disagreement Y c d).card := by
+      have hpartition := card_agreement_add_card_disagreement Y c d
+      omega
+    have hfourReal : (4 : ℝ) * m ≤ ((disagreement Y c d).card : ℝ) := by
+      exact_mod_cast hfourNat
+    rw [hammingDistance_eq_disagreement_card]
+    rw [show 4 * ((m : ℝ) / Fintype.card Y) =
+      ((4 : ℝ) * m) / Fintype.card Y by ring]
+    exact div_le_div_of_nonneg_right hfourReal hcardReal.le
+  · left
+    have hdisagreeReal : ((disagreement Y c d).card : ℝ) < m := by
+      exact_mod_cast hdisagree
+    rw [hammingDistance_eq_disagreement_card]
+    exact div_lt_div_of_pos_right hdisagreeReal hcardReal
+
 theorem hammingDistance_mul_mul_le (a b c d : Equiv.Perm Y) :
     hammingDistance Y (a * b) (c * d) ≤
       hammingDistance Y a c + hammingDistance Y b d := by
