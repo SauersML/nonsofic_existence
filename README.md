@@ -12,9 +12,9 @@ two-generator non-LEF subgroup of a Leavitt-family unit group.
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the
 required expander decomposition and Kun--Thom implication, the relevant
-property `(T)` results, and the identities and generation statements needed to
-turn the proposed rank-four words and non-LEF subgroup into the required
-concrete compression construction. The represented stream-operator algebra is
+property `(T)` results, the ambient-generation theorem for the rank-four words,
+and an embedding of the non-LEF witness into the elementary core. The
+rank-four conjugacy identities themselves are kernel-checked. The represented stream-operator algebra is
 also not identified with the universal Leavitt algebra, and the non-LEF witness
 is not identified with Thompson's group `V`.
 
