@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.SoficErrors
 import NonsoficGroupsExist.LEF
+import NonsoficGroupsExist.Criterion
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Order
 import Mathlib.Algebra.Group.MinimalAxioms
@@ -581,6 +582,52 @@ theorem firstFactorLabels_injective_eventually
   refine ⟨N, fun n hn x hx y hy hmap ↦ ?_⟩
   by_contra hxy
   exact hN n hn (x, y) (Finset.mem_product.mpr ⟨hx, hy⟩) hxy hmap
+
+/-- Forget the generator tag on a generator-graph occurrence.  This remains
+injective when distinct generators have distinct assigned permutations. -/
+noncomputable def generatorArcEmbedding
+    (A : SoficApproximation (K × J)) (n : ℕ) (T : Finset K)
+    (hinj : Set.InjOn (fun k : K ↦ A.map n (k, 1)) (T : Set K)) :
+    (generatorGraph (A.model n) T (fun k ↦ A.map n (k, 1))).edge ↪
+      Arc (A.model n) where
+  toFun a := (A.map n (a.1.1.1, 1), a.1.2)
+  inj' := by
+    intro a b hab
+    apply Subtype.ext
+    apply Prod.ext
+    · apply Subtype.ext
+      apply hinj a.1.1.2 b.1.1.2
+      exact congrArg Prod.fst hab
+    · exact congrArg (fun p : Arc (A.model n) ↦ p.2) hab
+
+/-- Every crossing occurrence in the tagged generator graph gives a distinct
+directed boundary arc after generator labels are known to be distinct. -/
+theorem generatorCrossing_card_le_directedBoundary
+    (A : SoficApproximation (K × J)) (n : ℕ) (T : Finset K)
+    (hinj : Set.InjOn (fun k : K ↦ A.map n (k, 1)) (T : Set K))
+    (U : Finset (A.model n)) :
+    ((generatorGraph (A.model n) T (fun k ↦ A.map n (k, 1))).crossingEdges
+      (fun y ↦ decide (y ∈ U))).card ≤
+      (directedBoundary (A.model n) (productLabels A n T) U).card := by
+  let e := generatorArcEmbedding A n T hinj
+  rw [← Finset.card_map (f := e)]
+  apply Finset.card_le_card
+  intro p hp
+  rw [Finset.mem_map] at hp
+  obtain ⟨a, ha, rfl⟩ := hp
+  rw [mem_directedBoundary]
+  refine ⟨?_, ?_⟩
+  · apply Finset.mem_image.mpr
+    exact ⟨a.1.1.1, a.1.1.2, rfl⟩
+  · have hcross := (FiniteMultiGraph.mem_crossingEdges
+      (generatorGraph (A.model n) T (fun k ↦ A.map n (k, 1)))
+      (fun y ↦ decide (y ∈ U)) a).1 ha
+    change decide (a.1.2 ∈ U) ≠
+      decide (A.map n (a.1.1.1, 1) a.1.2 ∈ U) at hcross
+    dsimp [e, generatorArcEmbedding]
+    by_cases hx : a.1.2 ∈ U <;>
+      by_cases hy : A.map n (a.1.1.1, 1) a.1.2 ∈ U <;>
+        simp [hx, hy] at hcross ⊢
 
 noncomputable def goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
     (m : ℕ) : Finset (Equiv.Perm Y) := by
