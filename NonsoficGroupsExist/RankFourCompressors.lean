@@ -11,10 +11,10 @@ the core; `ElementaryStabilization` followed by reindexing embeds that core.
 
 The matrix calculations below prove that the involution squares to one and
 that conjugation by either compressor word implements `compressionEnd` on the
-embedded core.  The module does not prove that these words and the core
-generate the ambient elementary group, or supply the required non-LEF subgroup
-of the core.  Consequently `compressorSet` is not by itself a constructed
-`CompressionSetup`.
+embedded core.  They also prove that the two words together with the core
+generate the ambient elementary group.  The complementary non-LEF subgroup is
+specific to the stream-operator coefficient ring and is supplied in
+`ConcreteRankFour`; `ConcreteCompressionSetup` combines both parts.
 -/
 
 namespace NonsoficGroupsExist

@@ -11,8 +11,9 @@ This module specializes the proved rank-four matrix calculations to the
 stream-operator algebra.  It constructs the coefficient ring, `EL₃` core,
 `EL₄` ambient group, finite-generation instances, infinitude instances, the
 two concrete compressor elements, and proves that the core and compressors
-generate the ambient group.  It does not assert property `(T)` or the existence
-of a non-LEF subgroup embedded in the core.
+generate the ambient group.  It also embeds the explicit non-LEF cylinder
+witness into the core and proves the complementary-corner centralizer and
+trivial-intersection assertions.  Property `(T)` is not asserted here.
 -/
 
 namespace NonsoficGroupsExist

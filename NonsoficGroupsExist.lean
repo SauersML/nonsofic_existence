@@ -74,10 +74,11 @@ matrix, non-LEF-obstruction, localization, and finite-table results.  It does
 In particular, no declaration in this root module assumes a proposition named
 after Kun, Kun--Thom, or Ershov--Jaikin and then advertises the resulting
 conditional implication as an existence theorem.  The uninstantiated
-`ExpanderDecomposition`, `MatchingCertificate`, `CompressionSetup`, and
-`LocalCriterionData` structures remain specifications for intermediate
-conditional mathematics.  They are not evidence that the corresponding data
-have been constructed for the proposed group.
+`ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData`
+structures remain specifications for intermediate conditional mathematics.
+They are not evidence that the corresponding analytic data have been
+constructed.  In contrast, `ConcreteRankFour.compressionSetup` is an actual
+inhabitant of the algebraic `CompressionSetup` interface.
 
 The concrete stream-operator algebra proves the binary Leavitt relations but
 has not been identified with the universal Leavitt algebra.  The two explicit
