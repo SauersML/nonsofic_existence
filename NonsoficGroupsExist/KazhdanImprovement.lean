@@ -366,5 +366,66 @@ theorem card_badArcs_roundRelation_le
   have hexcess := Finset.card_le_card (excess_roundRelation_subset Y U c)
   nlinarith
 
+/-- The integer error budget contributed by a relation's boundary and its
+symmetric difference from a permutation graph. -/
+def relationErrorBudget (S : Finset (Equiv.Perm Y))
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) : ℕ :=
+  (relationBoundary Y S U).card +
+    S.card * ((permutationGraph Y c \ U).card +
+      (U \ permutationGraph Y c).card)
+
+theorem roundRelation_isGood
+    (S : Finset (Equiv.Perm Y)) {h : ℝ} (m : ℕ)
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y)
+    (hbudget : (relationErrorBudget Y S U c : ℝ) < h * m / 2) :
+    IsGood Y S h m (roundRelation Y U c) := by
+  have hcard := card_badArcs_roundRelation_le Y S U c
+  have hcard' : (badArcs Y S (roundRelation Y U c)).card ≤
+      relationErrorBudget Y S U c := by
+    simpa [relationErrorBudget] using hcard
+  have hbad : ((badArcs Y S (roundRelation Y U c)).card : ℝ) <
+      h * m / 2 := by
+    apply lt_of_le_of_lt (b := (relationErrorBudget Y S U c : ℝ))
+    · exact_mod_cast hcard'
+    · exact hbudget
+  refine ⟨hbad, ?_⟩
+  rw [card_badArcs_inv]
+  exact hbad
+
+theorem roundRelation_close
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) (m : ℕ)
+    (hcardY : 0 < Fintype.card Y)
+    (hmissing : (permutationGraph Y c \ U).card < m) :
+    hammingDistance Y c (roundRelation Y U c) <
+      (m : ℝ) / Fintype.card Y := by
+  rw [hammingDistance_comm]
+  refine (hammingDistance_roundRelation_le Y U c).trans_lt ?_
+  have hmissingReal : ((permutationGraph Y c \ U).card : ℝ) < m := by
+    exact_mod_cast hmissing
+  have hcardReal : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardY
+  exact div_lt_div_of_pos_right hmissingReal hcardReal
+
+/-- Finite Kun--Thom improvement after the property-(T) step has supplied,
+for each product of good almost automorphisms, a nearby binary relation with
+small diagonal boundary.  Unlike `ClusterData`, the hypotheses here are the
+raw finite estimates that the Kazhdan argument must prove. -/
+noncomputable def clusterData_of_relationImprovement
+    (S : Finset (Equiv.Perm Y)) {h : ℝ}
+    (m : ℕ) (hm : 0 < m)
+    (hsize : 5 * m ≤ Fintype.card Y)
+    (hexp : HasDirectedExpansionAtScale Y S h m)
+    (improve : Equiv.Perm Y → Finset (Y × Y))
+    (hbudget : ∀ a, IsGood Y S h m a → ∀ b, IsGood Y S h m b →
+      (relationErrorBudget Y S (improve (a * b)) (a * b) : ℝ) < h * m / 2)
+    (hmissing : ∀ a, IsGood Y S h m a → ∀ b, IsGood Y S h m b →
+      (permutationGraph Y (a * b) \ improve (a * b)).card < m) :
+    ClusterData Y :=
+  clusterData_of_rounding Y S m hm hsize hexp
+    (fun c ↦ roundRelation Y (improve c) c)
+    (fun a ha b hb ↦ roundRelation_isGood Y S m (improve (a * b))
+      (a * b) (hbudget a ha b hb))
+    (fun a ha b hb ↦ roundRelation_close Y (improve (a * b))
+      (a * b) m (by omega) (hmissing a ha b hb))
+
 end KazhdanImprovement
 end NonsoficGroupsExist
