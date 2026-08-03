@@ -31,6 +31,62 @@ Kazhdan-pair formulation. -/
 def HasKazhdanPropertyT (G : Type u) [Group G] : Prop :=
   ∃ Q : Finset G, ∃ ε : ℝ, IsKazhdanPair.{u, v} G Q ε
 
+namespace IsKazhdanPair
+
+variable {G : Type u} [Group G] {Q R : Finset G} {ε : ℝ}
+
+/-- Enlarging the finite control set preserves a Kazhdan pair. -/
+theorem mono (hQ : IsKazhdanPair.{u, v} G Q ε) (hQR : Q ⊆ R) :
+    IsKazhdanPair.{u, v} G R ε := by
+  refine ⟨hQ.1, ?_⟩
+  intro E _ _ _ ρ x hx hnear
+  exact hQ.2 E ρ x hx (fun q hq ↦ hnear q (hQR hq))
+
+/-- A representation has no nonzero invariant vectors. -/
+def HasNoInvariantVectors {E : Type v} [NormedAddCommGroup E]
+    [InnerProductSpace ℝ E] (G : Type u) [Group G]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) : Prop :=
+  ∀ y : E, (∀ g : G, ρ g y = y) → y = 0
+
+/-- In a representation without invariant vectors, every unit vector is moved
+by at least the Kazhdan tolerance by one element of the finite control set. -/
+theorem exists_moved_of_noInvariant
+    (hQ : IsKazhdanPair.{u, v} G Q ε)
+    {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (hno : HasNoInvariantVectors G ρ) (x : E) (hx : ‖x‖ = 1) :
+    ∃ q ∈ Q, ε ≤ ‖ρ q x - x‖ := by
+  by_contra h
+  have hnear : ∀ q ∈ Q, ‖ρ q x - x‖ < ε := by
+    intro q hq
+    exact lt_of_not_ge (fun hge ↦ h ⟨q, hq, hge⟩)
+  obtain ⟨y, hy, hinv⟩ := hQ.2 E ρ x hx hnear
+  exact hy (hno y hinv)
+
+/-- Homogeneous form of the Kazhdan displacement estimate. -/
+theorem exists_moved_mul_norm_of_noInvariant
+    (hQ : IsKazhdanPair.{u, v} G Q ε)
+    {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (hno : HasNoInvariantVectors G ρ) (x : E) (hx : x ≠ 0) :
+    ∃ q ∈ Q, ε * ‖x‖ ≤ ‖ρ q x - x‖ := by
+  have hnorm : 0 < ‖x‖ := norm_pos_iff.mpr hx
+  let z : E := (‖x‖⁻¹ : ℝ) • x
+  have hz : ‖z‖ = 1 := by
+    rw [show ‖z‖ = |‖x‖⁻¹| * ‖x‖ by simp [z, norm_smul]]
+    rw [abs_of_pos (inv_pos.mpr hnorm), inv_mul_cancel₀ hnorm.ne']
+  obtain ⟨q, hq, hmove⟩ := exists_moved_of_noInvariant hQ ρ hno z hz
+  refine ⟨q, hq, ?_⟩
+  have hnormalized : ‖ρ q z - z‖ = ‖ρ q x - x‖ / ‖x‖ := by
+    rw [show ρ q z - z = (‖x‖⁻¹ : ℝ) • (ρ q x - x) by
+      simp [z, smul_sub]]
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hnorm)]
+    rw [div_eq_mul_inv, mul_comm]
+  rw [hnormalized] at hmove
+  exact (le_div_iff₀ hnorm).mp hmove
+
+end IsKazhdanPair
+
 namespace HasKazhdanPropertyT
 
 variable {G : Type u} {H : Type v} [Group G] [Group H]
