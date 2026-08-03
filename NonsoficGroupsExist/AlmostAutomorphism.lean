@@ -21,6 +21,22 @@ namespace AlmostAutomorphism
 
 variable (Y : FiniteModel)
 
+/-- Finitely many eventual assertions admit one common threshold. -/
+theorem eventually_finset {ι : Type*} (s : Finset ι) (P : ι → ℕ → Prop)
+    (h : ∀ i ∈ s, ∃ N, ∀ n ≥ N, P i n) :
+    ∃ N, ∀ n ≥ N, ∀ i ∈ s, P i n := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => exact ⟨0, by simp⟩
+  | @insert i s hi ih =>
+      obtain ⟨Ni, hNi⟩ := h i (Finset.mem_insert_self i s)
+      obtain ⟨Ns, hNs⟩ := ih fun j hj ↦ h j (Finset.mem_insert_of_mem hj)
+      refine ⟨max Ni Ns, fun n hn j hj ↦ ?_⟩
+      rw [Finset.mem_insert] at hj
+      rcases hj with rfl | hj
+      · exact hNi n ((le_max_left _ _).trans hn)
+      · exact hNs n ((le_max_right _ _).trans hn) j hj
+
 /-- Label occurrences on a finite permutation graph. -/
 abbrev Arc := Equiv.Perm Y × Y
 
@@ -471,6 +487,68 @@ theorem productMap_isGood_eventually
   have habs := hNdefect n hnd
   rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))] at habs
   exact habs
+
+theorem productMap_isGood_on_finset_eventually
+    (A : SoficApproximation (K × J)) (T : Finset K) {h : ℝ} (hh : 0 < h)
+    (F : Finset J) : ∃ N : ℕ, ∀ n ≥ N, ∀ j ∈ F,
+      IsGood (A.model n) (productLabels A n T) h
+        (clusterScale (A.model n)) (A.map n (1, j)) := by
+  exact eventually_finset F
+    (fun j n ↦ IsGood (A.model n) (productLabels A n T) h
+      (clusterScale (A.model n)) (A.map n (1, j)))
+    (fun j _ ↦ productMap_isGood_eventually A T hh j)
+
+/-- Approximate multiplicativity is uniform on each fixed finite subset of
+the second factor. -/
+theorem productMap_mul_close_on_finset_eventually
+    (A : SoficApproximation (K × J)) (F : Finset J) {ε : ℝ} (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ x ∈ F, ∀ y ∈ F,
+      hammingDistance (A.model n) (A.map n (1, x * y))
+        (A.map n (1, x) * A.map n (1, y)) < ε := by
+  obtain ⟨N, hN⟩ := eventually_finset (F.product F)
+    (fun p n ↦ hammingDistance (A.model n) (A.map n (1, p.1 * p.2))
+      (A.map n (1, p.1) * A.map n (1, p.2)) < ε) (by
+        intro p hp
+        obtain ⟨hx, hy⟩ := Finset.mem_product.mp hp
+        simpa using A.asymptoticallyMultiplicative (1, p.1) (1, p.2) ε hε)
+  exact ⟨N, fun n hn x hx y hy ↦ hN n hn (x, y)
+    (Finset.mem_product.mpr ⟨hx, hy⟩)⟩
+
+theorem productMap_pair_separated_eventually
+    (A : SoficApproximation (K × J)) {x y : J} (hxy : x ≠ y) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      9 / 10 < hammingDistance (A.model n) (A.map n (1, x)) (A.map n (1, y)) := by
+  have hpneq : ((1 : K), x) ≠ ((1 : K), y) := by simpa using hxy
+  have hcollision := A.collisionError_negligible (1, x) (1, y) hpneq
+  obtain ⟨Ne, hNe⟩ := hcollision (1 / 10) (by norm_num)
+  obtain ⟨Nc, hNc⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Ne Nc, fun n hn ↦ ?_⟩
+  have hne := hNe n ((le_max_left _ _).trans hn)
+  have hcard := hNc n ((le_max_right _ _).trans hn)
+  have hratio : ((A.collisionError n (1, x) (1, y)).card : ℝ) /
+      Fintype.card (A.model n) < 1 / 10 := by
+    exact lt_of_le_of_lt (le_abs_self _) hne
+  rw [A.hammingDistance_eq_one_sub_collision n (1, x) (1, y)
+    (lt_of_lt_of_le Nat.zero_lt_one hcard)]
+  linarith
+
+/-- Asymptotic faithfulness is uniform over distinct pairs in a fixed finite
+subset of the second factor. -/
+theorem productMap_separated_on_finset_eventually
+    (A : SoficApproximation (K × J)) (F : Finset J) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ x ∈ F, ∀ y ∈ F, x ≠ y →
+      9 / 10 < hammingDistance (A.model n) (A.map n (1, x)) (A.map n (1, y)) := by
+  obtain ⟨N, hN⟩ := eventually_finset (F.product F)
+    (fun p n ↦ p.1 ≠ p.2 →
+      9 / 10 < hammingDistance (A.model n)
+        (A.map n (1, p.1)) (A.map n (1, p.2))) (by
+      intro p _
+      by_cases hp : p.1 = p.2
+      · exact ⟨0, fun _ _ hne ↦ (hne hp).elim⟩
+      · obtain ⟨Np, hNp⟩ := productMap_pair_separated_eventually A hp
+        exact ⟨Np, fun n hn _ ↦ hNp n hn⟩)
+  exact ⟨N, fun n hn x hx y hy hxy ↦
+    hN n hn (x, y) (Finset.mem_product.mpr ⟨hx, hy⟩) hxy⟩
 
 noncomputable def goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
     (m : ℕ) : Finset (Equiv.Perm Y) := by
