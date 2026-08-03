@@ -368,6 +368,69 @@ theorem card_badArcs_mul_le
   rw [Finset.card_map] at hunion
   omega
 
+/-! ### Indicator-function form of the relation estimates -/
+
+/-- The real indicator of a finite binary relation. -/
+noncomputable def relationIndicator (U : Finset (Y × Y)) (p : Y × Y) : ℝ :=
+  if p ∈ U then 1 else 0
+
+/-- Unnormalized `ℓ¹` variation under the tagged diagonal generator action. -/
+noncomputable def relationVariation (S : Finset (Equiv.Perm Y))
+    (f : Y × Y → ℝ) : ℝ :=
+  ∑ p ∈ S.product (Finset.univ : Finset (Y × Y)),
+    |f (diagonalAction Y p.1 p.2) - f p.2|
+
+theorem relationVariation_indicator
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
+    relationVariation Y S (relationIndicator Y U) =
+      (relationBoundary Y S U).card := by
+  classical
+  rw [relationVariation, Finset.card_eq_sum_ones]
+  rw [Nat.cast_sum]
+  unfold relationBoundary
+  rw [Finset.sum_filter]
+  apply Finset.sum_congr rfl
+  intro p _
+  by_cases hq : p.2 ∈ U <;>
+    by_cases hr : diagonalAction Y p.1 p.2 ∈ U <;>
+      simp [relationIndicator, hq, hr, abs_of_nonneg, abs_of_nonpos]
+
+/-- Unnormalized `ℓ¹` distance on functions over the finite relation space. -/
+noncomputable def relationL1Distance (f g : Y × Y → ℝ) : ℝ :=
+  ∑ p : Y × Y, |f p - g p|
+
+theorem relationL1Distance_indicator
+    (U V : Finset (Y × Y)) :
+    relationL1Distance Y (relationIndicator Y U) (relationIndicator Y V) =
+      ((U \ V).card + (V \ U).card : ℕ) := by
+  classical
+  rw [relationL1Distance]
+  have hsum :
+      ∑ p : Y × Y,
+          |relationIndicator Y U p - relationIndicator Y V p| =
+        ∑ p ∈ (Finset.univ : Finset (Y × Y)),
+          if (p ∈ U ∧ p ∉ V) ∨ (p ∈ V ∧ p ∉ U) then (1 : ℝ) else 0 := by
+    apply Finset.sum_congr rfl
+    intro p _
+    by_cases hU : p ∈ U <;> by_cases hV : p ∈ V <;>
+      simp [relationIndicator, hU, hV, abs_of_nonneg, abs_of_nonpos]
+  rw [hsum]
+  rw [← Finset.sum_filter]
+  have hfilter :
+      (Finset.univ.filter fun p : Y × Y ↦
+        (p ∈ U ∧ p ∉ V) ∨ (p ∈ V ∧ p ∉ U)) =
+          (U \ V) ∪ (V \ U) := by
+    ext p
+    simp [and_or_left]
+  rw [hfilter, Finset.sum_const, nsmul_eq_mul]
+  have hdisjoint : Disjoint (U \ V) (V \ U) := by
+    apply Finset.disjoint_left.mpr
+    intro p hp hq
+    rw [Finset.mem_sdiff] at hp hq
+    exact hp.2 hq.1
+  rw [Finset.card_union_of_disjoint hdisjoint]
+  norm_num
+
 /-- Bad arcs whose graph point and its diagonal translate lie on opposite
 sides of the relation. -/
 def crossingBadArcs (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
