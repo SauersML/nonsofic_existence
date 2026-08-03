@@ -126,6 +126,13 @@ theorem mono (hQ : IsKazhdanPair.{u, v} G Q ε) (hQR : Q ⊆ R) :
   intro E _ _ _ ρ x hx hnear
   exact hQ.2 E ρ x hx (fun q hq ↦ hnear q (hQR hq))
 
+/-- Decreasing the tolerance preserves a Kazhdan pair. -/
+theorem shrink (hQ : IsKazhdanPair.{u, v} G Q ε) {a : ℝ}
+    (ha : 0 < a) (haε : a ≤ ε) : IsKazhdanPair.{u, v} G Q a := by
+  refine ⟨ha, ?_⟩
+  intro E _ _ _ ρ x hx hnear
+  exact hQ.2 E ρ x hx fun q hq ↦ (hnear q hq).trans_le haε
+
 /-- A representation has no nonzero invariant vectors. -/
 def HasNoInvariantVectors {E : Type v} [NormedAddCommGroup E]
     [InnerProductSpace ℝ E] (G : Type u) [Group G]
@@ -219,6 +226,22 @@ end IsKazhdanPair
 namespace HasKazhdanPropertyT
 
 variable {G : Type u} {H : Type v} [Group G] [Group H]
+
+/-- A property-`(T)` group has a Kazhdan pair whose control set contains the
+identity and whose tolerance lies in `(0,1]`. -/
+theorem exists_identity_pair (hG : HasKazhdanPropertyT.{u, w} G) :
+    ∃ S : Finset G, ∃ ε : ℝ,
+      1 ∈ S ∧ 0 < ε ∧ ε ≤ 1 ∧ IsKazhdanPair.{u, w} G S ε := by
+  classical
+  obtain ⟨Q, a, ha⟩ := hG
+  let ε := min a 1
+  let S := insert 1 Q
+  have hεpos : 0 < ε := lt_min ha.1 zero_lt_one
+  have hεa : ε ≤ a := min_le_left _ _
+  have hεone : ε ≤ 1 := min_le_right _ _
+  refine ⟨S, ε, by simp [S], hεpos, hεone, ?_⟩
+  apply IsKazhdanPair.mono (IsKazhdanPair.shrink ha hεpos hεa)
+  exact Finset.subset_insert 1 Q
 
 /-- Property `(T)` is invariant under group isomorphism. -/
 theorem of_mulEquiv (e : G ≃* H) (hH : HasKazhdanPropertyT.{v, w} H) :
