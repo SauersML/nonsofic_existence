@@ -1314,6 +1314,162 @@ theorem card_badArcs_repairRelation_le
   have hedits := card_repairRelation_edits_le Y U c
   nlinarith
 
+/-! ### Projection variation -/
+
+/-- Points in a row whose membership changes under one diagonal label step. -/
+def rowTransition (U : Finset (Y × Y)) (s : Equiv.Perm Y) (x : Y) :
+    Finset Y :=
+  Finset.univ.filter fun y ↦
+    ((x, y) ∈ U) ≠ ((s x, s y) ∈ U)
+
+/-- The pullback to row `x` of the relation fiber over `s x`. -/
+def nextRowFiber (U : Finset (Y × Y)) (s : Equiv.Perm Y) (x : Y) :
+    Finset Y :=
+  Finset.univ.filter fun y ↦ (s x, s y) ∈ U
+
+theorem card_nextRowFiber (U : Finset (Y × Y))
+    (s : Equiv.Perm Y) (x : Y) :
+    (nextRowFiber Y U s x).card = rowDegree Y U (s x) := by
+  let e : Y ↪ Y := s.toEmbedding
+  have hmap : (nextRowFiber Y U s x).map e = rowFiber Y U (s x) := by
+    ext z
+    constructor
+    · intro hz
+      rw [Finset.mem_map] at hz
+      obtain ⟨y, hy, rfl⟩ := hz
+      rw [show y ∈ nextRowFiber Y U s x ↔ (s x, s y) ∈ U by
+        simp [nextRowFiber]] at hy
+      rw [mem_rowFiber]
+      change (s x, s y) ∈ U
+      exact hy
+    · intro hz
+      rw [Finset.mem_map]
+      refine ⟨s.symm z, ?_, by simp [e]⟩
+      simpa [nextRowFiber, rowFiber] using hz
+  rw [rowDegree, ← hmap, Finset.card_map]
+
+theorem rowTransition_eq_filter_membership_ne
+    (U : Finset (Y × Y)) (s : Equiv.Perm Y) (x : Y) :
+    rowTransition Y U s x = Finset.univ.filter fun y ↦
+      (y ∈ rowFiber Y U x) ≠ (y ∈ nextRowFiber Y U s x) := by
+  ext y
+  simp [rowTransition, rowFiber, nextRowFiber]
+
+theorem natDist_card_le_membership_changes
+    {α : Type} [Fintype α] [DecidableEq α] (A B : Finset α) :
+    Nat.dist A.card B.card ≤
+      (Finset.univ.filter fun x ↦ (x ∈ A) ≠ (x ∈ B)).card := by
+  let D := Finset.univ.filter fun x ↦ (x ∈ A) ≠ (x ∈ B)
+  have hD : D = (A \ B) ∪ (B \ A) := by
+    ext x
+    by_cases hA : x ∈ A <;> by_cases hB : x ∈ B <;>
+      simp [D, hA, hB]
+  have hdisjoint : Disjoint (A \ B) (B \ A) := by
+    apply Finset.disjoint_left.mpr
+    intro x hx hy
+    rw [Finset.mem_sdiff] at hx hy
+    exact hx.2 hy.1
+  have hAcard := Finset.card_sdiff_add_card_inter A B
+  have hBcard := Finset.card_sdiff_add_card_inter B A
+  have hinter : (A ∩ B).card = (B ∩ A).card := by
+    rw [Finset.inter_comm]
+  rw [show (Finset.univ.filter fun x ↦ (x ∈ A) ≠ (x ∈ B)) = D from rfl,
+    hD, Finset.card_union_of_disjoint hdisjoint]
+  by_cases hle : A.card ≤ B.card
+  · rw [Nat.dist_eq_sub_of_le hle]
+    omega
+  · have hle' : B.card ≤ A.card := by omega
+    rw [Nat.dist_eq_sub_of_le_right hle']
+    omega
+
+theorem rowDegree_dist_le_transition
+    (U : Finset (Y × Y)) (s : Equiv.Perm Y) (x : Y) :
+    Nat.dist (rowDegree Y U x) (rowDegree Y U (s x)) ≤
+      (rowTransition Y U s x).card := by
+  rw [← card_nextRowFiber Y U s x,
+    rowDegree, rowTransition_eq_filter_membership_ne]
+  exact natDist_card_le_membership_changes
+    (rowFiber Y U x) (nextRowFiber Y U s x)
+
+theorem sum_card_rowTransition
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
+    ∑ p ∈ S.product (Finset.univ : Finset Y),
+      (rowTransition Y U p.1 p.2).card =
+        (relationBoundary Y S U).card := by
+  classical
+  have hfiber := Finset.sum_card_fiberwise_eq_card_filter
+    (relationBoundary Y S U) (S.product (Finset.univ : Finset Y))
+      (fun p : Equiv.Perm Y × (Y × Y) ↦ (p.1, p.2.1))
+  calc
+    ∑ p ∈ S.product (Finset.univ : Finset Y),
+        (rowTransition Y U p.1 p.2).card =
+      ∑ p ∈ S.product (Finset.univ : Finset Y),
+        ((relationBoundary Y S U).filter fun q ↦
+          (q.1, q.2.1) = p).card := by
+      apply Finset.sum_congr rfl
+      intro p hp
+      rcases p with ⟨s, x⟩
+      have hs : s ∈ S := (Finset.mem_product.mp hp).1
+      let e : Y ↪ Equiv.Perm Y × (Y × Y) :=
+        ⟨fun y ↦ (s, (x, y)), fun _ _ h ↦ congrArg (fun q ↦ q.2.2) h⟩
+      rw [← Finset.card_map (f := e)]
+      apply congrArg Finset.card
+      ext q
+      constructor
+      · intro hq
+        rw [Finset.mem_map] at hq
+        obtain ⟨z, hz, rfl⟩ := hq
+        rw [Finset.mem_filter]
+        refine ⟨?_, rfl⟩
+        rw [mem_relationBoundary]
+        refine ⟨hs, ?_⟩
+        dsimp [e, diagonalAction]
+        by_cases h₁ : (x, z) ∈ U <;> by_cases h₂ : (s x, s z) ∈ U <;>
+          simp [rowTransition, h₁, h₂] at hz ⊢
+      · intro hq
+        rw [Finset.mem_filter] at hq
+        obtain ⟨hboundary, heq⟩ := hq
+        have hlabel : q.1 = s := congrArg Prod.fst heq
+        have hsource : q.2.1 = x := congrArg Prod.snd heq
+        let z := q.2.2
+        have hqEq : q = (s, (x, z)) :=
+          Prod.ext hlabel (Prod.ext hsource rfl)
+        rw [hqEq] at hboundary ⊢
+        rw [Finset.mem_map]
+        refine ⟨z, ?_, rfl⟩
+        have hcross := (mem_relationBoundary Y S U _).1 hboundary |>.2
+        by_cases h₁ : (x, z) ∈ U <;> by_cases h₂ : (s x, s z) ∈ U <;>
+          simp [rowTransition, diagonalAction, h₁, h₂] at hcross ⊢
+    _ = ((relationBoundary Y S U).filter fun q ↦
+        (q.1, q.2.1) ∈ S.product (Finset.univ : Finset Y)).card := hfiber
+    _ = (relationBoundary Y S U).card := by
+      apply congrArg Finset.card
+      ext q
+      simp only [Finset.mem_filter]
+      constructor
+      · exact fun hq ↦ hq.1
+      · intro hq
+        refine ⟨hq, Finset.mem_product.mpr ⟨?_, Finset.mem_univ _⟩⟩
+        exact (mem_relationBoundary Y S U q).1 hq |>.1
+
+def rowDegreeVariation (S : Finset (Equiv.Perm Y))
+    (U : Finset (Y × Y)) : ℕ :=
+  ∑ p ∈ S.product (Finset.univ : Finset Y),
+    Nat.dist (rowDegree Y U p.2) (rowDegree Y U (p.1 p.2))
+
+theorem rowDegreeVariation_le_relationBoundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
+    rowDegreeVariation Y S U ≤ (relationBoundary Y S U).card := by
+  calc
+    rowDegreeVariation Y S U ≤
+        ∑ p ∈ S.product (Finset.univ : Finset Y),
+          (rowTransition Y U p.1 p.2).card := by
+      unfold rowDegreeVariation
+      apply Finset.sum_le_sum
+      intro p _
+      exact rowDegree_dist_le_transition Y U p.1 p.2
+    _ = (relationBoundary Y S U).card := sum_card_rowTransition Y S U
+
 theorem missingSources_roundRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     missingSources Y U (roundRelation Y U c) ⊆ missingSources Y U c := by
