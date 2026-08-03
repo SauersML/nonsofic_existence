@@ -427,5 +427,54 @@ noncomputable def clusterData_of_relationImprovement
     (fun a ha b hb ↦ roundRelation_close Y (improve (a * b))
       (a * b) m (by omega) (hmissing a ha b hb))
 
+variable {K J : Type} [Group K] [Group J]
+
+/-- The complete Kun--Thom finite-group conclusion from the raw relation
+improvement estimates.  This is the boundary at which the still-to-be-proved
+Kazhdan analytic theorem plugs into the already formalized finite argument. -/
+theorem isLEF_of_product_relationImprovement
+    (A : SoficApproximation (K × J)) (T : Finset K) {h : ℝ} (hh : 0 < h)
+    (hexp : ∃ Nexp, ∀ n ≥ Nexp,
+      HasDirectedExpansionAtScale (A.model n) (productLabels A n T) h
+        (clusterScale (A.model n)))
+    (himprove : ∃ Nimp, ∀ n ≥ Nimp,
+      ∃ improve : Equiv.Perm (A.model n) →
+          Finset (A.model n × A.model n),
+        (∀ a, IsGood (A.model n) (productLabels A n T) h
+              (clusterScale (A.model n)) a →
+          ∀ b, IsGood (A.model n) (productLabels A n T) h
+              (clusterScale (A.model n)) b →
+          (relationErrorBudget (A.model n) (productLabels A n T)
+              (improve (a * b)) (a * b) : ℝ) <
+            h * clusterScale (A.model n) / 2) ∧
+        (∀ a, IsGood (A.model n) (productLabels A n T) h
+              (clusterScale (A.model n)) a →
+          ∀ b, IsGood (A.model n) (productLabels A n T) h
+              (clusterScale (A.model n)) b →
+          (permutationGraph (A.model n) (a * b) \ improve (a * b)).card <
+            clusterScale (A.model n))) :
+    IsLEF J := by
+  apply AlmostAutomorphism.ClusterData.isLEF_of_product_rounding A T hh hexp
+  obtain ⟨Nimp, hNimp⟩ := himprove
+  refine ⟨Nimp, fun n hn ↦ ?_⟩
+  obtain ⟨improve, hbudget, hmissing⟩ := hNimp n hn
+  let round : Equiv.Perm (A.model n) → Equiv.Perm (A.model n) :=
+    fun c ↦ roundRelation (A.model n) (improve c) c
+  refine ⟨round, ?_, ?_⟩
+  · intro a ha b hb
+    exact roundRelation_isGood (A.model n) (productLabels A n T)
+      (clusterScale (A.model n)) (improve (a * b)) (a * b)
+      (hbudget a ha b hb)
+  · intro a ha b hb
+    change hammingDistance (A.model n) (a * b)
+      (roundRelation (A.model n) (improve (a * b)) (a * b)) <
+        clusterRadius (A.model n)
+    apply roundRelation_close (A.model n) (improve (a * b)) (a * b)
+      (clusterScale (A.model n))
+    · have hm := hmissing a ha b hb
+      unfold clusterScale at hm
+      omega
+    · exact hmissing a ha b hb
+
 end KazhdanImprovement
 end NonsoficGroupsExist
