@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.Sofic
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Order
+import Mathlib.Algebra.Group.MinimalAxioms
 
 /-!
 # Almost automorphisms of finite labeled permutation graphs
@@ -185,6 +186,216 @@ theorem agreement_or_disagreement_small
       rw [hboundaries]
       exact_mod_cast hboundary
     linarith
+
+theorem hammingDistance_mul_mul_le (a b c d : Equiv.Perm Y) :
+    hammingDistance Y (a * b) (c * d) ≤
+      hammingDistance Y a c + hammingDistance Y b d := by
+  calc
+    hammingDistance Y (a * b) (c * d) ≤
+        hammingDistance Y (a * b) (c * b) +
+          hammingDistance Y (c * b) (c * d) :=
+      hammingDistance_triangle Y _ _ _
+    _ = hammingDistance Y a c + hammingDistance Y b d := by
+      rw [hammingDistance_right_invariant, hammingDistance_left_invariant]
+
+theorem hammingDistance_inv (a b : Equiv.Perm Y) :
+    hammingDistance Y a⁻¹ b⁻¹ = hammingDistance Y a b := by
+  calc
+    hammingDistance Y a⁻¹ b⁻¹ =
+        hammingDistance Y (a⁻¹ * b) (b⁻¹ * b) := by
+      rw [hammingDistance_right_invariant]
+    _ = hammingDistance Y 1 (a⁻¹ * b) := by
+      rw [inv_mul_cancel, hammingDistance_comm]
+    _ = hammingDistance Y a b := by
+      rw [← hammingDistance_left_invariant Y a⁻¹ a b, inv_mul_cancel]
+
+/-! ### Finite groups of almost-automorphism clusters -/
+
+/-- Abstract finite-stage data produced by the Kun--Thom improvement theorem.
+`candidate` is the finite set of sufficiently good almost automorphisms;
+`round` improves a product back into that set. -/
+structure ClusterData where
+  radius : ℝ
+  radius_pos : 0 < radius
+  candidate : Finset (Equiv.Perm Y)
+  one_mem : 1 ∈ candidate
+  inv_mem : ∀ c ∈ candidate, c⁻¹ ∈ candidate
+  round : Equiv.Perm Y → Equiv.Perm Y
+  round_mem : ∀ p, round p ∈ candidate
+  round_product_close : ∀ a ∈ candidate, ∀ b ∈ candidate,
+    hammingDistance Y (a * b) (round (a * b)) < radius
+  gap : ∀ a ∈ candidate, ∀ b ∈ candidate,
+    hammingDistance Y a b < radius ∨
+      4 * radius ≤ hammingDistance Y a b
+
+namespace ClusterData
+
+variable (D : ClusterData Y)
+
+abbrev Candidate := {p : Equiv.Perm Y // p ∈ D.candidate}
+
+noncomputable instance candidateFintype : Fintype D.Candidate :=
+  Fintype.ofFinset D.candidate fun _ ↦ Iff.rfl
+
+/-- Being in the same small Hamming cluster. -/
+def Near (a b : D.Candidate) : Prop :=
+  hammingDistance Y a.1 b.1 < D.radius
+
+theorem near_refl (a : D.Candidate) : Near Y D a a := by
+  simp [Near, D.radius_pos]
+
+theorem near_symm {a b : D.Candidate} (h : Near Y D a b) : Near Y D b a := by
+  simpa [Near, hammingDistance_comm] using h
+
+theorem near_trans {a b c : D.Candidate}
+    (hab : Near Y D a b) (hbc : Near Y D b c) : Near Y D a c := by
+  have htri := hammingDistance_triangle Y a.1 b.1 c.1
+  have hlt : hammingDistance Y a.1 c.1 < 2 * D.radius := by
+    dsimp [Near] at hab hbc
+    linarith
+  rcases D.gap a.1 a.2 c.1 c.2 with hac | hfar
+  · exact hac
+  · exfalso
+    linarith [D.radius_pos]
+
+def nearSetoid : Setoid D.Candidate where
+  r := Near Y D
+  iseqv := ⟨near_refl Y D, fun {_ _} h ↦ near_symm Y D h,
+    fun {_ _ _} hab hbc ↦ near_trans Y D hab hbc⟩
+
+/-- The finite quotient of good almost automorphisms by small Hamming
+distance. -/
+abbrev Cluster := Quotient D.nearSetoid
+
+private def roundedMul (a b : D.Candidate) : D.Candidate :=
+  ⟨D.round (a.1 * b.1), D.round_mem _⟩
+
+private theorem roundedMul_congr {a a' b b' : D.Candidate}
+    (ha : Near Y D a a') (hb : Near Y D b b') :
+    Near Y D (roundedMul Y D a b) (roundedMul Y D a' b') := by
+  have hra := D.round_product_close a.1 a.2 b.1 b.2
+  have hrb := D.round_product_close a'.1 a'.2 b'.1 b'.2
+  have hmul := hammingDistance_mul_mul_le Y a.1 b.1 a'.1 b'.1
+  have htri₁ := hammingDistance_triangle Y
+    (D.round (a.1 * b.1)) (a.1 * b.1) (a'.1 * b'.1)
+  have htri₂ := hammingDistance_triangle Y
+    (D.round (a.1 * b.1)) (a'.1 * b'.1) (D.round (a'.1 * b'.1))
+  have hclose₁ : hammingDistance Y (D.round (a.1 * b.1)) (a.1 * b.1) <
+      D.radius := by simpa [hammingDistance_comm] using hra
+  have hlt : hammingDistance Y (D.round (a.1 * b.1))
+      (D.round (a'.1 * b'.1)) < 4 * D.radius := by
+    dsimp [Near] at ha hb
+    linarith
+  rcases D.gap _ (D.round_mem _) _ (D.round_mem _) with hnear | hfar
+  · exact hnear
+  · exfalso
+    linarith
+
+private theorem inv_congr {a b : D.Candidate} (h : Near Y D a b) :
+    Near Y D (⟨a.1⁻¹, D.inv_mem a.1 a.2⟩ : D.Candidate)
+      ⟨b.1⁻¹, D.inv_mem b.1 b.2⟩ := by
+  simpa [Near, hammingDistance_inv] using h
+
+noncomputable instance : One D.Cluster :=
+  ⟨Quotient.mk D.nearSetoid ⟨1, D.one_mem⟩⟩
+
+noncomputable instance : Mul D.Cluster :=
+  ⟨Quotient.map₂ (roundedMul Y D) fun _ _ ha _ _ hb ↦
+    roundedMul_congr Y D ha hb⟩
+
+noncomputable instance : Inv D.Cluster :=
+  ⟨Quotient.map
+    (fun a : D.Candidate ↦ ⟨a.1⁻¹, D.inv_mem a.1 a.2⟩)
+    (fun _ _ h ↦ inv_congr Y D h)⟩
+
+@[simp] theorem mk_mul_mk (a b : D.Candidate) :
+    (Quotient.mk D.nearSetoid a : D.Cluster) * Quotient.mk D.nearSetoid b =
+      Quotient.mk D.nearSetoid (roundedMul Y D a b) := rfl
+
+@[simp] theorem mk_inv (a : D.Candidate) :
+    (Quotient.mk D.nearSetoid a : D.Cluster)⁻¹ =
+      Quotient.mk D.nearSetoid
+        (⟨a.1⁻¹, D.inv_mem a.1 a.2⟩ : D.Candidate) := rfl
+
+private theorem roundedMul_one_left (a : D.Candidate) :
+    Near Y D (roundedMul Y D ⟨1, D.one_mem⟩ a) a := by
+  have h := D.round_product_close (1 : Equiv.Perm Y) D.one_mem a.1 a.2
+  simpa [roundedMul, Near, hammingDistance_comm] using h
+
+private theorem roundedMul_inv_left (a : D.Candidate) :
+    Near Y D (roundedMul Y D
+      (⟨a.1⁻¹, D.inv_mem a.1 a.2⟩ : D.Candidate) a) ⟨1, D.one_mem⟩ := by
+  have h := D.round_product_close a.1⁻¹ (D.inv_mem a.1 a.2) a.1 a.2
+  simpa [roundedMul, Near, hammingDistance_comm] using h
+
+private theorem roundedMul_assoc (a b c : D.Candidate) :
+    Near Y D (roundedMul Y D (roundedMul Y D a b) c)
+      (roundedMul Y D a (roundedMul Y D b c)) := by
+  have hab := D.round_product_close a.1 a.2 b.1 b.2
+  have hbc := D.round_product_close b.1 b.2 c.1 c.2
+  have hl := D.round_product_close
+    (D.round (a.1 * b.1)) (D.round_mem _) c.1 c.2
+  have hr := D.round_product_close
+    a.1 a.2 (D.round (b.1 * c.1)) (D.round_mem _)
+  let abc : Equiv.Perm Y := a.1 * b.1 * c.1
+  have hleftInner : hammingDistance Y
+      (D.round (a.1 * b.1) * c.1) abc < D.radius := by
+    rw [hammingDistance_right_invariant]
+    simpa [hammingDistance_comm] using hab
+  have hrightInner : hammingDistance Y
+      (a.1 * D.round (b.1 * c.1)) abc < D.radius := by
+    simpa [abc, mul_assoc, hammingDistance_left_invariant,
+      hammingDistance_comm] using hbc
+  have hleft : hammingDistance Y
+      (D.round (D.round (a.1 * b.1) * c.1)) abc < 2 * D.radius := by
+    have ht := hammingDistance_triangle Y
+      (D.round (D.round (a.1 * b.1) * c.1))
+      (D.round (a.1 * b.1) * c.1) abc
+    have hl' : hammingDistance Y
+        (D.round (D.round (a.1 * b.1) * c.1))
+        (D.round (a.1 * b.1) * c.1) < D.radius := by
+      simpa [hammingDistance_comm] using hl
+    linarith
+  have hright : hammingDistance Y abc
+      (D.round (a.1 * D.round (b.1 * c.1))) < 2 * D.radius := by
+    have ht := hammingDistance_triangle Y abc
+      (a.1 * D.round (b.1 * c.1))
+      (D.round (a.1 * D.round (b.1 * c.1)))
+    have hrightInner' : hammingDistance Y abc
+        (a.1 * D.round (b.1 * c.1)) < D.radius := by
+      simpa [hammingDistance_comm] using hrightInner
+    linarith
+  have htotal := hammingDistance_triangle Y
+    (D.round (D.round (a.1 * b.1) * c.1)) abc
+    (D.round (a.1 * D.round (b.1 * c.1)))
+  have hlt : hammingDistance Y
+      (D.round (D.round (a.1 * b.1) * c.1))
+      (D.round (a.1 * D.round (b.1 * c.1))) < 4 * D.radius := by
+    linarith
+  rcases D.gap _ (D.round_mem _) _ (D.round_mem _) with hnear | hfar
+  · exact hnear
+  · exfalso
+    change 4 * D.radius ≤ hammingDistance Y
+      (D.round (D.round (a.1 * b.1) * c.1))
+      (D.round (a.1 * D.round (b.1 * c.1))) at hfar
+    linarith
+
+noncomputable instance : Group D.Cluster := Group.ofLeftAxioms
+  (fun x y z ↦ by
+    induction x using Quotient.inductionOn with
+    | _ a =>
+      induction y using Quotient.inductionOn with
+      | _ b =>
+        induction z using Quotient.inductionOn with
+        | _ c => exact Quotient.sound (roundedMul_assoc Y D a b c))
+  (fun x ↦ by
+    induction x using Quotient.inductionOn with
+    | _ a => exact Quotient.sound (roundedMul_one_left Y D a))
+  (fun x ↦ by
+    induction x using Quotient.inductionOn with
+    | _ a => exact Quotient.sound (roundedMul_inv_left Y D a))
+
+end ClusterData
 
 end AlmostAutomorphism
 end NonsoficGroupsExist
