@@ -5,6 +5,7 @@ import Mathlib.Tactic.Order
 import Mathlib.Algebra.Group.MinimalAxioms
 import Mathlib.Algebra.Group.End
 import Mathlib.Data.Fintype.EquivFin
+import Mathlib.Data.Fintype.Perm
 
 /-!
 # Almost automorphisms of finite labeled permutation graphs
@@ -261,12 +262,78 @@ structure ClusterData where
   one_mem : 1 ∈ candidate
   inv_mem : ∀ c ∈ candidate, c⁻¹ ∈ candidate
   round : Equiv.Perm Y → Equiv.Perm Y
-  round_mem : ∀ p, round p ∈ candidate
+  round_product_mem : ∀ a ∈ candidate, ∀ b ∈ candidate,
+    round (a * b) ∈ candidate
   round_product_close : ∀ a ∈ candidate, ∀ b ∈ candidate,
     hammingDistance Y (a * b) (round (a * b)) < radius
   gap : ∀ a ∈ candidate, ∀ b ∈ candidate,
     hammingDistance Y a b < radius ∨
       4 * radius ≤ hammingDistance Y a b
+
+/-- The symmetric defect condition used for cluster representatives.  The
+inverse clause makes inverse closure literal without assuming that the chosen
+label set is symmetric at this finite stage. -/
+def IsGood (S : Finset (Equiv.Perm Y)) (h : ℝ) (m : ℕ)
+    (c : Equiv.Perm Y) : Prop :=
+  ((badArcs Y S c).card : ℝ) < h * m / 2 ∧
+    ((badArcs Y S c⁻¹).card : ℝ) < h * m / 2
+
+noncomputable def goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
+    (m : ℕ) : Finset (Equiv.Perm Y) := by
+  classical
+  exact Finset.univ.filter (IsGood Y S h m)
+
+@[simp] theorem mem_goodCandidates (S : Finset (Equiv.Perm Y)) (h : ℝ)
+    (m : ℕ) (c : Equiv.Perm Y) :
+    c ∈ goodCandidates Y S h m ↔ IsGood Y S h m c := by
+  simp [goodCandidates]
+
+/-- Construct the finite cluster group data from a genuine rounding operation.
+The two rounding assumptions mention only products of good permutations, which
+is the exact scope supplied by the Kun--Thom improvement argument. -/
+noncomputable def clusterData_of_rounding
+    (S : Finset (Equiv.Perm Y)) {h : ℝ}
+    (hexp : HasDirectedExpansion Y S h) (m : ℕ) (hm : 0 < m)
+    (hsize : 5 * m ≤ Fintype.card Y)
+    (round : Equiv.Perm Y → Equiv.Perm Y)
+    (hroundGood : ∀ a, IsGood Y S h m a → ∀ b, IsGood Y S h m b →
+      IsGood Y S h m (round (a * b)))
+    (hroundClose : ∀ a, IsGood Y S h m a → ∀ b, IsGood Y S h m b →
+      hammingDistance Y (a * b) (round (a * b)) <
+        (m : ℝ) / Fintype.card Y) : ClusterData Y where
+  radius := (m : ℝ) / Fintype.card Y
+  radius_pos := by
+    have hmReal : (0 : ℝ) < m := by exact_mod_cast hm
+    have hcard : (0 : ℝ) < Fintype.card Y := by
+      exact_mod_cast (show 0 < Fintype.card Y by omega)
+    exact div_pos hmReal hcard
+  candidate := goodCandidates Y S h m
+  one_mem := by
+    rw [mem_goodCandidates]
+    have hthreshold : 0 < h * (m : ℝ) / 2 := by
+      have hmReal : (0 : ℝ) < m := by exact_mod_cast hm
+      exact div_pos (mul_pos hexp.1 hmReal) (by norm_num)
+    constructor <;> simpa [IsGood, badArcs] using hthreshold
+  inv_mem := by
+    intro c hc
+    rw [mem_goodCandidates] at hc ⊢
+    simpa [IsGood] using hc.symm
+  round := round
+  round_product_mem := by
+    intro a ha b hb
+    rw [mem_goodCandidates] at ha hb ⊢
+    exact hroundGood a ha b hb
+  round_product_close := by
+    intro a ha b hb
+    rw [mem_goodCandidates] at ha hb
+    exact hroundClose a ha b hb
+  gap := by
+    intro a ha b hb
+    rw [mem_goodCandidates] at ha hb
+    apply hammingDistance_small_or_four_mul_le Y S hexp a b m hm hsize
+    dsimp [IsGood] at ha hb
+    norm_num [Nat.cast_add]
+    linarith [ha.1, hb.1]
 
 namespace ClusterData
 
@@ -308,7 +375,7 @@ distance. -/
 abbrev Cluster := Quotient D.nearSetoid
 
 private def roundedMul (a b : D.Candidate) : D.Candidate :=
-  ⟨D.round (a.1 * b.1), D.round_mem _⟩
+  ⟨D.round (a.1 * b.1), D.round_product_mem a.1 a.2 b.1 b.2⟩
 
 private theorem roundedMul_congr {a a' b b' : D.Candidate}
     (ha : Near Y D a a') (hb : Near Y D b b') :
@@ -326,7 +393,8 @@ private theorem roundedMul_congr {a a' b b' : D.Candidate}
       (D.round (a'.1 * b'.1)) < 4 * D.radius := by
     dsimp [Near] at ha hb
     linarith
-  rcases D.gap _ (D.round_mem _) _ (D.round_mem _) with hnear | hfar
+  rcases D.gap _ (D.round_product_mem a.1 a.2 b.1 b.2)
+      _ (D.round_product_mem a'.1 a'.2 b'.1 b'.2) with hnear | hfar
   · exact hnear
   · exfalso
     linarith
@@ -374,9 +442,10 @@ private theorem roundedMul_assoc (a b c : D.Candidate) :
   have hab := D.round_product_close a.1 a.2 b.1 b.2
   have hbc := D.round_product_close b.1 b.2 c.1 c.2
   have hl := D.round_product_close
-    (D.round (a.1 * b.1)) (D.round_mem _) c.1 c.2
+    (D.round (a.1 * b.1)) (D.round_product_mem a.1 a.2 b.1 b.2) c.1 c.2
   have hr := D.round_product_close
-    a.1 a.2 (D.round (b.1 * c.1)) (D.round_mem _)
+    a.1 a.2 (D.round (b.1 * c.1))
+      (D.round_product_mem b.1 b.2 c.1 c.2)
   let abc : Equiv.Perm Y := a.1 * b.1 * c.1
   have hleftInner : hammingDistance Y
       (D.round (a.1 * b.1) * c.1) abc < D.radius := by
@@ -412,7 +481,11 @@ private theorem roundedMul_assoc (a b c : D.Candidate) :
       (D.round (D.round (a.1 * b.1) * c.1))
       (D.round (a.1 * D.round (b.1 * c.1))) < 4 * D.radius := by
     linarith
-  rcases D.gap _ (D.round_mem _) _ (D.round_mem _) with hnear | hfar
+  rcases D.gap _
+      (D.round_product_mem (D.round (a.1 * b.1))
+        (D.round_product_mem a.1 a.2 b.1 b.2) c.1 c.2)
+      _ (D.round_product_mem a.1 a.2 (D.round (b.1 * c.1))
+        (D.round_product_mem b.1 b.2 c.1 c.2)) with hnear | hfar
   · exact hnear
   · exfalso
     change 4 * D.radius ≤ hammingDistance Y
