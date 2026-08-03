@@ -14,6 +14,7 @@ namespace NonsoficGroupsExist
 namespace KazhdanImprovement
 
 open AlmostAutomorphism
+open AlmostAutomorphism.ClusterData
 
 variable (Y : FiniteModel)
 
@@ -430,6 +431,216 @@ theorem relationL1Distance_indicator
     exact hp.2 hq.1
   rw [Finset.card_union_of_disjoint hdisjoint]
   norm_num
+
+/-! ### Small-defect cluster candidates
+
+The expansion constant controls separation of clusters, whereas the defect
+parameter controls which almost automorphisms are admitted.  These parameters
+must be independent: Kun's improvement theorem starts with a sufficiently
+small defect depending on its constants, not with the largest defect for which
+the separation lemma happens to hold. -/
+
+/-- A permutation and its inverse each fail to preserve fewer than an
+`ε`-fraction of the labeled arcs. -/
+def IsEpsilonGood (S : Finset (Equiv.Perm Y)) (ε : ℝ)
+    (c : Equiv.Perm Y) : Prop :=
+  ((badArcs Y S c).card : ℝ) < ε * Fintype.card Y ∧
+    ((badArcs Y S c⁻¹).card : ℝ) < ε * Fintype.card Y
+
+noncomputable def epsilonGoodCandidates
+    (S : Finset (Equiv.Perm Y)) (ε : ℝ) : Finset (Equiv.Perm Y) := by
+  classical
+  exact Finset.univ.filter (IsEpsilonGood Y S ε)
+
+@[simp] theorem mem_epsilonGoodCandidates
+    (S : Finset (Equiv.Perm Y)) (ε : ℝ) (c : Equiv.Perm Y) :
+    c ∈ epsilonGoodCandidates Y S ε ↔ IsEpsilonGood Y S ε c := by
+  simp [epsilonGoodCandidates]
+
+/-- Cluster data with a defect budget independent of the expansion scale. -/
+noncomputable def clusterData_of_epsilonRounding
+    (S : Finset (Equiv.Perm Y)) {h ε : ℝ}
+    (m : ℕ) (hm : 0 < m)
+    (hsize : 5 * m ≤ Fintype.card Y)
+    (hexp : HasDirectedExpansionAtScale Y S h m)
+    (hε : 0 < ε)
+    (hseparation : 2 * ε * Fintype.card Y < h * m)
+    (round : Equiv.Perm Y → Equiv.Perm Y)
+    (hroundGood : ∀ a, IsEpsilonGood Y S ε a →
+      ∀ b, IsEpsilonGood Y S ε b →
+        IsEpsilonGood Y S ε (round (a * b)))
+    (hroundClose : ∀ a, IsEpsilonGood Y S ε a →
+      ∀ b, IsEpsilonGood Y S ε b →
+        hammingDistance Y (a * b) (round (a * b)) <
+          (m : ℝ) / Fintype.card Y) : ClusterData Y where
+  radius := (m : ℝ) / Fintype.card Y
+  radius_pos := by
+    have hmReal : (0 : ℝ) < m := by exact_mod_cast hm
+    have hcard : (0 : ℝ) < Fintype.card Y := by
+      exact_mod_cast (show 0 < Fintype.card Y by omega)
+    exact div_pos hmReal hcard
+  candidate := epsilonGoodCandidates Y S ε
+  one_mem := by
+    rw [mem_epsilonGoodCandidates]
+    have hcard : (0 : ℝ) < Fintype.card Y := by
+      exact_mod_cast (show 0 < Fintype.card Y by omega)
+    have hthreshold : 0 < ε * Fintype.card Y := mul_pos hε hcard
+    constructor <;> simpa [IsEpsilonGood, badArcs] using hthreshold
+  inv_mem := by
+    intro c hc
+    rw [mem_epsilonGoodCandidates] at hc ⊢
+    simpa [IsEpsilonGood] using hc.symm
+  round := round
+  round_product_mem := by
+    intro a ha b hb
+    rw [mem_epsilonGoodCandidates] at ha hb ⊢
+    exact hroundGood a ha b hb
+  round_product_close := by
+    intro a ha b hb
+    rw [mem_epsilonGoodCandidates] at ha hb
+    exact hroundClose a ha b hb
+  gap := by
+    intro a ha b hb
+    rw [mem_epsilonGoodCandidates] at ha hb
+    apply hammingDistance_small_or_four_mul_le Y S a b m hm hsize hexp
+    have hsum :
+        (((badArcs Y S a).card + (badArcs Y S b).card : ℕ) : ℝ) <
+          2 * ε * Fintype.card Y := by
+      norm_num [Nat.cast_add]
+      linarith [ha.1, hb.1]
+    exact hsum.trans hseparation
+
+variable {K J : Type} [Group K] [Group J]
+
+theorem productMap_isEpsilonGood_eventually
+    (A : SoficApproximation (K × J)) (T : Finset K)
+    {ε : ℝ} (hε : 0 < ε) (j : J) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      IsEpsilonGood (A.model n) (productLabels A n T) ε
+        (A.map n (1, j)) := by
+  have hdefect := badArcs_productLabels_negligible A T j
+  obtain ⟨Ndefect, hNdefect⟩ := hdefect ε hε
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Ndefect Ncard, fun n hn ↦ ?_⟩
+  have hnd : Ndefect ≤ n := (le_max_left _ _).trans hn
+  have hnc : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcardNat : 0 < Fintype.card (A.model n) := by
+    have := hNcard n hnc
+    omega
+  have hcardReal : (0 : ℝ) < Fintype.card (A.model n) := by
+    exact_mod_cast hcardNat
+  have hratio := hNdefect n hnd
+  rw [abs_of_nonneg (div_nonneg (by positivity) hcardReal.le)] at hratio
+  rw [div_lt_iff₀ hcardReal] at hratio
+  refine ⟨hratio, ?_⟩
+  rw [card_badArcs_inv]
+  exact hratio
+
+theorem productMap_isEpsilonGood_on_finset_eventually
+    (A : SoficApproximation (K × J)) (T : Finset K)
+    {ε : ℝ} (hε : 0 < ε) (F : Finset J) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ j ∈ F,
+      IsEpsilonGood (A.model n) (productLabels A n T) ε
+        (A.map n (1, j)) := by
+  exact eventually_finset F
+    (fun j n ↦ IsEpsilonGood (A.model n) (productLabels A n T) ε
+      (A.map n (1, j)))
+    (fun j _ ↦ productMap_isEpsilonGood_eventually A T hε j)
+
+/-- Kun--Thom's finite cluster argument with the mathematically necessary
+small defect parameter separated from the expansion constant. -/
+theorem isLEF_of_product_epsilonRounding
+    (A : SoficApproximation (K × J)) (T : Finset K)
+    {h ε : ℝ} (hε : 0 < ε) (hsmall : 20 * ε < h)
+    (hexp : ∃ Nexp, ∀ n ≥ Nexp,
+      HasDirectedExpansionAtScale (A.model n) (productLabels A n T) h
+        (clusterScale (A.model n)))
+    (hround : ∃ Nround, ∀ n ≥ Nround,
+      ∃ round : Equiv.Perm (A.model n) → Equiv.Perm (A.model n),
+        (∀ a, IsEpsilonGood (A.model n) (productLabels A n T) ε a →
+          ∀ b, IsEpsilonGood (A.model n) (productLabels A n T) ε b →
+          IsEpsilonGood (A.model n) (productLabels A n T) ε
+            (round (a * b))) ∧
+        (∀ a, IsEpsilonGood (A.model n) (productLabels A n T) ε a →
+          ∀ b, IsEpsilonGood (A.model n) (productLabels A n T) ε b →
+          hammingDistance (A.model n) (a * b) (round (a * b)) <
+            clusterRadius (A.model n))) : IsLEF J := by
+  intro s
+  obtain ⟨Nexp, hNexp⟩ := hexp
+  obtain ⟨Nround, hNround⟩ := hround
+  obtain ⟨Ngood, hNgood⟩ :=
+    productMap_isEpsilonGood_on_finset_eventually A T hε (finiteControl s)
+  obtain ⟨Nmul, hNmul⟩ :=
+    productMap_mul_close_on_finset_eventually A s
+      (show (0 : ℝ) < 1 / 10 by norm_num)
+  obtain ⟨Nsep, hNsep⟩ := productMap_separated_on_finset_eventually A s
+  obtain ⟨None, hNone⟩ := A.map_one_close (1 / 10) (by norm_num)
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 10
+  let n := max Nexp
+    (max Nround (max Ngood (max Nmul (max Nsep (max None Ncard)))))
+  have hnexp : Nexp ≤ n := by dsimp [n]; omega
+  have hnround : Nround ≤ n := by dsimp [n]; omega
+  have hngood : Ngood ≤ n := by dsimp [n]; omega
+  have hnmul : Nmul ≤ n := by dsimp [n]; omega
+  have hnsep : Nsep ≤ n := by dsimp [n]; omega
+  have hnone : None ≤ n := by dsimp [n]; omega
+  have hncard : Ncard ≤ n := by dsimp [n]; omega
+  have hcard : 10 ≤ Fintype.card (A.model n) := hNcard n hncard
+  have hm : 0 < clusterScale (A.model n) :=
+    clusterScale_pos _ (by omega)
+  have hfive := five_mul_clusterScale_le (A.model n)
+  have hexpn := hNexp n hnexp
+  obtain ⟨round, hroundGood, hroundClose⟩ := hNround n hnround
+  have hcardScale : Fintype.card (A.model n) ≤
+      10 * clusterScale (A.model n) := by
+    unfold clusterScale
+    omega
+  have hcardScaleReal : (Fintype.card (A.model n) : ℝ) ≤
+      10 * clusterScale (A.model n) := by exact_mod_cast hcardScale
+  have hmReal : (0 : ℝ) < clusterScale (A.model n) := by exact_mod_cast hm
+  have hseparation :
+      2 * ε * Fintype.card (A.model n) <
+        h * clusterScale (A.model n) := by
+    have hle : 2 * ε * Fintype.card (A.model n) ≤
+        20 * ε * clusterScale (A.model n) := by
+      nlinarith [hcardScaleReal]
+    have hlt : 20 * ε * clusterScale (A.model n) <
+        h * clusterScale (A.model n) := by
+      exact mul_lt_mul_of_pos_right hsmall hmReal
+    exact hle.trans_lt hlt
+  let D : ClusterData (A.model n) := clusterData_of_epsilonRounding
+    (A.model n) (productLabels A n T) (clusterScale (A.model n)) hm hfive
+      hexpn hε hseparation round hroundGood hroundClose
+  have hradius : D.radius = clusterRadius (A.model n) := rfl
+  have hradiusLower : (1 : ℝ) / 10 ≤ D.radius := by
+    rw [hradius]
+    exact one_tenth_le_clusterRadius _ hcard
+  have hradiusUpper : D.radius ≤ (1 : ℝ) / 5 := by
+    rw [hradius]
+    exact clusterRadius_le_one_fifth _ (by omega)
+  apply localEmbedding_of_finite_stage (A.model n) D s
+    (fun j ↦ A.map n (1, j))
+  · dsimp [D, clusterData_of_epsilonRounding]
+    rw [mem_epsilonGoodCandidates]
+    simpa using hNgood n hngood 1 (one_mem_finiteControl s)
+  · intro x hx
+    dsimp [D, clusterData_of_epsilonRounding]
+    rw [mem_epsilonGoodCandidates]
+    exact hNgood n hngood x (mem_finiteControl hx)
+  · intro x hx y hy
+    dsimp [D, clusterData_of_epsilonRounding]
+    rw [mem_epsilonGoodCandidates]
+    exact hNgood n hngood (x * y) (mul_mem_finiteControl hx hy)
+  · have hone : hammingDistance (A.model n) (A.map n (1, 1)) 1 < 1 / 10 := by
+      change hammingDistance (A.model n) (A.map n (1 : K × J)) 1 < 1 / 10
+      exact hNone n hnone
+    linarith
+  · intro x hx y hy
+    have hmul := hNmul n hnmul x hx y hy
+    linarith
+  · intro x hx y hy hxy
+    have hsep := hNsep n hnsep x hx y hy hxy
+    linarith
 
 /-- Bad arcs whose graph point and its diagonal translate lie on opposite
 sides of the relation. -/
