@@ -35,6 +35,38 @@ namespace IsKazhdanPair
 
 variable {G : Type u} [Group G] {Q R : Finset G} {ε : ℝ}
 
+/-- The quantitative uniform-convexity estimate used to turn Kazhdan
+displacement into contraction of a finite orbit average. -/
+theorem norm_add_le_of_norm_sub_ge
+    {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {x y : E} {a : ℝ} (ha0 : 0 ≤ a) (ha1 : a ≤ 1)
+    (hnorm : ‖y‖ = ‖x‖) (hmove : a * ‖x‖ ≤ ‖y - x‖) :
+    ‖x + y‖ ≤ (2 - a ^ 2 / 4) * ‖x‖ := by
+  have hpara := parallelogram_law_with_norm ℝ x y
+  have hx0 : 0 ≤ ‖x‖ := norm_nonneg x
+  have hsum0 : 0 ≤ ‖x + y‖ := norm_nonneg _
+  have hcoef : 0 ≤ 2 - a ^ 2 / 4 := by nlinarith
+  have hamul : 0 ≤ a * ‖x‖ := mul_nonneg ha0 hx0
+  have hmoveSq : (a * ‖x‖) ^ 2 ≤ ‖y - x‖ ^ 2 := by
+    exact (sq_le_sq₀ hamul (norm_nonneg _)).2 hmove
+  have hsub : ‖y - x‖ = ‖x - y‖ := by
+    rw [show y - x = -(x - y) by abel, norm_neg]
+  rw [hnorm] at hpara
+  rw [hsub] at hmoveSq
+  have hfirst : ‖x + y‖ ^ 2 ≤ (4 - a ^ 2) * ‖x‖ ^ 2 := by
+    nlinarith
+  have hcoefsquare : 4 - a ^ 2 ≤ (2 - a ^ 2 / 4) ^ 2 := by
+    nlinarith [sq_nonneg (a ^ 2)]
+  have hsquare : ‖x + y‖ ^ 2 ≤
+      ((2 - a ^ 2 / 4) * ‖x‖) ^ 2 := by
+    calc
+      ‖x + y‖ ^ 2 ≤ (4 - a ^ 2) * ‖x‖ ^ 2 := hfirst
+      _ ≤ (2 - a ^ 2 / 4) ^ 2 * ‖x‖ ^ 2 :=
+        mul_le_mul_of_nonneg_right hcoefsquare (sq_nonneg _)
+      _ = ((2 - a ^ 2 / 4) * ‖x‖) ^ 2 := by ring
+  have hright0 : 0 ≤ (2 - a ^ 2 / 4) * ‖x‖ := mul_nonneg hcoef hx0
+  exact (sq_le_sq₀ hsum0 hright0).mp hsquare
+
 /-- Enlarging the finite control set preserves a Kazhdan pair. -/
 theorem mono (hQ : IsKazhdanPair.{u, v} G Q ε) (hQR : Q ⊆ R) :
     IsKazhdanPair.{u, v} G R ε := by
