@@ -887,6 +887,175 @@ theorem card_badColumns_le_edits
     _ ≤ (permutationGraph Y c \ U).card +
         (U \ permutationGraph Y c).card := Finset.card_union_le _ _
 
+/-- Points lying in a singleton row and a singleton column form the graph of
+a partial bijection. -/
+def relationCore (U : Finset (Y × Y)) : Finset (Y × Y) :=
+  U.filter fun p ↦ rowDegree Y U p.1 = 1 ∧ columnDegree Y U p.2 = 1
+
+@[simp] theorem mem_relationCore (U : Finset (Y × Y)) (p : Y × Y) :
+    p ∈ relationCore Y U ↔ p ∈ U ∧
+      rowDegree Y U p.1 = 1 ∧ columnDegree Y U p.2 = 1 := by
+  simp [relationCore]
+
+theorem relationCore_right_unique
+    (U : Finset (Y × Y)) {x y z : Y}
+    (hy : (x, y) ∈ relationCore Y U) (hz : (x, z) ∈ relationCore Y U) :
+    y = z := by
+  have hydata := (mem_relationCore Y U (x, y)).1 hy
+  have hzdata := (mem_relationCore Y U (x, z)).1 hz
+  have hyfiber := (mem_rowFiber Y U x y).2 hydata.1
+  have hzfiber := (mem_rowFiber Y U x z).2 hzdata.1
+  have heq : (rowFiber Y U x).card = 1 := hydata.2.1
+  have hcard : (rowFiber Y U x).card ≤ 1 := heq.le
+  exact Finset.card_le_one.mp hcard y hyfiber z hzfiber
+
+theorem relationCore_left_unique
+    (U : Finset (Y × Y)) {x y z : Y}
+    (hx : (x, z) ∈ relationCore Y U) (hy : (y, z) ∈ relationCore Y U) :
+    x = y := by
+  have hxdata := (mem_relationCore Y U (x, z)).1 hx
+  have hydata := (mem_relationCore Y U (y, z)).1 hy
+  have hxfiber := (mem_columnFiber Y U x z).2 hxdata.1
+  have hyfiber := (mem_columnFiber Y U y z).2 hydata.1
+  have heq : (columnFiber Y U z).card = 1 := hxdata.2.2
+  have hcard : (columnFiber Y U z).card ≤ 1 := heq.le
+  exact Finset.card_le_one.mp hcard x hxfiber y hyfiber
+
+def coreSources (U : Finset (Y × Y)) : Finset Y :=
+  (relationCore Y U).image Prod.fst
+
+theorem exists_core_target (U : Finset (Y × Y))
+    (x : {x // x ∈ coreSources Y U}) :
+    ∃ y : Y, (x.1, y) ∈ relationCore Y U := by
+  have hx := x.2
+  simp only [coreSources, Finset.mem_image] at hx
+  obtain ⟨p, hp, hpx⟩ := hx
+  refine ⟨p.2, ?_⟩
+  convert hp using 1
+  exact Prod.ext hpx.symm rfl
+
+noncomputable def coreTarget (U : Finset (Y × Y))
+    (x : {x // x ∈ coreSources Y U}) : Y :=
+  Classical.choose (exists_core_target Y U x)
+
+theorem coreTarget_mem (U : Finset (Y × Y))
+    (x : {x // x ∈ coreSources Y U}) :
+    (x.1, coreTarget Y U x) ∈ relationCore Y U :=
+  Classical.choose_spec (exists_core_target Y U x)
+
+theorem coreTarget_injective (U : Finset (Y × Y)) :
+    Function.Injective (coreTarget Y U) := by
+  intro x y hxy
+  apply Subtype.ext
+  exact relationCore_left_unique Y U (coreTarget_mem Y U x)
+    (hxy ▸ coreTarget_mem Y U y)
+
+/-- The partial bijection carried by the singleton-fiber core extends to a
+permutation of the whole finite model. -/
+theorem exists_permutation_agreeing_on_core (U : Finset (Y × Y)) :
+    ∃ c : Equiv.Perm Y, ∀ p ∈ relationCore Y U, c p.1 = p.2 := by
+  let A := {x // x ∈ coreSources Y U}
+  let inclusion : A → Y := fun x ↦ x.1
+  let target : A → Y := fun x ↦ coreTarget Y U x
+  have hinclusion : Function.Injective inclusion := fun _ _ h ↦ Subtype.ext h
+  have htarget : Function.Injective target := coreTarget_injective Y U
+  obtain ⟨c, hc⟩ :=
+    Equiv.Perm.exists_extending_pair inclusion target hinclusion htarget
+  refine ⟨c, fun p hp ↦ ?_⟩
+  have hsource : p.1 ∈ coreSources Y U := by
+    rw [coreSources, Finset.mem_image]
+    exact ⟨p, hp, rfl⟩
+  let x : A := ⟨p.1, hsource⟩
+  have hcx := hc x
+  have htargetCore := coreTarget_mem Y U x
+  have hunique := relationCore_right_unique Y U htargetCore hp
+  exact hcx.trans hunique
+
+noncomputable def repairRelation (U : Finset (Y × Y)) : Equiv.Perm Y :=
+  Classical.choose (exists_permutation_agreeing_on_core Y U)
+
+theorem repairRelation_eq_of_mem_core (U : Finset (Y × Y))
+    (p : Y × Y) (hp : p ∈ relationCore Y U) :
+    repairRelation Y U p.1 = p.2 :=
+  Classical.choose_spec (exists_permutation_agreeing_on_core Y U) p hp
+
+theorem core_subset_permutationGraph_repairRelation (U : Finset (Y × Y)) :
+    relationCore Y U ⊆ permutationGraph Y (repairRelation Y U) := by
+  intro p hp
+  rw [mem_permutationGraph]
+  exact (repairRelation_eq_of_mem_core Y U p hp).symm
+
+/-- Sources whose original targets lie in a non-singleton column. -/
+def badTargetSources (U : Finset (Y × Y))
+    (c : Equiv.Perm Y) : Finset Y :=
+  (badColumns Y U).map c.symm.toEmbedding
+
+@[simp] theorem mem_badTargetSources (U : Finset (Y × Y))
+    (c : Equiv.Perm Y) (x : Y) :
+    x ∈ badTargetSources Y U c ↔ c x ∈ badColumns Y U := by
+  constructor
+  · intro hx
+    rw [badTargetSources, Finset.mem_map] at hx
+    obtain ⟨y, hy, hxy⟩ := hx
+    have hyx : y = c x := by
+      simpa using congrArg c hxy
+    simpa [hyx] using hy
+  · intro hx
+    rw [badTargetSources, Finset.mem_map]
+    exact ⟨c x, hx, by simp⟩
+
+@[simp] theorem card_badTargetSources (U : Finset (Y × Y))
+    (c : Equiv.Perm Y) :
+    (badTargetSources Y U c).card = (badColumns Y U).card := by
+  simp [badTargetSources]
+
+theorem repairRelation_disagreement_subset
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    disagreement Y (repairRelation Y U) c ⊆
+      missingSources Y U c ∪
+        (badRows Y U ∪ badTargetSources Y U c) := by
+  intro x hx
+  have hne := (mem_disagreement Y (repairRelation Y U) c x).1 hx
+  by_cases hgraph : (x, c x) ∈ U
+  · by_cases hrow : rowDegree Y U x = 1
+    · by_cases hcol : columnDegree Y U (c x) = 1
+      · exfalso
+        apply hne
+        exact repairRelation_eq_of_mem_core Y U (x, c x)
+          ((mem_relationCore Y U (x, c x)).2 ⟨hgraph, hrow, hcol⟩)
+      · exact Finset.mem_union_right _ <| Finset.mem_union_right _ <|
+          (mem_badTargetSources Y U c x).2 ((mem_badColumns Y U (c x)).2 hcol)
+    · exact Finset.mem_union_right _ <| Finset.mem_union_left _ <|
+        (mem_badRows Y U x).2 hrow
+  · exact Finset.mem_union_left _ <| (mem_missingSources Y U c x).2 hgraph
+
+theorem card_repairRelation_disagreement_le
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (disagreement Y (repairRelation Y U) c).card ≤
+      (permutationGraph Y c \ U).card +
+        2 * ((permutationGraph Y c \ U).card +
+          (U \ permutationGraph Y c).card) := by
+  have hcover := Finset.card_le_card (repairRelation_disagreement_subset Y U c)
+  have hunion₁ := Finset.card_union_le (missingSources Y U c)
+    (badRows Y U ∪ badTargetSources Y U c)
+  have hunion₂ := Finset.card_union_le (badRows Y U) (badTargetSources Y U c)
+  have hmissing := card_missingSources Y U c
+  have hrows := card_badRows_le_edits Y U c
+  have hcolumns := card_badColumns_le_edits Y U c
+  rw [card_badTargetSources] at hunion₂
+  omega
+
+theorem hammingDistance_repairRelation_le
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    hammingDistance Y (repairRelation Y U) c ≤
+      (((permutationGraph Y c \ U).card +
+        2 * ((permutationGraph Y c \ U).card +
+          (U \ permutationGraph Y c).card) : ℕ) : ℝ) /
+            Fintype.card Y := by
+  rw [hammingDistance_eq_disagreement_card]
+  apply div_le_div_of_nonneg_right _ (by positivity)
+  exact_mod_cast card_repairRelation_disagreement_le Y U c
+
 /-- Bad arcs whose graph point and its diagonal translate lie on opposite
 sides of the relation. -/
 def crossingBadArcs (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
