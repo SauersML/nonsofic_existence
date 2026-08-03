@@ -60,6 +60,7 @@ import NonsoficGroupsExist.LeavittWords
 import NonsoficGroupsExist.PrefixCode
 import NonsoficGroupsExist.ElementaryGroup
 import NonsoficGroupsExist.ElementaryStabilization
+import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
