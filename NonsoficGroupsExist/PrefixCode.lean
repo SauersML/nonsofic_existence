@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.LeavittWords
 import NonsoficGroupsExist.MatrixSelfSimilarity
+import NonsoficGroupsExist.ElementaryGroup
 
 /-!
 # Prefix codes and the isomorphism `Θ_C`
@@ -70,6 +71,32 @@ def prefixRingEquiv (E : BinaryPrefixCode ι) (hE : L.IsComplete E) :
 def prefixUnitsEquiv (E : BinaryPrefixCode ι) (hE : L.IsComplete E) :
     (Matrix ι ι A)ˣ ≃* Aˣ :=
   (L.prefixMatrixFamily E hE).unitsEquiv
+
+/-- Under prefix self-similarity, an elementary matrix is the corresponding
+off-diagonal prefix root. -/
+@[simp] theorem prefixUnitsEquiv_elementaryUnit_val (E : BinaryPrefixCode ι)
+    (hE : L.IsComplete E) (i j : ι) (hij : i ≠ j) (a : A) :
+    (↑(L.prefixUnitsEquiv E hE (elementaryUnit i j hij a)) : A) =
+      1 + L.wordS (E.word i) * a * L.wordT (E.word j) := by
+  classical
+  change (∑ p, ∑ q, L.wordS (E.word p) *
+      (1 + Matrix.single i j a) p q * L.wordT (E.word q)) = _
+  simp only [Matrix.add_apply, Matrix.one_apply, Matrix.single_apply]
+  simp_rw [mul_add, add_mul, Finset.sum_add_distrib]
+  rw [show (∑ p, ∑ q, L.wordS (E.word p) * (if p = q then 1 else 0) *
+      L.wordT (E.word q)) = 1 by
+    simpa [IsComplete, cylinder] using hE]
+  congr 1
+  rw [Finset.sum_eq_single i]
+  · rw [Finset.sum_eq_single j]
+    · simp
+    · intro q _ hq
+      have hjq : j ≠ q := fun h => hq h.symm
+      simp [hjq]
+    · simp
+  · intro p _ hp
+    simp [hp.symm]
+  · simp
 
 /-- The corner idempotent attached to an arbitrary (not necessarily complete)
 prefix code. -/
