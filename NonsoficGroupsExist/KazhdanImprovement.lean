@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.AlmostAutomorphism
+import NonsoficGroupsExist.DirectedCoarea
 import Mathlib.Logic.Equiv.Fintype
 
 /-!
@@ -1678,6 +1678,86 @@ theorem columnDegreeVariation_le_relationBoundary
       intro p _
       exact columnDegree_dist_le_transition Y U p.1 p.2
     _ = (relationBoundary Y S U).card := sum_card_columnTransition Y S U
+
+/-- Directed `ℓ¹` variation of a natural-valued function under the labels. -/
+def natLabelVariation (S : Finset (Equiv.Perm Y)) (g : Y → ℕ) : ℕ :=
+  ∑ p ∈ S.product (Finset.univ : Finset Y),
+    Nat.dist (g p.2) (g (p.1 p.2))
+
+/-- The median-one instance of the standard `ℓ¹` Poincaré inequality.  This
+is proved from a Cheeger bound below; it is named separately because it is the
+exact finite statement used twice for the row and column multiplicities. -/
+def HasL1PoincareAtOne (S : Finset (Equiv.Perm Y)) (h : ℝ) : Prop :=
+  0 < h ∧ ∀ g : Y → ℕ,
+    2 * (Finset.univ.filter fun x ↦ g x < 1).card ≤ Fintype.card Y →
+    2 * (Finset.univ.filter fun x ↦ 1 < g x).card ≤ Fintype.card Y →
+    h * (∑ x : Y, Nat.dist (g x) 1 : ℕ) ≤ natLabelVariation Y S g
+
+theorem small_lower_level_of_badRows
+    (U : Finset (Y × Y))
+    (hhalf : 2 * (badRows Y U).card ≤ Fintype.card Y) :
+    2 * (Finset.univ.filter fun x ↦ rowDegree Y U x < 1).card ≤
+      Fintype.card Y := by
+  apply (Nat.mul_le_mul_left 2 <| Finset.card_le_card ?_).trans hhalf
+  intro x hx
+  rw [Finset.mem_filter] at hx
+  rw [mem_badRows]
+  omega
+
+theorem small_upper_level_of_badRows
+    (U : Finset (Y × Y))
+    (hhalf : 2 * (badRows Y U).card ≤ Fintype.card Y) :
+    2 * (Finset.univ.filter fun x ↦ 1 < rowDegree Y U x).card ≤
+      Fintype.card Y := by
+  apply (Nat.mul_le_mul_left 2 <| Finset.card_le_card ?_).trans hhalf
+  intro x hx
+  rw [Finset.mem_filter] at hx
+  rw [mem_badRows]
+  omega
+
+theorem small_lower_level_of_badColumns
+    (U : Finset (Y × Y))
+    (hhalf : 2 * (badColumns Y U).card ≤ Fintype.card Y) :
+    2 * (Finset.univ.filter fun y ↦ columnDegree Y U y < 1).card ≤
+      Fintype.card Y := by
+  apply (Nat.mul_le_mul_left 2 <| Finset.card_le_card ?_).trans hhalf
+  intro y hy
+  rw [Finset.mem_filter] at hy
+  rw [mem_badColumns]
+  omega
+
+theorem small_upper_level_of_badColumns
+    (U : Finset (Y × Y))
+    (hhalf : 2 * (badColumns Y U).card ≤ Fintype.card Y) :
+    2 * (Finset.univ.filter fun y ↦ 1 < columnDegree Y U y).card ≤
+      Fintype.card Y := by
+  apply (Nat.mul_le_mul_left 2 <| Finset.card_le_card ?_).trans hhalf
+  intro y hy
+  rw [Finset.mem_filter] at hy
+  rw [mem_badColumns]
+  omega
+
+theorem rowFiberDeviation_mul_le_boundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) {h : ℝ}
+    (hP : HasL1PoincareAtOne Y S h)
+    (hhalf : 2 * (badRows Y U).card ≤ Fintype.card Y) :
+    h * rowFiberDeviation Y U ≤ (relationBoundary Y S U).card := by
+  have hcoarea := hP.2 (rowDegree Y U)
+    (small_lower_level_of_badRows Y U hhalf)
+    (small_upper_level_of_badRows Y U hhalf)
+  have hvariation := rowDegreeVariation_le_relationBoundary Y S U
+  exact hcoarea.trans (by exact_mod_cast hvariation)
+
+theorem columnFiberDeviation_mul_le_boundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) {h : ℝ}
+    (hP : HasL1PoincareAtOne Y S h)
+    (hhalf : 2 * (badColumns Y U).card ≤ Fintype.card Y) :
+    h * columnFiberDeviation Y U ≤ (relationBoundary Y S U).card := by
+  have hcoarea := hP.2 (columnDegree Y U)
+    (small_lower_level_of_badColumns Y U hhalf)
+    (small_upper_level_of_badColumns Y U hhalf)
+  have hvariation := columnDegreeVariation_le_relationBoundary Y S U
+  exact hcoarea.trans (by exact_mod_cast hvariation)
 
 theorem missingSources_roundRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :

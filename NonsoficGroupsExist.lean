@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.Asymptotics
 import NonsoficGroupsExist.AlmostAutomorphism
+import NonsoficGroupsExist.DirectedCoarea
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.CompressionSetup
