@@ -887,6 +887,16 @@ theorem card_badColumns_le_edits
     _ ≤ (permutationGraph Y c \ U).card +
         (U \ permutationGraph Y c).card := Finset.card_union_le _ _
 
+theorem badFibers_at_most_half_of_edits
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y)
+    (hedits : 2 * ((permutationGraph Y c \ U).card +
+      (U \ permutationGraph Y c).card) ≤ Fintype.card Y) :
+    2 * (badRows Y U).card ≤ Fintype.card Y ∧
+      2 * (badColumns Y U).card ≤ Fintype.card Y := by
+  have hrows := card_badRows_le_edits Y U c
+  have hcolumns := card_badColumns_le_edits Y U c
+  omega
+
 /-- Points lying in a singleton row and a singleton column form the graph of
 a partial bijection. -/
 def relationCore (U : Finset (Y × Y)) : Finset (Y × Y) :=
@@ -2089,6 +2099,20 @@ theorem repairRelation_isEpsilonGood_of_boundary
   refine ⟨hbad, ?_⟩
   rw [card_badArcs_inv]
   exact hbad
+
+theorem repairRelation_isEpsilonGood_of_close_relation
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
+    (c : Equiv.Perm Y) {h ε : ℝ}
+    (hP : HasL1PoincareAtOne Y S h)
+    (hedits : 2 * ((permutationGraph Y c \ U).card +
+      (U \ permutationGraph Y c).card) ≤ Fintype.card Y)
+    (hboundary :
+      (h + 7 * S.card) * (relationBoundary Y S U).card <
+        h * (ε * Fintype.card Y)) :
+    IsEpsilonGood Y S ε (repairRelation Y U) := by
+  obtain ⟨hrows, hcolumns⟩ := badFibers_at_most_half_of_edits Y U c hedits
+  exact repairRelation_isEpsilonGood_of_boundary
+    Y S U hP hrows hcolumns hboundary
 
 theorem hammingDistance_repairRelation_lt
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) {r : ℝ}
