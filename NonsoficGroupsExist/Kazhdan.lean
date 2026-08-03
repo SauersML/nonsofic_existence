@@ -67,6 +67,58 @@ theorem norm_add_le_of_norm_sub_ge
   have hright0 : 0 ≤ (2 - a ^ 2 / 4) * ‖x‖ := mul_nonneg hcoef hx0
   exact (sq_le_sq₀ hsum0 hright0).mp hsquare
 
+/-- If a finite equal-norm family contains a separated pair, its vector sum
+falls quantitatively short of the triangle-inequality maximum. -/
+theorem norm_sum_le_of_pair_separated
+    {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    {I : Type*} [DecidableEq I] (s : Finset I) (z : I → E)
+    {i j : I} {a r : ℝ} (hi : i ∈ s) (hj : j ∈ s) (hij : i ≠ j)
+    (ha0 : 0 ≤ a) (ha1 : a ≤ 1)
+    (hnorm : ∀ k ∈ s, ‖z k‖ = r)
+    (hmove : a * r ≤ ‖z j - z i‖) :
+    ‖∑ k ∈ s, z k‖ ≤ (s.card - a ^ 2 / 4) * r := by
+  let rest := (s.erase i).erase j
+  have hjrest : j ∈ s.erase i := Finset.mem_erase.mpr ⟨hij.symm, hj⟩
+  have hsum : ∑ k ∈ s, z k = z i + z j + ∑ k ∈ rest, z k := by
+    calc
+      ∑ k ∈ s, z k = (∑ k ∈ s.erase i, z k) + z i :=
+        (Finset.sum_erase_add s z hi).symm
+      _ = ((∑ k ∈ rest, z k) + z j) + z i := by
+        rw [show ∑ k ∈ s.erase i, z k =
+          (∑ k ∈ rest, z k) + z j from
+            (Finset.sum_erase_add (s.erase i) z hjrest).symm]
+      _ = z i + z j + ∑ k ∈ rest, z k := by abel
+  have hpair : ‖z i + z j‖ ≤ (2 - a ^ 2 / 4) * r := by
+    calc
+      ‖z i + z j‖ ≤ (2 - a ^ 2 / 4) * ‖z i‖ :=
+        norm_add_le_of_norm_sub_ge ha0 ha1
+          (by rw [hnorm j hj, hnorm i hi])
+          (by simpa [hnorm i hi] using hmove)
+      _ = (2 - a ^ 2 / 4) * r := by rw [hnorm i hi]
+  have hrestSubset : rest ⊆ s := by
+    exact (Finset.erase_subset j (s.erase i)).trans (Finset.erase_subset i s)
+  have hrest : ‖∑ k ∈ rest, z k‖ ≤ rest.card * r := by
+    calc
+      ‖∑ k ∈ rest, z k‖ ≤ ∑ k ∈ rest, ‖z k‖ := norm_sum_le _ _
+      _ = ∑ _ ∈ rest, r := by
+        apply Finset.sum_congr rfl
+        intro k hk
+        exact hnorm k (hrestSubset hk)
+      _ = rest.card * r := by simp
+  have hcard : rest.card + 2 = s.card := by
+    have hcardI := Finset.card_erase_add_one hi
+    have hcardJ := Finset.card_erase_add_one hjrest
+    change ((s.erase i).erase j).card + 2 = s.card
+    omega
+  have hcardReal : (rest.card : ℝ) + 2 = s.card := by exact_mod_cast hcard
+  rw [hsum]
+  calc
+    ‖z i + z j + ∑ k ∈ rest, z k‖ ≤
+        ‖z i + z j‖ + ‖∑ k ∈ rest, z k‖ := norm_add_le _ _
+    _ ≤ (2 - a ^ 2 / 4) * r + rest.card * r := add_le_add hpair hrest
+    _ = ((rest.card : ℝ) + 2 - a ^ 2 / 4) * r := by ring
+    _ = (s.card - a ^ 2 / 4) * r := by rw [hcardReal]
+
 /-- Enlarging the finite control set preserves a Kazhdan pair. -/
 theorem mono (hQ : IsKazhdanPair.{u, v} G Q ε) (hQR : Q ⊆ R) :
     IsKazhdanPair.{u, v} G R ε := by
@@ -116,6 +168,51 @@ theorem exists_moved_mul_norm_of_noInvariant
     rw [div_eq_mul_inv, mul_comm]
   rw [hnormalized] at hmove
   exact (le_div_iff₀ hnorm).mp hmove
+
+/-- The normalized average of the orbit of a vector over a finite control
+set. -/
+noncomputable def orbitAverage {E : Type v}
+    [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    (S : Finset G) (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) : E :=
+  ((S.card : ℝ)⁻¹) • ∑ q ∈ S, ρ q x
+
+/-- A Kazhdan displacement estimate makes the orbit average a strict
+contraction on representations without invariant vectors.  The identity in
+`S` supplies one endpoint of the separated pair. -/
+theorem norm_orbitAverage_le
+    (hQ : IsKazhdanPair.{u, v} G Q ε) (S : Finset G)
+    (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (hno : HasNoInvariantVectors G ρ) (x : E) :
+    ‖orbitAverage S ρ x‖ ≤
+      (1 - ε ^ 2 / (4 * S.card)) * ‖x‖ := by
+  classical
+  by_cases hx : x = 0
+  · subst x
+    simp [orbitAverage]
+  have hxnorm : 0 < ‖x‖ := norm_pos_iff.mpr hx
+  obtain ⟨q, hqQ, hmove⟩ :=
+    exists_moved_mul_norm_of_noInvariant hQ ρ hno x hx
+  have hqS : q ∈ S := hQS hqQ
+  have hqne : (1 : G) ≠ q := by
+    intro heq
+    rw [← heq] at hmove
+    simp at hmove
+    exact (not_lt_of_ge hmove) (mul_pos hQ.1 hxnorm)
+  have hsum := norm_sum_le_of_pair_separated S (fun g ↦ ρ g x)
+    hone hqS hqne hQ.1.le hεone
+    (fun g _ ↦ (ρ g).norm_map x) (by simpa using hmove)
+  have hcardNat : 0 < S.card := Finset.card_pos.mpr ⟨1, hone⟩
+  have hcard : (0 : ℝ) < S.card := by exact_mod_cast hcardNat
+  rw [orbitAverage, norm_smul, Real.norm_eq_abs,
+    abs_of_pos (inv_pos.mpr hcard)]
+  calc
+    (S.card : ℝ)⁻¹ * ‖∑ q ∈ S, ρ q x‖ ≤
+        (S.card : ℝ)⁻¹ * ((S.card - ε ^ 2 / 4) * ‖x‖) :=
+      mul_le_mul_of_nonneg_left hsum (inv_nonneg.mpr hcard.le)
+    _ = (1 - ε ^ 2 / (4 * S.card)) * ‖x‖ := by
+      field_simp
 
 end IsKazhdanPair
 
