@@ -159,5 +159,72 @@ theorem nonnegative_coarea (S : Finset (Equiv.Perm Y)) {h : ℝ}
 termination_by (superlevel Y g 0).card
 decreasing_by simpa [U] using hdecrease
 
+/-- The directed `ℓ1` coarea estimate centered at a median. -/
+theorem coarea_mul (S : Finset (Equiv.Perm Y)) {h : ℝ}
+    (hcheeger : HasCheegerLowerBound Y S h) (f : Y → ℝ) (c : ℝ)
+    (hc : FiniteMultiGraph.IsMedian f c) :
+    h * ∑ x, |f x - c| ≤ variation Y S f := by
+  let gp : Y → ℝ := fun x ↦ FiniteMultiGraph.positivePart (f x - c)
+  let gn : Y → ℝ := fun x ↦ FiniteMultiGraph.negativePart (f x - c)
+  have hgp : ∀ x, 0 ≤ gp x := fun x ↦ le_max_right _ _
+  have hgn : ∀ x, 0 ≤ gn x := fun x ↦ le_max_right _ _
+  have hsmallp : ∀ t, 0 ≤ t →
+      2 * (superlevel Y gp t).card ≤ Fintype.card Y := by
+    intro t ht
+    have hsubset : superlevel Y gp t ⊆
+        Finset.univ.filter (fun x ↦ c < f x) := by
+      intro x hx
+      have htx : t < f x - c := by
+        have hx' : t < max (f x - c) 0 := by
+          simpa [gp, FiniteMultiGraph.positivePart, superlevel] using hx
+        exact (lt_max_iff.mp hx').resolve_right (not_lt_of_ge ht)
+      have hcx : c < f x := by
+        have : t + c < f x := lt_sub_iff_add_lt.mp htx
+        exact (le_add_of_nonneg_left ht).trans_lt (by simpa [add_comm] using this)
+      simpa using hcx
+    exact (Nat.mul_le_mul_left 2 (Finset.card_le_card hsubset)).trans hc.1
+  have hsmalln : ∀ t, 0 ≤ t →
+      2 * (superlevel Y gn t).card ≤ Fintype.card Y := by
+    intro t ht
+    have hsubset : superlevel Y gn t ⊆
+        Finset.univ.filter (fun x ↦ f x < c) := by
+      intro x hx
+      have htx : t < -(f x - c) := by
+        have hx' : t < max (-(f x - c)) 0 := by
+          simpa [gn, FiniteMultiGraph.negativePart, superlevel] using hx
+        exact (lt_max_iff.mp hx').resolve_right (not_lt_of_ge ht)
+      have hxc : f x < c := by
+        have : t + f x < c := by
+          rw [neg_sub] at htx
+          exact lt_sub_iff_add_lt.mp htx
+        exact (le_add_of_nonneg_left ht).trans_lt (by simpa [add_comm] using this)
+      simpa using hxc
+    exact (Nat.mul_le_mul_left 2 (Finset.card_le_card hsubset)).trans hc.2
+  have hp := nonnegative_coarea Y S hcheeger gp hgp hsmallp
+  have hn := nonnegative_coarea Y S hcheeger gn hgn hsmalln
+  have hsum : (∑ x, |f x - c|) = (∑ x, gp x) + ∑ x, gn x := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro x _
+    exact FiniteMultiGraph.abs_eq_positivePart_add_negativePart (f x - c)
+  have hedge : variation Y S gp + variation Y S gn = variation Y S f := by
+    rw [variation, variation, variation, ← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro p hp
+    rw [show gp p.2 = FiniteMultiGraph.positivePart (f p.2 - c) by rfl,
+      show gp (p.1 p.2) =
+        FiniteMultiGraph.positivePart (f (p.1 p.2) - c) by rfl,
+      show gn p.2 = FiniteMultiGraph.negativePart (f p.2 - c) by rfl,
+      show gn (p.1 p.2) =
+        FiniteMultiGraph.negativePart (f (p.1 p.2) - c) by rfl,
+      FiniteMultiGraph.positivePart_edge_add_negativePart_edge]
+    congr 1
+    ring
+  calc
+    h * ∑ x, |f x - c| = h * ((∑ x, gp x) + ∑ x, gn x) := by rw [hsum]
+    _ = h * ∑ x, gp x + h * ∑ x, gn x := by ring
+    _ ≤ variation Y S gp + variation Y S gn := add_le_add hp hn
+    _ = variation Y S f := hedge
+
 end DirectedCoarea
 end NonsoficGroupsExist

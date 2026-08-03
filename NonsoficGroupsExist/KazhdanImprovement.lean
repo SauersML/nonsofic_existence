@@ -1693,6 +1693,54 @@ def HasL1PoincareAtOne (S : Finset (Equiv.Perm Y)) (h : ℝ) : Prop :=
     2 * (Finset.univ.filter fun x ↦ 1 < g x).card ≤ Fintype.card Y →
     h * (∑ x : Y, Nat.dist (g x) 1 : ℕ) ≤ natLabelVariation Y S g
 
+theorem abs_natCast_sub_natCast_eq_dist (a b : ℕ) :
+    |(a : ℝ) - (b : ℝ)| = (Nat.dist a b : ℝ) := by
+  rcases le_total a b with hab | hba
+  · rw [Nat.dist_eq_sub_of_le hab, abs_of_nonpos]
+    · rw [Nat.cast_sub hab]
+      ring
+    · exact sub_nonpos.mpr (by exact_mod_cast hab)
+  · rw [Nat.dist_eq_sub_of_le_right hba, abs_of_nonneg]
+    · rw [Nat.cast_sub hba]
+    · exact sub_nonneg.mpr (by exact_mod_cast hba)
+
+theorem hasL1PoincareAtOne_of_cheeger
+    (S : Finset (Equiv.Perm Y)) {h : ℝ}
+    (hcheeger : DirectedCoarea.HasCheegerLowerBound Y S h) :
+    HasL1PoincareAtOne Y S h := by
+  refine ⟨hcheeger.1, ?_⟩
+  intro g hlower hupper
+  have hmedian : FiniteMultiGraph.IsMedian (fun x ↦ (g x : ℝ)) 1 := by
+    constructor
+    · have heq : (Finset.univ.filter fun x ↦ (1 : ℝ) < (g x : ℝ)) =
+          Finset.univ.filter fun x ↦ (1 : ℕ) < g x := by
+        ext x
+        simp
+      rw [heq]
+      exact hupper
+    · have heq : (Finset.univ.filter fun x ↦ (g x : ℝ) < (1 : ℝ)) =
+          Finset.univ.filter fun x ↦ g x < (1 : ℕ) := by
+        ext x
+        simp
+      rw [heq]
+      exact hlower
+  have hcoarea := DirectedCoarea.coarea_mul Y S hcheeger
+    (fun x ↦ (g x : ℝ)) 1 hmedian
+  have hsum : (∑ x, |(g x : ℝ) - 1|) =
+      (↑(∑ x, Nat.dist (g x) 1) : ℝ) := by
+    rw [Nat.cast_sum]
+    apply Finset.sum_congr rfl
+    intro x _
+    simpa only [Nat.cast_one] using abs_natCast_sub_natCast_eq_dist (g x) 1
+  have hvariation : DirectedCoarea.variation Y S (fun x ↦ (g x : ℝ)) =
+      (natLabelVariation Y S g : ℝ) := by
+    rw [DirectedCoarea.variation, natLabelVariation]
+    push_cast
+    apply Finset.sum_congr rfl
+    intro p _
+    exact abs_natCast_sub_natCast_eq_dist (g p.2) (g (p.1 p.2))
+  rwa [hsum, hvariation] at hcoarea
+
 theorem small_lower_level_of_badRows
     (U : Finset (Y × Y))
     (hhalf : 2 * (badRows Y U).card ≤ Fintype.card Y) :
