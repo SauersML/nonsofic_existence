@@ -1,7 +1,10 @@
 import NonsoficGroupsExist.Sofic
+import NonsoficGroupsExist.LEF
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Order
 import Mathlib.Algebra.Group.MinimalAxioms
+import Mathlib.Algebra.Group.End
+import Mathlib.Data.Fintype.EquivFin
 
 /-!
 # Almost automorphisms of finite labeled permutation graphs
@@ -394,6 +397,75 @@ noncomputable instance : Group D.Cluster := Group.ofLeftAxioms
   (fun x ↦ by
     induction x using Quotient.inductionOn with
     | _ a => exact Quotient.sound (roundedMul_inv_left Y D a))
+
+noncomputable instance : Fintype D.Cluster := Fintype.ofFinite D.Cluster
+
+/-- Send a good almost automorphism to its small-distance cluster. -/
+def classOf (a : D.Candidate) : D.Cluster := Quotient.mk D.nearSetoid a
+
+theorem classOf_eq_iff {a b : D.Candidate} :
+    classOf Y D a = classOf Y D b ↔ Near Y D a b := by
+  exact Quotient.eq_iff_equiv
+
+/-- A locally multiplicative and locally injective map into the cluster group
+gives an LEF model after the finite cluster group is represented by its left
+regular action. -/
+theorem localEmbedding_of_cluster {J : Type*} [Group J]
+    (s : Finset J) (f : J → D.Candidate)
+    (hone : Near Y D (f 1) ⟨1, D.one_mem⟩)
+    (hmul : ∀ x ∈ s, ∀ y ∈ s,
+      Near Y D (f (x * y)) (roundedMul Y D (f x) (f y)))
+    (hinj : ∀ x ∈ s, ∀ y ∈ s, x ≠ y → ¬ Near Y D (f x) (f y)) :
+    ∃ (n : ℕ) (φ : J → Equiv.Perm (Fin n)),
+      Set.InjOn φ (s : Set J) ∧ LocalMultiplicativeOn s φ := by
+  let q : J → D.Cluster := fun j ↦ classOf Y D (f j)
+  have q_one : q 1 = 1 := by
+    exact Quotient.sound hone
+  have q_mul : ∀ x ∈ s, ∀ y ∈ s, q (x * y) = q x * q y := by
+    intro x hx y hy
+    exact Quotient.sound (hmul x hx y hy)
+  have q_inj : Set.InjOn q (s : Set J) := by
+    intro x hx y hy hxy
+    by_contra hne
+    exact hinj x hx y hy hne ((classOf_eq_iff Y D).1 hxy)
+  let e : D.Cluster ≃ Fin (Fintype.card D.Cluster) := Fintype.equivFin _
+  let regular : D.Cluster → Equiv.Perm (Fin (Fintype.card D.Cluster)) :=
+    fun g ↦ e.symm.trans ((Equiv.mulLeft g).trans e)
+  have regular_inj : Function.Injective regular := by
+    intro a b hab
+    have hpoint := Equiv.congr_fun hab (e 1)
+    apply e.injective
+    simpa [regular, e] using hpoint
+  have regular_one : regular 1 = 1 := by
+    ext x
+    simp [regular, e]
+  have regular_mul (a b : D.Cluster) : regular (a * b) = regular a * regular b := by
+    ext x
+    simp [regular, e]
+  refine ⟨Fintype.card D.Cluster, fun j ↦ regular (q j), ?_, ?_⟩
+  · exact regular_inj.injOn.comp q_inj (Set.mapsTo_univ _ _)
+  · refine ⟨?_, ?_⟩
+    · rw [q_one, regular_one]
+    · intro x hx y hy
+      calc
+        regular (q (x * y)) = regular (q x * q y) :=
+          congrArg regular (q_mul x hx y hy)
+        _ = regular (q x) * regular (q y) := regular_mul _ _
+
+/-- Finite-stage cluster models for every finite subset are exactly enough to
+prove that a group is LEF.  Later analytic modules must construct all of this
+data from a concrete essential-expander sofic approximation. -/
+theorem isLEF_of_cluster_models {J : Type*} [Group J]
+    (hmodels : ∀ s : Finset J,
+      ∃ (Y : FiniteModel) (D : ClusterData Y) (f : J → D.Candidate),
+        Near Y D (f 1) ⟨1, D.one_mem⟩ ∧
+        (∀ x ∈ s, ∀ y ∈ s,
+          Near Y D (f (x * y)) (roundedMul Y D (f x) (f y))) ∧
+        (∀ x ∈ s, ∀ y ∈ s, x ≠ y → ¬ Near Y D (f x) (f y))) :
+    IsLEF J := by
+  intro s
+  obtain ⟨Y, D, f, hone, hmul, hinj⟩ := hmodels s
+  exact localEmbedding_of_cluster Y D s f hone hmul hinj
 
 end ClusterData
 
