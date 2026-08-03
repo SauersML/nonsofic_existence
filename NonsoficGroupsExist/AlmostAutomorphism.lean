@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.Sofic
+import NonsoficGroupsExist.SoficErrors
 import NonsoficGroupsExist.LEF
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Order
@@ -33,6 +33,92 @@ def badArcs (S : Finset (Equiv.Perm Y)) (c : Equiv.Perm Y) :
     (c : Equiv.Perm Y) (p : Arc Y) :
     p ∈ badArcs Y S c ↔ p.1 ∈ S ∧ c (p.1 p.2) ≠ p.1 (c p.2) := by
   simp [badArcs]
+
+/-! ### Defects coming from a product sofic approximation -/
+
+variable {K J : Type} [Group K] [Group J]
+
+/-- The finite set of permutations assigned to a fixed set of generators of
+the first factor. -/
+noncomputable def productLabels (A : SoficApproximation (K × J)) (n : ℕ)
+    (T : Finset K) : Finset (Equiv.Perm (A.model n)) := by
+  classical
+  exact T.image fun k ↦ A.map n (k, 1)
+
+/-- Generator-tagged failures of commutation between the first-factor labels
+and the permutation assigned to `(1,j)`. -/
+noncomputable def centralizerDefectPairs (A : SoficApproximation (K × J))
+    (n : ℕ) (T : Finset K) (j : J) : Finset (T × A.model n) := by
+  classical
+  exact (Finset.univ : Finset T).biUnion fun t ↦
+    ({t} : Finset T) ×ˢ A.commutationError n (1, j) (t.1, 1)
+
+theorem badArcs_productLabels_eq_image
+    (A : SoficApproximation (K × J)) (n : ℕ) (T : Finset K) (j : J) :
+    badArcs (A.model n) (productLabels A n T) (A.map n (1, j)) =
+      (centralizerDefectPairs A n T j).image fun p ↦
+        (A.map n (p.1.1, 1), p.2) := by
+  classical
+  ext p
+  simp only [mem_badArcs, productLabels, centralizerDefectPairs,
+    Finset.mem_image, Finset.mem_biUnion, Finset.mem_univ,
+    Finset.mem_product, Finset.mem_singleton, true_and,
+    SoficApproximation.commutationError, Finset.mem_filter]
+  constructor
+  · rintro ⟨⟨k, hk, hlabel⟩, hbad⟩
+    let t : T := ⟨k, hk⟩
+    refine ⟨(t, p.2), ⟨t, ⟨rfl, ?_⟩⟩, ?_⟩
+    · simpa [t, hlabel] using hbad
+    · simp [t, hlabel]
+  · rintro ⟨⟨qt, qx⟩, ⟨t, ⟨hqt, hq⟩⟩, rfl⟩
+    change qt = t at hqt
+    subst qt
+    refine ⟨⟨t.1, t.2, rfl⟩, ?_⟩
+    simpa [SoficApproximation.commutationError] using hq
+
+theorem card_badArcs_productLabels_le
+    (A : SoficApproximation (K × J)) (n : ℕ) (T : Finset K) (j : J) :
+    (badArcs (A.model n) (productLabels A n T) (A.map n (1, j))).card ≤
+      ∑ t : T, (A.commutationError n (1, j) (t.1, 1)).card := by
+  classical
+  rw [badArcs_productLabels_eq_image]
+  refine Finset.card_image_le.trans ?_
+  calc
+    (centralizerDefectPairs A n T j).card ≤
+        ∑ t : T,
+          (({t} : Finset T) ×ˢ
+            A.commutationError n (1, j) (t.1, 1)).card :=
+      Finset.card_biUnion_le
+    _ = ∑ t : T, (A.commutationError n (1, j) (t.1, 1)).card := by
+      apply Finset.sum_congr rfl
+      intro t _
+      rw [Finset.card_product]
+      simp
+
+/-- For every fixed element of the second factor, failure to preserve the
+first-factor labels has negligible density. -/
+theorem badArcs_productLabels_negligible
+    (A : SoficApproximation (K × J)) (T : Finset K) (j : J) :
+    Negligible (fun n ↦ (Fintype.card (A.model n) : ℝ)) fun n ↦
+      ((badArcs (A.model n) (productLabels A n T) (A.map n (1, j))).card : ℝ) := by
+  let errors : T → ℕ → ℝ := fun t n ↦
+    ((A.commutationError n (1, j) (t.1, 1)).card : ℝ)
+  have herrors : ∀ t : T,
+      Negligible (fun n ↦ (Fintype.card (A.model n) : ℝ)) (errors t) := by
+    intro t
+    apply A.commutationError_negligible
+    rw [commute_iff_eq]
+    ext <;> simp
+  have hsum : Negligible (fun n ↦ (Fintype.card (A.model n) : ℝ))
+      (fun n ↦ ∑ t : T, errors t n) := by
+    apply Negligible.sum (Finset.univ : Finset T)
+    intro t _
+    exact herrors t
+  apply Negligible.mono_nonneg
+    (fun _ ↦ by positivity) (fun _ ↦ by positivity) _ hsum
+  intro n
+  dsimp [errors]
+  exact_mod_cast card_badArcs_productLabels_le A n T j
 
 /-- The directed label boundary of a set of vertices.  Both orientations are
 retained when the label set is symmetric. -/
