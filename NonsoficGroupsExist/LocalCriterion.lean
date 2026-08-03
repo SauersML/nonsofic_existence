@@ -1,12 +1,12 @@
 import NonsoficGroupsExist.CompressionSetup
-import NonsoficGroupsExist.ExternalInputs
+import NonsoficGroupsExist.Criterion
 
 /-!
 # Exact local compression criterion
 
-This file states the input of Theorem `thm:local` with no preassembled matching
-certificate.  It also verifies that `A = S ∪ Q ∪ Q⁻¹` is symmetric and really
-generates `G`, facts used when Kun's theorem is applied to the ambient group.
+This file states the data consumed by the conditional local matching argument.
+It also verifies that `A = S ∪ Q ∪ Q⁻¹` is symmetric and really generates `G`.
+No existence theorem for the two expander decompositions is asserted here.
 -/
 
 namespace NonsoficGroupsExist

@@ -4,11 +4,16 @@ import NonsoficGroupsExist.LeavittMatrixCompression
 /-!
 # The explicit rank-four compressor words
 
-The two matrices used in the characteristic-two spine are defined here as
-literal words in elementary transvections.  Thus their membership in `EL₄` is
-constructive, rather than a field of a setup structure.  We use the block
-index `Fin 3 ⊕ Unit`; `ElementaryStabilization` identifies its upper-left
-`Fin 3` block with the subgroup `EL₃`.
+Two candidate matrices from the proposed characteristic-two construction are
+defined here as literal words in elementary transvections, so their membership
+in `EL₄` is proved.  We use the block index `Fin 3 ⊕ Unit`;
+`ElementaryStabilization` embeds its upper-left `Fin 3` block.
+
+This module does not prove that conjugation by either word implements
+`compressionEnd`, that the involution word squares to one, or that these words
+and the embedded core generate the ambient elementary group.  Consequently
+`compressorSet` is only a finite set of explicit candidate words and is not a
+constructed `CompressionSetup`.
 -/
 
 namespace NonsoficGroupsExist
@@ -67,7 +72,7 @@ theorem compressionEnd_injective (L : LeavittFamily A) :
     Function.Injective (compressionEnd L) :=
   L.elementaryCompressionEnd_injective
 
-/-- The two-element compressor set used by the criterion. -/
+/-- The two-element set of candidate compressor words. -/
 noncomputable def compressorSet (L : LeavittFamily A) : Finset (Ambient A) :=
   by
     classical

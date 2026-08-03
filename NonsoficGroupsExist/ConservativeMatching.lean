@@ -1,11 +1,11 @@
 import NonsoficGroupsExist.SelectedGraphComparison
 
 /-!
-# The internal conservative matching theorem
+# Conservative matching from fully supplied local data
 
-This closes Sections `subsec:onesided`--`subsec:selection`: every local
-criterion datum produces a localized approximation of `Γ × J` whose
-`Γ`-generator graphs are essentially expanding.
+Given both expander decompositions and all algebraic fields in a local criterion
+datum, the proved finite argument produces a localized approximation of
+`Γ × J` whose `Γ`-generator graphs are essentially expanding.
 -/
 
 namespace NonsoficGroupsExist
@@ -29,7 +29,7 @@ noncomputable def selectionOutput : SelectionOutput D where
 
 end LocalCriterionData
 
-/-- Kernel-level statement of the manuscript's internal matching argument. -/
+/-- Conditional statement of the kernel-checked finite matching argument. -/
 theorem conservativeMatchingTheorem :
     ∀ (G Γ J : Type) [Group G] [Group Γ] [Group J]
       [Countable Γ] [Countable J],

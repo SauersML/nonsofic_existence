@@ -3,7 +3,7 @@ import NonsoficGroupsExist.SoficTransfer
 import Mathlib.Algebra.Group.End
 
 /-!
-# Exact algebraic input of the compression--centralizer criterion
+# Algebraic specification for the conditional compression development
 
 This packages equations `eq:gen` and `eq:cent` without identifying an abstract
 subgroup with its ambient image.  The types `Γ` and `J` carry injective maps
@@ -11,12 +11,16 @@ into `G`; conjugation by every compressor is represented by an endomorphism of
 `Γ`.  The distinguished compressed copy and the commuting copy therefore
 give an injective homomorphism `Γ × J → G`, the precise subgroup on which the
 localized sofic approximation is constructed in the manuscript.
+
+No declaration in this module constructs an inhabitant of this structure for
+the proposed elementary groups.  Its fields are assumptions of conditional
+intermediate lemmas, not proved properties of the candidate rank-four words.
 -/
 
 namespace NonsoficGroupsExist
 
-/-- Algebraic hypotheses `eq:gen` and `eq:cent` of Theorems `thm:local` and
-`thm:D`, with finite generation and infinitude explicit. -/
+/-- The algebraic hypotheses of the conditional local matching argument, with
+finite generation and infinitude explicit. -/
 structure CompressionSetup (G Γ J : Type*) [Group G] [Group Γ] [Group J] where
   embedΓ : Γ →* G
   embedΓ_injective : Function.Injective embedΓ

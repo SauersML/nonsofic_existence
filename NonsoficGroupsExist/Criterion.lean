@@ -3,8 +3,8 @@ import NonsoficGroupsExist.Refinement
 import NonsoficGroupsExist.Selection
 import NonsoficGroupsExist.Localization
 import NonsoficGroupsExist.PermutationConservation
-import NonsoficGroupsExist.LEF
-import NonsoficGroupsExist.Kazhdan
+import Mathlib.Algebra.Group.Subgroup.Basic
+import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Fintype.Prod
 
 /-!
@@ -20,18 +20,10 @@ of Sections `subsec:onesided`--`subsec:matching` is proved here in full:
   `prop:match`(ii), the passage from pinning to almost-bijective matching;
 * `matching_injective` -- Proposition `prop:match`(iii).
 
-The two external inputs of the manuscript are isolated as explicit interfaces
-rather than being assumed silently:
-
-* `ExpanderDecomposition` records the conclusion of Kun's theorem
-  (Theorem `thm:kun`) in the form used in Section `subsec:partitions`;
-* `KunThomHypothesis` records the conclusion of the Kun--Thom theorem
-  (Theorem `thm:kunthom`) in the essential form invoked at the end of the proof
-  of Theorem `thm:local`.
-
-`compression_centralizer` is the manuscript's Theorem `thm:D` relative to these
-two interfaces together with the matching certificate produced by
-Sections `subsec:matching`--`subsec:selection`.
+`ExpanderDecomposition` and `MatchingCertificate` are data structures used to
+state conditional intermediate results.  This module does not prove that such
+data exist and does not expose a theorem which treats their existence as an
+external input.
 -/
 
 namespace NonsoficGroupsExist
@@ -152,7 +144,7 @@ theorem matching_injective (U₁ U₂ D : Finset α) (hdisj : Disjoint U₁ U₂
   dominant_intersection_unique U₁ U₂ D hdisj
     (dominant_of_small_symmDiff U₁ D h₁) (dominant_of_small_symmDiff U₂ D h₂)
 
-/-! ### The external interfaces -/
+/-! ### Data used by the conditional matching development -/
 
 /-- The loopless generator multigraph of a finite permutation model.  Its edge
 type consists of generator/vertex arc occurrences, so parallel edges and labels
@@ -185,10 +177,9 @@ noncomputable def generatorGraphVertexEquiv {G : Type} [Group G]
   change Y ≃ Y
   exact Equiv.refl Y
 
-/-- The conclusion of Kun's theorem (Theorem `thm:kun`) in the form used in
-Section `subsec:partitions`: after `o(|Yₙ|)` edge edits the generator graphs
-split into uniformly expanding components, and the resulting block partition is
-almost invariant under every generator. -/
+/-- An expander decomposition in the precise form consumed by the subsequent
+finite matching argument.  Constructing this data from property `(T)` remains
+a separate obligation; this structure is not itself a proof of that theorem. -/
 structure ExpanderDecomposition {G : Type} [Group G]
     (S : SoficApproximation G) (T : Finset G) where
   blocks : ∀ n, BlockStructure (S.model n)
@@ -220,9 +211,9 @@ structure ExpanderDecomposition {G : Type} [Group G]
     fun n ↦ ((Finset.univ.filter fun y : S.model n ↦
       (blocks n).block (S.map n t y) ≠ (blocks n).block y).card : ℝ)
 
-/-- The certificate produced by Sections `subsec:matching`--`subsec:selection`:
-a localized sofic approximation of `K × J` whose `K`-generator graphs form an
-essential expander sequence. -/
+/-- A localized sofic approximation of `K × J` whose `K`-generator graphs form
+an essential expander sequence.  The structure records the output of the
+finite matching construction; it does not imply the Kun--Thom conclusion. -/
 structure MatchingCertificate (K J : Type) [Group K] [Group J] where
   generatorsK : Finset K
   generatorsK_generate : Subgroup.closure (generatorsK : Set K) = ⊤
@@ -240,20 +231,5 @@ structure MatchingCertificate (K J : Type) [Group K] [Group J] where
       (fun k ↦ approx.map n (k, 1))).editDistance (graphs n)
         ((generatorGraphVertexEquiv (approx.model n) generatorsK
           (fun k ↦ approx.map n (k, 1))).trans (vertexEquiv n).symm) : ℕ)
-
-/-- The conclusion of the Kun--Thom theorem (Theorem `thm:kunthom`) for the
-fixed groups `K,J`.  Property `(T)` of `K` is deliberately kept in this named
-external hypothesis; every finite and asymptotic premise consumed by the
-theorem is explicit in `MatchingCertificate`. -/
-def KunThomHypothesis (K J : Type) [Group K] [Group J] : Prop :=
-  HasKazhdanPropertyT K → ∀ _ : MatchingCertificate K J, IsLEF J
-
-/-- **Theorem `thm:D`, relative to the two cited external theorems.**  Given the
-Kun--Thom obstruction and the matching certificate manufactured by the
-compression mechanism, the commuting subgroup is LEF. -/
-theorem compression_centralizer (K J : Type) [Group K] [Group J]
-    (hKT : KunThomHypothesis K J) (hT : HasKazhdanPropertyT K)
-    (cert : MatchingCertificate K J) : IsLEF J :=
-  hKT hT cert
 
 end NonsoficGroupsExist
