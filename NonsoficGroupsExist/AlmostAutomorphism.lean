@@ -196,6 +196,29 @@ theorem five_mul_clusterScale_le :
   unfold clusterScale
   omega
 
+noncomputable def clusterRadius (Y : FiniteModel) : ℝ :=
+  (clusterScale Y : ℝ) / Fintype.card Y
+
+theorem one_tenth_le_clusterRadius (hcard : 10 ≤ Fintype.card Y) :
+    (1 : ℝ) / 10 ≤ clusterRadius Y := by
+  have hcardReal : (0 : ℝ) < Fintype.card Y := by
+    exact_mod_cast (show 0 < Fintype.card Y by omega)
+  have hfloorNat : Fintype.card Y ≤ 10 * clusterScale Y := by
+    unfold clusterScale
+    omega
+  have hfloorReal : (Fintype.card Y : ℝ) ≤ 10 * clusterScale Y := by
+    exact_mod_cast hfloorNat
+  rw [clusterRadius, le_div_iff₀ hcardReal]
+  linarith
+
+theorem clusterRadius_le_one_fifth (hcard : 0 < Fintype.card Y) :
+    clusterRadius Y ≤ (1 : ℝ) / 5 := by
+  have hcardReal : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcard
+  rw [clusterRadius, div_le_iff₀ hcardReal]
+  have hscale : (5 : ℝ) * clusterScale Y ≤ Fintype.card Y := by
+    exact_mod_cast five_mul_clusterScale_le Y
+  linarith
+
 /-- The directed label boundary of a set of vertices.  Both orientations are
 retained when the label set is symmetric. -/
 def directedBoundary (S : Finset (Equiv.Perm Y)) (A : Finset Y) :
@@ -883,6 +906,104 @@ theorem localEmbedding_of_finite_stage {J : Type*} [Group J]
       simpa [Near, f_mem x hx, f_mem y hy] using hnear
     have hfar := hsep x hx y hy hxy
     linarith [D.radius_pos]
+
+noncomputable def finiteControl {J : Type*} [Group J] (s : Finset J) : Finset J := by
+  classical
+  exact insert 1 (s ∪ (s.product s).image fun p ↦ p.1 * p.2)
+
+@[simp] theorem one_mem_finiteControl {J : Type*} [Group J] (s : Finset J) :
+    1 ∈ finiteControl s := by
+  simp [finiteControl]
+
+theorem mem_finiteControl {J : Type*} [Group J] {s : Finset J} {x : J}
+    (hx : x ∈ s) : x ∈ finiteControl s := by
+  simp [finiteControl, hx]
+
+theorem mul_mem_finiteControl {J : Type*} [Group J] {s : Finset J} {x y : J}
+    (hx : x ∈ s) (hy : y ∈ s) : x * y ∈ finiteControl s := by
+  simp only [finiteControl, Finset.mem_insert, Finset.mem_union, Finset.mem_image]
+  right
+  right
+  exact ⟨(x, y), Finset.mem_product.mpr ⟨hx, hy⟩, rfl⟩
+
+/-- Kernel-checked Kun--Thom assembly after isolating the sole deep input:
+products of good almost automorphisms can eventually be rounded back to good
+ones within the one-fifth Hamming radius.  No property-(T) assumption is hidden
+in this theorem; the subsequent improvement theorem must prove `hround`. -/
+theorem isLEF_of_product_rounding
+    (A : SoficApproximation (K × J)) (T : Finset K) {h : ℝ} (hh : 0 < h)
+    (hexp : ∃ Nexp, ∀ n ≥ Nexp,
+      HasDirectedExpansion (A.model n) (productLabels A n T) h)
+    (hround : ∃ Nround, ∀ n ≥ Nround,
+      ∃ round : Equiv.Perm (A.model n) → Equiv.Perm (A.model n),
+        (∀ a, IsGood (A.model n) (productLabels A n T) h
+            (clusterScale (A.model n)) a →
+          ∀ b, IsGood (A.model n) (productLabels A n T) h
+            (clusterScale (A.model n)) b →
+          IsGood (A.model n) (productLabels A n T) h
+            (clusterScale (A.model n)) (round (a * b))) ∧
+        (∀ a, IsGood (A.model n) (productLabels A n T) h
+            (clusterScale (A.model n)) a →
+          ∀ b, IsGood (A.model n) (productLabels A n T) h
+            (clusterScale (A.model n)) b →
+          hammingDistance (A.model n) (a * b) (round (a * b)) <
+            clusterRadius (A.model n))) : IsLEF J := by
+  intro s
+  obtain ⟨Nexp, hNexp⟩ := hexp
+  obtain ⟨Nround, hNround⟩ := hround
+  obtain ⟨Ngood, hNgood⟩ :=
+    productMap_isGood_on_finset_eventually A T hh (finiteControl s)
+  obtain ⟨Nmul, hNmul⟩ :=
+    productMap_mul_close_on_finset_eventually A s (show (0 : ℝ) < 1 / 10 by norm_num)
+  obtain ⟨Nsep, hNsep⟩ := productMap_separated_on_finset_eventually A s
+  obtain ⟨None, hNone⟩ := A.map_one_close (1 / 10) (by norm_num)
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 10
+  let n := max Nexp (max Nround (max Ngood (max Nmul (max Nsep (max None Ncard)))))
+  have hnexp : Nexp ≤ n := by dsimp [n]; omega
+  have hnround : Nround ≤ n := by dsimp [n]; omega
+  have hngood : Ngood ≤ n := by dsimp [n]; omega
+  have hnmul : Nmul ≤ n := by dsimp [n]; omega
+  have hnsep : Nsep ≤ n := by dsimp [n]; omega
+  have hnone : None ≤ n := by dsimp [n]; omega
+  have hncard : Ncard ≤ n := by dsimp [n]; omega
+  have hcard : 10 ≤ Fintype.card (A.model n) := hNcard n hncard
+  have hm : 0 < clusterScale (A.model n) :=
+    clusterScale_pos _ (by omega)
+  have hfive := five_mul_clusterScale_le (A.model n)
+  have hexpn := hNexp n hnexp
+  obtain ⟨round, hroundGood, hroundClose⟩ := hNround n hnround
+  let D : ClusterData (A.model n) := clusterData_of_rounding (A.model n)
+    (productLabels A n T) hexpn (clusterScale (A.model n)) hm hfive
+      round hroundGood hroundClose
+  have hradius : D.radius = clusterRadius (A.model n) := rfl
+  have hradiusLower : (1 : ℝ) / 10 ≤ D.radius := by
+    rw [hradius]
+    exact one_tenth_le_clusterRadius _ hcard
+  have hradiusUpper : D.radius ≤ (1 : ℝ) / 5 := by
+    rw [hradius]
+    exact clusterRadius_le_one_fifth _ (by omega)
+  apply localEmbedding_of_finite_stage (A.model n) D s (fun j ↦ A.map n (1, j))
+  · dsimp [D, clusterData_of_rounding]
+    rw [mem_goodCandidates]
+    simpa using hNgood n hngood 1 (one_mem_finiteControl s)
+  · intro x hx
+    dsimp [D, clusterData_of_rounding]
+    rw [mem_goodCandidates]
+    exact hNgood n hngood x (mem_finiteControl hx)
+  · intro x hx y hy
+    dsimp [D, clusterData_of_rounding]
+    rw [mem_goodCandidates]
+    exact hNgood n hngood (x * y) (mul_mem_finiteControl hx hy)
+  · have hone : hammingDistance (A.model n) (A.map n (1, 1)) 1 < 1 / 10 := by
+      change hammingDistance (A.model n) (A.map n (1 : K × J)) 1 < 1 / 10
+      exact hNone n hnone
+    linarith
+  · intro x hx y hy
+    have hmul := hNmul n hnmul x hx y hy
+    linarith
+  · intro x hx y hy hxy
+    have hsep := hNsep n hnsep x hx y hy hxy
+    linarith
 
 /-- Finite-stage cluster models for every finite subset are exactly enough to
 prove that a group is LEF.  Later analytic modules must construct all of this
