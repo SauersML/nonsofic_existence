@@ -1056,6 +1056,79 @@ theorem hammingDistance_repairRelation_le
   apply div_le_div_of_nonneg_right _ (by positivity)
   exact_mod_cast card_repairRelation_disagreement_le Y U c
 
+theorem missingSources_repairRelation_subset
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    missingSources Y U (repairRelation Y U) ⊆
+      disagreement Y (repairRelation Y U) c ∪ missingSources Y U c := by
+  intro x hx
+  rw [mem_missingSources] at hx
+  by_cases hne : repairRelation Y U x ≠ c x
+  · exact Finset.mem_union_left _
+      ((mem_disagreement Y (repairRelation Y U) c x).2 hne)
+  · apply Finset.mem_union_right
+    rw [mem_missingSources]
+    simpa [not_ne_iff.mp hne] using hx
+
+theorem card_graph_repair_missing_le
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (permutationGraph Y (repairRelation Y U) \ U).card ≤
+      (disagreement Y (repairRelation Y U) c).card +
+        (permutationGraph Y c \ U).card := by
+  rw [← card_missingSources Y U (repairRelation Y U),
+    ← card_missingSources Y U c]
+  exact (Finset.card_le_card (missingSources_repairRelation_subset Y U c)).trans
+    (Finset.card_union_le _ _)
+
+def disagreementGraph (r c : Equiv.Perm Y) : Finset (Y × Y) :=
+  (disagreement Y r c).map
+    ⟨fun x ↦ (x, c x), fun _ _ h ↦ congrArg Prod.fst h⟩
+
+@[simp] theorem card_disagreementGraph (r c : Equiv.Perm Y) :
+    (disagreementGraph Y r c).card = (disagreement Y r c).card := by
+  simp [disagreementGraph]
+
+theorem repairRelation_excess_subset
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    U \ permutationGraph Y (repairRelation Y U) ⊆
+      (U \ permutationGraph Y c) ∪
+        disagreementGraph Y (repairRelation Y U) c := by
+  intro p hp
+  rw [Finset.mem_sdiff] at hp
+  by_cases horiginal : p ∈ permutationGraph Y c
+  · apply Finset.mem_union_right
+    rw [disagreementGraph, Finset.mem_map]
+    have hc := (mem_permutationGraph Y c p).1 horiginal
+    refine ⟨p.1, ?_, ?_⟩
+    · rw [mem_disagreement]
+      intro heq
+      apply hp.2
+      rw [mem_permutationGraph]
+      exact hc.trans heq.symm
+    · exact Prod.ext rfl hc.symm
+  · exact Finset.mem_union_left _ (Finset.mem_sdiff.mpr ⟨hp.1, horiginal⟩)
+
+theorem card_graph_repair_excess_le
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (U \ permutationGraph Y (repairRelation Y U)).card ≤
+      (U \ permutationGraph Y c).card +
+        (disagreement Y (repairRelation Y U) c).card := by
+  have hsubset := Finset.card_le_card (repairRelation_excess_subset Y U c)
+  have hunion := Finset.card_union_le (U \ permutationGraph Y c)
+    (disagreementGraph Y (repairRelation Y U) c)
+  rw [card_disagreementGraph] at hunion
+  omega
+
+theorem card_repairRelation_edits_le
+    (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
+    (permutationGraph Y (repairRelation Y U) \ U).card +
+      (U \ permutationGraph Y (repairRelation Y U)).card ≤
+        7 * ((permutationGraph Y c \ U).card +
+          (U \ permutationGraph Y c).card) := by
+  have hmissing := card_graph_repair_missing_le Y U c
+  have hexcess := card_graph_repair_excess_le Y U c
+  have hdisagreement := card_repairRelation_disagreement_le Y U c
+  omega
+
 /-- Bad arcs whose graph point and its diagonal translate lie on opposite
 sides of the relation. -/
 def crossingBadArcs (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
@@ -1225,6 +1298,21 @@ theorem card_badArcs_le_relationBoundary_add_edits
   have hexcess := card_excessBadArcs_le Y S U c
   rw [Nat.mul_add]
   omega
+
+/-- The singleton-core repair has controlled commutation defect.  This bound
+uses only finite combinatorics; the later expander-fiber argument sharpens the
+edit term from the original relation error to its new boundary error. -/
+theorem card_badArcs_repairRelation_le
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y))
+    (c : Equiv.Perm Y) :
+    (badArcs Y S (repairRelation Y U)).card ≤
+      (relationBoundary Y S U).card +
+        7 * S.card * ((permutationGraph Y c \ U).card +
+          (U \ permutationGraph Y c).card) := by
+  have hbase := card_badArcs_le_relationBoundary_add_edits Y S U
+    (repairRelation Y U)
+  have hedits := card_repairRelation_edits_le Y U c
+  nlinarith
 
 theorem missingSources_roundRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
