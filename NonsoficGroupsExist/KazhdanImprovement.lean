@@ -1470,6 +1470,215 @@ theorem rowDegreeVariation_le_relationBoundary
       exact rowDegree_dist_le_transition Y U p.1 p.2
     _ = (relationBoundary Y S U).card := sum_card_rowTransition Y S U
 
+/-- Total distance of row multiplicities from the value one. -/
+def rowFiberDeviation (U : Finset (Y × Y)) : ℕ :=
+  ∑ x : Y, Nat.dist (rowDegree Y U x) 1
+
+/-- Total distance of column multiplicities from the value one. -/
+def columnFiberDeviation (U : Finset (Y × Y)) : ℕ :=
+  ∑ y : Y, Nat.dist (columnDegree Y U y) 1
+
+theorem one_le_dist_one_of_ne_one {d : ℕ} (hd : d ≠ 1) :
+    1 ≤ Nat.dist d 1 := by
+  by_cases hd0 : d = 0
+  · subst d
+    decide
+  · have htwo : 2 ≤ d := by omega
+    rw [Nat.dist_eq_sub_of_le_right (by omega)]
+    omega
+
+theorem value_le_two_mul_dist_one_of_ne_one {d : ℕ} (hd : d ≠ 1) :
+    d ≤ 2 * Nat.dist d 1 := by
+  by_cases hd0 : d = 0
+  · simp [hd0]
+  · have htwo : 2 ≤ d := by omega
+    rw [Nat.dist_eq_sub_of_le_right (by omega)]
+    omega
+
+theorem card_badRows_le_rowFiberDeviation (U : Finset (Y × Y)) :
+    (badRows Y U).card ≤ rowFiberDeviation Y U := by
+  calc
+    (badRows Y U).card = ∑ _ ∈ badRows Y U, 1 := by simp
+    _ ≤ ∑ x ∈ badRows Y U, Nat.dist (rowDegree Y U x) 1 := by
+      apply Finset.sum_le_sum
+      intro x hx
+      exact one_le_dist_one_of_ne_one ((mem_badRows Y U x).1 hx)
+    _ ≤ ∑ x : Y, Nat.dist (rowDegree Y U x) 1 := by
+      exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+        (fun _ _ _ ↦ Nat.zero_le _)
+    _ = rowFiberDeviation Y U := rfl
+
+theorem card_badColumns_le_columnFiberDeviation (U : Finset (Y × Y)) :
+    (badColumns Y U).card ≤ columnFiberDeviation Y U := by
+  calc
+    (badColumns Y U).card = ∑ _ ∈ badColumns Y U, 1 := by simp
+    _ ≤ ∑ y ∈ badColumns Y U, Nat.dist (columnDegree Y U y) 1 := by
+      apply Finset.sum_le_sum
+      intro y hy
+      exact one_le_dist_one_of_ne_one ((mem_badColumns Y U y).1 hy)
+    _ ≤ ∑ y : Y, Nat.dist (columnDegree Y U y) 1 := by
+      exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+        (fun _ _ _ ↦ Nat.zero_le _)
+    _ = columnFiberDeviation Y U := rfl
+
+theorem sum_badRows_rowDegree_le (U : Finset (Y × Y)) :
+    ∑ x ∈ badRows Y U, rowDegree Y U x ≤ 2 * rowFiberDeviation Y U := by
+  calc
+    ∑ x ∈ badRows Y U, rowDegree Y U x ≤
+        ∑ x ∈ badRows Y U, 2 * Nat.dist (rowDegree Y U x) 1 := by
+      apply Finset.sum_le_sum
+      intro x hx
+      exact value_le_two_mul_dist_one_of_ne_one ((mem_badRows Y U x).1 hx)
+    _ = 2 * ∑ x ∈ badRows Y U, Nat.dist (rowDegree Y U x) 1 := by
+      rw [Finset.mul_sum]
+    _ ≤ 2 * rowFiberDeviation Y U := by
+      apply Nat.mul_le_mul_left
+      unfold rowFiberDeviation
+      exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+        (fun _ _ _ ↦ Nat.zero_le _)
+
+theorem sum_badColumns_columnDegree_le (U : Finset (Y × Y)) :
+    ∑ y ∈ badColumns Y U, columnDegree Y U y ≤
+      2 * columnFiberDeviation Y U := by
+  calc
+    ∑ y ∈ badColumns Y U, columnDegree Y U y ≤
+        ∑ y ∈ badColumns Y U, 2 * Nat.dist (columnDegree Y U y) 1 := by
+      apply Finset.sum_le_sum
+      intro y hy
+      exact value_le_two_mul_dist_one_of_ne_one ((mem_badColumns Y U y).1 hy)
+    _ = 2 * ∑ y ∈ badColumns Y U, Nat.dist (columnDegree Y U y) 1 := by
+      rw [Finset.mul_sum]
+    _ ≤ 2 * columnFiberDeviation Y U := by
+      apply Nat.mul_le_mul_left
+      unfold columnFiberDeviation
+      exact Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+        (fun _ _ _ ↦ Nat.zero_le _)
+
+def columnTransition (U : Finset (Y × Y)) (s : Equiv.Perm Y) (y : Y) :
+    Finset Y :=
+  Finset.univ.filter fun x ↦
+    ((x, y) ∈ U) ≠ ((s x, s y) ∈ U)
+
+def nextColumnFiber (U : Finset (Y × Y))
+    (s : Equiv.Perm Y) (y : Y) : Finset Y :=
+  Finset.univ.filter fun x ↦ (s x, s y) ∈ U
+
+theorem card_nextColumnFiber (U : Finset (Y × Y))
+    (s : Equiv.Perm Y) (y : Y) :
+    (nextColumnFiber Y U s y).card = columnDegree Y U (s y) := by
+  let e : Y ↪ Y := s.toEmbedding
+  have hmap : (nextColumnFiber Y U s y).map e = columnFiber Y U (s y) := by
+    ext z
+    constructor
+    · intro hz
+      rw [Finset.mem_map] at hz
+      obtain ⟨x, hx, rfl⟩ := hz
+      rw [show x ∈ nextColumnFiber Y U s y ↔ (s x, s y) ∈ U by
+        simp [nextColumnFiber]] at hx
+      rw [mem_columnFiber]
+      change (s x, s y) ∈ U
+      exact hx
+    · intro hz
+      rw [Finset.mem_map]
+      refine ⟨s.symm z, ?_, by simp [e]⟩
+      simpa [nextColumnFiber, columnFiber] using hz
+  rw [columnDegree, ← hmap, Finset.card_map]
+
+theorem columnTransition_eq_filter_membership_ne
+    (U : Finset (Y × Y)) (s : Equiv.Perm Y) (y : Y) :
+    columnTransition Y U s y = Finset.univ.filter fun x ↦
+      (x ∈ columnFiber Y U y) ≠ (x ∈ nextColumnFiber Y U s y) := by
+  ext x
+  simp [columnTransition, columnFiber, nextColumnFiber]
+
+theorem columnDegree_dist_le_transition
+    (U : Finset (Y × Y)) (s : Equiv.Perm Y) (y : Y) :
+    Nat.dist (columnDegree Y U y) (columnDegree Y U (s y)) ≤
+      (columnTransition Y U s y).card := by
+  rw [← card_nextColumnFiber Y U s y,
+    columnDegree, columnTransition_eq_filter_membership_ne]
+  exact natDist_card_le_membership_changes
+    (columnFiber Y U y) (nextColumnFiber Y U s y)
+
+theorem sum_card_columnTransition
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
+    ∑ p ∈ S.product (Finset.univ : Finset Y),
+      (columnTransition Y U p.1 p.2).card =
+        (relationBoundary Y S U).card := by
+  classical
+  have hfiber := Finset.sum_card_fiberwise_eq_card_filter
+    (relationBoundary Y S U) (S.product (Finset.univ : Finset Y))
+      (fun p : Equiv.Perm Y × (Y × Y) ↦ (p.1, p.2.2))
+  calc
+    ∑ p ∈ S.product (Finset.univ : Finset Y),
+        (columnTransition Y U p.1 p.2).card =
+      ∑ p ∈ S.product (Finset.univ : Finset Y),
+        ((relationBoundary Y S U).filter fun q ↦
+          (q.1, q.2.2) = p).card := by
+      apply Finset.sum_congr rfl
+      intro p hp
+      rcases p with ⟨s, y⟩
+      have hs : s ∈ S := (Finset.mem_product.mp hp).1
+      let e : Y ↪ Equiv.Perm Y × (Y × Y) :=
+        ⟨fun x ↦ (s, (x, y)), fun _ _ h ↦ congrArg (fun q ↦ q.2.1) h⟩
+      rw [← Finset.card_map (f := e)]
+      apply congrArg Finset.card
+      ext q
+      constructor
+      · intro hq
+        rw [Finset.mem_map] at hq
+        obtain ⟨x, hx, rfl⟩ := hq
+        rw [Finset.mem_filter]
+        refine ⟨?_, rfl⟩
+        rw [mem_relationBoundary]
+        refine ⟨hs, ?_⟩
+        dsimp [e, diagonalAction]
+        by_cases h₁ : (x, y) ∈ U <;> by_cases h₂ : (s x, s y) ∈ U <;>
+          simp [columnTransition, h₁, h₂] at hx ⊢
+      · intro hq
+        rw [Finset.mem_filter] at hq
+        obtain ⟨hboundary, heq⟩ := hq
+        have hlabel : q.1 = s := congrArg Prod.fst heq
+        have htarget : q.2.2 = y := congrArg Prod.snd heq
+        let x := q.2.1
+        have hqEq : q = (s, (x, y)) :=
+          Prod.ext hlabel (Prod.ext rfl htarget)
+        rw [hqEq] at hboundary ⊢
+        rw [Finset.mem_map]
+        refine ⟨x, ?_, rfl⟩
+        have hcross := (mem_relationBoundary Y S U _).1 hboundary |>.2
+        by_cases h₁ : (x, y) ∈ U <;> by_cases h₂ : (s x, s y) ∈ U <;>
+          simp [columnTransition, diagonalAction, h₁, h₂] at hcross ⊢
+    _ = ((relationBoundary Y S U).filter fun q ↦
+        (q.1, q.2.2) ∈ S.product (Finset.univ : Finset Y)).card := hfiber
+    _ = (relationBoundary Y S U).card := by
+      apply congrArg Finset.card
+      ext q
+      simp only [Finset.mem_filter]
+      constructor
+      · exact fun hq ↦ hq.1
+      · intro hq
+        refine ⟨hq, Finset.mem_product.mpr ⟨?_, Finset.mem_univ _⟩⟩
+        exact (mem_relationBoundary Y S U q).1 hq |>.1
+
+def columnDegreeVariation (S : Finset (Equiv.Perm Y))
+    (U : Finset (Y × Y)) : ℕ :=
+  ∑ p ∈ S.product (Finset.univ : Finset Y),
+    Nat.dist (columnDegree Y U p.2) (columnDegree Y U (p.1 p.2))
+
+theorem columnDegreeVariation_le_relationBoundary
+    (S : Finset (Equiv.Perm Y)) (U : Finset (Y × Y)) :
+    columnDegreeVariation Y S U ≤ (relationBoundary Y S U).card := by
+  calc
+    columnDegreeVariation Y S U ≤
+        ∑ p ∈ S.product (Finset.univ : Finset Y),
+          (columnTransition Y U p.1 p.2).card := by
+      unfold columnDegreeVariation
+      apply Finset.sum_le_sum
+      intro p _
+      exact columnDegree_dist_le_transition Y U p.1 p.2
+    _ = (relationBoundary Y S U).card := sum_card_columnTransition Y S U
+
 theorem missingSources_roundRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     missingSources Y U (roundRelation Y U c) ⊆ missingSources Y U c := by
