@@ -362,5 +362,16 @@ theorem secondCompressor_mem (L : LeavittFamily A) :
   classical
   simp [compressorSet]
 
+/-- Every member of the explicit two-word set implements the concrete
+compression endomorphism. -/
+theorem compressorSet_conjugation [CharP A 2] (L : LeavittFamily A)
+    (q : Ambient A) (hq : q ∈ compressorSet L) (g : Core A) :
+    coreEmbedding (compressionEnd L g) = q * coreEmbedding g * q⁻¹ := by
+  classical
+  simp only [compressorSet, Finset.mem_insert, Finset.mem_singleton] at hq
+  rcases hq with rfl | rfl
+  · exact (compressor_conjugation L g).symm
+  · exact (secondCompressor_conjugation L g).symm
+
 end RankFour
 end NonsoficGroupsExist

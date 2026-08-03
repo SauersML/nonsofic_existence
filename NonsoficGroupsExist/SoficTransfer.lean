@@ -46,10 +46,23 @@ def SoficApproximation.comap (S : SoficApproximation G) (f : H →* G)
 
 /-- Soficity passes along injective homomorphisms, in particular to
 subgroups. -/
-theorem isSofic_of_injective [Countable G] [Countable H] (f : H →* G)
+theorem isSofic_of_injective (f : H →* G)
     (hf : Function.Injective f) (h : IsSofic G) : IsSofic H := by
-  obtain ⟨S⟩ := h
-  exact ⟨S.comap f hf⟩
+  intro F ε hε
+  classical
+  obtain ⟨M⟩ := h (F.image f) ε hε
+  exact ⟨{
+    carrier := M.carrier
+    nonempty := M.nonempty
+    map := fun x ↦ M.map (f x)
+    multiplicative := by
+      intro g hg k hk
+      simpa using M.multiplicative (f g) (Finset.mem_image.mpr ⟨g, hg, rfl⟩)
+        (f k) (Finset.mem_image.mpr ⟨k, hk, rfl⟩)
+    separated := by
+      intro g hg k hk hne
+      exact M.separated (f g) (Finset.mem_image.mpr ⟨g, hg, rfl⟩)
+        (f k) (Finset.mem_image.mpr ⟨k, hk, rfl⟩) (fun heq ↦ hne (hf heq)) }⟩
 
 /-- The restriction of a sofic approximation of `G` to a subgroup. -/
 def SoficApproximation.restrict (S : SoficApproximation G) (K : Subgroup G) :

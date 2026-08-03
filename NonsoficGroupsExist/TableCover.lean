@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.SoficErrors
 import Mathlib.GroupTheory.PresentedGroup
+import Mathlib.GroupTheory.FinitelyPresentedGroup
 import Mathlib.GroupTheory.Finiteness
 import Mathlib.SetTheory.Cardinal.Free
 import Mathlib.Data.Countable.Small
@@ -27,7 +28,9 @@ namespace NonsoficGroupsExist
 
 open scoped BigOperators
 
-variable {G : Type*} [Group G]
+universe u
+
+variable {G : Type u} [Group G]
 
 /-- The exact domain `F ∪ F·F` of a finite multiplication-table model. -/
 noncomputable def tableDomain (F : Finset G) : Finset G := by
@@ -148,81 +151,43 @@ theorem TableModel.card_amplify {F : Finset G} {ε : ℝ} (M : TableModel G F ε
 /-! ### Lemma `lem:models` -/
 
 /-- Every sofic group has models of every finite table to every accuracy. -/
-theorem tableModel_of_isSofic [Countable G] (h : IsSofic G) (F : Finset G)
+theorem tableModel_of_isSofic (h : IsSofic G) (F : Finset G)
     (ε : ℝ) (hε : 0 < ε) : Nonempty (TableModel G F ε) := by
-  classical
-  obtain ⟨S⟩ := h
-  -- Choose one index at which all finitely many multiplication and pairwise
-  -- separation constraints hold.
-  have hpairs : ∃ N : ℕ, ∀ n ≥ N,
-      (0 < Fintype.card (S.model n)) ∧
-      (∀ g ∈ F, ∀ h ∈ F,
-        hammingDistance (S.model n) (S.map n (g * h))
-          (S.map n g * S.map n h) ≤ ε) ∧
-      (∀ g ∈ F, ∀ h ∈ F, g ≠ h →
-        1 - ε ≤ hammingDistance (S.model n) (S.map n g) (S.map n h)) := by
-    obtain ⟨N₀, hN₀⟩ := S.card_tendsToInfinity 1
-    have hmul : ∀ p : G × G, ∃ N : ℕ, ∀ n ≥ N,
-        hammingDistance (S.model n) (S.map n (p.1 * p.2))
-          (S.map n p.1 * S.map n p.2) ≤ ε := by
-      intro p
-      obtain ⟨N, hN⟩ := S.asymptoticallyMultiplicative p.1 p.2 ε hε
-      exact ⟨N, fun n hn ↦ (hN n hn).le⟩
-    have hsep : ∀ p : G × G, ∃ N : ℕ, ∀ n ≥ N,
-        p.1 ≠ p.2 → 1 - ε ≤
-          hammingDistance (S.model n) (S.map n p.1) (S.map n p.2) := by
-      intro p
-      by_cases hp : p.1 = p.2
-      · exact ⟨0, fun _ _ hne ↦ absurd hp hne⟩
-      · have hcol :=
-          @SoficApproximation.collisionError_negligible G _ S p.1 p.2 hp
-        obtain ⟨Ne, hNe⟩ := hcol ε hε
-        refine ⟨max N₀ Ne, fun n hn _ ↦ ?_⟩
-        have hcard : 0 < Fintype.card (S.model n) :=
-          lt_of_lt_of_le Nat.zero_lt_one
-            (hN₀ n ((le_max_left N₀ Ne).trans hn))
-        have herr := lt_of_abs_lt (hNe n ((le_max_right N₀ Ne).trans hn))
-        rw [S.hammingDistance_eq_one_sub_collision n p.1 p.2 hcard]
-        linarith
-    choose Nmul hNmul using hmul
-    choose Nsep hNsep using hsep
-    set Bm : Finset ℕ := insert 0 ((F ×ˢ F).image fun p ↦ Nmul p) with hBm
-    set Bs : Finset ℕ := insert 0 ((F ×ˢ F).image fun p ↦ Nsep p) with hBs
-    set Nm : ℕ := Bm.max' (Finset.insert_nonempty 0 _) with hNm
-    set Ns : ℕ := Bs.max' (Finset.insert_nonempty 0 _) with hNs
-    refine ⟨max N₀ (max Nm Ns), fun n hn ↦ ⟨?_, ?_, ?_⟩⟩
-    · exact hN₀ n ((le_max_left _ _).trans hn)
-    · intro g hg h hh
-      have hle : Nmul (g, h) ≤ Nm := by
-        apply Bm.le_max'
-        rw [hBm]
-        apply Finset.mem_insert_of_mem
-        exact Finset.mem_image.mpr
-          ⟨(g, h), Finset.mem_product.mpr ⟨hg, hh⟩, rfl⟩
-      exact hNmul (g, h) n (hle.trans ((le_max_left Nm Ns).trans
-        ((le_max_right N₀ _).trans hn)))
-    · intro g hg h hh hne
-      have hle : Nsep (g, h) ≤ Ns := by
-        apply Bs.le_max'
-        rw [hBs]
-        apply Finset.mem_insert_of_mem
-        exact Finset.mem_image.mpr
-          ⟨(g, h), Finset.mem_product.mpr ⟨hg, hh⟩, rfl⟩
-      exact hNsep (g, h) n (hle.trans ((le_max_right Nm Ns).trans
-        ((le_max_right N₀ _).trans hn))) hne
-  obtain ⟨N, hN⟩ := hpairs
-  obtain ⟨hcard, hmul, hfaith⟩ := hN N le_rfl
-  exact ⟨{ carrier := S.model N
-           nonempty := hcard
-           act := fun g ↦ S.map N g.1
-           multiplicative := hmul
-           separated := hfaith }⟩
+  obtain ⟨M⟩ := h F ε hε
+  exact ⟨{
+    carrier := M.carrier
+    nonempty := M.nonempty
+    act := fun g ↦ M.map g.1
+    multiplicative := M.multiplicative
+    separated := M.separated }⟩
 
-/-- Conversely, a countable group with models of every finite table to every
-accuracy is sofic.  The models are amplified so that the carriers diverge. -/
-theorem isSofic_of_tableModels [Countable G] [Nonempty G]
+/-- Conversely, table models give the standard local definition of soficity. -/
+theorem isSofic_of_tableModels
     (h : ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (TableModel G F ε)) :
     IsSofic G := by
+  intro F ε hε
+  obtain ⟨M⟩ := h F ε hε
+  classical
+  exact ⟨{
+    carrier := M.carrier
+    nonempty := M.nonempty
+    map := fun g ↦ if hg : g ∈ tableDomain F then M.act ⟨g, hg⟩ else 1
+    multiplicative := by
+      intro g hg h hh
+      rw [dif_pos (mul_mem_tableDomain hg hh), dif_pos (mem_tableDomain_of_mem hg),
+        dif_pos (mem_tableDomain_of_mem hh)]
+      exact M.multiplicative g hg h hh
+    separated := by
+      intro g hg h hh hne
+      rw [dif_pos (mem_tableDomain_of_mem hg), dif_pos (mem_tableDomain_of_mem hh)]
+      exact M.separated g hg h hh hne }⟩
+
+/-- For a countable group, local table models can be assembled into a
+sequential sofic approximation.  Models are amplified so their carriers
+diverge. -/
+theorem soficApproximation_of_tableModels [Countable G] [Nonempty G]
+    (h : ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (TableModel G F ε)) :
+    Nonempty (SoficApproximation G) := by
   classical
   obtain ⟨enum, henum⟩ : ∃ e : ℕ → G, Function.Surjective e :=
     exists_surjective_nat G
@@ -343,7 +308,7 @@ theorem tableModel_isEmpty_mono {F F' : Finset G} {ε : ℝ}
 
 /-- **Lemma `lem:models`.**  A countable group fails to be sofic exactly when
 some finite table containing `1` admits no sufficiently accurate model. -/
-theorem exists_table_obstruction [Countable G] [Nonempty G] (h : ¬ IsSofic G) :
+theorem exists_table_obstruction (h : ¬ IsSofic G) :
     ∃ (F : Finset G) (ε : ℝ), 1 ∈ F ∧ 0 < ε ∧ IsEmpty (TableModel G F ε) := by
   classical
   by_contra hcon
@@ -563,7 +528,7 @@ theorem tableGroup_no_model {ε : ℝ}
   intro M
   exact hbad.false (pullbackTableModel F h₁ M)
 
-theorem tableGroup_not_isSofic [Countable (tableGroup F h₁)] {ε : ℝ}
+theorem tableGroup_not_isSofic {ε : ℝ}
     (hε : 0 < ε) (hbad : IsEmpty (TableModel G F ε)) :
     ¬ IsSofic (tableGroup F h₁) := by
   intro hsofic
@@ -575,7 +540,7 @@ end Presentation
 /-- **Theorem `thm:C`**: every finitely generated nonsofic group is covered by
 a finitely presented nonsofic group, namely the group defined by a forbidden
 finite multiplication table enlarged to contain generators of `G`. -/
-theorem exists_finitelyPresented_obstruction [Countable G] [Nonempty G] [Group.FG G]
+theorem exists_finitelyPresented_obstruction [Group.FG G]
     (h : ¬ IsSofic G) :
     ∃ (F : Finset G) (h₁ : 1 ∈ F) (ε : ℝ), 0 < ε ∧
       IsEmpty (TableModel (tableGroup F h₁) (tableTestSet F h₁) ε) ∧
@@ -598,5 +563,16 @@ theorem exists_finitelyPresented_obstruction [Countable G] [Nonempty G] [Group.F
   have hbadGroup := tableGroup_no_model F h₁ hbadF
   have hnsofic := tableGroup_not_isSofic F h₁ hε hbadF
   exact ⟨F, h₁, ε, hε, hbadGroup, hnsofic, hcover⟩
+
+/-- Honest conditional finite-presentation reduction in Mathlib's standard
+`Group.IsFinitelyPresented` predicate.  The sole substantive premise is the
+supplied finitely generated nonsofic group. -/
+theorem exists_finitelyPresented_nonsofic_cover
+    [Group.FG G] (h : ¬ IsSofic G) :
+    ∃ (H : Type u) (_ : Group H), Group.IsFinitelyPresented H ∧ ¬ IsSofic H := by
+  obtain ⟨F, h₁, _, _, _, hnsofic, _⟩ :=
+    exists_finitelyPresented_obstruction h
+  letI : Group.IsFinitelyPresented (tableGroup F h₁) := inferInstance
+  exact ⟨tableGroup F h₁, inferInstance, inferInstance, hnsofic⟩
 
 end NonsoficGroupsExist

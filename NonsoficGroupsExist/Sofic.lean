@@ -8,10 +8,13 @@ import Mathlib.Tactic.Group
 import Mathlib.Tactic.Ring
 
 /-!
-# Sofic approximation specification
+# Sofic groups and sequential approximations
 
-This file formalizes Definition `def:sofic` from the manuscript.  All finite
-model data and every asymptotic quantifier are explicit.
+`IsSofic` is the standard local finite-permutation definition: every finite
+subset has an arbitrarily accurate approximately multiplicative and separated
+model.  It has no countability premise.  `SoficApproximation` is the equivalent
+sequential formulation used by the analytic part of the development; the
+conversion for countable groups is proved in `TableCover`.
 -/
 
 namespace NonsoficGroupsExist
@@ -128,6 +131,21 @@ theorem hammingDistance_triangle (Y : FiniteModel) (p q r : Equiv.Perm Y) :
     _ = ((q⁻¹ * p).support.card : ℝ) / Fintype.card Y +
         ((r⁻¹ * q).support.card : ℝ) / Fintype.card Y := by ring
 
+/-- A finite permutation model on a prescribed finite subset.  The map is
+defined on the whole group, while its laws are required on the test set. -/
+structure SoficModel (G : Type*) [Group G] (F : Finset G) (ε : ℝ) where
+  carrier : FiniteModel
+  nonempty : 0 < Fintype.card carrier
+  map : G → Equiv.Perm carrier
+  multiplicative : ∀ g ∈ F, ∀ h ∈ F,
+    hammingDistance carrier (map (g * h)) (map g * map h) ≤ ε
+  separated : ∀ g ∈ F, ∀ h ∈ F, g ≠ h →
+    1 - ε ≤ hammingDistance carrier (map g) (map h)
+
+/-- Standard local definition of a sofic group. -/
+def IsSofic (G : Type*) [Group G] : Prop :=
+  ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (SoficModel G F ε)
+
 /-- A sequence of finite permutation models satisfying Definition `def:sofic`
 in explicit epsilon--eventually form. -/
 structure SoficApproximation (G : Type*) [Group G] where
@@ -206,9 +224,5 @@ theorem word_close (S : SoficApproximation G) (w : List G) (ε : ℝ) (hε : 0 <
         _ = ε := by ring
 
 end SoficApproximation
-
-/-- A countable group is sofic exactly when it has a sofic approximation. -/
-def IsSofic (G : Type*) [Group G] [Countable G] : Prop :=
-  Nonempty (SoficApproximation G)
 
 end NonsoficGroupsExist

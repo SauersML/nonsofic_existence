@@ -155,7 +155,8 @@ theorem presentation_surjective : Function.Surjective presentation := by
 instance : Algebra.FiniteType (ZMod 2) StreamOperatorAlgebra :=
   Algebra.FiniteType.of_surjective presentation presentation_surjective
 
-noncomputable instance : Countable StreamOperatorAlgebra := by
+noncomputable instance streamOperatorAlgebra_countable :
+    Countable StreamOperatorAlgebra := by
   exact presentation_surjective.countable
 
 noncomputable def generator (g : Generator) : StreamOperatorAlgebra :=
