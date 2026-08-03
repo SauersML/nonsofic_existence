@@ -301,3 +301,12 @@ explicit pair of cylinder units built in `ThompsonWitness`.
 #print axioms NonsoficGroupsExist.SoficApproximation.comap
 #print axioms NonsoficGroupsExist.isSofic_of_injective
 #print axioms NonsoficGroupsExist.SoficApproximation.restrict
+#print axioms NonsoficGroupsExist.ConcreteLeavitt.family
+#print axioms NonsoficGroupsExist.ConcreteLeavitt.presentation_surjective
+#print axioms NonsoficGroupsExist.LeavittFamily.not_isLEF_cornerWitnessSubgroup
+#print axioms NonsoficGroupsExist.elementaryStabilization_injective
+#print axioms NonsoficGroupsExist.LeavittFamily.elementaryCompressionEnd
+#print axioms NonsoficGroupsExist.LeavittFamily.elementaryCompressionEnd_injective
+#print axioms NonsoficGroupsExist.RankFour.compressor
+#print axioms NonsoficGroupsExist.RankFour.involution
+#print axioms NonsoficGroupsExist.RankFour.secondCompressor
