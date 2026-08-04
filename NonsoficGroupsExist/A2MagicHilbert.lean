@@ -240,6 +240,71 @@ theorem coe_compressedLaplacian_apply [CompleteSpace E]
   change W.starProjection (laplacianFamily (f : Family E)) = _
   exact starProjection_vertexFixedSubspace A rho _
 
+/-- The compressed quadratic form is still half the graph's directed edge
+energy. -/
+theorem directedEnergy_eq_two_inner_compressedLaplacian [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    A2MagicLaplacian.directedEnergy (f : Family E) =
+      2 * inner ℝ f (compressedLaplacian A rho f) := by
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  rw [directedEnergy_eq_two_inner_laplacianFamily]
+  congr 1
+  change inner ℝ (f : Family E) (laplacianFamily (f : Family E)) =
+    inner ℝ (f : Family E)
+      (W.starProjection (laplacianFamily (f : Family E)))
+  rw [← W.inner_starProjection_left_eq_right,
+    W.starProjection_eq_self_iff.mpr f.property]
+
+/-- Positivity of the compressed Laplacian. -/
+theorem compressedLaplacian_energy_nonneg [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    0 ≤ inner ℝ f (compressedLaplacian A rho f) := by
+  have hD : 0 ≤ A2MagicLaplacian.directedEnergy (f : Family E) := by
+    unfold A2MagicLaplacian.directedEnergy
+    positivity
+  have hEq := directedEnergy_eq_two_inner_compressedLaplacian A rho f
+  nlinarith
+
+/-- Universal upper bound for the compressed quadratic form. -/
+theorem compressedLaplacian_energy_le_eight_norm_sq [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    inner ℝ f (compressedLaplacian A rho f) ≤ 8 * ‖f‖ ^ 2 := by
+  have hD := A2MagicLaplacian.directedEnergy_le_sixteen_sum_norm_sq
+    (fun i ↦ (f : Family E) i)
+  rw [← PiLp.norm_sq_eq_of_L2] at hD
+  change A2MagicLaplacian.directedEnergy (f : Family E) ≤
+    16 * ‖f‖ ^ 2 at hD
+  have hEq := directedEnergy_eq_two_inner_compressedLaplacian A rho f
+  nlinarith
+
+/-- The compressed operator norm squared is at most eight times its
+quadratic form. -/
+theorem norm_compressedLaplacian_sq_le_eight_energy [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    ‖compressedLaplacian A rho f‖ ^ 2 ≤
+      8 * inner ℝ f (compressedLaplacian A rho f) := by
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  have hproj : ‖compressedLaplacian A rho f‖ ≤
+      ‖laplacianFamily (f : Family E)‖ := by
+    exact W.norm_orthogonalProjectionOnto_apply_le _
+  have hprojSq := sq_le_sq₀ (norm_nonneg _) (norm_nonneg _) |>.2 hproj
+  have hlap := A2MagicLaplacian.sum_laplacian_norm_sq_le_four_directedEnergy
+    (fun i ↦ (f : Family E) i)
+  have hlap' : ‖laplacianFamily (f : Family E)‖ ^ 2 ≤
+      4 * A2MagicLaplacian.directedEnergy (f : Family E) := by
+    rw [PiLp.norm_sq_eq_of_L2]
+    exact hlap
+  have hEq := directedEnergy_eq_two_inner_compressedLaplacian A rho f
+  nlinarith [hlap']
+
 /-- Squared norm of the coordinatewise vertex projection. -/
 theorem norm_vertexProjectionFamily_sq [CompleteSpace E]
     (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
@@ -331,6 +396,30 @@ theorem constant_inf_vertexFixed_eq_bot [CompleteSpace E]
     rw [hc i, hz]
     rfl
   · exact bot_le
+
+/-- In a representation without invariant vectors, the compressed
+Laplacian has trivial kernel. -/
+theorem compressedLaplacian_eq_zero_imp [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (hno : IsKazhdanPair.HasNoInvariantVectors G rho)
+    (f : vertexFixedSubspace A rho)
+    (hf : compressedLaplacian A rho f = 0) : f = 0 := by
+  have hinner : inner ℝ f (compressedLaplacian A rho f) = 0 := by
+    rw [hf]
+    simp
+  have hD : A2MagicLaplacian.directedEnergy (f : Family E) = 0 := by
+    have hEq := directedEnergy_eq_two_inner_compressedLaplacian A rho f
+    rw [hinner, mul_zero] at hEq
+    exact hEq
+  have hconst : (f : Family E) ∈ constantSubspace (E := E) := by
+    intro i
+    exact A2MagicLaplacian.eq_zero_directedEnergy_imp_constant
+      (fun j ↦ (f : Family E) j) hD i
+  have hinter : (f : Family E) ∈
+      constantSubspace (E := E) ⊓ vertexFixedSubspace A rho :=
+    ⟨hconst, f.property⟩
+  rw [constant_inf_vertexFixed_eq_bot A rho hno] at hinter
+  exact Subtype.ext (show (f : Family E) = 0 from hinter)
 
 end A2MagicHilbert
 end NonsoficGroupsExist

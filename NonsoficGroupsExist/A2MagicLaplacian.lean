@@ -159,6 +159,40 @@ theorem directedEnergy_le_sixteen_sum_norm_sq (f : Fin 6 → E) :
       simp [neighborIndex, Fin.sum_univ_succ]
       ring
 
+omit [InnerProductSpace ℝ E] in
+/-- Vanishing directed energy forces a family on the connected magic graph
+to be constant. -/
+theorem eq_zero_directedEnergy_imp_constant (f : Fin 6 → E)
+    (hzero : directedEnergy f = 0) : ∀ i, f i = f 0 := by
+  change (∑ i : Fin 6,
+    ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2) = 0 at hzero
+  have hedge (i : Fin 6) (n : Fin 4) :
+      ‖f i - f (neighborIndex i n)‖ ^ 2 = 0 := by
+    have houter : ∀ i : Fin 6,
+        (∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2) = 0 := by
+      have hnonneg (i : Fin 6) :
+          0 ≤ ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2 :=
+        Finset.sum_nonneg fun n hn ↦ sq_nonneg _
+      intro i
+      exact (Finset.sum_eq_zero_iff_of_nonneg fun i hi ↦ hnonneg i).mp
+        hzero i (Finset.mem_univ i)
+    have hinner := houter i
+    exact (Finset.sum_eq_zero_iff_of_nonneg fun n hn ↦ sq_nonneg _).mp
+      hinner n (Finset.mem_univ n)
+  have hedgeEq (i : Fin 6) (n : Fin 4) :
+      f i = f (neighborIndex i n) := by
+    have := hedge i n
+    rw [sq_eq_zero_iff, norm_eq_zero, sub_eq_zero] at this
+    exact this
+  intro i
+  fin_cases i
+  · rfl
+  · exact (hedgeEq 0 0).symm
+  · exact (hedgeEq 1 3).symm.trans (hedgeEq 0 0).symm
+  · exact (hedgeEq 0 2).symm
+  · exact (hedgeEq 0 3).symm
+  · exact (hedgeEq 0 1).symm
+
 /-- The elementary opposite-pair estimate behind the eigenvalue `4`. -/
 theorem oppositePair_laplacian_norm_sq_ge (x y : E) :
     16 * (‖x‖ ^ 2 + ‖y‖ ^ 2) ≤
