@@ -234,7 +234,15 @@ theorem eq_sum_support_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
       have hcoeff : c = 1 := by
         have hn : c ≠ 0 := by
           simpa using hw
-        fin_cases c <;> simp_all
+        apply ZMod.val_injective
+        have hc_lt : c.val < 2 := ZMod.val_lt c
+        have hc_ne : c.val ≠ 0 := by
+          intro hc
+          apply hn
+          apply ZMod.val_injective
+          simpa using hc
+        simp only [ZMod.val_one]
+        omega
       simp [c, hcoeff]
 
 /-- A degree-bounded free polynomial is the sum, inside its degree submodule,

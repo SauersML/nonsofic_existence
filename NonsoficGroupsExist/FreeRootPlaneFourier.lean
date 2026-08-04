@@ -319,6 +319,80 @@ theorem exists_supported_word_of_additive_sign_character
       _ = 1 := by simp [hterm]
   norm_num at hbad
 
+/-- The first coefficient character is always sign-valued. -/
+theorem firstCoefficientEigenvalue_eq_one_or_neg_one
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (a : FreeAlgebraDegree.degreeLE X n) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n sign a = 1 ∨
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1 := by
+  unfold firstCoefficientEigenvalue planeEigenvalue
+  split <;> simp
+
+/-- The second coefficient character is always sign-valued. -/
+theorem secondCoefficientEigenvalue_eq_one_or_neg_one
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (a : FreeAlgebraDegree.degreeLE X n) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n sign a = 1 ∨
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign a = -1 := by
+  unfold secondCoefficientEigenvalue planeEigenvalue
+  split <;> simp
+
+/-- Nontriviality of the first coefficient character is witnessed on a
+supported free word. -/
+theorem exists_supported_word_of_firstCoefficientEigenvalue_eq_neg_one
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (a : FreeAlgebraDegree.degreeLE X n)
+    (ha : firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) :
+    ∃ (w : FreeMonoid X)
+      (hw : w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) a.1).coeff.support),
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign
+        ⟨FreeAlgebraDegree.wordMonomial X w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X
+            (((FreeAlgebraDegree.mem_degreeLE_iff X a.1 n).1 a.2) w hw)⟩ =
+        -1 := by
+  exact exists_supported_word_of_additive_sign_character X
+    (firstCoefficientEigenvalue X i j k hij hik hjk n sign)
+    (firstCoefficientEigenvalue_zero_of_component_ne_zero X i j k hij hik hjk n
+      rho sign z hv)
+    (firstCoefficientEigenvalue_add_of_component_ne_zero X i j k hij hik hjk n
+      rho sign z hv)
+    (firstCoefficientEigenvalue_eq_one_or_neg_one X i j k hij hik hjk n sign)
+    a ha
+
+/-- Nontriviality of the second coefficient character is witnessed on a
+supported free word. -/
+theorem exists_supported_word_of_secondCoefficientEigenvalue_eq_neg_one
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (a : FreeAlgebraDegree.degreeLE X n)
+    (ha : secondCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) :
+    ∃ (w : FreeMonoid X)
+      (hw : w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) a.1).coeff.support),
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign
+        ⟨FreeAlgebraDegree.wordMonomial X w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X
+            (((FreeAlgebraDegree.mem_degreeLE_iff X a.1 n).1 a.2) w hw)⟩ =
+        -1 := by
+  exact exists_supported_word_of_additive_sign_character X
+    (secondCoefficientEigenvalue X i j k hij hik hjk n sign)
+    (secondCoefficientEigenvalue_zero_of_component_ne_zero X i j k hij hik hjk n
+      rho sign z hv)
+    (secondCoefficientEigenvalue_add_of_component_ne_zero X i j k hij hik hjk n
+      rho sign z hv)
+    (secondCoefficientEigenvalue_eq_one_or_neg_one X i j k hij hik hjk n sign)
+    a ha
+
 /-- If a nonzero component has a nontrivial plane character, then one of its
 two coefficient characters is already nontrivial. -/
 theorem exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
@@ -358,6 +432,44 @@ theorem exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
       norm_num at hmul
     · exact hb
   · exact Or.inl ⟨a, ha⟩
+
+/-- A nontrivial plane character on a nonzero Fourier component is detected
+on a single degree-bounded word monomial in one of the two root
+coordinates. -/
+theorem exists_word_coordinate_of_planeEigenvalue_eq_neg_one
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (g : Plane X i j k hij hik hjk n)
+    (hg : planeEigenvalue X i j k hij hik hjk n sign g = -1) :
+    (∃ (w : FreeMonoid X), FreeAlgebraDegree.freeWordLength X w ≤ n ∧
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign
+        ⟨FreeAlgebraDegree.wordMonomial X w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (by assumption)⟩ =
+        -1) ∨
+    (∃ (w : FreeMonoid X), FreeAlgebraDegree.freeWordLength X w ≤ n ∧
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign
+        ⟨FreeAlgebraDegree.wordMonomial X w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (by assumption)⟩ =
+        -1) := by
+  rcases exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
+      X i j k hij hik hjk n rho sign z hv g hg with ⟨a, ha⟩ | ⟨b, hb⟩
+  · left
+    obtain ⟨w, hw, hword⟩ :=
+      exists_supported_word_of_firstCoefficientEigenvalue_eq_neg_one
+        X i j k hij hik hjk n rho sign z hv a ha
+    have hdegree :=
+      ((FreeAlgebraDegree.mem_degreeLE_iff X a.1 n).1 a.2) w hw
+    exact ⟨w, hdegree, hword⟩
+  · right
+    obtain ⟨w, hw, hword⟩ :=
+      exists_supported_word_of_secondCoefficientEigenvalue_eq_neg_one
+        X i j k hij hik hjk n rho sign z hv b hb
+    have hdegree :=
+      ((FreeAlgebraDegree.mem_degreeLE_iff X b.1 n).1 b.2) w hw
+    exact ⟨w, hdegree, hword⟩
 
 end
 
