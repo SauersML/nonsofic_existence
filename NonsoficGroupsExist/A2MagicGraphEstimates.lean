@@ -164,5 +164,147 @@ theorem centerMovingRoot_norm_sq_le_of_root_exponent_two
   exact HilbertEpsilonOrthogonality.norm_add_sq_le
     (by positivity) hangle hsNX htNY
 
+/-- Defect form of the four-edge estimate in the moving representation of a
+vertex group.  The deficit is exactly the energy of the two root-edge
+components orthogonal to the central root fixed space. -/
+theorem vertex_four_fixed_norm_sq_le_restricted_with_defect
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (r : A2Root)
+    (rho : A.vertexGroup r →* (E ≃ₗᵢ[ℝ] E))
+    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r) rho)
+    {p q s t : E}
+    (hp : p ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.leftEdgeGroup r).subgroupOf (A.vertexGroup r)))
+    (hq : q ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.rightEdgeGroup r).subgroupOf (A.vertexGroup r)))
+    (hs : s ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.leftRootGroup r).subgroupOf (A.vertexGroup r)))
+    (ht : t ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.rightRootGroup r).subgroupOf (A.vertexGroup r))) :
+    let Z := (A.rootAt r).subgroupOf (A.vertexGroup r)
+    let sN := s - KazhdanFixedSpace.fixedProjection rho Z s
+    let tN := t - KazhdanFixedSpace.fixedProjection rho Z t
+    ‖p + q + s + t‖ ^ 2 ≤
+      2 * (‖p‖ ^ 2 + ‖q‖ ^ 2 + ‖s‖ ^ 2 + ‖t‖ ^ 2) -
+        (1 - (Real.sqrt 2)⁻¹) * (‖sN‖ ^ 2 + ‖tN‖ ^ 2) := by
+  let L := A.vertexGroup r
+  let X := (A.leftRootGroup r).subgroupOf L
+  let Y := (A.rightRootGroup r).subgroupOf L
+  let Z := (A.rootAt r).subgroupOf L
+  let H := (A.leftEdgeGroup r).subgroupOf L
+  let K := (A.rightEdgeGroup r).subgroupOf L
+  have hXZ : X ⊔ Z = H := by
+    rw [← Subgroup.subgroupOf_sup (A.leftRoot_le_vertexGroup r)
+      (A.rootAt_le_vertexGroup r)]
+    rfl
+  have hYZ : Y ⊔ Z = K := by
+    rw [← Subgroup.subgroupOf_sup (A.rightRoot_le_vertexGroup r)
+      (A.rootAt_le_vertexGroup r)]
+    rfl
+  have hZcenter : Z ≤ Subgroup.center L := A.rootAt_subgroupOf_le_center r
+  have hXnorm : X ≤ Subgroup.normalizer (Z : Set L) := by
+    intro x hx
+    apply Subgroup.centralizer_le_normalizer (Z : Set L)
+    rw [Subgroup.mem_centralizer_iff]
+    intro z hz
+    exact (Subgroup.mem_center_iff.mp (hZcenter hz) x).symm
+  have hYnorm : Y ≤ Subgroup.normalizer (Z : Set L) := by
+    intro y hy
+    apply Subgroup.centralizer_le_normalizer (Z : Set L)
+    rw [Subgroup.mem_centralizer_iff]
+    intro z hz
+    exact (Subgroup.mem_center_iff.mp (hZcenter hz) y).symm
+  letI : H.Normal := A.leftEdgeGroup_normalIn_vertexGroup r
+  have hedgeHK := KazhdanFixedSpace.fixedSubspaces_isOrtho_of_normal_generate
+    rho H K (A.edgeSubgroups_sup_top r) hno
+  have hedge : KazhdanFixedSpace.fixedSubspace rho (X ⊔ Z) ⟂
+      KazhdanFixedSpace.fixedSubspace rho (Y ⊔ Z) := by
+    simpa [hXZ, hYZ] using hedgeHK
+  have hangle :=
+    A.rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_exponent_two
+      hexp r rho hno
+  apply NormalEdgeCodistance.four_fixed_norm_sq_le_with_defect
+    rho X Y Z (by positivity) hXnorm hYnorm hedge
+  · simpa [X, Y] using hangle
+  · simpa [hXZ] using hp
+  · simpa [hYZ] using hq
+  · exact hs
+  · exact ht
+
+/-- The component of an incident edge difference which moves both under the
+vertex group and under its central root subgroup.  Completeness of the
+nested moving space is constructed internally, so this is a closed concrete
+definition rather than a certificate parameter. -/
+noncomputable def centralMovingIncidentComponent
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E) (r : A2Root) (n : Fin 4) : E := by
+  let L := A.vertexGroup r
+  let W := KazhdanFixedSpace.subgroupMovingSubspace rho L
+  letI : CompleteSpace W := by
+    dsimp [W, KazhdanFixedSpace.subgroupMovingSubspace]
+    exact (KazhdanFixedSpace.fixedSubspace rho L).isClosed_orthogonal.completeSpace_coe
+  let rhoW := KazhdanFixedSpace.subgroupMovingRepresentation rho L
+  let d : E := f r - f (neighbor r n)
+  let p : W :=
+    ⟨KazhdanFixedSpace.subgroupMovingProjection rho L d,
+      KazhdanFixedSpace.subgroupMovingProjection_mem rho L d⟩
+  let Z := (A.rootAt r).subgroupOf L
+  exact ↑(p - KazhdanFixedSpace.fixedProjection rhoW Z p : W)
+
+/-- The local defect estimate applied to the four oriented edge differences
+of a vertex-fixed family.  All projections here are constructed from the
+given representation; no local no-invariants hypothesis is supplied. -/
+theorem incidentMovingProjection_norm_sq_le_with_defect
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (r : A2Root) :
+    let L := A.vertexGroup r
+    let W := KazhdanFixedSpace.subgroupMovingSubspace rho L
+    let d : Fin 4 → E := fun n ↦ f r - f (neighbor r n)
+    let p : Fin 4 → W := fun n ↦
+      ⟨KazhdanFixedSpace.subgroupMovingProjection rho L (d n),
+        KazhdanFixedSpace.subgroupMovingProjection_mem rho L (d n)⟩
+    ‖∑ n : Fin 4, p n‖ ^ 2 ≤
+      2 * ∑ n : Fin 4, ‖p n‖ ^ 2 -
+        (1 - (Real.sqrt 2)⁻¹) *
+          (‖centralMovingIncidentComponent A rho f r 2‖ ^ 2 +
+            ‖centralMovingIncidentComponent A rho f r 3‖ ^ 2) := by
+  let L := A.vertexGroup r
+  let W := KazhdanFixedSpace.subgroupMovingSubspace rho L
+  letI : CompleteSpace W := by
+    dsimp [W, KazhdanFixedSpace.subgroupMovingSubspace]
+    exact (KazhdanFixedSpace.fixedSubspace rho L).isClosed_orthogonal.completeSpace_coe
+  let rhoW := KazhdanFixedSpace.subgroupMovingRepresentation rho L
+  let d : Fin 4 → E := fun n ↦ f r - f (neighbor r n)
+  let p : Fin 4 → W := fun n ↦
+    ⟨KazhdanFixedSpace.subgroupMovingProjection rho L (d n),
+      KazhdanFixedSpace.subgroupMovingProjection_mem rho L (d n)⟩
+  let Z := (A.rootAt r).subgroupOf L
+  let sN : W := p 2 - KazhdanFixedSpace.fixedProjection rhoW Z (p 2)
+  let tN : W := p 3 - KazhdanFixedSpace.fixedProjection rhoW Z (p 3)
+  have hd (n : Fin 4) : d n ∈
+      KazhdanFixedSpace.fixedSubspace rho (edgeGroup A r n) :=
+    vertexFixed_sub_neighbor_mem_edgeFixed A rho f hf r n
+  have hp (n : Fin 4) : p n ∈ KazhdanFixedSpace.fixedSubspace rhoW
+      ((edgeGroup A r n).subgroupOf L) := by
+    exact KazhdanFixedSpace.subgroupMovingProjection_mem_restricted_fixedSubspace
+      rho (edgeGroup A r n) L (edgeGroup_le_sourceVertex A r n) (hd n)
+  have hlocal := vertex_four_fixed_norm_sq_le_restricted_with_defect
+    A hexp r rhoW
+    (KazhdanFixedSpace.subgroupMovingRepresentation_hasNoInvariantVectors rho L)
+    (p := p 0) (q := p 1) (s := p 2) (t := p 3)
+    (by simpa [edgeGroup] using hp 0)
+    (by simpa [edgeGroup] using hp 1)
+    (by simpa [edgeGroup, A2System.leftRootGroup] using hp 2)
+    (by simpa [edgeGroup, A2System.rightRootGroup] using hp 3)
+  simpa [Fin.sum_univ_succ, add_assoc, Z, sN, tN,
+    centralMovingIncidentComponent, L, W, rhoW, d, p] using hlocal
+
 end A2MagicGraph
 end NonsoficGroupsExist
