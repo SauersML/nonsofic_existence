@@ -136,5 +136,114 @@ theorem finiteModel_propertyT_partition
     hcross, hedit, fun y U hUP hU hhalf ↦ ?_⟩
   exact blockStructure_block_expands (X := X) B γ target hrule y U hUP hU hhalf
 
+/-- Quantitative form of the finite partition theorem in which the internal
+sofic tolerance is chosen so that the total exceptional density is below an
+arbitrary prescribed `ρ`.  Only the resulting crossing estimate and the
+uniform block cut estimate remain in the interface. -/
+theorem finiteModel_propertyT_partition_with_density
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{0, 0} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation G) (target ρ : ℝ)
+    (htarget : 0 < target) (hρ : 0 < ρ) :
+    ∃ N : ℕ, ∀ n ≥ N, ∃ P : BlockStructure (A.model n),
+      (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+          P.block).card : ℝ) ≤
+        (2 * (S.card : ℝ) * ρ + 2 * target) *
+          Fintype.card (A.model n) ∧
+      ∀ y : A.model n, ∀ U : Finset (A.model n),
+        U ⊆ P.block y → U.Nonempty →
+        2 * U.card ≤ (P.block y).card →
+        uniformInputCutThreshold S (movementConstant S ε + 1) * U.card ≤
+          (generatorGraph (A.model n) S (A.map n)).boundaryCard U := by
+  classical
+  obtain ⟨k, c, _hc0, hc, hpart⟩ :=
+    finiteModel_propertyT_partition hQ S hQS hone hεone A target htarget
+  have hS : S.Nonempty := ⟨1, hone⟩
+  let a₁ : ℝ :=
+    (KunSmallBoundary.boundaryAlpha S target) ^ 2 *
+      (((c + KunSmallBoundary.boundaryContraction S target) / 2) - c) ^ 2
+  let a₂ : ℝ :=
+    (KunSmallBoundary.boundaryAlpha S target) ^ 2 *
+      ((movementConstant S ε + 1) - movementConstant S ε) ^ 2
+  have hα : 0 < KunSmallBoundary.boundaryAlpha S target :=
+    KunSmallBoundary.boundaryAlpha_pos S hS htarget
+  have hgap : 0 <
+      ((c + KunSmallBoundary.boundaryContraction S target) / 2) - c := by
+    linarith [hc]
+  have ha₁ : 0 < a₁ := by
+    dsimp [a₁]
+    positivity
+  have ha₂ : 0 < a₂ := by
+    dsimp [a₂]
+    have hdiff : (movementConstant S ε + 1) - movementConstant S ε = 1 := by
+      ring
+    rw [hdiff]
+    positivity
+  let a : ℝ := min a₁ a₂
+  have ha : 0 < a := lt_min ha₁ ha₂
+  let θ : ℝ := ρ / 2
+  have hθ : 0 < θ := by dsimp [θ]; positivity
+  let R : ℝ := ((S.card + 1) ^ (2 * (k + 1)) : ℕ)
+  have hR : 0 < R := by
+    dsimp [R]
+    positivity
+  let δ : ℝ := Real.sqrt (a * θ / R)
+  have hδ : 0 < δ := by
+    dsimp [δ]
+    exact Real.sqrt_pos.2 (div_pos (mul_pos ha hθ) hR)
+  have hRδ : R * δ ^ 2 = a * θ := by
+    dsimp [δ]
+    rw [Real.sq_sqrt (div_nonneg (mul_nonneg ha.le hθ.le) hR.le)]
+    field_simp
+  obtain ⟨N, hN⟩ := hpart δ hδ
+  refine ⟨N, fun n hn ↦ ?_⟩
+  obtain ⟨Bcontract, Bmovement, P, hBcontract, hBmovement,
+    hcross, _hedit, hexpand⟩ := hN n hn
+  have hcontract : (Bcontract.card : ℝ) ≤
+      θ * Fintype.card (A.model n) := by
+    have hscale : a * (Bcontract.card : ℝ) ≤
+        a₁ * Bcontract.card := by
+      exact mul_le_mul_of_nonneg_right (min_le_left a₁ a₂) (by positivity)
+    have hbound : a * (Bcontract.card : ℝ) ≤
+        a * (θ * Fintype.card (A.model n)) := by
+      calc
+        a * (Bcontract.card : ℝ) ≤ a₁ * Bcontract.card := hscale
+        _ ≤ R * (δ ^ 2 * Fintype.card (A.model n)) := by
+          simpa [a₁, R] using hBcontract
+        _ = a * (θ * Fintype.card (A.model n)) := by
+          rw [mul_assoc, hRδ]
+          ring
+    exact (mul_le_mul_left ha).mp hbound
+  have hmovement : (Bmovement.card : ℝ) ≤
+      θ * Fintype.card (A.model n) := by
+    have hscale : a * (Bmovement.card : ℝ) ≤
+        a₂ * Bmovement.card := by
+      exact mul_le_mul_of_nonneg_right (min_le_right a₁ a₂) (by positivity)
+    have hbound : a * (Bmovement.card : ℝ) ≤
+        a * (θ * Fintype.card (A.model n)) := by
+      calc
+        a * (Bmovement.card : ℝ) ≤ a₂ * Bmovement.card := hscale
+        _ ≤ R * (δ ^ 2 * Fintype.card (A.model n)) := by
+          simpa [a₂, R] using hBmovement
+        _ = a * (θ * Fintype.card (A.model n)) := by
+          rw [mul_assoc, hRδ]
+          ring
+    exact (mul_le_mul_left ha).mp hbound
+  have hbad : (Bcontract.card : ℝ) + Bmovement.card ≤
+      ρ * Fintype.card (A.model n) := by
+    dsimp [θ] at hcontract hmovement
+    linarith
+  refine ⟨P, ?_, hexpand⟩
+  calc
+    (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+        P.block).card : ℝ) ≤
+        2 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+          2 * target * Fintype.card (A.model n) := hcross
+    _ ≤ 2 * (S.card : ℝ) *
+          (ρ * Fintype.card (A.model n)) +
+        2 * target * Fintype.card (A.model n) := by gcongr
+    _ = (2 * (S.card : ℝ) * ρ + 2 * target) *
+        Fintype.card (A.model n) := by ring
+
 end KunFinitePartition
 end NonsoficGroupsExist
