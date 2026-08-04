@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.KunFiniteMarkov
+import NonsoficGroupsExist.PermutationConservation
 
 /-!
 # Markov displacement and labeled cut size
@@ -24,6 +25,27 @@ with their occurrences even when their assigned permutations coincide. -/
 def generatorCutSize (M : FiniteModel) (τ : G → Equiv.Perm M)
     (S : Finset G) (U : Finset M) : ℕ :=
   ∑ s ∈ S, ((U.map (τ s).toEmbedding) ∆ U).card
+
+omit [Group G] in
+/-- The directed occurrence cut has the elementary degree bound `2|S||U|`. -/
+theorem generatorCutSize_le_two_mul_card
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (U : Finset M) :
+    generatorCutSize M τ S U ≤ 2 * S.card * U.card := by
+  unfold generatorCutSize
+  calc
+    ∑ s ∈ S, ((U.map (τ s).toEmbedding) ∆ U).card ≤
+        ∑ _s ∈ S, 2 * U.card := by
+      apply Finset.sum_le_sum
+      intro s _
+      calc
+        ((U.map (τ s).toEmbedding) ∆ U).card ≤
+            ((U.map (τ s).toEmbedding) ∪ U).card :=
+          Finset.card_le_card Finset.symmDiff_subset_union
+        _ ≤ (U.map (τ s).toEmbedding).card + U.card :=
+          Finset.card_union_le _ _
+        _ = 2 * U.card := by simp; omega
+    _ = 2 * S.card * U.card := by simp; ring
 
 omit [Group G] in
 /-- Hilbert-space Jensen inequality for a nonempty finite average. -/
@@ -113,6 +135,25 @@ theorem finiteModelAverage_between_zero_one
     exact mul_le_mul_of_nonneg_left hsum1 (inv_nonneg.mpr hcard.le)
 
 omit [Group G] in
+/-- A nonempty finite permutation average preserves total mass. -/
+theorem sum_finiteModelAverage
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
+    (hS : S.Nonempty) (x : EuclideanSpace ℝ M) :
+    ∑ y, finiteModelAverage M τ S x y = ∑ y, x y := by
+  have hcard : (S.card : ℝ) ≠ 0 := by
+    exact_mod_cast Finset.card_ne_zero.mpr hS
+  have hperm (s : G) :
+      ∑ y, permutationOperator (τ s) x y = ∑ y, x y := by
+    simpa [permutationOperator] using sum_comp_equiv (τ s).symm x
+  have havg_apply (y : M) : finiteModelAverage M τ S x y =
+      (S.card : ℝ)⁻¹ * ∑ s ∈ S, permutationOperator (τ s) x y := by
+    simp [finiteModelAverage]
+  simp_rw [havg_apply]
+  rw [← Finset.mul_sum, Finset.sum_comm]
+  simp_rw [hperm]
+  simp [hcard]
+
+omit [Group G] in
 /-- Centering does not alter a Markov displacement. -/
 theorem finiteModelAverage_centeredIndicator_sub
     (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
@@ -151,6 +192,26 @@ theorem norm_finiteModelAverage_indicator_sub_sq_le
       apply Finset.sum_congr rfl
       intro s hs
       exact_mod_cast norm_permutationOperator_indicator_sub_sq (τ s) U
+
+omit [Group G] in
+/-- The first Markov displacement of an indicator is at most `√(2|U|)`. -/
+theorem norm_finiteModelAverage_indicator_sub_sq_le_two_card
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
+    (hS : S.Nonempty) (U : Finset M) :
+    ‖finiteModelAverage M τ S (indicator U) - indicator U‖ ^ 2 ≤
+      2 * U.card := by
+  have hcard : (S.card : ℝ) ≠ 0 := by
+    exact_mod_cast Finset.card_ne_zero.mpr hS
+  have hcut : (generatorCutSize M τ S U : ℝ) ≤
+      2 * (S.card : ℝ) * U.card := by
+    exact_mod_cast generatorCutSize_le_two_mul_card M τ S U
+  calc
+    ‖finiteModelAverage M τ S (indicator U) - indicator U‖ ^ 2 ≤
+        (S.card : ℝ)⁻¹ * generatorCutSize M τ S U :=
+      norm_finiteModelAverage_indicator_sub_sq_le M τ S hS U
+    _ ≤ (S.card : ℝ)⁻¹ * (2 * (S.card : ℝ) * U.card) := by
+      gcongr
+    _ = 2 * U.card := by field_simp
 
 omit [Group G] in
 /-- The same cut-energy bound for centered indicators. -/
@@ -208,6 +269,35 @@ theorem finiteModelIndicatorIterate_between_zero_one
         (A.model n) (A.map n) S hS
         (finiteModelIndicatorIterate A n U S k)
         (fun y ↦ (ih y).1) (fun y ↦ (ih y).2) y
+
+/-- Every uncentered indicator trajectory has the same total mass as its
+initial set. -/
+theorem sum_finiteModelIndicatorIterate
+    (A : SoficApproximation G) (n : ℕ) (U : Finset (A.model n))
+    (S : Finset G) (hS : S.Nonempty) (k : ℕ) :
+    ∑ y, finiteModelIndicatorIterate A n U S k y = U.card := by
+  induction k with
+  | zero => simp [finiteModelIndicatorIterate, indicator_apply]
+  | succ k ih =>
+      rw [finiteModelIndicatorIterate_succ,
+        sum_finiteModelAverage (A.model n) (A.map n) S hS, ih]
+
+/-- The squared norm of an indicator Markov iterate is at most the cardinality
+of its initial set. -/
+theorem norm_finiteModelIndicatorIterate_sq_le_card
+    (A : SoficApproximation G) (n : ℕ) (U : Finset (A.model n))
+    (S : Finset G) (hS : S.Nonempty) (k : ℕ) :
+    ‖finiteModelIndicatorIterate A n U S k‖ ^ 2 ≤ U.card := by
+  rw [EuclideanSpace.real_norm_sq_eq]
+  calc
+    ∑ y, (finiteModelIndicatorIterate A n U S k y) ^ 2 ≤
+        ∑ y, finiteModelIndicatorIterate A n U S k y := by
+      apply Finset.sum_le_sum
+      intro y _
+      obtain ⟨hy0, hy1⟩ :=
+        finiteModelIndicatorIterate_between_zero_one A n U S hS k y
+      nlinarith [mul_nonneg hy0 (sub_nonneg.mpr hy1)]
+    _ = U.card := sum_finiteModelIndicatorIterate A n U S hS k
 
 /-- Markov displacement norms are nonincreasing along the genuine finite
 trajectory. -/

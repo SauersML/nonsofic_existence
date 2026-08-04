@@ -11,6 +11,7 @@ import NonsoficGroupsExist.KunBoundary
 import NonsoficGroupsExist.KunRounding
 import NonsoficGroupsExist.KunThreshold
 import NonsoficGroupsExist.KunGeneratorGraph
+import NonsoficGroupsExist.KunSupport
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation
