@@ -211,9 +211,9 @@ theorem finiteModel_propertyT_partition_with_density
         _ ≤ R * (δ ^ 2 * Fintype.card (A.model n)) := by
           simpa [a₁, R] using hBcontract
         _ = a * (θ * Fintype.card (A.model n)) := by
-          rw [mul_assoc, hRδ]
+          rw [← mul_assoc, hRδ]
           ring
-    exact (mul_le_mul_left ha).mp hbound
+    nlinarith
   have hmovement : (Bmovement.card : ℝ) ≤
       θ * Fintype.card (A.model n) := by
     have hscale : a * (Bmovement.card : ℝ) ≤
@@ -226,9 +226,9 @@ theorem finiteModel_propertyT_partition_with_density
         _ ≤ R * (δ ^ 2 * Fintype.card (A.model n)) := by
           simpa [a₂, R] using hBmovement
         _ = a * (θ * Fintype.card (A.model n)) := by
-          rw [mul_assoc, hRδ]
+          rw [← mul_assoc, hRδ]
           ring
-    exact (mul_le_mul_left ha).mp hbound
+    nlinarith
   have hbad : (Bcontract.card : ℝ) + Bmovement.card ≤
       ρ * Fintype.card (A.model n) := by
     dsimp [θ] at hcontract hmovement

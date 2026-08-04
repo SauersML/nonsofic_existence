@@ -19,7 +19,7 @@ open KunUniformRounding
 variable {G : Type} [Group G]
 
 /-- The accuracy used at diagonal stage `n`. -/
-def densityScale (n : ℕ) : ℝ := 1 / ((n : ℝ) + 1)
+noncomputable def densityScale (n : ℕ) : ℝ := 1 / ((n : ℝ) + 1)
 
 theorem densityScale_pos (n : ℕ) : 0 < densityScale n := by
   unfold densityScale
@@ -99,9 +99,16 @@ theorem exists_reindexed_partition
     apply Vanishing.squeeze
       (fun n ↦ div_nonneg (by positivity) (by positivity)) _ hvanish
     intro n
+    by_cases hcardZero :
+        Fintype.card ((A.reindex φ hφ).model n) = 0
+    · have hcardReal :
+          (Fintype.card ((A.reindex φ hφ).model n) : ℝ) = 0 := by
+        exact_mod_cast hcardZero
+      rw [hcardReal, div_zero]
+      exact mul_nonneg (by dsimp [C]; positivity) (densityScale_pos n).le
     have hcardPos : (0 : ℝ) <
         Fintype.card ((A.reindex φ hφ).model n) := by
-      exact_mod_cast ((A.reindex φ hφ).model n).nonempty
+      exact_mod_cast Nat.pos_of_ne_zero hcardZero
     apply (div_le_iff₀ hcardPos).2
     calc
       (((generatorGraph ((A.reindex φ hφ).model n) S

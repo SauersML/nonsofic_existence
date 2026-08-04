@@ -39,7 +39,9 @@ theorem card_wordCrossing_le_crossingEdges
     intro y z heq
     apply Subtype.ext
     exact congrArg (fun e ↦ e.1.1.2) heq
-  simpa [Fintype.card_coe] using Fintype.card_le_of_injective f hf
+  have hcard := Fintype.card_le_of_injective f hf
+  rw [Fintype.card_coe, Fintype.card_coe] at hcard
+  exact hcard
 
 /-- Every crossing newly created by singletonizing bad blocks is incident,
 before or after applying the permutation, to the bad-vertex locus. -/
