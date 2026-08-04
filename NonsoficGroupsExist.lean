@@ -94,6 +94,7 @@ import NonsoficGroupsExist.ExpanderReindex
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.ConcreteLeavitt
+import NonsoficGroupsExist.ConcreteRankEquivalence
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittMatrixCompression
