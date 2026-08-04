@@ -49,5 +49,63 @@ theorem laplacian_add_const (f : Fin 6 → E) (x : E) (i : Fin 6) :
     laplacian (fun _ ↦ x) i = 0 := by
   simp [laplacian]
 
+section InnerProduct
+
+variable [InnerProductSpace ℝ E]
+
+/-- The elementary opposite-pair estimate behind the eigenvalue `4`. -/
+theorem oppositePair_laplacian_norm_sq_ge (x y : E) :
+    16 * (‖x‖ ^ 2 + ‖y‖ ^ 2) ≤
+      ‖(5 : ℝ) • x + y‖ ^ 2 + ‖x + (5 : ℝ) • y‖ ^ 2 := by
+  have hidentity :
+      ‖(5 : ℝ) • x + y‖ ^ 2 + ‖x + (5 : ℝ) • y‖ ^ 2 =
+        16 * (‖x‖ ^ 2 + ‖y‖ ^ 2) + 10 * ‖x + y‖ ^ 2 := by
+    rw [norm_add_sq_real, norm_add_sq_real, norm_add_sq_real]
+    rw [norm_smul, norm_smul, Real.norm_eq_abs, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 5)]
+    simp only [inner_smul_left, inner_smul_right]
+    rw [real_inner_comm y x]
+    norm_num
+    ring
+  calc
+    16 * (‖x‖ ^ 2 + ‖y‖ ^ 2) ≤
+        16 * (‖x‖ ^ 2 + ‖y‖ ^ 2) + 10 * ‖x + y‖ ^ 2 :=
+      le_add_of_nonneg_right (mul_nonneg (by norm_num) (sq_nonneg _))
+    _ = ‖(5 : ℝ) • x + y‖ ^ 2 + ‖x + (5 : ℝ) • y‖ ^ 2 := hidentity.symm
+
+/-- On the zero-sum subspace, the squared norm of the magic-graph Laplacian
+is at least `4²` times the squared coordinate norm. -/
+theorem laplacian_norm_sq_ge_sixteen
+    (f : Fin 6 → E) (htotal : total f = 0) :
+    16 * ∑ i, ‖f i‖ ^ 2 ≤ ∑ i, ‖laplacian f i‖ ^ 2 := by
+  have hlap (i : Fin 6) :
+      laplacian f i = (5 : ℝ) • f i + f (oppositeIndex i) := by
+    rw [laplacian_eq_five_smul_add_opposite_sub_total, htotal]
+    simp only [sub_zero]
+    congr 1
+    exact (Nat.cast_smul_eq_nsmul ℝ 5 (f i)).symm
+  have h02 := oppositePair_laplacian_norm_sq_ge (f 0) (f 2)
+  have h14 := oppositePair_laplacian_norm_sq_ge (f 1) (f 4)
+  have h35 := oppositePair_laplacian_norm_sq_ge (f 3) (f 5)
+  calc
+    16 * ∑ i, ‖f i‖ ^ 2 =
+        16 * (‖f 0‖ ^ 2 + ‖f 2‖ ^ 2) +
+          16 * (‖f 1‖ ^ 2 + ‖f 4‖ ^ 2) +
+          16 * (‖f 3‖ ^ 2 + ‖f 5‖ ^ 2) := by
+            simp [Fin.sum_univ_succ]
+            ring
+    _ ≤ (‖(5 : ℝ) • f 0 + f 2‖ ^ 2 + ‖f 0 + (5 : ℝ) • f 2‖ ^ 2) +
+        (‖(5 : ℝ) • f 1 + f 4‖ ^ 2 + ‖f 1 + (5 : ℝ) • f 4‖ ^ 2) +
+        (‖(5 : ℝ) • f 3 + f 5‖ ^ 2 + ‖f 3 + (5 : ℝ) • f 5‖ ^ 2) := by
+          exact add_le_add (add_le_add h02 h14) h35
+    _ = ∑ i, ‖laplacian f i‖ ^ 2 := by
+      simp_rw [hlap]
+      simp [oppositeIndex, Fin.sum_univ_succ]
+      rw [show f 0 + (5 : ℝ) • f 2 = (5 : ℝ) • f 2 + f 0 by abel]
+      rw [show f 1 + (5 : ℝ) • f 4 = (5 : ℝ) • f 4 + f 1 by abel]
+      rw [show f 3 + (5 : ℝ) • f 5 = (5 : ℝ) • f 5 + f 3 by abel]
+      ring
+
+end InnerProduct
+
 end A2MagicLaplacian
 end NonsoficGroupsExist
