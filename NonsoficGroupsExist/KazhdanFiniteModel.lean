@@ -743,6 +743,59 @@ theorem normalizedGramCorrelation_eq_relative (M : FiniteModel)
   exact congrArg (fun r : ℝ ↦ r / Fintype.card M) hinner
 
 omit [Group G] in
+/-- Every finite matrix of normalized Gram coefficients is positive
+semidefinite. -/
+theorem normalizedGramCorrelation_quadratic_nonneg
+    {I : Type*} (F : Finset I) (c : I → ℝ)
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (a : I → G) :
+    0 ≤ ∑ i ∈ F, ∑ j ∈ F,
+      c i * c j * normalizedGramCorrelation M τ U (a i) (a j) := by
+  classical
+  by_cases hcard : Fintype.card M = 0
+  · simp [normalizedGramCorrelation, hcard]
+  · have hcardNat : 0 < Fintype.card M := Nat.pos_of_ne_zero hcard
+    have hcardReal : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
+    let v : I → EuclideanSpace ℝ M := fun i ↦
+      permutationOperator (τ (a i)) (centeredIndicator U)
+    let z : EuclideanSpace ℝ M := ∑ i ∈ F, c i • v i
+    have hz : 0 ≤ ‖z‖ ^ 2 := sq_nonneg _
+    have hsum :
+        (∑ i ∈ F, ∑ j ∈ F, c i * c j * inner ℝ (v i) (v j)) =
+          ‖z‖ ^ 2 := by
+      calc
+        (∑ i ∈ F, ∑ j ∈ F, c i * c j * inner ℝ (v i) (v j)) =
+            ∑ i ∈ F, inner ℝ (c i • v i) z := by
+          apply Finset.sum_congr rfl
+          intro i hi
+          rw [show z = ∑ j ∈ F, c j • v j by rfl, inner_sum]
+          apply Finset.sum_congr rfl
+          intro j hj
+          rw [inner_smul_left, inner_smul_right]
+          simp [mul_assoc]
+        _ = inner ℝ z z := by
+          rw [show z = ∑ i ∈ F, c i • v i by rfl, sum_inner]
+        _ = ‖z‖ ^ 2 := real_inner_self_eq_norm_sq z
+    unfold normalizedGramCorrelation
+    calc
+      0 ≤ ‖z‖ ^ 2 / Fintype.card M :=
+        div_nonneg hz hcardReal.le
+      _ = ∑ i ∈ F, ∑ j ∈ F,
+          c i * c j *
+            (inner ℝ (permutationOperator (τ (a i)) (centeredIndicator U))
+              (permutationOperator (τ (a j)) (centeredIndicator U)) /
+                Fintype.card M) := by
+        rw [← hsum]
+        rw [Finset.sum_div]
+        apply Finset.sum_congr rfl
+        intro i hi
+        rw [Finset.sum_div]
+        apply Finset.sum_congr rfl
+        intro j hj
+        simp only [v]
+        ring
+
+omit [Group G] in
 /-- Changing a permutation on a set of normalized Hamming size `d` changes
 every normalized centered-indicator coefficient by at most `√(2d)`.  The
 squared formulation avoids introducing square roots. -/
