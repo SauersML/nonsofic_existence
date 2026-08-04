@@ -35,6 +35,104 @@ def VertexCodistanceBound (A : A2System G) (gamma : ℝ) : Prop :=
         ‖∑ a, f a‖ ^ 2 ≤
           Fintype.card A2Root * gamma * ∑ a, ‖f a‖ ^ 2
 
+/-- Equivalent operator-facing target for the spectral proof: the sum of the
+squared norms of the six vertex-fixed projections is uniformly bounded. -/
+def VertexProjectionBound (A : A2System G) (gamma : ℝ) : Prop :=
+  ∀ (E : Type v) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [CompleteSpace E],
+    ∀ rho : G →* (E ≃ₗᵢ[ℝ] E),
+      IsKazhdanPair.HasNoInvariantVectors G rho →
+      ∀ x : E,
+        ∑ a : A2Root,
+            ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) x : E)‖ ^ 2 ≤
+          Fintype.card A2Root * gamma * ‖x‖ ^ 2
+
+/-- The projection formulation implies the standard six-subspace codistance
+inequality by self-adjointness and finite Cauchy--Schwarz. -/
+theorem vertexCodistanceBound_of_projectionBound
+    (A : A2System G) {gamma : ℝ} (hgamma : 0 ≤ gamma)
+    (hprojection : VertexProjectionBound.{u, v} A gamma) :
+    VertexCodistanceBound.{u, v} A gamma := by
+  intro E _ _ _ rho hno f hf
+  let S : E := ∑ a, f a
+  let p : A2Root → E := fun a ↦
+    KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) S
+  have hinner (a : A2Root) : inner ℝ (f a) S = inner ℝ (f a) (p a) := by
+    let U := KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup a)
+    letI : CompleteSpace U :=
+      (KazhdanFixedSpace.isClosed_fixedSubspace rho
+        (A.vertexGroup a)).completeSpace_coe
+    calc
+      inner ℝ (f a) S = inner ℝ (U.starProjection (f a)) S := by
+        rw [U.starProjection_eq_self_iff.mpr (hf a)]
+      _ = inner ℝ (f a) (U.starProjection S) :=
+        U.inner_starProjection_left_eq_right (f a) S
+      _ = inner ℝ (f a) (p a) := rfl
+  have hsumInner : ‖S‖ ^ 2 = ∑ a, inner ℝ (f a) (p a) := by
+    calc
+      ‖S‖ ^ 2 = inner ℝ S S := (real_inner_self_eq_norm_sq S).symm
+      _ = ∑ a, inner ℝ (f a) S := by
+        dsimp [S]
+        rw [sum_inner]
+      _ = ∑ a, inner ℝ (f a) (p a) := by
+        apply Finset.sum_congr rfl
+        intro a ha
+        exact hinner a
+  have hsumAbs : ‖S‖ ^ 2 ≤ ∑ a, ‖f a‖ * ‖p a‖ := by
+    rw [hsumInner]
+    calc
+      ∑ a, inner ℝ (f a) (p a) ≤
+          ∑ a, |inner ℝ (f a) (p a)| := by
+        apply Finset.sum_le_sum
+        intro a ha
+        exact le_abs_self _
+      _ ≤ ∑ a, ‖f a‖ * ‖p a‖ := by
+        apply Finset.sum_le_sum
+        intro a ha
+        exact abs_real_inner_le_norm _ _
+  have hcauchy : (∑ a, ‖f a‖ * ‖p a‖) ^ 2 ≤
+      (∑ a, ‖f a‖ ^ 2) * ∑ a, ‖p a‖ ^ 2 := by
+    simpa using Finset.sum_mul_sq_le_sq_mul_sq
+      (s := (Finset.univ : Finset A2Root))
+      (f := fun a ↦ ‖f a‖) (g := fun a ↦ ‖p a‖)
+  have hsumSq : ‖S‖ ^ 4 ≤
+      (∑ a, ‖f a‖ ^ 2) * ∑ a, ‖p a‖ ^ 2 := by
+    have hsquare := sq_le_sq₀ (sq_nonneg ‖S‖)
+      (Finset.sum_nonneg fun a ha ↦ mul_nonneg (norm_nonneg _) (norm_nonneg _))
+      |>.mpr hsumAbs
+    calc
+      ‖S‖ ^ 4 = (‖S‖ ^ 2) ^ 2 := by ring
+      _ ≤ (∑ a, ‖f a‖ ^ 2) * ∑ a, ‖p a‖ ^ 2 := hsquare.trans hcauchy
+  have hpbound := hprojection E rho hno S
+  change ∑ a, ‖p a‖ ^ 2 ≤
+    Fintype.card A2Root * gamma * ‖S‖ ^ 2 at hpbound
+  by_cases hS : S = 0
+  · change ‖S‖ ^ 2 ≤
+      Fintype.card A2Root * gamma * ∑ a, ‖f a‖ ^ 2
+    rw [hS, norm_zero, zero_pow (by norm_num : (2 : ℕ) ≠ 0)]
+    exact mul_nonneg
+      (mul_nonneg (Nat.cast_nonneg _) hgamma)
+      (Finset.sum_nonneg fun a ha ↦ sq_nonneg _)
+  · have hSnorm : 0 < ‖S‖ := norm_pos_iff.mpr hS
+    have hcombine : ‖S‖ ^ 4 ≤
+        (∑ a, ‖f a‖ ^ 2) *
+          (Fintype.card A2Root * gamma * ‖S‖ ^ 2) :=
+      hsumSq.trans (mul_le_mul_of_nonneg_left hpbound
+        (Finset.sum_nonneg fun a ha ↦ sq_nonneg _))
+    change ‖S‖ ^ 2 ≤
+      Fintype.card A2Root * gamma * ∑ a, ‖f a‖ ^ 2
+    have hspos : 0 < ‖S‖ ^ 2 := sq_pos_of_pos hSnorm
+    have hcancel :
+        ‖S‖ ^ 2 * ‖S‖ ^ 2 ≤
+          (Fintype.card A2Root * gamma * ∑ a, ‖f a‖ ^ 2) * ‖S‖ ^ 2 := by
+      calc
+        ‖S‖ ^ 2 * ‖S‖ ^ 2 = ‖S‖ ^ 4 := by ring
+        _ ≤ (∑ a, ‖f a‖ ^ 2) *
+            (Fintype.card A2Root * gamma * ‖S‖ ^ 2) := hcombine
+        _ = (Fintype.card A2Root * gamma * ∑ a, ‖f a‖ ^ 2) * ‖S‖ ^ 2 := by
+          ring
+    nlinarith
+
 /-- Membership in every root fixed subspace implies global invariance because
 the six root subgroups generate the group. -/
 theorem invariant_of_mem_root_fixedSubspaces (A : A2System G)

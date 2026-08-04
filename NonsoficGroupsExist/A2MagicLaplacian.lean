@@ -26,6 +26,10 @@ def total (f : Fin 6 → E) : E := ∑ i, f i
 def laplacian (f : Fin 6 → E) (i : Fin 6) : E :=
   ∑ n : Fin 4, (f i - f (neighborIndex i n))
 
+/-- Integral centering: `6 fᵢ - Σf`.  This avoids division while retaining
+exactly the zero-sum component of a family. -/
+def centered (f : Fin 6 → E) (i : Fin 6) : E := 6 • f i - total f
+
 /-- Each vertex sees every vertex except itself and its opposite. -/
 theorem laplacian_eq_five_smul_add_opposite_sub_total
     (f : Fin 6 → E) (i : Fin 6) :
@@ -48,6 +52,18 @@ theorem laplacian_add_const (f : Fin 6 → E) (x : E) (i : Fin 6) :
 @[simp] theorem laplacian_const (x : E) (i : Fin 6) :
     laplacian (fun _ ↦ x) i = 0 := by
   simp [laplacian]
+
+@[simp] theorem total_centered (f : Fin 6 → E) : total (centered f) = 0 := by
+  simp [total, centered, Fin.sum_univ_succ]
+
+theorem laplacian_centered (f : Fin 6 → E) (i : Fin 6) :
+    laplacian (centered f) i = 6 • laplacian f i := by
+  unfold laplacian
+  rw [Finset.smul_sum]
+  apply Finset.sum_congr rfl
+  intro n hn
+  simp only [centered]
+  module
 
 section InnerProduct
 
@@ -104,6 +120,13 @@ theorem laplacian_norm_sq_ge_sixteen
       rw [show f 1 + (5 : ℝ) • f 4 = (5 : ℝ) • f 4 + f 1 by abel]
       rw [show f 3 + (5 : ℝ) • f 5 = (5 : ℝ) • f 5 + f 3 by abel]
       ring
+
+/-- Division-free Poincaré inequality for an arbitrary six-tuple. -/
+theorem centered_norm_sq_le_laplacian_norm_sq (f : Fin 6 → E) :
+    16 * ∑ i, ‖centered f i‖ ^ 2 ≤
+      ∑ i, ‖6 • laplacian f i‖ ^ 2 := by
+  have h := laplacian_norm_sq_ge_sixteen (centered f) (total_centered f)
+  simpa only [laplacian_centered] using h
 
 end InnerProduct
 
