@@ -14,6 +14,59 @@ namespace NonsoficGroupsExist
 
 namespace A2MagicGraph
 
+/-- Explicit enumeration `(01,02,10,12,20,21)` of the six vertices. -/
+def vertex : Fin 6 → A2Root :=
+  ![⟨((0 : Fin 3), (1 : Fin 3)), by
+      intro h; have := congrArg Fin.val h; norm_num at this⟩,
+    ⟨((0 : Fin 3), (2 : Fin 3)), by
+      intro h; have := congrArg Fin.val h; norm_num at this⟩,
+    ⟨((1 : Fin 3), (0 : Fin 3)), by
+      intro h; have := congrArg Fin.val h; norm_num at this⟩,
+    ⟨((1 : Fin 3), (2 : Fin 3)), by
+      intro h; have := congrArg Fin.val h; norm_num at this⟩,
+    ⟨((2 : Fin 3), (0 : Fin 3)), by
+      intro h; have := congrArg Fin.val h; norm_num at this⟩,
+    ⟨((2 : Fin 3), (1 : Fin 3)), by
+      intro h; have := congrArg Fin.val h; norm_num at this⟩]
+
+theorem vertex_injective : Function.Injective vertex := by
+  intro i j hij
+  fin_cases i <;> fin_cases j <;> simp_all [vertex]
+
+theorem vertex_surjective : Function.Surjective vertex := by
+  rintro ⟨⟨i, j⟩, hij⟩
+  fin_cases i <;> fin_cases j
+  · exact (hij rfl).elim
+  · exact ⟨0, by apply Subtype.ext; rfl⟩
+  · exact ⟨1, by apply Subtype.ext; rfl⟩
+  · exact ⟨2, by apply Subtype.ext; rfl⟩
+  · exact (hij rfl).elim
+  · exact ⟨3, by apply Subtype.ext; rfl⟩
+  · exact ⟨4, by apply Subtype.ext; rfl⟩
+  · exact ⟨5, by apply Subtype.ext; rfl⟩
+  · exact (hij rfl).elim
+
+/-- The concrete enumeration as an equivalence. -/
+noncomputable def vertexEquiv : Fin 6 ≃ A2Root :=
+  Equiv.ofBijective vertex ⟨vertex_injective, vertex_surjective⟩
+
+@[simp] theorem vertexEquiv_apply (i : Fin 6) : vertexEquiv i = vertex i := rfl
+
+theorem a2Root_card : Fintype.card A2Root = 6 := by
+  simpa using (Fintype.card_congr vertexEquiv).symm
+
+/-- Opposite vertices in the explicit six-element indexing. -/
+def oppositeIndex : Fin 6 → Fin 6 := ![2, 4, 0, 5, 1, 3]
+
+/-- The four neighbors in the explicit six-element indexing. -/
+def neighborIndex : Fin 6 → Fin 4 → Fin 6 :=
+  ![![1, 5, 3, 4],
+    ![0, 3, 5, 2],
+    ![3, 4, 1, 5],
+    ![2, 1, 4, 0],
+    ![5, 2, 0, 3],
+    ![4, 0, 2, 1]]
+
 /-- The vertex opposite `(i,j)` is `(j,i)`. -/
 def opposite (r : A2Root) : A2Root :=
   ⟨(r.1.2, r.1.1), r.2.symm⟩
@@ -28,6 +81,15 @@ def neighbor (r : A2Root) : Fin 4 → A2Root :=
     ⟨(k, j), a2ThirdIndex_ne_right i j r.2⟩,
     ⟨(j, k), (a2ThirdIndex_ne_right i j r.2).symm⟩,
     ⟨(k, i), a2ThirdIndex_ne_left i j r.2⟩]
+
+@[simp] theorem vertex_oppositeIndex (i : Fin 6) :
+    vertex (oppositeIndex i) = opposite (vertex i) := by
+  fin_cases i <;> simp [vertex, oppositeIndex, opposite]
+
+@[simp] theorem vertex_neighborIndex (i : Fin 6) (n : Fin 4) :
+    vertex (neighborIndex i n) = neighbor (vertex i) n := by
+  fin_cases i <;> fin_cases n <;>
+    simp [vertex, neighborIndex, neighbor, a2ThirdIndex]
 
 @[simp] theorem third_same_left (i j : Fin 3) (hij : i ≠ j) :
     a2ThirdIndex i (a2ThirdIndex i j) = j := by
