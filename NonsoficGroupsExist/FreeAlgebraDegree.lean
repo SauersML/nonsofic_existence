@@ -211,6 +211,57 @@ theorem eq_sum_support_smul_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
         (R := ZMod 2) (X := X) p).coeff)
   simpa [Finsupp.sum] using h.symm
 
+omit [Fintype X] in
+/-- Over `ZMod 2`, every nonzero coefficient is one, so a free polynomial is
+the sum of exactly the basis words in its support. -/
+theorem eq_sum_support_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
+    p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) p).coeff.support,
+      wordMonomial X w := by
+  calc
+    p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := ZMod 2) (X := X) p).coeff.support,
+        ((FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := ZMod 2) (X := X) p).coeff w) • wordMonomial X w :=
+      eq_sum_support_smul_wordMonomial X p
+    _ = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := ZMod 2) (X := X) p).coeff.support,
+        wordMonomial X w := by
+      apply Finset.sum_congr rfl
+      intro w hw
+      let c := (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) p).coeff w
+      have hcoeff : c = 1 := by
+        have hn : c ≠ 0 := by
+          simpa using hw
+        fin_cases c <;> simp_all
+      simp [c, hcoeff]
+
+/-- A degree-bounded free polynomial is the sum, inside its degree submodule,
+of the basis words in its support. -/
+theorem eq_sum_support_degreeWordMonomial {n : ℕ} (p : degreeLE X n) :
+    let q := (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+      (R := ZMod 2) (X := X) p.1).coeff
+    let term : {w // w ∈ q.support} → degreeLE X n := fun w ↦
+      ⟨wordMonomial X w.1, wordMonomial_mem_degreeLE X
+        (((mem_degreeLE_iff X p.1 n).1 p.2) w.1 w.2)⟩
+    p = ∑ w, term w := by
+  dsimp only
+  apply Subtype.ext
+  simp only [Submodule.coe_sum]
+  change p.1 = ∑ w : {w // w ∈
+      (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) p.1).coeff.support},
+    wordMonomial X w.1
+  calc
+    p.1 = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := ZMod 2) (X := X) p.1).coeff.support,
+        wordMonomial X w := eq_sum_support_wordMonomial X p.1
+    _ = ∑ w : {w // w ∈
+        (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := ZMod 2) (X := X) p.1).coeff.support},
+      wordMonomial X w.1 := (Finset.sum_attach _ _).symm
+
 /-- Every free polynomial lies in some finite degree stage. -/
 theorem exists_mem_degreeLE (p : FreeAlgebra (ZMod 2) X) :
     ∃ n, p ∈ degreeLE X n := by

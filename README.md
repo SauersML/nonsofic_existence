@@ -72,6 +72,9 @@ box is still a required dependency of the final theorem.
   multiplication and zero maps to `1`) on every nonzero Fourier component;
   prove every nontrivial plane character is nontrivial on at least one of the
   two coefficient coordinates
+- [x] Expand each degree-bounded free polynomial in its exact supported-word
+  basis and prove that any nontrivial additive sign character is already
+  detected on one of those supported word monomials
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
