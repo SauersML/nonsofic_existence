@@ -22,6 +22,7 @@ import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.KazhdanFixedSpace
 import NonsoficGroupsExist.HilbertConvexFixedPoint
 import NonsoficGroupsExist.InvolutionSplitting
+import NonsoficGroupsExist.FiniteInvolutionDecomposition
 import NonsoficGroupsExist.HilbertEpsilonOrthogonality
 import NonsoficGroupsExist.FiniteGroupAverage
 import NonsoficGroupsExist.FiniteOrbitRepresentation

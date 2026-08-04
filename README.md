@@ -2,7 +2,7 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 60% of the way to the complete
+group exists. The current estimate is **about 61% of the way to the complete
 unconditional proof**. This percentage measures closed dependencies on the
 critical path, not lines of Lean.
 
@@ -58,6 +58,9 @@ box is still a required dependency of the final theorem.
   conjugation covariance without a finite-dimensional spectral assumption;
   prove the resulting sign projections are idempotent, complementary, and
   pairwise commuting for commuting involutions
+- [x] Iterate the involution splitting over an arbitrary finite family and
+  prove exact vector reconstruction and conservation of total squared norm
+  across all binary sign components
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
