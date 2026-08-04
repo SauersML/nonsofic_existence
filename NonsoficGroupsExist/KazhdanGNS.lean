@@ -691,6 +691,103 @@ theorem finiteFinsuppCombination_eq_sum
   classical
   simp [finiteFinsuppCombination, Finsupp.linearCombination_apply, Finsupp.sum]
 
+/-- Translate a finite-model combination using the permutation assigned to
+the exact product `s * g`. -/
+noncomputable def finiteExactTranslation
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (s : G) (c : G →₀ ℝ) : EuclideanSpace ℝ M :=
+  finiteFinsuppCombination M τ U (translateCoefficients s c)
+
+/-- Translate the same combination by composing the two assigned
+permutations.  Approximate multiplicativity will compare this with
+`finiteExactTranslation`. -/
+noncomputable def finiteComposedTranslation
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (s : G) (c : G →₀ ℝ) : EuclideanSpace ℝ M :=
+  Finsupp.linearCombination ℝ (fun g ↦
+    permutationOperator (τ s * τ g) (centeredIndicator U)) c
+
+/-- Exact translation expanded over the original coefficient support. -/
+theorem finiteExactTranslation_eq_sum
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (s : G) (c : G →₀ ℝ) :
+    finiteExactTranslation M τ U s c =
+      Finsupp.linearCombination ℝ (fun g ↦
+        permutationOperator (τ (s * g)) (centeredIndicator U)) c := by
+  induction c using Finsupp.induction with
+  | zero => simp [finiteExactTranslation]
+  | single_add g r c _ _ ih =>
+      rw [show finiteExactTranslation M τ U s (Finsupp.single g r + c) =
+          finiteExactTranslation M τ U s (Finsupp.single g r) +
+            finiteExactTranslation M τ U s c by
+            simp [finiteExactTranslation],
+        map_add, ih]
+      simp [finiteExactTranslation, finiteFinsuppCombination]
+
+omit [Group G] in
+/-- Composed translation is actual application of the assigned permutation
+to the finite combination. -/
+theorem finiteComposedTranslation_eq_apply
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (s : G) (c : G →₀ ℝ) :
+    finiteComposedTranslation M τ U s c =
+      permutationOperator (τ s) (finiteFinsuppCombination M τ U c) := by
+  induction c using Finsupp.induction with
+  | zero => simp [finiteComposedTranslation]
+  | single_add g r c _ _ ih =>
+      rw [show finiteComposedTranslation M τ U s (Finsupp.single g r + c) =
+          finiteComposedTranslation M τ U s (Finsupp.single g r) +
+            finiteComposedTranslation M τ U s c by
+            simp [finiteComposedTranslation],
+        map_add, ih]
+      simp [finiteComposedTranslation, finiteFinsuppCombination]
+
+/-- The exact-versus-composed translation error is the finite linear
+combination of the individual multiplication errors. -/
+theorem finiteTranslation_sub_eq
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (s : G) (c : G →₀ ℝ) :
+    finiteExactTranslation M τ U s c -
+        finiteComposedTranslation M τ U s c =
+      Finsupp.linearCombination ℝ (fun g ↦
+        permutationOperator (τ (s * g)) (centeredIndicator U) -
+          permutationOperator (τ s * τ g) (centeredIndicator U)) c := by
+  rw [finiteExactTranslation_eq_sum]
+  induction c using Finsupp.induction with
+  | zero => simp [finiteComposedTranslation]
+  | single_add g r c _ _ ih =>
+      rw [show finiteComposedTranslation M τ U s (Finsupp.single g r + c) =
+          finiteComposedTranslation M τ U s (Finsupp.single g r) +
+            finiteComposedTranslation M τ U s c by
+            simp [finiteComposedTranslation],
+        map_add, map_add, add_sub_add_comm, ih]
+      simp [finiteComposedTranslation, smul_sub]
+
+/-- Triangle-inequality bound reducing the whole translation error to the
+individual approximate-multiplication errors on the coefficient support. -/
+theorem norm_finiteTranslation_sub_le
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (s : G) (c : G →₀ ℝ) :
+    ‖finiteExactTranslation M τ U s c -
+        finiteComposedTranslation M τ U s c‖ ≤
+      ∑ g ∈ c.support, |c g| *
+        ‖permutationOperator (τ (s * g)) (centeredIndicator U) -
+          permutationOperator (τ s * τ g) (centeredIndicator U)‖ := by
+  classical
+  rw [finiteTranslation_sub_eq, Finsupp.linearCombination_apply, Finsupp.sum]
+  calc
+    ‖∑ g ∈ c.support, c g •
+        (permutationOperator (τ (s * g)) (centeredIndicator U) -
+          permutationOperator (τ s * τ g) (centeredIndicator U))‖ ≤
+        ∑ g ∈ c.support, ‖c g •
+          (permutationOperator (τ (s * g)) (centeredIndicator U) -
+            permutationOperator (τ s * τ g) (centeredIndicator U))‖ :=
+      norm_sum_le _ _
+    _ = _ := by
+      apply Finset.sum_congr rfl
+      intro g hg
+      rw [norm_smul, Real.norm_eq_abs]
+
 /-- The scalar finite-stage displacement quantity is exactly the normalized
 squared norm of its explicit finite vector. -/
 theorem finiteAveragingDisplacementNormSq_eq_norm
