@@ -23,6 +23,34 @@ open InvolutionSplitting
 variable {G : Type u} [Group G]
 variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
+theorem positivePart_eq_self_of_action_eq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E)
+    (h : rho c z = z) :
+    positivePart rho c z = z := by
+  rw [positivePart, h]
+  module
+
+theorem positivePart_eq_zero_of_action_eq_neg
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E)
+    (h : rho c z = -z) :
+    positivePart rho c z = 0 := by
+  rw [positivePart, h]
+  module
+
+theorem negativePart_eq_zero_of_action_eq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E)
+    (h : rho c z = z) :
+    negativePart rho c z = 0 := by
+  rw [negativePart, h]
+  module
+
+theorem negativePart_eq_self_of_action_eq_neg
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E)
+    (h : rho c z = -z) :
+    negativePart rho c z = z := by
+  rw [negativePart, h]
+  module
+
 /-- The component selected by a binary sign assignment for a finite family
 of represented group elements.  `true` selects the `+1` piece. -/
 noncomputable def iteratedPart (rho : G →* (E ≃ₗᵢ[ℝ] E)) :
@@ -33,6 +61,101 @@ noncomputable def iteratedPart (rho : G →* (E ≃ₗᵢ[ℝ] E)) :
         (fun i : Fin n ↦ c i.succ) (fun i : Fin n ↦ sign i.succ) z
       if sign 0 then positivePart rho (c 0) tail
       else negativePart rho (c 0) tail
+
+@[simp] theorem iteratedPart_zero
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (sign : Fin n → Bool) :
+    iteratedPart rho c sign 0 = 0 := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      simp only [iteratedPart, ih]
+      split <;> simp [positivePart, negativePart]
+
+theorem iteratedPart_add
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (sign : Fin n → Bool) (z w : E) :
+    iteratedPart rho c sign (z + w) =
+      iteratedPart rho c sign z + iteratedPart rho c sign w := by
+  induction n generalizing z w with
+  | zero => rfl
+  | succ n ih =>
+      simp only [iteratedPart, ih]
+      split <;> simp only [positivePart, negativePart, map_add]
+      all_goals module
+
+/-- Simultaneous sign projection distributes over every finite sum. -/
+theorem iteratedPart_finset_sum
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (sign : Fin n → Bool) {ι : Type*} (A : Finset ι) (f : ι → E) :
+    iteratedPart rho c sign (∑ a ∈ A, f a) =
+      ∑ a ∈ A, iteratedPart rho c sign (f a) := by
+  classical
+  induction A using Finset.induction_on with
+  | empty => simp
+  | @insert a A ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha,
+        iteratedPart_add, ih]
+
+/-- Applying a simultaneous sign projection to a joint eigenvector either
+keeps that vector or kills it, according to whether the selected signs agree
+with its eigencharacter. -/
+theorem iteratedPart_of_eigenvector
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (tau : Fin n → Bool) (z : E)
+    (hact : ∀ i, rho (c i) z = if tau i then z else -z)
+    (sign : Fin n → Bool) :
+    iteratedPart rho c sign z = if sign = tau then z else 0 := by
+  induction n with
+  | zero =>
+      have hst : sign = tau := Subsingleton.elim _ _
+      simp [iteratedPart, hst]
+  | succ n ih =>
+      let tailC : Fin n → G := fun i ↦ c i.succ
+      let tailTau : Fin n → Bool := fun i ↦ tau i.succ
+      let tailSign : Fin n → Bool := fun i ↦ sign i.succ
+      have htailAct : ∀ i, rho (tailC i) z =
+          if tailTau i then z else -z := fun i ↦ hact i.succ
+      have htail := ih tailC tailTau htailAct tailSign
+      simp only [iteratedPart]
+      change (if sign 0 then
+          positivePart rho (c 0) (iteratedPart rho tailC tailSign z)
+        else negativePart rho (c 0) (iteratedPart rho tailC tailSign z)) = _
+      rw [htail]
+      by_cases htailEq : tailSign = tailTau
+      · rw [if_pos htailEq]
+        by_cases hzero : sign 0 = tau 0
+        · have hfull : sign = tau := by
+            funext i
+            refine Fin.cases hzero (fun j ↦ ?_) i
+            exact congrFun htailEq j
+          rw [if_pos hfull]
+          cases hs : sign 0 <;> cases ht : tau 0
+          · simpa using negativePart_eq_self_of_action_eq_neg rho (c 0) z
+              (by simpa [ht] using hact 0)
+          · simp [hs, ht] at hzero
+          · simp [hs, ht] at hzero
+          · simpa using positivePart_eq_self_of_action_eq rho (c 0) z
+              (by simpa [ht] using hact 0)
+        · have hfull : sign ≠ tau := by
+            intro h
+            exact hzero (congrFun h 0)
+          rw [if_neg hfull]
+          cases hs : sign 0 <;> cases ht : tau 0
+          · exact False.elim (hzero (by simp [hs, ht]))
+          · simpa using negativePart_eq_zero_of_action_eq rho (c 0) z
+              (by simpa [ht] using hact 0)
+          · simpa using positivePart_eq_zero_of_action_eq_neg rho (c 0) z
+              (by simpa [ht] using hact 0)
+          · exact False.elim (hzero (by simp [hs, ht]))
+      · rw [if_neg htailEq]
+        have hfull : sign ≠ tau := by
+          intro h
+          apply htailEq
+          funext i
+          exact congrFun h i.succ
+        rw [if_neg hfull]
+        split <;> simp [positivePart, negativePart]
 
 /-- The binary components sum to the original vector. -/
 theorem sum_iteratedPart (rho : G →* (E ≃ₗᵢ[ℝ] E))
@@ -130,6 +253,65 @@ theorem action_iteratedPart
           split <;> try rfl
           simp only [positivePart_neg, negativePart_neg]
           rfl
+
+/-- A coarse simultaneous projection applied to one fine component keeps it
+exactly when the coarse signs are the restriction of the fine signs. -/
+theorem iteratedPart_coarse_on_fine
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (m n : ℕ) (fine : Fin m → G) (coarse : Fin n → G)
+    (index : Fin n → Fin m)
+    (hindex : ∀ i, coarse i = fine (index i))
+    (hfineSq : ∀ i, fine i ^ 2 = 1)
+    (hfineComm : Pairwise (Function.onFun Commute fine))
+    (fineSign : Fin m → Bool) (coarseSign : Fin n → Bool) (z : E) :
+    iteratedPart rho coarse coarseSign
+        (iteratedPart rho fine fineSign z) =
+      if coarseSign = fun i ↦ fineSign (index i) then
+        iteratedPart rho fine fineSign z
+      else 0 := by
+  apply iteratedPart_of_eigenvector
+  intro i
+  rw [hindex i]
+  exact action_iteratedPart rho m fine hfineSq hfineComm fineSign z (index i)
+
+/-- Every coarse component is the exact sum of all fine components whose
+signs restrict to the coarse sign assignment. -/
+theorem iteratedPart_eq_sum_fine_extensions
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (m n : ℕ) (fine : Fin m → G) (coarse : Fin n → G)
+    (index : Fin n → Fin m)
+    (hindex : ∀ i, coarse i = fine (index i))
+    (hfineSq : ∀ i, fine i ^ 2 = 1)
+    (hfineComm : Pairwise (Function.onFun Commute fine))
+    (coarseSign : Fin n → Bool) (z : E) :
+    iteratedPart rho coarse coarseSign z =
+      ∑ fineSign ∈ (Finset.univ.filter fun fineSign : Fin m → Bool ↦
+          coarseSign = fun i ↦ fineSign (index i)),
+        iteratedPart rho fine fineSign z := by
+  classical
+  calc
+    iteratedPart rho coarse coarseSign z =
+        iteratedPart rho coarse coarseSign
+          (∑ fineSign, iteratedPart rho fine fineSign z) := by
+      rw [sum_iteratedPart]
+    _ = ∑ fineSign,
+        iteratedPart rho coarse coarseSign
+          (iteratedPart rho fine fineSign z) := by
+      simpa using iteratedPart_finset_sum rho n coarse coarseSign
+        (Finset.univ : Finset (Fin m → Bool))
+        (fun fineSign ↦ iteratedPart rho fine fineSign z)
+    _ = ∑ fineSign,
+        if coarseSign = fun i ↦ fineSign (index i) then
+          iteratedPart rho fine fineSign z
+        else 0 := by
+      apply Finset.sum_congr rfl
+      intro fineSign _
+      exact iteratedPart_coarse_on_fine rho m n fine coarse index hindex
+        hfineSq hfineComm fineSign coarseSign z
+    _ = ∑ fineSign ∈ (Finset.univ.filter fun fineSign : Fin m → Bool ↦
+          coarseSign = fun i ↦ fineSign (index i)),
+        iteratedPart rho fine fineSign z := by
+      rw [Finset.sum_filter]
 
 /-- Simultaneous finite sign decomposition is covariant under conjugation of
 the entire commuting family. -/

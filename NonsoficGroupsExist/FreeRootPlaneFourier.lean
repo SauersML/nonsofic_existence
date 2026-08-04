@@ -41,6 +41,38 @@ noncomputable def planeFamily
       elementaryGroup (Fin 3) (FreeRing X) :=
   fun q ↦ (planeEnumeration X i j k hij hik hjk n q).1
 
+/-- Include one finite plane stage into the next stage without changing its
+ambient elementary-group element. -/
+noncomputable def planeSucc
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk (n + 1) :=
+  fun g ↦ ⟨g.1, rootPlaneDegreeSubgroup_mono X i j k hij hik hjk
+    (Nat.le_succ n) g.2⟩
+
+/-- The index of an included stage-`n` plane element in the exhaustive
+enumeration of stage `n+1`. -/
+noncomputable def planeSuccIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Fin (Nat.card (Plane X i j k hij hik hjk n)) →
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) :=
+  fun q ↦ (planeEnumeration X i j k hij hik hjk (n + 1)).symm
+    (planeSucc X i j k hij hik hjk n
+      (planeEnumeration X i j k hij hik hjk n q))
+
+theorem planeFamily_succIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (q : Fin (Nat.card (Plane X i j k hij hik hjk n))) :
+    planeFamily X i j k hij hik hjk n q =
+      planeFamily X i j k hij hik hjk (n + 1)
+        (planeSuccIndex X i j k hij hik hjk n q) := by
+  change (planeEnumeration X i j k hij hik hjk n q).1 =
+    ((planeEnumeration X i j k hij hik hjk (n + 1))
+      ((planeEnumeration X i j k hij hik hjk (n + 1)).symm
+        (planeSucc X i j k hij hik hjk n
+          (planeEnumeration X i j k hij hik hjk n q)))).1
+  rw [Equiv.apply_symm_apply]
+  rfl
+
 theorem planeFamily_sq
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
     ∀ q, planeFamily X i j k hij hik hjk n q ^ 2 = 1 := by
@@ -74,6 +106,30 @@ noncomputable def planeComponent
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) (z : E) : E :=
   iteratedPart rho (planeFamily X i j k hij hik hjk n) sign z
+
+/-- A stage-`n` plane component is exactly the sum of all stage-`n+1`
+components whose signs restrict along the concrete plane inclusion. -/
+theorem planeComponent_eq_sum_succ_extensions
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E) :
+    planeComponent X i j k hij hik hjk n rho sign z =
+      ∑ fineSign ∈ (Finset.univ.filter fun fineSign :
+          Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool ↦
+          sign = fun q ↦
+            fineSign (planeSuccIndex X i j k hij hik hjk n q)),
+        planeComponent X i j k hij hik hjk (n + 1) rho fineSign z := by
+  exact iteratedPart_eq_sum_fine_extensions rho
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk (n + 1))
+    (planeFamily X i j k hij hik hjk n)
+    (planeSuccIndex X i j k hij hik hjk n)
+    (planeFamily_succIndex X i j k hij hik hjk n)
+    (planeFamily_sq X i j k hij hik hjk (n + 1))
+    (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
+    sign z
 
 theorem sum_planeComponent
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)

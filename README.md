@@ -120,6 +120,10 @@ box is still a required dependency of the final theorem.
   into exact pairwise-disjoint least-leading-generator fibers, and prove both
   finite-stage dual shear formulas carry every fiber into Kassabov's required
   opposite-or-`D` valuation regions
+- [x] Prove simultaneous sign projections are additive over finite sums,
+  select joint eigenvectors exactly, and instantiate the resulting refinement
+  theorem to show each degree-`n` plane component is the exact sum of all
+  compatible degree-`n+1` Fourier components
 - [ ] Identify those dual shear maps with conjugation of the actual refined
   Fourier components and derive the corresponding disjoint mass-sum
   inequalities
