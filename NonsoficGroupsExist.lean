@@ -21,6 +21,7 @@ import NonsoficGroupsExist.KunPartition
 import NonsoficGroupsExist.KunFinitePartition
 import NonsoficGroupsExist.KunDiagonalPartition
 import NonsoficGroupsExist.KunDecomposition
+import NonsoficGroupsExist.KunThomDiagonal
 import NonsoficGroupsExist.KunPartitionBoundary
 import NonsoficGroupsExist.KunPartitionCrossing
 import NonsoficGroupsExist.KunBlockGraph
