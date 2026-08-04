@@ -22,8 +22,10 @@ approximate-multiplication error between exact group words and the actual
 finite permutation Markov operator.  Consequently, genuine finite-model
 Markov displacements satisfy a fixed strict contraction, uniformly over every
 centered indicator, with arbitrarily small normalized additive error.  The
-directed cut-energy and rounding steps needed to turn this estimate into
-Kun's expander decomposition are still being formalized.
+one-step displacement is now related to the genuine directed generator-cut
+energy, and centering has been eliminated from the threshold-rounding input.
+The remaining removal, partition, and graph-edit steps needed for Kun's
+expander decomposition are still being formalized.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the
