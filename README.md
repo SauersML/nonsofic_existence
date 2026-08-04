@@ -1,8 +1,70 @@
 # NonsoficGroupsExist
 
-This repository is a partial Lean formalization of a proposed construction of
-a finitely presented nonsofic group. It does **not** currently prove that such
-a group exists.
+This repository is an active Lean formalization of a proposed construction of
+a finitely presented nonsofic group. It does **not yet** prove that such a
+group exists. The current estimate is **about 47% of the way to the complete
+unconditional proof**. This percentage measures closed dependencies on the
+critical path, not lines of Lean.
+
+## Proof status
+
+Checked boxes below mean that the corresponding code has a genuine Lean proof
+term and its module has compiled with warnings treated as errors. An unchecked
+box is still a required dependency of the final theorem.
+
+- [x] Standard finite Hamming approximation and soficity infrastructure
+- [x] LEF definitions and the finite non-LEF obstruction
+- [x] Explicit cylinder-transposition non-LEF subgroup
+- [x] Injective embedding of that subgroup into the concrete `EL₃` core
+- [x] Concrete rank-four compression maps and compressor identities
+- [x] Closed `ConcreteRankFour.compressionSetup`
+- [x] Finite-table theorem turning a finitely generated nonsofic group into a
+  finitely presented nonsofic cover
+- [x] GNS/Kazhdan finite-model contraction and rounding infrastructure
+- [x] Terminating Kun finite partition recursion and cut accounting
+- [x] Six-vertex A₂ magic graph and its exact Laplacian estimates
+- [x] Characteristic-two class-two orthogonality estimate
+- [x] Strict A₂ local and global moving-energy defect
+- [x] Genuine Hilbert direct sum, fixed-family subspace, and compressed
+  Laplacian
+- [x] Real-Hilbert positive-operator gap proved by a convergent Neumann
+  iteration (no spectral assumption)
+- [x] Positivity, symmetry, and trivial kernel of the compressed A₂
+  Laplacian
+- [x] Strict moving-energy defect applied to prove the compressed quadratic
+  operator gap
+- [ ] Derive the uniform A₂ vertex projection/codistance bound below `1`
+- [ ] Prove property (T) for the concrete characteristic-two rank-three group
+- [ ] Transfer/instantiate property (T) for every concrete group used by the
+  compression argument
+- [ ] Close the exact Kun expander-decomposition theorem used at the final
+  criterion boundary
+- [ ] Close the exact Kun--Thom centralizer/LEF implication used at the final
+  criterion boundary
+- [ ] Assemble an unconditional concrete nonsofic group with no setup,
+  literature theorem, property-(T), or non-LEF premise
+- [ ] Instantiate the finite-table cover to obtain an unconditional finitely
+  presented nonsofic group
+- [ ] Add the two unconditional public headline declarations
+- [ ] Run the complete `lake build`
+- [ ] Audit the closed headline signatures and run `#print axioms`
+- [ ] Search for and eliminate forbidden assumptions, `sorry`, stale
+  conditional wrappers, dead code, and misleading documentation
+
+The final two declarations will remain unchecked until they can be consumed
+with exactly these premise-free mathematical types:
+
+```lean
+theorem nonsofic_groups_exist : NonsoficGroupExists := by
+  ...
+
+theorem exists_finitelyPresented_nonsofic_group :
+    ∃ (G : Type) (_ : Group G),
+      Group.IsFinitelyPresented G ∧ ¬ IsSofic G := by
+  ...
+```
+
+## What is already formalized
 
 What is kernel-checked includes finite Hamming/sofic bookkeeping, localization,
 finite-table covers, a represented algebra satisfying the binary Leavitt

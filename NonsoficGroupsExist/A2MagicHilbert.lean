@@ -26,6 +26,50 @@ variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 abbrev Family (E : Type v) [NormedAddCommGroup E] [InnerProductSpace ℝ E] :=
   PiLp 2 (fun _ : Fin 6 ↦ E)
 
+/-- Reindex a concrete six-family by the six A₂ roots. -/
+noncomputable def rootReindex (f : Family E) : A2Root → E :=
+  fun r ↦ f (vertexEquiv.symm r)
+
+@[simp] theorem rootReindex_vertex (f : Family E) (i : Fin 6) :
+    rootReindex f (vertex i) = f i := by
+  change f (vertexEquiv.symm (vertexEquiv i)) = f i
+  rw [vertexEquiv.symm_apply_apply]
+
+/-- Reindexing preserves the directed edge energy. -/
+theorem edgeEnergy_rootReindex (f : Family E) :
+    A2MagicEnergy.edgeEnergy (rootReindex f) =
+      A2MagicLaplacian.directedEnergy f := by
+  unfold A2MagicEnergy.edgeEnergy A2MagicLaplacian.directedEnergy
+    A2MagicEnergy.edgeDifference
+  rw [show (∑ r : A2Root,
+      ∑ n : Fin 4, ‖rootReindex f r - rootReindex f (neighbor r n)‖ ^ 2) =
+      ∑ i : Fin 6,
+        ∑ n : Fin 4,
+          ‖rootReindex f (vertexEquiv i) -
+            rootReindex f (neighbor (vertexEquiv i) n)‖ ^ 2 by
+    exact (Equiv.sum_comp vertexEquiv fun r ↦
+      ∑ n : Fin 4, ‖rootReindex f r - rootReindex f (neighbor r n)‖ ^ 2).symm]
+  apply Finset.sum_congr rfl
+  intro i hi
+  apply Finset.sum_congr rfl
+  intro n hn
+  rw [vertexEquiv_apply]
+  rw [rootReindex_vertex]
+  unfold rootReindex
+  change ‖f i - f (vertexEquiv.symm (neighbor (vertex i) n))‖ ^ 2 =
+    ‖f i - f (neighborIndex i n)‖ ^ 2
+  rw [← vertex_neighborIndex]
+  change ‖f i - f (vertexEquiv.symm (vertexEquiv (neighborIndex i n)))‖ ^ 2 = _
+  rw [vertexEquiv.symm_apply_apply]
+
+theorem rootLaplacian_rootReindex_vertex (f : Family E) (i : Fin 6) :
+    A2MagicEnergy.rootLaplacian (rootReindex f) (vertex i) =
+      A2MagicLaplacian.laplacian f i := by
+  rw [A2MagicEnergy.rootLaplacian_vertex]
+  congr 1
+  funext j
+  exact rootReindex_vertex f j
+
 /-- Constant six-tuples. -/
 def constantSubspace : Submodule ℝ (Family E) where
   carrier := {f | ∀ i, f i = f 0}
@@ -50,6 +94,17 @@ def vertexFixedSubspace (A : A2System G)
   smul_mem' := by
     intro c f hf i
     exact (KazhdanFixedSpace.fixedSubspace rho _).smul_mem c (hf i)
+
+theorem rootReindex_mem_vertexFixedSubspace
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) (r : A2Root) :
+    rootReindex (f : Family E) r ∈
+      KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r) := by
+  let i : Fin 6 := vertexEquiv.symm r
+  have hi := f.property i
+  have hir : vertex i = r := vertexEquiv.apply_symm_apply r
+  rw [← hir]
+  simpa using hi
 
 theorem isClosed_constantSubspace :
     IsClosed (constantSubspace (E := E) : Set (Family E)) := by
@@ -126,6 +181,11 @@ noncomputable def laplacianFamily : Family E →L[ℝ] Family E :=
 
 @[simp] theorem laplacianFamily_apply (f : Family E) (i : Fin 6) :
     laplacianFamily f i = A2MagicLaplacian.laplacian f i := rfl
+
+theorem norm_laplacianFamily_sq (f : Family E) :
+    ‖laplacianFamily f‖ ^ 2 =
+      ∑ i : Fin 6, ‖A2MagicLaplacian.laplacian f i‖ ^ 2 := by
+  exact PiLp.norm_sq_eq_of_L2 _ _
 
 /-- Symmetry of the bounded family Laplacian. -/
 theorem inner_laplacianFamily_comm (f g : Family E) :
@@ -304,6 +364,123 @@ theorem norm_compressedLaplacian_sq_le_eight_energy [CompleteSpace E]
     exact hlap
   have hEq := directedEnergy_eq_two_inner_compressedLaplacian A rho f
   nlinarith [hlap']
+
+/-- Orthogonal decomposition of the full Laplacian into its compressed and
+vertex-moving parts. -/
+theorem norm_laplacianFamily_sq_eq_compressed_add_moving [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    ‖laplacianFamily (f : Family E)‖ ^ 2 =
+      ‖compressedLaplacian A rho f‖ ^ 2 +
+        A2MagicEnergy.vertexMovingLaplacianEnergy A rho
+          (rootReindex (f : Family E)) := by
+  have hmove :
+      A2MagicEnergy.vertexMovingLaplacianEnergy A rho
+          (rootReindex (f : Family E)) =
+        ∑ i : Fin 6,
+          ‖KazhdanFixedSpace.subgroupMovingProjection rho
+            (A.vertexGroup (vertex i))
+            (A2MagicLaplacian.laplacian (f : Family E) i)‖ ^ 2 := by
+    unfold A2MagicEnergy.vertexMovingLaplacianEnergy
+    rw [show (∑ r : A2Root,
+        ‖A2MagicEnergy.vertexMovingLaplacian A rho
+          (rootReindex (f : Family E)) r‖ ^ 2) =
+      ∑ i : Fin 6,
+        ‖A2MagicEnergy.vertexMovingLaplacian A rho
+          (rootReindex (f : Family E)) (vertexEquiv i)‖ ^ 2 by
+      exact (Equiv.sum_comp vertexEquiv fun r ↦
+        ‖A2MagicEnergy.vertexMovingLaplacian A rho
+          (rootReindex (f : Family E)) r‖ ^ 2).symm]
+    apply Finset.sum_congr rfl
+    intro i hi
+    rw [vertexEquiv_apply]
+    unfold A2MagicEnergy.vertexMovingLaplacian
+    change ‖KazhdanFixedSpace.subgroupMovingProjection rho
+      (A.vertexGroup (vertex i))
+      (A2MagicEnergy.rootLaplacian
+        (rootReindex (f : Family E)) (vertex i))‖ ^ 2 = _
+    rw [rootLaplacian_rootReindex_vertex]
+  have hcomp : ‖compressedLaplacian A rho f‖ ^ 2 =
+      ∑ i : Fin 6,
+        ‖(KazhdanFixedSpace.fixedProjection rho
+          (A.vertexGroup (vertex i))
+          (A2MagicLaplacian.laplacian (f : Family E) i) : E)‖ ^ 2 := by
+    have hcoe := coe_compressedLaplacian_apply A rho f
+    calc
+      ‖compressedLaplacian A rho f‖ ^ 2 =
+          ‖vertexProjectionFamily A rho
+            (laplacianFamily (f : Family E))‖ ^ 2 :=
+        congrArg (fun x : Family E ↦ ‖x‖ ^ 2) hcoe
+      _ = ∑ i : Fin 6,
+          ‖(KazhdanFixedSpace.fixedProjection rho
+            (A.vertexGroup (vertex i))
+            (A2MagicLaplacian.laplacian (f : Family E) i) : E)‖ ^ 2 := by
+        rw [PiLp.norm_sq_eq_of_L2]
+        rfl
+  rw [PiLp.norm_sq_eq_of_L2, hcomp, hmove, ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro i hi
+  exact KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho (A.vertexGroup (vertex i)) (A2MagicLaplacian.laplacian (f : Family E) i)
+
+/-- The characteristic-two local defect creates a strict spectral gap for
+the compressed Laplacian. -/
+theorem compressedLaplacian_quadratic_gap [CompleteSpace E]
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    (2 * (1 - (Real.sqrt 2)⁻¹) / 3) *
+        inner ℝ f (compressedLaplacian A rho f) ≤
+      ‖compressedLaplacian A rho f‖ ^ 2 := by
+  let D := A2MagicLaplacian.directedEnergy (f : Family E)
+  let B := A2MagicEnergy.vertexMovingLaplacianEnergy A rho
+    (rootReindex (f : Family E))
+  let d : ℝ := 1 - (Real.sqrt 2)⁻¹
+  let beta : ℝ := 2 - d / 3
+  have hfixed (r : A2Root) :
+      rootReindex (f : Family E) r ∈
+        KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r) :=
+    rootReindex_mem_vertexFixedSubspace A rho f r
+  have hstrict : B ≤ beta * D := by
+    have h := A2MagicEnergy.vertexMovingLaplacianEnergy_lt_two_mul_edgeEnergy
+      A hexp rho (rootReindex (f : Family E)) hfixed
+    rw [edgeEnergy_rootReindex] at h
+    exact h
+  have hgraph : 2 * D ≤ ‖laplacianFamily (f : Family E)‖ ^ 2 := by
+    have h := A2MagicLaplacian.two_directedEnergy_le_sum_laplacian_norm_sq_general
+      (fun i ↦ (f : Family E) i)
+    calc
+      2 * D ≤ ∑ i : Fin 6,
+          ‖A2MagicLaplacian.laplacian (f : Family E) i‖ ^ 2 := h
+      _ = ‖laplacianFamily (f : Family E)‖ ^ 2 :=
+        (norm_laplacianFamily_sq _).symm
+  have hsplit := norm_laplacianFamily_sq_eq_compressed_add_moving A rho f
+  have henergy := directedEnergy_eq_two_inner_compressedLaplacian A rho f
+  have hcombine : 2 * D ≤
+      ‖compressedLaplacian A rho f‖ ^ 2 + beta * D := by
+    calc
+      2 * D ≤ ‖laplacianFamily (f : Family E)‖ ^ 2 := hgraph
+      _ = ‖compressedLaplacian A rho f‖ ^ 2 + B := hsplit
+      _ ≤ ‖compressedLaplacian A rho f‖ ^ 2 + beta * D := by
+        simpa [add_comm] using
+          add_le_add_right hstrict (‖compressedLaplacian A rho f‖ ^ 2)
+  have hcomp : (2 - beta) * D ≤
+      ‖compressedLaplacian A rho f‖ ^ 2 := by
+    calc
+      (2 - beta) * D = 2 * D - beta * D := by ring
+      _ ≤ ‖compressedLaplacian A rho f‖ ^ 2 := by linarith
+  have hcoef : 2 - beta = d / 3 := by
+    dsimp [beta]
+    ring
+  change (2 * d / 3) * inner ℝ f (compressedLaplacian A rho f) ≤ _
+  have henergyD : D = 2 * inner ℝ f (compressedLaplacian A rho f) := henergy
+  calc
+    (2 * d / 3) * inner ℝ f (compressedLaplacian A rho f) =
+        (d / 3) * D := by rw [henergyD]; ring
+    _ = (2 - beta) * D := by rw [hcoef]
+    _ ≤ ‖compressedLaplacian A rho f‖ ^ 2 := hcomp
 
 /-- Squared norm of the coordinatewise vertex projection. -/
 theorem norm_vertexProjectionFamily_sq [CompleteSpace E]
