@@ -250,6 +250,10 @@ theorem conjugate_firstCoordinate_generator
         (coefficientSucc X a)).1 := by
   have hcomm := elementaryRoot_commute_of_ne i j i k hij hik
     hij.symm hik.symm (FreeAlgebra.ι (ZMod 2) x) a.1
+  change elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
+      elementaryRoot i k hik a.1 *
+      (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+    elementaryRoot i k hik a.1
   rw [hcomm.eq]
   simp
 

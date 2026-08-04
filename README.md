@@ -65,6 +65,10 @@ box is still a required dependency of the final theorem.
   prove exact vector reconstruction and conservation of total squared norm
   across all binary sign components; for commuting families, prove every
   component is a simultaneous eigenvector with exactly its assigned signs
+- [x] Prove the simultaneous decomposition is covariant under conjugating the
+  entire family, prove distinct sign components are pairwise orthogonal, and
+  identify the squared norm of every finite subfamily sum with its exact
+  component-mass sum
 - [x] Prove every finite free-root plane is abelian of exponent two, enumerate
   all of its elements, and instantiate the simultaneous Fourier decomposition
   and sign-action theorem for that exhaustive enumeration; prove every

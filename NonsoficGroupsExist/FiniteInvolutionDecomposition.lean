@@ -131,6 +131,91 @@ theorem action_iteratedPart
           simp only [positivePart_neg, negativePart_neg]
           rfl
 
+/-- Simultaneous finite sign decomposition is covariant under conjugation of
+the entire commuting family. -/
+theorem map_iteratedPart
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (g : G) (n : ℕ)
+    (c : Fin n → G) (sign : Fin n → Bool) (z : E) :
+    rho g (iteratedPart rho c sign z) =
+      iteratedPart rho (fun i ↦ g * c i * g⁻¹) sign (rho g z) := by
+  induction n with
+  | zero => simp [iteratedPart]
+  | succ n ih =>
+      simp only [iteratedPart]
+      split
+      · rw [map_positivePart]
+        congr 1
+        exact ih (fun i ↦ c i.succ) (fun i ↦ sign i.succ)
+      · rw [map_negativePart]
+        congr 1
+        exact ih (fun i ↦ c i.succ) (fun i ↦ sign i.succ)
+
+/-- Distinct sign assignments select orthogonal simultaneous components. -/
+theorem inner_iteratedPart_eq_zero_of_ne
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    {sign tau : Fin n → Bool} (hne : sign ≠ tau) (z : E) :
+    inner ℝ (iteratedPart rho c sign z) (iteratedPart rho c tau z) = 0 := by
+  classical
+  have hex : ∃ i, sign i ≠ tau i := by
+    by_contra hall
+    apply hne
+    funext i
+    exact Classical.byContradiction (fun hi ↦ hall ⟨i, hi⟩)
+  obtain ⟨i, hi⟩ := hex
+  let a := iteratedPart rho c sign z
+  let b := iteratedPart rho c tau z
+  have ha := action_iteratedPart rho n c hc hcomm sign z i
+  have hb := action_iteratedPart rho n c hc hcomm tau z i
+  have hiso := (rho (c i)).inner_map_map a b
+  change inner ℝ (rho (c i) a) (rho (c i) b) = inner ℝ a b at hiso
+  cases hs : sign i <;> cases ht : tau i
+  · exact False.elim (hi (by simp [hs, ht]))
+  · simp [hs] at ha
+    simp [ht] at hb
+    rw [ha, hb] at hiso
+    simp [a, b] at hiso
+    linarith
+  · simp [hs] at ha
+    simp [ht] at hb
+    rw [ha, hb] at hiso
+    simp [a, b] at hiso
+    linarith
+  · exact False.elim (hi (by simp [hs, ht]))
+
+/-- The squared norm of the sum over any finite set of sign components is the
+sum of their squared norms. -/
+theorem norm_sum_iteratedPart_sq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (A : Finset (Fin n → Bool)) (z : E) :
+    ‖∑ sign ∈ A, iteratedPart rho c sign z‖ ^ 2 =
+      ∑ sign ∈ A, ‖iteratedPart rho c sign z‖ ^ 2 := by
+  classical
+  induction A using Finset.induction_on with
+  | empty => simp
+  | @insert sign A hsign ih =>
+      have hinner : inner ℝ (iteratedPart rho c sign z)
+          (∑ tau ∈ A, iteratedPart rho c tau z) = 0 := by
+        rw [inner_sum]
+        apply Finset.sum_eq_zero
+        intro tau htau
+        exact inner_iteratedPart_eq_zero_of_ne rho n c hc hcomm
+          (sign := sign) (tau := tau)
+          (fun heq ↦ hsign (heq.symm ▸ htau)) z
+      rw [Finset.sum_insert hsign, Finset.sum_insert hsign]
+      calc
+        ‖iteratedPart rho c sign z +
+            ∑ tau ∈ A, iteratedPart rho c tau z‖ ^ 2 =
+            ‖iteratedPart rho c sign z‖ ^ 2 +
+              ‖∑ tau ∈ A, iteratedPart rho c tau z‖ ^ 2 := by
+          simpa [pow_two] using
+            norm_add_sq_eq_norm_sq_add_norm_sq_real hinner
+        _ = ‖iteratedPart rho c sign z‖ ^ 2 +
+            ∑ tau ∈ A, ‖iteratedPart rho c tau z‖ ^ 2 := by rw [ih]
+
 end FiniteInvolutionDecomposition
 
 end NonsoficGroupsExist

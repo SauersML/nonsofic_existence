@@ -303,7 +303,7 @@ theorem exists_supported_word_of_additive_sign_character
     · exact hw
     · exact False.elim (hnone' w.1 w.2 hw)
   have hmap : ∀ s : Finset {w // w ∈ q.support},
-      chi (∑ w in s, term w) = ∏ w in s, chi (term w) := by
+      chi (∑ w ∈ s, term w) = ∏ w ∈ s, chi (term w) := by
     intro s
     induction s using Finset.induction_on with
     | empty => simpa using hzero
@@ -444,15 +444,17 @@ theorem exists_word_coordinate_of_planeEigenvalue_eq_neg_one
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
     (g : Plane X i j k hij hik hjk n)
     (hg : planeEigenvalue X i j k hij hik hjk n sign g = -1) :
-    (∃ (w : FreeMonoid X), FreeAlgebraDegree.freeWordLength X w ≤ n ∧
+    (∃ (w : FreeMonoid X)
+      (hw : FreeAlgebraDegree.freeWordLength X w ≤ n),
       firstCoefficientEigenvalue X i j k hij hik hjk n sign
         ⟨FreeAlgebraDegree.wordMonomial X w,
-          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (by assumption)⟩ =
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X hw⟩ =
         -1) ∨
-    (∃ (w : FreeMonoid X), FreeAlgebraDegree.freeWordLength X w ≤ n ∧
+    (∃ (w : FreeMonoid X)
+      (hw : FreeAlgebraDegree.freeWordLength X w ≤ n),
       secondCoefficientEigenvalue X i j k hij hik hjk n sign
         ⟨FreeAlgebraDegree.wordMonomial X w,
-          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (by assumption)⟩ =
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X hw⟩ =
         -1) := by
   rcases exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
       X i j k hij hik hjk n rho sign z hv g hg with ⟨a, ha⟩ | ⟨b, hb⟩
