@@ -21,20 +21,19 @@ namespace A2System
 variable {G : Type u} [Group G]
 variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
-/-- The uniform contraction statement supplied by the six-vertex spectral
-argument: in a representation without invariant vectors, a sum of six root-
-fixed vectors loses a fixed proportion of the triangle-inequality bound.
-This definition isolates the exact analytic conclusion to be proved from the
-strong `A₂` relations; it contains no invariant vector or property-`(T)`
-conclusion. -/
-def FixedSumContraction (A : A2System G) (c : ℝ) : Prop :=
+/-- A uniform upper bound for the codistance of the six vertex fixed spaces.
+The normalization is the standard one: `gamma = 1` is the universal
+Cauchy--Schwarz bound, while `gamma < 1` is the strict gap needed by the
+Kazhdan argument. -/
+def VertexCodistanceBound (A : A2System G) (gamma : ℝ) : Prop :=
   ∀ (E : Type v) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [CompleteSpace E],
     ∀ rho : G →* (E ≃ₗᵢ[ℝ] E),
       IsKazhdanPair.HasNoInvariantVectors G rho →
       ∀ f : A2Root → E,
-        (∀ a, f a ∈ KazhdanFixedSpace.fixedSubspace rho (A.rootAt a)) →
-        ‖∑ a, f a‖ ≤ c * ∑ a, ‖f a‖
+        (∀ a, f a ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup a)) →
+        ‖∑ a, f a‖ ^ 2 ≤
+          Fintype.card A2Root * gamma * ∑ a, ‖f a‖ ^ 2
 
 /-- Membership in every root fixed subspace implies global invariance because
 the six root subgroups generate the group. -/
@@ -62,6 +61,18 @@ theorem exists_near_root_fixedSubspace [CompleteSpace E]
   apply HilbertConvexFixedPoint.exists_near_fixedSubspace rho (A.rootAt a) x
   intro h
   exact (hnear h.1 ((A.mem_rootSet_iff h.1).2 ⟨a, h.2⟩)).le
+
+/-- The analogous nearest-fixed-point statement for the six vertex groups. -/
+theorem exists_near_vertex_fixedSubspace [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) {delta : ℝ}
+    (hnear : ∀ g ∈ A.vertexSet, ‖rho g x - x‖ < delta)
+    (a : A2Root) :
+    ∃ y ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup a),
+      ‖y - x‖ ≤ delta := by
+  apply HilbertConvexFixedPoint.exists_near_fixedSubspace rho
+    (A.vertexGroup a) x
+  intro h
+  exact (hnear h.1 ⟨a, h.2⟩).le
 
 /-- The six-root index is nonempty, so its real cardinality is positive. -/
 theorem a2Root_card_pos : (0 : ℝ) < Fintype.card A2Root := by
@@ -191,15 +202,23 @@ theorem vertex_four_fixed_norm_sq_le
   exact NormalEdgeCodistance.four_fixed_norm_sq_le rho X Y Z
     hXnorm hYnorm hedge hp hq hs ht
 
-/-- The six-vertex fixed-space contraction implies that the union of the root
-subgroups is a Kazhdan subset.  This is the norm-comparison step after the
-spectral estimate, with an explicit (non-optimal) constant. -/
-theorem rootSet_isKazhdan_of_fixedSumContraction
-    (A : A2System G) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
-    (hcontract : FixedSumContraction.{u, v} A c) :
-    IsKazhdanSubset.{u, v} G A.rootSet ((1 - c) / 4) := by
-  have hkappa : 0 < (1 - c) / 4 := div_pos (sub_pos.mpr hc1) (by norm_num)
-  refine ⟨hkappa, ?_⟩
+/-- A strict uniform codistance bound makes the union of the six vertex
+groups a Kazhdan subset. -/
+theorem vertexSet_isKazhdan_of_codistanceBound
+    (A : A2System G) {gamma : ℝ} (hgamma0 : 0 ≤ gamma)
+    (hgamma1 : gamma < 1)
+    (hcodistance : VertexCodistanceBound.{u, v} A gamma) :
+    IsKazhdanSubset.{u, v} G A.vertexSet ((1 - gamma) / 8) := by
+  let delta : ℝ := (1 - gamma) / 8
+  have hdelta : 0 < delta := div_pos (sub_pos.mpr hgamma1) (by norm_num)
+  have hdelta1 : delta < 1 := by
+    dsimp [delta]
+    nlinarith
+  have hdelta0 : 0 ≤ delta := hdelta.le
+  have hstrict : gamma * (1 + delta) ^ 2 < (1 - delta) ^ 2 := by
+    dsimp [delta]
+    nlinarith [sq_nonneg (1 - gamma)]
+  refine ⟨hdelta, ?_⟩
   intro E _ _ _ rho x hx hnear
   by_contra hinv
   have hno : IsKazhdanPair.HasNoInvariantVectors G rho := by
@@ -207,51 +226,73 @@ theorem rootSet_isKazhdan_of_fixedSumContraction
     by_contra hy0
     exact hinv ⟨y, hy0, hy⟩
   choose f hfmem hfnear using fun a ↦
-    A.exists_near_root_fixedSubspace rho x hnear a
+    A.exists_near_vertex_fixedSubspace rho x hnear a
   let N : ℝ := Fintype.card A2Root
-  let delta : ℝ := (1 - c) / 4
   have hN : 0 < N := a2Root_card_pos
   have herror : ‖(∑ a, f a) - N • x‖ ≤ N * delta := by
     exact norm_sum_sub_card_smul_le f x hfnear
-  have hsumNorm : ∑ a, ‖f a‖ ≤ N * (1 + delta) := by
+  have hsumNormSq : ∑ a, ‖f a‖ ^ 2 ≤ N * (1 + delta) ^ 2 := by
     calc
-      ∑ a, ‖f a‖ ≤ ∑ _ : A2Root, (1 + delta) := by
+      ∑ a, ‖f a‖ ^ 2 ≤ ∑ _ : A2Root, (1 + delta) ^ 2 := by
         apply Finset.sum_le_sum
         intro a _
         have hfa : ‖f a - x‖ ≤ delta := by
           simpa [delta] using hfnear a
-        calc
-          ‖f a‖ = ‖(f a - x) + x‖ := by congr 1; abel
-          _ ≤ ‖f a - x‖ + ‖x‖ := norm_add_le _ _
-          _ ≤ delta + 1 := by rw [hx]; linarith
-          _ = 1 + delta := add_comm _ _
-      _ = N * (1 + delta) := by simp [N]; ring
-  have hupper : ‖∑ a, f a‖ ≤ c * (N * (1 + delta)) :=
-    (hcontract E rho hno f hfmem).trans
-      (mul_le_mul_of_nonneg_left hsumNorm hc0)
-  have hscale : ‖N • x‖ = N := by
-    simp [norm_smul, hx, Real.norm_eq_abs, abs_of_pos hN]
-  have hlower : N ≤ ‖∑ a, f a‖ + N * delta := by
+        have hnorm : ‖f a‖ ≤ 1 + delta := by
+          calc
+            ‖f a‖ = ‖(f a - x) + x‖ := by congr 1; abel
+            _ ≤ ‖f a - x‖ + ‖x‖ := norm_add_le _ _
+            _ ≤ delta + 1 := by rw [hx]; linarith
+            _ = 1 + delta := add_comm _ _
+        exact (sq_le_sq₀ (norm_nonneg _) (by linarith)).mpr hnorm
+      _ = N * (1 + delta) ^ 2 := by simp [N]
+  have hupperSq : ‖∑ a, f a‖ ^ 2 ≤
+      N ^ 2 * gamma * (1 + delta) ^ 2 := by
     calc
-      N = ‖N • x‖ := hscale.symm
-      _ = ‖((N • x) - ∑ a, f a) + ∑ a, f a‖ := by
-        congr 1
-        abel
-      _ ≤ ‖(N • x) - ∑ a, f a‖ + ‖∑ a, f a‖ := norm_add_le _ _
-      _ = ‖(∑ a, f a) - N • x‖ + ‖∑ a, f a‖ := by
-        rw [norm_sub_rev]
-      _ ≤ N * delta + ‖∑ a, f a‖ := add_le_add herror le_rfl
-      _ = ‖∑ a, f a‖ + N * delta := add_comm _ _
-  have hbad : N ≤ N * (c * (1 + delta) + delta) := by
+      ‖∑ a, f a‖ ^ 2 ≤ N * gamma * ∑ a, ‖f a‖ ^ 2 := by
+        simpa [N] using hcodistance E rho hno f hfmem
+      _ ≤ N * gamma * (N * (1 + delta) ^ 2) := by
+        gcongr
+      _ = N ^ 2 * gamma * (1 + delta) ^ 2 := by ring
+  have hlower : N * (1 - delta) ≤ ‖∑ a, f a‖ := by
+    have hscale : ‖N • x‖ = N := by
+      simp [norm_smul, hx, Real.norm_eq_abs, abs_of_pos hN]
+    have hreverse : N ≤ N * delta + ‖∑ a, f a‖ := by
+      calc
+        N = ‖N • x‖ := hscale.symm
+        _ = ‖(N • x - ∑ a, f a) + ∑ a, f a‖ := by
+          congr 1
+          abel
+        _ ≤ ‖N • x - ∑ a, f a‖ + ‖∑ a, f a‖ := norm_add_le _ _
+        _ = ‖(∑ a, f a) - N • x‖ + ‖∑ a, f a‖ := by
+          rw [norm_sub_rev]
+        _ ≤ N * delta + ‖∑ a, f a‖ := add_le_add herror le_rfl
     calc
-      N ≤ ‖∑ a, f a‖ + N * delta := hlower
-      _ ≤ c * (N * (1 + delta)) + N * delta :=
-        add_le_add hupper le_rfl
-      _ = N * (c * (1 + delta) + delta) := by ring
-  have hone : 1 ≤ c * (1 + delta) + delta := by
-    apply le_of_mul_le_mul_left (a := N) (by simpa using hbad) hN
-  dsimp [delta] at hone
-  nlinarith [sq_nonneg (1 - c)]
+      N * (1 - delta) = N - N * delta := by ring
+      _ ≤ ‖∑ a, f a‖ := by linarith
+  have hlower0 : 0 ≤ N * (1 - delta) :=
+    mul_nonneg hN.le (sub_nonneg.mpr hdelta1.le)
+  have hlowerSq : N ^ 2 * (1 - delta) ^ 2 ≤ ‖∑ a, f a‖ ^ 2 := by
+    nlinarith [sq_nonneg (‖∑ a, f a‖ - N * (1 - delta))]
+  have hcontradiction : (1 - delta) ^ 2 ≤ gamma * (1 + delta) ^ 2 := by
+    apply le_of_mul_le_mul_left (a := N ^ 2)
+    · calc
+        N ^ 2 * (1 - delta) ^ 2 ≤ ‖∑ a, f a‖ ^ 2 := hlowerSq
+        _ ≤ N ^ 2 * gamma * (1 + delta) ^ 2 := hupperSq
+        _ = N ^ 2 * (gamma * (1 + delta) ^ 2) := by ring
+    · positivity
+  exact (not_le_of_gt hstrict) hcontradiction
+
+/-- The vertex codistance bound therefore yields a Kazhdan bound on the six
+root subgroups, using the proved three-factor vertex normal form. -/
+theorem rootSet_isKazhdan_of_vertexCodistanceBound
+    (A : A2System G) {gamma : ℝ} (hgamma0 : 0 ≤ gamma)
+    (hgamma1 : gamma < 1)
+    (hcodistance : VertexCodistanceBound.{u, v} A gamma) :
+    IsKazhdanSubset.{u, v} G A.rootSet ((1 - gamma) / 32) := by
+  convert A.rootSet_isKazhdan_of_vertexSet
+    (A.vertexSet_isKazhdan_of_codistanceBound hgamma0 hgamma1 hcodistance) using 1
+  ring
 
 end A2System
 end NonsoficGroupsExist
