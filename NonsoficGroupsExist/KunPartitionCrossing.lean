@@ -23,6 +23,32 @@ def exceptionalIncidentEdges (X : FiniteMultiGraph) (B : Finset X.vertex) :
     Finset X.edge :=
   Finset.univ.filter fun e ↦ X.first e ∈ B ∨ X.second e ∈ B
 
+/-- A generator occurrence can touch a fixed exceptional vertex at most once
+as a source and once as a target for each generator label. -/
+theorem card_exceptionalIncidentEdges_generatorGraph_le
+    {G : Type} [Group G] (Y : FiniteModel) (S : Finset G)
+    (act : G → Equiv.Perm Y) (B : Finset Y) :
+    (exceptionalIncidentEdges (generatorGraph Y S act) B).card ≤
+      2 * S.card * B.card := by
+  classical
+  let X := generatorGraph Y S act
+  have hedge : exceptionalIncidentEdges X B =
+      KunThreshold.activeEdges X (KazhdanFiniteModel.indicator B) 0 := by
+    ext e
+    by_cases hfirst : X.first e ∈ B <;>
+      by_cases hsecond : X.second e ∈ B <;>
+        simp [exceptionalIncidentEdges, KunThreshold.activeEdges,
+          KazhdanFiniteModel.indicator_apply, hfirst, hsecond]
+  have hsuper : X.superlevel (KazhdanFiniteModel.indicator B) 0 = B := by
+    ext y
+    by_cases hy : y ∈ B <;>
+      simp [X, FiniteMultiGraph.superlevel, KazhdanFiniteModel.indicator_apply,
+        hy]
+  rw [hedge]
+  simpa [X, hsuper] using
+    (KunGeneratorGraph.activeEdges_generatorGraph_card_le
+      Y S act (KazhdanFiniteModel.indicator B) 0)
+
 /-- If the first endpoint enters strictly before the second, the occurrence is
 in the boundary of the reference set at that stage. -/
 theorem edge_mem_boundary_reference_of_first_entry_lt
@@ -210,6 +236,72 @@ theorem card_crossingEdges_le
         ∑ i ∈ Finset.range (Fintype.card X.vertex),
           X.boundaryCard (referenceSetAt B γ α replace i) := by
       exact Nat.add_le_add_left Finset.card_biUnion_le _
+
+/-- For a generator graph, the total crossing budget consists of at most two
+exceptional incidences per label and the linear reference-boundary budget. -/
+theorem card_crossingEdges_generatorGraph_le
+    {G : Type} [Group G] (Y : FiniteModel) (S : Finset G)
+    (act : G → Equiv.Perm Y) (B : Finset Y) (γ α : ℝ)
+    (replace : ∀ T : Finset Y, T.Nonempty → Disjoint T B →
+      ((generatorGraph Y S act).boundaryCard T : ℝ) < γ * T.card →
+      ∃ W : Finset Y,
+        ((W ∆ T).card : ℝ) < (T.card : ℝ) / 3 ∧
+        ((generatorGraph Y S act).boundaryCard W : ℝ) < α * T.card) :
+    ((generatorGraph Y S act).crossingEdges
+        (blockStructure B γ α replace).block).card ≤
+      2 * S.card * B.card +
+        ∑ i ∈ Finset.range (Fintype.card Y),
+          (generatorGraph Y S act).boundaryCard
+            (referenceSetAt B γ α replace i) := by
+  calc
+    ((generatorGraph Y S act).crossingEdges
+        (blockStructure B γ α replace).block).card ≤
+      (exceptionalIncidentEdges (generatorGraph Y S act) B).card +
+        ∑ i ∈ Finset.range (Fintype.card Y),
+          (generatorGraph Y S act).boundaryCard
+            (referenceSetAt B γ α replace i) :=
+      card_crossingEdges_le (X := generatorGraph Y S act) B γ α replace
+    _ ≤ 2 * S.card * B.card +
+        ∑ i ∈ Finset.range (Fintype.card Y),
+          (generatorGraph Y S act).boundaryCard
+            (referenceSetAt B γ α replace i) := by
+      exact Nat.add_le_add_right
+        (card_exceptionalIncidentEdges_generatorGraph_le Y S act B) _
+
+/-- Real-valued form used after normalization by the model size. -/
+theorem card_crossingEdges_generatorGraph_real_le
+    {G : Type} [Group G] (Y : FiniteModel) (S : Finset G)
+    (act : G → Equiv.Perm Y) (B : Finset Y) (γ α : ℝ) (hα : 0 ≤ α)
+    (replace : ∀ T : Finset Y, T.Nonempty → Disjoint T B →
+      ((generatorGraph Y S act).boundaryCard T : ℝ) < γ * T.card →
+      ∃ W : Finset Y,
+        ((W ∆ T).card : ℝ) < (T.card : ℝ) / 3 ∧
+        ((generatorGraph Y S act).boundaryCard W : ℝ) < α * T.card) :
+    (((generatorGraph Y S act).crossingEdges
+        (blockStructure B γ α replace).block).card : ℝ) ≤
+      2 * (S.card : ℝ) * B.card + 2 * α * Fintype.card Y := by
+  have hcross := card_crossingEdges_generatorGraph_le
+    Y S act B γ α replace
+  have hcrossReal :
+      (((generatorGraph Y S act).crossingEdges
+          (blockStructure B γ α replace).block).card : ℝ) ≤
+        2 * (S.card : ℝ) * B.card +
+          ∑ i ∈ Finset.range (Fintype.card Y),
+            ((generatorGraph Y S act).boundaryCard
+              (referenceSetAt B γ α replace i) : ℝ) := by
+    exact_mod_cast hcross
+  calc
+    (((generatorGraph Y S act).crossingEdges
+        (blockStructure B γ α replace).block).card : ℝ) ≤
+      2 * (S.card : ℝ) * B.card +
+        ∑ i ∈ Finset.range (Fintype.card Y),
+          ((generatorGraph Y S act).boundaryCard
+            (referenceSetAt B γ α replace i) : ℝ) := hcrossReal
+    _ ≤ 2 * (S.card : ℝ) * B.card + 2 * α * Fintype.card Y := by
+      have hsum := sum_boundaryCard_referenceSetAt_le
+        (X := generatorGraph Y S act) B γ α hα replace
+        (Fintype.card Y)
+      linarith
 
 end KunPartitionCrossing
 end NonsoficGroupsExist
