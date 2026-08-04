@@ -318,6 +318,95 @@ theorem sum_symmDiff_lower_bound [Nonempty Y]
   exact Finset.single_le_sum
     (fun g _ ↦ Nat.cast_nonneg (((U.map (σ g).toEmbedding) ∆ U).card)) hq
 
+/-- Generator-labelled boundary size of a subset in an exact finite action.
+Each label is retained, so coincident permutations do not lose
+multiplicity. -/
+def actionBoundarySize (σ : G →* Equiv.Perm Y) (Q : Finset G)
+    (U : Finset Y) : ℕ :=
+  ∑ q ∈ Q, ((U.map (σ q).toEmbedding) ∆ U).card
+
+/-- Uniform set expansion for an exact finite action, expressed with the
+labelled boundary size. -/
+def HasActionExpansion (σ : G →* Equiv.Perm Y) (Q : Finset G)
+    (h : ℝ) : Prop :=
+  ∀ U : Finset Y, U.Nonempty → 2 * U.card ≤ Fintype.card Y →
+    h * U.card ≤ actionBoundarySize σ Q U
+
+/-- Every exact transitive finite action of a group with Kazhdan pair
+`(Q, ε)` has expansion constant `ε² / 2`. -/
+theorem hasActionExpansion_of_kazhdanPair [Nonempty Y]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ) :
+    HasActionExpansion σ Q (ε ^ 2 / 2) := by
+  intro U hU hhalf
+  have h := sum_symmDiff_lower_bound hQ σ htrans U hU hhalf
+  simpa [actionBoundarySize] using h
+
+/-- The orbit of a point in an exact finite action. -/
+noncomputable def orbitFinset (σ : G →* Equiv.Perm Y) (x : Y) : Finset Y := by
+  classical
+  exact Finset.univ.filter fun y ↦ ∃ g : G, σ g x = y
+
+omit [DecidableEq Y] in
+@[simp] theorem mem_orbitFinset (σ : G →* Equiv.Perm Y) (x y : Y) :
+    y ∈ orbitFinset σ x ↔ ∃ g : G, σ g x = y := by
+  classical
+  simp [orbitFinset]
+
+/-- Restriction of one action permutation to a chosen orbit. -/
+noncomputable def orbitPermutation (σ : G →* Equiv.Perm Y) (x : Y) (g : G) :
+    Equiv.Perm (orbitFinset σ x) where
+  toFun y := ⟨σ g y.1, by
+    rw [mem_orbitFinset]
+    obtain ⟨h, hh⟩ := (mem_orbitFinset σ x y.1).1 y.2
+    exact ⟨g * h, by simp [hh]⟩⟩
+  invFun y := ⟨σ g⁻¹ y.1, by
+    rw [mem_orbitFinset]
+    obtain ⟨h, hh⟩ := (mem_orbitFinset σ x y.1).1 y.2
+    exact ⟨g⁻¹ * h, by simp [hh]⟩⟩
+  left_inv y := by
+    apply Subtype.ext
+    simp
+  right_inv y := by
+    apply Subtype.ext
+    simp
+
+/-- The exact action restricted to one of its finite orbits. -/
+noncomputable def orbitAction (σ : G →* Equiv.Perm Y) (x : Y) :
+    G →* Equiv.Perm (orbitFinset σ x) where
+  toFun := orbitPermutation σ x
+  map_one' := by
+    ext y
+    simp [orbitPermutation]
+  map_mul' g h := by
+    ext y
+    simp [orbitPermutation]
+
+omit [DecidableEq Y] in
+/-- An action restricted to one orbit is transitive. -/
+theorem orbitAction_transitive (σ : G →* Equiv.Perm Y) (x : Y) :
+    IsTransitive (orbitAction σ x) := by
+  intro y z
+  obtain ⟨g, hg⟩ := (mem_orbitFinset σ x y.1).1 y.2
+  obtain ⟨h, hh⟩ := (mem_orbitFinset σ x z.1).1 z.2
+  refine ⟨h * g⁻¹, ?_⟩
+  apply Subtype.ext
+  change σ (h * g⁻¹) y.1 = z.1
+  rw [← hg, ← hh]
+  simp
+
+/-- Every orbit of an exact finite action of a Kazhdan group is a uniform
+expander, with the same constant for all finite actions and all orbits. -/
+theorem orbitAction_hasExpansion
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (σ : G →* Equiv.Perm Y) (x : Y) :
+    HasActionExpansion (orbitAction σ x) Q (ε ^ 2 / 2) := by
+  let x' : orbitFinset σ x :=
+    ⟨x, (mem_orbitFinset σ x x).2 ⟨1, by simp⟩⟩
+  letI : Nonempty (orbitFinset σ x) := ⟨x'⟩
+  exact hasActionExpansion_of_kazhdanPair hQ (orbitAction σ x)
+    (orbitAction_transitive σ x)
+
 end
 
 end KazhdanFiniteModel
