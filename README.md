@@ -69,7 +69,9 @@ box is still a required dependency of the final theorem.
   the identity to `1`
 - [x] Factor every finite-plane element through its two coefficient roots and
   derive genuine additive `𝔽₂` coefficient characters (addition maps to sign
-  multiplication and zero maps to `1`) on every nonzero Fourier component
+  multiplication and zero maps to `1`) on every nonzero Fourier component;
+  prove every nontrivial plane character is nontrivial on at least one of the
+  two coefficient coordinates
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

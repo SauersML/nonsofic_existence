@@ -260,6 +260,46 @@ theorem secondCoefficientEigenvalue_zero_of_component_ne_zero
   exact planeEigenvalue_one_of_component_ne_zero X i j k hij hik hjk n
     rho sign z hv
 
+/-- If a nonzero component has a nontrivial plane character, then one of its
+two coefficient characters is already nontrivial. -/
+theorem exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (g : Plane X i j k hij hik hjk n)
+    (hg : planeEigenvalue X i j k hij hik hjk n sign g = -1) :
+    (∃ a : FreeAlgebraDegree.degreeLE X n,
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) ∨
+    (∃ b : FreeAlgebraDegree.degreeLE X n,
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign b = -1) := by
+  obtain ⟨a, b, hab⟩ := exists_coordinate_factorization X i j k hij hik hjk n g
+  have hmul := planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk n
+    rho sign z hv
+    (firstCoordinate X i j k hij hik hjk n a)
+    (secondCoordinate X i j k hij hik hjk n b)
+  rw [hab, hg] at hmul
+  change (-1 : ℝ) =
+    firstCoefficientEigenvalue X i j k hij hik hjk n sign a *
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign b at hmul
+  have ha : firstCoefficientEigenvalue X i j k hij hik hjk n sign a = 1 ∨
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1 := by
+    unfold firstCoefficientEigenvalue planeEigenvalue
+    split <;> simp
+  have hb : secondCoefficientEigenvalue X i j k hij hik hjk n sign b = 1 ∨
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign b = -1 := by
+    unfold secondCoefficientEigenvalue planeEigenvalue
+    split <;> simp
+  rcases ha with ha | ha
+  · right
+    refine ⟨b, ?_⟩
+    rcases hb with hb | hb
+    · rw [ha, hb] at hmul
+      norm_num at hmul
+    · exact hb
+  · exact Or.inl ⟨a, ha⟩
+
 end
 
 end FreeRootPlaneFourier
