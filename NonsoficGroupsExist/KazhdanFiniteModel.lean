@@ -896,24 +896,23 @@ theorem sofic_relative_correlation_approaches_gram_eventually
 omit [Group G] in
 /-- Every normalized centered-indicator coefficient lies in `[-1,1]`, even
 for an empty finite model. -/
-theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
-    (τ : G → Equiv.Perm M) (U : Finset M) (g : G) :
-    |normalizedCorrelation M τ U g| ≤ 1 := by
+theorem abs_normalizedPermutationCorrelation_le_one (M : FiniteModel)
+    (U : Finset M) (p : Equiv.Perm M) :
+    |normalizedPermutationCorrelation M U p| ≤ 1 := by
   by_cases hcard : Fintype.card M = 0
   · haveI : IsEmpty M := Fintype.card_eq_zero_iff.mp hcard
-    simp [normalizedCorrelation, normalizedPermutationCorrelation]
+    simp [normalizedPermutationCorrelation]
   · have hcardNat : 0 < Fintype.card M := Nat.pos_of_ne_zero hcard
     letI : Nonempty M := Fintype.card_pos_iff.mp hcardNat
     have hcardReal : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
     have hinner := abs_real_inner_le_norm (centeredIndicator U)
-      (permutationOperator (τ g) (centeredIndicator U))
-    rw [(permutationOperator (τ g)).norm_map] at hinner
+      (permutationOperator p (centeredIndicator U))
+    rw [(permutationOperator p).norm_map] at hinner
     have hnorm := norm_centeredIndicator_sq_div_card_le_one U
-    rw [normalizedCorrelation, normalizedPermutationCorrelation, abs_div,
-      abs_of_pos hcardReal]
+    rw [normalizedPermutationCorrelation, abs_div, abs_of_pos hcardReal]
     calc
       |inner ℝ (centeredIndicator U)
-          (permutationOperator (τ g) (centeredIndicator U))| /
+          (permutationOperator p (centeredIndicator U))| /
           Fintype.card M ≤
         (‖centeredIndicator U‖ * ‖centeredIndicator U‖) /
           Fintype.card M :=
@@ -921,10 +920,23 @@ theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
       _ = ‖centeredIndicator U‖ ^ 2 / Fintype.card M := by ring
       _ ≤ 1 := hnorm
 
+omit [Group G] in
+/-- Every normalized model coefficient lies in `[-1,1]`. -/
+theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
+    (τ : G → Equiv.Perm M) (U : Finset M) (g : G) :
+    |normalizedCorrelation M τ U g| ≤ 1 := by
+  exact abs_normalizedPermutationCorrelation_le_one M U (τ g)
+
 /-- Hyperreal matrix coefficient of a sequence of finite models. -/
 noncomputable def correlationHyperreal (A : SoficApproximation G)
     (U : ∀ n, Finset (A.model n)) (g : G) : Hyperreal :=
   Hyperreal.ofSeq fun n ↦ normalizedCorrelation (A.model n) (A.map n) (U n) g
+
+/-- Hyperreal Gram coefficient of the two translated vectors. -/
+noncomputable def gramCorrelationHyperreal (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g h : G) : Hyperreal :=
+  Hyperreal.ofSeq fun n ↦
+    normalizedGramCorrelation (A.model n) (A.map n) (U n) g h
 
 /-- The coefficient hyperreal is finite, so taking its standard part is
 mathematically legitimate. -/
@@ -948,11 +960,80 @@ theorem correlationHyperreal_finite (A : SoficApproximation G)
       (abs_le.mp
         (abs_normalizedCorrelation_le_one (A.model n) (A.map n) (U n) g)).2
 
+/-- Gram-coefficient hyperreals are finite. -/
+theorem gramCorrelationHyperreal_finite (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g h : G) :
+    0 ≤ ArchimedeanClass.mk (gramCorrelationHyperreal A U g h) := by
+  apply ArchimedeanClass.mk_nonneg_of_le_of_le_of_archimedean
+    Hyperreal.coeRingHom (r := (-1 : ℝ)) (s := (1 : ℝ))
+  · change Hyperreal.ofSeq (fun _ : ℕ ↦ (-1 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) g h)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      rw [normalizedGramCorrelation_eq_relative]
+      exact (abs_le.mp (abs_normalizedPermutationCorrelation_le_one
+        (A.model n) (U n) ((A.map n g)⁻¹ * A.map n h))).1
+  · change Hyperreal.ofSeq (fun n ↦
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) g h) ≤
+      Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      rw [normalizedGramCorrelation_eq_relative]
+      exact (abs_le.mp (abs_normalizedPermutationCorrelation_le_one
+        (A.model n) (U n) ((A.map n g)⁻¹ * A.map n h))).2
+
+/-- The difference between the relative sofic coefficient and the
+corresponding Gram coefficient converges to zero. -/
+theorem correlation_sub_gram_tendsto_zero (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g h : G) :
+    Filter.Tendsto
+      (fun n ↦ normalizedCorrelation (A.model n) (A.map n) (U n) (g⁻¹ * h) -
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) g h)
+      Filter.atTop (nhds 0) := by
+  refine Metric.tendsto_atTop.mpr fun ε hε ↦ ?_
+  obtain ⟨N, hN⟩ :=
+    sofic_relative_correlation_approaches_gram_eventually A U g h ε hε
+  refine ⟨N, fun n hn ↦ ?_⟩
+  simpa only [dist_zero_right, Real.norm_eq_abs] using hN n hn
+
+/-- The relative coefficient and Gram coefficient differ by a hyperreal of
+strictly positive Archimedean class, i.e. by an infinitesimal. -/
+theorem correlationHyperreal_sub_gram_mk_pos
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) (g h : G) :
+    0 < ArchimedeanClass.mk
+      (correlationHyperreal A U (g⁻¹ * h) - gramCorrelationHyperreal A U g h) := by
+  change 0 < ArchimedeanClass.mk (Hyperreal.ofSeq (fun n ↦
+    normalizedCorrelation (A.model n) (A.map n) (U n) (g⁻¹ * h) -
+      normalizedGramCorrelation (A.model n) (A.map n) (U n) g h))
+  apply Hyperreal.archimedeanClassMk_pos_of_tendsto
+  rw [Hyperreal.tendsto_ofSeq]
+  exact (correlation_sub_gram_tendsto_zero A U g h).mono_left
+    Nat.hyperfilter_le_atTop
+
 /-- Standard-part correlation associated to a sequence of subsets in a
 sofic approximation. -/
 noncomputable def limitingCorrelation (A : SoficApproximation G)
     (U : ∀ n, Finset (A.model n)) (g : G) : ℝ :=
   ArchimedeanClass.stdPart (correlationHyperreal A U g)
+
+/-- The limiting relative correlation is the standard part of the Gram
+coefficient hyperreal. -/
+theorem limitingCorrelation_inv_mul_eq_stdPart_gram
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) (g h : G) :
+    limitingCorrelation A U (g⁻¹ * h) =
+      ArchimedeanClass.stdPart (gramCorrelationHyperreal A U g h) := by
+  have hc := correlationHyperreal_finite A U (g⁻¹ * h)
+  have hg := gramCorrelationHyperreal_finite A U g h
+  have hsmall := correlationHyperreal_sub_gram_mk_pos A U g h
+  have hzero : ArchimedeanClass.stdPart
+      (correlationHyperreal A U (g⁻¹ * h) - gramCorrelationHyperreal A U g h) = 0 :=
+    ArchimedeanClass.stdPart_eq_zero.mpr
+      hsmall.ne'
+  have hsub := ArchimedeanClass.stdPart_sub hc hg
+  rw [hzero] at hsub
+  unfold limitingCorrelation
+  exact sub_eq_zero.mp hsub.symm
 
 /-- The limiting correlation remains in the closed unit interval. -/
 theorem abs_limitingCorrelation_le_one (A : SoficApproximation G)
