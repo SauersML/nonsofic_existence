@@ -187,6 +187,21 @@ theorem norm_laplacianFamily_sq (f : Family E) :
       ∑ i : Fin 6, ‖A2MagicLaplacian.laplacian f i‖ ^ 2 := by
   exact PiLp.norm_sq_eq_of_L2 _ _
 
+/-- The concrete graph Laplacian has operator bound `8`. -/
+theorem norm_laplacianFamily_le_eight (f : Family E) :
+    ‖laplacianFamily f‖ ≤ 8 * ‖f‖ := by
+  have hlap := A2MagicLaplacian.sum_laplacian_norm_sq_le_four_directedEnergy
+    (fun i ↦ f i)
+  have hedge := A2MagicLaplacian.directedEnergy_le_sixteen_sum_norm_sq
+    (fun i ↦ f i)
+  rw [← PiLp.norm_sq_eq_of_L2] at hedge
+  have hsq : ‖laplacianFamily f‖ ^ 2 ≤ 64 * ‖f‖ ^ 2 := by
+    rw [norm_laplacianFamily_sq]
+    nlinarith
+  apply (sq_le_sq₀ (norm_nonneg _)
+    (mul_nonneg (by norm_num) (norm_nonneg _))).mp
+  nlinarith
+
 /-- Symmetry of the bounded family Laplacian. -/
 theorem inner_laplacianFamily_comm (f g : Family E) :
     inner ℝ (laplacianFamily f) g = inner ℝ f (laplacianFamily g) := by
@@ -646,6 +661,116 @@ theorem norm_le_inverseGap_mul_norm_compressedLaplacian [CompleteSpace E]
       norm_compressedLaplacian_sq_le_eight_energy A rho x
   · intro x hx
     exact compressedLaplacian_eq_zero_imp A rho hno x hx
+
+/-- Characteristic two forces a uniform strict contraction for the
+coordinatewise projections of a constant family onto the six vertex fixed
+spaces.  The contraction factor is constructed explicitly from the
+compressed-Laplacian inverse bound. -/
+theorem exists_constantProjectionBound
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1) :
+    ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧
+      ConstantProjectionBound.{u, v} A gamma := by
+  let c : ℝ := 2 * (1 - (Real.sqrt 2)⁻¹) / 3
+  let K : ℝ := (c * (1 - Real.sqrt (1 - c / 8)))⁻¹
+  let a : ℝ := 8 * K
+  let gamma : ℝ := a ^ 2 / (1 + a ^ 2)
+  have hsqrt0 : 0 < Real.sqrt 2 := Real.sqrt_pos.2 (by norm_num)
+  have hsqrtSq : (Real.sqrt 2) ^ 2 = 2 := Real.sq_sqrt (by norm_num)
+  have hsqrt1 : (1 : ℝ) < Real.sqrt 2 := by
+    have hsqrtNonneg := Real.sqrt_nonneg 2
+    nlinarith
+  have hinv0 : 0 ≤ (Real.sqrt 2)⁻¹ := inv_nonneg.mpr hsqrt0.le
+  have hinv1 : (Real.sqrt 2)⁻¹ < 1 :=
+    (inv_lt_one₀ hsqrt0).2 hsqrt1
+  have hc : 0 < c := by
+    dsimp [c]
+    nlinarith
+  have hc8 : c ≤ 8 := by
+    dsimp [c]
+    nlinarith
+  have hr0 : 0 ≤ 1 - c / 8 := by nlinarith
+  have hr1 : 1 - c / 8 < 1 := by nlinarith
+  have hs0 : 0 ≤ Real.sqrt (1 - c / 8) := Real.sqrt_nonneg _
+  have hsSq : (Real.sqrt (1 - c / 8)) ^ 2 = 1 - c / 8 :=
+    Real.sq_sqrt hr0
+  have hs1 : Real.sqrt (1 - c / 8) < 1 := by
+    nlinarith
+  have hden : 0 < c * (1 - Real.sqrt (1 - c / 8)) :=
+    mul_pos hc (sub_pos.mpr hs1)
+  have hK0 : 0 ≤ K := inv_nonneg.mpr hden.le
+  have ha0 : 0 ≤ a := mul_nonneg (by norm_num) hK0
+  have hgamma0 : 0 ≤ gamma := by
+    dsimp [gamma]
+    positivity
+  have hgamma1 : gamma < 1 := by
+    dsimp [gamma]
+    apply (div_lt_one (by positivity : 0 < 1 + a ^ 2)).2
+    linarith
+  refine ⟨gamma, hgamma0, hgamma1, ?_⟩
+  intro E _ _ _ rho hno x
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  let y : Family E := constantFamily x
+  let p₀ : Family E := vertexProjectionFamily A rho y
+  let p : W := ⟨p₀, vertexProjectionFamily_mem A rho y⟩
+  let q : Family E := y - p₀
+  have hprojection : W.starProjection y = p₀ := by
+    exact starProjection_vertexFixedSubspace A rho y
+  have hqOrth : q ∈ Wᗮ := by
+    change y - p₀ ∈ Wᗮ
+    rw [← hprojection]
+    exact W.sub_starProjection_mem_orthogonal y
+  have hpOrth : inner ℝ p₀ q = 0 :=
+    Submodule.inner_right_of_mem_orthogonal p.property hqOrth
+  have hpyth : ‖y‖ ^ 2 = ‖p₀‖ ^ 2 + ‖q‖ ^ 2 := by
+    have hsplit : y = p₀ + q := by
+      dsimp [q]
+      abel
+    calc
+      ‖y‖ ^ 2 = ‖p₀ + q‖ ^ 2 :=
+        congrArg (fun z : Family E ↦ ‖z‖ ^ 2) hsplit
+      _ = ‖p₀‖ ^ 2 + ‖q‖ ^ 2 := by
+        simpa [pow_two] using
+          norm_add_sq_eq_norm_sq_add_norm_sq_real hpOrth
+  have hLy : laplacianFamily y = 0 := by
+    apply PiLp.ext
+    intro i
+    change A2MagicLaplacian.laplacian (fun _ : Fin 6 ↦ x) i = 0
+    exact A2MagicLaplacian.laplacian_const x i
+  have hnormL : ‖laplacianFamily p₀‖ = ‖laplacianFamily q‖ := by
+    have hLq : laplacianFamily q = -laplacianFamily p₀ := by
+      dsimp [q]
+      rw [map_sub, hLy, zero_sub]
+    simpa using (congrArg norm hLq).symm
+  have hop : ‖compressedLaplacian A rho p‖ ≤ 8 * ‖q‖ := by
+    calc
+      ‖compressedLaplacian A rho p‖ ≤
+          ‖laplacianFamily (p : Family E)‖ := by
+        exact W.norm_orthogonalProjectionOnto_apply_le _
+      _ = ‖laplacianFamily p₀‖ := rfl
+      _ = ‖laplacianFamily q‖ := hnormL
+      _ ≤ 8 * ‖q‖ := norm_laplacianFamily_le_eight q
+  have hinverse := norm_le_inverseGap_mul_norm_compressedLaplacian
+    A hexp rho hno p
+  change ‖p₀‖ ≤ K * ‖compressedLaplacian A rho p‖ at hinverse
+  have hpq : ‖p₀‖ ≤ a * ‖q‖ := by
+    calc
+      ‖p₀‖ ≤ K * ‖compressedLaplacian A rho p‖ := hinverse
+      _ ≤ K * (8 * ‖q‖) := mul_le_mul_of_nonneg_left hop hK0
+      _ = a * ‖q‖ := by dsimp [a]; ring
+  have hpqSq : ‖p₀‖ ^ 2 ≤ a ^ 2 * ‖q‖ ^ 2 := by
+    have hsq := (sq_le_sq₀ (norm_nonneg _)
+      (mul_nonneg ha0 (norm_nonneg _))).2 hpq
+    nlinarith
+  change ‖p₀‖ ^ 2 ≤ gamma * ‖y‖ ^ 2
+  rw [hpyth]
+  dsimp [gamma]
+  rw [div_mul_eq_mul_div]
+  apply (le_div_iff₀ (by positivity : 0 < 1 + a ^ 2)).2
+  nlinarith
 
 end A2MagicHilbert
 end NonsoficGroupsExist

@@ -2,7 +2,7 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 48% of the way to the complete
+group exists. The current estimate is **about 51% of the way to the complete
 unconditional proof**. This percentage measures closed dependencies on the
 critical path, not lines of Lean.
 
@@ -35,7 +35,10 @@ box is still a required dependency of the final theorem.
   operator gap
 - [x] Explicit inverse norm bound for the compressed Laplacian, derived by
   the kernel-checked positive-operator iteration
-- [ ] Derive the uniform A₂ vertex projection/codistance bound below `1`
+- [x] Uniform A₂ constant-family/vertex projection bound with an explicit
+  contraction factor below `1`
+- [ ] Transfer the projection contraction to vertex codistance and the root
+  Kazhdan-subset bound
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
