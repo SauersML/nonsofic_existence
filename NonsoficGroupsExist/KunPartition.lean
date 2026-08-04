@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.KunDecompositionStep
+import NonsoficGroupsExist.KunUniformRounding
 
 /-!
 # The finite minimal-cut step in Kun's partition construction

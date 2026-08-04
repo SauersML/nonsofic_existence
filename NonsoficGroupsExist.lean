@@ -17,7 +17,6 @@ import NonsoficGroupsExist.KunQuantitativeRounding
 import NonsoficGroupsExist.KunRemoval
 import NonsoficGroupsExist.KunAsymptoticRemoval
 import NonsoficGroupsExist.KunSmallBoundary
-import NonsoficGroupsExist.KunDecompositionStep
 import NonsoficGroupsExist.KunPartition
 import NonsoficGroupsExist.KunFinitePartition
 import NonsoficGroupsExist.KunPartitionBoundary
@@ -26,6 +25,7 @@ import NonsoficGroupsExist.KunBlockGraph
 import NonsoficGroupsExist.KunUniformMovement
 import NonsoficGroupsExist.KunUniformRemoval
 import NonsoficGroupsExist.KunUniformRounding
+import NonsoficGroupsExist.KunUniformDecompositionStep
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation
