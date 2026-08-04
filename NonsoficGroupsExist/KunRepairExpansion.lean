@@ -404,5 +404,106 @@ theorem repaired_boundary_lower
     positivity
   nlinarith
 
+/-- For a graph whose edges stay inside partition blocks, the full-graph
+boundary of a subset of one block is exactly its boundary in the induced
+block graph. -/
+theorem boundaryCard_induce_block_eq
+    (Z : FiniteMultiGraph) (P : BlockStructure Z.vertex)
+    (hedge : ∀ e : Z.edge,
+      P.block (Z.first e) = P.block (Z.second e))
+    (y : Z.vertex) (U : Finset (Z.induce (P.block y)).vertex) :
+    (Z.induce (P.block y)).boundaryCard U =
+      Z.boundaryCard (U.map (Function.Embedding.subtype _)) := by
+  classical
+  let U₀ : Finset Z.vertex := U.map (Function.Embedding.subtype _)
+  have hmem (v : Z.vertex) (hv : v ∈ P.block y) :
+      (⟨v, hv⟩ : (Z.induce (P.block y)).vertex) ∈ U ↔ v ∈ U₀ := by
+    constructor
+    · intro hvU
+      exact Finset.mem_map.mpr ⟨⟨v, hv⟩, hvU, rfl⟩
+    · intro hvU₀
+      obtain ⟨v', hv'U, hv'v⟩ := Finset.mem_map.mp hvU₀
+      have hv'eq : v' = ⟨v, hv⟩ := Subtype.ext hv'v
+      rw [← hv'eq]
+      exact hv'U
+  apply Finset.card_bij (fun e _ ↦ e.1)
+  · intro e he
+    have hedata := (Finset.mem_filter.mp he).2
+    apply Finset.mem_filter.mpr
+    refine ⟨Finset.mem_univ _, ?_⟩
+    rcases hedata with h | h
+    · exact Or.inl ⟨(hmem _ e.2.1).mp h.1, fun hsU₀ ↦
+        h.2 ((hmem _ e.2.2).mpr hsU₀)⟩
+    · exact Or.inr ⟨(hmem _ e.2.2).mp h.1, fun hfU₀ ↦
+        h.2 ((hmem _ e.2.1).mpr hfU₀)⟩
+  · intro e _ e' _ heq
+    exact Subtype.ext heq
+  · intro e he
+    have hedata := (Finset.mem_filter.mp he).2
+    have hU₀subset : U₀ ⊆ P.block y := by
+      intro v hv
+      obtain ⟨v', _, rfl⟩ := Finset.mem_map.mp hv
+      exact v'.2
+    have hfirstOrSecond : Z.first e ∈ P.block y ∨ Z.second e ∈ P.block y := by
+      rcases hedata with h | h
+      · exact Or.inl (hU₀subset h.1)
+      · exact Or.inr (hU₀subset h.1)
+    have hends : Z.first e ∈ P.block y ∧ Z.second e ∈ P.block y := by
+      rcases hfirstOrSecond with hfirst | hsecond
+      · have hfirstBlock : P.block (Z.first e) = P.block y :=
+          P.eq_of_mem y _ hfirst
+        have hsecond : Z.second e ∈ P.block y := by
+          rw [← hfirstBlock, hedge e]
+          exact P.self_mem _
+        exact ⟨hfirst, hsecond⟩
+      · have hsecondBlock : P.block (Z.second e) = P.block y :=
+          P.eq_of_mem y _ hsecond
+        have hfirst : Z.first e ∈ P.block y := by
+          rw [← hsecondBlock, ← hedge e]
+          exact P.self_mem _
+        exact ⟨hfirst, hsecond⟩
+    let a : (Z.induce (P.block y)).edge := ⟨e, hends⟩
+    refine ⟨a, ?_, rfl⟩
+    apply Finset.mem_filter.mpr
+    refine ⟨Finset.mem_univ _, ?_⟩
+    rcases hedata with h | h
+    · exact Or.inl ⟨(hmem _ hends.1).mpr h.1, fun hsU ↦
+        h.2 ((hmem _ hends.2).mp hsU)⟩
+    · exact Or.inr ⟨(hmem _ hends.2).mpr h.1, fun hfU ↦
+        h.2 ((hmem _ hends.1).mp hfU)⟩
+
+/-- A blockwise full-graph cut inequality is therefore the Cheeger inequality
+for the corresponding induced component. -/
+theorem induce_block_hasCheegerLowerBound
+    (Z : FiniteMultiGraph) (P : BlockStructure Z.vertex)
+    (hedge : ∀ e : Z.edge,
+      P.block (Z.first e) = P.block (Z.second e))
+    (γ : ℝ) (hγ : 0 < γ) (y : Z.vertex)
+    (hcut : ∀ U : Finset Z.vertex, U ⊆ P.block y → U.Nonempty →
+      2 * U.card ≤ (P.block y).card →
+        γ * (U.card : ℝ) ≤ Z.boundaryCard U) :
+    (Z.induce (P.block y)).HasCheegerLowerBound γ := by
+  refine ⟨hγ, ?_⟩
+  intro U hU hhalf
+  let U₀ : Finset Z.vertex := U.map (Function.Embedding.subtype _)
+  have hU₀subset : U₀ ⊆ P.block y := by
+    intro z hz
+    obtain ⟨z', _, rfl⟩ := Finset.mem_map.mp hz
+    exact z'.2
+  have hU₀ : U₀.Nonempty := by
+    obtain ⟨u, hu⟩ := hU
+    exact ⟨u.1, Finset.mem_map.mpr ⟨u, hu, rfl⟩⟩
+  have hcard : U₀.card = U.card := Finset.card_map _
+  have hvertexCard : Fintype.card (Z.induce (P.block y)).vertex =
+      (P.block y).card := by
+    simp [FiniteMultiGraph.induce]
+  have hhalf₀ : 2 * U₀.card ≤ (P.block y).card := by
+    rw [hcard]
+    rw [← hvertexCard]
+    exact hhalf
+  have hfull := hcut U₀ hU₀subset hU₀ hhalf₀
+  rw [boundaryCard_induce_block_eq Z P hedge y U]
+  simpa [U₀, hcard] using hfull
+
 end KunRepairExpansion
 end NonsoficGroupsExist
