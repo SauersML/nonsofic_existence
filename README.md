@@ -111,6 +111,10 @@ box is still a required dependency of the final theorem.
   plane character has at least one valuation at most `n`; prove the exact
   leading-letter lemma that a positive valuation has a generator-derived
   character whose valuation is smaller by exactly one
+- [x] Enumerate the finite free-generator alphabet, collect every generator
+  realizing exact valuation descent, prove that set is nonempty whenever the
+  valuation is positive and detected, and define a canonical least-index
+  selector with its exact descent theorem
 - [ ] Partition the positive-valuation character regions by their least
   leading generator and prove the generator shears carry the required pieces
   into Kassabov's opposite-or-zero valuation regions

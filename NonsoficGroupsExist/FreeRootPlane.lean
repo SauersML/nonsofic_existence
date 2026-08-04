@@ -234,6 +234,19 @@ noncomputable def generatorShearedSecondCoordinate
     (generatorMulCoefficientSucc X x a).1 =
       FreeAlgebra.ι (ZMod 2) x * a.1 := rfl
 
+@[simp] theorem generatorMulCoefficientSucc_zero {n : ℕ} (x : X) :
+    generatorMulCoefficientSucc X x (0 : degreeLE X n) = 0 := by
+  apply Subtype.ext
+  simp
+
+theorem generatorMulCoefficientSucc_add {n : ℕ} (x : X)
+    (a b : degreeLE X n) :
+    generatorMulCoefficientSucc X x (a + b) =
+      generatorMulCoefficientSucc X x a +
+        generatorMulCoefficientSucc X x b := by
+  apply Subtype.ext
+  simp [mul_add]
+
 /-- Generator multiplication of a bounded tail monomial is exactly the
 bounded monomial of the word obtained by adjoining that generator on the
 left. -/

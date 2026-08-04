@@ -146,6 +146,29 @@ def leftDerivedCharacter {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X) :
     degreeLE X n → ℝ :=
   fun a ↦ chi (generatorMulCoefficientSucc X x a)
 
+theorem leftDerivedCharacter_zero
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
+    (hzero : chi 0 = 1) :
+    leftDerivedCharacter X chi x 0 = 1 := by
+  simp [leftDerivedCharacter, hzero]
+
+theorem leftDerivedCharacter_add
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
+    (hadd : ∀ a b, chi (a + b) = chi a * chi b) (a b : degreeLE X n) :
+    leftDerivedCharacter X chi x (a + b) =
+      leftDerivedCharacter X chi x a * leftDerivedCharacter X chi x b := by
+  change chi (generatorMulCoefficientSucc X x (a + b)) =
+    chi (generatorMulCoefficientSucc X x a) *
+      chi (generatorMulCoefficientSucc X x b)
+  rw [generatorMulCoefficientSucc_add, hadd]
+
+theorem leftDerivedCharacter_eq_one_or_neg_one
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
+    (hsign : ∀ a, chi a = 1 ∨ chi a = -1) (a : degreeLE X n) :
+    leftDerivedCharacter X chi x a = 1 ∨
+      leftDerivedCharacter X chi x a = -1 :=
+  hsign _
+
 /-- Kassabov's leading-letter claim: a positive nontrivial character
 valuation admits a first generator whose derived character has valuation
 exactly one smaller. -/
@@ -200,6 +223,74 @@ theorem exists_leftDerivedCharacter_valuation_succ
   refine ⟨x, ?_⟩
   dsimp [d] at hdLe hOriginalLe ⊢
   omega
+
+/-- A fixed exhaustive enumeration of the finite free-generator alphabet. -/
+noncomputable def generatorEnumeration :
+    Fin (Fintype.card X) ≃ X :=
+  (Fintype.equivFin X).symm
+
+/-- All generator indices realizing the exact one-step valuation descent. -/
+noncomputable def leadingGeneratorIndexSet
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) :
+    Finset (Fin (Fintype.card X)) :=
+  Finset.univ.filter fun q ↦
+    characterValuation X
+        (leftDerivedCharacter X chi (generatorEnumeration X q)) + 1 =
+      characterValuation X chi
+
+theorem mem_leadingGeneratorIndexSet_iff
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    (q : Fin (Fintype.card X)) :
+    q ∈ leadingGeneratorIndexSet X chi ↔
+      characterValuation X
+          (leftDerivedCharacter X chi (generatorEnumeration X q)) + 1 =
+        characterValuation X chi := by
+  simp [leadingGeneratorIndexSet]
+
+/-- Positive detected valuation makes the leading-generator index set
+nonempty. -/
+theorem leadingGeneratorIndexSet_nonempty
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    (hExists : ∃ d, HasDetectionAtDegree X chi d)
+    (hpos : 0 < characterValuation X chi) :
+    (leadingGeneratorIndexSet X chi).Nonempty := by
+  obtain ⟨x, hx⟩ :=
+    exists_leftDerivedCharacter_valuation_succ X chi hExists hpos
+  let q := (generatorEnumeration X).symm x
+  refine ⟨q, ?_⟩
+  rw [mem_leadingGeneratorIndexSet_iff]
+  simpa [q] using hx
+
+/-- The least enumerated leading generator, with `card X` as a total sentinel
+when no generator realizes valuation descent. -/
+noncomputable def leastLeadingGeneratorIndex
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) : ℕ :=
+  if h : (leadingGeneratorIndexSet X chi).Nonempty then
+    ((leadingGeneratorIndexSet X chi).min' h).val
+  else
+    Fintype.card X
+
+theorem leastLeadingGeneratorIndex_lt_card
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    (h : (leadingGeneratorIndexSet X chi).Nonempty) :
+    leastLeadingGeneratorIndex X chi < Fintype.card X := by
+  rw [leastLeadingGeneratorIndex, dif_pos h]
+  exact ((leadingGeneratorIndexSet X chi).min' h).isLt
+
+/-- The total least-index selector genuinely realizes valuation descent
+whenever the leading-generator set is nonempty. -/
+theorem leastLeadingGeneratorIndex_spec
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    (h : (leadingGeneratorIndexSet X chi).Nonempty) :
+    characterValuation X
+        (leftDerivedCharacter X chi
+          (generatorEnumeration X
+            ⟨leastLeadingGeneratorIndex X chi,
+              leastLeadingGeneratorIndex_lt_card X chi h⟩)) + 1 =
+      characterValuation X chi := by
+  have hmem := Finset.min'_mem (leadingGeneratorIndexSet X chi) h
+  rw [mem_leadingGeneratorIndexSet_iff] at hmem
+  simpa [leastLeadingGeneratorIndex, h] using hmem
 
 /-- Valuation of the first coefficient character of a finite plane sign
 component. -/
