@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.KazhdanOrthogonal
 import NonsoficGroupsExist.Sofic
 import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Analysis.Real.Hyperreal
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
 /-!
@@ -645,6 +646,99 @@ theorem sofic_multiplication_hilbert_error_on_finset_eventually
         A p.1 p.2 δ hδ)
   refine ⟨N, fun n hn g hg h hh U ↦ ?_⟩
   exact hN n hn (g, h) (Finset.mem_product.mpr ⟨hg, hh⟩) U
+
+/-- Normalized matrix coefficient of a centered characteristic vector in one
+finite permutation model. -/
+noncomputable def normalizedCorrelation (M : FiniteModel)
+    (τ : G → Equiv.Perm M) (U : Finset M) (g : G) : ℝ :=
+  inner ℝ (centeredIndicator U)
+      (permutationOperator (τ g) (centeredIndicator U)) /
+    Fintype.card M
+
+omit [Group G] in
+/-- Every normalized centered-indicator coefficient lies in `[-1,1]`, even
+for an empty finite model. -/
+theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
+    (τ : G → Equiv.Perm M) (U : Finset M) (g : G) :
+    |normalizedCorrelation M τ U g| ≤ 1 := by
+  by_cases hcard : Fintype.card M = 0
+  · haveI : IsEmpty M := Fintype.card_eq_zero_iff.mp hcard
+    simp [normalizedCorrelation, Subsingleton.elim (centeredIndicator U) 0]
+  · have hcardNat : 0 < Fintype.card M := Nat.pos_of_ne_zero hcard
+    letI : Nonempty M := Fintype.card_pos_iff.mp hcardNat
+    have hcardReal : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
+    have hinner := abs_real_inner_le_norm (centeredIndicator U)
+      (permutationOperator (τ g) (centeredIndicator U))
+    rw [(permutationOperator (τ g)).norm_map] at hinner
+    have hnorm := norm_centeredIndicator_sq_div_card_le_one U
+    rw [normalizedCorrelation, abs_div, abs_of_pos hcardReal]
+    calc
+      |inner ℝ (centeredIndicator U)
+          (permutationOperator (τ g) (centeredIndicator U))| /
+          Fintype.card M ≤
+        (‖centeredIndicator U‖ * ‖centeredIndicator U‖) /
+          Fintype.card M :=
+        div_le_div_of_nonneg_right hinner hcardReal.le
+      _ = ‖centeredIndicator U‖ ^ 2 / Fintype.card M := by ring
+      _ ≤ 1 := hnorm
+
+/-- Hyperreal matrix coefficient of a sequence of finite models. -/
+noncomputable def correlationHyperreal (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g : G) : Hyperreal :=
+  Hyperreal.ofSeq fun n ↦ normalizedCorrelation (A.model n) (A.map n) (U n) g
+
+/-- The coefficient hyperreal is finite, so taking its standard part is
+mathematically legitimate. -/
+theorem correlationHyperreal_finite (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g : G) :
+    0 ≤ ArchimedeanClass.mk (correlationHyperreal A U g) := by
+  apply ArchimedeanClass.mk_nonneg_of_le_of_le_of_archimedean
+    Hyperreal.coeRingHom (r := (-1 : ℝ)) (s := (1 : ℝ))
+  · change Hyperreal.ofSeq (fun _ : ℕ ↦ (-1 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦
+        normalizedCorrelation (A.model n) (A.map n) (U n) g)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦
+      (abs_le.mp
+        (abs_normalizedCorrelation_le_one (A.model n) (A.map n) (U n) g)).1
+  · change Hyperreal.ofSeq (fun n ↦
+        normalizedCorrelation (A.model n) (A.map n) (U n) g) ≤
+      Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦
+      (abs_le.mp
+        (abs_normalizedCorrelation_le_one (A.model n) (A.map n) (U n) g)).2
+
+/-- Standard-part correlation associated to a sequence of subsets in a
+sofic approximation. -/
+noncomputable def limitingCorrelation (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g : G) : ℝ :=
+  ArchimedeanClass.stdPart (correlationHyperreal A U g)
+
+/-- The limiting correlation remains in the closed unit interval. -/
+theorem abs_limitingCorrelation_le_one (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g : G) :
+    |limitingCorrelation A U g| ≤ 1 := by
+  have hfinite := correlationHyperreal_finite A U g
+  have hlHyper : ((-1 : ℝ) : Hyperreal) ≤ correlationHyperreal A U g := by
+    change Hyperreal.ofSeq (fun _ : ℕ ↦ (-1 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦
+        normalizedCorrelation (A.model n) (A.map n) (U n) g)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦
+      (abs_le.mp
+        (abs_normalizedCorrelation_le_one (A.model n) (A.map n) (U n) g)).1
+  have huHyper : correlationHyperreal A U g ≤ ((1 : ℝ) : Hyperreal) := by
+    change Hyperreal.ofSeq (fun n ↦
+        normalizedCorrelation (A.model n) (A.map n) (U n) g) ≤
+      Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦
+      (abs_le.mp
+        (abs_normalizedCorrelation_le_one (A.model n) (A.map n) (U n) g)).2
+  apply abs_le.mpr
+  exact ⟨ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom hfinite hlHyper,
+    ArchimedeanClass.stdPart_le_of_le Hyperreal.coeRingHom hfinite huHyper⟩
 
 end SoficNormalization
 
