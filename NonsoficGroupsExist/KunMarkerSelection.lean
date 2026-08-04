@@ -264,5 +264,94 @@ theorem exists_commonFuture_marker_assignment
     ((mem_commonFutureNeighborhood M τ S r (marker i) (marker j)).2
       ⟨z, hzi, hzj⟩)
 
+/-- Crossing stubs whose old endpoint belongs to one chosen block. -/
+def blockStubs (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (C : Finset X.vertex) : Finset (KunRepairGraph.CrossingStub X P) :=
+  Finset.univ.filter fun s ↦ KunRepairGraph.stubEndpoint X P s ∈ C
+
+/-- Vertices of `C` incident to a crossing occurrence, presented as the image
+of its block-side stubs. -/
+def boundaryVertices (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (C : Finset X.vertex) : Finset X.vertex :=
+  (blockStubs X P C).image (KunRepairGraph.stubEndpoint X P)
+
+theorem boundaryVertices_subset
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (C : Finset X.vertex) : boundaryVertices X P C ⊆ C := by
+  intro y hy
+  obtain ⟨s, hs, rfl⟩ := Finset.mem_image.mp hy
+  exact (Finset.mem_filter.mp hs).2
+
+theorem card_boundaryVertices_le
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (C : Finset X.vertex) :
+    (boundaryVertices X P C).card ≤ (blockStubs X P C).card := by
+  exact Finset.card_image_le
+
+/-- Vertices excluded because a radius-`r` forward trajectory from them could
+hit a block-boundary vertex. -/
+noncomputable def blockForbidden
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (P : BlockStructure M) (C : Finset M) :
+    Finset M :=
+  backwardNeighborhood M τ S r
+    (boundaryVertices (generatorGraph M S τ) P C)
+
+theorem card_blockForbidden_le
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (P : BlockStructure M) (C : Finset M) :
+    (blockForbidden M τ S r P C).card ≤
+      (S.card + 1) ^ r *
+        (blockStubs (generatorGraph M S τ) P C).card := by
+  calc
+    (blockForbidden M τ S r P C).card ≤
+        (S.card + 1) ^ r *
+          (boundaryVertices (generatorGraph M S τ) P C).card :=
+      card_backwardNeighborhood_le M τ S r _
+    _ ≤ (S.card + 1) ^ r *
+        (blockStubs (generatorGraph M S τ) P C).card := by
+      gcongr
+      exact card_boundaryVertices_le (generatorGraph M S τ) P C
+
+/-- A block whose stub density is below the explicit packing threshold has a
+distinct separated marker for every one of its crossing stubs. -/
+theorem exists_block_marker_assignment
+    {G : Type} [Group G]
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (P : BlockStructure M) (C : Finset M)
+    (hlarge :
+      ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+          (blockStubs (generatorGraph M S τ) P C).card < C.card) :
+    ∃ marker :
+        {s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
+          s ∈ blockStubs (generatorGraph M S τ) P C} → M,
+      Function.Injective marker ∧
+      (∀ s, marker s ∈ C \ blockForbidden M τ S r P C) ∧
+      ∀ s t, s ≠ t →
+        Disjoint (forwardNeighborhood M τ S r {marker s})
+          (forwardNeighborhood M τ S r {marker t}) := by
+  let I := {s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
+    s ∈ blockStubs (generatorGraph M S τ) P C}
+  have hforbidden := card_blockForbidden_le M τ S r P C
+  have hIcard : Fintype.card I =
+      (blockStubs (generatorGraph M S τ) P C).card := Fintype.card_coe _
+  have htotal :
+      (blockForbidden M τ S r P C).card +
+          Fintype.card I * (S.card + 1) ^ (2 * r) < C.card := by
+    calc
+      (blockForbidden M τ S r P C).card +
+          Fintype.card I * (S.card + 1) ^ (2 * r) ≤
+        (S.card + 1) ^ r *
+            (blockStubs (generatorGraph M S τ) P C).card +
+          (blockStubs (generatorGraph M S τ) P C).card *
+            (S.card + 1) ^ (2 * r) := by
+          rw [hIcard]
+          exact Nat.add_le_add_right hforbidden _
+      _ = ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+          (blockStubs (generatorGraph M S τ) P C).card := by ring
+      _ < C.card := hlarge
+  exact exists_commonFuture_marker_assignment M τ S r C
+    (blockForbidden M τ S r P C) htotal
+
 end KunMarkerSelection
 end NonsoficGroupsExist
