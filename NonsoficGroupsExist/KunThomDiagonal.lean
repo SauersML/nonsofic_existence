@@ -102,6 +102,11 @@ def diagonalPerm (p : Equiv.Perm Y) : Equiv.Perm (Y × Y) :=
     diagonalPerm (1 : Equiv.Perm Y) = 1 := by
   ext z <;> rfl
 
+@[simp] theorem diagonalPerm_inv (p : Equiv.Perm Y) :
+    diagonalPerm p⁻¹ = (diagonalPerm p)⁻¹ := by
+  apply inv_injective
+  simp
+
 /-- Source vertices where two diagonal actions disagree on the graph of `c`. -/
 def graphDiagonalDisagreement (c p q : Equiv.Perm Y) : Finset Y :=
   Finset.univ.filter fun x ↦
@@ -142,7 +147,6 @@ theorem card_restrictedDiagonalDisagreement_eq
     (restrictedPermutationDisagreement (permutationGraph Y c)
       (diagonalPerm p) (diagonalPerm q)).card =
         (graphDiagonalDisagreement c p q).card := by
-  let e : Y → Y × Y := fun x ↦ (x, c x)
   apply Finset.card_bij (fun z _ ↦ z.1)
   · intro z hz
     rw [mem_restrictedPermutationDisagreement] at hz
