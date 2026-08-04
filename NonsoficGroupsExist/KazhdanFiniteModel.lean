@@ -694,13 +694,19 @@ theorem sofic_multiplication_hilbert_error_on_finset_eventually
   refine ⟨N, fun n hn g hg h hh U ↦ ?_⟩
   exact hN n hn (g, h) (Finset.mem_product.mpr ⟨hg, hh⟩) U
 
+/-- Normalized matrix coefficient of a centered characteristic vector under
+one permutation. -/
+noncomputable def normalizedPermutationCorrelation (M : FiniteModel)
+    (U : Finset M) (p : Equiv.Perm M) : ℝ :=
+  inner ℝ (centeredIndicator U)
+      (permutationOperator p (centeredIndicator U)) /
+    Fintype.card M
+
 /-- Normalized matrix coefficient of a centered characteristic vector in one
 finite permutation model. -/
 noncomputable def normalizedCorrelation (M : FiniteModel)
     (τ : G → Equiv.Perm M) (U : Finset M) (g : G) : ℝ :=
-  inner ℝ (centeredIndicator U)
-      (permutationOperator (τ g) (centeredIndicator U)) /
-    Fintype.card M
+  normalizedPermutationCorrelation M U (τ g)
 
 /-- Normalized Gram coefficient between two translated centered
 characteristic vectors. -/
@@ -737,6 +743,104 @@ theorem normalizedGramCorrelation_eq_relative (M : FiniteModel)
   exact congrArg (fun r : ℝ ↦ r / Fintype.card M) hinner
 
 omit [Group G] in
+/-- Changing a permutation on a set of normalized Hamming size `d` changes
+every normalized centered-indicator coefficient by at most `√(2d)`.  The
+squared formulation avoids introducing square roots. -/
+theorem abs_normalizedPermutationCorrelation_sub_sq_le
+    [Nonempty M] (U : Finset M) (p q : Equiv.Perm M) :
+    |normalizedPermutationCorrelation M U p -
+        normalizedPermutationCorrelation M U q| ^ 2 ≤
+      2 * hammingDistance M p q := by
+  let x := centeredIndicator U
+  let d := permutationOperator p x - permutationOperator q x
+  have hcardNat : 0 < Fintype.card M := Fintype.card_pos
+  have hcard : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
+  have hinner : |inner ℝ x d| ≤ ‖x‖ * ‖d‖ :=
+    abs_real_inner_le_norm x d
+  have hinnerSq : |inner ℝ x d| ^ 2 ≤ (‖x‖ * ‖d‖) ^ 2 := by
+    have hright : 0 ≤ ‖x‖ * ‖d‖ := mul_nonneg (norm_nonneg _) (norm_nonneg _)
+    have hleft : 0 ≤ |inner ℝ x d| := abs_nonneg _
+    nlinarith
+  have hx := norm_centeredIndicator_sq_div_card_le_one U
+  have hd := normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
+    p q U
+  change ‖d‖ ^ 2 / Fintype.card M ≤
+      2 * hammingDistance M p q at hd
+  have hquot :
+      |inner ℝ x d| ^ 2 / (Fintype.card M : ℝ) ^ 2 ≤
+        (‖x‖ ^ 2 / Fintype.card M) *
+          (‖d‖ ^ 2 / Fintype.card M) := by
+    calc
+      |inner ℝ x d| ^ 2 / (Fintype.card M : ℝ) ^ 2 ≤
+          (‖x‖ * ‖d‖) ^ 2 / (Fintype.card M : ℝ) ^ 2 :=
+        div_le_div_of_nonneg_right hinnerSq (sq_nonneg _)
+      _ = (‖x‖ ^ 2 / Fintype.card M) *
+          (‖d‖ ^ 2 / Fintype.card M) := by ring
+  have hproduct :
+      (‖x‖ ^ 2 / Fintype.card M) *
+          (‖d‖ ^ 2 / Fintype.card M) ≤
+        2 * hammingDistance M p q := by
+    calc
+      (‖x‖ ^ 2 / Fintype.card M) *
+          (‖d‖ ^ 2 / Fintype.card M) ≤
+          1 * (‖d‖ ^ 2 / Fintype.card M) := by
+        exact mul_le_mul_of_nonneg_right hx
+          (div_nonneg (sq_nonneg _) hcard.le)
+      _ ≤ 1 * (2 * hammingDistance M p q) := by
+        exact mul_le_mul_of_nonneg_left hd zero_le_one
+      _ = 2 * hammingDistance M p q := one_mul _
+  change
+    |inner ℝ x (permutationOperator p x) / Fintype.card M -
+        inner ℝ x (permutationOperator q x) / Fintype.card M| ^ 2 ≤
+      2 * hammingDistance M p q
+  rw [← sub_div, abs_div, abs_of_pos hcard, div_pow]
+  have hrewrite :
+      inner ℝ x (permutationOperator p x) -
+          inner ℝ x (permutationOperator q x) = inner ℝ x d := by
+    simp [d, inner_sub_right]
+  rw [hrewrite]
+  exact hquot.trans hproduct
+
+/-- In a sofic approximation, the coefficient assigned to `g⁻¹h`
+approaches the Gram coefficient of the vectors translated by `g` and `h`.
+This is the concrete bridge from approximate actions to a positive-definite
+limiting function. -/
+theorem sofic_relative_correlation_approaches_gram_eventually
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (g h : G) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      |normalizedCorrelation (A.model n) (A.map n) (U n) (g⁻¹ * h) -
+          normalizedGramCorrelation (A.model n) (A.map n) (U n) g h| < ε := by
+  have hhalf : 0 < ε ^ 2 / 2 := by positivity
+  obtain ⟨Nclose, hNclose⟩ :=
+    sofic_inv_mul_close_eventually A g h (ε ^ 2 / 2) hhalf
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Nclose Ncard, fun n hn ↦ ?_⟩
+  have hnclose : Nclose ≤ n := (le_max_left _ _).trans hn
+  have hncard : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcard : 0 < Fintype.card (A.model n) := by
+    have := hNcard n hncard
+    omega
+  letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  have hclose := hNclose n hnclose
+  have hsquare := abs_normalizedPermutationCorrelation_sub_sq_le
+    (U n) (A.map n (g⁻¹ * h)) ((A.map n g)⁻¹ * A.map n h)
+  have hsquare' :
+      |normalizedCorrelation (A.model n) (A.map n) (U n) (g⁻¹ * h) -
+          normalizedGramCorrelation (A.model n) (A.map n) (U n) g h| ^ 2 ≤
+        2 * hammingDistance (A.model n) (A.map n (g⁻¹ * h))
+          ((A.map n g)⁻¹ * A.map n h) := by
+    rw [normalizedCorrelation,
+      normalizedGramCorrelation_eq_relative,
+      normalizedPermutationCorrelation]
+    exact hsquare
+  have habs :
+      0 ≤ |normalizedCorrelation (A.model n) (A.map n) (U n) (g⁻¹ * h) -
+          normalizedGramCorrelation (A.model n) (A.map n) (U n) g h| :=
+    abs_nonneg _
+  nlinarith
+
+omit [Group G] in
 /-- Every normalized centered-indicator coefficient lies in `[-1,1]`, even
 for an empty finite model. -/
 theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
@@ -744,7 +848,7 @@ theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
     |normalizedCorrelation M τ U g| ≤ 1 := by
   by_cases hcard : Fintype.card M = 0
   · haveI : IsEmpty M := Fintype.card_eq_zero_iff.mp hcard
-    simp [normalizedCorrelation, Subsingleton.elim (centeredIndicator U) 0]
+    simp [normalizedCorrelation, normalizedPermutationCorrelation]
   · have hcardNat : 0 < Fintype.card M := Nat.pos_of_ne_zero hcard
     letI : Nonempty M := Fintype.card_pos_iff.mp hcardNat
     have hcardReal : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
@@ -752,7 +856,8 @@ theorem abs_normalizedCorrelation_le_one (M : FiniteModel)
       (permutationOperator (τ g) (centeredIndicator U))
     rw [(permutationOperator (τ g)).norm_map] at hinner
     have hnorm := norm_centeredIndicator_sq_div_card_le_one U
-    rw [normalizedCorrelation, abs_div, abs_of_pos hcardReal]
+    rw [normalizedCorrelation, normalizedPermutationCorrelation, abs_div,
+      abs_of_pos hcardReal]
     calc
       |inner ℝ (centeredIndicator U)
           (permutationOperator (τ g) (centeredIndicator U))| /
