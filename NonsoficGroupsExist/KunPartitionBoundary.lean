@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.KunFinitePartition
+import NonsoficGroupsExist.KunPartition
 
 /-!
 # Boundary budget for Kun's recursive partition

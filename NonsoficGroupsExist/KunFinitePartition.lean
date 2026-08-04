@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.KunPartition
+import NonsoficGroupsExist.KunPartitionCrossing
 import NonsoficGroupsExist.KunUniformDecompositionStep
 
 /-!
@@ -16,6 +17,7 @@ namespace KunFinitePartition
 
 open KazhdanFiniteModel
 open KunPartition
+open KunPartitionCrossing
 open KunUniformMovement
 open KunUniformRounding
 open KunUniformDecompositionStep
@@ -46,6 +48,10 @@ theorem finiteModel_propertyT_partition
                 (Bmovement.card : ℝ) ≤
               ((S.card + 1) ^ (2 * (k + 1)) : ℕ) *
                 (δ ^ 2 * Fintype.card (A.model n) : ℝ) ∧
+            (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+                P.block).card : ℝ) ≤
+              2 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+                2 * target * Fintype.card (A.model n) ∧
             ∀ y : A.model n, ∀ U : Finset (A.model n),
               U ⊆ P.block y → U.Nonempty →
               2 * U.card ≤ (P.block y).card →
@@ -76,8 +82,26 @@ theorem finiteModel_propertyT_partition
     exact symmDiff_lt_third_of_uniform_cut (A.model n) (A.map n) S hS
       (movementConstant S ε + 1) T W hclose hcut'
   let P := blockStructure (X := X) B γ target hrule
+  have hBcardNat : B.card ≤ Bcontract.card + Bmovement.card := by
+    simpa [B] using Finset.card_union_le Bcontract Bmovement
+  have hBcardReal : (B.card : ℝ) ≤
+      (Bcontract.card : ℝ) + Bmovement.card := by
+    exact_mod_cast hBcardNat
+  have hcrossBase := card_crossingEdges_generatorGraph_real_le
+    (A.model n) S (A.map n) B γ target htarget.le hrule
+  have hcross :
+      (((generatorGraph (A.model n) S (A.map n)).crossingEdges P.block).card : ℝ) ≤
+        2 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+          2 * target * Fintype.card (A.model n) := by
+    calc
+      (((generatorGraph (A.model n) S (A.map n)).crossingEdges P.block).card : ℝ) ≤
+          2 * (S.card : ℝ) * B.card +
+            2 * target * Fintype.card (A.model n) := by
+        simpa [X, P] using hcrossBase
+      _ ≤ 2 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+          2 * target * Fintype.card (A.model n) := by gcongr
   refine ⟨Bcontract, Bmovement, P, hBcontractCard, hBmovementCard,
-    fun y U hUP hU hhalf ↦ ?_⟩
+    hcross, fun y U hUP hU hhalf ↦ ?_⟩
   exact blockStructure_block_expands (X := X) B γ target hrule y U hUP hU hhalf
 
 end KunFinitePartition
