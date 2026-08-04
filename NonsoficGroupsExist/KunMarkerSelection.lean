@@ -12,6 +12,8 @@ explicit cardinal hypothesis.
 namespace NonsoficGroupsExist
 namespace KunMarkerSelection
 
+open KunSupport
+
 /-- No two distinct selected vertices lie in one another's conflict
 neighborhood. -/
 def IsSeparated {V : Type} [DecidableEq V]
@@ -162,6 +164,105 @@ theorem exists_marker_assignment
     apply hMsep (emb i).2 (emb j).2
     intro heq
     exact hij (hemb (Subtype.ext heq))
+
+/-- Vertices whose radius-`r` forward neighborhoods meet.  This relation is
+manifestly symmetric, and its neighborhood size has the same
+backward-forward bound used in the finite removal argument. -/
+noncomputable def commonFutureNeighborhood
+    {G : Type} (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (x : M) : Finset M :=
+  Finset.univ.filter fun y ↦
+    ∃ z,
+      z ∈ forwardNeighborhood M τ S r {x} ∧
+      z ∈ forwardNeighborhood M τ S r {y}
+
+theorem mem_commonFutureNeighborhood
+    {G : Type} (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (x y : M) :
+    y ∈ commonFutureNeighborhood M τ S r x ↔
+      ∃ z,
+        z ∈ forwardNeighborhood M τ S r {x} ∧
+        z ∈ forwardNeighborhood M τ S r {y} := by
+  classical
+  simp [commonFutureNeighborhood]
+
+theorem self_mem_commonFutureNeighborhood
+    {G : Type} (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (x : M) :
+    x ∈ commonFutureNeighborhood M τ S r x := by
+  rw [mem_commonFutureNeighborhood]
+  exact ⟨x,
+    forwardNeighborhood_mono_time M τ S (Nat.zero_le r) {x}
+      (by simp [forwardNeighborhood]),
+    forwardNeighborhood_mono_time M τ S (Nat.zero_le r) {x}
+      (by simp [forwardNeighborhood])⟩
+
+theorem commonFutureNeighborhood_symmetric
+    {G : Type} (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (x y : M) :
+    y ∈ commonFutureNeighborhood M τ S r x ↔
+      x ∈ commonFutureNeighborhood M τ S r y := by
+  rw [mem_commonFutureNeighborhood, mem_commonFutureNeighborhood]
+  constructor <;> rintro ⟨z, hz₁, hz₂⟩
+  · exact ⟨z, hz₂, hz₁⟩
+  · exact ⟨z, hz₂, hz₁⟩
+
+theorem commonFutureNeighborhood_subset_backwardForward
+    {G : Type} (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (x : M) :
+    commonFutureNeighborhood M τ S r x ⊆
+      backwardNeighborhood M τ S r
+        (forwardNeighborhood M τ S r {x}) := by
+  intro y hy
+  obtain ⟨z, hzx, hzy⟩ :=
+    (mem_commonFutureNeighborhood M τ S r x y).mp hy
+  obtain ⟨y', hy'singleton, hy'back⟩ :=
+    exists_source_mem_backwardNeighborhood M τ S r {y} hzy
+  have hy'y : y' = y := by simpa using hy'singleton
+  subst y'
+  have hsingleton : ({z} : Finset M) ⊆
+      forwardNeighborhood M τ S r {x} := by simpa using hzx
+  exact backwardNeighborhood_mono M τ S r hsingleton hy'back
+
+theorem card_commonFutureNeighborhood_le
+    {G : Type} (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (x : M) :
+    (commonFutureNeighborhood M τ S r x).card ≤
+      (S.card + 1) ^ (2 * r) := by
+  calc
+    (commonFutureNeighborhood M τ S r x).card ≤
+        (backwardNeighborhood M τ S r
+          (forwardNeighborhood M τ S r {x})).card :=
+      Finset.card_le_card
+        (commonFutureNeighborhood_subset_backwardForward M τ S r x)
+    _ ≤ (S.card + 1) ^ (2 * r) * ({x} : Finset M).card :=
+      card_backwardForwardNeighborhood_le M τ S r {x}
+    _ = (S.card + 1) ^ (2 * r) := by simp
+
+/-- Explicit separated markers for the common-future conflict relation. -/
+theorem exists_commonFuture_marker_assignment
+    {G I : Type} [Fintype I]
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (C F : Finset M)
+    (hlarge : F.card + Fintype.card I * (S.card + 1) ^ (2 * r) < C.card) :
+    ∃ marker : I → M,
+      Function.Injective marker ∧
+      (∀ i, marker i ∈ C \ F) ∧
+      ∀ i j, i ≠ j →
+        Disjoint (forwardNeighborhood M τ S r {marker i})
+          (forwardNeighborhood M τ S r {marker j}) := by
+  obtain ⟨marker, hinjective, hmarker, hseparated⟩ :=
+    exists_marker_assignment C F
+      (commonFutureNeighborhood M τ S r) ((S.card + 1) ^ (2 * r))
+      (self_mem_commonFutureNeighborhood M τ S r)
+      (commonFutureNeighborhood_symmetric M τ S r)
+      (card_commonFutureNeighborhood_le M τ S r) hlarge
+  refine ⟨marker, hinjective, hmarker, fun i j hij ↦ ?_⟩
+  rw [Finset.disjoint_left]
+  intro z hzi hzj
+  exact hseparated i j hij
+    ((mem_commonFutureNeighborhood M τ S r (marker i) (marker j)).2
+      ⟨z, hzi, hzj⟩)
 
 end KunMarkerSelection
 end NonsoficGroupsExist
