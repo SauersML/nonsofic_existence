@@ -938,6 +938,18 @@ noncomputable def gramCorrelationHyperreal (A : SoficApproximation G)
   Hyperreal.ofSeq fun n ↦
     normalizedGramCorrelation (A.model n) (A.map n) (U n) g h
 
+/-- Taking a hyperreal class of a real sequence, bundled as a ring
+homomorphism. -/
+noncomputable def ofSeqRingHom : (ℕ → ℝ) →+* Hyperreal :=
+  { toFun := Hyperreal.ofSeq
+    map_zero' := rfl
+    map_one' := rfl
+    map_add' := fun _ _ ↦ rfl
+    map_mul' := fun _ _ ↦ rfl }
+
+@[simp] theorem ofSeqRingHom_apply (f : ℕ → ℝ) :
+    ofSeqRingHom f = Hyperreal.ofSeq f := rfl
+
 /-- The coefficient hyperreal is finite, so taking its standard part is
 mathematically legitimate. -/
 theorem correlationHyperreal_finite (A : SoficApproximation G)
@@ -1034,6 +1046,144 @@ theorem limitingCorrelation_inv_mul_eq_stdPart_gram
   rw [hzero] at hsub
   unfold limitingCorrelation
   exact sub_eq_zero.mp hsub.symm
+
+/-- A real number embedded in the hyperreals is finite. -/
+theorem hyperreal_coe_finite (r : ℝ) :
+    0 ≤ ArchimedeanClass.mk (r : Hyperreal) := by
+  apply ArchimedeanClass.mk_nonneg_of_le_of_le_of_archimedean
+    Hyperreal.coeRingHom (r := r - 1) (s := r + 1)
+  · simp
+  · simp
+
+/-- Finite hyperreals are closed under addition. -/
+theorem hyperreal_add_finite {x y : Hyperreal}
+    (hx : 0 ≤ ArchimedeanClass.mk x)
+    (hy : 0 ≤ ArchimedeanClass.mk y) :
+    0 ≤ ArchimedeanClass.mk (x + y) := by
+  exact (le_min hx hy).trans (ArchimedeanClass.min_le_mk_add x y)
+
+/-- Finite hyperreals are closed under multiplication. -/
+theorem hyperreal_mul_finite {x y : Hyperreal}
+    (hx : 0 ≤ ArchimedeanClass.mk x)
+    (hy : 0 ≤ ArchimedeanClass.mk y) :
+    0 ≤ ArchimedeanClass.mk (x * y) := by
+  rw [ArchimedeanClass.mk_mul]
+  exact add_nonneg hx hy
+
+/-- A finite sum of finite hyperreals is finite. -/
+theorem hyperreal_finset_sum_finite {I : Type*} (F : Finset I)
+    (x : I → Hyperreal)
+    (hx : ∀ i ∈ F, 0 ≤ ArchimedeanClass.mk (x i)) :
+    0 ≤ ArchimedeanClass.mk (∑ i ∈ F, x i) := by
+  classical
+  induction F using Finset.induction_on with
+  | empty => simp
+  | @insert a F ha ih =>
+      rw [Finset.sum_insert ha]
+      exact hyperreal_add_finite (hx a (by simp))
+        (ih fun i hi ↦ hx i (by simp [hi]))
+
+/-- Standard part commutes with a finite sum of finite hyperreals. -/
+theorem stdPart_finset_sum {I : Type*} (F : Finset I)
+    (x : I → Hyperreal)
+    (hx : ∀ i ∈ F, 0 ≤ ArchimedeanClass.mk (x i)) :
+    ArchimedeanClass.stdPart (∑ i ∈ F, x i) =
+      ∑ i ∈ F, ArchimedeanClass.stdPart (x i) := by
+  classical
+  induction F using Finset.induction_on with
+  | empty => simp
+  | @insert a F ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha,
+        ArchimedeanClass.stdPart_add (hx a (by simp))
+          (hyperreal_finset_sum_finite F x fun i hi ↦ hx i (by simp [hi])),
+        ih fun i hi ↦ hx i (by simp [hi])]
+
+/-- Standard positive-definiteness for a real-valued function on a group,
+expressed using all finite real quadratic forms. -/
+def IsPositiveDefinite (f : G → ℝ) : Prop :=
+  ∀ (m : ℕ) (c : Fin m → ℝ) (a : Fin m → G),
+    0 ≤ ∑ i, ∑ j, c i * c j * f ((a i)⁻¹ * a j)
+
+/-- The limiting correlation obtained from any sofic approximation and any
+sequence of subsets is positive-definite. -/
+theorem limitingCorrelation_isPositiveDefinite
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) :
+    IsPositiveDefinite (limitingCorrelation A U) := by
+  intro m c a
+  classical
+  let term : Fin m → Fin m → Hyperreal := fun i j ↦
+    ((c i * c j : ℝ) : Hyperreal) * gramCorrelationHyperreal A U (a i) (a j)
+  let q : Hyperreal := ∑ i, ∑ j, term i j
+  have hterm (i j : Fin m) :
+      0 ≤ ArchimedeanClass.mk (term i j) := by
+    exact hyperreal_mul_finite (hyperreal_coe_finite (c i * c j))
+      (gramCorrelationHyperreal_finite A U (a i) (a j))
+  have hinner (i : Fin m) :
+      0 ≤ ArchimedeanClass.mk (∑ j, term i j) := by
+    exact hyperreal_finset_sum_finite Finset.univ (term i)
+      (fun j hj ↦ hterm i j)
+  have hqfinite : 0 ≤ ArchimedeanClass.mk q := by
+    exact hyperreal_finset_sum_finite Finset.univ (fun i ↦ ∑ j, term i j)
+      (fun i hi ↦ hinner i)
+  have hq : q = Hyperreal.ofSeq (fun n ↦ ∑ i, ∑ j,
+      c i * c j *
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j)) := by
+    change (∑ i, ∑ j,
+        ofSeqRingHom (fun _ ↦ c i * c j) *
+          ofSeqRingHom (fun n ↦ normalizedGramCorrelation
+            (A.model n) (A.map n) (U n) (a i) (a j))) =
+      ofSeqRingHom (fun n ↦ ∑ i, ∑ j, c i * c j *
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j))
+    rw [show (fun n ↦ ∑ i, ∑ j, c i * c j *
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j)) =
+      ∑ i, ∑ j, fun n ↦ c i * c j * normalizedGramCorrelation
+        (A.model n) (A.map n) (U n) (a i) (a j) by
+          funext n
+          simp]
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro i hi
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [← map_mul]
+    congr 1
+  have hqnonneg : 0 ≤ q := by
+    rw [hq]
+    change Hyperreal.ofSeq (fun _ : ℕ ↦ (0 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦ ∑ i, ∑ j,
+        c i * c j *
+          normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j))
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦
+      normalizedGramCorrelation_quadratic_nonneg Finset.univ c
+        (A.model n) (A.map n) (U n) a
+  have hstdnonneg : 0 ≤ ArchimedeanClass.stdPart q :=
+    ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom hqfinite hqnonneg
+  have hstd : ArchimedeanClass.stdPart q =
+      ∑ i, ∑ j, c i * c j * limitingCorrelation A U ((a i)⁻¹ * a j) := by
+    calc
+      ArchimedeanClass.stdPart q =
+          ∑ i, ArchimedeanClass.stdPart (∑ j, term i j) := by
+        exact stdPart_finset_sum Finset.univ (fun i ↦ ∑ j, term i j)
+          (fun i hi ↦ hinner i)
+      _ = ∑ i, ∑ j, ArchimedeanClass.stdPart (term i j) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        exact stdPart_finset_sum Finset.univ (term i) (fun j hj ↦ hterm i j)
+      _ = ∑ i, ∑ j,
+          c i * c j * limitingCorrelation A U ((a i)⁻¹ * a j) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        apply Finset.sum_congr rfl
+        intro j hj
+        rw [ArchimedeanClass.stdPart_mul
+          (hyperreal_coe_finite (c i * c j))
+          (gramCorrelationHyperreal_finite A U (a i) (a j)),
+          Hyperreal.stdPart_coe,
+          ← limitingCorrelation_inv_mul_eq_stdPart_gram A U (a i) (a j)]
+  rw [← hstd]
+  exact hstdnonneg
 
 /-- The limiting correlation remains in the closed unit interval. -/
 theorem abs_limitingCorrelation_le_one (A : SoficApproximation G)
