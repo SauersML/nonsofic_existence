@@ -119,5 +119,39 @@ theorem four_fixed_norm_sq_le
   rw [hpyth, hhead]
   nlinarith
 
+omit [CompleteSpace E] in
+/-- On the component with no central fixed vectors, the two edge-fixed
+vectors vanish and the four-vector estimate reduces exactly to quantitative
+orthogonality of the two root fixed spaces. -/
+theorem four_fixed_norm_sq_le_of_center_fixed_eq_bot
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y Z : Subgroup G) {epsilon : ℝ}
+    (hepsilon : 0 ≤ epsilon)
+    (hcenter : KazhdanFixedSpace.fixedSubspace rho Z = ⊥)
+    (hXY : HilbertEpsilonOrthogonality.EpsilonOrthogonal
+      (KazhdanFixedSpace.fixedSubspace rho X)
+      (KazhdanFixedSpace.fixedSubspace rho Y) epsilon)
+    {a b c d : E}
+    (ha : a ∈ KazhdanFixedSpace.fixedSubspace rho (X ⊔ Z))
+    (hb : b ∈ KazhdanFixedSpace.fixedSubspace rho (Y ⊔ Z))
+    (hc : c ∈ KazhdanFixedSpace.fixedSubspace rho X)
+    (hd : d ∈ KazhdanFixedSpace.fixedSubspace rho Y) :
+    ‖a + b + c + d‖ ^ 2 ≤
+      (1 + epsilon) *
+        (‖a‖ ^ 2 + ‖b‖ ^ 2 + ‖c‖ ^ 2 + ‖d‖ ^ 2) := by
+  have haZ : a ∈ KazhdanFixedSpace.fixedSubspace rho Z :=
+    KazhdanFixedSpace.antitone rho le_sup_right ha
+  have hbZ : b ∈ KazhdanFixedSpace.fixedSubspace rho Z :=
+    KazhdanFixedSpace.antitone rho le_sup_right hb
+  have ha0 : a = 0 := by
+    rw [hcenter] at haZ
+    simpa using haZ
+  have hb0 : b = 0 := by
+    rw [hcenter] at hbZ
+    simpa using hbZ
+  subst a
+  subst b
+  simpa using HilbertEpsilonOrthogonality.norm_add_sq_le
+    hepsilon hXY hc hd
+
 end NormalEdgeCodistance
 end NonsoficGroupsExist
