@@ -111,6 +111,13 @@ def leftIndexEquiv (s : G) : G × ℝ ≃ G × ℝ where
   left_inv x := by simp
   right_inv x := by simp
 
+/-- Left multiplication as an equivalence of the group index itself. -/
+def leftGroupEquiv (s : G) : G ≃ G where
+  toFun g := s * g
+  invFun g := s⁻¹ * g
+  left_inv g := by simp
+  right_inv g := by simp
+
 /-- Kernel vectors are the images of the corresponding free generators in
 the Hilbert completion. -/
 theorem kernelVector_eq_coe (p : PositiveDefiniteFunction G) (g : G) :
@@ -345,6 +352,54 @@ noncomputable def representation (p : PositiveDefiniteFunction G) :
     (Finsupp.single (s * g, (1 : ℝ)) 1 : PreHilbertSpace p) = _
   rfl
 
+/-- The linear combination of cyclic kernel vectors encoded by a finitely
+supported coefficient function on the group. -/
+noncomputable def finsuppCombination (p : PositiveDefiniteFunction G) :
+    (G →₀ ℝ) →ₗ[ℝ] HilbertSpace p :=
+  Finsupp.linearCombination ℝ (kernelVector p)
+
+/-- Left translation of a finitely supported coefficient function. -/
+noncomputable def translateCoefficients (s : G) :
+    (G →₀ ℝ) ≃ₗ[ℝ] (G →₀ ℝ) :=
+  Finsupp.domLCongr (leftGroupEquiv s)
+
+@[simp] theorem translateCoefficients_single (s g : G) (r : ℝ) :
+    translateCoefficients s (Finsupp.single g r) =
+      Finsupp.single (s * g) r := by
+  simp [translateCoefficients, leftGroupEquiv]
+
+/-- The GNS representation translates every finitely supported cyclic
+combination by left multiplication of its indices. -/
+theorem representation_finsuppCombination
+    (p : PositiveDefiniteFunction G) (s : G) (c : G →₀ ℝ) :
+    representation p s (finsuppCombination p c) =
+      finsuppCombination p (translateCoefficients s c) := by
+  induction c using Finsupp.induction with
+  | zero => simp
+  | single_add g r c _ _ ih =>
+      rw [map_add, map_add, ih]
+      simp [finsuppCombination, representation_kernelVector]
+
+/-- The finitely supported probability measure obtained by taking `k`
+uniform steps in the averaging set. -/
+noncomputable def averagingCoefficients (S : Finset G) : ℕ → G →₀ ℝ
+  | 0 => Finsupp.single 1 1
+  | k + 1 => (S.card : ℝ)⁻¹ •
+      ∑ s ∈ S, translateCoefficients s (averagingCoefficients S k)
+
+/-- Applying one GNS orbit average advances the averaging coefficients by
+one step. -/
+theorem finsuppCombination_averagingCoefficients_succ
+    (p : PositiveDefiniteFunction G) (S : Finset G) (k : ℕ) :
+    finsuppCombination p (averagingCoefficients S (k + 1)) =
+      IsKazhdanPair.orbitAverage S (representation p)
+        (finsuppCombination p (averagingCoefficients S k)) := by
+  classical
+  rw [averagingCoefficients]
+  rw [IsKazhdanPair.orbitAverage]
+  simp only [map_smul, map_sum]
+  simp_rw [representation_finsuppCombination]
+
 /-- The cyclic coefficient of the GNS representation is exactly the
 positive-definite function from which it was built. -/
 @[simp] theorem representation_cyclicCoefficient
@@ -390,6 +445,52 @@ theorem norm_indexedCombination_sq {I : Type*}
   simp_rw [indexedCombination, sum_inner, inner_sum,
     real_inner_smul_left, real_inner_smul_right, inner_kernelVector]
   simp [mul_assoc]
+
+/-- A `Finsupp` cyclic combination is its support-indexed finite
+combination. -/
+theorem finsuppCombination_eq_indexed (p : PositiveDefiniteFunction G)
+    (c : G →₀ ℝ) :
+    finsuppCombination p c = indexedCombination p c.support id c := by
+  classical
+  simp [finsuppCombination, indexedCombination,
+    Finsupp.linearCombination_apply, Finsupp.sum]
+
+/-- Iterated orbit averaging of the cyclic vector is represented by the
+explicit finitely supported convolution coefficients. -/
+theorem iterate_orbitAverage_kernelVector
+    (p : PositiveDefiniteFunction G) (S : Finset G) (k : ℕ) :
+    let A := IsKazhdanPair.orbitAverage S (representation p)
+    (A^[k]) (kernelVector p 1) =
+      finsuppCombination p (averagingCoefficients S k) := by
+  let A := IsKazhdanPair.orbitAverage S (representation p)
+  induction k with
+  | zero =>
+      simp [averagingCoefficients, finsuppCombination]
+  | succ k ih =>
+      dsimp only
+      rw [Function.iterate_succ_apply', ih]
+      exact (finsuppCombination_averagingCoefficients_succ p S k).symm
+
+/-- Coefficients of the displacement between two successive averaging
+steps. -/
+noncomputable def averagingDisplacementCoefficients
+    (S : Finset G) (k : ℕ) : G →₀ ℝ :=
+  averagingCoefficients S (k + 1) - averagingCoefficients S k
+
+/-- Successive GNS averaging displacement as one explicit cyclic
+combination. -/
+theorem iterate_orbitAverage_succ_sub_eq_finsuppCombination
+    (p : PositiveDefiniteFunction G) (S : Finset G) (k : ℕ) :
+    let A := IsKazhdanPair.orbitAverage S (representation p)
+    (A^[k + 1]) (kernelVector p 1) -
+        (A^[k]) (kernelVector p 1) =
+      finsuppCombination p (averagingDisplacementCoefficients S k) := by
+  dsimp only
+  have hk1 := iterate_orbitAverage_kernelVector p S (k + 1)
+  have hk := iterate_orbitAverage_kernelVector p S k
+  dsimp only at hk1 hk
+  rw [hk1, hk]
+  simp [averagingDisplacementCoefficients]
 
 /-- The hyperreal Gram quadratic form associated to a fixed finite cyclic
 combination across a sofic approximation. -/
@@ -483,6 +584,184 @@ theorem stdPart_combinationNormSqHyperreal {I : Type*}
         (gramCorrelationHyperreal_finite A U (a i) (a j)),
         Hyperreal.stdPart_coe,
         ← limitingCorrelation_inv_mul_eq_stdPart_gram A U (a i) (a j)]
+
+/-- Standard part of the normalized finite-model displacement norm equals
+the squared norm of the corresponding successive GNS averages. -/
+theorem stdPart_averagingDisplacementNormSq
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (S : Finset G) (k : ℕ) :
+    let c := averagingDisplacementCoefficients S k
+    ArchimedeanClass.stdPart
+        (combinationNormSqHyperreal A U c.support id c) =
+      ‖((IsKazhdanPair.orbitAverage S
+          (representation (limitingPositiveDefiniteFunction A U)))^[k + 1])
+          (kernelVector (limitingPositiveDefiniteFunction A U) 1) -
+        ((IsKazhdanPair.orbitAverage S
+          (representation (limitingPositiveDefiniteFunction A U)))^[k])
+          (kernelVector (limitingPositiveDefiniteFunction A U) 1)‖ ^ 2 := by
+  let p := limitingPositiveDefiniteFunction A U
+  let c := averagingDisplacementCoefficients S k
+  dsimp only
+  rw [stdPart_combinationNormSqHyperreal]
+  rw [← finsuppCombination_eq_indexed]
+  have h := iterate_orbitAverage_succ_sub_eq_finsuppCombination p S k
+  dsimp only at h ⊢
+  rw [h]
+
+/-- The standard parts of normalized finite-model displacement norms obey
+the squared iterated Kazhdan contraction. -/
+theorem stdPart_averagingDisplacementNormSq_le
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) (k : ℕ) :
+    let ck := averagingDisplacementCoefficients S k
+    let c0 := averagingDisplacementCoefficients S 0
+    ArchimedeanClass.stdPart
+        (combinationNormSqHyperreal A U ck.support id ck) ≤
+      (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) *
+        ArchimedeanClass.stdPart
+          (combinationNormSqHyperreal A U c0.support id c0) := by
+  let p := limitingPositiveDefiniteFunction A U
+  let Av := IsKazhdanPair.orbitAverage S (representation p)
+  let factor : ℝ := 1 - ε ^ 2 / (4 * S.card)
+  have hnorm := KazhdanOrthogonal.norm_iterate_orbitAverage_succ_sub_le
+    hQ S hQS hone hεone (representation p) (kernelVector p 1) k
+  dsimp only at hnorm
+  have hcardNat : 0 < S.card := Finset.card_pos.mpr ⟨1, hone⟩
+  have hcard : (0 : ℝ) < S.card := by exact_mod_cast hcardNat
+  have hεsq : ε ^ 2 ≤ 1 := by
+    nlinarith [sq_nonneg ε, hQ.1, hεone]
+  have hden : (0 : ℝ) < 4 * S.card := mul_pos (by norm_num) hcard
+  have hcardOne : (1 : ℝ) ≤ S.card := by exact_mod_cast hcardNat
+  have hdenOne : (1 : ℝ) ≤ 4 * S.card := by nlinarith
+  have hfrac : ε ^ 2 / (4 * S.card) ≤ 1 := by
+    rw [div_le_one hden]
+    exact hεsq.trans hdenOne
+  have hfactor : 0 ≤ factor := by
+    dsimp [factor]
+    linarith
+  have hsq :
+      ‖(Av^[k + 1]) (kernelVector p 1) -
+          (Av^[k]) (kernelVector p 1)‖ ^ 2 ≤
+        factor ^ (2 * k) *
+          ‖Av (kernelVector p 1) - kernelVector p 1‖ ^ 2 := by
+    have hleft : 0 ≤ ‖(Av^[k + 1]) (kernelVector p 1) -
+        (Av^[k]) (kernelVector p 1)‖ := norm_nonneg _
+    have hright : 0 ≤ factor ^ k *
+        ‖Av (kernelVector p 1) - kernelVector p 1‖ := by
+      exact mul_nonneg (pow_nonneg hfactor k) (norm_nonneg _)
+    have hsquare := (sq_le_sq₀ hleft hright).2 hnorm
+    calc
+      ‖(Av^[k + 1]) (kernelVector p 1) -
+          (Av^[k]) (kernelVector p 1)‖ ^ 2 ≤
+          (factor ^ k *
+            ‖Av (kernelVector p 1) - kernelVector p 1‖) ^ 2 := hsquare
+      _ = factor ^ (2 * k) *
+          ‖Av (kernelVector p 1) - kernelVector p 1‖ ^ 2 := by ring
+  dsimp only
+  rw [stdPart_averagingDisplacementNormSq,
+    stdPart_averagingDisplacementNormSq]
+  simpa [Av, p] using hsq
+
+/-- The normalized squared norm of the exact group-word displacement in one
+finite permutation model. -/
+noncomputable def finiteAveragingDisplacementNormSq
+    (A : SoficApproximation G) (n : ℕ) (U : Finset (A.model n))
+    (S : Finset G) (k : ℕ) : ℝ :=
+  let c := averagingDisplacementCoefficients S k
+  normalizedCombinationNormSq c.support c
+    (A.model n) (A.map n) U id
+
+/-- The hyperreal displacement norm is represented by the corresponding
+finite-stage normalized norms. -/
+theorem combinationNormSqHyperreal_displacement_eq_ofSeq
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (S : Finset G) (k : ℕ) :
+    let c := averagingDisplacementCoefficients S k
+    combinationNormSqHyperreal A U c.support id c =
+      Hyperreal.ofSeq (fun n ↦
+        finiteAveragingDisplacementNormSq A n (U n) S k) := by
+  exact combinationNormSqHyperreal_eq_ofSeq A U
+    (averagingDisplacementCoefficients S k).support id
+    (averagingDisplacementCoefficients S k)
+
+/-- Finite hyperreals are closed under negation. -/
+theorem hyperreal_neg_finite {x : Hyperreal}
+    (hx : 0 ≤ ArchimedeanClass.mk x) :
+    0 ≤ ArchimedeanClass.mk (-x) := by
+  rw [ArchimedeanClass.mk_neg]
+  exact hx
+
+/-- Finite hyperreals are closed under subtraction. -/
+theorem hyperreal_sub_finite {x y : Hyperreal}
+    (hx : 0 ≤ ArchimedeanClass.mk x)
+    (hy : 0 ≤ ArchimedeanClass.mk y) :
+    0 ≤ ArchimedeanClass.mk (x - y) := by
+  rw [sub_eq_add_neg]
+  exact hyperreal_add_finite hx (hyperreal_neg_finite hy)
+
+/-- Uniform finite-stage version of Kun's exact-word contraction.  The
+proof is the compactness argument: a cofinal sequence of violations would
+contradict the GNS standard-part inequality. -/
+theorem finiteAveragingDisplacementNormSq_eventually_lt
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation G) (k : ℕ) (δ : ℝ) (hδ : 0 < δ) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+      finiteAveragingDisplacementNormSq A n U S k <
+        (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) *
+          finiteAveragingDisplacementNormSq A n U S 0 + δ := by
+  classical
+  by_contra h
+  push Not at h
+  choose φ hφ U hbad using h
+  let B := A.reindex φ hφ
+  let U' : ∀ n, Finset (B.model n) := fun n ↦ U n
+  let ck := averagingDisplacementCoefficients S k
+  let c0 := averagingDisplacementCoefficients S 0
+  let factor : ℝ := (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k)
+  let Hk : Hyperreal := combinationNormSqHyperreal B U' ck.support id ck
+  let H0 : Hyperreal := combinationNormSqHyperreal B U' c0.support id c0
+  have hHkfinite : 0 ≤ ArchimedeanClass.mk Hk :=
+    combinationNormSqHyperreal_finite B U' ck.support id ck
+  have hH0finite : 0 ≤ ArchimedeanClass.mk H0 :=
+    combinationNormSqHyperreal_finite B U' c0.support id c0
+  have hfactorfinite : 0 ≤ ArchimedeanClass.mk ((factor : ℝ) : Hyperreal) :=
+    hyperreal_coe_finite factor
+  have hprodFinite :
+      0 ≤ ArchimedeanClass.mk (((factor : ℝ) : Hyperreal) * H0) :=
+    hyperreal_mul_finite hfactorfinite hH0finite
+  have hdiffFinite :
+      0 ≤ ArchimedeanClass.mk (Hk - ((factor : ℝ) : Hyperreal) * H0) :=
+    hyperreal_sub_finite hHkfinite hprodFinite
+  have hhyper : ((δ : ℝ) : Hyperreal) ≤
+      Hk - ((factor : ℝ) : Hyperreal) * H0 := by
+    rw [show Hk = Hyperreal.ofSeq (fun n ↦
+        finiteAveragingDisplacementNormSq B n (U' n) S k) by
+          exact combinationNormSqHyperreal_displacement_eq_ofSeq B U' S k,
+      show H0 = Hyperreal.ofSeq (fun n ↦
+        finiteAveragingDisplacementNormSq B n (U' n) S 0) by
+          exact combinationNormSqHyperreal_displacement_eq_ofSeq B U' S 0]
+    change Hyperreal.ofSeq (fun _ : ℕ ↦ δ) ≤ Hyperreal.ofSeq (fun n ↦
+      finiteAveragingDisplacementNormSq B n (U' n) S k -
+        factor * finiteAveragingDisplacementNormSq B n (U' n) S 0)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      have hn := hbad n
+      change factor * finiteAveragingDisplacementNormSq B n (U' n) S 0 + δ ≤
+        finiteAveragingDisplacementNormSq B n (U' n) S k at hn
+      linarith
+  have hstdLower : δ ≤ ArchimedeanClass.stdPart
+      (Hk - ((factor : ℝ) : Hyperreal) * H0) :=
+    ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom hdiffFinite hhyper
+  rw [ArchimedeanClass.stdPart_sub hHkfinite hprodFinite,
+    ArchimedeanClass.stdPart_mul hfactorfinite hH0finite,
+    Hyperreal.stdPart_coe] at hstdLower
+  have hlimit := stdPart_averagingDisplacementNormSq_le
+    hQ S hQS hone hεone B U' k
+  change ArchimedeanClass.stdPart Hk ≤
+    factor * ArchimedeanClass.stdPart H0 at hlimit
+  linarith
 
 /-- Orbit averaging the cyclic vector is the corresponding uniform finite
 linear combination of kernel vectors. -/

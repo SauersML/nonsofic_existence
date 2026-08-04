@@ -223,6 +223,31 @@ theorem word_close (S : SoficApproximation G) (w : List G) (ε : ℝ) (hε : 0 <
           exact hword
         _ = ε := by ring
 
+/-- Reindex a sofic approximation along any pointwise cofinal map.  Strict
+monotonicity is unnecessary: the inequality `n ≤ φ n` alone preserves every
+eventual estimate in the sequential definition. -/
+def reindex (S : SoficApproximation G) (φ : ℕ → ℕ)
+    (hφ : ∀ n, n ≤ φ n) : SoficApproximation G where
+  model n := S.model (φ n)
+  map n := S.map (φ n)
+  card_tendsToInfinity M := by
+    obtain ⟨N, hN⟩ := S.card_tendsToInfinity M
+    exact ⟨N, fun n hn ↦ hN (φ n) (hn.trans (hφ n))⟩
+  asymptoticallyMultiplicative g h ε hε := by
+    obtain ⟨N, hN⟩ := S.asymptoticallyMultiplicative g h ε hε
+    exact ⟨N, fun n hn ↦ hN (φ n) (hn.trans (hφ n))⟩
+  asymptoticallyFaithful g hg ε hε := by
+    obtain ⟨N, hN⟩ := S.asymptoticallyFaithful g hg ε hε
+    exact ⟨N, fun n hn ↦ hN (φ n) (hn.trans (hφ n))⟩
+
+@[simp] theorem reindex_model (S : SoficApproximation G) (φ : ℕ → ℕ)
+    (hφ : ∀ n, n ≤ φ n) (n : ℕ) :
+    (S.reindex φ hφ).model n = S.model (φ n) := rfl
+
+@[simp] theorem reindex_map (S : SoficApproximation G) (φ : ℕ → ℕ)
+    (hφ : ∀ n, n ≤ φ n) (n : ℕ) :
+    (S.reindex φ hφ).map n = S.map (φ n) := rfl
+
 end SoficApproximation
 
 end NonsoficGroupsExist
