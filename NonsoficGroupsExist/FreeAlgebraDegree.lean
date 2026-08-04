@@ -163,6 +163,15 @@ theorem mul_generator_mem_degreeLE_succ (x : X)
     p * FreeAlgebra.ι (ZMod 2) x ∈ degreeLE X (n + 1) := by
   exact mul_mem_degreeLE X hp (generator_mem_degreeLE_one X x)
 
+omit [Fintype X] in
+/-- The additive group of the free `ZMod 2` algebra has exponent two. -/
+theorem add_self_eq_zero (p : FreeAlgebra (ZMod 2) X) : p + p = 0 := by
+  calc
+    p + p = (1 : ZMod 2) • p + (1 : ZMod 2) • p := by simp
+    _ = ((1 : ZMod 2) + 1) • p := by rw [add_smul]
+    _ = 0 := by
+      rw [show (1 : ZMod 2) + 1 = 0 by decide, zero_smul]
+
 /-- Every free polynomial lies in some finite degree stage. -/
 theorem exists_mem_degreeLE (p : FreeAlgebra (ZMod 2) X) :
     ∃ n, p ∈ degreeLE X n := by

@@ -2,7 +2,7 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 61% of the way to the complete
+group exists. The current estimate is **about 62% of the way to the complete
 unconditional proof**. This percentage measures closed dependencies on the
 critical path, not lines of Lean.
 
@@ -62,6 +62,9 @@ box is still a required dependency of the final theorem.
   prove exact vector reconstruction and conservation of total squared norm
   across all binary sign components; for commuting families, prove every
   component is a simultaneous eigenvector with exactly its assigned signs
+- [x] Prove every finite free-root plane is abelian of exponent two, enumerate
+  all of its elements, and instantiate the simultaneous Fourier decomposition
+  and sign-action theorem for that exhaustive enumeration
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

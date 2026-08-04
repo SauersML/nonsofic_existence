@@ -85,6 +85,44 @@ theorem rootPlaneDegreeSubgroup_mono
   rintro ⟨a, ha, b, hb, habg⟩
   exact ⟨a, degreeLE_mono X hmn ha, b, degreeLE_mono X hmn hb, habg⟩
 
+/-- Every finite coefficient plane is abelian. -/
+theorem rootPlaneDegreeSubgroup_commute
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    ∀ g ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n,
+      ∀ h ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n,
+        Commute g h := by
+  rintro _ ⟨a, _, b, _, rfl⟩ _ ⟨c, _, d, _, rfl⟩
+  have hAC := elementaryRoot_commute_of_ne i k i k hik hik
+    hik.symm hik.symm a c
+  have hAD := elementaryRoot_commute_of_ne i k j k hik hjk
+    hjk.symm hik.symm a d
+  have hBC := elementaryRoot_commute_of_ne j k i k hjk hik
+    hik.symm hjk.symm b c
+  have hBD := elementaryRoot_commute_of_ne j k j k hjk hjk
+    hjk.symm hjk.symm b d
+  exact (hAC.mul_right hAD).mul_left (hBC.mul_right hBD)
+
+/-- Every element of a finite coefficient plane is an involution. -/
+theorem rootPlaneDegreeSubgroup_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    ∀ g ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n, g ^ 2 = 1 := by
+  rintro _ ⟨a, _, b, _, rfl⟩
+  have hcomm := elementaryRoot_commute_of_ne i k j k hik hjk
+    hjk.symm hik.symm a b
+  have hA : elementaryRoot i k hik a * elementaryRoot i k hik a = 1 := by
+    rw [elementaryRoot_mul, add_self_eq_zero, elementaryRoot_zero]
+  have hB : elementaryRoot j k hjk b * elementaryRoot j k hjk b = 1 := by
+    rw [elementaryRoot_mul, add_self_eq_zero, elementaryRoot_zero]
+  rw [pow_two]
+  calc
+    (elementaryRoot i k hik a * elementaryRoot j k hjk b) *
+        (elementaryRoot i k hik a * elementaryRoot j k hjk b) =
+      (elementaryRoot i k hik a * elementaryRoot i k hik a) *
+        (elementaryRoot j k hjk b * elementaryRoot j k hjk b) := by
+      rw [mul_assoc, ← mul_assoc (elementaryRoot j k hjk b), ← hcomm.eq]
+      simp only [mul_assoc]
+    _ = 1 := by rw [hA, hB]; simp
+
 /-- The finite planes exhaust the join of the two full column roots. -/
 theorem iSup_rootPlaneDegreeSubgroup
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
