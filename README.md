@@ -55,7 +55,9 @@ box is still a required dependency of the final theorem.
   stage `n+1` by the explicit coefficient formula
 - [x] Construct the positive/negative Hilbert-space splitting for represented
   involutions and prove orthogonality, Pythagoras, displacement, and
-  conjugation covariance without a finite-dimensional spectral assumption
+  conjugation covariance without a finite-dimensional spectral assumption;
+  prove the resulting sign projections are idempotent, complementary, and
+  pairwise commuting for commuting involutions
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
