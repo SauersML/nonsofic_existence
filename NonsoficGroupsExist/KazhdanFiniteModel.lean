@@ -279,6 +279,29 @@ theorem norm_centeredIndicator_sq [Nonempty Y] (U : Finset Y) :
   field_simp
   ring
 
+/-- Centered characteristic vectors have normalized squared norm at most
+one, uniformly over the finite model and the subset. -/
+theorem norm_centeredIndicator_sq_div_card_le_one [Nonempty Y]
+    (U : Finset Y) :
+    ‖centeredIndicator U‖ ^ 2 / Fintype.card Y ≤ 1 := by
+  rw [norm_centeredIndicator_sq]
+  have hcardNat : 0 < Fintype.card Y := Fintype.card_pos
+  have hcard : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardNat
+  have hUleNat : U.card ≤ Fintype.card Y := Finset.card_le_univ U
+  have hUle : (U.card : ℝ) ≤ Fintype.card Y := by exact_mod_cast hUleNat
+  have hdensityNonneg : (0 : ℝ) ≤ (U.card : ℝ) / Fintype.card Y := by
+    positivity
+  have hdensityLe : (U.card : ℝ) / Fintype.card Y ≤ 1 := by
+    exact (div_le_one hcard).2 hUle
+  have hrewrite :
+      (U.card : ℝ) * (1 - (U.card : ℝ) / Fintype.card Y) /
+          Fintype.card Y =
+        ((U.card : ℝ) / Fintype.card Y) *
+          (1 - (U.card : ℝ) / Fintype.card Y) := by
+    field_simp
+  rw [hrewrite]
+  nlinarith [sq_nonneg ((U.card : ℝ) / Fintype.card Y)]
+
 /-- A centered characteristic vector has coordinate sum zero. -/
 theorem sum_centeredIndicator [Nonempty Y] (U : Finset Y) :
     ∑ y : Y, centeredIndicator U y = 0 := by
