@@ -24,12 +24,18 @@ Markov displacements satisfy an arbitrarily strong contraction, uniformly over
 every centered indicator, with arbitrarily small normalized additive error.  The
 one-step displacement is now related to the genuine directed generator-cut
 energy, and centering has been eliminated from the threshold-rounding input.
-Finite coarea rounding, the maximal-bad-set removal argument, finite support
-propagation, the resulting uniform small-boundary replacement theorem, and
-Kun's complete terminating finite partition recursion are also kernel-checked.
-The recursion constructs blocks with a uniform global cut inequality and a
-linear small-boundary budget.  Its graph-edit step is still required for Kun's
-expander decomposition.
+Finite coarea rounding, maximal-bad-set removal, and finite support propagation
+are also kernel-checked.  A geometric-series movement estimate now keeps the
+replacement-set proximity coefficient independent of the Markov horizon; a
+second maximal-bad-set argument removes its additive finite-model error.  The
+resulting rounding theorem therefore has a fixed admissible input-cut
+threshold even as the requested boundary ratio tends to zero.  Kun's complete
+terminating finite partition recursion constructs blocks with a uniform global
+cut inequality and a linear small-boundary budget.  The development charges
+all inter-block generator edges to exceptional incidence or reference cuts and
+constructs an explicit edit witness deleting them.  It does not yet perform
+Kun's subsequent matching repair that turns the additive block inequalities
+into genuine componentwise expansion.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the

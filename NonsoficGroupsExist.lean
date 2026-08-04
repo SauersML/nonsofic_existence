@@ -21,6 +21,11 @@ import NonsoficGroupsExist.KunDecompositionStep
 import NonsoficGroupsExist.KunPartition
 import NonsoficGroupsExist.KunFinitePartition
 import NonsoficGroupsExist.KunPartitionBoundary
+import NonsoficGroupsExist.KunPartitionCrossing
+import NonsoficGroupsExist.KunBlockGraph
+import NonsoficGroupsExist.KunUniformMovement
+import NonsoficGroupsExist.KunUniformRemoval
+import NonsoficGroupsExist.KunUniformRounding
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation
