@@ -32,6 +32,13 @@ def a2ThirdIndex (i j : Fin 3) : Fin 3 :=
     a2ThirdIndex i j ≠ j := by
   fin_cases i <;> fin_cases j <;> simp_all [a2ThirdIndex]
 
+/-- The third index is the unique remaining coordinate. -/
+theorem a2ThirdIndex_eq_of_pairwise_ne (i j k : Fin 3)
+    (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    a2ThirdIndex i k = j := by
+  fin_cases i <;> fin_cases j <;> fin_cases k <;>
+    simp_all [a2ThirdIndex]
+
 /-- A strongly graded `A₂` root-subgroup system: the six subgroups generate,
 non-addable roots commute, commutators of consecutive roots land in their sum
 root, and every element of a sum root is such a commutator.  The final field is

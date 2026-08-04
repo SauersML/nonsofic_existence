@@ -17,10 +17,117 @@ universe u v
 namespace A2MagicEnergy
 
 open A2MagicGraph
+open scoped commutatorElement
 
 variable {G : Type u} [Group G]
 variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [CompleteSpace E]
+
+/-- The projection identity used in EJZ Claim 5.7.  If a vector is fixed by
+the two roots ending at `k`, then its projection to `Xᵢⱼ` is already its
+projection to the full vertex group `Gᵢₖ`. -/
+theorem fixedProjection_root_eq_vertex
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    {x : E}
+    (hxik : x ∈ KazhdanFixedSpace.fixedSubspace rho (A.root i k hik))
+    (hxjk : x ∈ KazhdanFixedSpace.fixedSubspace rho (A.root j k hjk)) :
+    (KazhdanFixedSpace.fixedProjection rho (A.root i j hij) x : E) =
+      KazhdanFixedSpace.fixedProjection rho
+        (A.vertexGroup ⟨(i, k), hik⟩) x := by
+  let Xij := A.root i j hij
+  let Xik := A.root i k hik
+  let Xjk := A.root j k hjk
+  let a : A2Root := ⟨(i, k), hik⟩
+  have hthird : a2ThirdIndex i k = j :=
+    a2ThirdIndex_eq_of_pairwise_ne i j k hij hik hjk
+  have hXikV : Xik ≤ Xij ⊔ Xjk := by
+    simpa [Xik, Xij, Xjk, a, A2System.vertexGroup,
+      A2System.rootAt, A2System.leftRootGroup,
+      A2System.rightRootGroup, hthird] using A.rootAt_le_vertexGroup a
+  have hgroup : (Xij ⊔ Xik) ⊔ Xjk = A.vertexGroup a := by
+    have hvertex : A.vertexGroup a = Xij ⊔ Xjk := by
+      simp [a, Xij, Xjk, A2System.vertexGroup,
+        A2System.leftRootGroup, A2System.rightRootGroup, hthird]
+    rw [hvertex]
+    apply le_antisymm
+    · exact sup_le (sup_le le_sup_left hXikV) le_sup_right
+    · exact sup_le (le_sup_left.trans le_sup_left) le_sup_right
+  have hXikNorm : Xik ≤ Subgroup.normalizer (Xij : Set G) := by
+    intro y hy
+    apply Subgroup.centralizer_le_normalizer (Xij : Set G)
+    rw [Subgroup.mem_centralizer_iff]
+    intro x hx
+    exact (A.commute i k i j hik hij hik.symm hij.symm y hy x hx).symm
+  have hYX : ⁅Xjk, Xij⁆ ≤ Xik := by
+    apply Subgroup.commutator_le.mpr
+    intro y hy x hx
+    have hxy : ⁅x, y⁆ ∈ Xik :=
+      A.commutator_mem i j k hij hjk hik x hx y hy
+    rw [← commutatorElement_inv x y]
+    exact Xik.inv_mem hxy
+  have hYZ : ⁅Xjk, Xik⁆ ≤ Xik := by
+    apply Subgroup.commutator_le.mpr
+    intro y hy z hz
+    have hcomm : Commute y z :=
+      A.commute j k i k hjk hik hik.symm hjk.symm y hy z hz
+    rw [commutatorElement_eq_one_iff_commute.mpr hcomm]
+    exact Xik.one_mem
+  have hXjkNorm : Xjk ≤ Subgroup.normalizer (Xij ⊔ Xik : Subgroup G) :=
+    ClassTwoNormalForm.le_normalizer_sup Xij Xjk Xik hYX hYZ
+  have hp1 := KazhdanFixedSpace.fixedProjection_eq_sup_of_fixed_of_normalizes
+    rho Xij Xik hXikNorm hxik
+  have hp2 := KazhdanFixedSpace.fixedProjection_eq_sup_of_fixed_of_normalizes
+    rho (Xij ⊔ Xik) Xjk hXjkNorm hxjk
+  change (KazhdanFixedSpace.fixedProjection rho Xij x : E) =
+    KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) x
+  calc
+    (KazhdanFixedSpace.fixedProjection rho Xij x : E) =
+        KazhdanFixedSpace.fixedProjection rho (Xij ⊔ Xik) x := hp1
+    _ = KazhdanFixedSpace.fixedProjection rho ((Xij ⊔ Xik) ⊔ Xjk) x := hp2
+    _ = KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) x := by
+      rw [hgroup]
+
+/-- Concrete edge-difference instance of `fixedProjection_root_eq_vertex`.
+The required two root invariances follow from the endpoint vertex groups. -/
+theorem fixedProjection_root_edgeDifference_eq_vertex
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    let rik : A2Root := ⟨(i, k), hik⟩
+    let rjk : A2Root := ⟨(j, k), hjk⟩
+    (KazhdanFixedSpace.fixedProjection rho (A.root i j hij)
+        (f rik - f rjk) : E) =
+      KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+        (f rik - f rjk) := by
+  let rik : A2Root := ⟨(i, k), hik⟩
+  let rjk : A2Root := ⟨(j, k), hjk⟩
+  have hthirdIK : a2ThirdIndex i k = j :=
+    a2ThirdIndex_eq_of_pairwise_ne i j k hij hik hjk
+  have hthirdJK : a2ThirdIndex j k = i :=
+    a2ThirdIndex_eq_of_pairwise_ne j i k hij.symm hjk hik
+  have hXik_rik : A.root i k hik ≤ A.vertexGroup rik := by
+    simpa [rik, A2System.rootAt] using A.rootAt_le_vertexGroup rik
+  have hXik_rjk : A.root i k hik ≤ A.vertexGroup rjk := by
+    simpa [rjk, A2System.rightRootGroup, hthirdJK] using
+      A.rightRoot_le_vertexGroup rjk
+  have hXjk_rik : A.root j k hjk ≤ A.vertexGroup rik := by
+    simpa [rik, A2System.rightRootGroup, hthirdIK] using
+      A.rightRoot_le_vertexGroup rik
+  have hXjk_rjk : A.root j k hjk ≤ A.vertexGroup rjk := by
+    simpa [rjk, A2System.rootAt] using A.rootAt_le_vertexGroup rjk
+  have hxik : f rik - f rjk ∈
+      KazhdanFixedSpace.fixedSubspace rho (A.root i k hik) :=
+    (KazhdanFixedSpace.fixedSubspace rho (A.root i k hik)).sub_mem
+      (KazhdanFixedSpace.antitone rho hXik_rik (hf rik))
+      (KazhdanFixedSpace.antitone rho hXik_rjk (hf rjk))
+  have hxjk : f rik - f rjk ∈
+      KazhdanFixedSpace.fixedSubspace rho (A.root j k hjk) :=
+    (KazhdanFixedSpace.fixedSubspace rho (A.root j k hjk)).sub_mem
+      (KazhdanFixedSpace.antitone rho hXjk_rik (hf rik))
+      (KazhdanFixedSpace.antitone rho hXjk_rjk (hf rjk))
+  exact fixedProjection_root_eq_vertex A rho i j k hij hik hjk hxik hxjk
 
 /-- Difference along an oriented edge of the magic graph. -/
 def edgeDifference (f : A2Root → E) (r : A2Root) (n : Fin 4) : E :=

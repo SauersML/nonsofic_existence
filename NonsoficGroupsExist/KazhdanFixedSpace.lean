@@ -452,6 +452,37 @@ theorem fixedProjection_equivariant_of_mem_normalizer [CompleteSpace E]
       ρ H hg hxorth
     simpa [map_sub] using hmap
 
+/-- If `K` normalizes `H` and `x` is `K`-fixed, projecting `x` onto the
+`H`-fixed space already lands in the fixed space of `H ⊔ K`. -/
+theorem fixedProjection_eq_sup_of_fixed_of_normalizes [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H K : Subgroup G)
+    (hKnorm : K ≤ Subgroup.normalizer (H : Set G)) {x : E}
+    (hxK : x ∈ fixedSubspace ρ K) :
+    (fixedProjection ρ H x : E) = fixedProjection ρ (H ⊔ K) x := by
+  let U := fixedSubspace ρ H
+  let V := fixedSubspace ρ (H ⊔ K)
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  letI : CompleteSpace V :=
+    (isClosed_fixedSubspace ρ (H ⊔ K)).completeSpace_coe
+  let p : E := U.starProjection x
+  have hpH : p ∈ fixedSubspace ρ H := U.starProjection_apply_mem x
+  have hpK : p ∈ fixedSubspace ρ K := by
+    rw [mem_fixedSubspace_iff]
+    intro k hk
+    have hxk : ρ k x = x := (mem_fixedSubspace_iff ρ K x).mp hxK k hk
+    calc
+      ρ k p = U.starProjection (ρ k x) :=
+        (fixedProjection_equivariant_of_mem_normalizer ρ H (hKnorm hk) x).symm
+      _ = p := by rw [hxk]
+  have hpV : p ∈ V := by
+    change p ∈ fixedSubspace ρ (H ⊔ K)
+    rw [fixedSubspace_sup]
+    exact ⟨hpH, hpK⟩
+  have hresU : x - p ∈ Uᗮ := U.sub_starProjection_mem_orthogonal x
+  have hVU : V ≤ U := antitone ρ le_sup_left
+  have hresV : x - p ∈ Vᗮ := Submodule.orthogonal_le hVU hresU
+  exact (V.eq_starProjection_of_mem_orthogonal hpV hresV).symm
+
 /-- Projection onto the moving part, the orthogonal complement of the
 `H`-fixed subspace, commutes with the action of every element of `H`. -/
 theorem movingProjection_equivariant_of_mem [CompleteSpace E]
