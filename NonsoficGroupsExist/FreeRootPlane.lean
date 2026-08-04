@@ -123,6 +123,60 @@ theorem rootPlaneDegreeSubgroup_sq
       simp only [mul_assoc]
     _ = 1 := by rw [hA, hB]; simp
 
+/-- The first coefficient coordinate inside a finite plane stage. -/
+noncomputable def firstCoordinate
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (a : degreeLE X n) : rootPlaneDegreeSubgroup X i j k hij hik hjk n :=
+  ⟨elementaryRoot i k hik a.1,
+    ⟨a.1, a.2, 0, (degreeLE X n).zero_mem, by simp⟩⟩
+
+/-- The second coefficient coordinate inside a finite plane stage. -/
+noncomputable def secondCoordinate
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (b : degreeLE X n) : rootPlaneDegreeSubgroup X i j k hij hik hjk n :=
+  ⟨elementaryRoot j k hjk b.1,
+    ⟨0, (degreeLE X n).zero_mem, b.1, b.2, by simp⟩⟩
+
+@[simp] theorem firstCoordinate_val
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (a : degreeLE X n) :
+    (firstCoordinate X i j k hij hik hjk n a :
+      elementaryGroup (Fin 3) (FreeRing X)) = elementaryRoot i k hik a.1 := rfl
+
+@[simp] theorem secondCoordinate_val
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (b : degreeLE X n) :
+    (secondCoordinate X i j k hij hik hjk n b :
+      elementaryGroup (Fin 3) (FreeRing X)) = elementaryRoot j k hjk b.1 := rfl
+
+theorem firstCoordinate_add
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (a b : degreeLE X n) :
+    firstCoordinate X i j k hij hik hjk n (a + b) =
+      firstCoordinate X i j k hij hik hjk n a *
+        firstCoordinate X i j k hij hik hjk n b := by
+  apply Subtype.ext
+  exact (elementaryRoot_mul i k hik a.1 b.1).symm
+
+theorem secondCoordinate_add
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (a b : degreeLE X n) :
+    secondCoordinate X i j k hij hik hjk n (a + b) =
+      secondCoordinate X i j k hij hik hjk n a *
+        secondCoordinate X i j k hij hik hjk n b := by
+  apply Subtype.ext
+  exact (elementaryRoot_mul j k hjk a.1 b.1).symm
+
+/-- Every plane element factors through its two coefficient coordinates. -/
+theorem exists_coordinate_factorization
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (g : rootPlaneDegreeSubgroup X i j k hij hik hjk n) :
+    ∃ a b : degreeLE X n,
+      firstCoordinate X i j k hij hik hjk n a *
+        secondCoordinate X i j k hij hik hjk n b = g := by
+  obtain ⟨a, ha, b, hb, habg⟩ := g.2
+  exact ⟨⟨a, ha⟩, ⟨b, hb⟩, Subtype.ext habg⟩
+
 /-- The finite planes exhaust the join of the two full column roots. -/
 theorem iSup_rootPlaneDegreeSubgroup
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :

@@ -180,6 +180,86 @@ theorem planeEigenvalue_one_of_component_ne_zero
     rw [sub_smul, heq, sub_self]
   exact sub_eq_zero.mp ((smul_eq_zero.mp hzero).resolve_right hv)
 
+/-- The character value on the first coefficient root. -/
+def firstCoefficientEigenvalue
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (a : FreeAlgebraDegree.degreeLE X n) : ℝ :=
+  planeEigenvalue X i j k hij hik hjk n sign
+    (firstCoordinate X i j k hij hik hjk n a)
+
+/-- The character value on the second coefficient root. -/
+def secondCoefficientEigenvalue
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (b : FreeAlgebraDegree.degreeLE X n) : ℝ :=
+  planeEigenvalue X i j k hij hik hjk n sign
+    (secondCoordinate X i j k hij hik hjk n b)
+
+/-- On a nonzero component, the first coefficient character converts
+addition into multiplication of signs. -/
+theorem firstCoefficientEigenvalue_add_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (a b : FreeAlgebraDegree.degreeLE X n) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n sign (a + b) =
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign a *
+        firstCoefficientEigenvalue X i j k hij hik hjk n sign b := by
+  rw [firstCoefficientEigenvalue, firstCoordinate_add]
+  exact planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk n
+    rho sign z hv _ _
+
+/-- On a nonzero component, the second coefficient character converts
+addition into multiplication of signs. -/
+theorem secondCoefficientEigenvalue_add_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (a b : FreeAlgebraDegree.degreeLE X n) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n sign (a + b) =
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign a *
+        secondCoefficientEigenvalue X i j k hij hik hjk n sign b := by
+  rw [secondCoefficientEigenvalue, secondCoordinate_add]
+  exact planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk n
+    rho sign z hv _ _
+
+/-- The first coefficient character sends zero to `1` on a nonzero
+component. -/
+theorem firstCoefficientEigenvalue_zero_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n sign 0 = 1 := by
+  have hcoord : firstCoordinate X i j k hij hik hjk n 0 = 1 := by
+    apply Subtype.ext
+    simp
+  rw [firstCoefficientEigenvalue, hcoord]
+  exact planeEigenvalue_one_of_component_ne_zero X i j k hij hik hjk n
+    rho sign z hv
+
+/-- The second coefficient character sends zero to `1` on a nonzero
+component. -/
+theorem secondCoefficientEigenvalue_zero_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n sign 0 = 1 := by
+  have hcoord : secondCoordinate X i j k hij hik hjk n 0 = 1 := by
+    apply Subtype.ext
+    simp
+  rw [secondCoefficientEigenvalue, hcoord]
+  exact planeEigenvalue_one_of_component_ne_zero X i j k hij hik hjk n
+    rho sign z hv
+
 end
 
 end FreeRootPlaneFourier
