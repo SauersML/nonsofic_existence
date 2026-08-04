@@ -29,6 +29,38 @@ def restrictRepresentation (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (L : Subgroup G) :
     (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (L : Subgroup G) (g : L) :
     restrictRepresentation ρ L g = ρ g.1 := rfl
 
+/-- Restrict an orthogonal representation to a linear subspace preserved by
+the action.  The inverse is induced by `g⁻¹`, so this constructs genuine
+linear isometric equivalences on the subtype rather than merely endomorphisms. -/
+noncomputable def restrictToInvariantSubspace
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (U : Submodule ℝ E)
+    (hU : ∀ g : G, ∀ x ∈ U, ρ g x ∈ U) :
+    G →* (U ≃ₗᵢ[ℝ] U) where
+  toFun g :=
+    LinearIsometryEquiv.ofSurjective
+      { toLinearMap :=
+          { toFun := fun x ↦ ⟨ρ g x.1, hU g x.1 x.2⟩
+            map_add' := fun x y ↦ by ext; simp
+            map_smul' := fun r x ↦ by ext; simp }
+        norm_map' := fun x ↦ (ρ g).norm_map x.1 }
+      (by
+        intro y
+        refine ⟨⟨ρ g⁻¹ y.1, hU g⁻¹ y.1 y.2⟩, ?_⟩
+        ext
+        simp)
+  map_one' := by
+    ext x
+    simp
+  map_mul' := by
+    intro g h
+    ext x
+    simp [map_mul]
+
+@[simp] theorem restrictToInvariantSubspace_apply
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (U : Submodule ℝ E)
+    (hU : ∀ g : G, ∀ x ∈ U, ρ g x ∈ U) (g : G) (x : U) :
+    (restrictToInvariantSubspace ρ U hU g x : E) = ρ g x.1 := rfl
+
 /-- The subspace fixed pointwise by a subgroup. -/
 def fixedSubspace (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) :
     Submodule ℝ E :=
@@ -138,6 +170,79 @@ theorem map_mem_fixedSubspace_orthogonal_of_normal
       rw [(ρ g⁻¹).inner_map_map]
     _ = inner ℝ (ρ g⁻¹ y) x := by rw [hcancel]
     _ = 0 := Submodule.inner_right_of_mem_orthogonal hy' hx
+
+/-- The moving subspace relative to a subgroup is the orthogonal complement
+of that subgroup's fixed vectors. -/
+noncomputable def subgroupMovingSubspace
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) : Submodule ℝ E :=
+  (fixedSubspace ρ H)ᗮ
+
+/-- The moving subspace of a representation is the orthogonal complement of
+its globally invariant vectors. -/
+noncomputable def movingSubspace (ρ : G →* (E ≃ₗᵢ[ℝ] E)) : Submodule ℝ E :=
+  subgroupMovingSubspace ρ ⊤
+
+/-- The action restricted to its moving subspace. -/
+noncomputable def movingRepresentation (ρ : G →* (E ≃ₗᵢ[ℝ] E)) :
+    G →* (movingSubspace ρ ≃ₗᵢ[ℝ] movingSubspace ρ) :=
+  restrictToInvariantSubspace ρ (movingSubspace ρ) fun g x hx ↦ by
+    exact map_mem_fixedSubspace_orthogonal_of_normal ρ ⊤ g hx
+
+@[simp] theorem movingRepresentation_apply
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (g : G) (x : movingSubspace ρ) :
+    ((movingRepresentation ρ g x : movingSubspace ρ) : E) = ρ g x.1 := rfl
+
+/-- By construction, the moving representation has no nonzero invariant
+vectors.  This closes the logical step that is often left implicit when a
+representation is split into fixed and moving parts. -/
+theorem movingRepresentation_hasNoInvariantVectors
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) :
+    IsKazhdanPair.HasNoInvariantVectors G (movingRepresentation ρ) := by
+  intro x hx
+  have hxfix : (x : E) ∈ fixedSubspace ρ ⊤ := by
+    rw [mem_fixedSubspace_iff]
+    intro g _
+    have h := congrArg Subtype.val (hx g)
+    simpa using h
+  have hxorth : (x : E) ∈ (fixedSubspace ρ ⊤)ᗮ := x.2
+  have hinner : inner ℝ (x : E) x = 0 :=
+    Submodule.inner_right_of_mem_orthogonal hxfix hxorth
+  apply Subtype.ext
+  exact inner_self_eq_zero.mp hinner
+
+/-- The restricted action of `H` on the orthogonal complement of its fixed
+space. -/
+noncomputable def subgroupMovingRepresentation
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) :
+    H →* (subgroupMovingSubspace ρ H ≃ₗᵢ[ℝ] subgroupMovingSubspace ρ H) :=
+  restrictToInvariantSubspace (restrictRepresentation ρ H)
+    (subgroupMovingSubspace ρ H) fun g x hx ↦ by
+      exact map_mem_fixedSubspace_orthogonal_of_mem_normalizer ρ H
+        (H.le_normalizer g.2) hx
+
+@[simp] theorem subgroupMovingRepresentation_apply
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (g : H)
+    (x : subgroupMovingSubspace ρ H) :
+    ((subgroupMovingRepresentation ρ H g x : subgroupMovingSubspace ρ H) : E) =
+      ρ g.1 x.1 := rfl
+
+/-- The moving representation of a subgroup has no nonzero invariant
+vectors, with no hypothesis on the original representation. -/
+theorem subgroupMovingRepresentation_hasNoInvariantVectors
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) :
+    IsKazhdanPair.HasNoInvariantVectors H
+      (subgroupMovingRepresentation ρ H) := by
+  intro x hx
+  have hxfix : (x : E) ∈ fixedSubspace ρ H := by
+    rw [mem_fixedSubspace_iff]
+    intro g hg
+    have h := congrArg Subtype.val (hx ⟨g, hg⟩)
+    simpa using h
+  have hxorth : (x : E) ∈ (fixedSubspace ρ H)ᗮ := x.2
+  have hinner : inner ℝ (x : E) x = 0 :=
+    Submodule.inner_right_of_mem_orthogonal hxfix hxorth
+  apply Subtype.ext
+  exact inner_self_eq_zero.mp hinner
 
 /-- A vector fixed by a set is fixed by the subgroup it generates. -/
 theorem fixed_of_mem_closure (ρ : G →* (E ≃ₗᵢ[ℝ] E))
@@ -250,6 +355,20 @@ noncomputable def fixedProjection [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[�
     (isClosed_fixedSubspace ρ H).completeSpace_coe
   exact (fixedSubspace ρ H).orthogonalProjectionOnto
 
+/-- Orthogonal projection onto the moving subspace relative to `H`. -/
+noncomputable def subgroupMovingProjection [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) : E →L[ℝ] E := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  exact Uᗮ.starProjection
+
+theorem subgroupMovingProjection_mem [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) :
+    subgroupMovingProjection ρ H x ∈ subgroupMovingSubspace ρ H := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  exact Uᗮ.starProjection_apply_mem x
+
 @[simp] theorem fixedProjection_mem [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[ℝ] E))
     (H : Subgroup G) (x : E) (h : H) :
     ρ h.1 (fixedProjection ρ H x : E) = fixedProjection ρ H x := by
@@ -308,6 +427,49 @@ theorem movingProjection_equivariant_of_mem [CompleteSpace E]
     rw [Submodule.starProjection_orthogonal]
     rfl
   rw [hmoving, hfixed, hmoving, map_sub]
+
+/-- The named moving projection commutes with every element of the subgroup
+that defines it. -/
+theorem subgroupMovingProjection_equivariant_of_mem [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G} (hg : g ∈ H)
+    (x : E) :
+    subgroupMovingProjection ρ H (ρ g x) =
+      ρ g (subgroupMovingProjection ρ H x) := by
+  simpa [subgroupMovingProjection, subgroupMovingSubspace] using
+    movingProjection_equivariant_of_mem ρ H hg x
+
+/-- Projecting a `K`-fixed vector onto the moving part of a larger subgroup
+`H` preserves `K`-fixedness. -/
+theorem subgroupMovingProjection_mem_fixedSubspace [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (K H : Subgroup G) (hKH : K ≤ H)
+    {x : E} (hx : x ∈ fixedSubspace ρ K) :
+    subgroupMovingProjection ρ H x ∈ fixedSubspace ρ K := by
+  rw [mem_fixedSubspace_iff]
+  intro g hg
+  have hxg : ρ g x = x := (mem_fixedSubspace_iff ρ K x).mp hx g hg
+  calc
+    ρ g (subgroupMovingProjection ρ H x) =
+        subgroupMovingProjection ρ H (ρ g x) :=
+      (subgroupMovingProjection_equivariant_of_mem ρ H (hKH hg) x).symm
+    _ = subgroupMovingProjection ρ H x := by rw [hxg]
+
+/-- The projected vector, bundled in the moving subtype, lies in the fixed
+subspace for `K` inside the moving representation of `H`. -/
+theorem subgroupMovingProjection_mem_restricted_fixedSubspace
+    [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (K H : Subgroup G) (hKH : K ≤ H)
+    {x : E} (hx : x ∈ fixedSubspace ρ K) :
+    (⟨subgroupMovingProjection ρ H x,
+        subgroupMovingProjection_mem ρ H x⟩ : subgroupMovingSubspace ρ H) ∈
+      fixedSubspace (subgroupMovingRepresentation ρ H) (K.subgroupOf H) := by
+  rw [mem_fixedSubspace_iff]
+  intro g hg
+  apply Subtype.ext
+  change ρ g.1 (subgroupMovingProjection ρ H x) =
+    subgroupMovingProjection ρ H x
+  exact (mem_fixedSubspace_iff ρ K _).mp
+    (subgroupMovingProjection_mem_fixedSubspace ρ K H hKH hx)
+    g.1 (Subgroup.mem_subgroupOf.mp hg)
 
 /-- If a normal subgroup `H` together with `K` generates the ambient group,
 then their fixed subspaces are orthogonal in every representation without

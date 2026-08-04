@@ -3,6 +3,7 @@ import NonsoficGroupsExist.AlmostAutomorphism
 import NonsoficGroupsExist.A2System
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
+import NonsoficGroupsExist.ClassTwoApproximation
 import NonsoficGroupsExist.DirectedCoarea
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.Kazhdan
