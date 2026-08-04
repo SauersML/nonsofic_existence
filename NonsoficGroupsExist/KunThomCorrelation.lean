@@ -88,6 +88,42 @@ theorem scaledGramCorrelation_comm {G : Type*}
   unfold scaledGramCorrelation
   rw [real_inner_comm]
 
+/-- Squared norm of a finite combination of diagonal translates, normalized
+at the permutation-graph scale. -/
+noncomputable def scaledCombinationNormSq {G I : Type*}
+    (F : Finset I) (a : I → ℝ) (τ : G → Equiv.Perm Y)
+    (c : Equiv.Perm Y) (w : I → G) : ℝ :=
+  ‖∑ i ∈ F, a i •
+      permutationOperator (diagonalPerm (τ (w i))) (graphVector c)‖ ^ 2 /
+    Fintype.card Y
+
+theorem scaledCombinationNormSq_eq_gram {G I : Type*}
+    (F : Finset I) (a : I → ℝ) (τ : G → Equiv.Perm Y)
+    (c : Equiv.Perm Y) (w : I → G) :
+    scaledCombinationNormSq F a τ c w =
+      ∑ i ∈ F, ∑ j ∈ F,
+        a i * a j * scaledGramCorrelation τ c (w i) (w j) := by
+  classical
+  unfold scaledCombinationNormSq scaledGramCorrelation
+  rw [← real_inner_self_eq_norm_sq]
+  simp_rw [sum_inner, inner_sum, real_inner_smul_left,
+    real_inner_smul_right]
+  rw [Finset.sum_div]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [Finset.sum_div]
+  apply Finset.sum_congr rfl
+  intro j hj
+  ring
+
+theorem scaledGramCorrelation_quadratic_nonneg {G I : Type*}
+    (F : Finset I) (a : I → ℝ) (τ : G → Equiv.Perm Y)
+    (c : Equiv.Perm Y) (w : I → G) :
+    0 ≤ ∑ i ∈ F, ∑ j ∈ F,
+      a i * a j * scaledGramCorrelation τ c (w i) (w j) := by
+  rw [← scaledCombinationNormSq_eq_gram]
+  exact div_nonneg (sq_nonneg _) (Nat.cast_nonneg _)
+
 /-- Every scaled coefficient lies in `[-1,1]`. -/
 theorem abs_scaledPermutationCorrelation_le_one [Nonempty Y]
     (c p : Equiv.Perm Y) :
@@ -101,6 +137,26 @@ theorem abs_scaledPermutationCorrelation_le_one [Nonempty Y]
   calc
     |inner ℝ (graphVector c)
         (permutationOperator (diagonalPerm p) (graphVector c))| /
+          Fintype.card Y ≤
+      (‖graphVector c‖ * ‖graphVector c‖) / Fintype.card Y :=
+        div_le_div_of_nonneg_right hinner hcard.le
+    _ = ‖graphVector c‖ ^ 2 / Fintype.card Y := by ring
+    _ ≤ 1 := (div_le_one hcard).2 (norm_graphVector_sq_le c)
+
+theorem abs_scaledGramCorrelation_le_one [Nonempty Y] {G : Type*}
+    (τ : G → Equiv.Perm Y) (c : Equiv.Perm Y) (g h : G) :
+    |scaledGramCorrelation τ c g h| ≤ 1 := by
+  have hcard : (0 : ℝ) < Fintype.card Y := by
+    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card Y)
+  have hinner := abs_real_inner_le_norm
+    (permutationOperator (diagonalPerm (τ g)) (graphVector c))
+    (permutationOperator (diagonalPerm (τ h)) (graphVector c))
+  rw [(permutationOperator (diagonalPerm (τ g))).norm_map,
+    (permutationOperator (diagonalPerm (τ h))).norm_map] at hinner
+  rw [scaledGramCorrelation, abs_div, abs_of_pos hcard]
+  calc
+    |inner ℝ (permutationOperator (diagonalPerm (τ g)) (graphVector c))
+        (permutationOperator (diagonalPerm (τ h)) (graphVector c))| /
           Fintype.card Y ≤
       (‖graphVector c‖ * ‖graphVector c‖) / Fintype.card Y :=
         div_le_div_of_nonneg_right hinner hcard.le
@@ -211,6 +267,223 @@ theorem relativeCorrelation_approaches_gram_eventually
   rw [scaledCorrelation, scaledPermutationCorrelation,
     scaledGramCorrelation_eq_relative]
   simpa [p, q] using hresult
+
+/-! ### The limiting positive-definite function -/
+
+/-- Hyperreal scaled coefficient of a sequence of permutation graphs. -/
+noncomputable def correlationHyperreal
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g : K) : Hyperreal :=
+  Hyperreal.ofSeq fun n ↦
+    scaledCorrelation (fun k ↦ A.map n (k, 1)) (c n) g
+
+/-- Hyperreal Gram coefficient of the corresponding diagonal translates. -/
+noncomputable def gramCorrelationHyperreal
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) : Hyperreal :=
+  Hyperreal.ofSeq fun n ↦
+    scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) g h
+
+theorem correlationHyperreal_finite
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g : K) :
+    0 ≤ ArchimedeanClass.mk (correlationHyperreal A c g) := by
+  apply ArchimedeanClass.mk_nonneg_of_le_of_le_of_archimedean
+    Hyperreal.coeRingHom (r := (-1 : ℝ)) (s := (1 : ℝ))
+  · change Hyperreal.ofSeq (fun _ : ℕ ↦ (-1 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦
+        scaledCorrelation (fun k ↦ A.map n (k, 1)) (c n) g)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      letI : Nonempty (A.model n) :=
+        Fintype.card_pos_iff.mp (A.model n).nonempty
+      exact (abs_le.mp (abs_scaledPermutationCorrelation_le_one
+        (c n) (A.map n (g, 1)))).1
+  · change Hyperreal.ofSeq (fun n ↦
+        scaledCorrelation (fun k ↦ A.map n (k, 1)) (c n) g) ≤
+      Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      letI : Nonempty (A.model n) :=
+        Fintype.card_pos_iff.mp (A.model n).nonempty
+      exact (abs_le.mp (abs_scaledPermutationCorrelation_le_one
+        (c n) (A.map n (g, 1)))).2
+
+theorem gramCorrelationHyperreal_finite
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) :
+    0 ≤ ArchimedeanClass.mk (gramCorrelationHyperreal A c g h) := by
+  apply ArchimedeanClass.mk_nonneg_of_le_of_le_of_archimedean
+    Hyperreal.coeRingHom (r := (-1 : ℝ)) (s := (1 : ℝ))
+  · change Hyperreal.ofSeq (fun _ : ℕ ↦ (-1 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦
+        scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) g h)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      letI : Nonempty (A.model n) :=
+        Fintype.card_pos_iff.mp (A.model n).nonempty
+      exact (abs_le.mp (abs_scaledGramCorrelation_le_one
+        (fun k ↦ A.map n (k, 1)) (c n) g h)).1
+  · change Hyperreal.ofSeq (fun n ↦
+        scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) g h) ≤
+      Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      letI : Nonempty (A.model n) :=
+        Fintype.card_pos_iff.mp (A.model n).nonempty
+      exact (abs_le.mp (abs_scaledGramCorrelation_le_one
+        (fun k ↦ A.map n (k, 1)) (c n) g h)).2
+
+theorem gramCorrelationHyperreal_comm
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) :
+    gramCorrelationHyperreal A c g h =
+      gramCorrelationHyperreal A c h g := by
+  apply congrArg Hyperreal.ofSeq
+  funext n
+  exact scaledGramCorrelation_comm
+    (fun k ↦ A.map n (k, 1)) (c n) g h
+
+theorem correlation_sub_gram_tendsto_zero
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) :
+    Filter.Tendsto
+      (fun n ↦
+        scaledCorrelation (fun k ↦ A.map n (k, 1)) (c n) (g⁻¹ * h) -
+          scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) g h)
+      Filter.atTop (nhds 0) := by
+  refine Metric.tendsto_atTop.mpr fun η hη ↦ ?_
+  obtain ⟨N, hN⟩ :=
+    relativeCorrelation_approaches_gram_eventually A c g h η hη
+  refine ⟨N, fun n hn ↦ ?_⟩
+  simpa only [dist_zero_right, Real.norm_eq_abs] using hN n hn
+
+theorem correlationHyperreal_sub_gram_mk_pos
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) :
+    0 < ArchimedeanClass.mk
+      (correlationHyperreal A c (g⁻¹ * h) -
+        gramCorrelationHyperreal A c g h) := by
+  change 0 < ArchimedeanClass.mk (Hyperreal.ofSeq (fun n ↦
+    scaledCorrelation (fun k ↦ A.map n (k, 1)) (c n) (g⁻¹ * h) -
+      scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) g h))
+  apply Hyperreal.archimedeanClassMk_pos_of_tendsto
+  rw [Hyperreal.tendsto_ofSeq]
+  exact (correlation_sub_gram_tendsto_zero A c g h).mono_left
+    Nat.hyperfilter_le_atTop
+
+/-- Standard-part correlation of a permutation-graph sequence. -/
+noncomputable def limitingCorrelation
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g : K) : ℝ :=
+  ArchimedeanClass.stdPart (correlationHyperreal A c g)
+
+theorem limitingCorrelation_inv_mul_eq_stdPart_gram
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) :
+    limitingCorrelation A c (g⁻¹ * h) =
+      ArchimedeanClass.stdPart (gramCorrelationHyperreal A c g h) := by
+  have hc := correlationHyperreal_finite A c (g⁻¹ * h)
+  have hg := gramCorrelationHyperreal_finite A c g h
+  have hsmall := correlationHyperreal_sub_gram_mk_pos A c g h
+  have hzero : ArchimedeanClass.stdPart
+      (correlationHyperreal A c (g⁻¹ * h) -
+        gramCorrelationHyperreal A c g h) = 0 :=
+    ArchimedeanClass.stdPart_eq_zero.mpr hsmall.ne'
+  have hsub := ArchimedeanClass.stdPart_sub hc hg
+  rw [hzero] at hsub
+  unfold limitingCorrelation
+  exact sub_eq_zero.mp hsub.symm
+
+theorem limitingCorrelation_inv_mul_comm
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (g h : K) :
+    limitingCorrelation A c (g⁻¹ * h) =
+      limitingCorrelation A c (h⁻¹ * g) := by
+  rw [limitingCorrelation_inv_mul_eq_stdPart_gram A c g h,
+    limitingCorrelation_inv_mul_eq_stdPart_gram A c h g,
+    gramCorrelationHyperreal_comm A c g h]
+
+/-- The scaled limiting correlation is positive definite. -/
+theorem limitingCorrelation_isPositiveDefinite
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) :
+    IsPositiveDefinite (limitingCorrelation A c) := by
+  refine ⟨limitingCorrelation_inv_mul_comm A c, ?_⟩
+  intro F a
+  classical
+  let term : K → K → Hyperreal := fun i j ↦
+    ((a i * a j : ℝ) : Hyperreal) * gramCorrelationHyperreal A c i j
+  let q : Hyperreal := ∑ i ∈ F, ∑ j ∈ F, term i j
+  have hterm (i j : K) : 0 ≤ ArchimedeanClass.mk (term i j) :=
+    hyperreal_mul_finite (hyperreal_coe_finite (a i * a j))
+      (gramCorrelationHyperreal_finite A c i j)
+  have hinner (i : K) :
+      0 ≤ ArchimedeanClass.mk (∑ j ∈ F, term i j) :=
+    hyperreal_finset_sum_finite F (term i) (fun j _ ↦ hterm i j)
+  have hqfinite : 0 ≤ ArchimedeanClass.mk q :=
+    hyperreal_finset_sum_finite F (fun i ↦ ∑ j ∈ F, term i j)
+      (fun i _ ↦ hinner i)
+  have hq : q = Hyperreal.ofSeq (fun n ↦ ∑ i ∈ F, ∑ j ∈ F,
+      a i * a j *
+        scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) i j) := by
+    change (∑ i ∈ F, ∑ j ∈ F,
+        ofSeqRingHom (fun _ ↦ a i * a j) *
+          ofSeqRingHom (fun n ↦ scaledGramCorrelation
+            (fun k ↦ A.map n (k, 1)) (c n) i j)) =
+      ofSeqRingHom (fun n ↦ ∑ i ∈ F, ∑ j ∈ F, a i * a j *
+        scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) i j)
+    rw [show (fun n ↦ ∑ i ∈ F, ∑ j ∈ F, a i * a j *
+        scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) i j) =
+      ∑ i ∈ F, ∑ j ∈ F, fun n ↦ a i * a j *
+        scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) i j by
+          funext n
+          simp]
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro i hi
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [← map_mul]
+  have hqnonneg : 0 ≤ q := by
+    rw [hq]
+    change Hyperreal.ofSeq (fun _ : ℕ ↦ (0 : ℝ)) ≤
+      Hyperreal.ofSeq (fun n ↦ ∑ i ∈ F, ∑ j ∈ F,
+        a i * a j *
+          scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) i j)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦
+      scaledGramCorrelation_quadratic_nonneg F a
+        (fun k ↦ A.map n (k, 1)) (c n) id
+  have hstdnonneg : 0 ≤ ArchimedeanClass.stdPart q :=
+    ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom hqfinite hqnonneg
+  have hstd : ArchimedeanClass.stdPart q =
+      ∑ i ∈ F, ∑ j ∈ F,
+        a i * a j * limitingCorrelation A c (i⁻¹ * j) := by
+    calc
+      ArchimedeanClass.stdPart q =
+          ∑ i ∈ F, ArchimedeanClass.stdPart (∑ j ∈ F, term i j) :=
+        stdPart_finset_sum F (fun i ↦ ∑ j ∈ F, term i j)
+          (fun i _ ↦ hinner i)
+      _ = ∑ i ∈ F, ∑ j ∈ F,
+          ArchimedeanClass.stdPart (term i j) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        exact stdPart_finset_sum F (term i) (fun j _ ↦ hterm i j)
+      _ = ∑ i ∈ F, ∑ j ∈ F,
+          a i * a j * limitingCorrelation A c (i⁻¹ * j) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        apply Finset.sum_congr rfl
+        intro j hj
+        rw [ArchimedeanClass.stdPart_mul
+          (hyperreal_coe_finite (a i * a j))
+          (gramCorrelationHyperreal_finite A c i j),
+          Hyperreal.stdPart_coe,
+          ← limitingCorrelation_inv_mul_eq_stdPart_gram A c i j]
+  rw [← hstd]
+  exact hstdnonneg
 
 end KunThomCorrelation
 end NonsoficGroupsExist
