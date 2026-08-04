@@ -15,6 +15,9 @@ import NonsoficGroupsExist.KunSupport
 import NonsoficGroupsExist.KunIndicatorRounding
 import NonsoficGroupsExist.KunQuantitativeRounding
 import NonsoficGroupsExist.KunRemoval
+import NonsoficGroupsExist.KunAsymptoticRemoval
+import NonsoficGroupsExist.KunSmallBoundary
+import NonsoficGroupsExist.KunDecompositionStep
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation

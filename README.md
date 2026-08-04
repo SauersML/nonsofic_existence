@@ -20,12 +20,14 @@ limiting sofic correlation, proves the iterated Kazhdan contraction there,
 uniformizes it back to all sufficiently large finite models, and controls the
 approximate-multiplication error between exact group words and the actual
 finite permutation Markov operator.  Consequently, genuine finite-model
-Markov displacements satisfy a fixed strict contraction, uniformly over every
-centered indicator, with arbitrarily small normalized additive error.  The
+Markov displacements satisfy an arbitrarily strong contraction, uniformly over
+every centered indicator, with arbitrarily small normalized additive error.  The
 one-step displacement is now related to the genuine directed generator-cut
 energy, and centering has been eliminated from the threshold-rounding input.
-The remaining removal, partition, and graph-edit steps needed for Kun's
-expander decomposition are still being formalized.
+Finite coarea rounding, the maximal-bad-set removal argument, finite support
+propagation, and the resulting uniform small-boundary replacement theorem are
+also kernel-checked.  The remaining partition and graph-edit steps needed for
+Kun's expander decomposition are still being formalized.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the
