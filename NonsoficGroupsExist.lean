@@ -24,6 +24,7 @@ import NonsoficGroupsExist.KunPartitionCrossing
 import NonsoficGroupsExist.KunBlockGraph
 import NonsoficGroupsExist.KunRepairGraph
 import NonsoficGroupsExist.KunMarkerSelection
+import NonsoficGroupsExist.KunRepairExpansion
 import NonsoficGroupsExist.KunUniformMovement
 import NonsoficGroupsExist.KunUniformRemoval
 import NonsoficGroupsExist.KunUniformRounding
