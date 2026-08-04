@@ -416,6 +416,33 @@ theorem assignedAt_card_succ
   exact Finset.card_union_of_disjoint
     (nextPiece_disjoint_assigned B γ α replace i)
 
+theorem assignedAt_sdiff_eq_nextPiece
+    (B : Finset X.vertex) (γ α : ℝ)
+    (replace : ∀ T : Finset X.vertex, T.Nonempty → Disjoint T B →
+      (X.boundaryCard T : ℝ) < γ * T.card →
+      ∃ W : Finset X.vertex,
+        ((W ∆ T).card : ℝ) < (T.card : ℝ) / 3 ∧
+        (X.boundaryCard W : ℝ) < α * T.card)
+    (i : ℕ) :
+    (assignedAt B γ α replace (i + 1)).1 \
+        (assignedAt B γ α replace i).1 =
+      nextPiece B (assignedAt B γ α replace i).1 γ α
+        (assignedAt B γ α replace i).2 replace := by
+  rw [assignedAt_succ]
+  ext x
+  constructor
+  · intro hx
+    have hx' := Finset.mem_sdiff.mp hx
+    rcases Finset.mem_union.mp hx'.1 with hxA | hxP
+    · exact False.elim (hx'.2 hxA)
+    · exact hxP
+  · intro hxP
+    have hrest := nextPiece_subset_remainder B
+      (assignedAt B γ α replace i).1 γ α
+      (assignedAt B γ α replace i).2 replace hxP
+    exact Finset.mem_sdiff.mpr
+      ⟨Finset.mem_union_right _ hxP, (Finset.mem_sdiff.mp hrest).2⟩
+
 theorem base_card_add_sum_nextPiece
     (B : Finset X.vertex) (γ α : ℝ)
     (replace : ∀ T : Finset X.vertex, T.Nonempty → Disjoint T B →
