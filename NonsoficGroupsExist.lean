@@ -23,6 +23,7 @@ import NonsoficGroupsExist.KunDiagonalPartition
 import NonsoficGroupsExist.KunDecomposition
 import NonsoficGroupsExist.KunThomDiagonal
 import NonsoficGroupsExist.KunThomCorrelation
+import NonsoficGroupsExist.KunThomFiniteMarkov
 import NonsoficGroupsExist.KunPartitionBoundary
 import NonsoficGroupsExist.KunPartitionCrossing
 import NonsoficGroupsExist.KunBlockGraph

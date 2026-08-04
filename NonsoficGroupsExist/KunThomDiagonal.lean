@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.BlockWordCrossing
+import NonsoficGroupsExist.KazhdanFiniteModel
 
 /-!
 # Localized errors for the Kun--Thom diagonal action
@@ -17,8 +18,11 @@ namespace KunThomDiagonal
 
 open KazhdanFiniteModel
 open KazhdanImprovement
+open scoped symmDiff
 
-variable {Y : Type*} [Fintype Y] [DecidableEq Y]
+section Generic
+
+variable {Y : Type*} [DecidableEq Y]
 
 /-- Points of `U` on which two permutations disagree. -/
 def restrictedPermutationDisagreement (U : Finset Y)
@@ -77,6 +81,7 @@ theorem card_symmDiff_images_le_two_mul_restrictedDisagreement
 
 /-- Localized replacement error for centered characteristic vectors. -/
 theorem norm_permutationOperators_centeredIndicator_sub_sq_le_restricted
+    [Fintype Y]
     (U : Finset Y) (p q : Equiv.Perm Y) :
     ‖permutationOperator p (centeredIndicator U) -
         permutationOperator q (centeredIndicator U)‖ ^ 2 ≤
@@ -86,6 +91,12 @@ theorem norm_permutationOperators_centeredIndicator_sub_sq_le_restricted
     norm_indicator_sub_sq]
   exact_mod_cast
     card_symmDiff_images_le_two_mul_restrictedDisagreement U p q
+
+end Generic
+
+section Diagonal
+
+variable {Y : Type*}
 
 /-- The diagonal action of one permutation on ordered pairs. -/
 def diagonalPerm (p : Equiv.Perm Y) : Equiv.Perm (Y × Y) :=
@@ -104,13 +115,22 @@ def diagonalPerm (p : Equiv.Perm Y) : Equiv.Perm (Y × Y) :=
 
 @[simp] theorem diagonalPerm_inv (p : Equiv.Perm Y) :
     diagonalPerm p⁻¹ = (diagonalPerm p)⁻¹ := by
-  apply inv_injective
-  simp
+  ext z <;> rfl
+
+end Diagonal
+
+section GraphDisagreement
+
+variable {Y : Type*} [Fintype Y] [DecidableEq Y]
 
 /-- Source vertices where two diagonal actions disagree on the graph of `c`. -/
 def graphDiagonalDisagreement (c p q : Equiv.Perm Y) : Finset Y :=
   Finset.univ.filter fun x ↦
     diagonalPerm p (x, c x) ≠ diagonalPerm q (x, c x)
+
+end GraphDisagreement
+
+variable {Y : FiniteModel}
 
 theorem graphDiagonalDisagreement_subset
     (c p q : Equiv.Perm Y) :
@@ -154,7 +174,8 @@ theorem card_restrictedDiagonalDisagreement_eq
     apply Finset.mem_filter.mpr
     refine ⟨Finset.mem_univ _, ?_⟩
     have hzEq : z = (z.1, c z.1) := Prod.ext rfl hgraph
-    simpa [graphDiagonalDisagreement, hzEq] using hz.2
+    rw [hzEq] at hz
+    exact hz.2
   · intro z hz w hw hfirst
     have hzdata := (mem_restrictedPermutationDisagreement
       (permutationGraph Y c) (diagonalPerm p) (diagonalPerm q) z).1 hz
@@ -162,12 +183,18 @@ theorem card_restrictedDiagonalDisagreement_eq
       (permutationGraph Y c) (diagonalPerm p) (diagonalPerm q) w).1 hw
     have hzc := (mem_permutationGraph Y c z).1 hzdata.1
     have hwc := (mem_permutationGraph Y c w).1 hwdata.1
-    exact Prod.ext hfirst (by simpa [hzc, hwc, hfirst])
+    apply Prod.ext hfirst
+    calc
+      z.2 = c z.1 := hzc
+      _ = c w.1 := congrArg c hfirst
+      _ = w.2 := hwc.symm
   · intro x hx
     refine ⟨(x, c x), ?_, rfl⟩
     rw [mem_restrictedPermutationDisagreement]
     refine ⟨(mem_permutationGraph Y c _).2 rfl, ?_⟩
-    simpa [graphDiagonalDisagreement] using hx
+    simp only [graphDiagonalDisagreement, Finset.mem_filter, Finset.mem_univ,
+      true_and] at hx
+    exact hx
 
 /-- The key `O(|Y|)` diagonal operator-error estimate used in the
 Kun--Thom GNS compactness argument. -/
@@ -190,8 +217,11 @@ theorem norm_diagonal_centeredIndicator_sub_sq_le
     _ = 2 * (graphDiagonalDisagreement c p q).card := by
       rw [card_restrictedDiagonalDisagreement_eq]
     _ ≤ 4 * (permutationDisagreement p q).card := by
-      have := card_graphDiagonalDisagreement_le c p q
-      omega
+      have h := card_graphDiagonalDisagreement_le c p q
+      have hreal : ((graphDiagonalDisagreement c p q).card : ℝ) ≤
+          2 * (permutationDisagreement p q).card := by
+        exact_mod_cast h
+      linarith
 
 end KunThomDiagonal
 end NonsoficGroupsExist

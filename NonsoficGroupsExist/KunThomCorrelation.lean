@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.KunThomDiagonal
 import NonsoficGroupsExist.SoficTransfer
+import NonsoficGroupsExist.KazhdanGNS
 
 /-!
 # Correlations at the Hilbert--Schmidt scale
@@ -16,18 +17,24 @@ open KazhdanFiniteModel
 open KazhdanImprovement
 open KunThomDiagonal
 
-variable {Y : Type*} [Fintype Y] [DecidableEq Y]
+variable {Y : FiniteModel}
 
 /-- The centered characteristic vector of a permutation graph. -/
 noncomputable def graphVector (c : Equiv.Perm Y) :
     EuclideanSpace ℝ (Y × Y) :=
   centeredIndicator (permutationGraph Y c)
 
-theorem norm_graphVector_sq_le [Nonempty Y] (c : Equiv.Perm Y) :
+theorem norm_graphVector_sq_le (c : Equiv.Perm Y) :
     ‖graphVector c‖ ^ 2 ≤ Fintype.card Y := by
+  by_cases hcardZero : Fintype.card Y = 0
+  · haveI : IsEmpty Y := Fintype.card_eq_zero_iff.mp hcardZero
+    have hzero : graphVector c = 0 := Subsingleton.elim _ _
+    simp [hzero]
+  letI : Nonempty Y :=
+    Fintype.card_pos_iff.mp (Nat.pos_of_ne_zero hcardZero)
   rw [graphVector, norm_centeredIndicator_sq, card_permutationGraph]
   have hcard : (0 : ℝ) < Fintype.card Y := by
-    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card Y)
+    exact_mod_cast Nat.pos_of_ne_zero hcardZero
   have hdensity : (0 : ℝ) ≤
       (Fintype.card Y : ℝ) / Fintype.card (Y × Y) := by positivity
   nlinarith
@@ -125,11 +132,12 @@ theorem scaledGramCorrelation_quadratic_nonneg {G I : Type*}
   exact div_nonneg (sq_nonneg _) (Nat.cast_nonneg _)
 
 /-- Every scaled coefficient lies in `[-1,1]`. -/
-theorem abs_scaledPermutationCorrelation_le_one [Nonempty Y]
-    (c p : Equiv.Perm Y) :
+theorem abs_scaledPermutationCorrelation_le_one (c p : Equiv.Perm Y) :
     |scaledPermutationCorrelation c p| ≤ 1 := by
+  by_cases hcardZero : Fintype.card Y = 0
+  · simp [scaledPermutationCorrelation, hcardZero]
   have hcard : (0 : ℝ) < Fintype.card Y := by
-    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card Y)
+    exact_mod_cast Nat.pos_of_ne_zero hcardZero
   have hinner := abs_real_inner_le_norm (graphVector c)
     (permutationOperator (diagonalPerm p) (graphVector c))
   rw [(permutationOperator (diagonalPerm p)).norm_map] at hinner
@@ -143,11 +151,13 @@ theorem abs_scaledPermutationCorrelation_le_one [Nonempty Y]
     _ = ‖graphVector c‖ ^ 2 / Fintype.card Y := by ring
     _ ≤ 1 := (div_le_one hcard).2 (norm_graphVector_sq_le c)
 
-theorem abs_scaledGramCorrelation_le_one [Nonempty Y] {G : Type*}
+theorem abs_scaledGramCorrelation_le_one {G : Type*}
     (τ : G → Equiv.Perm Y) (c : Equiv.Perm Y) (g h : G) :
     |scaledGramCorrelation τ c g h| ≤ 1 := by
+  by_cases hcardZero : Fintype.card Y = 0
+  · simp [scaledGramCorrelation, hcardZero]
   have hcard : (0 : ℝ) < Fintype.card Y := by
-    exact_mod_cast (Fintype.card_pos : 0 < Fintype.card Y)
+    exact_mod_cast Nat.pos_of_ne_zero hcardZero
   have hinner := abs_real_inner_le_norm
     (permutationOperator (diagonalPerm (τ g)) (graphVector c))
     (permutationOperator (diagonalPerm (τ h)) (graphVector c))
@@ -231,7 +241,7 @@ theorem abs_scaledPermutationCorrelation_sub_sq_le [Nonempty Y]
   rw [hrewrite]
   exact hquot.trans hproduct
 
-variable {K J : Type*} [Group K] [Group J]
+variable {K J : Type} [Group K] [Group J]
 
 /-- In a sofic approximation of `K × J`, the scaled relative coefficient
 of any sequence of permutation graphs approaches its Gram coefficient. -/
@@ -246,13 +256,18 @@ theorem relativeCorrelation_approaches_gram_eventually
   obtain ⟨Nclose, hNclose⟩ :=
     sofic_inv_mul_close_eventually A (g, (1 : J)) (h, 1)
       (η ^ 2 / 4) htol
-  refine ⟨Nclose, fun n hn ↦ ?_⟩
-  have hcardNat : 0 < Fintype.card (A.model n) := (A.model n).nonempty
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Nclose Ncard, fun n hn ↦ ?_⟩
+  have hnclose : Nclose ≤ n := (le_max_left _ _).trans hn
+  have hncard : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcardNat : 0 < Fintype.card (A.model n) := by
+    have := hNcard n hncard
+    omega
   letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcardNat
   let p := A.map n (g⁻¹ * h, (1 : J))
   let q := (A.map n (g, (1 : J)))⁻¹ * A.map n (h, 1)
   have hclose : hammingDistance (A.model n) p q < η ^ 2 / 4 := by
-    simpa [p, q] using hNclose n hn
+    simpa [p, q] using hNclose n hnclose
   have hsquare := abs_scaledPermutationCorrelation_sub_sq_le (c n) p q
   have habs : 0 ≤ |scaledPermutationCorrelation (c n) p -
       scaledPermutationCorrelation (c n) q| := abs_nonneg _
@@ -264,9 +279,13 @@ theorem relativeCorrelation_approaches_gram_eventually
     nlinarith [sq_nonneg
       (|scaledPermutationCorrelation (c n) p -
         scaledPermutationCorrelation (c n) q| - η)]
-  rw [scaledCorrelation, scaledPermutationCorrelation,
-    scaledGramCorrelation_eq_relative]
-  simpa [p, q] using hresult
+  have hgram :
+      scaledGramCorrelation (fun k ↦ A.map n (k, (1 : J))) (c n) g h =
+        scaledPermutationCorrelation (c n) q := by
+    rw [scaledGramCorrelation_eq_relative, scaledPermutationCorrelation]
+    simp only [q, diagonalPerm_mul, diagonalPerm_inv]
+  rw [scaledCorrelation, hgram]
+  simpa [p] using hresult
 
 /-! ### The limiting positive-definite function -/
 
@@ -295,8 +314,6 @@ theorem correlationHyperreal_finite
         scaledCorrelation (fun k ↦ A.map n (k, 1)) (c n) g)
     rw [Hyperreal.ofSeq_le_ofSeq]
     exact Filter.Eventually.of_forall fun n ↦ by
-      letI : Nonempty (A.model n) :=
-        Fintype.card_pos_iff.mp (A.model n).nonempty
       exact (abs_le.mp (abs_scaledPermutationCorrelation_le_one
         (c n) (A.map n (g, 1)))).1
   · change Hyperreal.ofSeq (fun n ↦
@@ -304,8 +321,6 @@ theorem correlationHyperreal_finite
       Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
     rw [Hyperreal.ofSeq_le_ofSeq]
     exact Filter.Eventually.of_forall fun n ↦ by
-      letI : Nonempty (A.model n) :=
-        Fintype.card_pos_iff.mp (A.model n).nonempty
       exact (abs_le.mp (abs_scaledPermutationCorrelation_le_one
         (c n) (A.map n (g, 1)))).2
 
@@ -320,8 +335,6 @@ theorem gramCorrelationHyperreal_finite
         scaledGramCorrelation (fun k ↦ A.map n (k, 1)) (c n) g h)
     rw [Hyperreal.ofSeq_le_ofSeq]
     exact Filter.Eventually.of_forall fun n ↦ by
-      letI : Nonempty (A.model n) :=
-        Fintype.card_pos_iff.mp (A.model n).nonempty
       exact (abs_le.mp (abs_scaledGramCorrelation_le_one
         (fun k ↦ A.map n (k, 1)) (c n) g h)).1
   · change Hyperreal.ofSeq (fun n ↦
@@ -329,8 +342,6 @@ theorem gramCorrelationHyperreal_finite
       Hyperreal.ofSeq (fun _ : ℕ ↦ (1 : ℝ))
     rw [Hyperreal.ofSeq_le_ofSeq]
     exact Filter.Eventually.of_forall fun n ↦ by
-      letI : Nonempty (A.model n) :=
-        Fintype.card_pos_iff.mp (A.model n).nonempty
       exact (abs_le.mp (abs_scaledGramCorrelation_le_one
         (fun k ↦ A.map n (k, 1)) (c n) g h)).2
 
@@ -446,6 +457,7 @@ theorem limitingCorrelation_isPositiveDefinite
     apply Finset.sum_congr rfl
     intro j hj
     rw [← map_mul]
+    congr 1
   have hqnonneg : 0 ≤ q := by
     rw [hq]
     change Hyperreal.ofSeq (fun _ : ℕ ↦ (0 : ℝ)) ≤
@@ -533,6 +545,7 @@ theorem combinationNormSqHyperreal_eq_ofSeq {I : Type*}
   apply Finset.sum_congr rfl
   intro j hj
   rw [← map_mul]
+  congr 1
 
 theorem combinationNormSqHyperreal_finite {I : Type*}
     (A : SoficApproximation (K × J))
