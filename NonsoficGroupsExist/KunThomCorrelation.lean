@@ -485,5 +485,271 @@ theorem limitingCorrelation_isPositiveDefinite
   rw [← hstd]
   exact hstdnonneg
 
+/-! ### Kazhdan contraction at the graph scale -/
+
+/-- Bundle the proved scaled correlation for the GNS construction. -/
+noncomputable def limitingPositiveDefiniteFunction
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) :
+    KazhdanGNS.PositiveDefiniteFunction K where
+  toFun := limitingCorrelation A c
+  isPositiveDefinite := limitingCorrelation_isPositiveDefinite A c
+
+/-- Hyperreal Gram norm of a fixed finite cyclic combination. -/
+noncomputable def combinationNormSqHyperreal {I : Type*}
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n))
+    (F : Finset I) (w : I → K) (a : I → ℝ) : Hyperreal :=
+  ∑ i ∈ F, ∑ j ∈ F,
+    ((a i * a j : ℝ) : Hyperreal) *
+      gramCorrelationHyperreal A c (w i) (w j)
+
+theorem combinationNormSqHyperreal_eq_ofSeq {I : Type*}
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n))
+    (F : Finset I) (w : I → K) (a : I → ℝ) :
+    combinationNormSqHyperreal A c F w a = Hyperreal.ofSeq (fun n ↦
+      scaledCombinationNormSq F a (fun k ↦ A.map n (k, 1)) (c n) w) := by
+  classical
+  change (∑ i ∈ F, ∑ j ∈ F,
+      ofSeqRingHom (fun _ ↦ a i * a j) *
+        ofSeqRingHom (fun n ↦ scaledGramCorrelation
+          (fun k ↦ A.map n (k, 1)) (c n) (w i) (w j))) =
+    ofSeqRingHom (fun n ↦
+      scaledCombinationNormSq F a
+        (fun k ↦ A.map n (k, 1)) (c n) w)
+  rw [show (fun n ↦ scaledCombinationNormSq F a
+      (fun k ↦ A.map n (k, 1)) (c n) w) =
+    ∑ i ∈ F, ∑ j ∈ F, fun n ↦ a i * a j *
+      scaledGramCorrelation
+        (fun k ↦ A.map n (k, 1)) (c n) (w i) (w j) by
+      funext n
+      rw [scaledCombinationNormSq_eq_gram]
+      simp]
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [← map_mul]
+
+theorem combinationNormSqHyperreal_finite {I : Type*}
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n))
+    (F : Finset I) (w : I → K) (a : I → ℝ) :
+    0 ≤ ArchimedeanClass.mk (combinationNormSqHyperreal A c F w a) := by
+  apply hyperreal_finset_sum_finite F
+  intro i hi
+  apply hyperreal_finset_sum_finite F
+  intro j hj
+  exact hyperreal_mul_finite (hyperreal_coe_finite (a i * a j))
+    (gramCorrelationHyperreal_finite A c (w i) (w j))
+
+theorem stdPart_combinationNormSqHyperreal {I : Type*}
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n))
+    (F : Finset I) (w : I → K) (a : I → ℝ) :
+    ArchimedeanClass.stdPart (combinationNormSqHyperreal A c F w a) =
+      ‖KazhdanGNS.indexedCombination
+        (limitingPositiveDefiniteFunction A c) F w a‖ ^ 2 := by
+  classical
+  let term : I → I → Hyperreal := fun i j ↦
+    ((a i * a j : ℝ) : Hyperreal) *
+      gramCorrelationHyperreal A c (w i) (w j)
+  have hterm (i j : I) : 0 ≤ ArchimedeanClass.mk (term i j) :=
+    hyperreal_mul_finite (hyperreal_coe_finite (a i * a j))
+      (gramCorrelationHyperreal_finite A c (w i) (w j))
+  have hinner (i : I) :
+      0 ≤ ArchimedeanClass.mk (∑ j ∈ F, term i j) :=
+    hyperreal_finset_sum_finite F (term i) fun j _ ↦ hterm i j
+  rw [KazhdanGNS.norm_indexedCombination_sq]
+  change ArchimedeanClass.stdPart
+      (∑ i ∈ F, ∑ j ∈ F, term i j) = _
+  calc
+    ArchimedeanClass.stdPart (∑ i ∈ F, ∑ j ∈ F, term i j) =
+        ∑ i ∈ F, ArchimedeanClass.stdPart (∑ j ∈ F, term i j) :=
+      stdPart_finset_sum F (fun i ↦ ∑ j ∈ F, term i j)
+        (fun i _ ↦ hinner i)
+    _ = ∑ i ∈ F, ∑ j ∈ F,
+        ArchimedeanClass.stdPart (term i j) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      exact stdPart_finset_sum F (term i) fun j _ ↦ hterm i j
+    _ = ∑ i ∈ F, ∑ j ∈ F,
+        a i * a j * limitingCorrelation A c ((w i)⁻¹ * w j) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      apply Finset.sum_congr rfl
+      intro j hj
+      rw [ArchimedeanClass.stdPart_mul
+        (hyperreal_coe_finite (a i * a j))
+        (gramCorrelationHyperreal_finite A c (w i) (w j)),
+        Hyperreal.stdPart_coe,
+        ← limitingCorrelation_inv_mul_eq_stdPart_gram A c (w i) (w j)]
+
+theorem stdPart_averagingDisplacementNormSq
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (S : Finset K) (k : ℕ) :
+    let d := KazhdanGNS.averagingDisplacementCoefficients S k
+    ArchimedeanClass.stdPart
+        (combinationNormSqHyperreal A c d.support id d) =
+      ‖((IsKazhdanPair.orbitAverage S
+          (KazhdanGNS.representation
+            (limitingPositiveDefiniteFunction A c)))^[k + 1])
+          (KazhdanGNS.kernelVector (limitingPositiveDefiniteFunction A c) 1) -
+        ((IsKazhdanPair.orbitAverage S
+          (KazhdanGNS.representation
+            (limitingPositiveDefiniteFunction A c)))^[k])
+          (KazhdanGNS.kernelVector
+            (limitingPositiveDefiniteFunction A c) 1)‖ ^ 2 := by
+  let p := limitingPositiveDefiniteFunction A c
+  let d := KazhdanGNS.averagingDisplacementCoefficients S k
+  dsimp only
+  rw [stdPart_combinationNormSqHyperreal]
+  rw [← KazhdanGNS.finsuppCombination_eq_indexed]
+  have h := KazhdanGNS.iterate_orbitAverage_succ_sub_eq_finsuppCombination
+    p S k
+  dsimp only at h ⊢
+  rw [h]
+
+theorem stdPart_averagingDisplacementNormSq_le
+    {Q : Finset K} {ε : ℝ} (hQ : IsKazhdanPair.{0, 0} K Q ε)
+    (S : Finset K) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (k : ℕ) :
+    let dk := KazhdanGNS.averagingDisplacementCoefficients S k
+    let d0 := KazhdanGNS.averagingDisplacementCoefficients S 0
+    ArchimedeanClass.stdPart
+        (combinationNormSqHyperreal A c dk.support id dk) ≤
+      (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) *
+        ArchimedeanClass.stdPart
+          (combinationNormSqHyperreal A c d0.support id d0) := by
+  let p := limitingPositiveDefiniteFunction A c
+  let Av := IsKazhdanPair.orbitAverage S (KazhdanGNS.representation p)
+  let factor : ℝ := 1 - ε ^ 2 / (4 * S.card)
+  have hnorm := KazhdanOrthogonal.norm_iterate_orbitAverage_succ_sub_le
+    hQ S hQS hone hεone (KazhdanGNS.representation p)
+      (KazhdanGNS.kernelVector p 1) k
+  dsimp only at hnorm
+  have hcardNat : 0 < S.card := Finset.card_pos.mpr ⟨1, hone⟩
+  have hcard : (0 : ℝ) < S.card := by exact_mod_cast hcardNat
+  have hεsq : ε ^ 2 ≤ 1 := by
+    nlinarith [sq_nonneg ε, hQ.1, hεone]
+  have hden : (0 : ℝ) < 4 * S.card := mul_pos (by norm_num) hcard
+  have hdenOne : (1 : ℝ) ≤ 4 * S.card := by
+    have : (1 : ℝ) ≤ S.card := by exact_mod_cast hcardNat
+    nlinarith
+  have hfrac : ε ^ 2 / (4 * S.card) ≤ 1 := by
+    rw [div_le_one hden]
+    exact hεsq.trans hdenOne
+  have hfactor : 0 ≤ factor := by dsimp [factor]; linarith
+  have hsq :
+      ‖(Av^[k + 1]) (KazhdanGNS.kernelVector p 1) -
+          (Av^[k]) (KazhdanGNS.kernelVector p 1)‖ ^ 2 ≤
+        factor ^ (2 * k) *
+          ‖Av (KazhdanGNS.kernelVector p 1) -
+            KazhdanGNS.kernelVector p 1‖ ^ 2 := by
+    have hleft : 0 ≤ ‖(Av^[k + 1]) (KazhdanGNS.kernelVector p 1) -
+        (Av^[k]) (KazhdanGNS.kernelVector p 1)‖ := norm_nonneg _
+    have hright : 0 ≤ factor ^ k *
+        ‖Av (KazhdanGNS.kernelVector p 1) -
+          KazhdanGNS.kernelVector p 1‖ :=
+      mul_nonneg (pow_nonneg hfactor k) (norm_nonneg _)
+    have hsquare := (sq_le_sq₀ hleft hright).2 hnorm
+    calc
+      ‖(Av^[k + 1]) (KazhdanGNS.kernelVector p 1) -
+          (Av^[k]) (KazhdanGNS.kernelVector p 1)‖ ^ 2 ≤
+          (factor ^ k * ‖Av (KazhdanGNS.kernelVector p 1) -
+            KazhdanGNS.kernelVector p 1‖) ^ 2 := hsquare
+      _ = factor ^ (2 * k) *
+          ‖Av (KazhdanGNS.kernelVector p 1) -
+            KazhdanGNS.kernelVector p 1‖ ^ 2 := by ring
+  dsimp only
+  rw [stdPart_averagingDisplacementNormSq,
+    stdPart_averagingDisplacementNormSq]
+  simpa [Av, p] using hsq
+
+/-- Exact-word displacement norm in the diagonal pair model, normalized by
+the size of the underlying permutation model. -/
+noncomputable def finiteAveragingDisplacementNormSq
+    (A : SoficApproximation (K × J)) (n : ℕ)
+    (c : Equiv.Perm (A.model n)) (S : Finset K) (k : ℕ) : ℝ :=
+  let d := KazhdanGNS.averagingDisplacementCoefficients S k
+  scaledCombinationNormSq d.support d
+    (fun g ↦ A.map n (g, 1)) c id
+
+theorem combinationNormSqHyperreal_displacement_eq_ofSeq
+    (A : SoficApproximation (K × J))
+    (c : ∀ n, Equiv.Perm (A.model n)) (S : Finset K) (k : ℕ) :
+    let d := KazhdanGNS.averagingDisplacementCoefficients S k
+    combinationNormSqHyperreal A c d.support id d =
+      Hyperreal.ofSeq (fun n ↦
+        finiteAveragingDisplacementNormSq A n (c n) S k) := by
+  exact combinationNormSqHyperreal_eq_ofSeq A c
+    (KazhdanGNS.averagingDisplacementCoefficients S k).support id
+    (KazhdanGNS.averagingDisplacementCoefficients S k)
+
+/-- Uniform exact-word Kazhdan contraction over all permutation graphs. -/
+theorem finiteAveragingDisplacementNormSq_eventually_lt
+    {Q : Finset K} {ε : ℝ} (hQ : IsKazhdanPair.{0, 0} K Q ε)
+    (S : Finset K) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation (K × J)) (k : ℕ) (δ : ℝ) (hδ : 0 < δ) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ c : Equiv.Perm (A.model n),
+      finiteAveragingDisplacementNormSq A n c S k <
+        (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) *
+          finiteAveragingDisplacementNormSq A n c S 0 + δ := by
+  classical
+  by_contra h
+  push Not at h
+  choose φ hφ c hbad using h
+  let B := A.reindex φ hφ
+  let c' : ∀ n, Equiv.Perm (B.model n) := fun n ↦ c n
+  let dk := KazhdanGNS.averagingDisplacementCoefficients S k
+  let d0 := KazhdanGNS.averagingDisplacementCoefficients S 0
+  let factor : ℝ := (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k)
+  let Hk : Hyperreal := combinationNormSqHyperreal B c' dk.support id dk
+  let H0 : Hyperreal := combinationNormSqHyperreal B c' d0.support id d0
+  have hHkfinite : 0 ≤ ArchimedeanClass.mk Hk :=
+    combinationNormSqHyperreal_finite B c' dk.support id dk
+  have hH0finite : 0 ≤ ArchimedeanClass.mk H0 :=
+    combinationNormSqHyperreal_finite B c' d0.support id d0
+  have hfactorfinite : 0 ≤ ArchimedeanClass.mk ((factor : ℝ) : Hyperreal) :=
+    hyperreal_coe_finite factor
+  have hprodFinite :
+      0 ≤ ArchimedeanClass.mk (((factor : ℝ) : Hyperreal) * H0) :=
+    hyperreal_mul_finite hfactorfinite hH0finite
+  have hdiffFinite :
+      0 ≤ ArchimedeanClass.mk (Hk - ((factor : ℝ) : Hyperreal) * H0) :=
+    KazhdanGNS.hyperreal_sub_finite hHkfinite hprodFinite
+  have hhyper : ((δ : ℝ) : Hyperreal) ≤
+      Hk - ((factor : ℝ) : Hyperreal) * H0 := by
+    rw [show Hk = Hyperreal.ofSeq (fun n ↦
+        finiteAveragingDisplacementNormSq B n (c' n) S k) by
+          exact combinationNormSqHyperreal_displacement_eq_ofSeq B c' S k,
+      show H0 = Hyperreal.ofSeq (fun n ↦
+        finiteAveragingDisplacementNormSq B n (c' n) S 0) by
+          exact combinationNormSqHyperreal_displacement_eq_ofSeq B c' S 0]
+    change Hyperreal.ofSeq (fun _ : ℕ ↦ δ) ≤ Hyperreal.ofSeq (fun n ↦
+      finiteAveragingDisplacementNormSq B n (c' n) S k -
+        factor * finiteAveragingDisplacementNormSq B n (c' n) S 0)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact Filter.Eventually.of_forall fun n ↦ by
+      have hn := hbad n
+      change factor * finiteAveragingDisplacementNormSq B n (c' n) S 0 + δ ≤
+        finiteAveragingDisplacementNormSq B n (c' n) S k at hn
+      linarith
+  have hstdLower : δ ≤ ArchimedeanClass.stdPart
+      (Hk - ((factor : ℝ) : Hyperreal) * H0) :=
+    ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom hdiffFinite hhyper
+  rw [ArchimedeanClass.stdPart_sub hHkfinite hprodFinite,
+    ArchimedeanClass.stdPart_mul hfactorfinite hH0finite,
+    Hyperreal.stdPart_coe] at hstdLower
+  have hlimit := stdPart_averagingDisplacementNormSq_le
+    hQ S hQS hone hεone B c' k
+  change ArchimedeanClass.stdPart Hk ≤
+    factor * ArchimedeanClass.stdPart H0 at hlimit
+  linarith
+
 end KunThomCorrelation
 end NonsoficGroupsExist
