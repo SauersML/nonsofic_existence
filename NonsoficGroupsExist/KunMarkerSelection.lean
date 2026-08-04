@@ -442,5 +442,50 @@ theorem exists_block_marker_assignment
   exact exists_commonFuture_marker_assignment M τ S r C
     (blockForbidden M τ S r P C) htotal
 
+/-- Pairwise-disjoint marker neighborhoods have total intersection mass at
+most the size of the tested set. -/
+theorem sum_card_forwardNeighborhood_inter_le
+    {G I : Type} [Fintype I] [DecidableEq I]
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (marker : I → M)
+    (hdisjoint : ∀ i j, i ≠ j →
+      Disjoint (forwardNeighborhood M τ S r {marker i})
+        (forwardNeighborhood M τ S r {marker j}))
+    (J : Finset I) (U : Finset M) :
+    ∑ i ∈ J,
+        ((forwardNeighborhood M τ S r {marker i}) ∩ U).card ≤ U.card := by
+  classical
+  have hpairwise : (J : Set I).PairwiseDisjoint
+      (fun i ↦ (forwardNeighborhood M τ S r {marker i}) ∩ U) := by
+    intro i hi j hj hij
+    exact (hdisjoint i j hij).mono Finset.inter_subset_left
+      Finset.inter_subset_left
+  rw [← Finset.card_biUnion hpairwise]
+  apply Finset.card_le_card
+  intro y hy
+  obtain ⟨i, hiJ, hiy⟩ := Finset.mem_biUnion.mp hy
+  exact (Finset.mem_inter.mp hiy).2
+
+/-- If each selected marker contributes at least `q` tested vertices, their
+number is at most `|U| / q` in multiplication form. -/
+theorem mul_card_le_of_card_inter_forwardNeighborhood
+    {G I : Type} [Fintype I] [DecidableEq I]
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r q : ℕ) (marker : I → M)
+    (hdisjoint : ∀ i j, i ≠ j →
+      Disjoint (forwardNeighborhood M τ S r {marker i})
+        (forwardNeighborhood M τ S r {marker j}))
+    (J : Finset I) (U : Finset M)
+    (hlower : ∀ i ∈ J, q ≤
+      ((forwardNeighborhood M τ S r {marker i}) ∩ U).card) :
+    q * J.card ≤ U.card := by
+  calc
+    q * J.card = ∑ i ∈ J, q := by simp [Nat.mul_comm]
+    _ ≤ ∑ i ∈ J,
+        ((forwardNeighborhood M τ S r {marker i}) ∩ U).card := by
+      exact Finset.sum_le_sum fun i hi ↦ hlower i hi
+    _ ≤ U.card := sum_card_forwardNeighborhood_inter_le
+      M τ S r marker hdisjoint J U
+
 end KunMarkerSelection
 end NonsoficGroupsExist
