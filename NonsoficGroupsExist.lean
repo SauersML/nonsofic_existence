@@ -6,6 +6,7 @@ import NonsoficGroupsExist.A2MagicGraph
 import NonsoficGroupsExist.A2MagicGraphEstimates
 import NonsoficGroupsExist.A2MagicLaplacian
 import NonsoficGroupsExist.A2MagicEnergy
+import NonsoficGroupsExist.A2MagicHilbert
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.ClassTwoApproximation
