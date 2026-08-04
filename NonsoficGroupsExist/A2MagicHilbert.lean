@@ -598,5 +598,54 @@ theorem compressedLaplacian_eq_zero_imp [CompleteSpace E]
   rw [constant_inf_vertexFixed_eq_bot A rho hno] at hinter
   exact Subtype.ext (show (f : Family E) = 0 from hinter)
 
+/-- The strict quadratic gap, positivity, symmetry, and trivial kernel give
+an explicit bounded inverse estimate for the compressed Laplacian. -/
+theorem norm_le_inverseGap_mul_norm_compressedLaplacian [CompleteSpace E]
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (hno : IsKazhdanPair.HasNoInvariantVectors G rho)
+    (f : vertexFixedSubspace A rho) :
+    let c : ℝ := 2 * (1 - (Real.sqrt 2)⁻¹) / 3
+    ‖f‖ ≤ (c * (1 - Real.sqrt (1 - c / 8)))⁻¹ *
+      ‖compressedLaplacian A rho f‖ := by
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  let c : ℝ := 2 * (1 - (Real.sqrt 2)⁻¹) / 3
+  have hsqrt0 : 0 < Real.sqrt 2 := Real.sqrt_pos.2 (by norm_num)
+  have hsqrtSq : (Real.sqrt 2) ^ 2 = 2 := Real.sq_sqrt (by norm_num)
+  have hsqrt1 : (1 : ℝ) < Real.sqrt 2 := by
+    have hsqrtNonneg := Real.sqrt_nonneg 2
+    nlinarith
+  have hinv0 : 0 ≤ (Real.sqrt 2)⁻¹ := inv_nonneg.mpr hsqrt0.le
+  have hinv1 : (Real.sqrt 2)⁻¹ < 1 :=
+    (inv_lt_one₀ hsqrt0).2 hsqrt1
+  have hc : 0 < c := by
+    dsimp [c]
+    nlinarith
+  have hc8 : c ≤ 8 := by
+    dsimp [c]
+    nlinarith
+  apply PositiveOperatorGap.norm_le_of_quadratic_gap
+    (compressedLaplacian A rho) hc (by norm_num) hc8
+  · intro x y
+    exact inner_compressedLaplacian_comm A rho x y
+  · intro x
+    simpa [PositiveOperatorGap.energy] using
+      compressedLaplacian_energy_nonneg A rho x
+  · intro x
+    simpa [c, PositiveOperatorGap.energy] using
+      compressedLaplacian_quadratic_gap A hexp rho x
+  · intro x
+    simpa [PositiveOperatorGap.energy] using
+      compressedLaplacian_energy_le_eight_norm_sq A rho x
+  · intro x
+    simpa [PositiveOperatorGap.energy] using
+      norm_compressedLaplacian_sq_le_eight_energy A rho x
+  · intro x hx
+    exact compressedLaplacian_eq_zero_imp A rho hno x hx
+
 end A2MagicHilbert
 end NonsoficGroupsExist
