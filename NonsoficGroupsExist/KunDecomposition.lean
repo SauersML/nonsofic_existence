@@ -186,5 +186,46 @@ theorem exists_reindexed_expanderDecomposition
         (X n) (P n) (E n) K (A'.map n t)
   }⟩⟩
 
+/-- Unconditional Kun decomposition theorem from the standard hypotheses:
+finite generation, infinitude, property `(T)`, and a sofic approximation.  A
+symmetric finite generating set containing a Kazhdan pair is constructed
+inside the proof. -/
+theorem propertyT_expanderDecomposition [Group.FG G]
+    (hT : HasKazhdanPropertyT.{0, 0} G) (A : SoficApproximation G) :
+    ∃ (S : Finset G) (φ : ℕ → ℕ) (hφ : ∀ n, n ≤ φ n),
+      (∀ g ∈ S, g⁻¹ ∈ S) ∧
+      Subgroup.closure (S : Set G) = ⊤ ∧
+      Nonempty (ExpanderDecomposition (A.reindex φ hφ) S) := by
+  classical
+  obtain ⟨Q, ε, honeQ, _hε, hεone, hQ⟩ :=
+    HasKazhdanPropertyT.exists_identity_pair hT
+  obtain ⟨_, F, _, hF⟩ :=
+    Group.fg_iff'.mp (inferInstance : Group.FG G)
+  let U : Finset G := Q ∪ F
+  let S : Finset G := insert 1 (U ∪ U.image fun g ↦ g⁻¹)
+  have hsymm : ∀ g ∈ S, g⁻¹ ∈ S := by
+    intro g hg
+    simp only [S, Finset.mem_insert, Finset.mem_union, Finset.mem_image] at hg ⊢
+    rcases hg with h | h | ⟨x, hx, rfl⟩
+    · left
+      simp [h]
+    · exact Or.inr (Or.inr ⟨g, h, rfl⟩)
+    · exact Or.inr (Or.inl (by simpa using hx))
+  have hQS : Q ⊆ S := by
+    intro g hg
+    exact Finset.mem_insert_of_mem
+      (Finset.mem_union_left _ (Finset.mem_union_left _ hg))
+  have hone : (1 : G) ∈ S := Finset.mem_insert_self 1 _
+  have hgen : Subgroup.closure (S : Set G) = ⊤ := by
+    apply top_unique
+    rw [← hF]
+    apply Subgroup.closure_mono
+    intro g hg
+    exact Finset.mem_insert_of_mem
+      (Finset.mem_union_left _ (Finset.mem_union_right _ hg))
+  obtain ⟨φ, hφ, hD⟩ := exists_reindexed_expanderDecomposition
+    hQ S hQS hone hεone hsymm hgen A
+  exact ⟨S, φ, hφ, hsymm, hgen, hD⟩
+
 end KunDecomposition
 end NonsoficGroupsExist
