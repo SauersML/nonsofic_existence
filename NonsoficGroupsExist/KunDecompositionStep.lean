@@ -20,6 +20,52 @@ open scoped symmDiff
 
 variable {G : Type} [Group G]
 
+/-- Input cut ratio small enough to make Kun's rounded set differ from its
+input on less than one third of the input vertices. -/
+noncomputable def inputCutThreshold (S : Finset G) (k : ℕ) : ℝ :=
+  (S.card : ℝ) / (54 * (k ^ 2 + 1))
+
+omit [Group G] in
+theorem inputCutThreshold_pos (S : Finset G) (hS : S.Nonempty) (k : ℕ) :
+    0 < inputCutThreshold S k := by
+  unfold inputCutThreshold
+  have hcard : (0 : ℝ) < S.card := by
+    exact_mod_cast Finset.card_pos.mpr hS
+  positivity
+
+omit [Group G] in
+/-- The quantitative proximity estimate is strictly below one third whenever
+the input cut satisfies `inputCutThreshold`. -/
+theorem symmDiff_lt_third_of_cut_lt
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (hS : S.Nonempty) (k : ℕ) (U W : Finset M)
+    (hclose : ((W ∆ U).card : ℝ) ≤
+      9 * k ^ 2 * (S.card : ℝ)⁻¹ * generatorCutSize M τ S U)
+    (hcut : (generatorCutSize M τ S U : ℝ) <
+      inputCutThreshold S k * U.card) :
+    ((W ∆ U).card : ℝ) < (U.card : ℝ) / 3 := by
+  have hcard : (0 : ℝ) < S.card := by
+    exact_mod_cast Finset.card_pos.mpr hS
+  have hUpos : (0 : ℝ) < U.card := by
+    have hcut0 : (0 : ℝ) ≤ generatorCutSize M τ S U := by positivity
+    by_contra h
+    have hU0 : (U.card : ℝ) = 0 :=
+      le_antisymm (le_of_not_gt h) (by positivity)
+    rw [hU0, mul_zero] at hcut
+    exact (not_lt_of_ge hcut0) hcut
+  have hfactor : 0 ≤ 9 * (k : ℝ) ^ 2 * (S.card : ℝ)⁻¹ := by positivity
+  have hscaled := mul_le_mul_of_nonneg_left hcut.le hfactor
+  calc
+    ((W ∆ U).card : ℝ) ≤
+        9 * k ^ 2 * (S.card : ℝ)⁻¹ * generatorCutSize M τ S U := hclose
+    _ ≤ 9 * k ^ 2 * (S.card : ℝ)⁻¹ *
+        (inputCutThreshold S k * U.card) := hscaled
+    _ < (U.card : ℝ) / 3 := by
+      unfold inputCutThreshold
+      have hk : (0 : ℝ) ≤ k ^ 2 := sq_nonneg _
+      field_simp
+      nlinarith
+
 /-- Uniform small-boundary replacement in sufficiently large sofic models. -/
 theorem finiteModel_propertyT_smallBoundaryReplacement
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{0, 0} G Q ε)
