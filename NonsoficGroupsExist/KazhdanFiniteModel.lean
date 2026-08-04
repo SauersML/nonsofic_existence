@@ -1129,8 +1129,8 @@ theorem stdPart_finset_sum {I : Type*} (F : Finset I)
 expressed using all finite real quadratic forms. -/
 def IsPositiveDefinite (f : G → ℝ) : Prop :=
   (∀ g h : G, f (g⁻¹ * h) = f (h⁻¹ * g)) ∧
-    ∀ (m : ℕ) (c : Fin m → ℝ) (a : Fin m → G),
-      0 ≤ ∑ i, ∑ j, c i * c j * f ((a i)⁻¹ * a j)
+    ∀ (F : Finset G) (c : G → ℝ),
+      0 ≤ ∑ i ∈ F, ∑ j ∈ F, c i * c j * f (i⁻¹ * j)
 
 /-- The limiting correlation obtained from any sofic approximation and any
 sequence of subsets is positive-definite. -/
@@ -1138,35 +1138,35 @@ theorem limitingCorrelation_isPositiveDefinite
     (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) :
     IsPositiveDefinite (limitingCorrelation A U) := by
   refine ⟨limitingCorrelation_inv_mul_comm A U, ?_⟩
-  intro m c a
+  intro F c
   classical
-  let term : Fin m → Fin m → Hyperreal := fun i j ↦
-    ((c i * c j : ℝ) : Hyperreal) * gramCorrelationHyperreal A U (a i) (a j)
-  let q : Hyperreal := ∑ i, ∑ j, term i j
-  have hterm (i j : Fin m) :
+  let term : G → G → Hyperreal := fun i j ↦
+    ((c i * c j : ℝ) : Hyperreal) * gramCorrelationHyperreal A U i j
+  let q : Hyperreal := ∑ i ∈ F, ∑ j ∈ F, term i j
+  have hterm (i j : G) :
       0 ≤ ArchimedeanClass.mk (term i j) := by
     exact hyperreal_mul_finite (hyperreal_coe_finite (c i * c j))
-      (gramCorrelationHyperreal_finite A U (a i) (a j))
-  have hinner (i : Fin m) :
-      0 ≤ ArchimedeanClass.mk (∑ j, term i j) := by
-    exact hyperreal_finset_sum_finite Finset.univ (term i)
+      (gramCorrelationHyperreal_finite A U i j)
+  have hinner (i : G) :
+      0 ≤ ArchimedeanClass.mk (∑ j ∈ F, term i j) := by
+    exact hyperreal_finset_sum_finite F (term i)
       (fun j hj ↦ hterm i j)
   have hqfinite : 0 ≤ ArchimedeanClass.mk q := by
-    exact hyperreal_finset_sum_finite Finset.univ (fun i ↦ ∑ j, term i j)
+    exact hyperreal_finset_sum_finite F (fun i ↦ ∑ j ∈ F, term i j)
       (fun i hi ↦ hinner i)
-  have hq : q = Hyperreal.ofSeq (fun n ↦ ∑ i, ∑ j,
+  have hq : q = Hyperreal.ofSeq (fun n ↦ ∑ i ∈ F, ∑ j ∈ F,
       c i * c j *
-        normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j)) := by
-    change (∑ i, ∑ j,
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) i j) := by
+    change (∑ i ∈ F, ∑ j ∈ F,
         ofSeqRingHom (fun _ ↦ c i * c j) *
           ofSeqRingHom (fun n ↦ normalizedGramCorrelation
-            (A.model n) (A.map n) (U n) (a i) (a j))) =
-      ofSeqRingHom (fun n ↦ ∑ i, ∑ j, c i * c j *
-        normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j))
-    rw [show (fun n ↦ ∑ i, ∑ j, c i * c j *
-        normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j)) =
-      ∑ i, ∑ j, fun n ↦ c i * c j * normalizedGramCorrelation
-        (A.model n) (A.map n) (U n) (a i) (a j) by
+            (A.model n) (A.map n) (U n) i j)) =
+      ofSeqRingHom (fun n ↦ ∑ i ∈ F, ∑ j ∈ F, c i * c j *
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) i j)
+    rw [show (fun n ↦ ∑ i ∈ F, ∑ j ∈ F, c i * c j *
+        normalizedGramCorrelation (A.model n) (A.map n) (U n) i j) =
+      ∑ i ∈ F, ∑ j ∈ F, fun n ↦ c i * c j * normalizedGramCorrelation
+        (A.model n) (A.map n) (U n) i j by
           funext n
           simp]
     rw [map_sum]
@@ -1180,37 +1180,37 @@ theorem limitingCorrelation_isPositiveDefinite
   have hqnonneg : 0 ≤ q := by
     rw [hq]
     change Hyperreal.ofSeq (fun _ : ℕ ↦ (0 : ℝ)) ≤
-      Hyperreal.ofSeq (fun n ↦ ∑ i, ∑ j,
+      Hyperreal.ofSeq (fun n ↦ ∑ i ∈ F, ∑ j ∈ F,
         c i * c j *
-          normalizedGramCorrelation (A.model n) (A.map n) (U n) (a i) (a j))
+          normalizedGramCorrelation (A.model n) (A.map n) (U n) i j)
     rw [Hyperreal.ofSeq_le_ofSeq]
     exact Filter.Eventually.of_forall fun n ↦
-      normalizedGramCorrelation_quadratic_nonneg Finset.univ c
-        (A.model n) (A.map n) (U n) a
+      normalizedGramCorrelation_quadratic_nonneg F c
+        (A.model n) (A.map n) (U n) id
   have hstdnonneg : 0 ≤ ArchimedeanClass.stdPart q :=
     ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom hqfinite hqnonneg
   have hstd : ArchimedeanClass.stdPart q =
-      ∑ i, ∑ j, c i * c j * limitingCorrelation A U ((a i)⁻¹ * a j) := by
+      ∑ i ∈ F, ∑ j ∈ F, c i * c j * limitingCorrelation A U (i⁻¹ * j) := by
     calc
       ArchimedeanClass.stdPart q =
-          ∑ i, ArchimedeanClass.stdPart (∑ j, term i j) := by
-        exact stdPart_finset_sum Finset.univ (fun i ↦ ∑ j, term i j)
+          ∑ i ∈ F, ArchimedeanClass.stdPart (∑ j ∈ F, term i j) := by
+        exact stdPart_finset_sum F (fun i ↦ ∑ j ∈ F, term i j)
           (fun i hi ↦ hinner i)
-      _ = ∑ i, ∑ j, ArchimedeanClass.stdPart (term i j) := by
+      _ = ∑ i ∈ F, ∑ j ∈ F, ArchimedeanClass.stdPart (term i j) := by
         apply Finset.sum_congr rfl
         intro i hi
-        exact stdPart_finset_sum Finset.univ (term i) (fun j hj ↦ hterm i j)
-      _ = ∑ i, ∑ j,
-          c i * c j * limitingCorrelation A U ((a i)⁻¹ * a j) := by
+        exact stdPart_finset_sum F (term i) (fun j hj ↦ hterm i j)
+      _ = ∑ i ∈ F, ∑ j ∈ F,
+          c i * c j * limitingCorrelation A U (i⁻¹ * j) := by
         apply Finset.sum_congr rfl
         intro i hi
         apply Finset.sum_congr rfl
         intro j hj
         rw [ArchimedeanClass.stdPart_mul
           (hyperreal_coe_finite (c i * c j))
-          (gramCorrelationHyperreal_finite A U (a i) (a j)),
+          (gramCorrelationHyperreal_finite A U i j),
           Hyperreal.stdPart_coe,
-          ← limitingCorrelation_inv_mul_eq_stdPart_gram A U (a i) (a j)]
+          ← limitingCorrelation_inv_mul_eq_stdPart_gram A U i j]
   rw [← hstd]
   exact hstdnonneg
 
