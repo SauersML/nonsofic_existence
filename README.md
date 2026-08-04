@@ -90,6 +90,11 @@ box is still a required dependency of the final theorem.
   detected on one of those supported word monomials; decompose every
   positive-degree witness into its first free generator and strictly shorter
   tail, with the corresponding exact monomial factorization
+- [x] Define Kassabov's finite-stage character valuation as the least detected
+  free-word degree (using `n+1` exactly for a stage-trivial character), prove
+  valuation zero is precisely unit-coefficient detection, define the four
+  `A/B/C/D` valuation regions, and prove a nonzero component with nontrivial
+  plane character has at least one valuation at most `n`
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

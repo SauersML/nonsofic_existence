@@ -13,6 +13,7 @@ import NonsoficGroupsExist.FreeRootFiltration
 import NonsoficGroupsExist.FreeRootActions
 import NonsoficGroupsExist.FreeRootPlane
 import NonsoficGroupsExist.FreeRootPlaneFourier
+import NonsoficGroupsExist.FreeRootCharacterValuation
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.ClassTwoApproximation
@@ -156,10 +157,13 @@ In particular, no declaration in this root module assumes a proposition named
 after Kun, Kun--Thom, or Ershov--Jaikin and then advertises the resulting
 conditional implication as an existence theorem.  The uninstantiated
 `ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData` are
-specifications for intermediate mathematics, not assumptions at the public
-boundary.  Kun's decomposition and the Kun--Thom implication are proved, and
-`exists_localCriterionData` constructs both synchronized decompositions from
-property `(T)` and a sofic approximation.  Likewise,
+specifications for intermediate mathematics, not proofs merely by being
+inhabited in conditional lemmas.  The repository contains extensive compiled
+Kun and Kun--Thom machinery, including an `exists_localCriterionData`
+assembly from property `(T)` and a sofic approximation, but the full
+mathematical-fidelity and transitive-dependency audit of those headline
+dependencies remains open in the README checklist.  They are not counted as
+finished inputs to an unconditional existence theorem.  Likewise,
 `ConcreteRankFour.compressionSetup` is an actual inhabitant of the algebraic
 `CompressionSetup` interface.
 

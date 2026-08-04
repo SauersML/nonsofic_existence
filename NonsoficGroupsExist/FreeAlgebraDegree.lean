@@ -71,6 +71,22 @@ theorem freeWordLength_mul (u v : FreeMonoid X) :
   obtain ⟨b, rfl⟩ := e.surjective v
   simp [freeWordLength, e]
 
+omit [Fintype X] in
+/-- The only free word of length zero is the identity word. -/
+theorem freeWordLength_eq_zero_iff (w : FreeMonoid X) :
+    freeWordLength X w = 0 ↔ w = 1 := by
+  let e := FreeMonoid.ofList (α := X)
+  obtain ⟨l, rfl⟩ := e.surjective w
+  change l.length = 0 ↔ e l = 1
+  rw [List.length_eq_zero_iff]
+  constructor
+  · intro hl
+    subst l
+    simp [e]
+  · intro hl
+    apply e.injective
+    simpa [e] using hl
+
 /-- Polynomials supported on words of degree at most `n`. -/
 noncomputable def degreeLE (n : ℕ) :
     Submodule (ZMod 2) (FreeAlgebra (ZMod 2) X) :=
@@ -186,6 +202,26 @@ theorem wordMonomial_mem_degreeLE {w : FreeMonoid X} {n : ℕ}
   subst v
   exact hw
 
+/-- A total degree-stage version of a word monomial. Words outside the stage
+are sent to zero; on words of length at most `n` this is the genuine basis
+monomial. -/
+noncomputable def wordMonomialInDegree (n : ℕ) (w : FreeMonoid X) :
+    degreeLE X n :=
+  if hw : freeWordLength X w ≤ n then
+    ⟨wordMonomial X w, wordMonomial_mem_degreeLE X hw⟩
+  else 0
+
+@[simp] theorem wordMonomialInDegree_of_le {n : ℕ} (w : FreeMonoid X)
+    (hw : freeWordLength X w ≤ n) :
+    wordMonomialInDegree X n w =
+      ⟨wordMonomial X w, wordMonomial_mem_degreeLE X hw⟩ := by
+  simp [wordMonomialInDegree, hw]
+
+@[simp] theorem wordMonomialInDegree_of_not_le {n : ℕ} (w : FreeMonoid X)
+    (hw : ¬ freeWordLength X w ≤ n) :
+    wordMonomialInDegree X n w = 0 := by
+  simp [wordMonomialInDegree, hw]
+
 omit [Fintype X] in
 /-- Multiplication of basis monomials is free-word concatenation. -/
 theorem wordMonomial_mul (u v : FreeMonoid X) :
@@ -193,6 +229,20 @@ theorem wordMonomial_mul (u v : FreeMonoid X) :
   apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
     (R := ZMod 2) (X := X)).injective
   simp [wordMonomial]
+
+omit [Fintype X] in
+@[simp] theorem wordMonomial_one : wordMonomial X 1 = 1 := by
+  unfold wordMonomial
+  rw [← MonoidAlgebra.one_def]
+  exact (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+    (R := ZMod 2) (X := X)).symm.map_one
+
+omit [Fintype X] in
+/-- A length-zero basis monomial is the unit coefficient. -/
+theorem wordMonomial_eq_one_of_freeWordLength_eq_zero
+    (w : FreeMonoid X) (hw : freeWordLength X w = 0) :
+    wordMonomial X w = 1 := by
+  rw [(freeWordLength_eq_zero_iff X w).1 hw, wordMonomial_one]
 
 omit [Fintype X] in
 /-- A one-letter basis monomial is the corresponding canonical free-algebra
