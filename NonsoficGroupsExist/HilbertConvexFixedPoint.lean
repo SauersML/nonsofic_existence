@@ -104,5 +104,17 @@ theorem exists_fixed_of_orbit_displacement_le [CompleteSpace E]
   rw [Metric.mem_closedBall, dist_eq_norm] at hyball
   exact hyball
 
+/-- Uniform displacement by a subgroup bounds the distance to its fixed
+subspace.  The point in the subspace is constructed by the preceding
+closed-convex-hull argument. -/
+theorem exists_near_fixedSubspace [CompleteSpace E]
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) {delta : ℝ}
+    (hbound : ∀ h : H, ‖rho h.1 x - x‖ ≤ delta) :
+    ∃ y ∈ KazhdanFixedSpace.fixedSubspace rho H, ‖y - x‖ ≤ delta := by
+  obtain ⟨y, hyfixed, hynear⟩ :=
+    exists_fixed_of_orbit_displacement_le rho H x hbound
+  exact ⟨y, (KazhdanFixedSpace.mem_fixedSubspace_iff rho H y).2
+    (fun h hh ↦ hyfixed ⟨h, hh⟩), hynear⟩
+
 end HilbertConvexFixedPoint
 end NonsoficGroupsExist

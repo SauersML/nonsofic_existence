@@ -12,8 +12,10 @@ namespace NonsoficGroupsExist
 
 open scoped commutatorElement
 
-/-- An `A₂` root-subgroup system: the six subgroups generate, non-addable
-roots commute, and commutators of consecutive roots land in their sum root. -/
+/-- A strongly graded `A₂` root-subgroup system: the six subgroups generate,
+non-addable roots commute, commutators of consecutive roots land in their sum
+root, and every element of a sum root is such a commutator.  The final field is
+the strong-grading hypothesis required by the EJZ Kazhdan-subset argument. -/
 structure A2System (G : Type*) [Group G] where
   root : ∀ (i j : Fin 3), i ≠ j → Subgroup G
   generate : Subgroup.closure
@@ -25,6 +27,10 @@ structure A2System (G : Type*) [Group G] where
     (hij : i ≠ j) (hjk : j ≠ k) (hik : i ≠ k),
       ∀ x ∈ root i j hij, ∀ y ∈ root j k hjk,
         ⁅x, y⁆ ∈ root i k hik
+  commutator_surjective : ∀ (i j k : Fin 3)
+    (hij : i ≠ j) (hjk : j ≠ k) (hik : i ≠ k),
+      ∀ z ∈ root i k hik,
+        ∃ x ∈ root i j hij, ∃ y ∈ root j k hjk, ⁅x, y⁆ = z
 
 namespace A2System
 
@@ -36,6 +42,12 @@ def rootSet (A : A2System G) : Set G :=
 
 theorem rootSet_generate (A : A2System G) :
     Subgroup.closure A.rootSet = ⊤ := A.generate
+
+/-- Each root subgroup in an `A₂` system is abelian.  This is a consequence
+of the non-addable-root commutation axiom, not an additional assumption. -/
+theorem root_commute (A : A2System G) (i j : Fin 3) (hij : i ≠ j) :
+    ∀ x ∈ A.root i j hij, ∀ y ∈ A.root i j hij, Commute x y := by
+  exact A.commute i j i j hij hij hij.symm hij.symm
 
 end A2System
 
@@ -56,5 +68,11 @@ def elementaryA2System (R : Type*) [Ring R] :
     obtain ⟨a, rfl⟩ := hx
     obtain ⟨b, rfl⟩ := hy
     exact ⟨a * b, (elementaryRoot_commutator i j k hij hjk hik a b).symm⟩
+  commutator_surjective := by
+    intro i j k hij hjk hik z hz
+    obtain ⟨a, rfl⟩ := hz
+    refine ⟨elementaryRoot i j hij a, ⟨a, rfl⟩,
+      elementaryRoot j k hjk 1, ⟨1, rfl⟩, ?_⟩
+    simpa using elementaryRoot_commutator i j k hij hjk hik a 1
 
 end NonsoficGroupsExist
