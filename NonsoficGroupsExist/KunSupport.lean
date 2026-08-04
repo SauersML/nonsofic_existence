@@ -273,6 +273,21 @@ theorem forwardNeighborhood_subset_succ
   exact subset_forwardStep M τ S _
 
 omit [Group G] in
+theorem forwardNeighborhood_mono_time
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
+    {i j : ℕ} (hij : i ≤ j) (U : Finset M) :
+    forwardNeighborhood M τ S i U ⊆
+      forwardNeighborhood M τ S j U := by
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hij
+  clear hij
+  induction d with
+  | zero => simp
+  | succ d ih =>
+      exact ih.trans (by
+        simpa [Nat.add_assoc] using
+          forwardNeighborhood_subset_succ M τ S (i + d) U)
+
+omit [Group G] in
 /-- A finite permutation average is additive. -/
 theorem finiteModelAverage_add
     (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
