@@ -313,6 +313,95 @@ theorem card_blockForbidden_le
       gcongr
       exact card_boundaryVertices_le (generatorGraph M S τ) P C
 
+/-- The source of a generator occurrence leaving one block is one of that
+block's formally enumerated boundary vertices. -/
+theorem sourceBoundary_mem_boundaryVertices
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (P : BlockStructure M) (y : M)
+    {s : G} (hs : s ∈ S) {w : M}
+    (hw : w ∈ P.block y) (hout : τ s w ∉ P.block y) :
+    w ∈ boundaryVertices (generatorGraph M S τ) P (P.block y) := by
+  classical
+  have hmove : τ s w ≠ w := by
+    intro hfix
+    exact hout (by simpa [hfix] using hw)
+  let t : S := ⟨s, hs⟩
+  let e : (generatorGraph M S τ).edge :=
+    ⟨(t, w), Finset.mem_filter.mpr ⟨Finset.mem_univ _, hmove⟩⟩
+  have hwBlock : P.block w = P.block y := P.eq_of_mem y w hw
+  have hblocks : P.block w ≠ P.block (τ s w) := by
+    intro heq
+    apply hout
+    rw [← hwBlock, heq]
+    exact P.self_mem _
+  have heCrossing : e ∈ (generatorGraph M S τ).crossingEdges P.block := by
+    exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, by
+      simpa [e, t] using hblocks⟩
+  let stub : KunRepairGraph.CrossingStub (generatorGraph M S τ) P :=
+    (⟨e, heCrossing⟩, KunRepairGraph.StubSide.first)
+  apply Finset.mem_image.mpr
+  refine ⟨stub, ?_, ?_⟩
+  · exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, by
+      simpa [stub, KunRepairGraph.stubEndpoint, e, t] using hw⟩
+  · simp [stub, KunRepairGraph.stubEndpoint, e]
+
+/-- If a forward trajectory starts inside a block and reaches outside it,
+some block-boundary vertex was reached no later than the same horizon. -/
+theorem exists_boundaryVertex_of_mem_forwardNeighborhood_not_mem_block
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (P : BlockStructure M) (y x : M)
+    (hx : x ∈ P.block y) (r : ℕ) {z : M}
+    (hz : z ∈ forwardNeighborhood M τ S r {x})
+    (hzout : z ∉ P.block y) :
+    ∃ b ∈ boundaryVertices (generatorGraph M S τ) P (P.block y),
+      b ∈ forwardNeighborhood M τ S r {x} := by
+  induction r generalizing z with
+  | zero =>
+      have hzx : z = x := by simpa [forwardNeighborhood] using hz
+      subst z
+      exact False.elim (hzout hx)
+  | succ r ih =>
+      change z ∈ forwardStep M τ S
+        (forwardNeighborhood M τ S r {x}) at hz
+      simp only [forwardStep, Finset.mem_union, Finset.mem_biUnion,
+        Finset.mem_map] at hz
+      rcases hz with hzPrev | ⟨s, hs, w, hw, hzw⟩
+      · obtain ⟨b, hbBoundary, hbReach⟩ := ih hzPrev hzout
+        exact ⟨b, hbBoundary,
+          forwardNeighborhood_subset_succ M τ S r {x} hbReach⟩
+      · subst z
+        by_cases hwBlock : w ∈ P.block y
+        · have hwBoundary := sourceBoundary_mem_boundaryVertices
+            M τ S P y hs hwBlock hzout
+          exact ⟨w, hwBoundary,
+            forwardNeighborhood_subset_succ M τ S r {x} hw⟩
+        · obtain ⟨b, hbBoundary, hbReach⟩ := ih hw hwBlock
+          exact ⟨b, hbBoundary,
+            forwardNeighborhood_subset_succ M τ S r {x} hbReach⟩
+
+/-- Excluding the backward neighborhood of the block boundary forces the
+whole forward marker neighborhood to remain in the block. -/
+theorem forwardNeighborhood_subset_block_of_not_mem_forbidden
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (P : BlockStructure M) (y x : M) (r : ℕ)
+    (hxBlock : x ∈ P.block y)
+    (hxForbidden : x ∉ blockForbidden M τ S r P (P.block y)) :
+    forwardNeighborhood M τ S r {x} ⊆ P.block y := by
+  intro z hz
+  by_contra hzBlock
+  obtain ⟨b, hbBoundary, hbReach⟩ :=
+    exists_boundaryVertex_of_mem_forwardNeighborhood_not_mem_block
+      M τ S P y x hxBlock r hz hzBlock
+  obtain ⟨x', hx'singleton, hx'back⟩ :=
+    exists_source_mem_backwardNeighborhood M τ S r {x} hbReach
+  have hx'x : x' = x := by simpa using hx'singleton
+  subst x'
+  apply hxForbidden
+  have hsingleton : ({b} : Finset M) ⊆
+      boundaryVertices (generatorGraph M S τ) P (P.block y) := by
+    simpa using hbBoundary
+  exact backwardNeighborhood_mono M τ S r hsingleton hx'back
+
 /-- A block whose stub density is below the explicit packing threshold has a
 distinct separated marker for every one of its crossing stubs. -/
 theorem exists_block_marker_assignment
