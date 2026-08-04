@@ -672,6 +672,39 @@ noncomputable def finiteAveragingDisplacementNormSq
   normalizedCombinationNormSq c.support c
     (A.model n) (A.map n) U id
 
+/-- A finitely supported linear combination of translated centered
+indicators in one finite model. -/
+noncomputable def finiteFinsuppCombination
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M) :
+    (G →₀ ℝ) →ₗ[ℝ] EuclideanSpace ℝ M :=
+  Finsupp.linearCombination ℝ fun g ↦
+    permutationOperator (τ g) (centeredIndicator U)
+
+omit [Group G] in
+/-- The finite `Finsupp` combination is its support-indexed sum. -/
+theorem finiteFinsuppCombination_eq_sum
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (c : G →₀ ℝ) :
+    finiteFinsuppCombination M τ U c =
+      ∑ g ∈ c.support,
+        c g • permutationOperator (τ g) (centeredIndicator U) := by
+  classical
+  simp [finiteFinsuppCombination, Finsupp.linearCombination_apply, Finsupp.sum]
+
+/-- The scalar finite-stage displacement quantity is exactly the normalized
+squared norm of its explicit finite vector. -/
+theorem finiteAveragingDisplacementNormSq_eq_norm
+    (A : SoficApproximation G) (n : ℕ) (U : Finset (A.model n))
+    (S : Finset G) (k : ℕ) :
+    finiteAveragingDisplacementNormSq A n U S k =
+      ‖finiteFinsuppCombination (A.model n) (A.map n) U
+        (averagingDisplacementCoefficients S k)‖ ^ 2 /
+          Fintype.card (A.model n) := by
+  rw [finiteAveragingDisplacementNormSq,
+    normalizedCombinationNormSq]
+  rw [finiteFinsuppCombination_eq_sum]
+  simp
+
 /-- The hyperreal displacement norm is represented by the corresponding
 finite-stage normalized norms. -/
 theorem combinationNormSqHyperreal_displacement_eq_ofSeq
