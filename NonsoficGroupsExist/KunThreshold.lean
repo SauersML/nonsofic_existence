@@ -167,13 +167,14 @@ theorem edgeVariation_clippedLayer_le
   exact Finset.sum_le_sum fun e he ↦
     abs_clippedLayer_sub_le f a b (X.first e) (X.second e)
 
-/-- Coarea threshold selection on an arbitrary open interval. -/
-theorem exists_superlevel_boundary_mul_sub_le_variation
+/-- Coarea threshold selection on an arbitrary open interval, retaining the
+sharper variation of the clipped layer. -/
+theorem exists_superlevel_boundary_mul_sub_le_clippedVariation
     (X : FiniteMultiGraph) (f : X.vertex → ℝ) (a b : ℝ)
     (hab : a < b) :
     ∃ t : ℝ, a < t ∧ t < b ∧
       (b - a) * (X.boundaryCard (X.superlevel f t) : ℝ) ≤
-        X.edgeVariation f := by
+        X.edgeVariation (clippedLayer f a b) := by
   let g := clippedLayer f a b
   have hL : 0 < b - a := sub_pos.mpr hab
   obtain ⟨t, ht0, htL, htbound⟩ :=
@@ -197,7 +198,100 @@ theorem exists_superlevel_boundary_mul_sub_le_variation
       exact hraw.trans_le (le_max_left _ _)
   refine ⟨a + t, by linarith, by linarith, ?_⟩
   rw [← hlevel]
-  exact htbound.trans (edgeVariation_clippedLayer_le X f a b)
+  exact htbound
+
+/-- Coarea threshold selection on an arbitrary open interval. -/
+theorem exists_superlevel_boundary_mul_sub_le_variation
+    (X : FiniteMultiGraph) (f : X.vertex → ℝ) (a b : ℝ)
+    (hab : a < b) :
+    ∃ t : ℝ, a < t ∧ t < b ∧
+      (b - a) * (X.boundaryCard (X.superlevel f t) : ℝ) ≤
+        X.edgeVariation f := by
+  obtain ⟨t, hat, htb, ht⟩ :=
+    exists_superlevel_boundary_mul_sub_le_clippedVariation X f a b hab
+  exact ⟨t, hat, htb,
+    ht.trans (edgeVariation_clippedLayer_le X f a b)⟩
+
+/-- Sum of squared differences across edge occurrences. -/
+def edgeSquareVariation (X : FiniteMultiGraph) (f : X.vertex → ℝ) : ℝ :=
+  ∑ e, (f (X.first e) - f (X.second e)) ^ 2
+
+/-- Edges on which clipping above `a` can be nonzero. -/
+noncomputable def activeEdges (X : FiniteMultiGraph) (f : X.vertex → ℝ)
+    (a : ℝ) : Finset X.edge :=
+  Finset.univ.filter fun e ↦ a < f (X.first e) ∨ a < f (X.second e)
+
+theorem clippedLayer_eq_zero_of_le
+    {f : α → ℝ} {a b : ℝ} {x : α} (hx : f x ≤ a) :
+    clippedLayer f a b x = 0 := by
+  simp [clippedLayer, min_le_of_left_le hx]
+
+/-- Squared finite coarea estimate.  The factor counting active edge
+occurrences is retained explicitly; the generator-graph degree estimate is
+proved separately. -/
+theorem exists_boundary_sq_mul_sub_sq_le
+    (X : FiniteMultiGraph) (f : X.vertex → ℝ) (a b : ℝ)
+    (hab : a < b) :
+    ∃ t : ℝ, a < t ∧ t < b ∧
+      (b - a) ^ 2 * (X.boundaryCard (X.superlevel f t) : ℝ) ^ 2 ≤
+        (activeEdges X f a).card * edgeSquareVariation X f := by
+  classical
+  obtain ⟨t, hat, htb, ht⟩ :=
+    exists_superlevel_boundary_mul_sub_le_clippedVariation X f a b hab
+  let g := clippedLayer f a b
+  let E := activeEdges X f a
+  have hvariation : X.edgeVariation g =
+      ∑ e ∈ E, |g (X.first e) - g (X.second e)| := by
+    unfold edgeVariation
+    apply Eq.symm
+    apply Finset.sum_subset (Finset.filter_subset _ _)
+    intro e _ he
+    have hboth : f (X.first e) ≤ a ∧ f (X.second e) ≤ a := by
+      simpa [E, activeEdges] using he
+    have hfirst : f (X.first e) ≤ a := by
+      exact hboth.1
+    have hsecond : f (X.second e) ≤ a := by
+      exact hboth.2
+    simp [g, clippedLayer_eq_zero_of_le hfirst,
+      clippedLayer_eq_zero_of_le hsecond]
+  have hcoarea :
+      (b - a) * (X.boundaryCard (X.superlevel f t) : ℝ) ≤
+        X.edgeVariation g :=
+    ht
+  have hcoareaSq := (sq_le_sq₀ (by positivity)
+    (Finset.sum_nonneg fun _ _ ↦ abs_nonneg _)).2
+      (hvariation ▸ hcoarea)
+  have hcauchy :
+      (∑ e ∈ E, |g (X.first e) - g (X.second e)|) ^ 2 ≤
+        (E.card : ℝ) *
+          ∑ e ∈ E, |g (X.first e) - g (X.second e)| ^ 2 := by
+    simpa using Finset.sum_mul_sq_le_sq_mul_sq E
+      (fun _ ↦ (1 : ℝ))
+      (fun e ↦ |g (X.first e) - g (X.second e)|)
+  have hclipSq :
+      ∑ e ∈ E, |g (X.first e) - g (X.second e)| ^ 2 ≤
+        edgeSquareVariation X f := by
+    unfold edgeSquareVariation
+    calc
+      ∑ e ∈ E, |g (X.first e) - g (X.second e)| ^ 2 ≤
+          ∑ e ∈ E, (f (X.first e) - f (X.second e)) ^ 2 := by
+        apply Finset.sum_le_sum
+        intro e _
+        have h := abs_clippedLayer_sub_le f a b (X.first e) (X.second e)
+        have hs := (sq_le_sq₀ (abs_nonneg _) (abs_nonneg _)).2 h
+        simpa [g, sq_abs] using hs
+      _ ≤ ∑ e, (f (X.first e) - f (X.second e)) ^ 2 := by
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.filter_subset _ _) (fun _ _ _ ↦ sq_nonneg _)
+  refine ⟨t, hat, htb, ?_⟩
+  calc
+    (b - a) ^ 2 * (X.boundaryCard (X.superlevel f t) : ℝ) ^ 2 =
+        ((b - a) * (X.boundaryCard (X.superlevel f t) : ℝ)) ^ 2 := by ring
+    _ ≤ (∑ e ∈ E, |g (X.first e) - g (X.second e)|) ^ 2 := hcoareaSq
+    _ ≤ (E.card : ℝ) *
+        ∑ e ∈ E, |g (X.first e) - g (X.second e)| ^ 2 := hcauchy
+    _ ≤ (E.card : ℝ) * edgeSquareVariation X f := by
+      gcongr
 
 end KunThreshold
 end NonsoficGroupsExist
