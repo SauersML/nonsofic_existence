@@ -120,6 +120,111 @@ theorem map_mem_jointEigenspace
     _ = rho g (chi c • z) := by rw [hcz]
     _ = chi c • rho g z := by rw [map_smul]
 
+/-- The ambient action restricted linearly to one joint eigenspace. -/
+def restrictedLinearMap
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    (hcentral : C ≤ Subgroup.center G) (chi : C → ℝ) (g : G) :
+    jointEigenspace rho C chi →ₗ[ℝ] jointEigenspace rho C chi where
+  toFun z := ⟨rho g z.1, map_mem_jointEigenspace rho C hcentral chi g z.2⟩
+  map_add' x y := by ext; simp
+  map_smul' r x := by ext; simp
+
+@[simp] theorem restrictedLinearMap_coe
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    (hcentral : C ≤ Subgroup.center G) (chi : C → ℝ) (g : G)
+    (z : jointEigenspace rho C chi) :
+    (restrictedLinearMap rho C hcentral chi g z : E) = rho g z.1 := rfl
+
+/-- Recomposition intertwines the componentwise restricted action with the
+ambient action. -/
+theorem coeLinearMap_map_restricted
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    [DecidableEq (C → ℝ)]
+    (hcentral : C ≤ Subgroup.center G) (g : G)
+    (d : DirectSum (C → ℝ) (fun chi ↦ jointEigenspace rho C chi)) :
+    DirectSum.coeLinearMap (jointEigenspace rho C)
+        (DirectSum.map (fun chi ↦
+          (restrictedLinearMap rho C hcentral chi g).toAddMonoidHom) d) =
+      rho g (DirectSum.coeLinearMap (jointEigenspace rho C) d) := by
+  classical
+  let lhs : DirectSum (C → ℝ) (fun chi ↦ jointEigenspace rho C chi) →+ E :=
+    (DirectSum.coeLinearMap (jointEigenspace rho C)).toAddMonoidHom.comp
+      (DirectSum.map (fun chi ↦
+        (restrictedLinearMap rho C hcentral chi g).toAddMonoidHom))
+  let rhs : DirectSum (C → ℝ) (fun chi ↦ jointEigenspace rho C chi) →+ E :=
+    ((rho g).toLinearEquiv.toLinearMap.comp
+      (DirectSum.coeLinearMap (jointEigenspace rho C))).toAddMonoidHom
+  have heq : lhs = rhs := by
+    apply DirectSum.addHom_ext
+    intro chi z
+    simp [lhs, rhs]
+  exact DFunLike.congr_fun heq d
+
+/-- The canonical finite-dimensional joint-eigenspace decomposition. -/
+noncomputable def components [FiniteDimensional ℝ E]
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    [DecidableEq (C → ℝ)]
+    (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ 2 = 1) (z : E) :
+    DirectSum (C → ℝ) (fun chi ↦ jointEigenspace rho C chi) := by
+  exact (LinearEquiv.ofBijective
+    (DirectSum.coeLinearMap (jointEigenspace rho C))
+    (jointEigenspaces_isInternal rho C hcentral hexp)).symm z
+
+theorem coeLinearMap_components [FiniteDimensional ℝ E]
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    [DecidableEq (C → ℝ)]
+    (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ 2 = 1) (z : E) :
+  DirectSum.coeLinearMap (jointEigenspace rho C)
+      (components rho C hcentral hexp z) = z := by
+  unfold components
+  exact LinearEquiv.apply_ofBijective_symm_apply
+    (DirectSum.coeLinearMap (jointEigenspace rho C))
+    (h := jointEigenspaces_isInternal rho C hcentral hexp) z
+
+/-- Joint-eigenspace components commute with the ambient group action. -/
+theorem component_equivariant [FiniteDimensional ℝ E]
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    [DecidableEq (C → ℝ)]
+    (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ 2 = 1) (g : G) (z : E) (chi : C → ℝ) :
+    components rho C hcentral hexp (rho g z) chi =
+      restrictedLinearMap rho C hcentral chi g
+        (components rho C hcentral hexp z chi) := by
+  let d := components rho C hcentral hexp z
+  let d' := DirectSum.map (fun psi ↦
+    (restrictedLinearMap rho C hcentral psi g).toAddMonoidHom) d
+  have hcoe : DirectSum.coeLinearMap (jointEigenspace rho C) d' = rho g z := by
+    calc
+      DirectSum.coeLinearMap (jointEigenspace rho C) d' =
+          rho g (DirectSum.coeLinearMap (jointEigenspace rho C) d) :=
+        coeLinearMap_map_restricted rho C hcentral g d
+      _ = rho g z := by rw [coeLinearMap_components rho C hcentral hexp z]
+  have hd : d' = components rho C hcentral hexp (rho g z) := by
+    apply (jointEigenspaces_isInternal rho C hcentral hexp).1
+    change DirectSum.coeLinearMap (jointEigenspace rho C) d' =
+      DirectSum.coeLinearMap (jointEigenspace rho C)
+        (components rho C hcentral hexp (rho g z))
+    rw [hcoe, coeLinearMap_components rho C hcentral hexp (rho g z)]
+  have hcomponent := congrArg (fun e ↦ e chi) hd
+  change restrictedLinearMap rho C hcentral chi g
+      (components rho C hcentral hexp z chi) =
+      components rho C hcentral hexp (rho g z) chi at hcomponent
+  exact hcomponent.symm
+
+/-- Components of a fixed vector remain fixed. -/
+theorem component_fixed [FiniteDimensional ℝ E]
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    [DecidableEq (C → ℝ)]
+    (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ 2 = 1) {g : G} {z : E}
+    (hz : rho g z = z) (chi : C → ℝ) :
+    restrictedLinearMap rho C hcentral chi g
+        (components rho C hcentral hexp z chi) =
+      components rho C hcentral hexp z chi := by
+  rw [← component_equivariant rho C hcentral hexp g z chi, hz]
+
 /-- Every eigenvalue occurring on a nonzero joint eigenspace of involutions
 is `+1` or `-1`. -/
 theorem jointEigenvalue_eq_one_or_neg_one
