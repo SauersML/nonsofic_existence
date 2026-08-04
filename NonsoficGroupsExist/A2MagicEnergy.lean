@@ -412,6 +412,66 @@ theorem triangle_third_edge_norm_sq_le
   rw [hpyth, hfixed, hmovingEq]
   nlinarith
 
+/-- The three estimates combine with coefficients `3` and `5`, which is the
+per-triangle form of EJZ Claim 5.7(a). -/
+theorem triangle_total_energy_le_three_root_add_five_vertex
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    let rij : A2Root := ⟨(i, j), hij⟩
+    let rik : A2Root := ⟨(i, k), hik⟩
+    let rjk : A2Root := ⟨(j, k), hjk⟩
+    let L := A.vertexGroup rik
+    let a := f rij - f rik
+    let b := f rik - f rjk
+    let c := f rij - f rjk
+    ‖a‖ ^ 2 + ‖b‖ ^ 2 + 2 * ‖c‖ ^ 2 ≤
+      5 * (‖(KazhdanFixedSpace.fixedProjection rho L a : E)‖ ^ 2 +
+        ‖(KazhdanFixedSpace.fixedProjection rho L b : E)‖ ^ 2) +
+      3 * (‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rij) c‖ ^ 2 +
+        ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rjk) (-c)‖ ^ 2) := by
+  let rij : A2Root := ⟨(i, j), hij⟩
+  let rik : A2Root := ⟨(i, k), hik⟩
+  let rjk : A2Root := ⟨(j, k), hjk⟩
+  let L := A.vertexGroup rik
+  let a : E := f rij - f rik
+  let b : E := f rik - f rjk
+  let c : E := f rij - f rjk
+  have h8 := triangle_edge_norm_sq_eq A rho f hf i j k hij hik hjk
+  have h9 := triangle_second_edge_norm_sq_eq A rho f hf i j k hij hik hjk
+  have h10 := triangle_third_edge_norm_sq_le A rho f hf i j k hij hik hjk
+  dsimp only at h8 h9 h10
+  have haNeg : f rik - f rij = -a := by
+    dsimp [a]
+    module
+  have hcNeg : f rjk - f rij = -c := by
+    dsimp [c]
+    module
+  rw [haNeg, map_neg, norm_neg, hcNeg] at h9
+  simp only [Submodule.coe_neg, norm_neg] at h9
+  have hpythA := KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho L a
+  have hpythB := KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho L b
+  change ‖a‖ ^ 2 + ‖b‖ ^ 2 + 2 * ‖c‖ ^ 2 ≤
+    5 * (‖(KazhdanFixedSpace.fixedProjection rho L a : E)‖ ^ 2 +
+      ‖(KazhdanFixedSpace.fixedProjection rho L b : E)‖ ^ 2) +
+    3 * (‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rij) c‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rjk) (-c)‖ ^ 2)
+  change ‖b‖ ^ 2 =
+    ‖(KazhdanFixedSpace.fixedProjection rho L b : E)‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rij) c‖ ^ 2 at h8
+  change ‖a‖ ^ 2 =
+    ‖(KazhdanFixedSpace.fixedProjection rho L a : E)‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rjk) (-c)‖ ^ 2 at h9
+  change ‖c‖ ^ 2 ≤
+    2 * (‖(KazhdanFixedSpace.fixedProjection rho L a : E)‖ ^ 2 +
+      ‖(KazhdanFixedSpace.fixedProjection rho L b : E)‖ ^ 2) +
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho L a‖ ^ 2 +
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho L b‖ ^ 2 at h10
+  nlinarith
+
 /-- Difference along an oriented edge of the magic graph. -/
 def edgeDifference (f : A2Root → E) (r : A2Root) (n : Fin 4) : E :=
   f r - f (neighbor r n)
