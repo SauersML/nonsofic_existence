@@ -144,6 +144,70 @@ theorem norm_permutationOperator_indicator_sub_sq
       (((U.map p.toEmbedding) ∆ U).card : ℝ) := by
   rw [permutationOperator_indicator, norm_indicator_sub_sq]
 
+/-- Points on which two finite permutations disagree. -/
+def permutationDisagreement (p q : Equiv.Perm Y) : Finset Y :=
+  Finset.univ.filter fun y ↦ p y ≠ q y
+
+@[simp] theorem mem_permutationDisagreement (p q : Equiv.Perm Y) (y : Y) :
+    y ∈ permutationDisagreement p q ↔ p y ≠ q y := by
+  simp [permutationDisagreement]
+
+/-- Images of a set under two permutations can differ only through images
+of points where the permutations disagree. -/
+theorem symmDiff_image_subset_disagreement_images
+    (p q : Equiv.Perm Y) (U : Finset Y) :
+    (U.map p.toEmbedding) ∆ (U.map q.toEmbedding) ⊆
+      (permutationDisagreement p q).map p.toEmbedding ∪
+        (permutationDisagreement p q).map q.toEmbedding := by
+  intro y hy
+  rw [Finset.mem_symmDiff] at hy
+  rcases hy with ⟨hp, hnq⟩ | ⟨hq, hnp⟩
+  · rw [Finset.mem_map] at hp
+    obtain ⟨x, hx, rfl⟩ := hp
+    apply Finset.mem_union_left
+    rw [Finset.mem_map]
+    refine ⟨x, (mem_permutationDisagreement p q x).2 ?_, rfl⟩
+    intro heq
+    apply hnq
+    exact Finset.mem_map.mpr ⟨x, hx, heq.symm⟩
+  · rw [Finset.mem_map] at hq
+    obtain ⟨x, hx, rfl⟩ := hq
+    apply Finset.mem_union_right
+    rw [Finset.mem_map]
+    refine ⟨x, (mem_permutationDisagreement p q x).2 ?_, rfl⟩
+    intro heq
+    apply hnp
+    exact Finset.mem_map.mpr ⟨x, hx, heq⟩
+
+/-- Symmetric difference of images is at most twice the permutation
+disagreement set. -/
+theorem card_symmDiff_images_le_two_mul_disagreement
+    (p q : Equiv.Perm Y) (U : Finset Y) :
+    ((U.map p.toEmbedding) ∆ (U.map q.toEmbedding)).card ≤
+      2 * (permutationDisagreement p q).card := by
+  calc
+    ((U.map p.toEmbedding) ∆ (U.map q.toEmbedding)).card ≤
+        ((permutationDisagreement p q).map p.toEmbedding ∪
+          (permutationDisagreement p q).map q.toEmbedding).card :=
+      Finset.card_le_card (symmDiff_image_subset_disagreement_images p q U)
+    _ ≤ ((permutationDisagreement p q).map p.toEmbedding).card +
+        ((permutationDisagreement p q).map q.toEmbedding).card :=
+      Finset.card_union_le _ _
+    _ = 2 * (permutationDisagreement p q).card := by
+      simp only [Finset.card_map]
+      omega
+
+/-- Hamming disagreement controls the squared `ℓ²` error made by replacing
+one permutation operator with another on a characteristic vector. -/
+theorem norm_permutationOperators_indicator_sub_sq_le
+    (p q : Equiv.Perm Y) (U : Finset Y) :
+    ‖permutationOperator p (indicator U) -
+        permutationOperator q (indicator U)‖ ^ 2 ≤
+      2 * (permutationDisagreement p q).card := by
+  rw [permutationOperator_indicator, permutationOperator_indicator,
+    norm_indicator_sub_sq]
+  exact_mod_cast card_symmDiff_images_le_two_mul_disagreement p q U
+
 /-- The characteristic vector after subtracting its global mean. -/
 noncomputable def centeredIndicator (U : Finset Y) : EuclideanSpace ℝ Y :=
   indicator U - ((U.card : ℝ) / Fintype.card Y) • constantVector 1
@@ -160,6 +224,25 @@ theorem permutationOperator_centeredIndicator_sub
     permutationOperator p (centeredIndicator U) - centeredIndicator U =
       permutationOperator p (indicator U) - indicator U := by
   simp [centeredIndicator, map_sub, map_smul]
+
+/-- Centering also cancels when comparing two permutation operators. -/
+theorem permutationOperators_centeredIndicator_sub
+    (p q : Equiv.Perm Y) (U : Finset Y) :
+    permutationOperator p (centeredIndicator U) -
+        permutationOperator q (centeredIndicator U) =
+      permutationOperator p (indicator U) -
+        permutationOperator q (indicator U) := by
+  simp [centeredIndicator, map_sub, map_smul]
+
+/-- Hamming disagreement controls operator replacement error on centered
+characteristic vectors as well. -/
+theorem norm_permutationOperators_centeredIndicator_sub_sq_le
+    (p q : Equiv.Perm Y) (U : Finset Y) :
+    ‖permutationOperator p (centeredIndicator U) -
+        permutationOperator q (centeredIndicator U)‖ ^ 2 ≤
+      2 * (permutationDisagreement p q).card := by
+  rw [permutationOperators_centeredIndicator_sub]
+  exact norm_permutationOperators_indicator_sub_sq_le p q U
 
 /-- Exact variance formula for a centered characteristic vector. -/
 theorem norm_centeredIndicator_sq [Nonempty Y] (U : Finset Y) :
