@@ -172,6 +172,45 @@ theorem add_self_eq_zero (p : FreeAlgebra (ZMod 2) X) : p + p = 0 := by
     _ = 0 := by
       rw [show (1 : ZMod 2) + 1 = 0 by decide, zero_smul]
 
+/-- The canonical basis monomial belonging to a free word. -/
+noncomputable def wordMonomial (w : FreeMonoid X) :
+    FreeAlgebra (ZMod 2) X :=
+  (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+    (R := ZMod 2) (X := X)).symm (MonoidAlgebra.single w 1)
+
+theorem wordMonomial_mem_degreeLE {w : FreeMonoid X} {n : ℕ}
+    (hw : freeWordLength X w ≤ n) : wordMonomial X w ∈ degreeLE X n := by
+  rw [mem_degreeLE_iff]
+  intro v hv
+  simp [wordMonomial] at hv
+  subst v
+  exact hw
+
+omit [Fintype X] in
+/-- Multiplication of basis monomials is free-word concatenation. -/
+theorem wordMonomial_mul (u v : FreeMonoid X) :
+    wordMonomial X u * wordMonomial X v = wordMonomial X (u * v) := by
+  apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+    (R := ZMod 2) (X := X)).injective
+  simp [wordMonomial]
+
+omit [Fintype X] in
+/-- Every free polynomial is the finite sum of its supported word terms. -/
+theorem eq_sum_support_smul_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
+    p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) p).coeff.support,
+      ((FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) p).coeff w) • wordMonomial X w := by
+  apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+    (R := ZMod 2) (X := X)).injective
+  ext v
+  simp [wordMonomial]
+  have h := congrArg (fun f : FreeMonoid X →₀ ZMod 2 ↦ f v)
+    (Finsupp.sum_single
+      (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := ZMod 2) (X := X) p).coeff)
+  simpa [Finsupp.sum] using h.symm
+
 /-- Every free polynomial lies in some finite degree stage. -/
 theorem exists_mem_degreeLE (p : FreeAlgebra (ZMod 2) X) :
     ∃ n, p ∈ degreeLE X n := by

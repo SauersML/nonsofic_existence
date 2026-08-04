@@ -159,9 +159,15 @@ bound to obtain an estimate for `M^2`.  Ordinary Cheeger expansion bounds the
 nonconstant spectrum away from `+1`; it does not bound the bottom of the
 Markov spectrum away from `-1`.  Uniform expanders can be arbitrarily close to
 bipartite, so their least eigenvalues can approach `-1` without being exactly
-`-1`.  Squaring the Markov operator turns those eigenvalues into values
-arbitrarily close to `+1`, contradicting the uniform estimate asserted in that
-step.  Thus the full four-way equivalence must not be imported or used here.
+`-1`.  More explicitly, make a degree-preserving two-edge switch in each graph
+of a bipartite expander family, and then form one sequence containing repeated
+copies of every switched graph.  The components retain a uniform Cheeger
+constant, while their least Markov eigenvalues approach `-1`.  Repeating a
+least-eigenvalue eigenvector on all copies makes its `L2` norm proportional to
+the square root of the total vertex count, so the additive `L-infinity` error
+in condition `(1)` cannot absorb the defect.  This gives a sequence satisfying
+conditions `(2)`, `(3)`, and `(4)` but not `(1)`.  Thus the full four-way
+equivalence must not be imported or used here.
 
 This defect does not by itself refute Kun's Theorem 1.  In the same paper,
 Proposition 11 establishes condition `(2)`, and the proof of Theorem 1 needs
@@ -172,3 +178,11 @@ result, and it must be checked from the forward partition-and-repair argument
 without appealing to the false equivalence.  The corresponding completion
 checkbox remains open above until that exact Lean dependency is compiled and
 wired into the final theorem.
+
+The target here is the full-generality one-way theorem: for every infinite
+finitely generated property-`(T)` group, every finite symmetric generating set
+containing the identity, and every sofic approximation, construct an
+asymptotically edge-equivalent bounded-degree multigraph whose connected
+components have one uniform positive Cheeger constant.  Proving only the
+particular instances needed by the proposed nonsofic construction would not
+close this checkbox; the development is pursuing the general theorem directly.
