@@ -184,6 +184,38 @@ theorem planeCharacterMass_eq_quarter_displacement
     _ = (4 : ℝ)⁻¹ * ‖rho g.1 z - z‖ ^ 2 :=
       InvolutionSplitting.norm_negativePart_sq rho g.1 z
 
+/-- Quantitative character-mass transport under one free-generator shear. The
+mass of the sheared next-stage character event differs from the original pure
+second-coordinate event only by the displacement of the vector under that
+single elementary generator. -/
+theorem abs_generatorShearedSecondCharacterMass_sub_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (b : FreeAlgebraDegree.degreeLE X n)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    |(∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk (n + 1)
+          (generatorShearedSecondCoordinate X i j k hij hik hjk x n b),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) -
+      (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
+          (secondCoordinate X i j k hij hik hjk n b),
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2)| ≤
+      2 * ‖z‖ *
+        ‖z - rho (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x)) z‖ := by
+  rw [← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk
+      (n + 1) rho z
+      (generatorShearedSecondCoordinate X i j k hij hik hjk x n b),
+    ← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk n rho z
+      (secondCoordinate X i j k hij hik hjk n b)]
+  have hc : (secondCoordinate X i j k hij hik hjk n b).1 ^ 2 = 1 :=
+    rootPlaneDegreeSubgroup_sq X i j k hij hik hjk n _
+      (secondCoordinate X i j k hij hik hjk n b).2
+  have htransport :=
+    InvolutionSplitting.abs_norm_negativePart_conjugate_sq_sub_le rho
+      (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x)) hc z
+  rw [conjugate_secondCoordinate_generator X i j k hij hik hjk x n b]
+    at htransport
+  exact htransport
+
 /-- On every nonzero component, the assigned eigenvalue is multiplicative.
 Thus inconsistent binary assignments necessarily have zero component. -/
 theorem planeEigenvalue_mul_of_component_ne_zero

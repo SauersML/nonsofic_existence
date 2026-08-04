@@ -222,6 +222,33 @@ theorem norm_negativePart_sq
   norm_num [Real.norm_eq_abs]
   ring
 
+/-- An involutive negative spectral projection does not increase norms. -/
+theorem norm_negativePart_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) {c : G} (hc : c ^ 2 = 1) (z : E) :
+    ‖negativePart rho c z‖ ≤ ‖z‖ := by
+  have hpyth := norm_positivePart_sq_add_norm_negativePart_sq rho hc z
+  have hp : 0 ≤ ‖positivePart rho c z‖ ^ 2 := sq_nonneg _
+  have hn : 0 ≤ ‖negativePart rho c z‖ := norm_nonneg _
+  have hz : 0 ≤ ‖z‖ := norm_nonneg _
+  nlinarith
+
+/-- Negative projection respects subtraction. -/
+theorem negativePart_sub
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (x y : E) :
+    negativePart rho c x - negativePart rho c y =
+      negativePart rho c (x - y) := by
+  unfold negativePart
+  rw [map_sub]
+  module
+
+/-- An involutive negative spectral projection is `1`-Lipschitz. -/
+theorem norm_negativePart_sub_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) {c : G} (hc : c ^ 2 = 1)
+    (x y : E) :
+    ‖negativePart rho c x - negativePart rho c y‖ ≤ ‖x - y‖ := by
+  rw [negativePart_sub]
+  exact norm_negativePart_le rho hc (x - y)
+
 /-- Positive splitting is covariant under conjugation. -/
 theorem map_positivePart
     (rho : G →* (E ≃ₗᵢ[ℝ] E)) (g c : G) (z : E) :
@@ -251,6 +278,61 @@ theorem map_negativePart
       _ = rho (g * c * g⁻¹) (rho g z) := by rw [map_mul]; rfl
   unfold negativePart
   rw [map_smul, map_sub, haction]
+
+/-- Conjugating both the involution and vector preserves negative spectral
+mass exactly. -/
+theorem norm_negativePart_conjugate
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (g c : G) (z : E) :
+    ‖negativePart rho (g * c * g⁻¹) (rho g z)‖ =
+      ‖negativePart rho c z‖ := by
+  rw [← map_negativePart]
+  exact (rho g).norm_map _
+
+/-- If the vector is almost fixed by `q`, then the negative spectral norms for
+`c` and its conjugate by `q` differ by at most that displacement. -/
+theorem abs_norm_negativePart_conjugate_sub_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (q : G) {c : G} (hc : c ^ 2 = 1)
+    (z : E) :
+    |‖negativePart rho (q * c * q⁻¹) z‖ - ‖negativePart rho c z‖| ≤
+      ‖z - rho q z‖ := by
+  rw [← norm_negativePart_conjugate rho q c z]
+  have hconj : (q * c * q⁻¹) ^ 2 = 1 := by
+    rw [pow_two] at hc ⊢
+    calc
+      (q * c * q⁻¹) * (q * c * q⁻¹) = q * (c * c) * q⁻¹ := by group
+      _ = 1 := by rw [hc]; simp
+  exact (abs_norm_sub_norm_le _ _).trans
+    (norm_negativePart_sub_le rho hconj z (rho q z))
+
+/-- Quantitative shear transport for squared spectral mass. -/
+theorem abs_norm_negativePart_conjugate_sq_sub_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (q : G) {c : G} (hc : c ^ 2 = 1)
+    (z : E) :
+    |‖negativePart rho (q * c * q⁻¹) z‖ ^ 2 -
+        ‖negativePart rho c z‖ ^ 2| ≤
+      2 * ‖z‖ * ‖z - rho q z‖ := by
+  let a := ‖negativePart rho (q * c * q⁻¹) z‖
+  let b := ‖negativePart rho c z‖
+  let d := ‖z - rho q z‖
+  have hdiff : |a - b| ≤ d :=
+    abs_norm_negativePart_conjugate_sub_le rho q hc z
+  have hconj : (q * c * q⁻¹) ^ 2 = 1 := by
+    rw [pow_two] at hc ⊢
+    calc
+      (q * c * q⁻¹) * (q * c * q⁻¹) = q * (c * c) * q⁻¹ := by group
+      _ = 1 := by rw [hc]; simp
+  have ha : a ≤ ‖z‖ := norm_negativePart_le rho hconj z
+  have hb : b ≤ ‖z‖ := norm_negativePart_le rho hc z
+  have hab : a + b ≤ 2 * ‖z‖ := by linarith
+  have hd : 0 ≤ d := norm_nonneg _
+  have hab0 : 0 ≤ a + b := by positivity
+  calc
+    |a ^ 2 - b ^ 2| = |a - b| * (a + b) := by
+      rw [show a ^ 2 - b ^ 2 = (a - b) * (a + b) by ring, abs_mul,
+        abs_of_nonneg hab0]
+    _ ≤ d * (a + b) := mul_le_mul_of_nonneg_right hdiff hab0
+    _ ≤ d * (2 * ‖z‖) := mul_le_mul_of_nonneg_left hab hd
+    _ = 2 * ‖z‖ * d := by ring
 
 end InvolutionSplitting
 

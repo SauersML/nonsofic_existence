@@ -71,6 +71,10 @@ box is still a required dependency of the final theorem.
   component-mass sum; identify the mass of characters taking value `-1` on
   any finite-plane element with exactly one quarter of that element's squared
   displacement
+- [x] Prove quantitative finite-stage character-mass transport under each
+  free-generator shear: the next-stage sheared event and the original
+  coordinate event differ by at most `2 * ‖z‖` times the displacement of `z`
+  under that single elementary generator
 - [x] Prove every finite free-root plane is abelian of exponent two, enumerate
   all of its elements, and instantiate the simultaneous Fourier decomposition
   and sign-action theorem for that exhaustive enumeration; prove every

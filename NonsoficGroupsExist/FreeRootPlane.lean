@@ -215,6 +215,17 @@ noncomputable def generatorMulCoefficientSucc {n : ℕ} (x : X)
   ⟨FreeAlgebra.ι (ZMod 2) x * a.1,
     generator_mul_mem_degreeLE_succ X x a.2⟩
 
+/-- The next-stage plane element obtained by shearing a pure second
+coordinate by a free generator. -/
+noncomputable def generatorShearedSecondCoordinate
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (b : degreeLE X n) :
+    rootPlaneDegreeSubgroup X i j k hij hik hjk (n + 1) :=
+  firstCoordinate X i j k hij hik hjk (n + 1)
+      (generatorMulCoefficientSucc X x b) *
+    secondCoordinate X i j k hij hik hjk (n + 1)
+      (coefficientSucc X b)
+
 @[simp] theorem coefficientSucc_val {n : ℕ} (a : degreeLE X n) :
     (coefficientSucc X a).1 = a.1 := rfl
 
@@ -232,10 +243,7 @@ theorem conjugate_secondCoordinate_generator
     elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
         (secondCoordinate X i j k hij hik hjk n b).1 *
         (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
-      (firstCoordinate X i j k hij hik hjk (n + 1)
-          (generatorMulCoefficientSucc X x b)).1 *
-        (secondCoordinate X i j k hij hik hjk (n + 1)
-          (coefficientSucc X b)).1 := by
+      (generatorShearedSecondCoordinate X i j k hij hik hjk x n b).1 := by
   exact FreeRootActions.conjugate_by_generator X i j k hij hjk hik x b.1
 
 /-- The same adjacent shear fixes the first coordinate, viewed in the next
