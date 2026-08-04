@@ -85,6 +85,57 @@ theorem norm_sum_sub_card_smul_le {ι : Type*} [Fintype ι]
     _ ≤ ∑ _ : ι, delta := Finset.sum_le_sum fun i _ ↦ hnear i
     _ = (Fintype.card ι : ℝ) * delta := by simp
 
+/-- Displacement of a product is at most the sum of the two displacements. -/
+theorem norm_mul_displacement_le (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (x : E) (g h : G) :
+    ‖rho (g * h) x - x‖ ≤ ‖rho g x - x‖ + ‖rho h x - x‖ := by
+  calc
+    ‖rho (g * h) x - x‖ = ‖rho g (rho h x) - x‖ := by
+      rw [map_mul]
+      rfl
+    _ = ‖(rho g (rho h x) - rho g x) + (rho g x - x)‖ := by
+      congr 1
+      abel
+    _ ≤ ‖rho g (rho h x) - rho g x‖ + ‖rho g x - x‖ := norm_add_le _ _
+    _ = ‖rho h x - x‖ + ‖rho g x - x‖ := by
+      rw [← (rho g).map_sub, (rho g).norm_map]
+    _ = ‖rho g x - x‖ + ‖rho h x - x‖ := add_comm _ _
+
+/-- A Kazhdan bound for the six magic-graph vertex groups transfers to the
+six root groups.  The loss of a factor four follows from the proved
+three-factor vertex normal form (the paper obtains the sharper factor three). -/
+theorem rootSet_isKazhdan_of_vertexSet
+    (A : A2System G) {kappa : ℝ}
+    (hvertex : IsKazhdanSubset.{u, v} G A.vertexSet kappa) :
+    IsKazhdanSubset.{u, v} G A.rootSet (kappa / 4) := by
+  have hquarter : 0 < kappa / 4 := div_pos hvertex.1 (by norm_num)
+  refine ⟨hquarter, ?_⟩
+  intro E _ _ _ rho v hv hnear
+  apply hvertex.2 E rho v hv
+  intro g hg
+  obtain ⟨a, hga⟩ := hg
+  obtain ⟨x, hx, y, hy, z, hz, rfl⟩ :=
+    A.exists_vertexGroup_three_factor a hga
+  have hxSet : x ∈ A.rootSet := by
+    exact ⟨a.1.1, a2ThirdIndex a.1.1 a.1.2,
+      (a2ThirdIndex_ne_left a.1.1 a.1.2 a.2).symm, hx⟩
+  have hySet : y ∈ A.rootSet := by
+    exact ⟨a2ThirdIndex a.1.1 a.1.2, a.1.2,
+      a2ThirdIndex_ne_right a.1.1 a.1.2 a.2, hy⟩
+  have hzSet : z ∈ A.rootSet := (A.mem_rootSet_iff z).2 ⟨a, hz⟩
+  have hxyz := norm_mul_displacement_le rho v (x * y) z
+  have hxy := norm_mul_displacement_le rho v x y
+  calc
+    ‖rho (x * y * z) v - v‖ ≤
+        ‖rho (x * y) v - v‖ + ‖rho z v - v‖ := hxyz
+    _ ≤ (‖rho x v - v‖ + ‖rho y v - v‖) + ‖rho z v - v‖ :=
+      add_le_add hxy le_rfl
+    _ < kappa := by
+      have hxnear := hnear x hxSet
+      have hynear := hnear y hySet
+      have hznear := hnear z hzSet
+      linarith
+
 /-- The six-vertex fixed-space contraction implies that the union of the root
 subgroups is a Kazhdan subset.  This is the norm-comparison step after the
 spectral estimate, with an explicit (non-optimal) constant. -/
