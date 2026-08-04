@@ -14,6 +14,7 @@ import NonsoficGroupsExist.HilbertConvexFixedPoint
 import NonsoficGroupsExist.HilbertEpsilonOrthogonality
 import NonsoficGroupsExist.FiniteGroupAverage
 import NonsoficGroupsExist.FiniteOrbitRepresentation
+import NonsoficGroupsExist.FiniteClassTwoOrthogonality
 import NonsoficGroupsExist.NormalEdgeCodistance
 import NonsoficGroupsExist.KazhdanGenerators
 import NonsoficGroupsExist.KazhdanOrthogonal
