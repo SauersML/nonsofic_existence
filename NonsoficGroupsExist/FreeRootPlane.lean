@@ -203,6 +203,56 @@ theorem iSup_rootPlaneDegreeSubgroup
       apply (le_iSup (rootPlaneDegreeSubgroup X i j k hij hik hjk) n)
       exact ⟨0, (degreeLE X n).zero_mem, b, hn, by simp⟩
 
+/-- Regard a degree-`n` coefficient as a degree-`n+1` coefficient. -/
+noncomputable def coefficientSucc {n : ℕ} (a : degreeLE X n) :
+    degreeLE X (n + 1) :=
+  ⟨a.1, degreeLE_mono X (Nat.le_succ n) a.2⟩
+
+/-- Left multiplication by a free generator, as a coefficient in the next
+degree stage. -/
+noncomputable def generatorMulCoefficientSucc {n : ℕ} (x : X)
+    (a : degreeLE X n) : degreeLE X (n + 1) :=
+  ⟨FreeAlgebra.ι (ZMod 2) x * a.1,
+    generator_mul_mem_degreeLE_succ X x a.2⟩
+
+@[simp] theorem coefficientSucc_val {n : ℕ} (a : degreeLE X n) :
+    (coefficientSucc X a).1 = a.1 := rfl
+
+@[simp] theorem generatorMulCoefficientSucc_val {n : ℕ} (x : X)
+    (a : degreeLE X n) :
+    (generatorMulCoefficientSucc X x a).1 =
+      FreeAlgebra.ι (ZMod 2) x * a.1 := rfl
+
+/-- The exact adjacent-stage shear on the second plane coordinate.  This is
+an equality of actual elementary matrices, not merely membership in the next
+stage. -/
+theorem conjugate_secondCoordinate_generator
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (b : degreeLE X n) :
+    elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
+        (secondCoordinate X i j k hij hik hjk n b).1 *
+        (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      (firstCoordinate X i j k hij hik hjk (n + 1)
+          (generatorMulCoefficientSucc X x b)).1 *
+        (secondCoordinate X i j k hij hik hjk (n + 1)
+          (coefficientSucc X b)).1 := by
+  exact FreeRootActions.conjugate_by_generator X i j k hij hjk hik x b.1
+
+/-- The same adjacent shear fixes the first coordinate, viewed in the next
+degree stage. -/
+theorem conjugate_firstCoordinate_generator
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (a : degreeLE X n) :
+    elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
+        (firstCoordinate X i j k hij hik hjk n a).1 *
+        (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      (firstCoordinate X i j k hij hik hjk (n + 1)
+        (coefficientSucc X a)).1 := by
+  have hcomm := elementaryRoot_commute_of_ne i j i k hij hik
+    hij.symm hik.symm (FreeAlgebra.ι (ZMod 2) x) a.1
+  rw [hcomm.eq]
+  simp
+
 /-- Conjugation by an adjacent free-generator root sends the degree-`n`
 plane into the degree-`n+1` plane. -/
 theorem conjugate_generator_mem_succ

@@ -52,7 +52,10 @@ box is still a required dependency of the final theorem.
   commutation with each free-ring generator advances root degree by one
 - [x] Build the finite two-root coefficient planes, prove that they exhaust
   the full additive plane, and prove the generator shear sends stage `n` to
-  stage `n+1` by the explicit coefficient formula
+  stage `n+1` by the explicit coefficient formula; prove separately, as
+  ambient elementary-matrix equalities, that the shear fixes the first
+  coordinate and sends the second coordinate to the precise first-times-second
+  factorization in the next stage
 - [x] Construct the positive/negative Hilbert-space splitting for represented
   involutions and prove orthogonality, Pythagoras, displacement, and
   conjugation covariance without a finite-dimensional spectral assumption;
