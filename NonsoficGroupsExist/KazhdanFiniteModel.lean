@@ -426,6 +426,30 @@ theorem hasActionExpansion_of_kazhdanPair [Nonempty Y]
   have h := sum_symmDiff_lower_bound hQ σ htrans U hU hhalf
   simpa [actionBoundarySize] using h
 
+/-- Concrete spectral-gap form for an exact finite permutation action: the
+orbit average contracts every centered characteristic vector. -/
+theorem norm_orbitAverage_centeredIndicator_le [Nonempty Y]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ) (U : Finset Y) :
+    ‖IsKazhdanPair.orbitAverage S (permutationRepresentation σ)
+        (centeredIndicator U)‖ ≤
+      (1 - ε ^ 2 / (4 * S.card)) * ‖centeredIndicator U‖ := by
+  apply norm_orbitAverage_le_of_mem_orthogonal hQ S hQS hone hεone
+    (permutationRepresentation σ)
+  exact centeredIndicator_mem_orthogonal σ htrans U
+
+omit [DecidableEq Y] in
+/-- Pointwise formula for the orbit average in a finite permutation
+representation. -/
+theorem orbitAverage_permutationRepresentation_apply
+    (S : Finset G) (σ : G →* Equiv.Perm Y)
+    (x : EuclideanSpace ℝ Y) (y : Y) :
+    IsKazhdanPair.orbitAverage S (permutationRepresentation σ) x y =
+      ((S.card : ℝ)⁻¹) * ∑ q ∈ S, x ((σ q).symm y) := by
+  classical
+  simp [IsKazhdanPair.orbitAverage, permutationRepresentation_apply]
+
 /-- The orbit of a point in an exact finite action. -/
 noncomputable def orbitFinset (σ : G →* Equiv.Perm Y) (x : Y) : Finset Y := by
   classical
