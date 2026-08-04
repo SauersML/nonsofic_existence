@@ -309,6 +309,48 @@ theorem norm_orbitAverage_sq_le_half_of_scalar
   · exact norm_orbitAverage_sq_le_half
       rho X Y hscalar hradical hvY
 
+/-- Passing from the squared half estimate to the `1 / sqrt 2` norm
+estimate. -/
+theorem le_inv_sqrt_two_mul_of_sq_le_half {a b : ℝ}
+    (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (h : a ^ 2 ≤ (1 / 2 : ℝ) * b ^ 2) :
+    a ≤ (Real.sqrt 2)⁻¹ * b := by
+  have hsqrt : 0 < Real.sqrt 2 := Real.sqrt_pos.2 (by norm_num)
+  have hinv : 0 ≤ (Real.sqrt 2)⁻¹ := inv_nonneg.mpr hsqrt.le
+  have hsquare : ((Real.sqrt 2)⁻¹ * b) ^ 2 = (1 / 2 : ℝ) * b ^ 2 := by
+    have hsqrtSq : (Real.sqrt 2) ^ 2 = (2 : ℝ) :=
+      Real.sq_sqrt (by norm_num)
+    field_simp
+    rw [hsqrtSq]
+    ring
+  have hsq : a ^ 2 ≤ ((Real.sqrt 2)⁻¹ * b) ^ 2 := by
+    rwa [hsquare]
+  exact (sq_le_sq₀ ha (mul_nonneg hinv hb)).mp hsq
+
+/-- The `1 / sqrt 2` averaging estimate in an irreducible real summand of
+a finite class-two group. -/
+theorem norm_orbitAverage_le_inv_sqrt_two_of_irreducible
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y C : Subgroup G) [Finite X]
+    (hgen : X ⊔ Y = ⊤)
+    (hcomm : ⁅Y, X⁆ ≤ C)
+    (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ 2 = 1)
+    (hirr : IsOrthogonallyIrreducible rho)
+    (hno : IsKazhdanPair.HasNoInvariantVectors G rho)
+    {v : E} (hvY : v ∈ KazhdanFixedSpace.fixedSubspace rho Y) :
+    ‖FiniteGroupAverage.orbitAverage
+        (KazhdanFixedSpace.restrictRepresentation rho X) v‖ ≤
+      (Real.sqrt 2)⁻¹ * ‖v‖ := by
+  have hscalar : ∀ y ∈ Y, ∀ x ∈ X,
+      rho ⁅y, x⁆ = 1 ∨ ∀ z : E, rho ⁅y, x⁆ z = -z := by
+    intro y hy x hx
+    have hc : ⁅y, x⁆ ∈ C :=
+      hcomm (Subgroup.commutator_mem_commutator hy hx)
+    exact central_involution_scalar rho hirr (hcentral hc) (hexp _ hc)
+  apply le_inv_sqrt_two_mul_of_sq_le_half (norm_nonneg _) (norm_nonneg _)
+  exact norm_orbitAverage_sq_le_half_of_scalar
+    rho X Y hgen hno hscalar hvY
+
 /-- On the part fixed by the commutator subgroup, the fixed spaces of the
 two generating subgroups are orthogonal.  The proof uses the literal finite
 average over `X`: modulo `C`, every point in the `X`-orbit of a `Y`-fixed
