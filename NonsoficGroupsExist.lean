@@ -22,6 +22,7 @@ import NonsoficGroupsExist.KunFinitePartition
 import NonsoficGroupsExist.KunPartitionBoundary
 import NonsoficGroupsExist.KunPartitionCrossing
 import NonsoficGroupsExist.KunBlockGraph
+import NonsoficGroupsExist.KunRepairGraph
 import NonsoficGroupsExist.KunUniformMovement
 import NonsoficGroupsExist.KunUniformRemoval
 import NonsoficGroupsExist.KunUniformRounding
