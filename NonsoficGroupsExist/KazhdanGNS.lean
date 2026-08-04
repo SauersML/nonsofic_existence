@@ -788,6 +788,87 @@ theorem norm_finiteTranslation_sub_le
       intro g hg
       rw [norm_smul, Real.norm_eq_abs]
 
+/-- Approximate multiplicativity makes every fixed finitely supported
+translation error uniformly negligible over all centered indicators. -/
+theorem finiteTranslation_hilbert_error_eventually
+    (A : SoficApproximation G) (s : G) (c : G →₀ ℝ)
+    (δ : ℝ) (hδ : 0 < δ) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+      ‖finiteExactTranslation (A.model n) (A.map n) U s c -
+          finiteComposedTranslation (A.model n) (A.map n) U s c‖ ^ 2 /
+        Fintype.card (A.model n) < δ := by
+  classical
+  let R : ℝ := ∑ g ∈ c.support, |c g| ^ 2
+  let m : ℝ := c.support.card
+  let η : ℝ := δ / (R * m + 1)
+  have hR : 0 ≤ R := Finset.sum_nonneg fun _ _ ↦ sq_nonneg _
+  have hm : 0 ≤ m := by positivity
+  have hden : 0 < R * m + 1 := by positivity
+  have hη : 0 < η := div_pos hδ hden
+  let F := insert s c.support
+  obtain ⟨Nerr, hNerr⟩ :=
+    sofic_multiplication_hilbert_error_on_finset_eventually A F η hη
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Nerr Ncard, fun n hn U ↦ ?_⟩
+  have hnerr : Nerr ≤ n := (le_max_left _ _).trans hn
+  have hncard : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcardNat : 0 < Fintype.card (A.model n) :=
+    Nat.zero_lt_of_lt (hNcard n hncard)
+  have hcard : (0 : ℝ) < Fintype.card (A.model n) := by
+    exact_mod_cast hcardNat
+  let e : G → EuclideanSpace ℝ (A.model n) := fun g ↦
+    permutationOperator (A.map n (s * g)) (centeredIndicator U) -
+      permutationOperator (A.map n s * A.map n g) (centeredIndicator U)
+  have herr (g : G) (hg : g ∈ c.support) :
+      ‖e g‖ ^ 2 / Fintype.card (A.model n) ≤ η := by
+    exact (hNerr n hnerr s (by simp [F]) g (by simp [F, hg]) U).le
+  have herr' (g : G) (hg : g ∈ c.support) :
+      ‖e g‖ ^ 2 ≤ η * Fintype.card (A.model n) := by
+    exact (div_le_iff₀ hcard).mp (herr g hg)
+  have hsumErr :
+      (∑ g ∈ c.support, ‖e g‖ ^ 2) ≤
+        m * (η * Fintype.card (A.model n)) := by
+    calc
+      (∑ g ∈ c.support, ‖e g‖ ^ 2) ≤
+          ∑ g ∈ c.support, η * Fintype.card (A.model n) :=
+        Finset.sum_le_sum fun g hg ↦ herr' g hg
+      _ = m * (η * Fintype.card (A.model n)) := by
+        simp [m]
+  have hcauchy :
+      (∑ g ∈ c.support, |c g| * ‖e g‖) ^ 2 ≤
+        R * ∑ g ∈ c.support, ‖e g‖ ^ 2 := by
+    simpa [R] using Finset.sum_mul_sq_le_sq_mul_sq c.support
+      (fun g ↦ |c g|) (fun g ↦ ‖e g‖)
+  have htriangle := norm_finiteTranslation_sub_le
+    (A.model n) (A.map n) U s c
+  change ‖finiteExactTranslation (A.model n) (A.map n) U s c -
+      finiteComposedTranslation (A.model n) (A.map n) U s c‖ ≤
+        ∑ g ∈ c.support, |c g| * ‖e g‖ at htriangle
+  have hsumNonneg : 0 ≤ ∑ g ∈ c.support, |c g| * ‖e g‖ :=
+    Finset.sum_nonneg fun _ _ ↦ mul_nonneg (abs_nonneg _) (norm_nonneg _)
+  have htriangleSq := (sq_le_sq₀ (norm_nonneg _) hsumNonneg).2 htriangle
+  calc
+    ‖finiteExactTranslation (A.model n) (A.map n) U s c -
+        finiteComposedTranslation (A.model n) (A.map n) U s c‖ ^ 2 /
+        Fintype.card (A.model n) ≤
+      (∑ g ∈ c.support, |c g| * ‖e g‖) ^ 2 /
+        Fintype.card (A.model n) :=
+      div_le_div_of_nonneg_right htriangleSq hcard.le
+    _ ≤ (R * ∑ g ∈ c.support, ‖e g‖ ^ 2) /
+        Fintype.card (A.model n) :=
+      div_le_div_of_nonneg_right hcauchy hcard.le
+    _ ≤ (R * (m * (η * Fintype.card (A.model n)))) /
+        Fintype.card (A.model n) := by
+      gcongr
+    _ = R * m * η := by field_simp
+    _ < δ := by
+      dsimp [η]
+      calc
+        R * m * (δ / (R * m + 1)) =
+            (R * m * δ) / (R * m + 1) := by ring
+        _ < δ := (div_lt_iff₀ hden).2 (by
+          nlinarith [mul_nonneg hR hm])
+
 /-- The scalar finite-stage displacement quantity is exactly the normalized
 squared norm of its explicit finite vector. -/
 theorem finiteAveragingDisplacementNormSq_eq_norm
