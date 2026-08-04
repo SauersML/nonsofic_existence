@@ -331,5 +331,46 @@ theorem incidentMovingLaplacian_norm_sq_le_with_defect
   have h := incidentMovingProjection_norm_sq_le_with_defect A hexp rho f hf r
   simpa [KazhdanFixedSpace.subgroupMovingProjection] using h
 
+/-- The moving components of the first two incident edges are orthogonal.
+Their edge subgroups are normal and together generate the source vertex
+group. -/
+theorem incidentFirstSecondMoving_inner_eq_zero
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (r : A2Root) :
+    inner ℝ
+      (KazhdanFixedSpace.subgroupMovingProjection rho (A.vertexGroup r)
+        (f r - f (neighbor r 0)))
+      (KazhdanFixedSpace.subgroupMovingProjection rho (A.vertexGroup r)
+        (f r - f (neighbor r 1))) = 0 := by
+  let L := A.vertexGroup r
+  let W := KazhdanFixedSpace.subgroupMovingSubspace rho L
+  letI : CompleteSpace W := by
+    dsimp [W, KazhdanFixedSpace.subgroupMovingSubspace]
+    exact (KazhdanFixedSpace.fixedSubspace rho L).isClosed_orthogonal.completeSpace_coe
+  let rhoW := KazhdanFixedSpace.subgroupMovingRepresentation rho L
+  let H := (A.leftEdgeGroup r).subgroupOf L
+  let K := (A.rightEdgeGroup r).subgroupOf L
+  let d : Fin 4 → E := fun n ↦ f r - f (neighbor r n)
+  let p : Fin 4 → W := fun n ↦
+    ⟨KazhdanFixedSpace.subgroupMovingProjection rho L (d n),
+      KazhdanFixedSpace.subgroupMovingProjection_mem rho L (d n)⟩
+  have hd (n : Fin 4) : d n ∈
+      KazhdanFixedSpace.fixedSubspace rho (edgeGroup A r n) :=
+    vertexFixed_sub_neighbor_mem_edgeFixed A rho f hf r n
+  have hp (n : Fin 4) : p n ∈ KazhdanFixedSpace.fixedSubspace rhoW
+      ((edgeGroup A r n).subgroupOf L) :=
+    KazhdanFixedSpace.subgroupMovingProjection_mem_restricted_fixedSubspace
+      rho (edgeGroup A r n) L (edgeGroup_le_sourceVertex A r n) (hd n)
+  letI : H.Normal := A.leftEdgeGroup_normalIn_vertexGroup r
+  have hedge := KazhdanFixedSpace.fixedSubspaces_isOrtho_of_normal_generate
+    rhoW H K (A.edgeSubgroups_sup_top r)
+      (KazhdanFixedSpace.subgroupMovingRepresentation_hasNoInvariantVectors rho L)
+  have hinner : inner ℝ (p 0) (p 1) = 0 :=
+    hedge.inner_eq (by simpa [H, edgeGroup] using hp 0)
+      (by simpa [K, edgeGroup] using hp 1)
+  exact hinner
+
 end A2MagicGraph
 end NonsoficGroupsExist

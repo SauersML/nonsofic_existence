@@ -339,6 +339,79 @@ theorem triangle_second_edge_norm_sq_eq
   rw [← hproj, ← hmove]
   exact hpyth
 
+/-- Equation (5.10): the third side of an A₂ triangle is controlled by the
+fixed and moving components of the two sides meeting at `Gᵢₖ`. -/
+theorem triangle_third_edge_norm_sq_le
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    let rij : A2Root := ⟨(i, j), hij⟩
+    let rik : A2Root := ⟨(i, k), hik⟩
+    let rjk : A2Root := ⟨(j, k), hjk⟩
+    let L := A.vertexGroup rik
+    let a := f rij - f rik
+    let b := f rik - f rjk
+    ‖f rij - f rjk‖ ^ 2 ≤
+      2 * (‖(KazhdanFixedSpace.fixedProjection rho L a : E)‖ ^ 2 +
+        ‖(KazhdanFixedSpace.fixedProjection rho L b : E)‖ ^ 2) +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho L a‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho L b‖ ^ 2 := by
+  let rij : A2Root := ⟨(i, j), hij⟩
+  let rik : A2Root := ⟨(i, k), hik⟩
+  let rjk : A2Root := ⟨(j, k), hjk⟩
+  let L := A.vertexGroup rik
+  let a : E := f rij - f rik
+  let b : E := f rik - f rjk
+  let c : E := f rij - f rjk
+  have hthird : a2ThirdIndex i k = j :=
+    a2ThirdIndex_eq_of_pairwise_ne i j k hij hik hjk
+  have hn0 : neighbor rik 0 = rij := by
+    apply Subtype.ext
+    simp [neighbor, rik, rij, hthird]
+  have hn1 : neighbor rik 1 = rjk := by
+    apply Subtype.ext
+    simp [neighbor, rik, rjk, hthird]
+  have hbase := incidentFirstSecondMoving_inner_eq_zero A rho f hf rik
+  rw [hn0, hn1] at hbase
+  have ha : a = -(f rik - f rij) := by
+    dsimp [a]
+    module
+  have horth : inner ℝ
+      (KazhdanFixedSpace.subgroupMovingProjection rho L a)
+      (KazhdanFixedSpace.subgroupMovingProjection rho L b) = 0 := by
+    rw [ha, map_neg, inner_neg_left]
+    exact neg_eq_zero.mpr hbase
+  have hc : c = a + b := by
+    dsimp [a, b, c]
+    module
+  have hfixed : (KazhdanFixedSpace.fixedProjection rho L c : E) =
+      (KazhdanFixedSpace.fixedProjection rho L a : E) +
+        KazhdanFixedSpace.fixedProjection rho L b := by
+    rw [hc, map_add]
+    rfl
+  have hmoving : KazhdanFixedSpace.subgroupMovingProjection rho L c =
+      KazhdanFixedSpace.subgroupMovingProjection rho L a +
+        KazhdanFixedSpace.subgroupMovingProjection rho L b := by
+    rw [hc, map_add]
+  have hfixedBound := HilbertEpsilonOrthogonality.norm_add_sq_le_two
+    (KazhdanFixedSpace.fixedProjection rho L a : E)
+    (KazhdanFixedSpace.fixedProjection rho L b : E)
+  have hmovingEq : ‖KazhdanFixedSpace.subgroupMovingProjection rho L c‖ ^ 2 =
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho L a‖ ^ 2 +
+        ‖KazhdanFixedSpace.subgroupMovingProjection rho L b‖ ^ 2 := by
+    rw [hmoving]
+    simpa [pow_two] using norm_add_sq_eq_norm_sq_add_norm_sq_real horth
+  have hpyth := KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho L c
+  change ‖c‖ ^ 2 ≤
+    2 * (‖(KazhdanFixedSpace.fixedProjection rho L a : E)‖ ^ 2 +
+      ‖(KazhdanFixedSpace.fixedProjection rho L b : E)‖ ^ 2) +
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho L a‖ ^ 2 +
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho L b‖ ^ 2
+  rw [hpyth, hfixed, hmovingEq]
+  nlinarith
+
 /-- Difference along an oriented edge of the magic graph. -/
 def edgeDifference (f : A2Root → E) (r : A2Root) (n : Fin 4) : E :=
   f r - f (neighbor r n)
