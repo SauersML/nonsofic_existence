@@ -702,6 +702,40 @@ noncomputable def normalizedCorrelation (M : FiniteModel)
       (permutationOperator (τ g) (centeredIndicator U)) /
     Fintype.card M
 
+/-- Normalized Gram coefficient between two translated centered
+characteristic vectors. -/
+noncomputable def normalizedGramCorrelation (M : FiniteModel)
+    (τ : G → Equiv.Perm M) (U : Finset M) (g h : G) : ℝ :=
+  inner ℝ (permutationOperator (τ g) (centeredIndicator U))
+      (permutationOperator (τ h) (centeredIndicator U)) /
+    Fintype.card M
+
+omit [Group G] in
+/-- A Gram coefficient is exactly the coefficient of the relative
+permutation `(τ g)⁻¹ τ h`. -/
+theorem normalizedGramCorrelation_eq_relative (M : FiniteModel)
+    (τ : G → Equiv.Perm M) (U : Finset M) (g h : G) :
+    normalizedGramCorrelation M τ U g h =
+      inner ℝ (centeredIndicator U)
+          (permutationOperator ((τ g)⁻¹ * τ h) (centeredIndicator U)) /
+        Fintype.card M := by
+  unfold normalizedGramCorrelation
+  let x := centeredIndicator U
+  have hop :
+      permutationOperator (τ g)
+          (permutationOperator ((τ g)⁻¹ * τ h) x) =
+        permutationOperator (τ h) x := by
+    have hcomp := congrArg
+      (fun e : EuclideanSpace ℝ M ≃ₗᵢ[ℝ] EuclideanSpace ℝ M ↦ e x)
+      (permutationOperator_mul (τ g) ((τ g)⁻¹ * τ h)).symm
+    simpa using hcomp
+  have hinner :
+    inner ℝ (permutationOperator (τ g) x) (permutationOperator (τ h) x) =
+      inner ℝ x (permutationOperator ((τ g)⁻¹ * τ h) x) := by
+    rw [← hop]
+    exact (permutationOperator (τ g)).inner_map_map _ _
+  exact congrArg (fun r : ℝ ↦ r / Fintype.card M) hinner
+
 omit [Group G] in
 /-- Every normalized centered-indicator coefficient lies in `[-1,1]`, even
 for an empty finite model. -/
