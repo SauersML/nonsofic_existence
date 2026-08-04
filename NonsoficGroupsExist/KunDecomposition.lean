@@ -18,6 +18,8 @@ namespace KunDecomposition
 
 open KunDiagonalPartition
 open KunLocalNeighborhood
+open KunLocalNeighborhood.SoficApproximation
+open KunSupport
 open KunMarkerSelection
 open KunRepairGraph
 open KunBadBlocks
@@ -65,7 +67,8 @@ theorem exists_reindexed_expanderDecomposition
   let X : ℕ → FiniteMultiGraph := fun n ↦
     generatorGraph (A'.model n) S (A'.map n)
   let E : ∀ n, Finset (A'.model n) := fun n ↦
-    A'.localNeighborhoodBad S hsymm hgen q n
+    KunLocalNeighborhood.SoficApproximation.localNeighborhoodBad
+      A' S hsymm hgen q n
   let B : ∀ n, Finset (A'.model n) := fun n ↦
     badVertices (X n) (P n) (E n) K
   have hmarkerExists (n : ℕ) :
@@ -97,7 +100,8 @@ theorem exists_reindexed_expanderDecomposition
   have hE : Negligible (fun n ↦ (Fintype.card (A'.model n) : ℝ))
       (fun n ↦ ((E n).card : ℝ)) := by
     simpa [A', E] using
-      (A'.localNeighborhoodBad_negligible S hsymm hgen q)
+      (KunLocalNeighborhood.SoficApproximation.localNeighborhoodBad_negligible
+        A' S hsymm hgen q)
   have hB : Negligible (fun n ↦ (Fintype.card (A'.model n) : ℝ))
       (fun n ↦ ((B n).card : ℝ)) := by
     have hmajor := Negligible.add hE
@@ -107,7 +111,16 @@ theorem exists_reindexed_expanderDecomposition
     intro n
     have hcard := card_badVertices_le (X n) (P n) (E n) K
     rw [card_crossingStub] at hcard
-    exact_mod_cast hcard
+    have hcard' : (B n).card ≤ (E n).card +
+        2 * K * ((X n).crossingEdges (P n).block).card := by
+      calc
+        (B n).card ≤ (E n).card +
+            K * (2 * ((X n).crossingEdges (P n).block).card) := by
+          change (badVertices (X n) (P n) (E n) K).card ≤ _
+          exact hcard
+        _ = (E n).card +
+            2 * K * ((X n).crossingEdges (P n).block).card := by ring
+    exact_mod_cast hcard'
   have hbadSource : Negligible
       (fun n ↦ (Fintype.card (A'.model n) : ℝ))
       (fun n ↦ ((badSourceEdges (X n) (B n)).card : ℝ)) := by
@@ -144,15 +157,32 @@ theorem exists_reindexed_expanderDecomposition
     graph := Z
     vertexEquiv := fun n ↦ Equiv.refl (A'.model n)
     edit_negligible := by
-      simpa [A', X, Z] using hedit
+      apply Negligible.congr hedit
+      intro n
+      exact_mod_cast
+        (FiniteMultiGraph.editDistance_transport_right
+          (X n) (Z n) (Equiv.refl _)).symm
     editWitness := fun n ↦ by
-      simpa [A', X, Z] using
-        (editWitness (X n) (P n) (B n) (marker n) (marker_ne n))
+      let W := editWitness (X n) (P n) (B n) (marker n) (marker_ne n)
+      exact {
+        sourceKept := W.sourceKept
+        targetKept := W.targetKept
+        edgeEquiv := W.edgeEquiv
+        preservesEndpoints := by
+          intro a
+          exact W.preservesEndpoints a }
     unmatched_negligible := by
-      simpa [A', X, Z] using hunmatched
+      apply Negligible.congr hunmatched
+      intro n
+      rfl
     edge_inside := by
       intro n e
-      simpa [A', X, Z] using
+      change
+        (singletonizeBadBlocks (X n) (P n) (E n) K).block
+            ((Equiv.refl _) ((Z n).first e)) =
+          (singletonizeBadBlocks (X n) (P n) (E n) K).block
+            ((Equiv.refl _) ((Z n).second e))
+      simpa only [Equiv.refl_apply] using
         edge_inside_refined (X n) (P n) (E n) K
           (marker n) (marker_ne n) (marker_spec n).2.2.1 e
     component_expands := by
@@ -161,7 +191,9 @@ theorem exists_reindexed_expanderDecomposition
         (P n) (E n) K (marker n) (marker_ne n) (marker_spec n).2.2.1
         r q
       · intro s
-        apply A'.card_forwardNeighborhood_ge S hsymm hgen q n (marker n s)
+        apply
+          KunLocalNeighborhood.SoficApproximation.card_forwardNeighborhood_ge
+            A' S hsymm hgen q n (marker n s)
         exact (marker_spec n).2.1 s
       · exact (marker_spec n).2.2.2.1
       · exact (marker_spec n).2.2.2.2
