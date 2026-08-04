@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.KunPartition
 import NonsoficGroupsExist.KunPartitionCrossing
+import NonsoficGroupsExist.KunBlockGraph
 import NonsoficGroupsExist.KunUniformDecompositionStep
 
 /-!
@@ -18,6 +19,7 @@ namespace KunFinitePartition
 open KazhdanFiniteModel
 open KunPartition
 open KunPartitionCrossing
+open KunBlockGraph
 open KunUniformMovement
 open KunUniformRounding
 open KunUniformDecompositionStep
@@ -52,6 +54,12 @@ theorem finiteModel_propertyT_partition
                 P.block).card : ℝ) ≤
               2 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
                 2 * target * Fintype.card (A.model n) ∧
+            ((generatorGraph (A.model n) S (A.map n)).editDistance
+                (KunBlockGraph.graph
+                  (generatorGraph (A.model n) S (A.map n)) P)
+                (Equiv.refl (A.model n)) : ℝ) ≤
+              4 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+                4 * target * Fintype.card (A.model n) ∧
             ∀ y : A.model n, ∀ U : Finset (A.model n),
               U ⊆ P.block y → U.Nonempty →
               2 * U.card ≤ (P.block y).card →
@@ -100,8 +108,32 @@ theorem finiteModel_propertyT_partition
         simpa [X, P] using hcrossBase
       _ ≤ 2 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
           2 * target * Fintype.card (A.model n) := by gcongr
+  have heditNat := editDistance_le_two_mul_crossing X P
+  have heditReal :
+      (X.editDistance (KunBlockGraph.graph X P) (Equiv.refl X.vertex) : ℝ) ≤
+        2 * ((X.crossingEdges P.block).card : ℝ) := by
+    exact_mod_cast heditNat
+  have hedit :
+      ((generatorGraph (A.model n) S (A.map n)).editDistance
+          (KunBlockGraph.graph
+            (generatorGraph (A.model n) S (A.map n)) P)
+          (Equiv.refl (A.model n)) : ℝ) ≤
+        4 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+          4 * target * Fintype.card (A.model n) := by
+    calc
+      ((generatorGraph (A.model n) S (A.map n)).editDistance
+          (KunBlockGraph.graph
+            (generatorGraph (A.model n) S (A.map n)) P)
+          (Equiv.refl (A.model n)) : ℝ) ≤
+        2 * (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+          P.block).card : ℝ) := by simpa [X] using heditReal
+      _ ≤ 2 * (2 * (S.card : ℝ) *
+          (Bcontract.card + Bmovement.card) +
+            2 * target * Fintype.card (A.model n)) := by gcongr
+      _ = 4 * (S.card : ℝ) * (Bcontract.card + Bmovement.card) +
+          4 * target * Fintype.card (A.model n) := by ring
   refine ⟨Bcontract, Bmovement, P, hBcontractCard, hBmovementCard,
-    hcross, fun y U hUP hU hhalf ↦ ?_⟩
+    hcross, hedit, fun y U hUP hU hhalf ↦ ?_⟩
   exact blockStructure_block_expands (X := X) B γ target hrule y U hUP hU hhalf
 
 end KunFinitePartition
