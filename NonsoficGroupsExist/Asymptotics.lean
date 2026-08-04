@@ -34,6 +34,13 @@ def Diverges (a : ℕ → ℝ) : Prop :=
 
 namespace Vanishing
 
+/-- A pointwise cofinal reindexing preserves convergence to zero. -/
+theorem reindex {a : ℕ → ℝ} (ha : Vanishing a) (φ : ℕ → ℕ)
+    (hφ : ∀ n, n ≤ φ n) : Vanishing fun n ↦ a (φ n) := by
+  intro ε hε
+  obtain ⟨N, hN⟩ := ha ε hε
+  exact ⟨N, fun n hn ↦ hN (φ n) (hn.trans (hφ n))⟩
+
 /-- Removing finitely many initial terms preserves convergence to zero. -/
 theorem shift {a : ℕ → ℝ} (ha : Vanishing a) (k : ℕ) :
     Vanishing fun n ↦ a (n + k) := by
@@ -153,6 +160,13 @@ def Negligible (N : ℕ → ℝ) (e : ℕ → ℝ) : Prop :=
   Vanishing fun n ↦ e n / N n
 
 namespace Negligible
+
+/-- Reindexing numerator and denominator along a pointwise cofinal map
+preserves negligible density. -/
+theorem reindex {N e : ℕ → ℝ} (h : Negligible N e) (φ : ℕ → ℕ)
+    (hφ : ∀ n, n ≤ φ n) :
+    Negligible (fun n ↦ N (φ n)) (fun n ↦ e (φ n)) := by
+  exact Vanishing.reindex h φ hφ
 
 /-- Removing finitely many initial terms preserves a negligible-density
 estimate, with numerator and denominator shifted together. -/
