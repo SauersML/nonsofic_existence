@@ -150,6 +150,22 @@ theorem backwardNeighborhood_subset_succ
   subset_backwardStep M τ S _
 
 omit [Group G] in
+/-- Backward neighborhoods are monotone in their time horizon. -/
+theorem backwardNeighborhood_mono_time
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) {k l : ℕ} (hkl : k ≤ l) (U : Finset M) :
+    backwardNeighborhood M τ S k U ⊆
+      backwardNeighborhood M τ S l U := by
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hkl
+  clear hkl
+  induction d with
+  | zero => exact Finset.Subset.rfl
+  | succ d ih =>
+      exact ih.trans (by
+        simpa [Nat.add_assoc] using
+          backwardNeighborhood_subset_succ M τ S (k + d) U)
+
+omit [Group G] in
 /-- Iterating one more backward step commutes with an existing number of
 backward steps. -/
 theorem backwardNeighborhood_step_commute
