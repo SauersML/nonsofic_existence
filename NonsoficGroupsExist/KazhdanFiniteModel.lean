@@ -753,6 +753,39 @@ theorem normalizedGramCorrelation_comm (M : FiniteModel)
   rw [real_inner_comm]
 
 omit [Group G] in
+/-- The squared norm of a finite combination of translated centered
+indicators, normalized by the model size. -/
+noncomputable def normalizedCombinationNormSq
+    {I : Type*} (F : Finset I) (c : I → ℝ)
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (a : I → G) : ℝ :=
+  ‖∑ i ∈ F, c i • permutationOperator (τ (a i)) (centeredIndicator U)‖ ^ 2 /
+    Fintype.card M
+
+omit [Group G] in
+/-- The normalized squared norm is exactly the corresponding finite Gram
+quadratic form. -/
+theorem normalizedCombinationNormSq_eq_gram
+    {I : Type*} (F : Finset I) (c : I → ℝ)
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (a : I → G) :
+    normalizedCombinationNormSq F c M τ U a =
+      ∑ i ∈ F, ∑ j ∈ F,
+        c i * c j * normalizedGramCorrelation M τ U (a i) (a j) := by
+  classical
+  unfold normalizedCombinationNormSq normalizedGramCorrelation
+  rw [← real_inner_self_eq_norm_sq]
+  simp_rw [sum_inner, inner_sum, real_inner_smul_left,
+    real_inner_smul_right]
+  rw [Finset.sum_div]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [Finset.sum_div]
+  apply Finset.sum_congr rfl
+  intro j hj
+  ring
+
+omit [Group G] in
 /-- Every finite matrix of normalized Gram coefficients is positive
 semidefinite. -/
 theorem normalizedGramCorrelation_quadratic_nonneg
@@ -761,49 +794,8 @@ theorem normalizedGramCorrelation_quadratic_nonneg
     (a : I → G) :
     0 ≤ ∑ i ∈ F, ∑ j ∈ F,
       c i * c j * normalizedGramCorrelation M τ U (a i) (a j) := by
-  classical
-  by_cases hcard : Fintype.card M = 0
-  · simp [normalizedGramCorrelation, hcard]
-  · have hcardNat : 0 < Fintype.card M := Nat.pos_of_ne_zero hcard
-    have hcardReal : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
-    let v : I → EuclideanSpace ℝ M := fun i ↦
-      permutationOperator (τ (a i)) (centeredIndicator U)
-    let z : EuclideanSpace ℝ M := ∑ i ∈ F, c i • v i
-    have hz : 0 ≤ ‖z‖ ^ 2 := sq_nonneg _
-    have hsum :
-        (∑ i ∈ F, ∑ j ∈ F, c i * c j * inner ℝ (v i) (v j)) =
-          ‖z‖ ^ 2 := by
-      calc
-        (∑ i ∈ F, ∑ j ∈ F, c i * c j * inner ℝ (v i) (v j)) =
-            ∑ i ∈ F, inner ℝ (c i • v i) z := by
-          apply Finset.sum_congr rfl
-          intro i hi
-          rw [show z = ∑ j ∈ F, c j • v j by rfl, inner_sum]
-          apply Finset.sum_congr rfl
-          intro j hj
-          rw [inner_smul_left, inner_smul_right]
-          simp [mul_assoc]
-        _ = inner ℝ z z := by
-          rw [show z = ∑ i ∈ F, c i • v i by rfl, sum_inner]
-        _ = ‖z‖ ^ 2 := real_inner_self_eq_norm_sq z
-    unfold normalizedGramCorrelation
-    calc
-      0 ≤ ‖z‖ ^ 2 / Fintype.card M :=
-        div_nonneg hz hcardReal.le
-      _ = ∑ i ∈ F, ∑ j ∈ F,
-          c i * c j *
-            (inner ℝ (permutationOperator (τ (a i)) (centeredIndicator U))
-              (permutationOperator (τ (a j)) (centeredIndicator U)) /
-                Fintype.card M) := by
-        rw [← hsum]
-        rw [Finset.sum_div]
-        apply Finset.sum_congr rfl
-        intro i hi
-        rw [Finset.sum_div]
-        apply Finset.sum_congr rfl
-        intro j hj
-        simp only [v]
-        ring
+  rw [← normalizedCombinationNormSq_eq_gram]
+  exact div_nonneg (sq_nonneg _) (Nat.cast_nonneg _)
 
 omit [Group G] in
 /-- Changing a permutation on a set of normalized Hamming size `d` changes

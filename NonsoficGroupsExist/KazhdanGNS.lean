@@ -371,6 +371,119 @@ theorem inner_finiteCombination (p : PositiveDefiniteFunction G)
     real_inner_smul_right, inner_kernelVector]
   simp [mul_assoc]
 
+/-- A finite linear combination whose index type may retain repeated group
+words.  This is convenient for powers of an averaging operator. -/
+noncomputable def indexedCombination {I : Type*}
+    (p : PositiveDefiniteFunction G) (F : Finset I)
+    (a : I → G) (c : I → ℝ) : HilbertSpace p :=
+  ∑ i ∈ F, c i • kernelVector p (a i)
+
+/-- Squared norms of indexed cyclic combinations are their finite Gram
+quadratic forms. -/
+theorem norm_indexedCombination_sq {I : Type*}
+    (p : PositiveDefiniteFunction G) (F : Finset I)
+    (a : I → G) (c : I → ℝ) :
+    ‖indexedCombination p F a c‖ ^ 2 =
+      ∑ i ∈ F, ∑ j ∈ F, c i * c j * p ((a i)⁻¹ * a j) := by
+  classical
+  rw [← real_inner_self_eq_norm_sq]
+  simp_rw [indexedCombination, sum_inner, inner_sum,
+    real_inner_smul_left, real_inner_smul_right, inner_kernelVector]
+  simp [mul_assoc]
+
+/-- The hyperreal Gram quadratic form associated to a fixed finite cyclic
+combination across a sofic approximation. -/
+noncomputable def combinationNormSqHyperreal {I : Type*}
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (F : Finset I) (a : I → G) (c : I → ℝ) : Hyperreal :=
+  ∑ i ∈ F, ∑ j ∈ F,
+    ((c i * c j : ℝ) : Hyperreal) * gramCorrelationHyperreal A U (a i) (a j)
+
+/-- The hyperreal Gram form is represented by the sequence of normalized
+finite-model squared norms. -/
+theorem combinationNormSqHyperreal_eq_ofSeq {I : Type*}
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (F : Finset I) (a : I → G) (c : I → ℝ) :
+    combinationNormSqHyperreal A U F a c = Hyperreal.ofSeq (fun n ↦
+      normalizedCombinationNormSq F c (A.model n) (A.map n) (U n) a) := by
+  classical
+  change (∑ i ∈ F, ∑ j ∈ F,
+      ofSeqRingHom (fun _ ↦ c i * c j) *
+        ofSeqRingHom (fun n ↦ normalizedGramCorrelation
+          (A.model n) (A.map n) (U n) (a i) (a j))) =
+    ofSeqRingHom (fun n ↦ normalizedCombinationNormSq
+      F c (A.model n) (A.map n) (U n) a)
+  rw [show (fun n ↦ normalizedCombinationNormSq
+      F c (A.model n) (A.map n) (U n) a) =
+      ∑ i ∈ F, ∑ j ∈ F, fun n ↦ c i * c j *
+        normalizedGramCorrelation
+          (A.model n) (A.map n) (U n) (a i) (a j) by
+        funext n
+        rw [normalizedCombinationNormSq_eq_gram]
+        simp]
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [← map_mul]
+  congr 1
+
+/-- The hyperreal normalized squared norm is finite. -/
+theorem combinationNormSqHyperreal_finite {I : Type*}
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (F : Finset I) (a : I → G) (c : I → ℝ) :
+    0 ≤ ArchimedeanClass.mk (combinationNormSqHyperreal A U F a c) := by
+  apply hyperreal_finset_sum_finite F
+  intro i hi
+  apply hyperreal_finset_sum_finite F
+  intro j hj
+  exact hyperreal_mul_finite (hyperreal_coe_finite (c i * c j))
+    (gramCorrelationHyperreal_finite A U (a i) (a j))
+
+/-- Standard part of every fixed normalized finite Gram norm is the squared
+norm of the corresponding vector in the limiting GNS representation. -/
+theorem stdPart_combinationNormSqHyperreal {I : Type*}
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n))
+    (F : Finset I) (a : I → G) (c : I → ℝ) :
+    ArchimedeanClass.stdPart (combinationNormSqHyperreal A U F a c) =
+      ‖indexedCombination (limitingPositiveDefiniteFunction A U) F a c‖ ^ 2 := by
+  classical
+  let term : I → I → Hyperreal := fun i j ↦
+    ((c i * c j : ℝ) : Hyperreal) *
+      gramCorrelationHyperreal A U (a i) (a j)
+  have hterm (i j : I) : 0 ≤ ArchimedeanClass.mk (term i j) :=
+    hyperreal_mul_finite (hyperreal_coe_finite (c i * c j))
+      (gramCorrelationHyperreal_finite A U (a i) (a j))
+  have hinner (i : I) :
+      0 ≤ ArchimedeanClass.mk (∑ j ∈ F, term i j) :=
+    hyperreal_finset_sum_finite F (term i) fun j hj ↦ hterm i j
+  rw [norm_indexedCombination_sq]
+  change ArchimedeanClass.stdPart
+      (∑ i ∈ F, ∑ j ∈ F, term i j) = _
+  calc
+    ArchimedeanClass.stdPart (∑ i ∈ F, ∑ j ∈ F, term i j) =
+        ∑ i ∈ F, ArchimedeanClass.stdPart (∑ j ∈ F, term i j) := by
+      exact stdPart_finset_sum F (fun i ↦ ∑ j ∈ F, term i j)
+        (fun i hi ↦ hinner i)
+    _ = ∑ i ∈ F, ∑ j ∈ F,
+        ArchimedeanClass.stdPart (term i j) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      exact stdPart_finset_sum F (term i) fun j hj ↦ hterm i j
+    _ = ∑ i ∈ F, ∑ j ∈ F,
+        c i * c j * limitingCorrelation A U ((a i)⁻¹ * a j) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      apply Finset.sum_congr rfl
+      intro j hj
+      rw [ArchimedeanClass.stdPart_mul
+        (hyperreal_coe_finite (c i * c j))
+        (gramCorrelationHyperreal_finite A U (a i) (a j)),
+        Hyperreal.stdPart_coe,
+        ← limitingCorrelation_inv_mul_eq_stdPart_gram A U (a i) (a j)]
+
 /-- Orbit averaging the cyclic vector is the corresponding uniform finite
 linear combination of kernel vectors. -/
 theorem orbitAverage_kernelVector (p : PositiveDefiniteFunction G)
@@ -394,6 +507,20 @@ theorem norm_orbitAverage_sq_sub_le
           kernelVector p 1‖ := by
   exact KazhdanOrthogonal.norm_orbitAverage_sq_sub_le
     hQ S hQS hone hεone (representation p) (kernelVector p 1)
+
+/-- The iterated Kun contraction in the concrete cyclic GNS
+representation. -/
+theorem norm_iterate_orbitAverage_succ_sub_le
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (p : PositiveDefiniteFunction G) (k : ℕ) :
+    let A := IsKazhdanPair.orbitAverage S (representation p)
+    ‖(A^[k + 1]) (kernelVector p 1) -
+        (A^[k]) (kernelVector p 1)‖ ≤
+      (1 - ε ^ 2 / (4 * S.card)) ^ k *
+        ‖A (kernelVector p 1) - kernelVector p 1‖ := by
+  exact KazhdanOrthogonal.norm_iterate_orbitAverage_succ_sub_le
+    hQ S hQS hone hεone (representation p) (kernelVector p 1) k
 
 end KazhdanGNS
 end NonsoficGroupsExist
