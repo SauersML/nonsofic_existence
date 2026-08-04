@@ -742,6 +742,142 @@ theorem finiteComposedTranslation_eq_apply
         map_add, ih]
       simp [finiteComposedTranslation, finiteFinsuppCombination]
 
+/-- The genuine Markov operator of one finite permutation model.  Unlike the
+exact-word combinations above, this operator composes the permutations that
+actually occur in the model. -/
+noncomputable def finiteModelAverage
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
+    (x : EuclideanSpace ℝ M) : EuclideanSpace ℝ M :=
+  (S.card : ℝ)⁻¹ • ∑ s ∈ S, permutationOperator (τ s) x
+
+omit [Group G] in
+/-- The finite-model Markov operator is linear on differences. -/
+theorem finiteModelAverage_sub
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
+    (x y : EuclideanSpace ℝ M) :
+    finiteModelAverage M τ S (x - y) =
+      finiteModelAverage M τ S x - finiteModelAverage M τ S y := by
+  simp [finiteModelAverage, Finset.sum_sub_distrib, smul_sub]
+
+omit [Group G] in
+/-- Averaging a nonempty finite family of orthogonal permutation operators is
+norm nonincreasing. -/
+theorem norm_finiteModelAverage_le
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (S : Finset G)
+    (hS : S.Nonempty) (x : EuclideanSpace ℝ M) :
+    ‖finiteModelAverage M τ S x‖ ≤ ‖x‖ := by
+  have hcardNat : 0 < S.card := Finset.card_pos.mpr hS
+  have hcard : (0 : ℝ) < S.card := by exact_mod_cast hcardNat
+  calc
+    ‖finiteModelAverage M τ S x‖ =
+        (S.card : ℝ)⁻¹ * ‖∑ s ∈ S, permutationOperator (τ s) x‖ := by
+      rw [finiteModelAverage, norm_smul, Real.norm_eq_abs,
+        abs_of_pos (inv_pos.mpr hcard)]
+    _ ≤ (S.card : ℝ)⁻¹ *
+        ∑ s ∈ S, ‖permutationOperator (τ s) x‖ := by
+      gcongr
+      exact norm_sum_le _ _
+    _ = ‖x‖ := by
+      simp [hcard.ne']
+
+omit [Group G] in
+/-- A Cauchy--Schwarz bound for a finite average of error vectors, normalized
+by the size of the ambient finite model. -/
+theorem normalized_norm_average_le {I : Type*}
+    (M : FiniteModel) (S : Finset I) (hS : S.Nonempty)
+    (e : I → EuclideanSpace ℝ M) (δ : ℝ)
+    (hcard : (0 : ℝ) < Fintype.card M)
+    (he : ∀ i ∈ S, ‖e i‖ ^ 2 / Fintype.card M ≤ δ) :
+    ‖(S.card : ℝ)⁻¹ • ∑ i ∈ S, e i‖ ^ 2 /
+        Fintype.card M ≤ δ := by
+  have hScardNat : 0 < S.card := Finset.card_pos.mpr hS
+  have hScard : (0 : ℝ) < S.card := by exact_mod_cast hScardNat
+  have he' (i : I) (hi : i ∈ S) :
+      ‖e i‖ ^ 2 ≤ δ * Fintype.card M :=
+    (div_le_iff₀ hcard).mp (he i hi)
+  have hsumSq :
+      ∑ i ∈ S, ‖e i‖ ^ 2 ≤
+        (S.card : ℝ) * (δ * Fintype.card M) := by
+    calc
+      ∑ i ∈ S, ‖e i‖ ^ 2 ≤
+          ∑ i ∈ S, δ * Fintype.card M :=
+        Finset.sum_le_sum fun i hi ↦ he' i hi
+      _ = (S.card : ℝ) * (δ * Fintype.card M) := by simp
+  have hcauchy :
+      (∑ i ∈ S, ‖e i‖) ^ 2 ≤
+        (S.card : ℝ) * ∑ i ∈ S, ‖e i‖ ^ 2 := by
+    simpa using Finset.sum_mul_sq_le_sq_mul_sq S
+      (fun _ ↦ (1 : ℝ)) (fun i ↦ ‖e i‖)
+  have htriangle :
+      ‖(S.card : ℝ)⁻¹ • ∑ i ∈ S, e i‖ ≤
+        (S.card : ℝ)⁻¹ * ∑ i ∈ S, ‖e i‖ := by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hScard)]
+    gcongr
+    exact norm_sum_le _ _
+  have hsumNonneg : 0 ≤ ∑ i ∈ S, ‖e i‖ :=
+    Finset.sum_nonneg fun _ _ ↦ norm_nonneg _
+  have hright : 0 ≤ (S.card : ℝ)⁻¹ * ∑ i ∈ S, ‖e i‖ :=
+    mul_nonneg (inv_nonneg.mpr hScard.le) hsumNonneg
+  have htriangleSq := (sq_le_sq₀ (norm_nonneg _) hright).2 htriangle
+  calc
+    ‖(S.card : ℝ)⁻¹ • ∑ i ∈ S, e i‖ ^ 2 /
+        Fintype.card M ≤
+      ((S.card : ℝ)⁻¹ * ∑ i ∈ S, ‖e i‖) ^ 2 /
+        Fintype.card M :=
+      div_le_div_of_nonneg_right htriangleSq hcard.le
+    _ ≤ ((S.card : ℝ)⁻¹ ^ 2 *
+        ((S.card : ℝ) * ∑ i ∈ S, ‖e i‖ ^ 2)) /
+          Fintype.card M := by
+      gcongr
+      nlinarith [hcauchy]
+    _ ≤ ((S.card : ℝ)⁻¹ ^ 2 *
+        ((S.card : ℝ) *
+          ((S.card : ℝ) * (δ * Fintype.card M)))) /
+            Fintype.card M := by
+      gcongr
+    _ = δ := by field_simp
+
+/-- The exact group-word combination at the next time is the average of the
+exact left translations of the current combination. -/
+theorem finiteFinsuppCombination_averagingCoefficients_succ
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (S : Finset G) (k : ℕ) :
+    finiteFinsuppCombination M τ U (averagingCoefficients S (k + 1)) =
+      (S.card : ℝ)⁻¹ • ∑ s ∈ S,
+        finiteExactTranslation M τ U s (averagingCoefficients S k) := by
+  rw [averagingCoefficients]
+  simp only [map_smul, map_sum]
+  rfl
+
+omit [Group G] in
+/-- Applying the genuine finite Markov operator to an exact-word combination
+is the average of its composed translations. -/
+theorem finiteModelAverage_finiteFinsuppCombination
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (S : Finset G) (c : G →₀ ℝ) :
+    finiteModelAverage M τ S (finiteFinsuppCombination M τ U c) =
+      (S.card : ℝ)⁻¹ • ∑ s ∈ S,
+        finiteComposedTranslation M τ U s c := by
+  simp_rw [finiteComposedTranslation_eq_apply]
+  rfl
+
+/-- The one-step discrepancy between exact group-word averaging and the
+genuine finite Markov operator is precisely the average of the individual
+approximate-multiplication errors. -/
+theorem finiteAveragingStep_sub_eq
+    (M : FiniteModel) (τ : G → Equiv.Perm M) (U : Finset M)
+    (S : Finset G) (k : ℕ) :
+    finiteFinsuppCombination M τ U (averagingCoefficients S (k + 1)) -
+        finiteModelAverage M τ S
+          (finiteFinsuppCombination M τ U (averagingCoefficients S k)) =
+      (S.card : ℝ)⁻¹ • ∑ s ∈ S,
+        (finiteExactTranslation M τ U s (averagingCoefficients S k) -
+          finiteComposedTranslation M τ U s
+            (averagingCoefficients S k)) := by
+  rw [finiteFinsuppCombination_averagingCoefficients_succ,
+    finiteModelAverage_finiteFinsuppCombination]
+  simp [Finset.sum_sub_distrib, smul_sub]
+
 /-- The exact-versus-composed translation error is the finite linear
 combination of the individual multiplication errors. -/
 theorem finiteTranslation_sub_eq
@@ -868,6 +1004,59 @@ theorem finiteTranslation_hilbert_error_eventually
             (R * m * δ) / (R * m + 1) := by ring
         _ < δ := (div_lt_iff₀ hden).2 (by
           nlinarith [mul_nonneg hR hm])
+
+/-- For every fixed time, exact group-word averaging and one application of
+the genuine finite-model Markov operator are uniformly close over all
+centered indicators. -/
+theorem finiteAveragingStep_hilbert_error_eventually
+    (A : SoficApproximation G) (S : Finset G) (hS : S.Nonempty)
+    (k : ℕ) (δ : ℝ) (hδ : 0 < δ) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+      ‖finiteFinsuppCombination (A.model n) (A.map n) U
+            (averagingCoefficients S (k + 1)) -
+          finiteModelAverage (A.model n) (A.map n) S
+            (finiteFinsuppCombination (A.model n) (A.map n) U
+              (averagingCoefficients S k))‖ ^ 2 /
+        Fintype.card (A.model n) < δ := by
+  classical
+  let c := averagingCoefficients S k
+  let η := δ / 2
+  have hη : 0 < η := by dsimp [η]; linarith
+  have hηδ : η < δ := by dsimp [η]; linarith
+  have hall (T : Finset G) :
+      ∃ N : ℕ, ∀ n ≥ N, ∀ s ∈ T, ∀ U : Finset (A.model n),
+        ‖finiteExactTranslation (A.model n) (A.map n) U s c -
+            finiteComposedTranslation (A.model n) (A.map n) U s c‖ ^ 2 /
+          Fintype.card (A.model n) < η := by
+    induction T using Finset.induction_on with
+    | empty => exact ⟨0, by simp⟩
+    | @insert s T hst ih =>
+        obtain ⟨Ns, hNs⟩ :=
+          finiteTranslation_hilbert_error_eventually A s c η hη
+        obtain ⟨NT, hNT⟩ := ih
+        refine ⟨max Ns NT, fun n hn t ht U ↦ ?_⟩
+        rcases Finset.mem_insert.mp ht with rfl | ht
+        · exact hNs n ((le_max_left _ _).trans hn) U
+        · exact hNT n ((le_max_right _ _).trans hn) t ht U
+  obtain ⟨Nerr, hNerr⟩ := hall S
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Nerr Ncard, fun n hn U ↦ ?_⟩
+  have hnerr : Nerr ≤ n := (le_max_left _ _).trans hn
+  have hncard : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcardNat : 0 < Fintype.card (A.model n) :=
+    Nat.zero_lt_of_lt (hNcard n hncard)
+  have hcard : (0 : ℝ) < Fintype.card (A.model n) := by
+    exact_mod_cast hcardNat
+  let e : G → EuclideanSpace ℝ (A.model n) := fun s ↦
+    finiteExactTranslation (A.model n) (A.map n) U s c -
+      finiteComposedTranslation (A.model n) (A.map n) U s c
+  have he (s : G) (hs : s ∈ S) :
+      ‖e s‖ ^ 2 / Fintype.card (A.model n) ≤ η :=
+    (hNerr n hnerr s hs U).le
+  rw [finiteAveragingStep_sub_eq]
+  change ‖(S.card : ℝ)⁻¹ • ∑ s ∈ S, e s‖ ^ 2 /
+      Fintype.card (A.model n) < δ
+  exact (normalized_norm_average_le (A.model n) S hS e η hcard he).trans_lt hηδ
 
 /-- The scalar finite-stage displacement quantity is exactly the normalized
 squared norm of its explicit finite vector. -/
