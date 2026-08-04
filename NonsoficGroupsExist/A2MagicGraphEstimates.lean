@@ -306,5 +306,26 @@ theorem incidentMovingProjection_norm_sq_le_with_defect
   simpa [Fin.sum_univ_succ, add_assoc, Z, sN, tN,
     centralMovingIncidentComponent, L, W, rhoW, d, p] using hlocal
 
+/-- E-valued form of the preceding estimate: the sum of the four moving
+edge components is the moving projection of the graph Laplacian at the
+vertex. -/
+theorem incidentMovingLaplacian_norm_sq_le_with_defect
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (r : A2Root) :
+    let L := A.vertexGroup r
+    let d : Fin 4 → E := fun n ↦ f r - f (neighbor r n)
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho L (∑ n, d n)‖ ^ 2 ≤
+      2 * ∑ n, ‖KazhdanFixedSpace.subgroupMovingProjection rho L (d n)‖ ^ 2 -
+        (1 - (Real.sqrt 2)⁻¹) *
+          (‖centralMovingIncidentComponent A rho f r 2‖ ^ 2 +
+            ‖centralMovingIncidentComponent A rho f r 3‖ ^ 2) := by
+  have h := incidentMovingProjection_norm_sq_le_with_defect A hexp rho f hf r
+  simpa [KazhdanFixedSpace.subgroupMovingProjection] using h
+
 end A2MagicGraph
 end NonsoficGroupsExist

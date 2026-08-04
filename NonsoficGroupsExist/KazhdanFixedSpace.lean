@@ -362,6 +362,47 @@ noncomputable def subgroupMovingProjection [CompleteSpace E]
   letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
   exact Uᗮ.starProjection
 
+/-- The moving projection is the residual after orthogonal projection onto
+the subgroup-fixed space. -/
+theorem subgroupMovingProjection_eq_sub_fixedProjection [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) :
+    subgroupMovingProjection ρ H x =
+      x - (fixedProjection ρ H x : E) := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  change Uᗮ.starProjection x = x - U.starProjection x
+  exact congrArg (fun T : E →L[ℝ] E ↦ T x)
+    (Submodule.starProjection_orthogonal U)
+
+/-- Fixed and moving projections are orthogonal. -/
+theorem fixedProjection_inner_movingProjection [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) :
+    inner ℝ (fixedProjection ρ H x : E)
+      (subgroupMovingProjection ρ H x) = 0 := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  apply Submodule.inner_right_of_mem_orthogonal
+  · exact (fixedProjection ρ H x).property
+  · exact Uᗮ.starProjection_apply_mem x
+
+/-- Pythagoras for the fixed/moving decomposition of a vector. -/
+theorem norm_sq_fixedProjection_add_movingProjection [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) :
+    ‖x‖ ^ 2 = ‖(fixedProjection ρ H x : E)‖ ^ 2 +
+      ‖subgroupMovingProjection ρ H x‖ ^ 2 := by
+  have hsum : x = (fixedProjection ρ H x : E) +
+      subgroupMovingProjection ρ H x := by
+    rw [subgroupMovingProjection_eq_sub_fixedProjection]
+    abel
+  calc
+    ‖x‖ ^ 2 = ‖(fixedProjection ρ H x : E) +
+        subgroupMovingProjection ρ H x‖ ^ 2 :=
+      congrArg (fun y : E ↦ ‖y‖ ^ 2) hsum
+    _ = ‖(fixedProjection ρ H x : E)‖ ^ 2 +
+        ‖subgroupMovingProjection ρ H x‖ ^ 2 := by
+      simpa [pow_two] using norm_add_sq_eq_norm_sq_add_norm_sq_real
+        (fixedProjection_inner_movingProjection ρ H x)
+
 theorem subgroupMovingProjection_mem [CompleteSpace E]
     (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) :
     subgroupMovingProjection ρ H x ∈ subgroupMovingSubspace ρ H := by
