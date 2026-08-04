@@ -57,6 +57,10 @@ theorem laplacian_add_const (f : Fin 6 → E) (x : E) (i : Fin 6) :
     laplacian (fun _ ↦ x) i = 0 := by
   simp [laplacian]
 
+theorem directedEnergy_add_const (f : Fin 6 → E) (x : E) :
+    directedEnergy (fun i ↦ f i + x) = directedEnergy f := by
+  simp [directedEnergy]
+
 @[simp] theorem total_centered (f : Fin 6 → E) : total (centered f) = 0 := by
   simp [total, centered, Fin.sum_univ_succ]
 
@@ -194,6 +198,41 @@ theorem laplacian_norm_sq_ge_sixteen
       rw [show f 1 + (5 : ℝ) • f 4 = (5 : ℝ) • f 4 + f 1 by abel]
       rw [show f 3 + (5 : ℝ) • f 5 = (5 : ℝ) • f 5 + f 3 by abel]
       ring
+
+/-- On the zero-sum subspace, `L² ≥ 4L`; equivalently, the squared
+Laplacian norm is at least twice the directed edge energy. -/
+theorem two_directedEnergy_le_sum_laplacian_norm_sq
+    (f : Fin 6 → E) (htotal : total f = 0) :
+    2 * directedEnergy f ≤ ∑ i : Fin 6, ‖laplacian f i‖ ^ 2 := by
+  have hlap (i : Fin 6) :
+      laplacian f i = (5 : ℝ) • f i + f (oppositeIndex i) := by
+    rw [laplacian_eq_five_smul_add_opposite_sub_total, htotal]
+    simp only [sub_zero]
+    congr 1
+    exact (Nat.cast_smul_eq_nsmul ℝ 5 (f i)).symm
+  rw [directedEnergy_eq_two_sum_inner_laplacian]
+  simp_rw [hlap]
+  simp [oppositeIndex, Fin.sum_univ_succ, norm_add_sq_real,
+    norm_smul,
+    inner_add_right, inner_smul_left, inner_smul_right, real_inner_comm]
+  have h02 : 0 ≤ ‖f 0 + f 2‖ ^ 2 := sq_nonneg _
+  have h14 : 0 ≤ ‖f 1 + f 4‖ ^ 2 := sq_nonneg _
+  have h35 : 0 ≤ ‖f 3 + f 5‖ ^ 2 := sq_nonneg _
+  rw [norm_add_sq_real] at h02 h14 h35
+  rw [real_inner_comm (f 2) (f 0)] at *
+  nlinarith
+
+/-- The inequality `L² ≥ 4L` holds on every family because both sides
+vanish on constants. -/
+theorem two_directedEnergy_le_sum_laplacian_norm_sq_general (f : Fin 6 → E) :
+    2 * directedEnergy f ≤ ∑ i : Fin 6, ‖laplacian f i‖ ^ 2 := by
+  let m : E := (6 : ℝ)⁻¹ • total f
+  let g : Fin 6 → E := fun i ↦ f i + (-m)
+  have hgTotal : total g = 0 := by
+    simp [total, g, m, Fin.sum_univ_succ]
+    module
+  have h := two_directedEnergy_le_sum_laplacian_norm_sq g hgTotal
+  simpa only [g, directedEnergy_add_const, laplacian_add_const] using h
 
 /-- Division-free Poincaré inequality for an arbitrary six-tuple. -/
 theorem centered_norm_sq_le_laplacian_norm_sq (f : Fin 6 → E) :

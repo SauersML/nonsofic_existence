@@ -127,6 +127,16 @@ noncomputable def laplacianFamily : Family E →L[ℝ] Family E :=
 @[simp] theorem laplacianFamily_apply (f : Family E) (i : Fin 6) :
     laplacianFamily f i = A2MagicLaplacian.laplacian f i := rfl
 
+/-- Compression of the graph Laplacian to the closed vertex-fixed family
+subspace. -/
+noncomputable def compressedLaplacian [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E)) :
+    vertexFixedSubspace A rho →L[ℝ] vertexFixedSubspace A rho := by
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  exact W.orthogonalProjectionOnto.comp (laplacianFamily.comp W.subtypeL)
+
 /-- The coordinatewise orthogonal projection to the six vertex fixed
 spaces, bundled in the Hilbert direct sum. -/
 noncomputable def vertexProjectionFamily [CompleteSpace E]
@@ -182,6 +192,17 @@ theorem starProjection_vertexFixedSubspace [CompleteSpace E]
           (A.vertexGroup (vertex i))).completeSpace_coe
       exact U.sub_starProjection_mem_orthogonal (x i)
     exact Submodule.inner_right_of_mem_orthogonal hyi horth
+
+theorem coe_compressedLaplacian_apply [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : vertexFixedSubspace A rho) :
+    ((compressedLaplacian A rho f : vertexFixedSubspace A rho) : Family E) =
+      vertexProjectionFamily A rho (laplacianFamily (f : Family E)) := by
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  change W.starProjection (laplacianFamily (f : Family E)) = _
+  exact starProjection_vertexFixedSubspace A rho _
 
 /-- Squared norm of the coordinatewise vertex projection. -/
 theorem norm_vertexProjectionFamily_sq [CompleteSpace E]
