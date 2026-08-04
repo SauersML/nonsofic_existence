@@ -70,18 +70,31 @@ construction from a positive-definite group function. -/
 abbrev HilbertSpace (p : PositiveDefiniteFunction G) :=
   RKHS.OfKernel (scalarKernel p.toFun)
 
-/-- The kernel vector indexed by a group element. -/
-noncomputable def kernelVector (p : PositiveDefiniteFunction G) (g : G) :
-    HilbertSpace p :=
-  RKHS.kerFun (HilbertSpace p) g 1
+/-- The finitely supported pre-Hilbert space whose completion is the GNS
+Hilbert space. -/
+abbrev PreHilbertSpace (p : PositiveDefiniteFunction G) :=
+  RKHS.H₀ (scalarKernel p.toFun)
 
-/-- Inner products of kernel vectors recover the original group
-coefficient. -/
-theorem inner_kernelVector (p : PositiveDefiniteFunction G) (g h : G) :
-    inner ℝ (kernelVector p g) (kernelVector p h) = p (g⁻¹ * h) := by
-  have hker := RKHS.kernel_inner (H := HilbertSpace p) h g (1 : ℝ) (1 : ℝ)
-  rw [RKHS.OfKernel.kernel_ofKernel] at hker
-  simpa [kernelVector, scalarKernel] using hker.symm
+@[reducible] noncomputable def preHilbertSeminormed
+    (p : PositiveDefiniteFunction G) :
+    SeminormedAddCommGroup (PreHilbertSpace p) :=
+  RKHS.instSeminormedAddCommGroupH₀ (K := scalarKernel p.toFun)
+
+@[reducible] noncomputable def preHilbertInnerProduct
+    (p : PositiveDefiniteFunction G) :
+    InnerProductSpace ℝ (PreHilbertSpace p) :=
+  RKHS.instInnerProductSpaceH₀ (K := scalarKernel p.toFun)
+
+/-- The kernel vector indexed by a group element, explicitly realized as a
+free generator in the Hilbert completion. -/
+noncomputable def kernelVector (p : PositiveDefiniteFunction G) (g : G) :
+    HilbertSpace p := by
+  letI : SeminormedAddCommGroup (PreHilbertSpace p) :=
+    preHilbertSeminormed p
+  letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
+    preHilbertInnerProduct p
+  exact UniformSpace.Completion.coe'
+    (Finsupp.single (g, (1 : ℝ)) 1 : PreHilbertSpace p)
 
 /-- The limiting correlation with its positive-definiteness proof. -/
 noncomputable def limitingPositiveDefiniteFunction
@@ -98,19 +111,16 @@ def leftIndexEquiv (s : G) : G × ℝ ≃ G × ℝ where
   left_inv x := by simp
   right_inv x := by simp
 
-/-- The finitely supported pre-Hilbert space used by the RKHS completion. -/
-abbrev PreHilbertSpace (p : PositiveDefiniteFunction G) :=
-  RKHS.H₀ (scalarKernel p.toFun)
-
-@[reducible] noncomputable def preHilbertSeminormed
-    (p : PositiveDefiniteFunction G) :
-    SeminormedAddCommGroup (PreHilbertSpace p) :=
-  RKHS.instSeminormedAddCommGroupH₀ (K := scalarKernel p.toFun)
-
-@[reducible] noncomputable def preHilbertInnerProduct
-    (p : PositiveDefiniteFunction G) :
-    InnerProductSpace ℝ (PreHilbertSpace p) :=
-  RKHS.instInnerProductSpaceH₀ (K := scalarKernel p.toFun)
+/-- Kernel vectors are the images of the corresponding free generators in
+the Hilbert completion. -/
+theorem kernelVector_eq_coe (p : PositiveDefiniteFunction G) (g : G) :
+    letI : SeminormedAddCommGroup (PreHilbertSpace p) :=
+      preHilbertSeminormed p
+    letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
+      preHilbertInnerProduct p
+    kernelVector p g = UniformSpace.Completion.coe'
+      (Finsupp.single (g, (1 : ℝ)) 1 : PreHilbertSpace p) := by
+  rfl
 
 /-- Left translation on finitely supported kernel generators. -/
 noncomputable def preTranslationLinearEquiv (p : PositiveDefiniteFunction G) (s : G) :
@@ -137,6 +147,18 @@ theorem inner_single (p : PositiveDefiniteFunction G)
     (Finsupp.single j d).sum (fun xv w ↦
       star z * w * inner ℝ (scalarKernel p.toFun xv.1 yu.1 yu.2) xv.2)) = _
   simp [scalarKernel, mul_assoc, mul_comm, mul_left_comm]
+
+/-- Inner products of kernel vectors recover the original group
+coefficient. -/
+theorem inner_kernelVector (p : PositiveDefiniteFunction G) (g h : G) :
+    inner ℝ (kernelVector p g) (kernelVector p h) = p (g⁻¹ * h) := by
+  letI : SeminormedAddCommGroup (PreHilbertSpace p) :=
+    preHilbertSeminormed p
+  letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
+    preHilbertInnerProduct p
+  rw [kernelVector_eq_coe, kernelVector_eq_coe,
+    UniformSpace.Completion.inner_coe, inner_single]
+  simp
 
 /-- Left translation preserves the pre-Hilbert inner product. -/
 theorem inner_preTranslationLinearEquiv (p : PositiveDefiniteFunction G)
@@ -260,6 +282,118 @@ noncomputable def translationOperator (p : PositiveDefiniteFunction G) (s : G) :
         have hn := (preTranslationLinearIsometryEquiv p s).norm_map x
         change ‖preTranslationLinearEquiv p s x‖ = ‖x‖ at hn
         simpa [T, L, preTranslationContinuousLinearMap] using hn
+
+@[simp] theorem preTranslationLinearEquiv_one
+    (p : PositiveDefiniteFunction G) (f : PreHilbertSpace p) :
+    preTranslationLinearEquiv p 1 f = f := by
+  ext i
+  simp [preTranslationLinearEquiv, leftIndexEquiv]
+
+@[simp] theorem preTranslationLinearEquiv_mul
+    (p : PositiveDefiniteFunction G) (s t : G) (f : PreHilbertSpace p) :
+    preTranslationLinearEquiv p (s * t) f =
+      preTranslationLinearEquiv p s (preTranslationLinearEquiv p t f) := by
+  ext i
+  simp [preTranslationLinearEquiv, leftIndexEquiv, mul_assoc]
+
+/-- The completed translation agrees with the explicit translation on the
+dense finitely supported subspace. -/
+@[simp] theorem translationOperator_coe
+    (p : PositiveDefiniteFunction G) (s : G) (f : PreHilbertSpace p) :
+    translationOperator p s (UniformSpace.Completion.coe' f) =
+      UniformSpace.Completion.coe' (preTranslationLinearEquiv p s f) := by
+  change (preTranslationContinuousLinearMap p s).completion
+      (UniformSpace.Completion.coe' f) = _
+  simp [preTranslationContinuousLinearMap]
+
+@[simp] theorem translationOperator_one (p : PositiveDefiniteFunction G) :
+    translationOperator p 1 = 1 := by
+  apply LinearIsometryEquiv.ext
+  intro x
+  induction x using UniformSpace.Completion.induction_on with
+  | hp => apply isClosed_eq <;> fun_prop
+  | ih f => simp
+
+@[simp] theorem translationOperator_mul (p : PositiveDefiniteFunction G) (s t : G) :
+    translationOperator p (s * t) =
+      translationOperator p s * translationOperator p t := by
+  apply LinearIsometryEquiv.ext
+  intro x
+  induction x using UniformSpace.Completion.induction_on with
+  | hp => apply isClosed_eq <;> fun_prop
+  | ih f => simp
+
+/-- The left-translation representation generated by a positive-definite
+function. -/
+noncomputable def representation (p : PositiveDefiniteFunction G) :
+    G →* (HilbertSpace p ≃ₗᵢ[ℝ] HilbertSpace p) where
+  toFun := translationOperator p
+  map_one' := translationOperator_one p
+  map_mul' := translationOperator_mul p
+
+@[simp] theorem representation_kernelVector
+    (p : PositiveDefiniteFunction G) (s g : G) :
+    representation p s (kernelVector p g) = kernelVector p (s * g) := by
+  letI : SeminormedAddCommGroup (PreHilbertSpace p) :=
+    preHilbertSeminormed p
+  letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
+    preHilbertInnerProduct p
+  rw [kernelVector_eq_coe, kernelVector_eq_coe]
+  change translationOperator p s (UniformSpace.Completion.coe' _) = _
+  rw [translationOperator_coe, preTranslationLinearEquiv_single]
+  change UniformSpace.Completion.coe'
+    (Finsupp.single (s * g, (1 : ℝ)) 1 : PreHilbertSpace p) = _
+  rfl
+
+/-- The cyclic coefficient of the GNS representation is exactly the
+positive-definite function from which it was built. -/
+@[simp] theorem representation_cyclicCoefficient
+    (p : PositiveDefiniteFunction G) (g : G) :
+    inner ℝ (kernelVector p 1) (representation p g (kernelVector p 1)) =
+      p g := by
+  rw [representation_kernelVector, inner_kernelVector]
+  simp
+
+/-- A finite linear combination of cyclic translates in the GNS space. -/
+noncomputable def finiteCombination (p : PositiveDefiniteFunction G)
+    (F : Finset G) (c : G → ℝ) : HilbertSpace p :=
+  ∑ g ∈ F, c g • kernelVector p g
+
+/-- The Gram formula for two finite linear combinations of cyclic
+translates. -/
+theorem inner_finiteCombination (p : PositiveDefiniteFunction G)
+    (F K : Finset G) (c d : G → ℝ) :
+    inner ℝ (finiteCombination p F c) (finiteCombination p K d) =
+      ∑ g ∈ F, ∑ h ∈ K, c g * d h * p (g⁻¹ * h) := by
+  classical
+  rw [finiteCombination, finiteCombination]
+  simp_rw [sum_inner, inner_sum, real_inner_smul_left,
+    real_inner_smul_right, inner_kernelVector]
+  simp [mul_assoc]
+
+/-- Orbit averaging the cyclic vector is the corresponding uniform finite
+linear combination of kernel vectors. -/
+theorem orbitAverage_kernelVector (p : PositiveDefiniteFunction G)
+    (S : Finset G) :
+    IsKazhdanPair.orbitAverage S (representation p) (kernelVector p 1) =
+      finiteCombination p S (fun _ ↦ (S.card : ℝ)⁻¹) := by
+  classical
+  simp [IsKazhdanPair.orbitAverage, finiteCombination, Finset.smul_sum]
+
+/-- Kun's second-difference contraction applied to the actual GNS
+representation of a positive-definite function. -/
+theorem norm_orbitAverage_sq_sub_le
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (p : PositiveDefiniteFunction G) :
+    ‖IsKazhdanPair.orbitAverage S (representation p)
+        (IsKazhdanPair.orbitAverage S (representation p) (kernelVector p 1)) -
+      IsKazhdanPair.orbitAverage S (representation p) (kernelVector p 1)‖ ≤
+      (1 - ε ^ 2 / (4 * S.card)) *
+        ‖IsKazhdanPair.orbitAverage S (representation p) (kernelVector p 1) -
+          kernelVector p 1‖ := by
+  exact KazhdanOrthogonal.norm_orbitAverage_sq_sub_le
+    hQ S hQS hone hεone (representation p) (kernelVector p 1)
 
 end KazhdanGNS
 end NonsoficGroupsExist
