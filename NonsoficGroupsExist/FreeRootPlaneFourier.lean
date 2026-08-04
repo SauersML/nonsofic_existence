@@ -103,6 +103,83 @@ theorem action_planeComponent
     (planeFamily_sq X i j k hij hik hjk n)
     (planeFamily_pairwise_commute X i j k hij hik hjk n) sign z q
 
+/-- The real `±1` value assigned by a binary sign choice to a plane element. -/
+def planeEigenvalue
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (g : Plane X i j k hij hik hjk n) : ℝ :=
+  if sign ((planeEnumeration X i j k hij hik hjk n).symm g) then 1 else -1
+
+/-- An arbitrary stage element acts on a component by its assigned real
+eigenvalue. -/
+theorem action_planeComponent_element
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E) (g : Plane X i j k hij hik hjk n) :
+    rho g.1 (planeComponent X i j k hij hik hjk n rho sign z) =
+      planeEigenvalue X i j k hij hik hjk n sign g •
+        planeComponent X i j k hij hik hjk n rho sign z := by
+  let q := (planeEnumeration X i j k hij hik hjk n).symm g
+  have hq : planeFamily X i j k hij hik hjk n q = g.1 := by
+    exact congrArg Subtype.val
+      ((planeEnumeration X i j k hij hik hjk n).apply_symm_apply g)
+  rw [← hq]
+  have haction := action_planeComponent X i j k hij hik hjk n rho sign z q
+  simpa [planeEigenvalue, q] using haction
+
+/-- On every nonzero component, the assigned eigenvalue is multiplicative.
+Thus inconsistent binary assignments necessarily have zero component. -/
+theorem planeEigenvalue_mul_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (g h : Plane X i j k hij hik hjk n) :
+    planeEigenvalue X i j k hij hik hjk n sign (g * h) =
+      planeEigenvalue X i j k hij hik hjk n sign g *
+        planeEigenvalue X i j k hij hik hjk n sign h := by
+  let v := planeComponent X i j k hij hik hjk n rho sign z
+  let lambda := planeEigenvalue X i j k hij hik hjk n sign
+  have hg := action_planeComponent_element X i j k hij hik hjk n rho sign z g
+  have hh := action_planeComponent_element X i j k hij hik hjk n rho sign z h
+  have hgh := action_planeComponent_element X i j k hij hik hjk n rho sign z (g * h)
+  have heq : lambda (g * h) • v = (lambda g * lambda h) • v := by
+    calc
+      lambda (g * h) • v = rho (g * h).1 v := hgh.symm
+      _ = rho g.1 (rho h.1 v) := by
+        change rho (g.1 * h.1) v = rho g.1 (rho h.1 v)
+        rw [map_mul]
+        rfl
+      _ = rho g.1 (lambda h • v) := by rw [hh]
+      _ = lambda h • rho g.1 v := by rw [map_smul]
+      _ = lambda h • (lambda g • v) := by rw [hg]
+      _ = (lambda g * lambda h) • v := by
+        rw [smul_smul, mul_comm]
+  have hzero : (lambda (g * h) - lambda g * lambda h) • v = 0 := by
+    rw [sub_smul, heq, sub_self]
+  exact sub_eq_zero.mp ((smul_eq_zero.mp hzero).resolve_right hv)
+
+/-- On every nonzero component, the identity has eigenvalue `1`. -/
+theorem planeEigenvalue_one_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0) :
+    planeEigenvalue X i j k hij hik hjk n sign 1 = 1 := by
+  let v := planeComponent X i j k hij hik hjk n rho sign z
+  let lambda := planeEigenvalue X i j k hij hik hjk n sign
+  have hone := action_planeComponent_element X i j k hij hik hjk n rho sign z
+    (1 : Plane X i j k hij hik hjk n)
+  have heq : lambda 1 • v = (1 : ℝ) • v := by
+    rw [← hone]
+    simp [v]
+  have hzero : (lambda 1 - 1) • v = 0 := by
+    rw [sub_smul, heq, sub_self]
+  exact sub_eq_zero.mp ((smul_eq_zero.mp hzero).resolve_right hv)
+
 end
 
 end FreeRootPlaneFourier

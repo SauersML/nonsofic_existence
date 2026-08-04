@@ -64,7 +64,9 @@ box is still a required dependency of the final theorem.
   component is a simultaneous eigenvector with exactly its assigned signs
 - [x] Prove every finite free-root plane is abelian of exponent two, enumerate
   all of its elements, and instantiate the simultaneous Fourier decomposition
-  and sign-action theorem for that exhaustive enumeration
+  and sign-action theorem for that exhaustive enumeration; prove every
+  nonzero component's assigned `±1` eigenvalues are multiplicative and send
+  the identity to `1`
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
