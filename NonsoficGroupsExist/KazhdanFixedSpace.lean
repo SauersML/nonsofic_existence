@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.Kazhdan
 import Mathlib.Analysis.InnerProductSpace.Projection.Basic
 import Mathlib.LinearAlgebra.FixedSubmodule
+import Mathlib.Algebra.Group.Subgroup.Map
 
 /-!
 # Fixed subspaces of subgroup representations
@@ -19,6 +20,14 @@ namespace KazhdanFixedSpace
 
 variable {G : Type u} [Group G]
 variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+
+/-- Restriction of an orthogonal representation to a subgroup. -/
+def restrictRepresentation (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (L : Subgroup G) :
+    L →* (E ≃ₗᵢ[ℝ] E) := ρ.comp L.subtype
+
+@[simp] theorem restrictRepresentation_apply
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (L : Subgroup G) (g : L) :
+    restrictRepresentation ρ L g = ρ g.1 := rfl
 
 /-- The subspace fixed pointwise by a subgroup. -/
 def fixedSubspace (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) :
@@ -40,6 +49,20 @@ theorem isClosed_fixedSubspace (ρ : G →* (E ≃ₗᵢ[ℝ] E))
     ext x
     simp [mem_fixedSubspace_iff]]
   exact isClosed_iInter fun h ↦ isClosed_eq (ρ h.1).continuous continuous_id
+
+/-- Fixed vectors for `H`, viewed inside a larger subgroup `L`, are exactly
+the original `H`-fixed vectors. -/
+theorem fixedSubspace_subgroupOf_eq (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (H L : Subgroup G) (hHL : H ≤ L) :
+    fixedSubspace (restrictRepresentation ρ L) (H.subgroupOf L) =
+      fixedSubspace ρ H := by
+  ext x
+  rw [mem_fixedSubspace_iff, mem_fixedSubspace_iff]
+  constructor
+  · intro hx h hh
+    exact hx ⟨h, hHL hh⟩ (Subgroup.mem_subgroupOf.mpr hh)
+  · intro hx h hh
+    exact hx h.1 (Subgroup.mem_subgroupOf.mp hh)
 
 /-- Inclusion of subgroups reverses inclusion of fixed subspaces. -/
 theorem antitone (ρ : G →* (E ≃ₗᵢ[ℝ] E)) {H K : Subgroup G}
@@ -116,6 +139,71 @@ noncomputable def fixedProjection [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[�
     (H : Subgroup G) (x : E) (h : H) :
     ρ h.1 (fixedProjection ρ H x : E) = fixedProjection ρ H x := by
   exact (mem_fixedSubspace_iff ρ H _).mp (fixedProjection ρ H x).property h h.property
+
+/-- Orthogonal projection onto the fixed subspace of a normal subgroup
+commutes with the ambient orthogonal representation. -/
+theorem fixedProjection_equivariant_of_normal [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) [H.Normal]
+    (g : G) (x : E) :
+    (fixedProjection ρ H (ρ g x) : E) =
+      ρ g (fixedProjection ρ H x : E) := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  change U.starProjection (ρ g x) = ρ g (U.starProjection x)
+  apply U.eq_starProjection_of_mem_orthogonal
+  · exact map_mem_fixedSubspace_of_normal ρ H g
+      (U.starProjection_apply_mem x)
+  · have hxorth : x - U.starProjection x ∈ Uᗮ :=
+      U.sub_starProjection_mem_orthogonal x
+    have hmap := map_mem_fixedSubspace_orthogonal_of_normal ρ H g hxorth
+    simpa [map_sub] using hmap
+
+/-- If a normal subgroup `H` together with `K` generates the ambient group,
+then their fixed subspaces are orthogonal in every representation without
+nonzero invariant vectors.  This is the normal-subgroup orthogonality lemma
+used in the EJZ magic-graph proof. -/
+theorem fixedSubspaces_isOrtho_of_normal_generate [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H K : Subgroup G) [H.Normal]
+    (hgen : H ⊔ K = ⊤)
+    (hno : IsKazhdanPair.HasNoInvariantVectors G ρ) :
+    fixedSubspace ρ H ⟂ fixedSubspace ρ K := by
+  rw [Submodule.isOrtho_iff_inner_eq]
+  intro u hu v hv
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  let p : E := U.starProjection v
+  have hpH : p ∈ fixedSubspace ρ H := U.starProjection_apply_mem v
+  have hpK : p ∈ fixedSubspace ρ K := by
+    rw [mem_fixedSubspace_iff]
+    intro k hk
+    have hvk : ρ k v = v :=
+      (mem_fixedSubspace_iff ρ K v).mp hv k hk
+    calc
+      ρ k p = U.starProjection (ρ k v) := by
+        exact (fixedProjection_equivariant_of_normal ρ H k v).symm
+      _ = p := by rw [hvk]
+  have hpglobal : ∀ g : G, ρ g p = p := by
+    intro g
+    have hseed : ∀ s ∈ (H : Set G) ∪ (K : Set G), ρ s p = p := by
+      intro s hs
+      rcases hs with hs | hs
+      · exact (mem_fixedSubspace_iff ρ H p).mp hpH s hs
+      · exact (mem_fixedSubspace_iff ρ K p).mp hpK s hs
+    apply fixed_of_mem_closure ρ ((H : Set G) ∪ (K : Set G)) p hseed g
+    rw [Subgroup.closure_union, Subgroup.closure_eq,
+        Subgroup.closure_eq, hgen]
+    exact Subgroup.mem_top g
+  have hpzero : p = 0 := hno p hpglobal
+  have hvorth : v - p ∈ (fixedSubspace ρ H)ᗮ :=
+    U.sub_starProjection_mem_orthogonal v
+  calc
+    inner ℝ u v = inner ℝ u (p + (v - p)) := by congr 2; abel
+    _ = inner ℝ u p + inner ℝ u (v - p) := inner_add_right _ _ _
+    _ = 0 := by
+      have horth : inner ℝ u (v - p) = 0 :=
+        Submodule.inner_right_of_mem_orthogonal hu hvorth
+      rw [hpzero] at horth ⊢
+      simpa using horth
 
 end KazhdanFixedSpace
 end NonsoficGroupsExist

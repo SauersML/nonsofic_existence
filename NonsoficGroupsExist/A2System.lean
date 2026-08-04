@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.ElementaryRoots
 import NonsoficGroupsExist.ClassTwoNormalForm
 import Mathlib.GroupTheory.Commutator.Basic
+import Mathlib.GroupTheory.Subgroup.Centralizer
 
 /-!
 # Root-subgroup systems of type A₂
@@ -140,6 +141,38 @@ theorem exists_vertexGroup_three_factor (A : A2System G) (a : A2Root)
     exact Z.one_mem
   exact ClassTwoNormalForm.exists_three_factor X Y Z hYX hXZ hYZ
     (A.rootAt_le_vertexGroup a) hg
+
+/-- The sum root is normalized by its magic-graph vertex group (in fact it
+is central there). -/
+theorem vertexGroup_le_normalizer_rootAt (A : A2System G) (a : A2Root) :
+    A.vertexGroup a ≤ Subgroup.normalizer (A.rootAt a : Subgroup G) := by
+  intro g hg
+  apply Subgroup.centralizer_le_normalizer (A.rootAt a : Set G)
+  rw [Subgroup.mem_centralizer_iff]
+  intro z hz
+  obtain ⟨x, hx, y, hy, z₀, hz₀, rfl⟩ :=
+    A.exists_vertexGroup_three_factor a hg
+  let i := a.1.1
+  let j := a.1.2
+  let k := a2ThirdIndex i j
+  have hik : i ≠ k := (a2ThirdIndex_ne_left i j a.2).symm
+  have hkj : k ≠ j := a2ThirdIndex_ne_right i j a.2
+  have hxz : Commute x z := by
+    exact (A.commute i j i k a.2 hik
+      a.2.symm (a2ThirdIndex_ne_left i j a.2) z hz x hx).symm
+  have hyz : Commute y z := by
+    exact (A.commute i j k j a.2 hkj hkj.symm a.2.symm
+      z hz y hy).symm
+  have hz₀z : Commute z₀ z :=
+    A.commute i j i j a.2 a.2 a.2.symm a.2.symm z₀ hz₀ z hz
+  have hcomm : Commute (x * y * z₀) z := (hxz.mul_left hyz).mul_left hz₀z
+  exact hcomm.eq.symm
+
+/-- The sum root, viewed inside its vertex group, is a normal subgroup. -/
+theorem rootAt_normalIn_vertexGroup (A : A2System G) (a : A2Root) :
+    (A.rootAt a).subgroupOf (A.vertexGroup a) |>.Normal := by
+  exact (Subgroup.normal_subgroupOf_iff_le_normalizer
+    (A.rootAt_le_vertexGroup a)).mpr (A.vertexGroup_le_normalizer_rootAt a)
 
 /-- The union of the six root subgroups. -/
 def rootSet (A : A2System G) : Set G :=
