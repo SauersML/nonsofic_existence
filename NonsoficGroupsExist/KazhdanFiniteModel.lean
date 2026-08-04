@@ -607,6 +607,53 @@ theorem sofic_multiplication_hilbert_error_eventually
   have herr := hNerr n hnerr
   exact hbound.trans_lt (by linarith)
 
+/-- A sofic approximation also respects the `g⁻¹h` displacement permutation:
+the assigned permutation approaches `(map g)⁻¹ * map h`. -/
+theorem sofic_inv_mul_close_eventually (A : SoficApproximation G)
+    (g h : G) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      hammingDistance (A.model n) (A.map n (g⁻¹ * h))
+        ((A.map n g)⁻¹ * A.map n h) < ε := by
+  have hthird : 0 < ε / 3 := by positivity
+  obtain ⟨Nmul, hNmul⟩ :=
+    A.asymptoticallyMultiplicative g⁻¹ h (ε / 3) hthird
+  obtain ⟨Ninv, hNinv⟩ :=
+    A.asymptoticallyMultiplicative g⁻¹ g (ε / 3) hthird
+  obtain ⟨None, hNone⟩ := A.map_one_close (ε / 3) hthird
+  refine ⟨max Nmul (max Ninv None), fun n hn ↦ ?_⟩
+  have hnmul : Nmul ≤ n := by omega
+  have hninv : Ninv ≤ n := by omega
+  have hnone : None ≤ n := by omega
+  have hmul := hNmul n hnmul
+  have hinvMul := hNinv n hninv
+  have hone := hNone n hnone
+  simp only [inv_mul_cancel] at hinvMul
+  have hinv : hammingDistance (A.model n) (A.map n g⁻¹)
+      (A.map n g)⁻¹ < 2 * (ε / 3) := by
+    have htri := hammingDistance_triangle (A.model n)
+      (A.map n g⁻¹ * A.map n g) (A.map n 1) 1
+    have hprod : hammingDistance (A.model n) (A.map n g⁻¹ * A.map n g) 1 <
+        2 * (ε / 3) := by
+      rw [hammingDistance_comm] at hinvMul
+      linarith
+    calc
+      hammingDistance (A.model n) (A.map n g⁻¹) (A.map n g)⁻¹ =
+          hammingDistance (A.model n)
+            (A.map n g⁻¹ * A.map n g) ((A.map n g)⁻¹ * A.map n g) := by
+        rw [hammingDistance_right_invariant]
+      _ = hammingDistance (A.model n)
+          (A.map n g⁻¹ * A.map n g) 1 := by simp
+      _ < 2 * (ε / 3) := hprod
+  have hright : hammingDistance (A.model n)
+      (A.map n g⁻¹ * A.map n h) ((A.map n g)⁻¹ * A.map n h) <
+      2 * (ε / 3) := by
+    rw [hammingDistance_right_invariant]
+    exact hinv
+  have htri := hammingDistance_triangle (A.model n)
+    (A.map n (g⁻¹ * h)) (A.map n g⁻¹ * A.map n h)
+    ((A.map n g)⁻¹ * A.map n h)
+  linarith
+
 /-- Uniformize an eventually statement over a fixed finite index set. -/
 theorem eventually_all_finset {ι : Type*} (s : Finset ι)
     (P : ι → ℕ → Prop)
