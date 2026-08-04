@@ -270,6 +270,106 @@ theorem map_planeComponent_opposite_eq_sum_conjugated_extensions
     (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
     sign _
 
+/-- Exact squared-mass transport for an arbitrary set of coarse signs under
+the opposite conjugated refinement. -/
+theorem sum_norm_oppositeConjugatedRestriction_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (coarseSigns :
+      Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n)
+          coarseSigns,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign
+          (rho (elementaryRoot j i hij.symm
+            (FreeAlgebra.ι (ZMod 2) x)) z)‖ ^ 2 := by
+  have hsq : elementaryRoot j i hij.symm
+      (FreeAlgebra.ι (ZMod 2) x) ^ 2 = 1 := by
+    have hadd : FreeAlgebra.ι (ZMod 2) x + FreeAlgebra.ι (ZMod 2) x =
+        (0 : FreeRing X) := by
+      calc
+        FreeAlgebra.ι (ZMod 2) x + FreeAlgebra.ι (ZMod 2) x =
+            (1 : ZMod 2) • FreeAlgebra.ι (ZMod 2) x +
+              (1 : ZMod 2) • FreeAlgebra.ι (ZMod 2) x := by
+          congr 1 <;> exact (one_smul (ZMod 2) _).symm
+        _ = ((1 : ZMod 2) + 1) • FreeAlgebra.ι (ZMod 2) x := by
+          rw [add_smul]
+        _ = 0 := by
+          have htwo : (1 : ZMod 2) + 1 = 0 := by
+            rw [one_add_one_eq_two]
+            exact CharTwo.two_eq_zero
+          rw [htwo, zero_smul]
+    rw [pow_two, elementaryRoot_mul, hadd, elementaryRoot_zero]
+  exact sum_norm_fineRestriction_conjugated_sq rho
+    (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))
+    hsq
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk (n + 1))
+    (planeFamily X i j k hij hik hjk n)
+    (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n)
+    (planeFamily_oppositeConjugatedPlaneSuccIndex
+      X i j k hij hik hjk x n)
+    (planeFamily_sq X i j k hij hik hjk (n + 1))
+    (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
+    coarseSigns z
+
+/-- Exact squared-mass transport for an arbitrary set of coarse signs under
+the forward conjugated refinement. -/
+theorem sum_norm_forwardConjugatedRestriction_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (coarseSigns :
+      Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n)
+          coarseSigns,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign
+          (rho (elementaryRoot i j hij
+            (FreeAlgebra.ι (ZMod 2) x)) z)‖ ^ 2 := by
+  have hsq : elementaryRoot i j hij
+      (FreeAlgebra.ι (ZMod 2) x) ^ 2 = 1 := by
+    have hadd : FreeAlgebra.ι (ZMod 2) x + FreeAlgebra.ι (ZMod 2) x =
+        (0 : FreeRing X) := by
+      calc
+        FreeAlgebra.ι (ZMod 2) x + FreeAlgebra.ι (ZMod 2) x =
+            (1 : ZMod 2) • FreeAlgebra.ι (ZMod 2) x +
+              (1 : ZMod 2) • FreeAlgebra.ι (ZMod 2) x := by
+          congr 1 <;> exact (one_smul (ZMod 2) _).symm
+        _ = ((1 : ZMod 2) + 1) • FreeAlgebra.ι (ZMod 2) x := by
+          rw [add_smul]
+        _ = 0 := by
+          have htwo : (1 : ZMod 2) + 1 = 0 := by
+            rw [one_add_one_eq_two]
+            exact CharTwo.two_eq_zero
+          rw [htwo, zero_smul]
+    rw [pow_two, elementaryRoot_mul, hadd, elementaryRoot_zero]
+  exact sum_norm_fineRestriction_conjugated_sq rho
+    (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))
+    hsq
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk (n + 1))
+    (planeFamily X i j k hij hik hjk n)
+    (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n)
+    (planeFamily_forwardConjugatedPlaneSuccIndex
+      X i j k hij hik hjk x n)
+    (planeFamily_sq X i j k hij hik hjk (n + 1))
+    (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
+    coarseSigns z
+
 theorem sum_planeComponent
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E)) (z : E) :

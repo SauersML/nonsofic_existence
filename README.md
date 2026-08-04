@@ -130,8 +130,13 @@ box is still a required dependency of the final theorem.
   precisely its conjugated fine extensions; identify both restricted
   coefficient characters with the algebraic dual shears and prove the
   transported valuation-region conclusions for every nonzero fine component
-- [ ] Derive the corresponding disjoint mass-sum inequalities from the exact
-  conjugated refinement and the pairwise-disjoint leading-generator fibers
+- [x] Prove exact squared-mass conservation for arbitrary coarse sign sets
+  under refinement and conjugation, derive both concrete per-leading-fiber
+  mass bounds, and prove that below the top-degree boundary restriction
+  preserves every leading generator and the canonical least leading index
+- [ ] Prove the transported leading-fiber images are pairwise disjoint below
+  that boundary, control the top-degree boundary in the increasing-stage
+  limit, and derive Kassabov's corresponding disjoint mass-sum inequalities
 - [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
   for the two-root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group

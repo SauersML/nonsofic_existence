@@ -18,6 +18,7 @@ open FreeAlgebraDegree
 open FreeRootPlaneFourier
 open FreeRootFiltration
 open FreeRootPlane
+open FiniteInvolutionDecomposition
 
 noncomputable section
 
@@ -335,6 +336,16 @@ def leftDerivedCharacter {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X) :
     degreeLE X n → ℝ :=
   fun a ↦ chi (generatorMulCoefficientSucc X x a)
 
+/-- Taking a generator-derived character commutes exactly with restriction by
+one degree stage. -/
+theorem leftDerivedCharacter_restrictCharacterSucc
+    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ) (x : X) :
+    leftDerivedCharacter X (restrictCharacterSucc X chi) x =
+      restrictCharacterSucc X (leftDerivedCharacter X chi x) := by
+  funext a
+  unfold leftDerivedCharacter restrictCharacterSucc
+  congr 1
+
 theorem leftDerivedCharacter_zero
     {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
     (hzero : chi 0 = 1) :
@@ -436,6 +447,50 @@ theorem mem_leadingGeneratorIndexSet_iff
         characterValuation X chi := by
   simp [leadingGeneratorIndexSet]
 
+/-- Away from the top-degree boundary, restriction preserves exactly the set
+of generators realizing leading-term valuation descent. -/
+theorem mem_leadingGeneratorIndexSet_restrictCharacterSucc_iff
+    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ)
+    (hle : characterValuation X chi ≤ n + 1)
+    (q : Fin (Fintype.card X)) :
+    q ∈ leadingGeneratorIndexSet X (restrictCharacterSucc X chi) ↔
+      q ∈ leadingGeneratorIndexSet X chi := by
+  rw [mem_leadingGeneratorIndexSet_iff,
+    mem_leadingGeneratorIndexSet_iff]
+  have hchi : characterValuation X (restrictCharacterSucc X chi) =
+      characterValuation X chi :=
+    characterValuation_restrictCharacterSucc_eq X chi
+      (hle.trans (Nat.le_succ (n + 1)))
+  have hderived : leftDerivedCharacter X (restrictCharacterSucc X chi)
+      (generatorEnumeration X q) =
+      restrictCharacterSucc X
+        (leftDerivedCharacter X chi (generatorEnumeration X q)) :=
+    leftDerivedCharacter_restrictCharacterSucc X chi
+      (generatorEnumeration X q)
+  rw [hchi, hderived]
+  constructor
+  · intro h
+    have hmin := characterValuation_restrictCharacterSucc_eq_min X
+      (leftDerivedCharacter X chi (generatorEnumeration X q))
+    rw [hmin] at h
+    have hbound := characterValuation_le_succ X
+      (leftDerivedCharacter X chi (generatorEnumeration X q))
+    omega
+  · intro h
+    have hderivedLe : characterValuation X
+        (leftDerivedCharacter X chi (generatorEnumeration X q)) ≤ n + 1 := by
+      omega
+    rw [characterValuation_restrictCharacterSucc_eq X _ hderivedLe]
+    exact h
+
+theorem leadingGeneratorIndexSet_restrictCharacterSucc
+    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ)
+    (hle : characterValuation X chi ≤ n + 1) :
+    leadingGeneratorIndexSet X (restrictCharacterSucc X chi) =
+      leadingGeneratorIndexSet X chi := by
+  ext q
+  exact mem_leadingGeneratorIndexSet_restrictCharacterSucc_iff X chi hle q
+
 /-- Positive detected valuation makes the leading-generator index set
 nonempty. -/
 theorem leadingGeneratorIndexSet_nonempty
@@ -480,6 +535,16 @@ theorem leastLeadingGeneratorIndex_spec
   have hmem := Finset.min'_mem (leadingGeneratorIndexSet X chi) h
   rw [mem_leadingGeneratorIndexSet_iff] at hmem
   simpa [leastLeadingGeneratorIndex, h] using hmem
+
+/-- Below the top-degree boundary, the canonical least leading generator is
+unchanged by restriction to the preceding stage. -/
+theorem leastLeadingGeneratorIndex_restrictCharacterSucc
+    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ)
+    (hle : characterValuation X chi ≤ n + 1) :
+    leastLeadingGeneratorIndex X (restrictCharacterSucc X chi) =
+      leastLeadingGeneratorIndex X chi := by
+  unfold leastLeadingGeneratorIndex
+  rw [leadingGeneratorIndexSet_restrictCharacterSucc X chi hle]
 
 /-- Valuation of the first coefficient character of a finite plane sign
 component. -/
@@ -1073,6 +1138,39 @@ theorem biUnion_planeCBLeadingSignSet
       true_and]
     exact ⟨hregion, rfl⟩
 
+/-- Summation over `A ∪ B` is exactly summation over its disjoint canonical
+leading-generator fibers. -/
+theorem sum_planeABLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (f : (Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) → ℝ) :
+    ∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+        planeRegionSignSet X i j k hij hik hjk (n + 1) .B), f sign =
+      ∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeABLeadingSignSet X i j k hij hik hjk n q, f sign := by
+  rw [← biUnion_planeABLeadingSignSet X i j k hij hik hjk n]
+  have hpair :
+      ((Finset.univ : Finset (Fin (Fintype.card X))) : Set _).PairwiseDisjoint
+        (planeABLeadingSignSet X i j k hij hik hjk n) := by
+    intro q _ r _ hqr
+    exact planeABLeadingSignSet_pairwise_disjoint X i j k hij hik hjk n hqr
+  exact Finset.sum_biUnion hpair
+
+/-- The symmetric exact summation over the disjoint `C ∪ B` fibers. -/
+theorem sum_planeCBLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (f : (Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) → ℝ) :
+    ∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+        planeRegionSignSet X i j k hij hik hjk (n + 1) .B), f sign =
+      ∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeCBLeadingSignSet X i j k hij hik hjk n q, f sign := by
+  rw [← biUnion_planeCBLeadingSignSet X i j k hij hik hjk n]
+  have hpair :
+      ((Finset.univ : Finset (Fin (Fintype.card X))) : Set _).PairwiseDisjoint
+        (planeCBLeadingSignSet X i j k hij hik hjk n) := by
+    intro q _ r _ hqr
+    exact planeCBLeadingSignSet_pairwise_disjoint X i j k hij hik hjk n hqr
+  exact Finset.sum_biUnion hpair
+
 /-- Every `A ∪ B` least-generator fiber is carried into `C ∪ D` by the
 opposite shear indexed by that fiber. -/
 theorem planeABLeadingSignSet_region_transport
@@ -1376,6 +1474,142 @@ theorem planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D
   rw [hfirst, hsecond]
   exact planeCBLeadingSignSet_region_transport X i j k hij hik hjk n q
     fineSign hsign
+
+/-- The squared mass of one `A ∪ B` leading-generator fiber is bounded by
+the coarse `C ∪ D` mass after acting by its opposite adjacent generator.
+No component is counted through a merely algebraic character map: the proof
+uses the concrete conjugated-plane refinement. -/
+theorem sum_norm_planeABLeadingSignSet_sq_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    ∑ fineSign ∈ planeABLeadingSignSet X i j k hij hik hjk n q,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 ≤
+      ∑ coarseSign ∈
+          (planeRegionSignSet X i j k hij hik hjk n .C ∪
+            planeRegionSignSet X i j k hij hik hjk n .D),
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign
+          (rho (elementaryRoot j i hij.symm
+            (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z)‖ ^ 2 := by
+  classical
+  let fiber := planeABLeadingSignSet X i j k hij hik hjk n q
+  let nonzeroFiber := fiber.filter fun fineSign ↦
+    planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0
+  let target := planeRegionSignSet X i j k hij hik hjk n .C ∪
+    planeRegionSignSet X i j k hij hik hjk n .D
+  let index := oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+    (generatorEnumeration X q) n
+  have hremove :
+      ∑ fineSign ∈ fiber,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+        ∑ fineSign ∈ nonzeroFiber,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 := by
+    symm
+    apply Finset.sum_subset (Finset.filter_subset _ _)
+    intro fineSign hmem hnot
+    have hzero : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z = 0 := by
+      by_contra hne
+      exact hnot (Finset.mem_filter.mpr ⟨hmem, hne⟩)
+    rw [hzero]
+    simp
+  have hsubset : nonzeroFiber ⊆ fineRestrictionSignSet
+      (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+      (Nat.card (Plane X i j k hij hik hjk n)) index target := by
+    intro fineSign hmem
+    obtain ⟨hfiber, hne⟩ := Finset.mem_filter.mp hmem
+    have hregion :=
+      planeCharacterRegion_oppositeConjugatedRestriction_eq_C_or_D
+        X i j k hij hik hjk n q rho fineSign z hne hfiber
+    simp only [fineRestrictionSignSet, Finset.mem_filter, Finset.mem_univ,
+      true_and]
+    change (fun r ↦ fineSign (index r)) ∈ target
+    simpa [target, planeRegionSignSet] using hregion
+  calc
+    ∑ fineSign ∈ planeABLeadingSignSet X i j k hij hik hjk n q,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+        ∑ fineSign ∈ nonzeroFiber,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 :=
+      hremove
+    _ ≤ ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n)) index target,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset
+        (fun _ _ _ ↦ sq_nonneg _)
+    _ = ∑ coarseSign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho coarseSign
+            (rho (elementaryRoot j i hij.symm
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z)‖ ^ 2 :=
+      sum_norm_oppositeConjugatedRestriction_sq X i j k hij hik hjk
+        (generatorEnumeration X q) n rho target z
+
+/-- Symmetrically, one `C ∪ B` leading-generator fiber is bounded by the
+coarse `A ∪ D` mass after the corresponding forward adjacent action. -/
+theorem sum_norm_planeCBLeadingSignSet_sq_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    ∑ fineSign ∈ planeCBLeadingSignSet X i j k hij hik hjk n q,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 ≤
+      ∑ coarseSign ∈
+          (planeRegionSignSet X i j k hij hik hjk n .A ∪
+            planeRegionSignSet X i j k hij hik hjk n .D),
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign
+          (rho (elementaryRoot i j hij
+            (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z)‖ ^ 2 := by
+  classical
+  let fiber := planeCBLeadingSignSet X i j k hij hik hjk n q
+  let nonzeroFiber := fiber.filter fun fineSign ↦
+    planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0
+  let target := planeRegionSignSet X i j k hij hik hjk n .A ∪
+    planeRegionSignSet X i j k hij hik hjk n .D
+  let index := forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+    (generatorEnumeration X q) n
+  have hremove :
+      ∑ fineSign ∈ fiber,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+        ∑ fineSign ∈ nonzeroFiber,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 := by
+    symm
+    apply Finset.sum_subset (Finset.filter_subset _ _)
+    intro fineSign hmem hnot
+    have hzero : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z = 0 := by
+      by_contra hne
+      exact hnot (Finset.mem_filter.mpr ⟨hmem, hne⟩)
+    rw [hzero]
+    simp
+  have hsubset : nonzeroFiber ⊆ fineRestrictionSignSet
+      (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+      (Nat.card (Plane X i j k hij hik hjk n)) index target := by
+    intro fineSign hmem
+    obtain ⟨hfiber, hne⟩ := Finset.mem_filter.mp hmem
+    have hregion :=
+      planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D
+        X i j k hij hik hjk n q rho fineSign z hne hfiber
+    simp only [fineRestrictionSignSet, Finset.mem_filter, Finset.mem_univ,
+      true_and]
+    change (fun r ↦ fineSign (index r)) ∈ target
+    simpa [target, planeRegionSignSet] using hregion
+  calc
+    ∑ fineSign ∈ planeCBLeadingSignSet X i j k hij hik hjk n q,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+        ∑ fineSign ∈ nonzeroFiber,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 :=
+      hremove
+    _ ≤ ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n)) index target,
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset
+        (fun _ _ _ ↦ sq_nonneg _)
+    _ = ∑ coarseSign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho coarseSign
+            (rho (elementaryRoot i j hij
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z)‖ ^ 2 :=
+      sum_norm_forwardConjugatedRestriction_sq X i j k hij hik hjk
+        (generatorEnumeration X q) n rho target z
 
 /-- A nonzero Fourier component with a nontrivial plane character has at least
 one genuinely detected coordinate valuation within the current stage. -/

@@ -313,6 +313,45 @@ theorem iteratedPart_eq_sum_fine_extensions
         iteratedPart rho fine fineSign z := by
       rw [Finset.sum_filter]
 
+/-- Fine sign assignments extending one prescribed coarse sign assignment. -/
+def fineExtensionSignSet (m n : ℕ) (index : Fin n → Fin m)
+    (coarseSign : Fin n → Bool) : Finset (Fin m → Bool) :=
+  Finset.univ.filter fun fineSign ↦
+    coarseSign = fun i ↦ fineSign (index i)
+
+/-- Fine sign assignments whose restriction belongs to a selected set of
+coarse sign assignments. -/
+def fineRestrictionSignSet (m n : ℕ) (index : Fin n → Fin m)
+    (coarseSigns : Finset (Fin n → Bool)) : Finset (Fin m → Bool) :=
+  Finset.univ.filter fun fineSign ↦
+    (fun i ↦ fineSign (index i)) ∈ coarseSigns
+
+theorem fineExtensionSignSet_pairwise_disjoint
+    (m n : ℕ) (index : Fin n → Fin m) :
+    Pairwise (fun s t : Fin n → Bool ↦
+      Disjoint (fineExtensionSignSet m n index s)
+        (fineExtensionSignSet m n index t)) := by
+  intro s t hst
+  rw [Finset.disjoint_left]
+  intro fineSign hs ht
+  simp only [fineExtensionSignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and] at hs ht
+  exact hst (hs.trans ht.symm)
+
+theorem biUnion_fineExtensionSignSet
+    (m n : ℕ) (index : Fin n → Fin m)
+    (coarseSigns : Finset (Fin n → Bool)) :
+    coarseSigns.biUnion (fineExtensionSignSet m n index) =
+      fineRestrictionSignSet m n index coarseSigns := by
+  ext fineSign
+  simp only [Finset.mem_biUnion, fineExtensionSignSet,
+    fineRestrictionSignSet, Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨coarseSign, hcoarse, hrestrict⟩
+    exact hrestrict.symm ▸ hcoarse
+  · intro hrestrict
+    exact ⟨fun i ↦ fineSign (index i), hrestrict, rfl⟩
+
 /-- Simultaneous finite sign decomposition is covariant under conjugation of
 the entire commuting family. -/
 theorem map_iteratedPart
@@ -397,6 +436,109 @@ theorem norm_sum_iteratedPart_sq
             norm_add_sq_eq_norm_sq_add_norm_sq_real hinner
         _ = ‖iteratedPart rho c sign z‖ ^ 2 +
             ∑ tau ∈ A, ‖iteratedPart rho c tau z‖ ^ 2 := by rw [ih]
+
+/-- Pythagoras for one coarse component refined into all of its compatible
+fine components. -/
+theorem norm_iteratedPart_sq_eq_sum_fine_extensions
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (m n : ℕ) (fine : Fin m → G) (coarse : Fin n → G)
+    (index : Fin n → Fin m)
+    (hindex : ∀ i, coarse i = fine (index i))
+    (hfineSq : ∀ i, fine i ^ 2 = 1)
+    (hfineComm : Pairwise (Function.onFun Commute fine))
+    (coarseSign : Fin n → Bool) (z : E) :
+    ‖iteratedPart rho coarse coarseSign z‖ ^ 2 =
+      ∑ fineSign ∈ fineExtensionSignSet m n index coarseSign,
+        ‖iteratedPart rho fine fineSign z‖ ^ 2 := by
+  rw [iteratedPart_eq_sum_fine_extensions rho m n fine coarse index hindex
+    hfineSq hfineComm coarseSign z]
+  exact norm_sum_iteratedPart_sq rho m fine hfineSq hfineComm
+    (fineExtensionSignSet m n index coarseSign) z
+
+/-- Exact conservation of squared Fourier mass across a finite refinement:
+fine characters whose restriction lies in a coarse sign set carry exactly the
+mass of that coarse sign set. -/
+theorem sum_norm_fineRestrictionSignSet_sq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (m n : ℕ) (fine : Fin m → G) (coarse : Fin n → G)
+    (index : Fin n → Fin m)
+    (hindex : ∀ i, coarse i = fine (index i))
+    (hfineSq : ∀ i, fine i ^ 2 = 1)
+    (hfineComm : Pairwise (Function.onFun Commute fine))
+    (coarseSigns : Finset (Fin n → Bool)) (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet m n index coarseSigns,
+        ‖iteratedPart rho fine fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖iteratedPart rho coarse coarseSign z‖ ^ 2 := by
+  classical
+  symm
+  calc
+    ∑ coarseSign ∈ coarseSigns,
+        ‖iteratedPart rho coarse coarseSign z‖ ^ 2 =
+        ∑ coarseSign ∈ coarseSigns,
+          ∑ fineSign ∈ fineExtensionSignSet m n index coarseSign,
+            ‖iteratedPart rho fine fineSign z‖ ^ 2 := by
+      apply Finset.sum_congr rfl
+      intro coarseSign _
+      exact norm_iteratedPart_sq_eq_sum_fine_extensions rho m n fine coarse
+        index hindex hfineSq hfineComm coarseSign z
+    _ = ∑ fineSign ∈
+          coarseSigns.biUnion (fineExtensionSignSet m n index),
+          ‖iteratedPart rho fine fineSign z‖ ^ 2 := by
+      have hpair : (coarseSigns : Set (Fin n → Bool)).PairwiseDisjoint
+          (fineExtensionSignSet m n index) := by
+        intro s _ t _ hst
+        exact fineExtensionSignSet_pairwise_disjoint m n index hst
+      exact (Finset.sum_biUnion hpair).symm
+    _ = ∑ fineSign ∈ fineRestrictionSignSet m n index coarseSigns,
+          ‖iteratedPart rho fine fineSign z‖ ^ 2 := by
+      rw [biUnion_fineExtensionSignSet]
+
+/-- Conjugating an entire finite family by an involution and simultaneously
+acting on the vector preserves the squared norm of each sign component. -/
+theorem norm_iteratedPart_conjugated_sq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (g : G) (hg : g ^ 2 = 1)
+    (n : ℕ) (coarse : Fin n → G) (coarseSign : Fin n → Bool) (z : E) :
+    ‖iteratedPart rho (fun i ↦ g * coarse i * g⁻¹) coarseSign z‖ ^ 2 =
+      ‖iteratedPart rho coarse coarseSign (rho g z)‖ ^ 2 := by
+  have hmap := map_iteratedPart rho g n coarse coarseSign (rho g z)
+  have htwice : rho g (rho g z) = z := InvolutionSplitting.action_sq rho hg z
+  rw [htwice] at hmap
+  calc
+    ‖iteratedPart rho (fun i ↦ g * coarse i * g⁻¹) coarseSign z‖ ^ 2 =
+        ‖rho g (iteratedPart rho coarse coarseSign (rho g z))‖ ^ 2 := by
+      rw [hmap]
+    _ = ‖iteratedPart rho coarse coarseSign (rho g z)‖ ^ 2 := by
+      rw [(rho g).norm_map]
+
+/-- Exact mass transport when the coarse family is included in the fine
+family after conjugation by an involution. -/
+theorem sum_norm_fineRestriction_conjugated_sq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (g : G) (hg : g ^ 2 = 1)
+    (m n : ℕ) (fine : Fin m → G) (coarse : Fin n → G)
+    (index : Fin n → Fin m)
+    (hindex : ∀ i, g * coarse i * g⁻¹ = fine (index i))
+    (hfineSq : ∀ i, fine i ^ 2 = 1)
+    (hfineComm : Pairwise (Function.onFun Commute fine))
+    (coarseSigns : Finset (Fin n → Bool)) (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet m n index coarseSigns,
+        ‖iteratedPart rho fine fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖iteratedPart rho coarse coarseSign (rho g z)‖ ^ 2 := by
+  calc
+    ∑ fineSign ∈ fineRestrictionSignSet m n index coarseSigns,
+        ‖iteratedPart rho fine fineSign z‖ ^ 2 =
+        ∑ coarseSign ∈ coarseSigns,
+          ‖iteratedPart rho (fun i ↦ g * coarse i * g⁻¹)
+            coarseSign z‖ ^ 2 :=
+      sum_norm_fineRestrictionSignSet_sq rho m n fine
+        (fun i ↦ g * coarse i * g⁻¹) index hindex hfineSq hfineComm
+        coarseSigns z
+    _ = ∑ coarseSign ∈ coarseSigns,
+          ‖iteratedPart rho coarse coarseSign (rho g z)‖ ^ 2 := by
+      apply Finset.sum_congr rfl
+      intro coarseSign _
+      exact norm_iteratedPart_conjugated_sq rho g hg n coarse coarseSign z
 
 /-- The negative spectral projection for one family member keeps exactly the
 components assigning that member the negative sign. -/
