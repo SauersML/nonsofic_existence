@@ -131,6 +131,46 @@ theorem positivePart_negativePart_commute
   rw [haction]
   module
 
+theorem positivePart_neg
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E) :
+    positivePart rho c (-z) = -positivePart rho c z := by
+  simp only [positivePart, map_neg]
+  module
+
+theorem negativePart_neg
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E) :
+    negativePart rho c (-z) = -negativePart rho c z := by
+  simp only [negativePart, map_neg]
+  module
+
+/-- The action of a commuting element passes through a positive splitting
+operator. -/
+theorem action_positivePart_of_commute
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) {c d : G} (hdc : Commute d c) (z : E) :
+    rho d (positivePart rho c z) = positivePart rho c (rho d z) := by
+  simp only [positivePart, map_smul, map_add]
+  congr 2
+  calc
+    rho d (rho c z) = rho (d * c) z := by
+      change (rho d * rho c) z = rho (d * c) z
+      rw [← map_mul]
+    _ = rho (c * d) z := by rw [hdc.eq]
+    _ = rho c (rho d z) := by rw [map_mul]; rfl
+
+/-- The action of a commuting element passes through a negative splitting
+operator. -/
+theorem action_negativePart_of_commute
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) {c d : G} (hdc : Commute d c) (z : E) :
+    rho d (negativePart rho c z) = negativePart rho c (rho d z) := by
+  simp only [negativePart, map_smul, map_sub]
+  congr 2
+  calc
+    rho d (rho c z) = rho (d * c) z := by
+      change (rho d * rho c) z = rho (d * c) z
+      rw [← map_mul]
+    _ = rho (c * d) z := by rw [hdc.eq]
+    _ = rho c (rho d z) := by rw [map_mul]; rfl
+
 /-- An orthogonal involution is symmetric. -/
 theorem inner_action_left_eq_right
     (rho : G →* (E ≃ₗᵢ[ℝ] E)) {c : G} (hc : c ^ 2 = 1) (x y : E) :

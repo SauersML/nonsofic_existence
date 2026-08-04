@@ -60,7 +60,8 @@ box is still a required dependency of the final theorem.
   pairwise commuting for commuting involutions
 - [x] Iterate the involution splitting over an arbitrary finite family and
   prove exact vector reconstruction and conservation of total squared norm
-  across all binary sign components
+  across all binary sign components; for commuting families, prove every
+  component is a simultaneous eigenvector with exactly its assigned signs
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

@@ -85,6 +85,52 @@ theorem sum_norm_iteratedPart_sq
               (iteratedPart rho tail sign z)
         _ = ‖z‖ ^ 2 := ih tail htail z
 
+/-- For a commuting family of involutions, every binary component is a
+simultaneous `+1`/`-1` eigenvector with the prescribed signs. -/
+theorem action_iteratedPart
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (sign : Fin n → Bool) (z : E) (i : Fin n) :
+    rho (c i) (iteratedPart rho c sign z) =
+      if sign i then iteratedPart rho c sign z
+      else -iteratedPart rho c sign z := by
+  induction n with
+  | zero => exact Fin.elim0 i
+  | succ n ih =>
+      refine Fin.cases ?_ (fun j ↦ ?_) i
+      · simp only [iteratedPart]
+        split <;> simp_all [action_positivePart, action_negativePart]
+      · let tail : Fin n → G := fun t ↦ c t.succ
+        let tailSign : Fin n → Bool := fun t ↦ sign t.succ
+        let w := iteratedPart rho tail tailSign z
+        have htailExp : ∀ t, tail t ^ 2 = 1 := fun t ↦ hc t.succ
+        have htailComm : Pairwise (Function.onFun Commute tail) := by
+          intro a b hab
+          apply hcomm
+          intro hs
+          exact hab (Fin.succ_inj.mp hs)
+        have htailAction := ih tail htailExp htailComm tailSign j
+        have hj0 : (j.succ : Fin (n + 1)) ≠ 0 := Fin.succ_ne_zero j
+        have hdc : Commute (c j.succ) (c 0) := hcomm hj0
+        change rho (c j.succ)
+            (if sign 0 then positivePart rho (c 0) w
+              else negativePart rho (c 0) w) =
+          if sign j.succ then
+            (if sign 0 then positivePart rho (c 0) w
+              else negativePart rho (c 0) w)
+          else -(if sign 0 then positivePart rho (c 0) w
+              else negativePart rho (c 0) w)
+        split <;> simp only
+          [action_positivePart_of_commute rho hdc,
+            action_negativePart_of_commute rho hdc]
+        all_goals
+          rw [htailAction]
+          split <;> try rfl
+          simp only [positivePart_neg, negativePart_neg]
+          rfl
+
 end FiniteInvolutionDecomposition
 
 end NonsoficGroupsExist
