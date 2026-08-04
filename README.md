@@ -2,7 +2,7 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 56% of the way to the complete
+group exists. The current estimate is **about 57% of the way to the complete
 unconditional proof**. This percentage measures closed dependencies on the
 critical path, not lines of Lean.
 
@@ -46,6 +46,8 @@ box is still a required dependency of the final theorem.
   algebraic filtration for the relative-property-`(T)` proof)
 - [x] Prove multiplication adds free-word degree bounds and multiplication by
   each free generator advances the finite filtration by one stage
+- [x] Construct finite, monotone degree stages inside every elementary root
+  subgroup and prove that their supremum is the full root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

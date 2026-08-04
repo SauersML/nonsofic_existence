@@ -9,6 +9,7 @@ import NonsoficGroupsExist.A2MagicEnergy
 import NonsoficGroupsExist.A2MagicHilbert
 import NonsoficGroupsExist.PositiveOperatorGap
 import NonsoficGroupsExist.FreeAlgebraDegree
+import NonsoficGroupsExist.FreeRootFiltration
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.ClassTwoApproximation
