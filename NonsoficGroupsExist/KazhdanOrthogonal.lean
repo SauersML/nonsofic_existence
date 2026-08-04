@@ -136,6 +136,25 @@ theorem norm_orbitAverage_le_of_mem_orthogonal [CompleteSpace E]
   have h := norm_orbitAverage_orthogonal_le hQ S hQS hone hεone ρ x'
   simpa [x'] using h
 
+/-- Homogeneous Kazhdan displacement for a vector orthogonal to the
+invariant subspace of an arbitrary representation. -/
+theorem exists_moved_mul_norm_of_mem_orthogonal [CompleteSpace E]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) {x : E}
+    (hxorth : x ∈ (invariantSubmodule ρ)ᗮ) (hx : x ≠ 0) :
+    ∃ q ∈ Q, ε * ‖x‖ ≤ ‖ρ q x - x‖ := by
+  let x' : (invariantSubmodule ρ)ᗮ := ⟨x, hxorth⟩
+  have hx' : x' ≠ 0 := by
+    intro hzero
+    apply hx
+    exact congrArg Subtype.val hzero
+  obtain ⟨q, hq, hmove⟩ :=
+    hQ.exists_moved_mul_norm_of_noInvariant (orthogonalRepresentation ρ)
+      (orthogonalRepresentation_hasNoInvariantVectors ρ) x' hx'
+  refine ⟨q, hq, ?_⟩
+  change ε * ‖x‖ ≤ ‖ρ q x - x‖ at hmove
+  exact hmove
+
 /-- Subtracting a vector from its orbit average removes its invariant
 component. -/
 theorem orbitAverage_sub_mem_orthogonal

@@ -15,6 +15,7 @@ namespace NonsoficGroupsExist
 namespace KazhdanFiniteModel
 
 open scoped symmDiff
+open KazhdanOrthogonal
 
 universe u v
 
@@ -55,6 +56,43 @@ noncomputable def permutationRepresentation (σ : G →* Equiv.Perm Y) :
 @[simp] theorem permutationRepresentation_apply
     (σ : G →* Equiv.Perm Y) (g : G) (x : EuclideanSpace ℝ Y) (y : Y) :
     permutationRepresentation σ g x y = x ((σ g).symm y) := rfl
+
+/-- Transitivity of an exact finite permutation action. -/
+def IsTransitive (σ : G →* Equiv.Perm Y) : Prop :=
+  ∀ x y : Y, ∃ g : G, σ g x = y
+
+/-- In a transitive finite action, the invariant vectors in the permutation
+representation are exactly the constant functions. -/
+theorem invariant_iff_constant (σ : G →* Equiv.Perm Y)
+    (htrans : IsTransitive σ) (x : EuclideanSpace ℝ Y) :
+    (∀ g : G, permutationRepresentation σ g x = x) ↔
+      ∀ a b : Y, x a = x b := by
+  constructor
+  · intro hinv a b
+    obtain ⟨g, hg⟩ := htrans a b
+    have h := congrArg (fun z : EuclideanSpace ℝ Y ↦ z b) (hinv g)
+    have hpre : (σ g).symm b = a := by
+      apply (σ g).injective
+      simp [hg]
+    simpa [permutationRepresentation_apply, hpre] using h
+  · intro hconstant g
+    ext y
+    exact hconstant _ _
+
+/-- The constant vector with prescribed value. -/
+noncomputable def constantVector (c : ℝ) : EuclideanSpace ℝ Y :=
+  WithLp.toLp 2 fun _ ↦ c
+
+omit [Fintype Y] in
+@[simp] theorem constantVector_apply (c : ℝ) (y : Y) :
+    constantVector c y = c := rfl
+
+/-- Permutation operators fix constant vectors. -/
+@[simp] theorem permutationOperator_constantVector
+    (p : Equiv.Perm Y) (c : ℝ) :
+    permutationOperator p (constantVector c) = constantVector c := by
+  ext y
+  rfl
 
 section
 
@@ -105,6 +143,180 @@ theorem norm_permutationOperator_indicator_sub_sq
     ‖permutationOperator p (indicator U) - indicator U‖ ^ 2 =
       (((U.map p.toEmbedding) ∆ U).card : ℝ) := by
   rw [permutationOperator_indicator, norm_indicator_sub_sq]
+
+/-- The characteristic vector after subtracting its global mean. -/
+noncomputable def centeredIndicator (U : Finset Y) : EuclideanSpace ℝ Y :=
+  indicator U - ((U.card : ℝ) / Fintype.card Y) • constantVector 1
+
+@[simp] theorem centeredIndicator_apply (U : Finset Y) (y : Y) :
+    centeredIndicator U y =
+      (if y ∈ U then 1 else 0) - (U.card : ℝ) / Fintype.card Y := by
+  simp [centeredIndicator]
+
+/-- Centering does not change a characteristic vector's displacement under
+a permutation. -/
+theorem permutationOperator_centeredIndicator_sub
+    (p : Equiv.Perm Y) (U : Finset Y) :
+    permutationOperator p (centeredIndicator U) - centeredIndicator U =
+      permutationOperator p (indicator U) - indicator U := by
+  simp [centeredIndicator, map_sub, map_smul]
+
+/-- Exact variance formula for a centered characteristic vector. -/
+theorem norm_centeredIndicator_sq [Nonempty Y] (U : Finset Y) :
+    ‖centeredIndicator U‖ ^ 2 =
+      (U.card : ℝ) * (1 - (U.card : ℝ) / Fintype.card Y) := by
+  rw [EuclideanSpace.real_norm_sq_eq]
+  let a : ℝ := (U.card : ℝ) / Fintype.card Y
+  have hpoint (y : Y) :
+      (centeredIndicator U y) ^ 2 =
+        if y ∈ U then (1 - a) ^ 2 else a ^ 2 := by
+    by_cases hy : y ∈ U <;> simp [centeredIndicator_apply, a, hy]
+  simp_rw [hpoint]
+  have hcardNat : 0 < Fintype.card Y := Fintype.card_pos
+  have hcard : (Fintype.card Y : ℝ) ≠ 0 := by exact_mod_cast hcardNat.ne'
+  simp only [Finset.sum_ite, Finset.sum_const, nsmul_eq_mul]
+  have hfilterU : (Finset.univ.filter fun y : Y ↦ y ∈ U) = U := by
+    ext y
+    simp
+  rw [hfilterU]
+  change (U.card : ℝ) * (1 - a) ^ 2 +
+      ((Finset.univ.filter fun y : Y ↦ y ∉ U).card : ℝ) * a ^ 2 =
+        (U.card : ℝ) * (1 - (U.card : ℝ) / Fintype.card Y)
+  have hcomplement : (Finset.univ.filter fun y : Y ↦ y ∉ U).card =
+      Fintype.card Y - U.card := by
+    rw [← Finset.card_compl]
+    congr
+    ext y
+    simp
+  rw [hcomplement]
+  have hUle : U.card ≤ Fintype.card Y := Finset.card_le_univ U
+  rw [Nat.cast_sub hUle]
+  dsimp [a]
+  field_simp
+  ring
+
+/-- A centered characteristic vector has coordinate sum zero. -/
+theorem sum_centeredIndicator [Nonempty Y] (U : Finset Y) :
+    ∑ y : Y, centeredIndicator U y = 0 := by
+  have hcardNat : 0 < Fintype.card Y := Fintype.card_pos
+  have hcard : (Fintype.card Y : ℝ) ≠ 0 := by exact_mod_cast hcardNat.ne'
+  simp_rw [centeredIndicator_apply]
+  rw [Finset.sum_sub_distrib]
+  simp
+  field_simp
+  ring
+
+/-- For a transitive action, centered characteristic vectors are orthogonal
+to every invariant vector. -/
+theorem centeredIndicator_mem_orthogonal [Nonempty Y]
+    (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ) (U : Finset Y) :
+    centeredIndicator U ∈
+      (invariantSubmodule (permutationRepresentation σ))ᗮ := by
+  rw [Submodule.mem_orthogonal]
+  intro x hx
+  obtain ⟨y₀⟩ := ‹Nonempty Y›
+  have hxinv : ∀ g : G, permutationRepresentation σ g x = x :=
+    (mem_invariantSubmodule (permutationRepresentation σ) x).1 hx
+  have hxconstant : ∀ y z : Y, x y = x z :=
+    (invariant_iff_constant σ htrans x).1 hxinv
+  rw [PiLp.inner_apply]
+  calc
+    (∑ y : Y, inner ℝ (x y) (centeredIndicator U y)) =
+        ∑ y : Y, x y * centeredIndicator U y := by
+      apply Finset.sum_congr rfl
+      intro y _
+      rw [Real.inner_apply]
+    _ = ∑ y : Y, x y₀ * centeredIndicator U y := by
+      apply Finset.sum_congr rfl
+      intro y _
+      rw [hxconstant y y₀]
+    _ = x y₀ * ∑ y : Y, centeredIndicator U y := by
+      rw [Finset.mul_sum]
+    _ = 0 := by rw [sum_centeredIndicator]; ring
+
+/-- A nonempty subset of at most half the finite space has a nonzero centered
+characteristic vector. -/
+theorem centeredIndicator_ne_zero [Nonempty Y] (U : Finset Y)
+    (hU : U.Nonempty) (hhalf : 2 * U.card ≤ Fintype.card Y) :
+    centeredIndicator U ≠ 0 := by
+  intro hzero
+  have hnorm := norm_centeredIndicator_sq U
+  rw [hzero, norm_zero, zero_pow (by norm_num : (2 : ℕ) ≠ 0)] at hnorm
+  have hUposNat : 0 < U.card := Finset.card_pos.mpr hU
+  have hUpos : (0 : ℝ) < U.card := by exact_mod_cast hUposNat
+  have hcardPosNat : 0 < Fintype.card Y := Fintype.card_pos
+  have hcardPos : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardPosNat
+  have hhalfReal : (2 : ℝ) * U.card ≤ Fintype.card Y := by
+    exact_mod_cast hhalf
+  have hdensity : (U.card : ℝ) / Fintype.card Y ≤ 1 / 2 := by
+    rw [div_le_iff₀ hcardPos]
+    linarith
+  nlinarith
+
+/-- A Kazhdan pair gives a uniform set-expansion estimate for every exact
+transitive finite action. -/
+theorem exists_symmDiff_lower_bound [Nonempty Y]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ)
+    (U : Finset Y) (hU : U.Nonempty)
+    (hhalf : 2 * U.card ≤ Fintype.card Y) :
+    ∃ q ∈ Q, ε ^ 2 / 2 * U.card ≤
+      (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := by
+  have hxorth := centeredIndicator_mem_orthogonal σ htrans U
+  have hxne := centeredIndicator_ne_zero U hU hhalf
+  obtain ⟨q, hq, hmove⟩ :=
+    exists_moved_mul_norm_of_mem_orthogonal hQ
+      (permutationRepresentation σ) hxorth hxne
+  refine ⟨q, hq, ?_⟩
+  have hleftNonneg : 0 ≤ ε * ‖centeredIndicator U‖ :=
+    mul_nonneg hQ.1.le (norm_nonneg _)
+  have hrightNonneg :
+      0 ≤ ‖permutationRepresentation σ q (centeredIndicator U) -
+        centeredIndicator U‖ := norm_nonneg _
+  have hmoveSq :=
+    (sq_le_sq₀ hleftNonneg hrightNonneg).2 hmove
+  have hdisp :
+      ‖permutationRepresentation σ q (centeredIndicator U) -
+          centeredIndicator U‖ ^ 2 =
+        (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := by
+    change ‖permutationOperator (σ q) (centeredIndicator U) -
+      centeredIndicator U‖ ^ 2 = _
+    rw [permutationOperator_centeredIndicator_sub,
+      norm_permutationOperator_indicator_sub_sq]
+  have hnorm := norm_centeredIndicator_sq U
+  have hcardPosNat : 0 < Fintype.card Y := Fintype.card_pos
+  have hcardPos : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardPosNat
+  have hhalfReal : (2 : ℝ) * U.card ≤ Fintype.card Y := by
+    exact_mod_cast hhalf
+  have hdensity : (U.card : ℝ) / Fintype.card Y ≤ 1 / 2 := by
+    rw [div_le_iff₀ hcardPos]
+    linarith
+  have hnormLower : (U.card : ℝ) / 2 ≤ ‖centeredIndicator U‖ ^ 2 := by
+    rw [hnorm]
+    have hU : (0 : ℝ) ≤ U.card := by positivity
+    nlinarith
+  rw [hdisp] at hmoveSq
+  have hεsq : 0 ≤ ε ^ 2 := sq_nonneg ε
+  calc
+    ε ^ 2 / 2 * U.card = ε ^ 2 * ((U.card : ℝ) / 2) := by ring
+    _ ≤ ε ^ 2 * ‖centeredIndicator U‖ ^ 2 :=
+      mul_le_mul_of_nonneg_left hnormLower hεsq
+    _ = (ε * ‖centeredIndicator U‖) ^ 2 := by ring
+    _ ≤ (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := hmoveSq
+
+/-- Summed generator form of the exact finite-action expansion estimate. -/
+theorem sum_symmDiff_lower_bound [Nonempty Y]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ)
+    (U : Finset Y) (hU : U.Nonempty)
+    (hhalf : 2 * U.card ≤ Fintype.card Y) :
+    ε ^ 2 / 2 * U.card ≤
+      ∑ q ∈ Q, (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := by
+  obtain ⟨q, hq, hbound⟩ :=
+    exists_symmDiff_lower_bound hQ σ htrans U hU hhalf
+  refine hbound.trans ?_
+  exact Finset.single_le_sum
+    (fun g _ ↦ Nat.cast_nonneg (((U.map (σ g).toEmbedding) ∆ U).card)) hq
 
 end
 
