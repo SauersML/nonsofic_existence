@@ -68,7 +68,9 @@ box is still a required dependency of the final theorem.
 - [x] Prove the simultaneous decomposition is covariant under conjugating the
   entire family, prove distinct sign components are pairwise orthogonal, and
   identify the squared norm of every finite subfamily sum with its exact
-  component-mass sum
+  component-mass sum; identify the mass of characters taking value `-1` on
+  any finite-plane element with exactly one quarter of that element's squared
+  displacement
 - [x] Prove every finite free-root plane is abelian of exponent two, enumerate
   all of its elements, and instantiate the simultaneous Fourier decomposition
   and sign-action theorem for that exhaustive enumeration; prove every

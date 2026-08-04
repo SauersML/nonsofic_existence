@@ -212,6 +212,16 @@ theorem negativePart_eq_neg_half_smul_displacement
   rw [negativePart, show z - rho c z = -(rho c z - z) by abel]
   simp only [smul_neg, neg_smul]
 
+/-- The negative spectral mass is exactly one quarter of the squared
+displacement by the involution. -/
+theorem norm_negativePart_sq
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (c : G) (z : E) :
+    ‖negativePart rho c z‖ ^ 2 =
+      (4 : ℝ)⁻¹ * ‖rho c z - z‖ ^ 2 := by
+  rw [negativePart_eq_neg_half_smul_displacement, norm_smul]
+  norm_num [Real.norm_eq_abs]
+  ring
+
 /-- Positive splitting is covariant under conjugation. -/
 theorem map_positivePart
     (rho : G →* (E ≃ₗᵢ[ℝ] E)) (g c : G) (z : E) :

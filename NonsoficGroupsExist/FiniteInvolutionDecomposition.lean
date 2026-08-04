@@ -216,6 +216,61 @@ theorem norm_sum_iteratedPart_sq
         _ = ‖iteratedPart rho c sign z‖ ^ 2 +
             ∑ tau ∈ A, ‖iteratedPart rho c tau z‖ ^ 2 := by rw [ih]
 
+/-- The negative spectral projection for one family member keeps exactly the
+components assigning that member the negative sign. -/
+theorem negativePart_iteratedPart
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (sign : Fin n → Bool) (z : E) (i : Fin n) :
+    negativePart rho (c i) (iteratedPart rho c sign z) =
+      if sign i then 0 else iteratedPart rho c sign z := by
+  unfold negativePart
+  rw [action_iteratedPart rho n c hc hcomm sign z i]
+  split <;> module
+
+/-- The negative part of the original vector is the sum of precisely its
+negative sign components for the selected family member. -/
+theorem negativePart_eq_sum_false_iteratedPart
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (z : E) (i : Fin n) :
+    negativePart rho (c i) z =
+      ∑ sign ∈ (Finset.univ.filter fun sign : Fin n → Bool ↦ sign i = false),
+        iteratedPart rho c sign z := by
+  let part : (Fin n → Bool) → E := fun sign ↦ iteratedPart rho c sign z
+  calc
+    negativePart rho (c i) z =
+        negativePart rho (c i) (∑ sign, part sign) := by
+      rw [sum_iteratedPart]
+    _ = ∑ sign, negativePart rho (c i) (part sign) := by
+      unfold negativePart
+      rw [map_sum, ← Finset.sum_sub_distrib, Finset.smul_sum]
+    _ = ∑ sign, if sign i then 0 else part sign := by
+      apply Finset.sum_congr rfl
+      intro sign _
+      exact negativePart_iteratedPart rho n c hc hcomm sign z i
+    _ = ∑ sign ∈ (Finset.univ.filter fun sign : Fin n → Bool ↦
+        sign i = false), part sign := by
+      rw [Finset.sum_filter]
+      apply Finset.sum_congr rfl
+      intro sign _
+      cases sign i <;> simp
+
+/-- The negative character mass is exactly the squared norm of the negative
+spectral projection. -/
+theorem norm_negativePart_sq_eq_sum_false
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (z : E) (i : Fin n) :
+    ‖negativePart rho (c i) z‖ ^ 2 =
+      ∑ sign ∈ (Finset.univ.filter fun sign : Fin n → Bool ↦ sign i = false),
+        ‖iteratedPart rho c sign z‖ ^ 2 := by
+  rw [negativePart_eq_sum_false_iteratedPart rho n c hc hcomm z i]
+  exact norm_sum_iteratedPart_sq rho n c hc hcomm _ z
+
 end FiniteInvolutionDecomposition
 
 end NonsoficGroupsExist

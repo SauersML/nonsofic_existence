@@ -110,6 +110,15 @@ def planeEigenvalue
     (g : Plane X i j k hij hik hjk n) : ℝ :=
   if sign ((planeEnumeration X i j k hij hik hjk n).symm g) then 1 else -1
 
+/-- The finite set of sign components on which a selected plane element has
+eigenvalue `-1`. -/
+noncomputable def negativePlaneSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (g : Plane X i j k hij hik hjk n) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  Finset.univ.filter fun sign ↦
+    planeEigenvalue X i j k hij hik hjk n sign g = -1
+
 /-- An arbitrary stage element acts on a component by its assigned real
 eigenvalue. -/
 theorem action_planeComponent_element
@@ -127,6 +136,53 @@ theorem action_planeComponent_element
   rw [← hq]
   have haction := action_planeComponent X i j k hij hik hjk n rho sign z q
   simpa [planeEigenvalue, q] using haction
+
+/-- The negative spectral projection for any finite-plane element has squared
+norm exactly equal to the total mass of the components on which that element
+has character value `-1`. -/
+theorem norm_negativePart_sq_eq_planeCharacterMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (g : Plane X i j k hij hik hjk n) :
+    ‖InvolutionSplitting.negativePart rho g.1 z‖ ^ 2 =
+      ∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n g,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := by
+  let q := (planeEnumeration X i j k hij hik hjk n).symm g
+  have hq : planeFamily X i j k hij hik hjk n q = g.1 := by
+    exact congrArg Subtype.val
+      ((planeEnumeration X i j k hij hik hjk n).apply_symm_apply g)
+  rw [← hq]
+  have hmass := norm_negativePart_sq_eq_sum_false rho _
+    (planeFamily X i j k hij hik hjk n)
+    (planeFamily_sq X i j k hij hik hjk n)
+    (planeFamily_pairwise_commute X i j k hij hik hjk n) z q
+  rw [hmass]
+  apply Finset.sum_congr
+  · ext sign
+    simp only [negativePlaneSignSet, Finset.mem_filter,
+      Finset.mem_univ, true_and]
+    simp only [planeEigenvalue, q]
+    cases sign ((planeEnumeration X i j k hij hik hjk n).symm g) <;> norm_num
+  · intro sign _
+    rfl
+
+/-- Equivalently, the total mass of the characters detecting a plane element
+is one quarter of that element's squared displacement. -/
+theorem planeCharacterMass_eq_quarter_displacement
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (g : Plane X i j k hij hik hjk n) :
+    (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n g,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+      (4 : ℝ)⁻¹ * ‖rho g.1 z - z‖ ^ 2 := by
+  calc
+    (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n g,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+        ‖InvolutionSplitting.negativePart rho g.1 z‖ ^ 2 :=
+      (norm_negativePart_sq_eq_planeCharacterMass
+        X i j k hij hik hjk n rho z g).symm
+    _ = (4 : ℝ)⁻¹ * ‖rho g.1 z - z‖ ^ 2 :=
+      InvolutionSplitting.norm_negativePart_sq rho g.1 z
 
 /-- On every nonzero component, the assigned eigenvalue is multiplicative.
 Thus inconsistent binary assignments necessarily have zero component. -/
