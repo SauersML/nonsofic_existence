@@ -6,6 +6,7 @@ import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.KazhdanOrthogonal
 import NonsoficGroupsExist.KazhdanFiniteModel
 import NonsoficGroupsExist.KazhdanGNS
+import NonsoficGroupsExist.KunFiniteMarkov
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation

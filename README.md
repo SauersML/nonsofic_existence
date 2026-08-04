@@ -15,6 +15,16 @@ the core, and have the required centralization and trivial-intersection
 properties.  `ConcreteRankFour.compressionSetup` assembles these facts into a
 closed concrete algebraic setup.
 
+The analytic development also constructs the GNS Hilbert space of every
+limiting sofic correlation, proves the iterated Kazhdan contraction there,
+uniformizes it back to all sufficiently large finite models, and controls the
+approximate-multiplication error between exact group words and the actual
+finite permutation Markov operator.  Consequently, genuine finite-model
+Markov displacements satisfy a fixed strict contraction, uniformly over every
+centered indicator, with arbitrarily small normalized additive error.  The
+directed cut-energy and rounding steps needed to turn this estimate into
+Kun's expander decomposition are still being formalized.
+
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the
 required expander decomposition and Kun--Thom implication, the relevant
