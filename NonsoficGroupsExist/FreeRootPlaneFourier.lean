@@ -216,6 +216,38 @@ theorem abs_generatorShearedSecondCharacterMass_sub_le
     at htransport
   exact htransport
 
+/-- The symmetric character-mass transport estimate for the opposite shear.
+It compares the next-stage sheared first-coordinate event with the original
+pure first-coordinate event. -/
+theorem abs_generatorShearedFirstCharacterMass_sub_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (a : FreeAlgebraDegree.degreeLE X n)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    |(∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk (n + 1)
+          (generatorShearedFirstCoordinate X i j k hij hik hjk x n a),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) -
+      (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
+          (firstCoordinate X i j k hij hik hjk n a),
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2)| ≤
+      2 * ‖z‖ *
+        ‖z - rho (elementaryRoot j i hij.symm
+          (FreeAlgebra.ι (ZMod 2) x)) z‖ := by
+  rw [← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk
+      (n + 1) rho z
+      (generatorShearedFirstCoordinate X i j k hij hik hjk x n a),
+    ← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk n rho z
+      (firstCoordinate X i j k hij hik hjk n a)]
+  have hc : (firstCoordinate X i j k hij hik hjk n a).1 ^ 2 = 1 :=
+    rootPlaneDegreeSubgroup_sq X i j k hij hik hjk n _
+      (firstCoordinate X i j k hij hik hjk n a).2
+  have htransport :=
+    InvolutionSplitting.abs_norm_negativePart_conjugate_sq_sub_le rho
+      (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x)) hc z
+  rw [conjugate_firstCoordinate_opposite_generator
+      X i j k hij hik hjk x n a] at htransport
+  exact htransport
+
 /-- On every nonzero component, the assigned eigenvalue is multiplicative.
 Thus inconsistent binary assignments necessarily have zero component. -/
 theorem planeEigenvalue_mul_of_component_ne_zero

@@ -226,8 +226,28 @@ noncomputable def generatorShearedSecondCoordinate
     secondCoordinate X i j k hij hik hjk (n + 1)
       (coefficientSucc X b)
 
+/-- The opposite adjacent shear of a pure first coordinate.  Conjugation by
+the `j,i` generator fixes the first coefficient and adds its left-generator
+multiple to the second coefficient. -/
+noncomputable def generatorShearedFirstCoordinate
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (a : degreeLE X n) :
+    rootPlaneDegreeSubgroup X i j k hij hik hjk (n + 1) :=
+  firstCoordinate X i j k hij hik hjk (n + 1)
+      (coefficientSucc X a) *
+    secondCoordinate X i j k hij hik hjk (n + 1)
+      (generatorMulCoefficientSucc X x a)
+
 @[simp] theorem coefficientSucc_val {n : ℕ} (a : degreeLE X n) :
     (coefficientSucc X a).1 = a.1 := rfl
+
+@[simp] theorem coefficientSucc_zero {n : ℕ} :
+    coefficientSucc X (0 : degreeLE X n) = 0 := by
+  rfl
+
+theorem coefficientSucc_add {n : ℕ} (a b : degreeLE X n) :
+    coefficientSucc X (a + b) = coefficientSucc X a + coefficientSucc X b := by
+  rfl
 
 @[simp] theorem generatorMulCoefficientSucc_val {n : ℕ} (x : X)
     (a : degreeLE X n) :
@@ -266,6 +286,16 @@ theorem generatorMulCoefficientSucc_wordMonomialInDegree
     wordMonomial X (FreeMonoid.of x * w)
   rw [← wordMonomial_mul X (FreeMonoid.of x) w, wordMonomial_of]
 
+/-- The filtration inclusion preserves every bounded basis monomial exactly. -/
+theorem coefficientSucc_wordMonomialInDegree
+    (n : ℕ) (w : FreeMonoid X) (hw : freeWordLength X w ≤ n) :
+    coefficientSucc X (wordMonomialInDegree X n w) =
+      wordMonomialInDegree X (n + 1) w := by
+  have hsucc : freeWordLength X w ≤ n + 1 := hw.trans (Nat.le_succ n)
+  apply Subtype.ext
+  rw [coefficientSucc_val, wordMonomialInDegree_of_le X w hw,
+    wordMonomialInDegree_of_le X w hsucc]
+
 /-- The exact adjacent-stage shear on the second plane coordinate.  This is
 an equality of actual elementary matrices, not merely membership in the next
 stage. -/
@@ -294,6 +324,45 @@ theorem conjugate_firstCoordinate_generator
       elementaryRoot i k hik a.1 *
       (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
     elementaryRoot i k hik a.1
+  rw [hcomm.eq]
+  simp
+
+/-- Conjugation by the opposite adjacent generator performs the exact shear
+on a pure first-coordinate element. -/
+theorem conjugate_firstCoordinate_opposite_generator
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (a : degreeLE X n) :
+    elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+        (firstCoordinate X i j k hij hik hjk n a).1 *
+        (elementaryRoot j i hij.symm
+          (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      (generatorShearedFirstCoordinate X i j k hij hik hjk x n a).1 := by
+  change elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+      elementaryRoot i k hik a.1 *
+      (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+    elementaryRoot i k hik a.1 *
+      elementaryRoot j k hjk (FreeAlgebra.ι (ZMod 2) x * a.1)
+  rw [FreeRootActions.conjugate_by_generator X j i k hij.symm hik hjk]
+  exact (elementaryRoot_commute_of_ne j k i k hjk hik
+    hik.symm hjk.symm _ _).eq
+
+/-- The opposite adjacent shear fixes the second coordinate, viewed in the
+next degree stage. -/
+theorem conjugate_secondCoordinate_opposite_generator
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) (b : degreeLE X n) :
+    elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+        (secondCoordinate X i j k hij hik hjk n b).1 *
+        (elementaryRoot j i hij.symm
+          (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      (secondCoordinate X i j k hij hik hjk (n + 1)
+        (coefficientSucc X b)).1 := by
+  have hcomm := elementaryRoot_commute_of_ne j i j k hij.symm hjk
+    hij hjk.symm (FreeAlgebra.ι (ZMod 2) x) b.1
+  change elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+      elementaryRoot j k hjk b.1 *
+      (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+    elementaryRoot j k hjk b.1
   rw [hcomm.eq]
   simp
 

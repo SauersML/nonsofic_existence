@@ -115,9 +115,14 @@ box is still a required dependency of the final theorem.
   realizing exact valuation descent, prove that set is nonempty whenever the
   valuation is positive and detected, and define a canonical least-index
   selector with its exact descent theorem
-- [ ] Partition the positive-valuation character regions by their least
-  leading generator and prove the generator shears carry the required pieces
-  into Kassabov's opposite-or-zero valuation regions
+- [x] Separate the all-trivial character pair into its own `zero` region
+  (rather than incorrectly counting it in `B`), partition `A ∪ B` and `C ∪ B`
+  into exact pairwise-disjoint least-leading-generator fibers, and prove both
+  finite-stage dual shear formulas carry every fiber into Kassabov's required
+  opposite-or-`D` valuation regions
+- [ ] Identify those dual shear maps with conjugation of the actual refined
+  Fourier components and derive the corresponding disjoint mass-sum
+  inequalities
 - [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
   for the two-root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
