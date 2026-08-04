@@ -289,6 +289,14 @@ theorem soficApproximation_of_tableModels [Countable G] [Nonempty G]
       (M.act ⟨g, mem_tableDomain_of_mem h₁⟩) 1 (M.act ⟨1, hdomOne⟩)
     linarith [honeclose']
 
+/-- The standard local definition of soficity yields a sequential sofic
+approximation for every countable group.  This closes the quantifier bridge
+between `IsSofic` and the analytic decomposition theorems. -/
+theorem soficApproximation_of_isSofic [Countable G] [Nonempty G]
+    (h : IsSofic G) : Nonempty (SoficApproximation G) := by
+  exact soficApproximation_of_tableModels fun F ε hε ↦
+    tableModel_of_isSofic h F ε hε
+
 /-- Restricting the table only weakens the requirements on a model. -/
 def TableModel.restrict {F F' : Finset G} {ε : ℝ} (M : TableModel G F' ε)
     (hFF : F ⊆ F') : TableModel G F ε where

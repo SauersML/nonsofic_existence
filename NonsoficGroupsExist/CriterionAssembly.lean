@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.ConservativeMatching
 import NonsoficGroupsExist.ExpanderReindex
 import NonsoficGroupsExist.KunFixedDecomposition
+import NonsoficGroupsExist.TableCover
 
 /-!
 # Constructing the local criterion data
@@ -64,5 +65,30 @@ theorem isLEF_of_soficApproximation
     (A : SoficApproximation G) : IsLEF J := by
   obtain ⟨D⟩ := exists_localCriterionData C hTG hTΓ A
   exact D.selectionOutput.isLEF hTΓ
+
+/-- If the ambient group is sofic, the local-to-sequential conversion and the
+fully proved compression criterion force the concrete witness subgroup to be
+LEF. -/
+theorem isLEF_of_isSofic
+    {G Γ J : Type} [Group G] [Group Γ] [Group J]
+    [Countable G] [Countable Γ] [Countable J]
+    (C : CompressionSetup G Γ J)
+    (hTG : HasKazhdanPropertyT.{0, 0} G)
+    (hTΓ : HasKazhdanPropertyT.{0, 0} Γ)
+    (hS : IsSofic G) : IsLEF J := by
+  obtain ⟨A⟩ := soficApproximation_of_isSofic hS
+  exact isLEF_of_soficApproximation C hTG hTΓ A
+
+/-- A non-LEF witness in a concrete compression setup makes the ambient group
+nonsofic once property `(T)` has been proved for the two relevant groups. -/
+theorem not_isSofic_of_not_isLEF
+    {G Γ J : Type} [Group G] [Group Γ] [Group J]
+    [Countable G] [Countable Γ] [Countable J]
+    (C : CompressionSetup G Γ J)
+    (hTG : HasKazhdanPropertyT.{0, 0} G)
+    (hTΓ : HasKazhdanPropertyT.{0, 0} Γ)
+    (hJ : ¬ IsLEF J) : ¬ IsSofic G := by
+  intro hS
+  exact hJ (isLEF_of_isSofic C hTG hTΓ hS)
 
 end NonsoficGroupsExist
