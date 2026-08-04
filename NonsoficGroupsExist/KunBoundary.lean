@@ -348,6 +348,29 @@ theorem finiteModelAverageIterate_displacement_eq_indicator
     finiteModelAverageIterate_eq_indicatorIterate_sub A n U S hS]
   abel
 
+/-- The uncentered indicator contraction with coefficient below any prescribed
+positive target. -/
+theorem finiteModel_markovNormContraction_indicator_lt
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation G) (θ : ℝ) (hθ : 0 < θ) :
+    ∃ k : ℕ, ∃ c : ℝ, 0 ≤ c ∧ c < θ ∧
+      ∀ α : ℝ, 0 < α →
+        ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+          ‖finiteModelIndicatorIterate A n U S (k + 1) -
+              finiteModelIndicatorIterate A n U S k‖ <
+            c * ‖finiteModelIndicatorIterate A n U S 1 -
+              finiteModelIndicatorIterate A n U S 0‖ +
+            α * Real.sqrt (Fintype.card (A.model n) : ℝ) := by
+  obtain ⟨k, c, hc0, hc1, hcontract⟩ :=
+    finiteModel_markovNormContraction_lt
+      hQ S hQS hone hεone A θ hθ
+  refine ⟨k, c, hc0, hc1, fun α hα ↦ ?_⟩
+  obtain ⟨N, hN⟩ := hcontract α hα
+  refine ⟨N, fun n hn U ↦ ?_⟩
+  simpa only [finiteModelAverageIterate_displacement_eq_indicator
+      A n U S ⟨1, hone⟩] using hN n hn U
+
 /-- The strict Kazhdan Markov contraction in the uncentered indicator form
 used by finite threshold rounding. -/
 theorem finiteModel_strictMarkovNormContraction_indicator
@@ -362,13 +385,8 @@ theorem finiteModel_strictMarkovNormContraction_indicator
             c * ‖finiteModelIndicatorIterate A n U S 1 -
               finiteModelIndicatorIterate A n U S 0‖ +
             α * Real.sqrt (Fintype.card (A.model n) : ℝ) := by
-  obtain ⟨k, c, hc0, hc1, hcontract⟩ :=
-    finiteModel_strictMarkovNormContraction hQ S hQS hone hεone A
-  refine ⟨k, c, hc0, hc1, fun α hα ↦ ?_⟩
-  obtain ⟨N, hN⟩ := hcontract α hα
-  refine ⟨N, fun n hn U ↦ ?_⟩
-  simpa only [finiteModelAverageIterate_displacement_eq_indicator
-      A n U S ⟨1, hone⟩] using hN n hn U
+  exact finiteModel_markovNormContraction_indicator_lt
+    hQ S hQS hone hεone A 1 (by norm_num)
 
 end KazhdanGNS
 end NonsoficGroupsExist

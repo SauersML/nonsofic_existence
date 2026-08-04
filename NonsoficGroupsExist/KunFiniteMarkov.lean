@@ -325,14 +325,12 @@ theorem finiteModelAveragingDisplacementNormSq_eventually_lt
       he0scaled, he1scaled]
   exact hintermediate.trans_le (by linarith only [hbudget])
 
-/-- A Kazhdan contraction factor becomes smaller than `1/4` after a fixed
-number of squared averaging steps. -/
-theorem exists_four_mul_kazhdanFactor_pow_lt_one
+/-- The basic Kazhdan averaging factor lies in `[0,1)`. -/
+theorem kazhdanFactor_nonneg_lt_one
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
     (S : Finset G) (hone : 1 ∈ S) (hεone : ε ≤ 1) :
-    ∃ k : ℕ,
-      0 ≤ 4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) ∧
-      4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) < 1 := by
+    0 ≤ 1 - ε ^ 2 / (4 * S.card) ∧
+      1 - ε ^ 2 / (4 * S.card) < 1 := by
   have hScardNat : 0 < S.card := Finset.card_pos.mpr ⟨1, hone⟩
   have hScard : (0 : ℝ) < S.card := by exact_mod_cast hScardNat
   have hden : (0 : ℝ) < 4 * S.card := mul_pos (by norm_num) hScard
@@ -351,14 +349,65 @@ theorem exists_four_mul_kazhdanFactor_pow_lt_one
     dsimp [c]
     linarith
   have hcLt : c < 1 := by dsimp [c]; linarith
-  obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one
-    (by norm_num : (0 : ℝ) < 1 / 2) hcLt
+  exact ⟨hcNonneg, hcLt⟩
+
+/-- A Kazhdan contraction factor becomes smaller than any prescribed positive
+constant after a fixed number of squared averaging steps. -/
+theorem exists_four_mul_kazhdanFactor_pow_lt
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (η : ℝ) (hη : 0 < η) :
+    ∃ k : ℕ,
+      0 ≤ 4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) ∧
+      4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) < η := by
+  obtain ⟨hcNonneg, hcLt⟩ :=
+    kazhdanFactor_nonneg_lt_one hQ S hone hεone
+  let c : ℝ := 1 - ε ^ 2 / (4 * S.card)
+  let r : ℝ := min 1 (Real.sqrt (η / 4))
+  have hηdiv : 0 < η / 4 := div_pos hη (by norm_num)
+  have hr : 0 < r := lt_min (by norm_num) (Real.sqrt_pos.2 hηdiv)
+  obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one hr hcLt
   refine ⟨k, mul_nonneg (by norm_num) (pow_nonneg hcNonneg _), ?_⟩
-  change 4 * c ^ (2 * k) < 1
   have hpow : c ^ (2 * k) = (c ^ k) ^ 2 := by
     rw [show 2 * k = k * 2 by omega, pow_mul]
+  have hksqrt : c ^ k < Real.sqrt (η / 4) :=
+    hk.trans_le (min_le_right _ _)
+  have hkSq : (c ^ k) ^ 2 < (Real.sqrt (η / 4)) ^ 2 :=
+    (sq_lt_sq₀ (pow_nonneg hcNonneg _) (Real.sqrt_nonneg _)).2 hksqrt
+  have hsqrtSq : (Real.sqrt (η / 4)) ^ 2 = η / 4 :=
+    Real.sq_sqrt hηdiv.le
   rw [hpow]
-  nlinarith [pow_nonneg hcNonneg k]
+  nlinarith
+
+/-- A Kazhdan contraction factor becomes smaller than `1/4` after a fixed
+number of squared averaging steps. -/
+theorem exists_four_mul_kazhdanFactor_pow_lt_one
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hone : 1 ∈ S) (hεone : ε ≤ 1) :
+    ∃ k : ℕ,
+      0 ≤ 4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) ∧
+      4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k) < 1 := by
+  exact exists_four_mul_kazhdanFactor_pow_lt
+    hQ S hone hεone 1 (by norm_num)
+
+/-- Property `(T)` supplies a contraction coefficient below any prescribed
+positive target. -/
+theorem finiteModel_markovContraction_lt
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation G) (θ : ℝ) (hθ : 0 < θ) :
+    ∃ k : ℕ, ∃ ρ : ℝ, 0 ≤ ρ ∧ ρ < θ ∧
+      ∀ δ : ℝ, 0 < δ →
+        ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+          finiteModelAveragingDisplacementNormSq A n U S k <
+            ρ * finiteModelAveragingDisplacementNormSq A n U S 0 + δ := by
+  obtain ⟨k, hk0, hk1⟩ :=
+    exists_four_mul_kazhdanFactor_pow_lt hQ S hone hεone θ hθ
+  let ρ : ℝ := 4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k)
+  refine ⟨k, ρ, hk0, hk1, fun δ hδ ↦ ?_⟩
+  simpa [ρ, mul_assoc] using
+    finiteModelAveragingDisplacementNormSq_eventually_lt
+      hQ S hQS hone hεone A k δ hδ
 
 /-- Property `(T)` therefore supplies a fixed strict contraction of genuine
 finite-model Markov displacements, uniformly over every centered indicator
@@ -372,21 +421,16 @@ theorem finiteModel_strictMarkovContraction
         ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
           finiteModelAveragingDisplacementNormSq A n U S k <
             ρ * finiteModelAveragingDisplacementNormSq A n U S 0 + δ := by
-  obtain ⟨k, hk0, hk1⟩ :=
-    exists_four_mul_kazhdanFactor_pow_lt_one hQ S hone hεone
-  let ρ : ℝ := 4 * (1 - ε ^ 2 / (4 * S.card)) ^ (2 * k)
-  refine ⟨k, ρ, hk0, hk1, fun δ hδ ↦ ?_⟩
-  simpa [ρ, mul_assoc] using
-    finiteModelAveragingDisplacementNormSq_eventually_lt
-      hQ S hQS hone hεone A k δ hδ
+  exact finiteModel_markovContraction_lt
+    hQ S hQS hone hεone A 1 (by norm_num)
 
-/-- Unsquared form of the strict Markov contraction, matching the analytic
-hypothesis in Kun's finite rounding theorem. -/
-theorem finiteModel_strictMarkovNormContraction
+/-- Unsquared Markov contraction with coefficient below any prescribed
+positive target. -/
+theorem finiteModel_markovNormContraction_lt
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
     (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
-    (A : SoficApproximation G) :
-    ∃ k : ℕ, ∃ c : ℝ, 0 ≤ c ∧ c < 1 ∧
+    (A : SoficApproximation G) (θ : ℝ) (hθ : 0 < θ) :
+    ∃ k : ℕ, ∃ c : ℝ, 0 ≤ c ∧ c < θ ∧
       ∀ α : ℝ, 0 < α →
         ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
           ‖finiteModelAverageIterate A n U S (k + 1) -
@@ -395,11 +439,14 @@ theorem finiteModel_strictMarkovNormContraction
               finiteModelAverageIterate A n U S 0‖ +
             α * Real.sqrt (Fintype.card (A.model n) : ℝ) := by
   obtain ⟨k, ρ, hρ0, hρ1, hcontract⟩ :=
-    finiteModel_strictMarkovContraction hQ S hQS hone hεone A
+    finiteModel_markovContraction_lt
+      hQ S hQS hone hεone A (θ ^ 2) (sq_pos_of_pos hθ)
   let c := Real.sqrt ρ
   have hc0 : 0 ≤ c := Real.sqrt_nonneg _
   have hcsq : c ^ 2 = ρ := Real.sq_sqrt hρ0
-  have hc1 : c < 1 := by nlinarith [sq_nonneg (c - 1)]
+  have hc1 : c < θ := by
+    apply (sq_lt_sq₀ hc0 hθ.le).mp
+    simpa [hcsq] using hρ1
   refine ⟨k, c, hc0, hc1, fun α hα ↦ ?_⟩
   obtain ⟨Nerr, hNerr⟩ := hcontract (α ^ 2) (sq_pos_of_pos hα)
   obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
@@ -431,6 +478,23 @@ theorem finiteModel_strictMarkovNormContraction
   change a < c * b + α * Real.sqrt (Fintype.card (A.model n) : ℝ)
   nlinarith [mul_nonneg hc0 hb0, mul_nonneg hα.le hsqrtCard0,
     sq_nonneg (c * b + α * Real.sqrt (Fintype.card (A.model n) : ℝ))]
+
+/-- Unsquared form of the strict Markov contraction, matching the analytic
+hypothesis in Kun's finite rounding theorem. -/
+theorem finiteModel_strictMarkovNormContraction
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (A : SoficApproximation G) :
+    ∃ k : ℕ, ∃ c : ℝ, 0 ≤ c ∧ c < 1 ∧
+      ∀ α : ℝ, 0 < α →
+        ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+          ‖finiteModelAverageIterate A n U S (k + 1) -
+              finiteModelAverageIterate A n U S k‖ <
+            c * ‖finiteModelAverageIterate A n U S 1 -
+              finiteModelAverageIterate A n U S 0‖ +
+            α * Real.sqrt (Fintype.card (A.model n) : ℝ) := by
+  exact finiteModel_markovNormContraction_lt
+    hQ S hQS hone hεone A 1 (by norm_num)
 
 end KazhdanGNS
 end NonsoficGroupsExist
