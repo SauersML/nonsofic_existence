@@ -1,5 +1,5 @@
 import NonsoficGroupsExist.Kazhdan
-import Mathlib.Analysis.InnerProductSpace.Projection.Basic
+import Mathlib.Analysis.InnerProductSpace.Projection.Submodule
 import Mathlib.LinearAlgebra.FixedSubmodule
 import Mathlib.Algebra.Group.Subgroup.Map
 
@@ -170,6 +170,68 @@ theorem fixedSubspace_sup (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H K : Subgroup G) 
     apply fixed_of_mem_closure ρ ((H : Set G) ∪ (K : Set G)) x hseed g
     rwa [Subgroup.closure_union, Subgroup.closure_eq, Subgroup.closure_eq]
 
+/-- Fixed vectors for a supremum of subgroups are exactly the vectors fixed
+by every subgroup in the family. -/
+theorem fixedSubspace_iSup {ι : Type*} (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (H : ι → Subgroup G) :
+    fixedSubspace ρ (⨆ i, H i) = ⨅ i, fixedSubspace ρ (H i) := by
+  apply le_antisymm
+  · exact le_iInf fun i ↦ antitone ρ (le_iSup H i)
+  · intro x hx
+    rw [mem_fixedSubspace_iff]
+    intro g hg
+    let S : Set G := {g | ∃ i, g ∈ H i}
+    have hclosure : Subgroup.closure S = ⨆ i, H i := by
+      apply le_antisymm
+      · rw [Subgroup.closure_le]
+        rintro s ⟨i, hs⟩
+        exact (le_iSup H i) hs
+      · refine iSup_le fun i s hs ↦ ?_
+        exact Subgroup.subset_closure ⟨i, hs⟩
+    have hxS : ∀ s ∈ S, ρ s x = x := by
+      rintro s ⟨i, hs⟩
+      have hxall : ∀ i, x ∈ fixedSubspace ρ (H i) := by
+        simpa using hx
+      have hxi : x ∈ fixedSubspace ρ (H i) := hxall i
+      exact (mem_fixedSubspace_iff ρ (H i) x).mp hxi s hs
+    apply fixed_of_mem_closure ρ S x hxS g
+    rwa [hclosure]
+
+/-- Absence of nonzero invariant vectors is equivalently triviality of the
+fixed subspace of the whole group. -/
+theorem fixedSubspace_top_eq_bot
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (hno : IsKazhdanPair.HasNoInvariantVectors G ρ) :
+    fixedSubspace ρ ⊤ = ⊥ := by
+  rw [eq_bot_iff]
+  intro x hx
+  rw [Submodule.mem_bot]
+  apply hno x
+  intro g
+  exact (mem_fixedSubspace_iff ρ ⊤ x).mp hx g (Subgroup.mem_top g)
+
+/-- If a family of subgroups exhausts the ambient group and the
+representation has no invariant vectors, the orthogonal complements of the
+finite-stage fixed spaces have dense supremum.  This is the group-theoretic
+density input to the EJZ directed-limit argument. -/
+theorem movingSubspaces_iSup_dense {ι : Type*} [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : ι → Subgroup G)
+    (hsup : ⨆ i, H i = ⊤)
+    (hno : IsKazhdanPair.HasNoInvariantVectors G ρ) :
+    ⊤ ≤ (⨆ i, (fixedSubspace ρ (H i))ᗮ).topologicalClosure := by
+  apply le_of_eq
+  symm
+  rw [Submodule.topologicalClosure_eq_top_iff]
+  rw [← Submodule.iInf_orthogonal]
+  have hdouble : ∀ i, (fixedSubspace ρ (H i))ᗮᗮ =
+      fixedSubspace ρ (H i) := by
+    intro i
+    rw [Submodule.orthogonal_orthogonal_eq_closure]
+    exact (isClosed_fixedSubspace ρ (H i)).submodule_topologicalClosure_eq
+  simp_rw [hdouble]
+  rw [← fixedSubspace_iSup, hsup]
+  exact fixedSubspace_top_eq_bot ρ hno
+
 /-- If a family of subgroups generates `G`, a vector fixed by each member is
 globally invariant. -/
 theorem invariant_of_fixed_generators (ρ : G →* (E ≃ₗᵢ[ℝ] E))
@@ -229,6 +291,23 @@ theorem fixedProjection_equivariant_of_mem_normalizer [CompleteSpace E]
     have hmap := map_mem_fixedSubspace_orthogonal_of_mem_normalizer
       ρ H hg hxorth
     simpa [map_sub] using hmap
+
+/-- Projection onto the moving part, the orthogonal complement of the
+`H`-fixed subspace, commutes with the action of every element of `H`. -/
+theorem movingProjection_equivariant_of_mem [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G} (hg : g ∈ H)
+    (x : E) :
+    ((fixedSubspace ρ H)ᗮ).starProjection (ρ g x) =
+      ρ g (((fixedSubspace ρ H)ᗮ).starProjection x) := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  have hfixed : U.starProjection (ρ g x) = ρ g (U.starProjection x) := by
+    exact fixedProjection_equivariant_of_mem_normalizer ρ H
+      (H.le_normalizer hg) x
+  have hmoving (y : E) : Uᗮ.starProjection y = y - U.starProjection y := by
+    rw [Submodule.starProjection_orthogonal]
+    rfl
+  rw [hmoving, hfixed, hmoving, map_sub]
 
 /-- If a normal subgroup `H` together with `K` generates the ambient group,
 then their fixed subspaces are orthogonal in every representation without
