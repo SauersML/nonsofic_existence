@@ -33,12 +33,7 @@ noncomputable def rootDegreeSubgroup (i j : Fin 3) (hij : i ≠ j) (n : ℕ) :
       (elementaryRoot_mul i j hij a b).symm⟩
   inv_mem' := by
     rintro _ ⟨a, ha, rfl⟩
-    refine ⟨-a, (degreeLE X n).neg_mem ha, ?_⟩
-    have hmul : elementaryRoot i j hij a * elementaryRoot i j hij (-a) = 1 := by
-      rw [elementaryRoot_mul]
-      simp
-    have h := congrArg (fun z ↦ (elementaryRoot i j hij a)⁻¹ * z) hmul
-    simpa using h
+    exact ⟨-a, (degreeLE X n).neg_mem ha, elementaryRoot_neg i j hij a⟩
 
 theorem mem_rootDegreeSubgroup_iff (i j : Fin 3) (hij : i ≠ j) (n : ℕ)
     (g : elementaryGroup (Fin 3) (FreeRing X)) :

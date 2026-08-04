@@ -2,7 +2,7 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 58% of the way to the complete
+group exists. The current estimate is **about 59% of the way to the complete
 unconditional proof**. This percentage measures closed dependencies on the
 critical path, not lines of Lean.
 
@@ -50,6 +50,9 @@ box is still a required dependency of the final theorem.
   subgroup and prove that their supremum is the full root subgroup
 - [x] Prove the exact elementary shear/conjugation identity and that
   commutation with each free-ring generator advances root degree by one
+- [x] Build the finite two-root coefficient planes, prove that they exhaust
+  the full additive plane, and prove the generator shear sends stage `n` to
+  stage `n+1` by the explicit coefficient formula
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

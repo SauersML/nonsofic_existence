@@ -33,6 +33,12 @@ theorem elementaryRoot_mul (i j : I) (hij : i ≠ j) (a b : R) :
   apply Subtype.ext
   exact elementaryUnit_mul i j hij a b
 
+@[simp] theorem elementaryRoot_neg (i j : I) (hij : i ≠ j) (a : R) :
+    elementaryRoot i j hij (-a) = (elementaryRoot i j hij a)⁻¹ := by
+  apply eq_inv_of_mul_eq_one_right
+  rw [elementaryRoot_mul]
+  simp
+
 /-- In characteristic two every elementary root element is an involution. -/
 theorem elementaryRoot_sq [CharP R 2]
     (i j : I) (hij : i ≠ j) (a : R) :
@@ -50,12 +56,7 @@ def elementaryRootSubgroup (i j : I) (hij : i ≠ j) :
     exact ⟨a + b, (elementaryRoot_mul i j hij a b).symm⟩
   inv_mem' := by
     rintro _ ⟨a, rfl⟩
-    refine ⟨-a, ?_⟩
-    have hmul : elementaryRoot i j hij a * elementaryRoot i j hij (-a) = 1 := by
-      rw [elementaryRoot_mul]
-      simp
-    have h := congrArg (fun z ↦ (elementaryRoot i j hij a)⁻¹ * z) hmul
-    simpa using h
+    exact ⟨-a, elementaryRoot_neg i j hij a⟩
 
 theorem mem_elementaryRootSubgroup_iff (i j : I) (hij : i ≠ j)
     (g : elementaryGroup I R) :
