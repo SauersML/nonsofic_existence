@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Group.Subgroup.Pointwise
+import Mathlib.Data.Finite.Prod
 import Mathlib.GroupTheory.Commutator.Basic
 import Mathlib.Tactic.Group
 
@@ -157,6 +158,28 @@ theorem exists_three_factor (X Y Z : Subgroup G)
   refine ⟨x, hx, y, hy, z', hz', ?_⟩
   dsimp [z']
   group
+
+/-- A three-factor normal form by finite subgroups makes the generated
+subgroup finite. -/
+theorem finite_sup_of_three_factor (X Y Z : Subgroup G)
+    [Finite X] [Finite Y] [Finite Z]
+    (hYX : ⁅Y, X⁆ ≤ Z) (hXZ : ⁅X, Z⁆ ≤ Z) (hYZ : ⁅Y, Z⁆ ≤ Z)
+    (hZ : Z ≤ X ⊔ Y) :
+    Finite ↥(X ⊔ Y) := by
+  let f : X × Y × Z → ↥(X ⊔ Y) := fun p ↦
+    ⟨p.1.1 * p.2.1.1 * p.2.2.1,
+      (X ⊔ Y).mul_mem
+        ((X ⊔ Y).mul_mem
+          ((show X ≤ X ⊔ Y from le_sup_left) p.1.2)
+          ((show Y ≤ X ⊔ Y from le_sup_right) p.2.1.2))
+        (hZ p.2.2.2)⟩
+  exact Finite.of_surjective f (by
+    intro g
+    obtain ⟨x, hx, y, hy, z, hz, hxyz⟩ :=
+      exists_three_factor X Y Z hYX hXZ hYZ hZ g.2
+    refine ⟨(⟨x, hx⟩, (⟨y, hy⟩, ⟨z, hz⟩)), ?_⟩
+    apply Subtype.ext
+    exact hxyz)
 
 end ClassTwoNormalForm
 end NonsoficGroupsExist

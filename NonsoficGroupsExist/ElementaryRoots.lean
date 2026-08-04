@@ -33,6 +33,13 @@ theorem elementaryRoot_mul (i j : I) (hij : i ≠ j) (a b : R) :
   apply Subtype.ext
   exact elementaryUnit_mul i j hij a b
 
+/-- In characteristic two every elementary root element is an involution. -/
+theorem elementaryRoot_sq [CharP R 2]
+    (i j : I) (hij : i ≠ j) (a : R) :
+    elementaryRoot i j hij a ^ 2 = 1 := by
+  rw [pow_two, elementaryRoot_mul, CharTwo.add_self_eq_zero,
+    elementaryRoot_zero]
+
 /-- The additive elementary root subgroup `Xᵢⱼ`. -/
 def elementaryRootSubgroup (i j : I) (hij : i ≠ j) :
     Subgroup (elementaryGroup I R) where
@@ -54,6 +61,15 @@ theorem mem_elementaryRootSubgroup_iff (i j : I) (hij : i ≠ j)
     (g : elementaryGroup I R) :
     g ∈ elementaryRootSubgroup i j hij ↔
       ∃ a : R, elementaryRoot i j hij a = g := Iff.rfl
+
+/-- Every element of an elementary root subgroup has exponent two in
+characteristic two. -/
+theorem elementaryRootSubgroup_sq [CharP R 2]
+    (i j : I) (hij : i ≠ j) (g : elementaryGroup I R)
+    (hg : g ∈ elementaryRootSubgroup i j hij) :
+    g ^ 2 = 1 := by
+  obtain ⟨a, rfl⟩ := hg
+  exact elementaryRoot_sq i j hij a
 
 /-- The union of all elementary root subgroups. -/
 def elementaryRootSet (I R : Type*) [Fintype I] [DecidableEq I] [Ring R] :
