@@ -2,6 +2,7 @@ import NonsoficGroupsExist.MaximalCutRepair
 import NonsoficGroupsExist.SoficRestriction
 import NonsoficGroupsExist.KunGeneratorGraph
 import NonsoficGroupsExist.CompletionGraphEditing
+import NonsoficGroupsExist.DirectedCoarea
 
 /-!
 # Repairing an essential expander approximation
@@ -178,6 +179,59 @@ theorem repairedActualGraph_expands_eventually
         (repairedActualGraph C n).boundaryCard U := by
     exact_mod_cast hretain
   exact hsource.trans hretainReal
+
+/-- Enlarging the first-factor label set preserves the exact directed
+Cheeger bound supplied by the repaired tagged generator graph. -/
+theorem repairedDirected_expands_eventually
+    (C : MatchingCertificate K J) (S : Finset K)
+    (hKS : C.generatorsK ⊆ S) :
+    ∃ N, ∀ n ≥ N,
+      DirectedCoarea.HasCheegerLowerBound
+        ((repairedApproximation C).model n)
+        (AlmostAutomorphism.productLabels (repairedApproximation C) n S)
+        (expansionConstant C) := by
+  obtain ⟨Nexpand, hNexpand⟩ := repairedActualGraph_expands_eventually C
+  obtain ⟨Ninject, hNinject⟩ :=
+    AlmostAutomorphism.firstFactorLabels_injective_eventually
+      (repairedApproximation C) C.generatorsK
+  refine ⟨max Nexpand Ninject, fun n hn ↦ ?_⟩
+  have hexpand := hNexpand n ((le_max_left Nexpand Ninject).trans hn)
+  have hinject := hNinject n ((le_max_right Nexpand Ninject).trans hn)
+  refine ⟨expansionConstant_pos C, fun U hU hhalf ↦ ?_⟩
+  have hgraph := hexpand.2 U hU hhalf
+  have htagged : (repairedActualGraph C n).boundaryCard U ≤
+      (AlmostAutomorphism.directedBoundary
+        ((repairedApproximation C).model n)
+        (AlmostAutomorphism.productLabels (repairedApproximation C) n
+          C.generatorsK) U).card := by
+    rw [FiniteMultiGraph.boundaryCard,
+      ← AlmostAutomorphism.crossingEdges_decide_mem]
+    exact AlmostAutomorphism.generatorCrossing_card_le_directedBoundary
+      (repairedApproximation C) n C.generatorsK hinject U
+  have hlabelSubset :
+      AlmostAutomorphism.productLabels (repairedApproximation C) n
+          C.generatorsK ⊆
+        AlmostAutomorphism.productLabels (repairedApproximation C) n S := by
+    unfold AlmostAutomorphism.productLabels
+    exact Finset.image_mono _ hKS
+  have hboundarySubset :
+      AlmostAutomorphism.directedBoundary
+          ((repairedApproximation C).model n)
+          (AlmostAutomorphism.productLabels (repairedApproximation C) n
+            C.generatorsK) U ⊆
+        AlmostAutomorphism.directedBoundary
+          ((repairedApproximation C).model n)
+          (AlmostAutomorphism.productLabels (repairedApproximation C) n S) U := by
+    intro p hp
+    rw [AlmostAutomorphism.mem_directedBoundary] at hp ⊢
+    exact ⟨hlabelSubset hp.1, hp.2⟩
+  have hboundaryCard := Finset.card_le_card hboundarySubset
+  have hreal : ((repairedActualGraph C n).boundaryCard U : ℝ) ≤
+      (AlmostAutomorphism.directedBoundary
+        ((repairedApproximation C).model n)
+        (AlmostAutomorphism.productLabels (repairedApproximation C) n S) U).card := by
+    exact_mod_cast htagged.trans hboundaryCard
+  exact hgraph.trans hreal
 
 end EssentialExpanderRepair
 end NonsoficGroupsExist

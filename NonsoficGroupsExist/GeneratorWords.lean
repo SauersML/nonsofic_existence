@@ -13,7 +13,9 @@ given generating finset.
 
 namespace NonsoficGroupsExist
 
-variable {G : Type} [Group G]
+universe u
+
+variable {G : Type u} [Group G]
 
 /-- The inverse word, in the order required in a noncommutative group. -/
 def inverseWord (w : List G) : List G := (w.map Inv.inv).reverse

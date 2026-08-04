@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.LocalCriterion
 import NonsoficGroupsExist.LocalizedApproximation
+import NonsoficGroupsExist.KunThomEssential
 
 /-!
 # Output of component selection
@@ -57,6 +58,22 @@ noncomputable def toMatchingCertificate (O : SelectionOutput D) :
   expands := O.expands
   edit_negligible := by
     simpa [LocalizedApproximationData.toSoficApproximation] using O.edit_negligible
+
+/-- The selected component forces `J` to be LEF whenever the first factor has
+property `(T)`.  The Kun--Thom argument and essential-to-exact repair are
+proved internally; no theorem-shaped implication is supplied by the caller. -/
+theorem isLEF (O : SelectionOutput D)
+    (hT : HasKazhdanPropertyT.{0, 0} Γ) : IsLEF J := by
+  classical
+  obtain ⟨Q, κ, honeQ, _hκpos, hκone, hQ⟩ :=
+    HasKazhdanPropertyT.exists_identity_pair hT
+  let S : Finset Γ := Q ∪ D.setup.generatorsΓ
+  apply KunThomEssential.isLEF_of_matchingCertificate hQ
+    O.toMatchingCertificate S
+  · exact Finset.subset_union_left
+  · exact Finset.subset_union_right
+  · exact Finset.mem_union_left _ honeQ
+  · exact hκone
 
 end SelectionOutput
 end NonsoficGroupsExist
