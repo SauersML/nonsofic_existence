@@ -87,6 +87,11 @@ theorem freeWordLength_eq_zero_iff (w : FreeMonoid X) :
     apply e.injective
     simpa [e] using hl
 
+omit [Fintype X] in
+@[simp] theorem freeWordLength_of (x : X) :
+    freeWordLength X (FreeMonoid.of x) = 1 := by
+  simp [freeWordLength]
+
 /-- Polynomials supported on words of degree at most `n`. -/
 noncomputable def degreeLE (n : ℕ) :
     Submodule (ZMod 2) (FreeAlgebra (ZMod 2) X) :=

@@ -17,6 +17,7 @@ namespace FreeRootCharacterValuation
 open FreeAlgebraDegree
 open FreeRootPlaneFourier
 open FreeRootFiltration
+open FreeRootPlane
 
 noncomputable section
 
@@ -138,6 +139,67 @@ theorem characterValuation_eq_zero_iff
     have hle := characterValuation_le_of_hasDetection X chi
       ⟨0, hdetect⟩ hdetect
     omega
+
+/-- The character obtained by precomposing with left multiplication by one
+free generator.  It lives one degree stage lower. -/
+def leftDerivedCharacter {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X) :
+    degreeLE X n → ℝ :=
+  fun a ↦ chi (generatorMulCoefficientSucc X x a)
+
+/-- Kassabov's leading-letter claim: a positive nontrivial character
+valuation admits a first generator whose derived character has valuation
+exactly one smaller. -/
+theorem exists_leftDerivedCharacter_valuation_succ
+    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    (hExists : ∃ d, HasDetectionAtDegree X chi d)
+    (hpos : 0 < characterValuation X chi) :
+    ∃ x : X,
+      characterValuation X (leftDerivedCharacter X chi x) + 1 =
+        characterValuation X chi := by
+  have hminimal := hasDetectionAtDegree_characterValuation X chi hExists
+  obtain ⟨w, hwVal, hwStage, hwChi⟩ := hminimal
+  have hwPos : 0 < freeWordLength X w := by omega
+  obtain ⟨x, v, hwFactor, hvLength⟩ :=
+    exists_of_mul_of_freeWordLength_pos X w hwPos
+  have hvStage : freeWordLength X v ≤ n := by omega
+  have hvChi : leftDerivedCharacter X chi x
+      (wordMonomialInDegree X n v) = -1 := by
+    unfold leftDerivedCharacter
+    rw [generatorMulCoefficientSucc_wordMonomialInDegree X x n v hvStage]
+    rw [← hwFactor]
+    exact hwChi
+  have hvDetect : HasDetectionAtDegree X (leftDerivedCharacter X chi x)
+      (freeWordLength X v) := ⟨v, rfl, hvStage, hvChi⟩
+  have hvExists : ∃ d,
+      HasDetectionAtDegree X (leftDerivedCharacter X chi x) d :=
+    ⟨_, hvDetect⟩
+  let d := characterValuation X (leftDerivedCharacter X chi x)
+  have hdLe : d ≤ freeWordLength X v :=
+    characterValuation_le_of_hasDetection X
+      (leftDerivedCharacter X chi x) hvExists hvDetect
+  have hdDetect := hasDetectionAtDegree_characterValuation X
+    (leftDerivedCharacter X chi x) hvExists
+  obtain ⟨u, huVal, huStage, huChi⟩ := hdDetect
+  have huProductStage :
+      freeWordLength X (FreeMonoid.of x * u) ≤ n + 1 := by
+    rw [freeWordLength_mul, freeWordLength_of]
+    omega
+  have huProductChi :
+      chi (wordMonomialInDegree X (n + 1) (FreeMonoid.of x * u)) = -1 := by
+    change chi (generatorMulCoefficientSucc X x
+      (wordMonomialInDegree X n u)) = -1 at huChi
+    rw [generatorMulCoefficientSucc_wordMonomialInDegree X x n u huStage]
+      at huChi
+    exact huChi
+  have huProductDetect : HasDetectionAtDegree X chi (d + 1) := by
+    refine ⟨FreeMonoid.of x * u, ?_, huProductStage, huProductChi⟩
+    rw [freeWordLength_mul, freeWordLength_of, huVal]
+    omega
+  have hOriginalLe : characterValuation X chi ≤ d + 1 :=
+    characterValuation_le_of_hasDetection X chi hExists huProductDetect
+  refine ⟨x, ?_⟩
+  dsimp [d] at hdLe hOriginalLe ⊢
+  omega
 
 /-- Valuation of the first coefficient character of a finite plane sign
 component. -/

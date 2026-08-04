@@ -234,6 +234,25 @@ noncomputable def generatorShearedSecondCoordinate
     (generatorMulCoefficientSucc X x a).1 =
       FreeAlgebra.ι (ZMod 2) x * a.1 := rfl
 
+/-- Generator multiplication of a bounded tail monomial is exactly the
+bounded monomial of the word obtained by adjoining that generator on the
+left. -/
+theorem generatorMulCoefficientSucc_wordMonomialInDegree
+    (x : X) (n : ℕ) (w : FreeMonoid X)
+    (hw : freeWordLength X w ≤ n) :
+    generatorMulCoefficientSucc X x (wordMonomialInDegree X n w) =
+      wordMonomialInDegree X (n + 1) (FreeMonoid.of x * w) := by
+  have hprod : freeWordLength X (FreeMonoid.of x * w) ≤ n + 1 := by
+    rw [freeWordLength_mul, freeWordLength_of]
+    omega
+  apply Subtype.ext
+  rw [generatorMulCoefficientSucc_val,
+    wordMonomialInDegree_of_le X w hw,
+    wordMonomialInDegree_of_le X (FreeMonoid.of x * w) hprod]
+  change FreeAlgebra.ι (ZMod 2) x * wordMonomial X w =
+    wordMonomial X (FreeMonoid.of x * w)
+  rw [← wordMonomial_mul X (FreeMonoid.of x) w, wordMonomial_of]
+
 /-- The exact adjacent-stage shear on the second plane coordinate.  This is
 an equality of actual elementary matrices, not merely membership in the next
 stage. -/

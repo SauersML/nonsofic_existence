@@ -2,9 +2,23 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 63% of the way to the complete
-unconditional proof**. This percentage measures closed dependencies on the
-critical path, not lines of Lean.
+group exists.
+
+The project is pursuing the unconditional result in full mathematical
+generality.  In particular, the Kun dependency means the one-way theorem for
+**every** infinite finitely generated property-`(T)` group, every finite
+symmetric identity-containing generating set, and every sofic approximation.
+A theorem only for the concrete compression groups, an additional
+non-bipartiteness hypothesis, or a caller-supplied expander decomposition will
+not count as completing that dependency.  Likewise, the final nonsoficity
+theorems must construct all property-`(T)`, compression, non-LEF, Kun, and
+Kun--Thom inputs internally; none may remain an explicit argument, implicit
+instance, bundled field, or `Nonempty` premise.
+
+There is no honest numerical completion percentage at present: the remaining
+items include substantial theorems of very different sizes, so a percentage
+would suggest precision the dependency graph cannot support.  The checked
+milestones below are the progress record.
 
 ## Proof status
 
@@ -94,7 +108,14 @@ box is still a required dependency of the final theorem.
   free-word degree (using `n+1` exactly for a stage-trivial character), prove
   valuation zero is precisely unit-coefficient detection, define the four
   `A/B/C/D` valuation regions, and prove a nonzero component with nontrivial
-  plane character has at least one valuation at most `n`
+  plane character has at least one valuation at most `n`; prove the exact
+  leading-letter lemma that a positive valuation has a generator-derived
+  character whose valuation is smaller by exactly one
+- [ ] Partition the positive-valuation character regions by their least
+  leading generator and prove the generator shears carry the required pieces
+  into Kassabov's opposite-or-zero valuation regions
+- [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
+  for the two-root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
