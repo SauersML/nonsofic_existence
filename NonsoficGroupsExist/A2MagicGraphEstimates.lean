@@ -239,19 +239,22 @@ nested moving space is constructed internally, so this is a closed concrete
 definition rather than a certificate parameter. -/
 noncomputable def centralMovingIncidentComponent
     (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
-    (f : A2Root → E) (r : A2Root) (n : Fin 4) : E := by
-  let L := A.vertexGroup r
-  let W := KazhdanFixedSpace.subgroupMovingSubspace rho L
-  letI : CompleteSpace W := by
-    dsimp [W, KazhdanFixedSpace.subgroupMovingSubspace]
-    exact (KazhdanFixedSpace.fixedSubspace rho L).isClosed_orthogonal.completeSpace_coe
-  let rhoW := KazhdanFixedSpace.subgroupMovingRepresentation rho L
-  let d : E := f r - f (neighbor r n)
-  let p : W :=
-    ⟨KazhdanFixedSpace.subgroupMovingProjection rho L d,
-      KazhdanFixedSpace.subgroupMovingProjection_mem rho L d⟩
-  let Z := (A.rootAt r).subgroupOf L
-  exact ↑(p - KazhdanFixedSpace.fixedProjection rhoW Z p : W)
+    (f : A2Root → E) (r : A2Root) (n : Fin 4) : E :=
+  KazhdanFixedSpace.nestedMovingProjection rho (A.rootAt r)
+    (A.vertexGroup r) (A.rootAt_le_vertexGroup r)
+    (f r - f (neighbor r n))
+
+/-- The nested component is exactly direct movement relative to the central
+root subgroup. -/
+theorem centralMovingIncidentComponent_eq
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E) (r : A2Root) (n : Fin 4) :
+    centralMovingIncidentComponent A rho f r n =
+      KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt r)
+        (f r - f (neighbor r n)) :=
+  KazhdanFixedSpace.nestedMovingProjection_eq rho (A.rootAt r)
+    (A.vertexGroup r) (A.rootAt_le_vertexGroup r)
+    (f r - f (neighbor r n))
 
 /-- The local defect estimate applied to the four oriented edge differences
 of a vertex-fixed family.  All projections here are constructed from the
@@ -304,7 +307,8 @@ theorem incidentMovingProjection_norm_sq_le_with_defect
     (by simpa [edgeGroup, A2System.leftRootGroup] using hp 2)
     (by simpa [edgeGroup, A2System.rightRootGroup] using hp 3)
   simpa [Fin.sum_univ_succ, add_assoc, Z, sN, tN,
-    centralMovingIncidentComponent, L, W, rhoW, d, p] using hlocal
+    centralMovingIncidentComponent, KazhdanFixedSpace.nestedMovingProjection,
+    L, W, rhoW, d, p] using hlocal
 
 /-- E-valued form of the preceding estimate: the sum of the four moving
 edge components is the moving projection of the graph Laplacian at the

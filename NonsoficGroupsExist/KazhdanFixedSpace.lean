@@ -512,6 +512,98 @@ theorem subgroupMovingProjection_mem_restricted_fixedSubspace
     (subgroupMovingProjection_mem_fixedSubspace ρ K H hKH hx)
     g.1 (Subgroup.mem_subgroupOf.mp hg)
 
+/-- Move first relative to `H`, then remove the `K`-fixed part inside the
+`H`-moving space.  The canonical completeness proof is internal. -/
+noncomputable def nestedMovingProjection [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (K H : Subgroup G) (_hKH : K ≤ H)
+    (x : E) : E := by
+  let W := subgroupMovingSubspace ρ H
+  letI : CompleteSpace W := by
+    dsimp [W, subgroupMovingSubspace]
+    exact (fixedSubspace ρ H).isClosed_orthogonal.completeSpace_coe
+  let rhoW := subgroupMovingRepresentation ρ H
+  let p : W := ⟨subgroupMovingProjection ρ H x,
+    subgroupMovingProjection_mem ρ H x⟩
+  exact ↑(p - fixedProjection rhoW (K.subgroupOf H) p : W)
+
+/-- Orthogonal projection is transitive along nested fixed spaces. -/
+theorem nestedMovingProjection_eq [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (K H : Subgroup G) (hKH : K ≤ H)
+    (x : E) :
+    nestedMovingProjection ρ K H hKH x = subgroupMovingProjection ρ K x := by
+  let U := fixedSubspace ρ H
+  let V := fixedSubspace ρ K
+  have hUV : U ≤ V := antitone ρ hKH
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  letI : CompleteSpace V := (isClosed_fixedSubspace ρ K).completeSpace_coe
+  let W := subgroupMovingSubspace ρ H
+  letI : CompleteSpace W := by
+    dsimp [W, subgroupMovingSubspace]
+    exact U.isClosed_orthogonal.completeSpace_coe
+  let rhoW := subgroupMovingRepresentation ρ H
+  let p : W := ⟨subgroupMovingProjection ρ H x,
+    subgroupMovingProjection_mem ρ H x⟩
+  have hcomp : U.starProjection (V.starProjection x) = U.starProjection x := by
+    have hm := U.starProjection_comp_starProjection_of_le hUV
+    exact congrArg (fun T : E →L[ℝ] E ↦ T x) hm
+  have hqW : V.starProjection x - U.starProjection x ∈ W := by
+    change V.starProjection x - U.starProjection x ∈ Uᗮ
+    rw [← hcomp]
+    exact U.sub_starProjection_mem_orthogonal (V.starProjection x)
+  let q : W := ⟨V.starProjection x - U.starProjection x, hqW⟩
+  have hqfix : q ∈ fixedSubspace rhoW (K.subgroupOf H) := by
+    rw [mem_fixedSubspace_iff]
+    intro k hk
+    apply Subtype.ext
+    change ρ k.1 (V.starProjection x - U.starProjection x) =
+      V.starProjection x - U.starProjection x
+    rw [map_sub]
+    congr 1
+    · exact (mem_fixedSubspace_iff ρ K _).mp
+        (V.starProjection_apply_mem x) k.1 (Subgroup.mem_subgroupOf.mp hk)
+    · exact (mem_fixedSubspace_iff ρ H _).mp
+        (U.starProjection_apply_mem x) k.1 k.2
+  have hpqOrth : p - q ∈ (fixedSubspace rhoW (K.subgroupOf H))ᗮ := by
+    rw [Submodule.mem_orthogonal]
+    intro y hy
+    have hyV : (y : E) ∈ V := by
+      rw [mem_fixedSubspace_iff] at hy ⊢
+      intro k hk
+      have hyk := hy ⟨k, hKH hk⟩ (Subgroup.mem_subgroupOf.mpr hk)
+      exact congrArg Subtype.val hyk
+    have hres : x - V.starProjection x ∈ Vᗮ :=
+      V.sub_starProjection_mem_orthogonal x
+    have hinner : inner ℝ (y : E) (x - V.starProjection x) = 0 :=
+      Submodule.inner_right_of_mem_orthogonal hyV hres
+    change inner ℝ (y : E)
+      (subgroupMovingProjection ρ H x -
+        (V.starProjection x - U.starProjection x)) = 0
+    rw [subgroupMovingProjection_eq_sub_fixedProjection]
+    change inner ℝ (y : E)
+      ((x - U.starProjection x) -
+        (V.starProjection x - U.starProjection x)) = 0
+    have hvect : (x - U.starProjection x) -
+        (V.starProjection x - U.starProjection x) =
+          x - V.starProjection x := by module
+    rw [hvect]
+    exact hinner
+  let F := fixedSubspace rhoW (K.subgroupOf H)
+  letI : CompleteSpace F :=
+    (isClosed_fixedSubspace rhoW (K.subgroupOf H)).completeSpace_coe
+  have hproj : (fixedProjection rhoW (K.subgroupOf H) p : W) = q := by
+    exact (fixedSubspace rhoW (K.subgroupOf H)).eq_starProjection_of_mem_orthogonal
+      hqfix hpqOrth
+  rw [subgroupMovingProjection_eq_sub_fixedProjection]
+  change ((p - fixedProjection rhoW (K.subgroupOf H) p : W) : E) =
+    x - V.starProjection x
+  rw [hproj]
+  change ((p - q : W) : E) = x - V.starProjection x
+  dsimp [p, q]
+  rw [subgroupMovingProjection_eq_sub_fixedProjection]
+  change (x - U.starProjection x) -
+      (V.starProjection x - U.starProjection x) = x - V.starProjection x
+  module
+
 /-- If a normal subgroup `H` together with `K` generates the ambient group,
 then their fixed subspaces are orthogonal in every representation without
 nonzero invariant vectors.  This is the normal-subgroup orthogonality lemma
