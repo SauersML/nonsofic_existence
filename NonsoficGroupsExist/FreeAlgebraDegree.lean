@@ -1,5 +1,6 @@
 import Mathlib.Algebra.FreeAlgebra
 import Mathlib.Algebra.MonoidAlgebra.Module
+import Mathlib.Algebra.MonoidAlgebra.Support
 import Mathlib.Data.ZMod.Basic
 import Mathlib.LinearAlgebra.Finsupp.Supported
 
@@ -60,6 +61,16 @@ noncomputable def freeWordsLE (n : ℕ) : Finset (FreeMonoid X) :=
     w ∈ freeWordsLE X n ↔ freeWordLength X w ≤ n := by
   simp [freeWordsLE, freeWordLength]
 
+omit [Fintype X] in
+/-- Free-word length is additive under multiplication. -/
+theorem freeWordLength_mul (u v : FreeMonoid X) :
+    freeWordLength X (u * v) =
+      freeWordLength X u + freeWordLength X v := by
+  let e := FreeMonoid.ofList (α := X)
+  obtain ⟨a, rfl⟩ := e.surjective u
+  obtain ⟨b, rfl⟩ := e.surjective v
+  simp [freeWordLength, e]
+
 /-- Polynomials supported on words of degree at most `n`. -/
 noncomputable def degreeLE (n : ℕ) :
     Submodule (ZMod 2) (FreeAlgebra (ZMod 2) X) :=
@@ -109,6 +120,48 @@ theorem degreeLE_mono : Monotone (degreeLE X) := by
   rw [mem_degreeLE_iff] at hp ⊢
   intro w hw
   exact (hp w hw).trans hmn
+
+/-- Multiplication adds degree bounds. -/
+theorem mul_mem_degreeLE {p q : FreeAlgebra (ZMod 2) X} {m n : ℕ}
+    (hp : p ∈ degreeLE X m) (hq : q ∈ degreeLE X n) :
+    p * q ∈ degreeLE X (m + n) := by
+  classical
+  rw [mem_degreeLE_iff] at hp hq ⊢
+  intro w hw
+  rw [map_mul] at hw
+  have hmul := MonoidAlgebra.support_coeff_mul_subset
+    (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+      (R := ZMod 2) (X := X) p)
+    (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+      (R := ZMod 2) (X := X) q) hw
+  rw [Finset.mem_mul] at hmul
+  obtain ⟨u, hu, v, hv, huv⟩ := hmul
+  rw [← huv, freeWordLength_mul]
+  exact Nat.add_le_add (hp u hu) (hq v hv)
+
+/-- A canonical free generator has degree one. -/
+theorem generator_mem_degreeLE_one (x : X) :
+    FreeAlgebra.ι (ZMod 2) x ∈ degreeLE X 1 := by
+  rw [mem_degreeLE_iff]
+  intro w hw
+  simp [FreeAlgebra.equivMonoidAlgebraFreeMonoid] at hw
+  subst w
+  simp [freeWordLength]
+
+/-- Left multiplication by a free generator advances the filtration by one
+stage. -/
+theorem generator_mul_mem_degreeLE_succ (x : X)
+    {p : FreeAlgebra (ZMod 2) X} {n : ℕ} (hp : p ∈ degreeLE X n) :
+    FreeAlgebra.ι (ZMod 2) x * p ∈ degreeLE X (n + 1) := by
+  simpa [Nat.add_comm] using
+    mul_mem_degreeLE X (generator_mem_degreeLE_one X x) hp
+
+/-- Right multiplication by a free generator advances the filtration by one
+stage. -/
+theorem mul_generator_mem_degreeLE_succ (x : X)
+    {p : FreeAlgebra (ZMod 2) X} {n : ℕ} (hp : p ∈ degreeLE X n) :
+    p * FreeAlgebra.ι (ZMod 2) x ∈ degreeLE X (n + 1) := by
+  exact mul_mem_degreeLE X hp (generator_mem_degreeLE_one X x)
 
 /-- Every free polynomial lies in some finite degree stage. -/
 theorem exists_mem_degreeLE (p : FreeAlgebra (ZMod 2) X) :
