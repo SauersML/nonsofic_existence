@@ -799,5 +799,18 @@ theorem exists_rootSet_isKazhdan
     A.rootSet_isKazhdan_of_vertexCodistanceBound
       hgamma0 hgamma1 hcodistance⟩
 
+/-- For every characteristic-two ring, the union of the six elementary
+rank-three root subgroups is a Kazhdan subset.  The exponent-two input is
+discharged by the elementary-matrix multiplication identity. -/
+theorem elementary_exists_rootSet_isKazhdan
+    (R : Type*) [Ring R] [CharP R 2] :
+    ∃ kappa : ℝ,
+      IsKazhdanSubset
+        (elementaryGroup (Fin 3) R)
+        (elementaryA2System R).rootSet kappa := by
+  apply exists_rootSet_isKazhdan (elementaryA2System R)
+  intro i j hij g hg
+  exact elementaryRootSubgroup_sq i j hij g hg
+
 end A2MagicHilbert
 end NonsoficGroupsExist

@@ -2,7 +2,7 @@
 
 This repository is an active Lean formalization of a proposed construction of
 a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists. The current estimate is **about 53% of the way to the complete
+group exists. The current estimate is **about 54% of the way to the complete
 unconditional proof**. This percentage measures closed dependencies on the
 critical path, not lines of Lean.
 
@@ -39,6 +39,8 @@ box is still a required dependency of the final theorem.
   contraction factor below `1`
 - [x] Transfer the projection contraction to strict vertex codistance and a
   genuine Kazhdan-subset bound for the union of the six root subgroups
+- [x] Instantiate the root Kazhdan-subset theorem for every characteristic-two
+  elementary rank-three group; no exponent-law premise remains
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
