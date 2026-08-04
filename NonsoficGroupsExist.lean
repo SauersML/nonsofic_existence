@@ -25,6 +25,8 @@ import NonsoficGroupsExist.KunThomDiagonal
 import NonsoficGroupsExist.KunThomCorrelation
 import NonsoficGroupsExist.KunThomFiniteMarkov
 import NonsoficGroupsExist.KunThomRounding
+import NonsoficGroupsExist.KunThomParameters
+import NonsoficGroupsExist.KunThomTheorem
 import NonsoficGroupsExist.KunPartitionBoundary
 import NonsoficGroupsExist.KunPartitionCrossing
 import NonsoficGroupsExist.KunBlockGraph
