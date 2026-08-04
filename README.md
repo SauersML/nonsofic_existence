@@ -74,7 +74,9 @@ box is still a required dependency of the final theorem.
   two coefficient coordinates
 - [x] Expand each degree-bounded free polynomial in its exact supported-word
   basis and prove that any nontrivial additive sign character is already
-  detected on one of those supported word monomials
+  detected on one of those supported word monomials; decompose every
+  positive-degree witness into its first free generator and strictly shorter
+  tail, with the corresponding exact monomial factorization
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

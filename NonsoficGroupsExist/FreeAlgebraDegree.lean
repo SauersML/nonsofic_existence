@@ -195,6 +195,44 @@ theorem wordMonomial_mul (u v : FreeMonoid X) :
   simp [wordMonomial]
 
 omit [Fintype X] in
+/-- A one-letter basis monomial is the corresponding canonical free-algebra
+generator. -/
+theorem wordMonomial_of (x : X) :
+    wordMonomial X (FreeMonoid.of x) = FreeAlgebra.ι (ZMod 2) x := by
+  apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+    (R := ZMod 2) (X := X)).injective
+  simp [wordMonomial, FreeAlgebra.equivMonoidAlgebraFreeMonoid]
+
+omit [Fintype X] in
+/-- Every nonempty free word has a first letter and a tail, with the exact
+length relation needed for induction over the degree filtration. -/
+theorem exists_of_mul_of_freeWordLength_pos (w : FreeMonoid X)
+    (hw : 0 < freeWordLength X w) :
+    ∃ x : X, ∃ v : FreeMonoid X,
+      w = FreeMonoid.of x * v ∧
+      freeWordLength X v + 1 = freeWordLength X w := by
+  let e := FreeMonoid.ofList (α := X)
+  obtain ⟨l, rfl⟩ := e.surjective w
+  cases l with
+  | nil => simp [freeWordLength, e] at hw
+  | cons x l =>
+      refine ⟨x, e l, ?_, ?_⟩
+      · simp [e]
+      · simp [freeWordLength, e]
+
+omit [Fintype X] in
+/-- A positive-degree word monomial is a free generator times the monomial
+of its tail. -/
+theorem wordMonomial_eq_generator_mul_of_freeWordLength_pos
+    (w : FreeMonoid X) (hw : 0 < freeWordLength X w) :
+    ∃ x : X, ∃ v : FreeMonoid X,
+      w = FreeMonoid.of x * v ∧
+      wordMonomial X w = FreeAlgebra.ι (ZMod 2) x * wordMonomial X v := by
+  obtain ⟨x, v, hword, _⟩ := exists_of_mul_of_freeWordLength_pos X w hw
+  refine ⟨x, v, hword, ?_⟩
+  rw [hword, ← wordMonomial_mul X (FreeMonoid.of x) v, wordMonomial_of]
+
+omit [Fintype X] in
 /-- Every free polynomial is the finite sum of its supported word terms. -/
 theorem eq_sum_support_smul_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
     p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
