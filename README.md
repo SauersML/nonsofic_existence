@@ -148,3 +148,27 @@ concrete compression setup.
 `TableCover` proves a conditional reduction: a finitely generated nonsofic
 group has a finitely presented nonsofic cover. It does not provide the initial
 nonsofic group.
+
+## Literature audit: Kun's spectral characterization
+
+Version 5 of Kun's *On sofic approximations of Property (T) groups*
+([arXiv:1606.04471](https://arxiv.org/abs/1606.04471)) states Theorem 3 as an
+equivalence.  Its final implication, `(4) -> (1)`, is not valid as written.
+The proof invokes the ordinary Cheeger/Dodziuk--Alon--Milman eigenvalue-gap
+bound to obtain an estimate for `M^2`.  Ordinary Cheeger expansion bounds the
+nonconstant spectrum away from `+1`; it does not bound the bottom of the
+Markov spectrum away from `-1`.  Uniform expanders can be arbitrarily close to
+bipartite, so their least eigenvalues can approach `-1` without being exactly
+`-1`.  Squaring the Markov operator turns those eigenvalues into values
+arbitrarily close to `+1`, contradicting the uniform estimate asserted in that
+step.  Thus the full four-way equivalence must not be imported or used here.
+
+This defect does not by itself refute Kun's Theorem 1.  In the same paper,
+Proposition 11 establishes condition `(2)`, and the proof of Theorem 1 needs
+only the forward combinatorial implications `(2) -> (3) -> (4)`.  The invalid
+spectral implication `(4) -> (1)` is the reverse direction.  This repository's
+required Kun dependency is therefore the one-way expander-decomposition
+result, and it must be checked from the forward partition-and-repair argument
+without appealing to the false equivalence.  The corresponding completion
+checkbox remains open above until that exact Lean dependency is compiled and
+wired into the final theorem.
