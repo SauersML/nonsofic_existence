@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.KazhdanOrthogonal
 import NonsoficGroupsExist.Sofic
 import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Analysis.InnerProductSpace.Reproducing
 import Mathlib.Analysis.Real.Hyperreal
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
@@ -743,6 +744,15 @@ theorem normalizedGramCorrelation_eq_relative (M : FiniteModel)
   exact congrArg (fun r : ℝ ↦ r / Fintype.card M) hinner
 
 omit [Group G] in
+/-- Real Gram coefficients are symmetric. -/
+theorem normalizedGramCorrelation_comm (M : FiniteModel)
+    (τ : G → Equiv.Perm M) (U : Finset M) (g h : G) :
+    normalizedGramCorrelation M τ U g h =
+      normalizedGramCorrelation M τ U h g := by
+  unfold normalizedGramCorrelation
+  rw [real_inner_comm]
+
+omit [Group G] in
 /-- Every finite matrix of normalized Gram coefficients is positive
 semidefinite. -/
 theorem normalizedGramCorrelation_quadratic_nonneg
@@ -995,6 +1005,14 @@ theorem gramCorrelationHyperreal_finite (A : SoficApproximation G)
       exact (abs_le.mp (abs_normalizedPermutationCorrelation_le_one
         (A.model n) (U n) ((A.map n g)⁻¹ * A.map n h))).2
 
+/-- Hyperreal Gram coefficients are symmetric. -/
+theorem gramCorrelationHyperreal_comm (A : SoficApproximation G)
+    (U : ∀ n, Finset (A.model n)) (g h : G) :
+    gramCorrelationHyperreal A U g h = gramCorrelationHyperreal A U h g := by
+  apply congrArg Hyperreal.ofSeq
+  funext n
+  exact normalizedGramCorrelation_comm (A.model n) (A.map n) (U n) g h
+
 /-- The difference between the relative sofic coefficient and the
 corresponding Gram coefficient converges to zero. -/
 theorem correlation_sub_gram_tendsto_zero (A : SoficApproximation G)
@@ -1046,6 +1064,15 @@ theorem limitingCorrelation_inv_mul_eq_stdPart_gram
   rw [hzero] at hsub
   unfold limitingCorrelation
   exact sub_eq_zero.mp hsub.symm
+
+/-- Limiting relative correlations are symmetric. -/
+theorem limitingCorrelation_inv_mul_comm
+    (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) (g h : G) :
+    limitingCorrelation A U (g⁻¹ * h) =
+      limitingCorrelation A U (h⁻¹ * g) := by
+  rw [limitingCorrelation_inv_mul_eq_stdPart_gram A U g h,
+    limitingCorrelation_inv_mul_eq_stdPart_gram A U h g,
+    gramCorrelationHyperreal_comm A U g h]
 
 /-- A real number embedded in the hyperreals is finite. -/
 theorem hyperreal_coe_finite (r : ℝ) :
@@ -1101,14 +1128,16 @@ theorem stdPart_finset_sum {I : Type*} (F : Finset I)
 /-- Standard positive-definiteness for a real-valued function on a group,
 expressed using all finite real quadratic forms. -/
 def IsPositiveDefinite (f : G → ℝ) : Prop :=
-  ∀ (m : ℕ) (c : Fin m → ℝ) (a : Fin m → G),
-    0 ≤ ∑ i, ∑ j, c i * c j * f ((a i)⁻¹ * a j)
+  (∀ g h : G, f (g⁻¹ * h) = f (h⁻¹ * g)) ∧
+    ∀ (m : ℕ) (c : Fin m → ℝ) (a : Fin m → G),
+      0 ≤ ∑ i, ∑ j, c i * c j * f ((a i)⁻¹ * a j)
 
 /-- The limiting correlation obtained from any sofic approximation and any
 sequence of subsets is positive-definite. -/
 theorem limitingCorrelation_isPositiveDefinite
     (A : SoficApproximation G) (U : ∀ n, Finset (A.model n)) :
     IsPositiveDefinite (limitingCorrelation A U) := by
+  refine ⟨limitingCorrelation_inv_mul_comm A U, ?_⟩
   intro m c a
   classical
   let term : Fin m → Fin m → Hyperreal := fun i j ↦
