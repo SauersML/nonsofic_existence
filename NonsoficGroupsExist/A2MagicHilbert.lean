@@ -127,6 +127,19 @@ noncomputable def laplacianFamily : Family E →L[ℝ] Family E :=
 @[simp] theorem laplacianFamily_apply (f : Family E) (i : Fin 6) :
     laplacianFamily f i = A2MagicLaplacian.laplacian f i := rfl
 
+/-- Symmetry of the bounded family Laplacian. -/
+theorem inner_laplacianFamily_comm (f g : Family E) :
+    inner ℝ (laplacianFamily f) g = inner ℝ f (laplacianFamily g) := by
+  rw [PiLp.inner_apply, PiLp.inner_apply]
+  exact A2MagicLaplacian.sum_inner_laplacian_comm f g
+
+/-- The family Laplacian quadratic form is half the directed edge energy. -/
+theorem directedEnergy_eq_two_inner_laplacianFamily (f : Family E) :
+    A2MagicLaplacian.directedEnergy f =
+      2 * inner ℝ f (laplacianFamily f) := by
+  rw [PiLp.inner_apply]
+  exact A2MagicLaplacian.directedEnergy_eq_two_sum_inner_laplacian f
+
 /-- Compression of the graph Laplacian to the closed vertex-fixed family
 subspace. -/
 noncomputable def compressedLaplacian [CompleteSpace E]
@@ -136,6 +149,29 @@ noncomputable def compressedLaplacian [CompleteSpace E]
   letI : CompleteSpace W :=
     (isClosed_vertexFixedSubspace A rho).completeSpace_coe
   exact W.orthogonalProjectionOnto.comp (laplacianFamily.comp W.subtypeL)
+
+/-- The compressed Laplacian is symmetric on the vertex-fixed subspace. -/
+theorem inner_compressedLaplacian_comm [CompleteSpace E]
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f g : vertexFixedSubspace A rho) :
+    inner ℝ (compressedLaplacian A rho f) g =
+      inner ℝ f (compressedLaplacian A rho g) := by
+  let W := vertexFixedSubspace A rho
+  letI : CompleteSpace W :=
+    (isClosed_vertexFixedSubspace A rho).completeSpace_coe
+  change inner ℝ (W.starProjection (laplacianFamily (f : Family E))) (g : Family E) =
+    inner ℝ (f : Family E) (W.starProjection (laplacianFamily (g : Family E)))
+  calc
+    inner ℝ (W.starProjection (laplacianFamily (f : Family E))) (g : Family E) =
+        inner ℝ (laplacianFamily (f : Family E)) (g : Family E) := by
+      rw [W.inner_starProjection_left_eq_right,
+        W.starProjection_eq_self_iff.mpr g.property]
+    _ = inner ℝ (f : Family E) (laplacianFamily (g : Family E)) :=
+      inner_laplacianFamily_comm _ _
+    _ = inner ℝ (f : Family E)
+        (W.starProjection (laplacianFamily (g : Family E))) := by
+      rw [← W.inner_starProjection_left_eq_right,
+        W.starProjection_eq_self_iff.mpr f.property]
 
 /-- The coordinatewise orthogonal projection to the six vertex fixed
 spaces, bundled in the Hilbert direct sum. -/

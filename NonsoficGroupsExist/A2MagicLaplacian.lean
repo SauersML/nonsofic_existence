@@ -85,6 +85,18 @@ theorem directedEnergy_eq_two_sum_inner_laplacian (f : Fin 6 → E) :
     ← Nat.cast_smul_eq_nsmul ℝ, inner_smul_right, real_inner_comm]
   ring
 
+/-- The explicit graph Laplacian is symmetric. -/
+theorem sum_inner_laplacian_comm (f g : Fin 6 → E) :
+    (∑ i : Fin 6, inner ℝ (laplacian f i) (g i)) =
+      ∑ i : Fin 6, inner ℝ (f i) (laplacian g i) := by
+  simp [laplacian, neighborIndex, Fin.sum_univ_succ, inner_sub_left,
+    inner_sub_right, inner_add_left, inner_add_right,
+    ← Nat.cast_smul_eq_nsmul ℝ, inner_smul_left, inner_smul_right,
+    real_inner_comm]
+  rw [real_inner_comm (g 0) (f 1), real_inner_comm (g 1) (f 0),
+    real_inner_comm (g 1) (f 2), real_inner_comm (g 2) (f 1)]
+  ring
+
 omit [InnerProductSpace ℝ E] in
 /-- Cauchy--Schwarz at one degree-four vertex. -/
 theorem laplacian_norm_sq_le_four_incidentEnergy (f : Fin 6 → E) (i : Fin 6) :
