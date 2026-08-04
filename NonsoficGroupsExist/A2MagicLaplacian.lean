@@ -26,6 +26,10 @@ def total (f : Fin 6 → E) : E := ∑ i, f i
 def laplacian (f : Fin 6 → E) (i : Fin 6) : E :=
   ∑ n : Fin 4, (f i - f (neighborIndex i n))
 
+/-- Directed edge energy of the four-regular magic graph. -/
+def directedEnergy (f : Fin 6 → E) : ℝ :=
+  ∑ i : Fin 6, ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2
+
 /-- Integral centering: `6 fᵢ - Σf`.  This avoids division while retaining
 exactly the zero-sum component of a family. -/
 def centered (f : Fin 6 → E) (i : Fin 6) : E := 6 • f i - total f
@@ -68,6 +72,76 @@ theorem laplacian_centered (f : Fin 6 → E) (i : Fin 6) :
 section InnerProduct
 
 variable [InnerProductSpace ℝ E]
+
+/-- The directed edge energy is twice the Laplacian quadratic form. -/
+theorem directedEnergy_eq_two_sum_inner_laplacian (f : Fin 6 → E) :
+    directedEnergy f = 2 * ∑ i : Fin 6, inner ℝ (f i) (laplacian f i) := by
+  simp [directedEnergy, laplacian, neighborIndex, Fin.sum_univ_succ,
+    norm_sub_sq_real, inner_sub_right, inner_add_right,
+    ← Nat.cast_smul_eq_nsmul ℝ, inner_smul_right, real_inner_comm]
+  ring
+
+omit [InnerProductSpace ℝ E] in
+/-- Cauchy--Schwarz at one degree-four vertex. -/
+theorem laplacian_norm_sq_le_four_incidentEnergy (f : Fin 6 → E) (i : Fin 6) :
+    ‖laplacian f i‖ ^ 2 ≤
+      4 * ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2 := by
+  have hnorm : ‖laplacian f i‖ ≤
+      ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ := by
+    exact norm_sum_le _ _
+  have hsum0 : 0 ≤ ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ :=
+    Finset.sum_nonneg fun n hn ↦ norm_nonneg _
+  have hsq := sq_le_sq₀ (norm_nonneg _) hsum0 |>.2 hnorm
+  have hcauchy :
+      (∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖) ^ 2 ≤
+        4 * ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2 := by
+    simpa using Finset.sum_mul_sq_le_sq_mul_sq
+      (s := (Finset.univ : Finset (Fin 4)))
+      (f := fun _ ↦ (1 : ℝ))
+      (g := fun n ↦ ‖f i - f (neighborIndex i n)‖)
+  exact hsq.trans hcauchy
+
+omit [InnerProductSpace ℝ E] in
+/-- The squared Laplacian norm is at most four times directed edge energy. -/
+theorem sum_laplacian_norm_sq_le_four_directedEnergy (f : Fin 6 → E) :
+    ∑ i : Fin 6, ‖laplacian f i‖ ^ 2 ≤ 4 * directedEnergy f := by
+  calc
+    ∑ i : Fin 6, ‖laplacian f i‖ ^ 2 ≤
+        ∑ i : Fin 6,
+          4 * ∑ n : Fin 4, ‖f i - f (neighborIndex i n)‖ ^ 2 := by
+      apply Finset.sum_le_sum
+      intro i hi
+      exact laplacian_norm_sq_le_four_incidentEnergy f i
+    _ = 4 * directedEnergy f := by
+      simp [directedEnergy, Finset.mul_sum]
+
+omit [InnerProductSpace ℝ E] in
+/-- Universal two-endpoint bound for one directed edge. -/
+theorem norm_sub_sq_le_two (x y : E) :
+    ‖x - y‖ ^ 2 ≤ 2 * (‖x‖ ^ 2 + ‖y‖ ^ 2) := by
+  have hnorm : ‖x - y‖ ≤ ‖x‖ + ‖y‖ := norm_sub_le x y
+  have hsq := sq_le_sq₀ (norm_nonneg _)
+    (add_nonneg (norm_nonneg _) (norm_nonneg _)) |>.2 hnorm
+  nlinarith [sq_nonneg (‖x‖ - ‖y‖)]
+
+omit [InnerProductSpace ℝ E] in
+/-- The directed edge energy is bounded by sixteen times the family norm
+squared. -/
+theorem directedEnergy_le_sixteen_sum_norm_sq (f : Fin 6 → E) :
+    directedEnergy f ≤ 16 * ∑ i : Fin 6, ‖f i‖ ^ 2 := by
+  calc
+    directedEnergy f ≤
+        ∑ i : Fin 6, ∑ n : Fin 4,
+          2 * (‖f i‖ ^ 2 + ‖f (neighborIndex i n)‖ ^ 2) := by
+      unfold directedEnergy
+      apply Finset.sum_le_sum
+      intro i hi
+      apply Finset.sum_le_sum
+      intro n hn
+      exact norm_sub_sq_le_two (f i) (f (neighborIndex i n))
+    _ = 16 * ∑ i : Fin 6, ‖f i‖ ^ 2 := by
+      simp [neighborIndex, Fin.sum_univ_succ]
+      ring
 
 /-- The elementary opposite-pair estimate behind the eigenvalue `4`. -/
 theorem oppositePair_laplacian_norm_sq_ge (x y : E) :

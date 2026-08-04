@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.A2MagicEnergy
+import NonsoficGroupsExist.PositiveOperatorGap
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
 /-!
@@ -74,6 +75,57 @@ theorem isClosed_vertexFixedSubspace
     (KazhdanFixedSpace.isClosed_fixedSubspace rho
       (A.vertexGroup (vertex i))).preimage
         (PiLp.continuous_apply (p := 2) (fun _ : Fin 6 ↦ E) i)
+
+/-- The magic-graph Laplacian as a linear map on the Hilbert family. -/
+def laplacianFamilyLinear : Family E →ₗ[ℝ] Family E where
+  toFun f := WithLp.toLp 2 (A2MagicLaplacian.laplacian f)
+  map_add' := by
+    intro f g
+    apply PiLp.ext
+    intro i
+    change (∑ n : Fin 4,
+      ((f i + g i) - (f (neighborIndex i n) + g (neighborIndex i n)))) =
+        (∑ n : Fin 4, (f i - f (neighborIndex i n))) +
+          ∑ n : Fin 4, (g i - g (neighborIndex i n))
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro n hn
+    module
+  map_smul' := by
+    intro c f
+    apply PiLp.ext
+    intro i
+    change (∑ n : Fin 4,
+      (c • f i - c • f (neighborIndex i n))) =
+        c • ∑ n : Fin 4, (f i - f (neighborIndex i n))
+    rw [Finset.smul_sum]
+    apply Finset.sum_congr rfl
+    intro n hn
+    module
+
+@[simp] theorem laplacianFamilyLinear_apply (f : Family E) (i : Fin 6) :
+    laplacianFamilyLinear f i = A2MagicLaplacian.laplacian f i := rfl
+
+/-- The magic-graph Laplacian is bounded by `8` on the Hilbert direct sum. -/
+noncomputable def laplacianFamily : Family E →L[ℝ] Family E :=
+  laplacianFamilyLinear.mkContinuous 8 fun f ↦ by
+    have hlap := A2MagicLaplacian.sum_laplacian_norm_sq_le_four_directedEnergy
+      (fun i ↦ f i)
+    have hedge := A2MagicLaplacian.directedEnergy_le_sixteen_sum_norm_sq
+      (fun i ↦ f i)
+    rw [← PiLp.norm_sq_eq_of_L2] at hedge
+    have hsq :
+        (∑ i : Fin 6, ‖A2MagicLaplacian.laplacian f i‖ ^ 2) ≤
+          64 * ‖f‖ ^ 2 := by nlinarith
+    apply (sq_le_sq₀ (norm_nonneg _)
+      (mul_nonneg (by norm_num) (norm_nonneg _))).mp
+    rw [PiLp.norm_sq_eq_of_L2]
+    change (∑ i : Fin 6, ‖A2MagicLaplacian.laplacian f i‖ ^ 2) ≤
+      (8 * ‖f‖) ^ 2
+    nlinarith
+
+@[simp] theorem laplacianFamily_apply (f : Family E) (i : Fin 6) :
+    laplacianFamily f i = A2MagicLaplacian.laplacian f i := rfl
 
 /-- The coordinatewise orthogonal projection to the six vertex fixed
 spaces, bundled in the Hilbert direct sum. -/
