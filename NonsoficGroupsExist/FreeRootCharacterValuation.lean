@@ -1187,6 +1187,196 @@ universe u
 
 variable {E : Type u} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
+/-- On a nonzero fine Fourier component, restricting its sign assignment
+along the opposite conjugated-plane map produces exactly the algebraic dual
+shear of the first coefficient character. -/
+theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
+    (a : degreeLE X n) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) a =
+      oppositeShearedFirstCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        x a := by
+  rw [firstCoefficientEigenvalue,
+    planeEigenvalue_oppositeConjugatedRestriction]
+  have hconj : oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
+      (firstCoordinate X i j k hij hik hjk n a) =
+      generatorShearedFirstCoordinate X i j k hij hik hjk x n a := by
+    apply Subtype.ext
+    exact conjugate_firstCoordinate_opposite_generator
+      X i j k hij hik hjk x n a
+  rw [hconj, generatorShearedFirstCoordinate,
+    planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk (n + 1)
+      rho fineSign z hv]
+  rfl
+
+/-- The second coefficient of the opposite-conjugated restriction is exactly
+the restricted fine second character. -/
+theorem secondCoefficientEigenvalue_oppositeConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (b : degreeLE X n) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) b =
+      oppositeShearedSecondCharacter X
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) b := by
+  rw [secondCoefficientEigenvalue,
+    planeEigenvalue_oppositeConjugatedRestriction]
+  have hconj : oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
+      (secondCoordinate X i j k hij hik hjk n b) =
+      secondCoordinate X i j k hij hik hjk (n + 1)
+        (coefficientSucc X b) := by
+    apply Subtype.ext
+    exact conjugate_secondCoordinate_opposite_generator
+      X i j k hij hik hjk x n b
+  rw [hconj]
+  rfl
+
+/-- The first coefficient of the forward-conjugated restriction is the
+ordinary restriction of the fine first character. -/
+theorem firstCoefficientEigenvalue_forwardConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (a : degreeLE X n) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) a =
+      forwardShearedFirstCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) a := by
+  rw [firstCoefficientEigenvalue,
+    planeEigenvalue_forwardConjugatedRestriction]
+  have hconj : forwardConjugatedPlaneSucc X i j k hij hik hjk x n
+      (firstCoordinate X i j k hij hik hjk n a) =
+      firstCoordinate X i j k hij hik hjk (n + 1)
+        (coefficientSucc X a) := by
+    apply Subtype.ext
+    exact conjugate_firstCoordinate_generator X i j k hij hik hjk x n a
+  rw [hconj]
+  rfl
+
+/-- On a nonzero fine component, the second coefficient of the
+forward-conjugated restriction is exactly the algebraic forward dual shear. -/
+theorem secondCoefficientEigenvalue_forwardConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
+    (b : degreeLE X n) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) b =
+      forwardShearedSecondCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        x b := by
+  rw [secondCoefficientEigenvalue,
+    planeEigenvalue_forwardConjugatedRestriction]
+  have hconj : forwardConjugatedPlaneSucc X i j k hij hik hjk x n
+      (secondCoordinate X i j k hij hik hjk n b) =
+      generatorShearedSecondCoordinate X i j k hij hik hjk x n b := by
+    apply Subtype.ext
+    exact conjugate_secondCoordinate_generator X i j k hij hik hjk x n b
+  rw [hconj, generatorShearedSecondCoordinate,
+    planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk (n + 1)
+      rho fineSign z hv]
+  simp only [forwardShearedSecondCharacter, oppositeShearedFirstCharacter,
+    characterProduct, restrictCharacterSucc, leftDerivedCharacter,
+    firstCoefficientEigenvalue, secondCoefficientEigenvalue]
+  rw [mul_comm]
+
+/-- The exact concrete opposite conjugation carries every nonzero fine
+component in an `A ∪ B` leading fiber to a coarse character in `C ∪ D`.
+This closes the bridge from the matrix conjugation to the valuation transport
+statement. -/
+theorem planeCharacterRegion_oppositeConjugatedRestriction_eq_C_or_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
+    (hsign : fineSign ∈ planeABLeadingSignSet X i j k hij hik hjk n q) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .C ∨
+      planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .D := by
+  have hfirst : firstCoefficientEigenvalue X i j k hij hik hjk n
+      (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+        (generatorEnumeration X q) n r)) =
+      oppositeShearedFirstCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (generatorEnumeration X q) := by
+    funext a
+    exact firstCoefficientEigenvalue_oppositeConjugatedRestriction
+      X i j k hij hik hjk (generatorEnumeration X q) n rho fineSign z hv a
+  have hsecond : secondCoefficientEigenvalue X i j k hij hik hjk n
+      (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+        (generatorEnumeration X q) n r)) =
+      oppositeShearedSecondCharacter X
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) := by
+    funext b
+    exact secondCoefficientEigenvalue_oppositeConjugatedRestriction
+      X i j k hij hik hjk (generatorEnumeration X q) n fineSign b
+  unfold planeCharacterRegion
+  rw [hfirst, hsecond]
+  exact planeABLeadingSignSet_region_transport X i j k hij hik hjk n q
+    fineSign hsign
+
+/-- The symmetric concrete forward conjugation sends every nonzero fine
+component in a `C ∪ B` leading fiber to `A ∪ D` at the coarse stage. -/
+theorem planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
+    (hsign : fineSign ∈ planeCBLeadingSignSet X i j k hij hik hjk n q) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .A ∨
+      planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .D := by
+  have hfirst : firstCoefficientEigenvalue X i j k hij hik hjk n
+      (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+        (generatorEnumeration X q) n r)) =
+      forwardShearedFirstCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) := by
+    funext a
+    exact firstCoefficientEigenvalue_forwardConjugatedRestriction
+      X i j k hij hik hjk (generatorEnumeration X q) n fineSign a
+  have hsecond : secondCoefficientEigenvalue X i j k hij hik hjk n
+      (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+        (generatorEnumeration X q) n r)) =
+      forwardShearedSecondCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (generatorEnumeration X q) := by
+    funext b
+    exact secondCoefficientEigenvalue_forwardConjugatedRestriction
+      X i j k hij hik hjk (generatorEnumeration X q) n rho fineSign z hv b
+  unfold planeCharacterRegion
+  rw [hfirst, hsecond]
+  exact planeCBLeadingSignSet_region_transport X i j k hij hik hjk n q
+    fineSign hsign
+
 /-- A nonzero Fourier component with a nontrivial plane character has at least
 one genuinely detected coordinate valuation within the current stage. -/
 theorem firstValuation_le_or_secondValuation_le_of_planeEigenvalue_eq_neg_one

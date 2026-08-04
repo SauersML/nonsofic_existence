@@ -124,9 +124,14 @@ box is still a required dependency of the final theorem.
   select joint eigenvectors exactly, and instantiate the resulting refinement
   theorem to show each degree-`n` plane component is the exact sum of all
   compatible degree-`n+1` Fourier components
-- [ ] Identify those dual shear maps with conjugation of the actual refined
-  Fourier components and derive the corresponding disjoint mass-sum
-  inequalities
+- [x] Construct the concrete forward and opposite conjugated-plane maps into
+  the next filtration stage, re-index them in the exhaustive enumeration, and
+  prove exact Fourier covariance: an acted-on coarse component is the sum of
+  precisely its conjugated fine extensions; identify both restricted
+  coefficient characters with the algebraic dual shears and prove the
+  transported valuation-region conclusions for every nonzero fine component
+- [ ] Derive the corresponding disjoint mass-sum inequalities from the exact
+  conjugated refinement and the pairwise-disjoint leading-generator fibers
 - [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
   for the two-root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
@@ -196,7 +201,7 @@ into genuine componentwise expansion.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the
-required expander decomposition and Kun--Thom implication, the relevant
+required expander decomposition and Kun--Thom implication and the relevant
 property `(T)` results.  The represented stream-operator algebra is not
 identified with the universal Leavitt algebra, and the non-LEF witness is not
 identified with Thompson's group `V`; neither identification is used by the

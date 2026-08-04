@@ -73,6 +73,80 @@ theorem planeFamily_succIndex
   rw [Equiv.apply_symm_apply]
   rfl
 
+/-- Conjugate every stage-`n` plane element by a forward adjacent root and
+regard the result as an element of the next plane stage. -/
+noncomputable def forwardConjugatedPlaneSucc
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) :
+    Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk (n + 1) :=
+  fun g ↦ ⟨elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) * g.1 *
+      (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹,
+    conjugate_generator_mem_succ X i j k hij hik hjk x n g.1 g.2⟩
+
+/-- Conjugate every stage-`n` plane element by an opposite adjacent root and
+regard the result as an element of the next plane stage. -/
+noncomputable def oppositeConjugatedPlaneSucc
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) :
+    Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk (n + 1) :=
+  fun g ↦ ⟨elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) * g.1 *
+      (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹,
+    conjugate_opposite_generator_mem_succ X i j k hij hik hjk x n g.1 g.2⟩
+
+/-- The next-stage enumeration index of the forward conjugate of a coarse
+plane element. -/
+noncomputable def forwardConjugatedPlaneSuccIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) :
+    Fin (Nat.card (Plane X i j k hij hik hjk n)) →
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) :=
+  fun q ↦ (planeEnumeration X i j k hij hik hjk (n + 1)).symm
+    (forwardConjugatedPlaneSucc X i j k hij hik hjk x n
+      (planeEnumeration X i j k hij hik hjk n q))
+
+/-- The next-stage enumeration index of the opposite conjugate of a coarse
+plane element. -/
+noncomputable def oppositeConjugatedPlaneSuccIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ) :
+    Fin (Nat.card (Plane X i j k hij hik hjk n)) →
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) :=
+  fun q ↦ (planeEnumeration X i j k hij hik hjk (n + 1)).symm
+    (oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
+      (planeEnumeration X i j k hij hik hjk n q))
+
+theorem planeFamily_forwardConjugatedPlaneSuccIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (q : Fin (Nat.card (Plane X i j k hij hik hjk n))) :
+    elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
+        planeFamily X i j k hij hik hjk n q *
+        (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      planeFamily X i j k hij hik hjk (n + 1)
+        (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q) := by
+  change _ = ((planeEnumeration X i j k hij hik hjk (n + 1))
+    ((planeEnumeration X i j k hij hik hjk (n + 1)).symm
+      (forwardConjugatedPlaneSucc X i j k hij hik hjk x n
+        (planeEnumeration X i j k hij hik hjk n q)))).1
+  rw [Equiv.apply_symm_apply]
+  rfl
+
+theorem planeFamily_oppositeConjugatedPlaneSuccIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (q : Fin (Nat.card (Plane X i j k hij hik hjk n))) :
+    elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+        planeFamily X i j k hij hik hjk n q *
+        (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      planeFamily X i j k hij hik hjk (n + 1)
+        (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q) := by
+  change _ = ((planeEnumeration X i j k hij hik hjk (n + 1))
+    ((planeEnumeration X i j k hij hik hjk (n + 1)).symm
+      (oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
+        (planeEnumeration X i j k hij hik hjk n q)))).1
+  rw [Equiv.apply_symm_apply]
+  rfl
+
 theorem planeFamily_sq
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
     ∀ q, planeFamily X i j k hij hik hjk n q ^ 2 = 1 := by
@@ -131,6 +205,71 @@ theorem planeComponent_eq_sum_succ_extensions
     (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
     sign z
 
+/-- Exact Fourier transport under a forward adjacent root.  The image of a
+coarse component is the sum of precisely those next-stage components whose
+signs restrict along the concrete conjugated-plane index map. -/
+theorem map_planeComponent_forward_eq_sum_conjugated_extensions
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E) :
+    rho (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))
+        (planeComponent X i j k hij hik hjk n rho sign z) =
+      ∑ fineSign ∈ (Finset.univ.filter fun fineSign :
+          Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool ↦
+          sign = fun q ↦ fineSign
+            (forwardConjugatedPlaneSuccIndex
+              X i j k hij hik hjk x n q)),
+        planeComponent X i j k hij hik hjk (n + 1) rho fineSign
+          (rho (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x)) z) := by
+  rw [planeComponent, map_iteratedPart]
+  exact iteratedPart_eq_sum_fine_extensions rho
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk (n + 1))
+    (fun q ↦ elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
+      planeFamily X i j k hij hik hjk n q *
+      (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹)
+    (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n)
+    (planeFamily_forwardConjugatedPlaneSuccIndex
+      X i j k hij hik hjk x n)
+    (planeFamily_sq X i j k hij hik hjk (n + 1))
+    (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
+    sign _
+
+/-- Exact Fourier transport under an opposite adjacent root. -/
+theorem map_planeComponent_opposite_eq_sum_conjugated_extensions
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E) :
+    rho (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))
+        (planeComponent X i j k hij hik hjk n rho sign z) =
+      ∑ fineSign ∈ (Finset.univ.filter fun fineSign :
+          Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool ↦
+          sign = fun q ↦ fineSign
+            (oppositeConjugatedPlaneSuccIndex
+              X i j k hij hik hjk x n q)),
+        planeComponent X i j k hij hik hjk (n + 1) rho fineSign
+          (rho (elementaryRoot j i hij.symm
+            (FreeAlgebra.ι (ZMod 2) x)) z) := by
+  rw [planeComponent, map_iteratedPart]
+  exact iteratedPart_eq_sum_fine_extensions rho
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk (n + 1))
+    (fun q ↦ elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+      planeFamily X i j k hij hik hjk n q *
+      (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹)
+    (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n)
+    (planeFamily_oppositeConjugatedPlaneSuccIndex
+      X i j k hij hik hjk x n)
+    (planeFamily_sq X i j k hij hik hjk (n + 1))
+    (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
+    sign _
+
 theorem sum_planeComponent
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E)) (z : E) :
@@ -165,6 +304,35 @@ def planeEigenvalue
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (g : Plane X i j k hij hik hjk n) : ℝ :=
   if sign ((planeEnumeration X i j k hij hik hjk n).symm g) then 1 else -1
+
+/-- Restricting a fine sign assignment along the forward conjugated index map
+computes exactly the fine eigenvalue of the concretely conjugated element. -/
+theorem planeEigenvalue_forwardConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (g : Plane X i j k hij hik hjk n) :
+    planeEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) g =
+      planeEigenvalue X i j k hij hik hjk (n + 1) fineSign
+        (forwardConjugatedPlaneSucc X i j k hij hik hjk x n g) := by
+  unfold planeEigenvalue forwardConjugatedPlaneSuccIndex
+  simp only [Equiv.apply_symm_apply]
+
+/-- The corresponding exact restriction formula for the opposite shear. -/
+theorem planeEigenvalue_oppositeConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (g : Plane X i j k hij hik hjk n) :
+    planeEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) g =
+      planeEigenvalue X i j k hij hik hjk (n + 1) fineSign
+        (oppositeConjugatedPlaneSucc X i j k hij hik hjk x n g) := by
+  unfold planeEigenvalue oppositeConjugatedPlaneSuccIndex
+  simp only [Equiv.apply_symm_apply]
 
 /-- The finite set of sign components on which a selected plane element has
 eigenvalue `-1`. -/

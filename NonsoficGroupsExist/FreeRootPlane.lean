@@ -398,6 +398,52 @@ theorem conjugate_generator_mem_succ
     rw [← elementaryRoot_mul i k hik a
       (FreeAlgebra.ι (ZMod 2) x * b), mul_assoc]
 
+/-- Conjugation by the opposite adjacent free-generator root sends the
+degree-`n` plane into the degree-`n+1` plane.  This is the subgroup-level
+counterpart of `conjugate_firstCoordinate_opposite_generator`; in
+particular, it proves the bridge needed to re-index the entire Fourier
+decomposition after the opposite shear. -/
+theorem conjugate_opposite_generator_mem_succ
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (g : elementaryGroup (Fin 3) (FreeRing X))
+    (hg : g ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n) :
+    elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) * g *
+        (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ ∈
+      rootPlaneDegreeSubgroup X i j k hij hik hjk (n + 1) := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := hg
+  let q := elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x)
+  refine ⟨a, degreeLE_mono X (Nat.le_succ n) ha,
+    FreeAlgebra.ι (ZMod 2) x * a + b, ?_, ?_⟩
+  · exact (degreeLE X (n + 1)).add_mem
+      (generator_mul_mem_degreeLE_succ X x ha)
+      (degreeLE_mono X (Nat.le_succ n) hb)
+  · symm
+    have hfirst := conjugate_firstCoordinate_opposite_generator
+      X i j k hij hik hjk x n ⟨a, ha⟩
+    change elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+        elementaryRoot i k hik a *
+        (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      elementaryRoot i k hik a *
+        elementaryRoot j k hjk (FreeAlgebra.ι (ZMod 2) x * a) at hfirst
+    have hsecond := conjugate_secondCoordinate_opposite_generator
+      X i j k hij hik hjk x n ⟨b, hb⟩
+    change elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
+        elementaryRoot j k hjk b *
+        (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
+      elementaryRoot j k hjk b at hsecond
+    rw [show q * (elementaryRoot i k hik a * elementaryRoot j k hjk b) * q⁻¹ =
+        (q * elementaryRoot i k hik a * q⁻¹) *
+          (q * elementaryRoot j k hjk b * q⁻¹) by group]
+    dsimp [q]
+    rw [hfirst, hsecond]
+    change (elementaryRoot i k hik a *
+        elementaryRoot j k hjk (FreeAlgebra.ι (ZMod 2) x * a)) *
+        elementaryRoot j k hjk b =
+      elementaryRoot i k hik a *
+        elementaryRoot j k hjk (FreeAlgebra.ι (ZMod 2) x * a + b)
+    rw [mul_assoc, ← elementaryRoot_mul]
+
 end FreeRootPlane
 
 end NonsoficGroupsExist
