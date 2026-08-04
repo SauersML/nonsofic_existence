@@ -88,6 +88,68 @@ theorem fixedProjection_root_eq_vertex
     _ = KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) x := by
       rw [hgroup]
 
+/-- The companion projection identity with the other generating root first.
+If a vector is fixed by `Xᵢⱼ` and `Xᵢₖ`, its `Xⱼₖ`-projection is its full
+`Gᵢₖ`-projection. -/
+theorem fixedProjection_other_root_eq_vertex
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    {x : E}
+    (hxij : x ∈ KazhdanFixedSpace.fixedSubspace rho (A.root i j hij))
+    (hxik : x ∈ KazhdanFixedSpace.fixedSubspace rho (A.root i k hik)) :
+    (KazhdanFixedSpace.fixedProjection rho (A.root j k hjk) x : E) =
+      KazhdanFixedSpace.fixedProjection rho
+        (A.vertexGroup ⟨(i, k), hik⟩) x := by
+  let Xij := A.root i j hij
+  let Xik := A.root i k hik
+  let Xjk := A.root j k hjk
+  let a : A2Root := ⟨(i, k), hik⟩
+  have hthird : a2ThirdIndex i k = j :=
+    a2ThirdIndex_eq_of_pairwise_ne i j k hij hik hjk
+  have hXikV : Xik ≤ Xij ⊔ Xjk := by
+    simpa [Xik, Xij, Xjk, a, A2System.vertexGroup,
+      A2System.rootAt, A2System.leftRootGroup,
+      A2System.rightRootGroup, hthird] using A.rootAt_le_vertexGroup a
+  have hgroup : (Xjk ⊔ Xik) ⊔ Xij = A.vertexGroup a := by
+    have hvertex : A.vertexGroup a = Xij ⊔ Xjk := by
+      simp [a, Xij, Xjk, A2System.vertexGroup,
+        A2System.leftRootGroup, A2System.rightRootGroup, hthird]
+    rw [hvertex]
+    apply le_antisymm
+    · exact sup_le (sup_le le_sup_right hXikV) le_sup_left
+    · exact sup_le le_sup_right (le_sup_left.trans le_sup_left)
+  have hXikNorm : Xik ≤ Subgroup.normalizer (Xjk : Set G) := by
+    intro z hz
+    apply Subgroup.centralizer_le_normalizer (Xjk : Set G)
+    rw [Subgroup.mem_centralizer_iff]
+    intro y hy
+    exact A.commute j k i k hjk hik hik.symm hjk.symm y hy z hz
+  have hYX : ⁅Xij, Xjk⁆ ≤ Xik := by
+    apply Subgroup.commutator_le.mpr
+    intro x hx y hy
+    exact A.commutator_mem i j k hij hjk hik x hx y hy
+  have hYZ : ⁅Xij, Xik⁆ ≤ Xik := by
+    apply Subgroup.commutator_le.mpr
+    intro x hx z hz
+    have hcomm : Commute x z :=
+      A.commute i j i k hij hik hij.symm hik.symm x hx z hz
+    rw [commutatorElement_eq_one_iff_commute.mpr hcomm]
+    exact Xik.one_mem
+  have hXijNorm : Xij ≤ Subgroup.normalizer (Xjk ⊔ Xik : Subgroup G) :=
+    ClassTwoNormalForm.le_normalizer_sup Xjk Xij Xik hYX hYZ
+  have hp1 := KazhdanFixedSpace.fixedProjection_eq_sup_of_fixed_of_normalizes
+    rho Xjk Xik hXikNorm hxik
+  have hp2 := KazhdanFixedSpace.fixedProjection_eq_sup_of_fixed_of_normalizes
+    rho (Xjk ⊔ Xik) Xij hXijNorm hxij
+  change (KazhdanFixedSpace.fixedProjection rho Xjk x : E) =
+    KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) x
+  calc
+    (KazhdanFixedSpace.fixedProjection rho Xjk x : E) =
+        KazhdanFixedSpace.fixedProjection rho (Xjk ⊔ Xik) x := hp1
+    _ = KazhdanFixedSpace.fixedProjection rho ((Xjk ⊔ Xik) ⊔ Xij) x := hp2
+    _ = KazhdanFixedSpace.fixedProjection rho (A.vertexGroup a) x := by
+      rw [hgroup]
+
 /-- Concrete edge-difference instance of `fixedProjection_root_eq_vertex`.
 The required two root invariances follow from the endpoint vertex groups. -/
 theorem fixedProjection_root_edgeDifference_eq_vertex
@@ -189,6 +251,91 @@ theorem triangle_edge_norm_sq_eq
         (f rik - f rjk) : E)‖ ^ 2 +
       ‖KazhdanFixedSpace.subgroupMovingProjection rho Xij
         (f rij - f rjk)‖ ^ 2
+  rw [← hproj, ← hmove]
+  exact hpyth
+
+/-- Equation (5.9), strengthened to equality by retaining the full
+fixed/moving orthogonal decomposition. -/
+theorem triangle_second_edge_norm_sq_eq
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    let rij : A2Root := ⟨(i, j), hij⟩
+    let rik : A2Root := ⟨(i, k), hik⟩
+    let rjk : A2Root := ⟨(j, k), hjk⟩
+    ‖f rik - f rij‖ ^ 2 =
+      ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+          (f rik - f rij) : E)‖ ^ 2 +
+        ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rjk)
+          (f rjk - f rij)‖ ^ 2 := by
+  let rij : A2Root := ⟨(i, j), hij⟩
+  let rik : A2Root := ⟨(i, k), hik⟩
+  let rjk : A2Root := ⟨(j, k), hjk⟩
+  let Xij := A.root i j hij
+  let Xik := A.root i k hik
+  let Xjk := A.root j k hjk
+  have hthirdIK : a2ThirdIndex i k = j :=
+    a2ThirdIndex_eq_of_pairwise_ne i j k hij hik hjk
+  have hthirdIJ : a2ThirdIndex i j = k :=
+    a2ThirdIndex_eq_of_pairwise_ne i k j hik hij hjk.symm
+  have hXij_rik : Xij ≤ A.vertexGroup rik := by
+    simpa [Xij, rik, A2System.leftRootGroup, hthirdIK] using
+      A.leftRoot_le_vertexGroup rik
+  have hXij_rij : Xij ≤ A.vertexGroup rij := by
+    simpa [Xij, rij, A2System.rootAt] using A.rootAt_le_vertexGroup rij
+  have hXik_rik : Xik ≤ A.vertexGroup rik := by
+    simpa [Xik, rik, A2System.rootAt] using A.rootAt_le_vertexGroup rik
+  have hXik_rij : Xik ≤ A.vertexGroup rij := by
+    simpa [Xik, rij, A2System.leftRootGroup, hthirdIJ] using
+      A.leftRoot_le_vertexGroup rij
+  have hxij : f rik - f rij ∈ KazhdanFixedSpace.fixedSubspace rho Xij :=
+    (KazhdanFixedSpace.fixedSubspace rho Xij).sub_mem
+      (KazhdanFixedSpace.antitone rho hXij_rik (hf rik))
+      (KazhdanFixedSpace.antitone rho hXij_rij (hf rij))
+  have hxik : f rik - f rij ∈ KazhdanFixedSpace.fixedSubspace rho Xik :=
+    (KazhdanFixedSpace.fixedSubspace rho Xik).sub_mem
+      (KazhdanFixedSpace.antitone rho hXik_rik (hf rik))
+      (KazhdanFixedSpace.antitone rho hXik_rij (hf rij))
+  have hproj := fixedProjection_other_root_eq_vertex
+    A rho i j k hij hik hjk hxij hxik
+  have hXjk_rik : Xjk ≤ A.vertexGroup rik := by
+    simpa [Xjk, rik, A2System.rightRootGroup, hthirdIK] using
+      A.rightRoot_le_vertexGroup rik
+  have hXjk_rjk : Xjk ≤ A.vertexGroup rjk := by
+    simpa [Xjk, rjk, A2System.rootAt] using A.rootAt_le_vertexGroup rjk
+  have hfixed : f rik - f rjk ∈ KazhdanFixedSpace.fixedSubspace rho Xjk :=
+    (KazhdanFixedSpace.fixedSubspace rho Xjk).sub_mem
+      (KazhdanFixedSpace.antitone rho hXjk_rik (hf rik))
+      (KazhdanFixedSpace.antitone rho hXjk_rjk (hf rjk))
+  have hzero : KazhdanFixedSpace.subgroupMovingProjection rho Xjk
+      (f rik - f rjk) = 0 :=
+    KazhdanFixedSpace.subgroupMovingProjection_eq_zero_of_mem rho Xjk hfixed
+  have hmove : KazhdanFixedSpace.subgroupMovingProjection rho Xjk
+      (f rik - f rij) =
+      KazhdanFixedSpace.subgroupMovingProjection rho Xjk
+        (f rjk - f rij) := by
+    have hdecomp : f rik - f rij =
+        (f rik - f rjk) + (f rjk - f rij) := by module
+    rw [hdecomp, map_add, hzero, zero_add]
+  have hpyth := KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho Xjk (f rik - f rij)
+  change ‖f rik - f rij‖ ^ 2 =
+    ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+        (f rik - f rij) : E)‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rjk)
+        (f rjk - f rij)‖ ^ 2
+  change (KazhdanFixedSpace.fixedProjection rho Xjk
+      (f rik - f rij) : E) =
+    KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+      (f rik - f rij) at hproj
+  have hroot : A.rootAt rjk = Xjk := rfl
+  rw [hroot]
+  change ‖f rik - f rij‖ ^ 2 =
+    ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+        (f rik - f rij) : E)‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho Xjk
+        (f rjk - f rij)‖ ^ 2
   rw [← hproj, ← hmove]
   exact hpyth
 
