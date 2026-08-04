@@ -49,6 +49,38 @@ theorem antitone (ρ : G →* (E ≃ₗᵢ[ℝ] E)) {H K : Subgroup G}
   intro h hh
   exact hx h (hHK hh)
 
+/-- The fixed subspace of a normal subgroup is invariant under the ambient
+group action. -/
+theorem map_mem_fixedSubspace_of_normal (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (H : Subgroup G) [H.Normal] (g : G) {x : E}
+    (hx : x ∈ fixedSubspace ρ H) : ρ g x ∈ fixedSubspace ρ H := by
+  rw [mem_fixedSubspace_iff] at hx ⊢
+  intro h hh
+  have hconj : g⁻¹ * h * g ∈ H := by
+    simpa using (inferInstance : H.Normal).conj_mem h hh g⁻¹
+  calc
+    ρ h (ρ g x) = ρ (h * g) x := by simp [map_mul]
+    _ = ρ (g * (g⁻¹ * h * g)) x := by congr 2; group
+    _ = ρ g (ρ (g⁻¹ * h * g) x) := by simp [map_mul]
+    _ = ρ g x := by rw [hx _ hconj]
+
+/-- The orthogonal complement of the fixed subspace of a normal subgroup is
+also invariant under the ambient group action. -/
+theorem map_mem_fixedSubspace_orthogonal_of_normal
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) [H.Normal]
+    (g : G) {x : E} (hx : x ∈ (fixedSubspace ρ H)ᗮ) :
+    ρ g x ∈ (fixedSubspace ρ H)ᗮ := by
+  rw [Submodule.mem_orthogonal]
+  intro y hy
+  have hy' : ρ g⁻¹ y ∈ fixedSubspace ρ H :=
+    map_mem_fixedSubspace_of_normal ρ H g⁻¹ hy
+  have hcancel : ρ g⁻¹ (ρ g x) = x := by simp
+  calc
+    inner ℝ y (ρ g x) = inner ℝ (ρ g⁻¹ y) (ρ g⁻¹ (ρ g x)) := by
+      rw [(ρ g⁻¹).inner_map_map]
+    _ = inner ℝ (ρ g⁻¹ y) x := by rw [hcancel]
+    _ = 0 := Submodule.inner_right_of_mem_orthogonal hy' hx
+
 /-- A vector fixed by a set is fixed by the subgroup it generates. -/
 theorem fixed_of_mem_closure (ρ : G →* (E ≃ₗᵢ[ℝ] E))
     (S : Set G) (x : E) (hx : ∀ g ∈ S, ρ g x = x) :

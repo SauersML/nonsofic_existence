@@ -12,6 +12,9 @@ namespace NonsoficGroupsExist
 
 open scoped commutatorElement
 
+/-- The six ordered roots of type `A₂`. -/
+abbrev A2Root := {p : Fin 3 × Fin 3 // p.1 ≠ p.2}
+
 /-- A strongly graded `A₂` root-subgroup system: the six subgroups generate,
 non-addable roots commute, commutators of consecutive roots land in their sum
 root, and every element of a sum root is such a commutator.  The final field is
@@ -36,9 +39,21 @@ namespace A2System
 
 variable {G : Type*} [Group G]
 
+/-- A root subgroup indexed by the finite type of six ordered roots. -/
+def rootAt (A : A2System G) (a : A2Root) : Subgroup G :=
+  A.root a.1.1 a.1.2 a.2
+
 /-- The union of the six root subgroups. -/
 def rootSet (A : A2System G) : Set G :=
   {g | ∃ (i j : Fin 3) (hij : i ≠ j), g ∈ A.root i j hij}
+
+theorem mem_rootSet_iff (A : A2System G) (g : G) :
+    g ∈ A.rootSet ↔ ∃ a : A2Root, g ∈ A.rootAt a := by
+  constructor
+  · rintro ⟨i, j, hij, hg⟩
+    exact ⟨⟨(i, j), hij⟩, hg⟩
+  · rintro ⟨⟨⟨i, j⟩, hij⟩, hg⟩
+    exact ⟨i, j, hij, hg⟩
 
 theorem rootSet_generate (A : A2System G) :
     Subgroup.closure A.rootSet = ⊤ := A.generate
