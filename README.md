@@ -25,9 +25,11 @@ every centered indicator, with arbitrarily small normalized additive error.  The
 one-step displacement is now related to the genuine directed generator-cut
 energy, and centering has been eliminated from the threshold-rounding input.
 Finite coarea rounding, the maximal-bad-set removal argument, finite support
-propagation, and the resulting uniform small-boundary replacement theorem are
-also kernel-checked.  The remaining partition and graph-edit steps needed for
-Kun's expander decomposition are still being formalized.
+propagation, the resulting uniform small-boundary replacement theorem, and
+Kun's complete terminating finite partition recursion are also kernel-checked.
+The recursion constructs blocks with a uniform global cut inequality and a
+linear small-boundary budget.  Its graph-edit step is still required for Kun's
+expander decomposition.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. In particular, the repository currently lacks proofs of the
