@@ -129,6 +129,69 @@ theorem fixedProjection_root_edgeDifference_eq_vertex
       (KazhdanFixedSpace.antitone rho hXjk_rjk (hf rjk))
   exact fixedProjection_root_eq_vertex A rho i j k hij hik hjk hxik hxjk
 
+/-- Equation (5.8) of the magic-graph proof, with all three vertices and
+projections explicit. -/
+theorem triangle_edge_norm_sq_eq
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) :
+    let rij : A2Root := ⟨(i, j), hij⟩
+    let rik : A2Root := ⟨(i, k), hik⟩
+    let rjk : A2Root := ⟨(j, k), hjk⟩
+    ‖f rik - f rjk‖ ^ 2 =
+      ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+          (f rik - f rjk) : E)‖ ^ 2 +
+        ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rij)
+          (f rij - f rjk)‖ ^ 2 := by
+  let rij : A2Root := ⟨(i, j), hij⟩
+  let rik : A2Root := ⟨(i, k), hik⟩
+  let rjk : A2Root := ⟨(j, k), hjk⟩
+  let Xij := A.root i j hij
+  have hthirdIK : a2ThirdIndex i k = j :=
+    a2ThirdIndex_eq_of_pairwise_ne i j k hij hik hjk
+  have hXij_rij : Xij ≤ A.vertexGroup rij := by
+    simpa [Xij, rij, A2System.rootAt] using A.rootAt_le_vertexGroup rij
+  have hXij_rik : Xij ≤ A.vertexGroup rik := by
+    simpa [Xij, rik, A2System.leftRootGroup, hthirdIK] using
+      A.leftRoot_le_vertexGroup rik
+  have hfixed : f rik - f rij ∈ KazhdanFixedSpace.fixedSubspace rho Xij :=
+    (KazhdanFixedSpace.fixedSubspace rho Xij).sub_mem
+      (KazhdanFixedSpace.antitone rho hXij_rik (hf rik))
+      (KazhdanFixedSpace.antitone rho hXij_rij (hf rij))
+  have hzero : KazhdanFixedSpace.subgroupMovingProjection rho Xij
+      (f rik - f rij) = 0 :=
+    KazhdanFixedSpace.subgroupMovingProjection_eq_zero_of_mem rho Xij hfixed
+  have hmove : KazhdanFixedSpace.subgroupMovingProjection rho Xij
+      (f rik - f rjk) =
+      KazhdanFixedSpace.subgroupMovingProjection rho Xij
+        (f rij - f rjk) := by
+    have hdecomp : f rik - f rjk =
+        (f rik - f rij) + (f rij - f rjk) := by module
+    rw [hdecomp, map_add, hzero, zero_add]
+  have hpyth := KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho Xij (f rik - f rjk)
+  have hproj := fixedProjection_root_edgeDifference_eq_vertex
+    A rho f hf i j k hij hik hjk
+  change ‖f rik - f rjk‖ ^ 2 =
+    ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+        (f rik - f rjk) : E)‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rij)
+        (f rij - f rjk)‖ ^ 2
+  change (KazhdanFixedSpace.fixedProjection rho Xij
+      (f rik - f rjk) : E) =
+    KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+      (f rik - f rjk) at hproj
+  have hroot : A.rootAt rij = Xij := rfl
+  rw [hroot]
+  change ‖f rik - f rjk‖ ^ 2 =
+    ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+        (f rik - f rjk) : E)‖ ^ 2 +
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho Xij
+        (f rij - f rjk)‖ ^ 2
+  rw [← hproj, ← hmove]
+  exact hpyth
+
 /-- Difference along an oriented edge of the magic graph. -/
 def edgeDifference (f : A2Root → E) (r : A2Root) (n : Fin 4) : E :=
   f r - f (neighbor r n)
@@ -153,6 +216,52 @@ noncomputable def vertexMovingLaplacian
     (f : A2Root → E) (r : A2Root) : E :=
   KazhdanFixedSpace.subgroupMovingProjection rho (A.vertexGroup r)
     (∑ n : Fin 4, edgeDifference f r n)
+
+/-- The unprojected magic-graph Laplacian on the root-indexed vertices. -/
+def rootLaplacian (f : A2Root → E) (r : A2Root) : E :=
+  ∑ n : Fin 4, edgeDifference f r n
+
+/-- Sum and integral centering on the root-indexed form of the graph. -/
+def rootTotal (f : A2Root → E) : E := ∑ r, f r
+
+def rootCentered (f : A2Root → E) (r : A2Root) : E :=
+  6 • f r - rootTotal f
+
+omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+/-- The explicit enumeration intertwines the two Laplacian definitions. -/
+theorem rootLaplacian_vertex (f : A2Root → E) (i : Fin 6) :
+    rootLaplacian f (vertex i) =
+      A2MagicLaplacian.laplacian (fun j ↦ f (vertex j)) i := by
+  simp [rootLaplacian, edgeDifference, A2MagicLaplacian.laplacian]
+
+omit [CompleteSpace E] in
+/-- The proved eigenvalue-four gap, transported to the actual root index. -/
+theorem rootCentered_norm_sq_le_rootLaplacian_norm_sq
+    (f : A2Root → E) :
+    16 * ∑ r : A2Root, ‖rootCentered f r‖ ^ 2 ≤
+      ∑ r : A2Root, ‖6 • rootLaplacian f r‖ ^ 2 := by
+  let g : Fin 6 → E := fun i ↦ f (vertexEquiv i)
+  have htotal : A2MagicLaplacian.total g = rootTotal f := by
+    exact Equiv.sum_comp vertexEquiv f
+  have hcenter (i : Fin 6) :
+      A2MagicLaplacian.centered g i = rootCentered f (vertexEquiv i) := by
+    change 6 • f (vertexEquiv i) - A2MagicLaplacian.total g =
+      6 • f (vertexEquiv i) - rootTotal f
+    rw [htotal]
+  have hlap (i : Fin 6) :
+      A2MagicLaplacian.laplacian g i = rootLaplacian f (vertexEquiv i) := by
+    symm
+    exact rootLaplacian_vertex f i
+  have h := A2MagicLaplacian.centered_norm_sq_le_laplacian_norm_sq g
+  rw [show (∑ r : A2Root, ‖rootCentered f r‖ ^ 2) =
+      ∑ i : Fin 6, ‖rootCentered f (vertexEquiv i)‖ ^ 2 by
+        exact (Equiv.sum_comp vertexEquiv
+          (fun r ↦ ‖rootCentered f r‖ ^ 2)).symm]
+  rw [show (∑ r : A2Root, ‖6 • rootLaplacian f r‖ ^ 2) =
+      ∑ i : Fin 6, ‖6 • rootLaplacian f (vertexEquiv i)‖ ^ 2 by
+        exact (Equiv.sum_comp vertexEquiv
+          (fun r ↦ ‖6 • rootLaplacian f r‖ ^ 2)).symm]
+  simpa only [hcenter, hlap] using h
 
 /-- Directed edge energy.  Every undirected edge occurs twice. -/
 def edgeEnergy (f : A2Root → E) : ℝ :=

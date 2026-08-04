@@ -410,6 +410,16 @@ theorem subgroupMovingProjection_mem [CompleteSpace E]
   letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
   exact Uᗮ.starProjection_apply_mem x
 
+/-- A subgroup-fixed vector has zero moving component. -/
+@[simp] theorem subgroupMovingProjection_eq_zero_of_mem [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {x : E}
+    (hx : x ∈ fixedSubspace ρ H) :
+    subgroupMovingProjection ρ H x = 0 := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  change Uᗮ.starProjection x = 0
+  exact U.starProjection_orthogonal_apply_eq_zero hx
+
 @[simp] theorem fixedProjection_mem [CompleteSpace E] (ρ : G →* (E ≃ₗᵢ[ℝ] E))
     (H : Subgroup G) (x : E) (h : H) :
     ρ h.1 (fixedProjection ρ H x : E) = fixedProjection ρ H x := by
