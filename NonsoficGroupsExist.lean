@@ -26,6 +26,7 @@ import NonsoficGroupsExist.KunRepairGraph
 import NonsoficGroupsExist.KunMarkerSelection
 import NonsoficGroupsExist.KunLocalNeighborhood
 import NonsoficGroupsExist.KunBadBlocks
+import NonsoficGroupsExist.KunSelectiveRepairGraph
 import NonsoficGroupsExist.KunRepairExpansion
 import NonsoficGroupsExist.KunUniformMovement
 import NonsoficGroupsExist.KunUniformRemoval

@@ -1,0 +1,262 @@
+import NonsoficGroupsExist.KunBadBlocks
+import NonsoficGroupsExist.EdgeWitnessDistance
+
+/-!
+# Repairing good Kun blocks and isolating bad blocks
+
+The full repair graph cannot attach a nonloop edge inside a singleton bad
+block.  This graph therefore retains internal occurrences only in good
+original blocks and inserts repair edges only for good crossing stubs.  Bad
+vertices are isolated by the refined singleton partition.
+-/
+
+namespace NonsoficGroupsExist
+namespace KunSelectiveRepairGraph
+
+open FiniteMultiGraph
+open KunBlockGraph
+open KunRepairGraph
+open KunMarkerSelection
+open KunBadBlocks
+
+/-- Original internal occurrences whose source block is good. -/
+def goodInternalEdges (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) : Finset X.edge :=
+  (internalEdges X P).filter fun e ↦ X.first e ∉ B
+
+/-- Original occurrences charged to a bad source vertex. -/
+def badSourceEdges (X : FiniteMultiGraph) (B : Finset X.vertex) :
+    Finset X.edge :=
+  Finset.univ.filter fun e ↦ X.first e ∈ B
+
+/-- Retained good internal occurrences together with good-side repair stubs. -/
+abbrev SelectiveEdge (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) :=
+  Sum {e : X.edge // e ∈ goodInternalEdges X P B}
+    (GoodCrossingStub X P B)
+
+instance selectiveEdgeFintype (X : FiniteMultiGraph)
+    (P : BlockStructure X.vertex) (B : Finset X.vertex) :
+    Fintype (SelectiveEdge X P B) := inferInstance
+
+instance selectiveEdgeDecidableEq (X : FiniteMultiGraph)
+    (P : BlockStructure X.vertex) (B : Finset X.vertex) :
+    DecidableEq (SelectiveEdge X P B) := inferInstance
+
+/-- The selective repaired graph. -/
+def graph (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    FiniteMultiGraph where
+  vertex := X.vertex
+  edge :=
+    { carrier := SelectiveEdge X P B
+      fintype := selectiveEdgeFintype X P B
+      decidableEq := selectiveEdgeDecidableEq X P B }
+  first
+    | Sum.inl e => X.first e.1
+    | Sum.inr s => stubEndpoint X P s.1
+  second
+    | Sum.inl e => X.second e.1
+    | Sum.inr s => marker s
+  loopless
+    | Sum.inl e => X.loopless e.1
+    | Sum.inr s => (marker_ne s).symm
+
+@[simp] theorem graph_first_internal
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1)
+    (e : {e : X.edge // e ∈ goodInternalEdges X P B}) :
+    (graph X P B marker marker_ne).first (Sum.inl e) = X.first e.1 := rfl
+
+@[simp] theorem graph_second_internal
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1)
+    (e : {e : X.edge // e ∈ goodInternalEdges X P B}) :
+    (graph X P B marker marker_ne).second (Sum.inl e) = X.second e.1 := rfl
+
+@[simp] theorem graph_first_stub
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1)
+    (s : GoodCrossingStub X P B) :
+    (graph X P B marker marker_ne).first (Sum.inr s) =
+      stubEndpoint X P s.1 := rfl
+
+@[simp] theorem graph_second_stub
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1)
+    (s : GoodCrossingStub X P B) :
+    (graph X P B marker marker_ne).second (Sum.inr s) = marker s := rfl
+
+/-- Every selective edge stays in a block of the singleton-refined
+partition. -/
+theorem edge_inside_refined
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (E : Finset X.vertex) (K : ℕ)
+    (marker : GoodCrossingStub X P (badVertices X P E K) → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1)
+    (marker_inside : ∀ s, marker s ∈ P.block (stubEndpoint X P s.1))
+    (e : (graph X P (badVertices X P E K) marker marker_ne).edge) :
+    (singletonizeBadBlocks X P E K).block
+        ((graph X P (badVertices X P E K) marker marker_ne).first e) =
+      (singletonizeBadBlocks X P E K).block
+        ((graph X P (badVertices X P E K) marker marker_ne).second e) := by
+  rcases e with e | s
+  · have hedata := Finset.mem_filter.mp e.2
+    have hinternal := (Finset.mem_filter.mp hedata.1).2
+    have hfirstGood := hedata.2
+    have hsecondMem : X.second e.1 ∈ P.block (X.first e.1) := by
+      rw [hinternal]
+      exact P.self_mem _
+    have hsecondGood : X.second e.1 ∉ badVertices X P E K := by
+      intro hbad
+      exact hfirstGood
+        ((mem_badVertices_iff_of_mem_block X P E K hsecondMem).mpr hbad)
+    change (singletonizeBadBlocks X P E K).block (X.first e.1) =
+      (singletonizeBadBlocks X P E K).block (X.second e.1)
+    rw [singletonizeBadBlocks_block_of_good X P E K hfirstGood,
+      singletonizeBadBlocks_block_of_good X P E K hsecondGood]
+    exact hinternal
+  · have hendpointGood : stubEndpoint X P s.1 ∉ badVertices X P E K :=
+      s.2
+    have hmarkerGood : marker s ∉ badVertices X P E K := by
+      intro hbad
+      exact hendpointGood
+        ((mem_badVertices_iff_of_mem_block X P E K (marker_inside s)).mpr hbad)
+    change (singletonizeBadBlocks X P E K).block (stubEndpoint X P s.1) =
+      (singletonizeBadBlocks X P E K).block (marker s)
+    rw [singletonizeBadBlocks_block_of_good X P E K hendpointGood,
+      singletonizeBadBlocks_block_of_good X P E K hmarkerGood]
+    exact (P.eq_of_mem _ _ (marker_inside s)).symm
+
+/-- Target occurrences retained by the edit witness are the internal left
+summand. -/
+noncomputable def targetInternalEdges
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    Finset (graph X P B marker marker_ne).edge := by
+  classical
+  exact Finset.univ.filter fun e ↦
+    match e with
+    | Sum.inl _ => True
+    | Sum.inr _ => False
+
+/-- The occurrence-level edit witness retains every good internal edge
+verbatim. -/
+noncomputable def editWitness
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    EdgeEditWitness X (graph X P B marker marker_ne) (Equiv.refl X.vertex) where
+  sourceKept := goodInternalEdges X P B
+  targetKept := targetInternalEdges X P B marker marker_ne
+  edgeEquiv :=
+    { toFun := fun e ↦ ⟨Sum.inl ⟨e.1, e.2⟩, by
+        simp [targetInternalEdges]⟩
+      invFun := fun e ↦ by
+        rcases e with ⟨e, he⟩
+        rcases e with e | s
+        · exact ⟨e.1, e.2⟩
+        · simp [targetInternalEdges] at he
+      left_inv := fun _ ↦ rfl
+      right_inv := fun e ↦ by
+        rcases e with ⟨e, he⟩
+        rcases e with e | s
+        · rfl
+        · simp [targetInternalEdges] at he }
+  preservesEndpoints _ := Or.inl ⟨rfl, rfl⟩
+
+theorem sourceUnmatched_subset
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    (editWitness X P B marker marker_ne).sourceUnmatched ⊆
+      X.crossingEdges P.block ∪ badSourceEdges X B := by
+  classical
+  intro e he
+  have hnotGood : e ∉ goodInternalEdges X P B := by
+    simpa [EdgeEditWitness.sourceUnmatched, editWitness] using he
+  by_cases hinternal : e ∈ internalEdges X P
+  · apply Finset.mem_union_right
+    apply Finset.mem_filter.mpr
+    refine ⟨Finset.mem_univ _, ?_⟩
+    by_contra hfirst
+    exact hnotGood (Finset.mem_filter.mpr ⟨hinternal, hfirst⟩)
+  · apply Finset.mem_union_left
+    apply Finset.mem_filter.mpr
+    refine ⟨Finset.mem_univ _, ?_⟩
+    intro heq
+    exact hinternal (Finset.mem_filter.mpr ⟨Finset.mem_univ _, heq⟩)
+
+theorem card_sourceUnmatched_le
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    (editWitness X P B marker marker_ne).sourceUnmatched.card ≤
+      (X.crossingEdges P.block).card + (badSourceEdges X B).card := by
+  exact (Finset.card_le_card
+    (sourceUnmatched_subset X P B marker marker_ne)).trans
+      (Finset.card_union_le _ _)
+
+theorem card_targetUnmatched_le
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    (editWitness X P B marker marker_ne).targetUnmatched.card ≤
+      2 * (X.crossingEdges P.block).card := by
+  classical
+  have htarget : (editWitness X P B marker marker_ne).targetUnmatched.card =
+      Fintype.card (GoodCrossingStub X P B) := by
+    rw [← Fintype.card_coe]
+    apply Fintype.card_congr
+    let T := {e : (graph X P B marker marker_ne).edge //
+      e ∈ (editWitness X P B marker marker_ne).targetUnmatched}
+    exact
+      { toFun := fun e ↦ by
+          rcases e with ⟨e, he⟩
+          rcases e with a | s
+          · simp [EdgeEditWitness.targetUnmatched, editWitness,
+              targetInternalEdges] at he
+          · exact s
+        invFun := fun s ↦ ⟨Sum.inr s, by
+          simp [EdgeEditWitness.targetUnmatched, editWitness,
+            targetInternalEdges]⟩
+        left_inv := fun e ↦ by
+          rcases e with ⟨e, he⟩
+          rcases e with a | s
+          · simp [EdgeEditWitness.targetUnmatched, editWitness,
+              targetInternalEdges] at he
+          · rfl
+        right_inv := fun _ ↦ rfl }
+  rw [htarget, ← card_crossingStub X P]
+  exact Fintype.card_le_of_injective Subtype.val Subtype.val_injective
+
+/-- Explicit edit-count bound for selective repair. -/
+theorem unmatchedCount_le
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    (editWitness X P B marker marker_ne).unmatchedCount ≤
+      3 * (X.crossingEdges P.block).card + (badSourceEdges X B).card := by
+  rw [EdgeEditWitness.unmatchedCount]
+  have hs := card_sourceUnmatched_le X P B marker marker_ne
+  have ht := card_targetUnmatched_le X P B marker marker_ne
+  omega
+
+theorem editDistance_le
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) (marker : GoodCrossingStub X P B → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s.1) :
+    X.editDistance (graph X P B marker marker_ne) (Equiv.refl X.vertex) ≤
+      2 * (3 * (X.crossingEdges P.block).card +
+        (badSourceEdges X B).card) := by
+  exact (editWitness X P B marker marker_ne).editDistance_le_two_mul_unmatchedCount.trans
+    (Nat.mul_le_mul_left 2 (unmatchedCount_le X P B marker marker_ne))
+
+end KunSelectiveRepairGraph
+end NonsoficGroupsExist

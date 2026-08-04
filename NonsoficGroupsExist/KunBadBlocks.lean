@@ -63,6 +63,14 @@ theorem mem_badVertices_iff (X : FiniteMultiGraph)
     exact (mem_badBlocks_iff X P E K (P.block y)).mpr
       ⟨P.block_mem_blocksFinset y, hy⟩
 
+/-- Membership in the bad-vertex locus is constant on each original block. -/
+theorem mem_badVertices_iff_of_mem_block (X : FiniteMultiGraph)
+    (P : BlockStructure X.vertex) (E : Finset X.vertex) (K : ℕ)
+    {x y : X.vertex} (hy : y ∈ P.block x) :
+    x ∈ badVertices X P E K ↔ y ∈ badVertices X P E K := by
+  rw [mem_badVertices_iff, mem_badVertices_iff,
+    P.eq_of_mem x y hy]
+
 theorem badBlocks_pairwise_disjoint (X : FiniteMultiGraph)
     (P : BlockStructure X.vertex) (E : Finset X.vertex) (K : ℕ) :
     (badBlocks X P E K : Set (Finset X.vertex)).PairwiseDisjoint id := by

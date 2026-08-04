@@ -678,6 +678,168 @@ theorem exists_global_marker_assignment
       rw [heq]
       exact stubEndpoint_mem_blockForbidden_self M τ S r P s)
 
+/-- Crossing stubs whose endpoint lies outside a block-saturated exceptional
+set.  These are exactly the stubs repaired after bad blocks are isolated. -/
+abbrev GoodCrossingStub (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (B : Finset X.vertex) :=
+  {s : KunRepairGraph.CrossingStub X P //
+    KunRepairGraph.stubEndpoint X P s ∉ B}
+
+/-- The global marker construction restricted to good blocks.  No marker is
+requested for a bad block; those vertices become singleton components in the
+selective repair graph. -/
+theorem exists_good_marker_assignment
+    {G : Type} [Group G]
+    (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (r : ℕ) (P : BlockStructure M) (E B : Finset M)
+    (hB : ∀ x y : M, y ∈ P.block x → (x ∈ B ↔ y ∈ B))
+    (hlarge : ∀ y : M, y ∉ B →
+      (E ∩ P.block y).card +
+        ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+          (blockStubs (generatorGraph M S τ) P (P.block y)).card <
+        (P.block y).card) :
+    ∃ marker : GoodCrossingStub (generatorGraph M S τ) P B → M,
+      (∀ s, marker s ≠
+        KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s.1) ∧
+      (∀ s, marker s ∉ E) ∧
+      (∀ s, marker s ∈
+        P.block (KunRepairGraph.stubEndpoint
+          (generatorGraph M S τ) P s.1)) ∧
+      (∀ s, forwardNeighborhood M τ S r {marker s} ⊆
+        P.block (KunRepairGraph.stubEndpoint
+          (generatorGraph M S τ) P s.1)) ∧
+      ∀ s t, s ≠ t →
+        Disjoint (forwardNeighborhood M τ S r {marker s})
+          (forwardNeighborhood M τ S r {marker t}) := by
+  classical
+  have block_disjoint_B_of_good (y : M) (hy : y ∉ B) :
+      Disjoint (P.block y) B := by
+    rw [Finset.disjoint_left]
+    intro z hzBlock hzB
+    exact hy ((hB y z hzBlock).mpr hzB)
+  have hlargeBlock (C : Finset M) (hC : C ∈ P.blocksFinset)
+      (hCB : Disjoint C B) :
+      (E ∩ C).card +
+        ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+          (blockStubs (generatorGraph M S τ) P C).card < C.card := by
+    obtain ⟨y, rfl⟩ := (P.mem_blocksFinset C).mp hC
+    apply hlarge y
+    intro hyB
+    exact Finset.disjoint_left.mp hCB (P.self_mem y) hyB
+  let localMarker : ∀ (C : Finset M) (hC : C ∈ P.blocksFinset)
+      (hCB : Disjoint C B),
+      {s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
+        s ∈ blockStubs (generatorGraph M S τ) P C} → M :=
+    fun C hC hCB ↦ Classical.choose
+      (exists_block_marker_assignment M τ S r P C E
+        (hlargeBlock C hC hCB))
+  have localMarker_spec (C : Finset M) (hC : C ∈ P.blocksFinset)
+      (hCB : Disjoint C B) := Classical.choose_spec
+    (exists_block_marker_assignment M τ S r P C E
+      (hlargeBlock C hC hCB))
+  let localStub (s : GoodCrossingStub (generatorGraph M S τ) P B) :
+      {t : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
+        t ∈ blockStubs (generatorGraph M S τ) P
+          (P.block (KunRepairGraph.stubEndpoint
+            (generatorGraph M S τ) P s.1))} :=
+    ⟨s.1, mem_blockStubs_self (generatorGraph M S τ) P s.1⟩
+  let marker (s : GoodCrossingStub (generatorGraph M S τ) P B) : M :=
+    localMarker
+      (P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s.1))
+      (P.block_mem_blocksFinset _)
+      (block_disjoint_B_of_good _ s.2)
+      (localStub s)
+  have marker_eq_local
+      (s : GoodCrossingStub (generatorGraph M S τ) P B)
+      (C : Finset M)
+      (hCeq : P.block (KunRepairGraph.stubEndpoint
+        (generatorGraph M S τ) P s.1) = C)
+      (hCmem : C ∈ P.blocksFinset) (hCB : Disjoint C B)
+      (hs : s.1 ∈ blockStubs (generatorGraph M S τ) P C) :
+      marker s = localMarker C hCmem hCB ⟨s.1, hs⟩ := by
+    subst C
+    rfl
+  have hmarkerData (s : GoodCrossingStub
+      (generatorGraph M S τ) P B) := Finset.mem_sdiff.mp
+    ((localMarker_spec
+      (P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s.1))
+      (P.block_mem_blocksFinset _) (block_disjoint_B_of_good _ s.2)).2.1
+        (localStub s))
+  have hmarkerBlock (s : GoodCrossingStub
+      (generatorGraph M S τ) P B) :
+      marker s ∈ P.block (KunRepairGraph.stubEndpoint
+        (generatorGraph M S τ) P s.1) := (hmarkerData s).1
+  have hmarkerForbidden (s : GoodCrossingStub
+      (generatorGraph M S τ) P B) :
+      marker s ∉ blockForbidden M τ S r P
+        (P.block (KunRepairGraph.stubEndpoint
+          (generatorGraph M S τ) P s.1)) := fun h ↦
+    (hmarkerData s).2 (Finset.mem_union_left _ h)
+  have hmarkerE (s : GoodCrossingStub
+      (generatorGraph M S τ) P B) : marker s ∉ E := fun h ↦
+    (hmarkerData s).2 (Finset.mem_union_right _ h)
+  have hneighborhoodBlock (s : GoodCrossingStub
+      (generatorGraph M S τ) P B) :
+      forwardNeighborhood M τ S r {marker s} ⊆
+        P.block (KunRepairGraph.stubEndpoint
+          (generatorGraph M S τ) P s.1) :=
+    forwardNeighborhood_subset_block_of_not_mem_forbidden M τ S P
+      (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s.1)
+      (marker s) r (hmarkerBlock s) (hmarkerForbidden s)
+  have hsameBlockSeparated
+      (s t : GoodCrossingStub (generatorGraph M S τ) P B)
+      (hblock : P.block (KunRepairGraph.stubEndpoint
+          (generatorGraph M S τ) P s.1) =
+        P.block (KunRepairGraph.stubEndpoint
+          (generatorGraph M S τ) P t.1))
+      (hst : s ≠ t) :
+      Disjoint (forwardNeighborhood M τ S r {marker s})
+        (forwardNeighborhood M τ S r {marker t}) := by
+    let C := P.block (KunRepairGraph.stubEndpoint
+      (generatorGraph M S τ) P s.1)
+    have hCmem : C ∈ P.blocksFinset := P.block_mem_blocksFinset _
+    have hCB : Disjoint C B := block_disjoint_B_of_good _ s.2
+    have hCt : P.block (KunRepairGraph.stubEndpoint
+        (generatorGraph M S τ) P t.1) = C := hblock.symm
+    have htmem : t.1 ∈ blockStubs (generatorGraph M S τ) P C := by
+      apply Finset.mem_filter.mpr
+      refine ⟨Finset.mem_univ _, ?_⟩
+      rw [← hCt]
+      exact P.self_mem _
+    let tLocal : {a : KunRepairGraph.CrossingStub
+        (generatorGraph M S τ) P //
+          a ∈ blockStubs (generatorGraph M S τ) P C} := ⟨t.1, htmem⟩
+    have hlocalNe : localStub s ≠ tLocal := by
+      intro heq
+      have hval : s.1 = t.1 := congrArg
+        (fun u : {a : KunRepairGraph.CrossingStub
+          (generatorGraph M S τ) P //
+            a ∈ blockStubs (generatorGraph M S τ) P C} ↦ u.1) heq
+      exact hst (Subtype.ext hval)
+    have hsep := (localMarker_spec C hCmem hCB).2.2
+      (localStub s) tLocal hlocalNe
+    have hmarkerS : marker s = localMarker C hCmem hCB (localStub s) :=
+      marker_eq_local s C rfl hCmem hCB _
+    have hmarkerT : marker t = localMarker C hCmem hCB tLocal :=
+      marker_eq_local t C hCt hCmem hCB htmem
+    simpa [hmarkerS, hmarkerT] using hsep
+  have hdisjoint
+      (s t : GoodCrossingStub (generatorGraph M S τ) P B)
+      (hst : s ≠ t) :
+      Disjoint (forwardNeighborhood M τ S r {marker s})
+        (forwardNeighborhood M τ S r {marker t}) := by
+    by_cases hblock : P.block (KunRepairGraph.stubEndpoint
+        (generatorGraph M S τ) P s.1) =
+      P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P t.1)
+    · exact hsameBlockSeparated s t hblock hst
+    · exact (P.block_disjoint hblock).mono
+        (hneighborhoodBlock s) (hneighborhoodBlock t)
+  refine ⟨marker, ?_, hmarkerE, hmarkerBlock, hneighborhoodBlock, hdisjoint⟩
+  intro s heq
+  exact hmarkerForbidden s (by
+    rw [heq]
+    exact stubEndpoint_mem_blockForbidden_self M τ S r P s.1)
+
 /-- Pairwise-disjoint marker neighborhoods have total intersection mass at
 most the size of the tested set. -/
 theorem sum_card_forwardNeighborhood_inter_le
