@@ -55,5 +55,16 @@ theorem norm_add_sq_le {U V : Submodule ℝ E} {epsilon : ℝ}
   rw [norm_add_sq_real]
   nlinarith
 
+/-- The universal two-vector bound obtained from Cauchy--Schwarz. -/
+theorem norm_add_sq_le_two (u v : E) :
+    ‖u + v‖ ^ 2 ≤ 2 * (‖u‖ ^ 2 + ‖v‖ ^ 2) := by
+  have hall : EpsilonOrthogonal (⊤ : Submodule ℝ E) ⊤ 1 := by
+    intro x _ y _
+    simpa using abs_real_inner_le_norm x y
+  convert norm_add_sq_le (U := (⊤ : Submodule ℝ E)) (V := ⊤)
+    (epsilon := 1) (by norm_num) hall (Submodule.mem_top : u ∈ (⊤ : Submodule ℝ E))
+      (Submodule.mem_top : v ∈ (⊤ : Submodule ℝ E)) using 1
+  norm_num
+
 end HilbertEpsilonOrthogonality
 end NonsoficGroupsExist

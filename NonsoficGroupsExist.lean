@@ -10,6 +10,7 @@ import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.KazhdanFixedSpace
 import NonsoficGroupsExist.HilbertConvexFixedPoint
 import NonsoficGroupsExist.HilbertEpsilonOrthogonality
+import NonsoficGroupsExist.NormalEdgeCodistance
 import NonsoficGroupsExist.KazhdanGenerators
 import NonsoficGroupsExist.KazhdanOrthogonal
 import NonsoficGroupsExist.KazhdanFiniteModel

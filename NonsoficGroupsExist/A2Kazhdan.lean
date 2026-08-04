@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.A2System
 import NonsoficGroupsExist.HilbertConvexFixedPoint
 import NonsoficGroupsExist.KazhdanControl
+import NonsoficGroupsExist.NormalEdgeCodistance
 
 /-!
 # Representation geometry of an A₂ system
@@ -158,6 +159,37 @@ theorem edgeFixedSubspaces_isOrtho
     KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho
       (A.rightEdgeGroup a) L (A.rightEdgeGroup_le_vertexGroup a)] at hortho
   exact hortho
+
+/-- The first local magic-graph estimate: four vectors fixed by the four edge
+groups incident to a vertex satisfy the codistance-`1/2` inequality. -/
+theorem vertex_four_fixed_norm_sq_le
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E)) [CompleteSpace E]
+    (r : A2Root)
+    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r)
+      (KazhdanFixedSpace.restrictRepresentation rho (A.vertexGroup r)))
+    {p q s t : E}
+    (hp : p ∈ KazhdanFixedSpace.fixedSubspace rho (A.leftEdgeGroup r))
+    (hq : q ∈ KazhdanFixedSpace.fixedSubspace rho (A.rightEdgeGroup r))
+    (hs : s ∈ KazhdanFixedSpace.fixedSubspace rho
+      (A.root r.1.1 (a2ThirdIndex r.1.1 r.1.2)
+        (a2ThirdIndex_ne_left r.1.1 r.1.2 r.2).symm))
+    (ht : t ∈ KazhdanFixedSpace.fixedSubspace rho
+      (A.root (a2ThirdIndex r.1.1 r.1.2) r.1.2
+        (a2ThirdIndex_ne_right r.1.1 r.1.2 r.2))) :
+    ‖p + q + s + t‖ ^ 2 ≤
+      2 * (‖p‖ ^ 2 + ‖q‖ ^ 2 + ‖s‖ ^ 2 + ‖t‖ ^ 2) := by
+  let X := A.root r.1.1 (a2ThirdIndex r.1.1 r.1.2)
+    (a2ThirdIndex_ne_left r.1.1 r.1.2 r.2).symm
+  let Y := A.root (a2ThirdIndex r.1.1 r.1.2) r.1.2
+    (a2ThirdIndex_ne_right r.1.1 r.1.2 r.2)
+  let Z := A.rootAt r
+  have hXnorm : X ≤ Subgroup.normalizer (Z : Set G) :=
+    (A.leftRoot_le_vertexGroup r).trans (A.vertexGroup_le_normalizer_rootAt r)
+  have hYnorm : Y ≤ Subgroup.normalizer (Z : Set G) :=
+    (A.rightRoot_le_vertexGroup r).trans (A.vertexGroup_le_normalizer_rootAt r)
+  have hedge := A.edgeFixedSubspaces_isOrtho rho r hno
+  exact NormalEdgeCodistance.four_fixed_norm_sq_le rho X Y Z
+    hXnorm hYnorm hedge hp hq hs ht
 
 /-- The six-vertex fixed-space contraction implies that the union of the root
 subgroups is a Kazhdan subset.  This is the norm-comparison step after the

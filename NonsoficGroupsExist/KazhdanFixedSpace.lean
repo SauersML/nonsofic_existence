@@ -72,6 +72,41 @@ theorem antitone (ρ : G →* (E ≃ₗᵢ[ℝ] E)) {H K : Subgroup G}
   intro h hh
   exact hx h (hHK hh)
 
+/-- An element normalizing `H` preserves its fixed subspace. -/
+theorem map_mem_fixedSubspace_of_mem_normalizer
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G}
+    (hg : g ∈ Subgroup.normalizer (H : Set G)) {x : E}
+    (hx : x ∈ fixedSubspace ρ H) : ρ g x ∈ fixedSubspace ρ H := by
+  rw [mem_fixedSubspace_iff] at hx ⊢
+  intro h hh
+  have hconj : g⁻¹ * h * g ∈ H :=
+    (Subgroup.mem_normalizer_iff''.mp hg h).mp hh
+  calc
+    ρ h (ρ g x) = ρ (h * g) x := by simp [map_mul]
+    _ = ρ (g * (g⁻¹ * h * g)) x := by congr 2; group
+    _ = ρ g (ρ (g⁻¹ * h * g) x) := by simp [map_mul]
+    _ = ρ g x := by rw [hx _ hconj]
+
+/-- A normalizing element also preserves the orthogonal complement of the
+fixed subspace. -/
+theorem map_mem_fixedSubspace_orthogonal_of_mem_normalizer
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G}
+    (hg : g ∈ Subgroup.normalizer (H : Set G)) {x : E}
+    (hx : x ∈ (fixedSubspace ρ H)ᗮ) :
+    ρ g x ∈ (fixedSubspace ρ H)ᗮ := by
+  rw [Submodule.mem_orthogonal]
+  intro y hy
+  have hginv : g⁻¹ ∈ Subgroup.normalizer (H : Set G) :=
+    (Subgroup.normalizer (H : Set G)).inv_mem hg
+  have hy' : ρ g⁻¹ y ∈ fixedSubspace ρ H :=
+    map_mem_fixedSubspace_of_mem_normalizer ρ H hginv hy
+  have hcancel : ρ g⁻¹ (ρ g x) = x := by simp
+  calc
+    inner ℝ y (ρ g x) = inner ℝ (ρ g⁻¹ y) (ρ g⁻¹ (ρ g x)) := by
+      rw [(ρ g⁻¹).inner_map_map]
+    _ = inner ℝ (ρ g⁻¹ y) x := by rw [hcancel]
+    _ = 0 := Submodule.inner_right_of_mem_orthogonal hy' hx
+
 /-- The fixed subspace of a normal subgroup is invariant under the ambient
 group action. -/
 theorem map_mem_fixedSubspace_of_normal (ρ : G →* (E ≃ₗᵢ[ℝ] E))
@@ -117,6 +152,24 @@ theorem fixed_of_mem_closure (ρ : G →* (E ≃ₗᵢ[ℝ] E))
       have h := congrArg (fun z ↦ (ρ a)⁻¹ z) ha
       simpa [map_inv] using h.symm
 
+/-- Fixed vectors of a join are exactly the vectors fixed by both subgroups. -/
+theorem fixedSubspace_sup (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H K : Subgroup G) :
+    fixedSubspace ρ (H ⊔ K) = fixedSubspace ρ H ⊓ fixedSubspace ρ K := by
+  apply le_antisymm
+  · exact le_inf (antitone ρ le_sup_left) (antitone ρ le_sup_right)
+  · intro x hx
+    change x ∈ fixedSubspace ρ H ∧ x ∈ fixedSubspace ρ K at hx
+    rw [mem_fixedSubspace_iff, mem_fixedSubspace_iff] at hx
+    rw [mem_fixedSubspace_iff]
+    intro g hg
+    have hseed : ∀ s ∈ (H : Set G) ∪ (K : Set G), ρ s x = x := by
+      intro s hs
+      rcases hs with hs | hs
+      · exact hx.1 s hs
+      · exact hx.2 s hs
+    apply fixed_of_mem_closure ρ ((H : Set G) ∪ (K : Set G)) x hseed g
+    rwa [Subgroup.closure_union, Subgroup.closure_eq, Subgroup.closure_eq]
+
 /-- If a family of subgroups generates `G`, a vector fixed by each member is
 globally invariant. -/
 theorem invariant_of_fixed_generators (ρ : G →* (E ≃ₗᵢ[ℝ] E))
@@ -156,6 +209,25 @@ theorem fixedProjection_equivariant_of_normal [CompleteSpace E]
   · have hxorth : x - U.starProjection x ∈ Uᗮ :=
       U.sub_starProjection_mem_orthogonal x
     have hmap := map_mem_fixedSubspace_orthogonal_of_normal ρ H g hxorth
+    simpa [map_sub] using hmap
+
+/-- Orthogonal projection onto `H`-fixed vectors commutes with every element
+that normalizes `H`. -/
+theorem fixedProjection_equivariant_of_mem_normalizer [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G}
+    (hg : g ∈ Subgroup.normalizer (H : Set G)) (x : E) :
+    (fixedProjection ρ H (ρ g x) : E) =
+      ρ g (fixedProjection ρ H x : E) := by
+  let U := fixedSubspace ρ H
+  letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
+  change U.starProjection (ρ g x) = ρ g (U.starProjection x)
+  apply U.eq_starProjection_of_mem_orthogonal
+  · exact map_mem_fixedSubspace_of_mem_normalizer ρ H hg
+      (U.starProjection_apply_mem x)
+  · have hxorth : x - U.starProjection x ∈ Uᗮ :=
+      U.sub_starProjection_mem_orthogonal x
+    have hmap := map_mem_fixedSubspace_orthogonal_of_mem_normalizer
+      ρ H hg hxorth
     simpa [map_sub] using hmap
 
 /-- If a normal subgroup `H` together with `K` generates the ambient group,
