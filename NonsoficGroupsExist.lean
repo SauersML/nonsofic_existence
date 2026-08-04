@@ -22,6 +22,7 @@ import NonsoficGroupsExist.KunPartition
 import NonsoficGroupsExist.KunFinitePartition
 import NonsoficGroupsExist.KunDiagonalPartition
 import NonsoficGroupsExist.KunDecomposition
+import NonsoficGroupsExist.KunFixedDecomposition
 import NonsoficGroupsExist.KunThomDiagonal
 import NonsoficGroupsExist.KunThomCorrelation
 import NonsoficGroupsExist.KunThomFiniteMarkov
@@ -87,6 +88,8 @@ import NonsoficGroupsExist.GeneratorGraphEditing
 import NonsoficGroupsExist.CompletionGraphEditing
 import NonsoficGroupsExist.SelectedGraphComparison
 import NonsoficGroupsExist.ConservativeMatching
+import NonsoficGroupsExist.ExpanderReindex
+import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.ConcreteLeavitt
 import NonsoficGroupsExist.FiniteGraph
@@ -121,11 +124,13 @@ matrix, non-LEF-obstruction, localization, and finite-table results.  It does
 In particular, no declaration in this root module assumes a proposition named
 after Kun, Kun--Thom, or Ershov--Jaikin and then advertises the resulting
 conditional implication as an existence theorem.  The uninstantiated
-`ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData`
-structures remain specifications for intermediate conditional mathematics.
-They are not evidence that the corresponding analytic data have been
-constructed.  In contrast, `ConcreteRankFour.compressionSetup` is an actual
-inhabitant of the algebraic `CompressionSetup` interface.
+`ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData` are
+specifications for intermediate mathematics, not assumptions at the public
+boundary.  Kun's decomposition and the Kun--Thom implication are proved, and
+`exists_localCriterionData` constructs both synchronized decompositions from
+property `(T)` and a sofic approximation.  Likewise,
+`ConcreteRankFour.compressionSetup` is an actual inhabitant of the algebraic
+`CompressionSetup` interface.
 
 The concrete stream-operator algebra proves the binary Leavitt relations but
 has not been identified with the universal Leavitt algebra.  The two explicit

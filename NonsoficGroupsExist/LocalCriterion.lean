@@ -34,6 +34,12 @@ theorem ambientGenerators_symmetric :
   · obtain ⟨q, hq, rfl⟩ := hg
     exact Or.inl (Or.inr (by simpa using hq))
 
+theorem ambientGenerators_one : 1 ∈ C.ambientGenerators := by
+  classical
+  unfold ambientGenerators
+  exact Finset.mem_union_left _ (Finset.mem_union_left _
+    (Finset.mem_image.mpr ⟨1, C.generatorsΓ_one, map_one C.embedΓ⟩))
+
 theorem embedΓ_mem_closure_ambient (g : Γ) :
     C.embedΓ g ∈ Subgroup.closure (C.ambientGenerators : Set G) := by
   classical

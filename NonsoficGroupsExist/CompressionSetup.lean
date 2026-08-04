@@ -27,6 +27,7 @@ structure CompressionSetup (G Γ J : Type*) [Group G] [Group Γ] [Group J] where
   embedJ : J →* Γ
   embedJ_injective : Function.Injective embedJ
   generatorsΓ : Finset Γ
+  generatorsΓ_one : 1 ∈ generatorsΓ
   generatorsΓ_symmetric : ∀ g ∈ generatorsΓ, g⁻¹ ∈ generatorsΓ
   generatorsΓ_generate : Subgroup.closure (generatorsΓ : Set Γ) = ⊤
   generatorsJ : Finset J

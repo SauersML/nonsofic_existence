@@ -14,11 +14,12 @@ namespace ConcreteRankFour
 
 private theorem exists_core_generators :
     ∃ S : Finset Core,
-      (∀ g ∈ S, g⁻¹ ∈ S) ∧ Subgroup.closure (S : Set Core) = ⊤ := by
+      1 ∈ S ∧ (∀ g ∈ S, g⁻¹ ∈ S) ∧
+        Subgroup.closure (S : Set Core) = ⊤ := by
   classical
   obtain ⟨_, S, _, hS⟩ := Group.fg_iff'.mp (inferInstance : Group.FG Core)
   let T : Finset Core := insert 1 (S ∪ S.image fun g ↦ g⁻¹)
-  refine ⟨T, ?_, ?_⟩
+  refine ⟨T, Finset.mem_insert_self 1 _, ?_, ?_⟩
   · intro g hg
     simp only [T, Finset.mem_insert, Finset.mem_union, Finset.mem_image] at hg ⊢
     rcases hg with h | h | ⟨x, hx, rfl⟩
@@ -37,11 +38,14 @@ private noncomputable def coreGenerators : Finset Core :=
 
 private theorem coreGenerators_symmetric :
     ∀ g ∈ coreGenerators, g⁻¹ ∈ coreGenerators :=
-  (Classical.choose_spec exists_core_generators).1
+  (Classical.choose_spec exists_core_generators).2.1
+
+private theorem coreGenerators_one : 1 ∈ coreGenerators := by
+  exact (Classical.choose_spec exists_core_generators).1
 
 private theorem coreGenerators_generate :
     Subgroup.closure (coreGenerators : Set Core) = ⊤ :=
-  (Classical.choose_spec exists_core_generators).2
+  (Classical.choose_spec exists_core_generators).2.2
 
 /-- The complete concrete algebraic setup required by the compression
 criterion.  In particular, neither an embedding nor a centralizer or
@@ -54,6 +58,7 @@ noncomputable def compressionSetup : CompressionSetup Ambient Core Witness := by
       embedJ := witnessEmbedding
       embedJ_injective := witnessEmbedding_injective
       generatorsΓ := coreGenerators
+      generatorsΓ_one := coreGenerators_one
       generatorsΓ_symmetric := coreGenerators_symmetric
       generatorsΓ_generate := coreGenerators_generate
       generatorsJ := family.cornerWitnessGenerators
