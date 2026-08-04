@@ -219,5 +219,55 @@ theorem norm_orbitAverage_sq_sub_le [CompleteSpace E]
   rw [← orbitAverage_sub]
   exact norm_orbitAverage_average_sub_le hQ S hQS hone hεone ρ x
 
+/-- The Kazhdan contraction iterates: successive orbit averages converge
+geometrically, with the first displacement as scale.  This is the Hilbert
+estimate used in Kun's finite rounding argument. -/
+theorem norm_iterate_orbitAverage_succ_sub_le [CompleteSpace E]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (k : ℕ) :
+    let A := IsKazhdanPair.orbitAverage S ρ
+    ‖(A^[k + 1]) x - (A^[k]) x‖ ≤
+      (1 - ε ^ 2 / (4 * S.card)) ^ k * ‖A x - x‖ := by
+  let A := IsKazhdanPair.orbitAverage S ρ
+  let c : ℝ := 1 - ε ^ 2 / (4 * S.card)
+  have hcardNat : 0 < S.card := Finset.card_pos.mpr ⟨1, hone⟩
+  have hcard : (0 : ℝ) < S.card := by exact_mod_cast hcardNat
+  have hεsq : ε ^ 2 ≤ 1 := by
+    nlinarith [sq_nonneg ε, hQ.1, hεone]
+  have hden : (0 : ℝ) < 4 * S.card := mul_pos (by norm_num) hcard
+  have hcardOne : (1 : ℝ) ≤ S.card := by exact_mod_cast hcardNat
+  have hdenOne : (1 : ℝ) ≤ 4 * S.card := by
+    nlinarith
+  have hfrac : ε ^ 2 / (4 * S.card) ≤ 1 := by
+    rw [div_le_one hden]
+    exact hεsq.trans hdenOne
+  have hc : 0 ≤ c := by
+    dsimp [c]
+    linarith
+  induction k with
+  | zero =>
+      simp
+  | succ k ih =>
+      have hstep := norm_orbitAverage_average_sub_le hQ S hQS hone hεone ρ
+        ((A^[k]) x)
+      rw [orbitAverage_sub] at hstep
+      change ‖A (A ((A^[k]) x)) - A ((A^[k]) x)‖ ≤
+        c * ‖A ((A^[k]) x) - (A^[k]) x‖ at hstep
+      dsimp only at ih
+      rw [show k + 1 = k.succ by omega, Function.iterate_succ_apply'] at ih
+      change ‖A ((A^[k]) x) - (A^[k]) x‖ ≤
+        c ^ k * ‖A x - x‖ at ih
+      dsimp only
+      simp only [Nat.add_one, Function.iterate_succ_apply']
+      change ‖A (A ((A^[k]) x)) - A ((A^[k]) x)‖ ≤
+        c ^ (k + 1) * ‖A x - x‖
+      calc
+        ‖A (A ((A^[k]) x)) - A ((A^[k]) x)‖ ≤
+            c * ‖A ((A^[k]) x) - (A^[k]) x‖ := hstep
+        _ ≤ c * (c ^ k * ‖A x - x‖) :=
+          mul_le_mul_of_nonneg_left ih hc
+        _ = c ^ (k + 1) * ‖A x - x‖ := by rw [pow_succ]; ring
+
 end KazhdanOrthogonal
 end NonsoficGroupsExist
