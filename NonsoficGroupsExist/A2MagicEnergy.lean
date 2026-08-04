@@ -983,5 +983,52 @@ theorem vertexMovingLaplacianEnergy_le_with_defect
               ‖centralMovingIncidentComponent A rho f r 3‖ ^ 2) := by
       rw [Finset.sum_sub_distrib, Finset.mul_sum, Finset.mul_sum]
 
+/-- Combining Claim 5.7(a) with the strict local defect gives a uniform
+coefficient strictly below the borderline value `2`. -/
+theorem vertexMovingLaplacianEnergy_lt_two_mul_edgeEnergy
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r)) :
+    vertexMovingLaplacianEnergy A rho f ≤
+      (2 - (1 - (Real.sqrt 2)⁻¹) / 3) * edgeEnergy f := by
+  let c : ℝ := 1 - (Real.sqrt 2)⁻¹
+  let D := edgeEnergy f
+  let M := vertexMovingEdgeEnergy A rho f
+  let F := vertexFixedEdgeEnergy A rho f
+  let R := centralMovingEdgeEnergy A rho f
+  have hsqrt0 : 0 < Real.sqrt 2 := Real.sqrt_pos.2 (by norm_num)
+  have hsqrtSq : (Real.sqrt 2) ^ 2 = 2 := Real.sq_sqrt (by norm_num)
+  have hsqrt1 : (1 : ℝ) ≤ Real.sqrt 2 := by
+    have hsqrtNonneg := Real.sqrt_nonneg 2
+    nlinarith
+  have hinv0 : 0 ≤ (Real.sqrt 2)⁻¹ := inv_nonneg.mpr hsqrt0.le
+  have hinv1 : (Real.sqrt 2)⁻¹ ≤ 1 :=
+    (inv_le_one₀ hsqrt0).2 hsqrt1
+  have hc0 : 0 ≤ c := by dsimp [c]; linarith
+  have hc1 : c ≤ 1 := by dsimp [c]; linarith
+  have hF0 : 0 ≤ F := by
+    dsimp [F, vertexFixedEdgeEnergy]
+    positivity
+  have hclaim : D ≤ 3 * R + 5 * F := by
+    exact edgeEnergy_le_three_root_add_five_vertex A rho f hf
+  have hscaled : (c / 3) * D ≤ (c / 3) * (3 * R + 5 * F) :=
+    mul_le_mul_of_nonneg_left hclaim (div_nonneg hc0 (by norm_num))
+  have hcoef : 5 * (c / 3) ≤ 2 := by nlinarith
+  have hcoefF : 5 * (c / 3) * F ≤ 2 * F :=
+    mul_le_mul_of_nonneg_right hcoef hF0
+  have hdefect : (c / 3) * D ≤ c * R + 2 * F := by
+    calc
+      (c / 3) * D ≤ (c / 3) * (3 * R + 5 * F) := hscaled
+      _ = c * R + 5 * (c / 3) * F := by ring
+      _ ≤ c * R + 2 * F := by linarith
+  have hsplit : D = M + F := edgeEnergy_eq_moving_add_fixed A rho f
+  have hlocal : vertexMovingLaplacianEnergy A rho f ≤ 2 * M - c * R := by
+    exact vertexMovingLaplacianEnergy_le_with_defect A hexp rho f hf
+  change vertexMovingLaplacianEnergy A rho f ≤ (2 - c / 3) * D
+  nlinarith
+
 end A2MagicEnergy
 end NonsoficGroupsExist
