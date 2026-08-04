@@ -3,6 +3,7 @@ import NonsoficGroupsExist.AlmostAutomorphism
 import NonsoficGroupsExist.DirectedCoarea
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.Kazhdan
+import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.KazhdanGenerators
 import NonsoficGroupsExist.KazhdanOrthogonal
 import NonsoficGroupsExist.KazhdanFiniteModel
