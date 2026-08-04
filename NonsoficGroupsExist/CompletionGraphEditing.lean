@@ -163,5 +163,106 @@ theorem canonicalCompletion_editDistance_le :
   intro t _
   exact Localization.exists_completion_with_bound U (act t.1) |>.choose_spec
 
+/-- An internal ambient generator occurrence becomes the identical labeled
+occurrence in any completion that agrees on all internal values. -/
+noncomputable def internalEdgeToCompleted
+    (hagree : ∀ (t : T) (x : U), act t.1 (x : Y) ∈ U →
+      (completed t.1 x : Y) = act t.1 x)
+    (e : ((generatorGraph Y T act).induce U).edge) :
+    (generatorGraph
+      { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+      T completed).edge := by
+  let t : T := e.1.1.1
+  let x : U := ⟨e.1.1.2, e.2.1⟩
+  have ha := hagree t x e.2.2
+  have hmove : completed t.1 x ≠ x := by
+    intro hfix
+    exact (generatorGraph Y T act).loopless e.1
+      (by
+        change (x : Y) = act t.1 x
+        calc
+          (x : Y) = (completed t.1 x : Y) := congrArg Subtype.val hfix.symm
+          _ = act t.1 x := ha)
+  exact ⟨(t, x), Finset.mem_filter.mpr ⟨Finset.mem_univ _, hmove⟩⟩
+
+theorem internalEdgeToCompleted_injective
+    (hagree : ∀ (t : T) (x : U), act t.1 (x : Y) ∈ U →
+      (completed t.1 x : Y) = act t.1 x) :
+    Function.Injective (internalEdgeToCompleted U T act completed hagree) := by
+  intro e f hef
+  have harc :
+      (internalEdgeToCompleted U T act completed hagree e).1 =
+        (internalEdgeToCompleted U T act completed hagree f).1 :=
+    congrArg Subtype.val hef
+  change (e.1.1.1, (⟨e.1.1.2, e.2.1⟩ : U)) =
+    (f.1.1.1, (⟨f.1.1.2, f.2.1⟩ : U)) at harc
+  have ht : e.1.1.1 = f.1.1.1 :=
+    congrArg (fun p : T × U ↦ p.1) harc
+  have hxsub :
+      (⟨e.1.1.2, e.2.1⟩ : U) = ⟨f.1.1.2, f.2.1⟩ :=
+    congrArg (fun p : T × U ↦ p.2) harc
+  have hx : e.1.1.2 = f.1.1.2 := congrArg Subtype.val hxsub
+  apply Subtype.ext
+  apply Subtype.ext
+  exact Prod.ext ht hx
+
+/-- Every boundary occurrence of the induced ambient generator graph remains
+a boundary occurrence after an exact internal completion. -/
+theorem induce_boundaryCard_le_completed
+    (hagree : ∀ (t : T) (x : U), act t.1 (x : Y) ∈ U →
+      (completed t.1 x : Y) = act t.1 x)
+    (V : Finset U) :
+    ((generatorGraph Y T act).induce U).boundaryCard V ≤
+      (generatorGraph
+        { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+        T completed).boundaryCard V := by
+  classical
+  unfold FiniteMultiGraph.boundaryCard
+  apply Finset.card_le_card_of_injOn
+    (s := ((generatorGraph Y T act).induce U).boundary V)
+    (t := (generatorGraph
+      { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+      T completed).boundary V)
+    (internalEdgeToCompleted U T act completed hagree)
+  · intro e he
+    have hecut := (Finset.mem_filter.mp he).2
+    apply Finset.mem_filter.mpr
+    refine ⟨Finset.mem_univ _, ?_⟩
+    have hsecond :
+        (generatorGraph
+          { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+          T completed).second
+            (internalEdgeToCompleted U T act completed hagree e) =
+          ((generatorGraph Y T act).induce U).second e := by
+      apply Subtype.ext
+      exact hagree e.1.1.1 ⟨e.1.1.2, e.2.1⟩ e.2.2
+    have hfirst :
+        (generatorGraph
+          { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+          T completed).first
+            (internalEdgeToCompleted U T act completed hagree e) =
+          ((generatorGraph Y T act).induce U).first e := rfl
+    change
+      ((generatorGraph
+        { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+        T completed).first
+          (internalEdgeToCompleted U T act completed hagree e) ∈ V ∧
+        (generatorGraph
+          { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+          T completed).second
+            (internalEdgeToCompleted U T act completed hagree e) ∉ V) ∨
+      ((generatorGraph
+        { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+        T completed).second
+          (internalEdgeToCompleted U T act completed hagree e) ∈ V ∧
+        (generatorGraph
+          { carrier := U, fintype := inferInstance, decidableEq := inferInstance }
+          T completed).first
+            (internalEdgeToCompleted U T act completed hagree e) ∉ V)
+    rw [hfirst, hsecond]
+    exact hecut
+  · intro e _ f _ hef
+    exact internalEdgeToCompleted_injective U T act completed hagree hef
+
 end CompletionGraphEditing
 end NonsoficGroupsExist

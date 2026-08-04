@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.FiniteGraph
+import NonsoficGroupsExist.EdgeWitnessDistance
 import Mathlib.Tactic.Linarith
 
 /-!
@@ -241,36 +241,54 @@ theorem boundaryCard_union_complement_le
         exact Finset.card_map _]
       rfl
 
+/-- Editing an expanding graph gives an additive Cheeger inequality for the
+source graph.  The factor two is the fixed conversion between the repository's
+unordered-pair edit distance and occurrence boundaries. -/
+theorem additiveCheeger_of_editDistance
+    (X Z : FiniteMultiGraph) (e : X.vertex ≃ Z.vertex) {γ : ℝ}
+    (hZ : Z.HasCheegerLowerBound γ) (U : Finset X.vertex)
+    (hU : U.Nonempty) (hhalf : 2 * U.card ≤ Fintype.card X.vertex) :
+    γ / 2 * (U.card : ℝ) ≤ (X.boundaryCard U : ℝ) +
+      (X.editDistance Z e : ℝ) / 2 := by
+  let Z' := Z.transport X.vertex e.symm
+  have hZ' : Z'.HasCheegerLowerBound γ :=
+    FiniteMultiGraph.transport_hasCheegerLowerBound Z X.vertex e.symm hZ
+  have htarget := hZ'.2 U hU hhalf
+  have heditNat :=
+    X.boundaryCard_transport_le_two_mul_add_editDistance Z e U
+  have hedit : (Z'.boundaryCard U : ℝ) ≤
+      2 * X.boundaryCard U + X.editDistance Z e := by
+    exact_mod_cast heditNat
+  linarith
+
 /-- The additive inequality bounds the maximum sparse cut quantitatively. -/
-theorem sparseCut_card_bound (X : FiniteMultiGraph) {γ c a : ℝ}
-    (ha : 0 ≤ a)
+theorem sparseCut_card_bound (X : FiniteMultiGraph) {γ c E : ℝ}
+    (hE : 0 ≤ E)
     (hadd : ∀ U : Finset X.vertex, U.Nonempty →
       2 * U.card ≤ Fintype.card X.vertex →
-      γ * (U.card : ℝ) ≤ (X.boundaryCard U : ℝ) +
-        a * Fintype.card X.vertex) :
+      γ * (U.card : ℝ) ≤ (X.boundaryCard U : ℝ) + E) :
     (γ - c) * ((sparseCut X c).card : ℝ) ≤
-      a * Fintype.card X.vertex := by
+      E := by
   by_cases hB : (sparseCut X c).Nonempty
   · have hsparse := sparseCut_sparse X c hB
     have haddB := hadd (sparseCut X c) hB hsparse.2.1
     linarith [hsparse.2.2]
   · rw [Finset.not_nonempty_iff_eq_empty.mp hB]
     simp
-    positivity
+    exact hE
 
 /-- Maximal-cut repair.  The last inequality is precisely the finite
-near-half estimate; it is automatic eventually when `a` and the removed
+near-half estimate; it is automatic eventually when the additive error and removed
 proportion tend to zero while `γ - c` stays positive. -/
 theorem induce_retained_hasCheegerLowerBound
-    (X : FiniteMultiGraph) {γ c a d : ℝ}
+    (X : FiniteMultiGraph) {γ c E d : ℝ}
     (hc : 0 < c) (hgap : c < γ)
     (hadd : ∀ U : Finset X.vertex, U.Nonempty →
       2 * U.card ≤ Fintype.card X.vertex →
-      γ * (U.card : ℝ) ≤ (X.boundaryCard U : ℝ) +
-        a * Fintype.card X.vertex)
+      γ * (U.card : ℝ) ≤ (X.boundaryCard U : ℝ) + E)
     (hdegree : (X.boundaryCard (sparseCut X c) : ℝ) ≤
       d * (sparseCut X c).card)
-    (hnear : 2 * (a * Fintype.card X.vertex +
+    (hnear : 2 * (E +
         d * (sparseCut X c).card) ≤
       (γ - c) * ((Fintype.card X.vertex : ℝ) -
         2 * (sparseCut X c).card)) :
@@ -361,7 +379,7 @@ theorem induce_retained_hasCheegerLowerBound
       have hlargeCast : (Fintype.card X.vertex : ℝ) <
           2 * ((U₀.card : ℝ) + B.card) := by exact_mod_cast hunionLarge
       linarith
-    have herror : a * Fintype.card X.vertex + d * B.card <
+    have herror : E + d * B.card <
         (γ - c) * U₀.card := by
       have hscaled := mul_lt_mul_of_pos_left hlargeReal hgapPos
       nlinarith [hnear]

@@ -36,15 +36,26 @@ variable {H : Type} [Group H] (D : LocalizedApproximationData H)
 
 /-- A chosen completion of the restriction of the ambient permutation. -/
 noncomputable def completedMap (n : ℕ) (g : H) : Equiv.Perm (D.subset n) :=
-  Classical.choose (Localization.exists_completion_with_bound (D.subset n) (D.act n g))
+  Classical.choose (Localization.exists_completion (D.subset n) (D.act n g))
+
+/-- The chosen completion retains every value whose ambient image remains in
+the selected subset. -/
+theorem completedMap_agrees (n : ℕ) (g : H) (x : D.subset n)
+    (hx : D.act n g (x : D.ambient n) ∈ D.subset n) :
+    (D.completedMap n g x : D.ambient n) = D.act n g x :=
+  Classical.choose_spec
+    (Localization.exists_completion (D.subset n) (D.act n g)) x hx
 
 theorem completedMap_disagreement_bound (n : ℕ) (g : H) :
     (Finset.univ.filter fun x : D.subset n ↦
       (D.completedMap n g x : D.ambient n) ≠ D.act n g x).card ≤
     (Finset.univ.filter fun x : D.subset n ↦
       D.act n g (x : D.ambient n) ∉ D.subset n).card :=
-  Classical.choose_spec
-    (Localization.exists_completion_with_bound (D.subset n) (D.act n g))
+  Finset.card_le_card (by
+    intro x hx
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx ⊢
+    intro hin
+    exact hx (D.completedMap_agrees n g x hin))
 
 theorem completedMap_disagreement_vanishing (g : H) : Vanishing fun n ↦
     ((Finset.univ.filter fun x : D.subset n ↦
