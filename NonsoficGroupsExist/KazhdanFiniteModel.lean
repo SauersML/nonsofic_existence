@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.KazhdanOrthogonal
+import NonsoficGroupsExist.Sofic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
@@ -491,6 +492,74 @@ theorem orbitAction_hasExpansion
     (orbitAction_transitive σ x)
 
 end
+
+section SoficNormalization
+
+variable {M : FiniteModel}
+
+/-- The local disagreement cardinality is exactly the numerator in normalized
+Hamming distance. -/
+theorem hammingDistance_eq_permutationDisagreement_ratio
+    (p q : Equiv.Perm M) :
+    hammingDistance M p q =
+      ((permutationDisagreement p q).card : ℝ) / Fintype.card M := rfl
+
+/-- Normalized Hilbert error is bounded by twice normalized Hamming error. -/
+theorem normalized_norm_permutationOperators_indicator_sub_sq_le
+    [Nonempty M] (p q : Equiv.Perm M) (U : Finset M) :
+    ‖permutationOperator p (indicator U) -
+        permutationOperator q (indicator U)‖ ^ 2 / Fintype.card M ≤
+      2 * hammingDistance M p q := by
+  have h := norm_permutationOperators_indicator_sub_sq_le p q U
+  have hcardNat : 0 < Fintype.card M := Fintype.card_pos
+  have hcard : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
+  rw [hammingDistance_eq_permutationDisagreement_ratio]
+  calc
+    ‖permutationOperator p (indicator U) -
+        permutationOperator q (indicator U)‖ ^ 2 / Fintype.card M ≤
+        (2 * (permutationDisagreement p q).card : ℝ) / Fintype.card M :=
+      div_le_div_of_nonneg_right h hcard.le
+    _ = 2 * (((permutationDisagreement p q).card : ℝ) /
+        Fintype.card M) := by ring
+
+/-- The same normalized Hamming control for centered characteristic
+vectors. -/
+theorem normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
+    [Nonempty M] (p q : Equiv.Perm M) (U : Finset M) :
+    ‖permutationOperator p (centeredIndicator U) -
+        permutationOperator q (centeredIndicator U)‖ ^ 2 /
+        Fintype.card M ≤
+      2 * hammingDistance M p q := by
+  rw [permutationOperators_centeredIndicator_sub]
+  exact normalized_norm_permutationOperators_indicator_sub_sq_le p q U
+
+/-- Approximate multiplicativity in a sofic approximation gives uniformly
+vanishing normalized Hilbert error on every centered characteristic vector.
+The subset may vary arbitrarily with the approximation index. -/
+theorem sofic_multiplication_hilbert_error_eventually
+    (A : SoficApproximation G) (g h : G) (δ : ℝ) (hδ : 0 < δ) :
+    ∃ N : ℕ, ∀ n ≥ N, ∀ U : Finset (A.model n),
+      ‖permutationOperator (A.map n (g * h)) (centeredIndicator U) -
+          permutationOperator (A.map n g * A.map n h)
+            (centeredIndicator U)‖ ^ 2 /
+          Fintype.card (A.model n) < δ := by
+  obtain ⟨Nerr, hNerr⟩ :=
+    A.asymptoticallyMultiplicative g h (δ / 2) (half_pos hδ)
+  obtain ⟨Ncard, hNcard⟩ := A.card_tendsToInfinity 1
+  refine ⟨max Nerr Ncard, fun n hn U ↦ ?_⟩
+  have hnerr : Nerr ≤ n := (le_max_left _ _).trans hn
+  have hncard : Ncard ≤ n := (le_max_right _ _).trans hn
+  have hcard : 0 < Fintype.card (A.model n) := by
+    have := hNcard n hncard
+    omega
+  letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  have hbound :=
+    normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
+      (A.map n (g * h)) (A.map n g * A.map n h) U
+  have herr := hNerr n hnerr
+  exact hbound.trans_lt (by linarith)
+
+end SoficNormalization
 
 end KazhdanFiniteModel
 end NonsoficGroupsExist
