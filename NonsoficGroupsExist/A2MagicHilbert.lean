@@ -772,5 +772,32 @@ theorem exists_constantProjectionBound
   apply (le_div_iff₀ (by positivity : 0 < 1 + a ^ 2)).2
   nlinarith
 
+/-- The strict projection contraction gives a strict codistance bound for
+the six vertex fixed spaces. -/
+theorem exists_vertexCodistanceBound
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1) :
+    ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧
+      A2System.VertexCodistanceBound.{u, v} A gamma := by
+  obtain ⟨gamma, hgamma0, hgamma1, hprojection⟩ :=
+    exists_constantProjectionBound A hexp
+  exact ⟨gamma, hgamma0, hgamma1,
+    A.vertexCodistanceBound_of_projectionBound hgamma0
+      (vertexProjectionBound_of_constantProjectionBound A hprojection)⟩
+
+/-- The union of the six A₂ root subgroups is a genuine Kazhdan subset in
+characteristic two. -/
+theorem exists_rootSet_isKazhdan
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1) :
+    ∃ kappa : ℝ, IsKazhdanSubset.{u, v} G A.rootSet kappa := by
+  obtain ⟨gamma, hgamma0, hgamma1, hcodistance⟩ :=
+    exists_vertexCodistanceBound A hexp
+  exact ⟨(1 - gamma) / 32,
+    A.rootSet_isKazhdan_of_vertexCodistanceBound
+      hgamma0 hgamma1 hcodistance⟩
+
 end A2MagicHilbert
 end NonsoficGroupsExist
