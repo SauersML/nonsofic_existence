@@ -472,6 +472,155 @@ theorem triangle_total_energy_le_three_root_add_five_vertex
     ‖KazhdanFixedSpace.subgroupMovingProjection rho L b‖ ^ 2 at h10
   nlinarith
 
+/-- The six ordered triples of distinct coordinates. -/
+def tripleI : Fin 6 → Fin 3 := ![0, 0, 1, 1, 2, 2]
+def tripleJ : Fin 6 → Fin 3 := ![1, 2, 0, 2, 0, 1]
+def tripleK : Fin 6 → Fin 3 := ![2, 1, 2, 0, 1, 0]
+
+theorem tripleI_ne_tripleJ (t : Fin 6) : tripleI t ≠ tripleJ t := by
+  fin_cases t <;> decide
+
+theorem tripleI_ne_tripleK (t : Fin 6) : tripleI t ≠ tripleK t := by
+  fin_cases t <;> decide
+
+theorem tripleJ_ne_tripleK (t : Fin 6) : tripleJ t ≠ tripleK t := by
+  fin_cases t <;> decide
+
+def tripleIJ (t : Fin 6) : A2Root :=
+  ⟨(tripleI t, tripleJ t), tripleI_ne_tripleJ t⟩
+
+def tripleIK (t : Fin 6) : A2Root :=
+  ⟨(tripleI t, tripleK t), tripleI_ne_tripleK t⟩
+
+def tripleJK (t : Fin 6) : A2Root :=
+  ⟨(tripleJ t, tripleK t), tripleJ_ne_tripleK t⟩
+
+def tripleIKIndex : Fin 6 → Fin 6 := ![1, 0, 3, 2, 5, 4]
+def tripleJKIndex : Fin 6 → Fin 6 := ![3, 5, 1, 4, 0, 2]
+
+noncomputable def tripleIKEquiv : Fin 6 ≃ Fin 6 :=
+  Equiv.ofBijective tripleIKIndex ⟨by
+    intro s t h
+    fin_cases s <;> fin_cases t <;> simp_all [tripleIKIndex], by
+    intro t
+    fin_cases t
+    · exact ⟨1, rfl⟩
+    · exact ⟨0, rfl⟩
+    · exact ⟨3, rfl⟩
+    · exact ⟨2, rfl⟩
+    · exact ⟨5, rfl⟩
+    · exact ⟨4, rfl⟩⟩
+
+noncomputable def tripleJKEquiv : Fin 6 ≃ Fin 6 :=
+  Equiv.ofBijective tripleJKIndex ⟨by
+    intro s t h
+    fin_cases s <;> fin_cases t <;> simp_all [tripleJKIndex], by
+    intro t
+    fin_cases t
+    · exact ⟨4, rfl⟩
+    · exact ⟨2, rfl⟩
+    · exact ⟨5, rfl⟩
+    · exact ⟨0, rfl⟩
+    · exact ⟨3, rfl⟩
+    · exact ⟨1, rfl⟩⟩
+
+@[simp] theorem tripleIKEquiv_apply (t : Fin 6) :
+    tripleIKEquiv t = tripleIKIndex t := rfl
+
+@[simp] theorem tripleJKEquiv_apply (t : Fin 6) :
+    tripleJKEquiv t = tripleJKIndex t := rfl
+
+@[simp] theorem tripleIJ_eq_vertex (t : Fin 6) : tripleIJ t = vertex t := by
+  fin_cases t <;> apply Subtype.ext <;> rfl
+
+@[simp] theorem tripleIK_eq_vertex (t : Fin 6) :
+    tripleIK t = vertex (tripleIKIndex t) := by
+  fin_cases t <;> apply Subtype.ext <;> rfl
+
+@[simp] theorem tripleJK_eq_vertex (t : Fin 6) :
+    tripleJK t = vertex (tripleJKIndex t) := by
+  fin_cases t <;> apply Subtype.ext <;> rfl
+
+@[simp] theorem neighborIndex_tripleIK_zero (t : Fin 6) :
+    neighborIndex (tripleIKIndex t) 0 = t := by
+  fin_cases t <;> rfl
+
+@[simp] theorem neighborIndex_tripleIK_one (t : Fin 6) :
+    neighborIndex (tripleIKIndex t) 1 = tripleJKIndex t := by
+  fin_cases t <;> rfl
+
+@[simp] theorem neighborIndex_two (t : Fin 6) :
+    neighborIndex t 2 = tripleJKIndex t := by
+  fin_cases t <;> rfl
+
+@[simp] theorem neighborIndex_tripleJK_three (t : Fin 6) :
+    neighborIndex (tripleJKIndex t) 3 = t := by
+  fin_cases t <;> rfl
+
+@[simp] theorem neighbor_vertex_tripleIK_zero (t : Fin 6) :
+    neighbor (vertex (tripleIKIndex t)) 0 = vertex t := by
+  rw [← vertex_neighborIndex, neighborIndex_tripleIK_zero]
+
+@[simp] theorem neighbor_vertex_tripleIK_one (t : Fin 6) :
+    neighbor (vertex (tripleIKIndex t)) 1 = vertex (tripleJKIndex t) := by
+  rw [← vertex_neighborIndex, neighborIndex_tripleIK_one]
+
+@[simp] theorem neighbor_vertex_two (t : Fin 6) :
+    neighbor (vertex t) 2 = vertex (tripleJKIndex t) := by
+  rw [← vertex_neighborIndex, neighborIndex_two]
+
+@[simp] theorem neighbor_vertex_tripleJK_three (t : Fin 6) :
+    neighbor (vertex (tripleJKIndex t)) 3 = vertex t := by
+  rw [← vertex_neighborIndex, neighborIndex_tripleJK_three]
+
+/-- The three-edge energy attached to one ordered coordinate triple. -/
+def triangleEnergy (f : A2Root → E) (t : Fin 6) : ℝ :=
+  ‖f (tripleIJ t) - f (tripleIK t)‖ ^ 2 +
+    ‖f (tripleIK t) - f (tripleJK t)‖ ^ 2 +
+      2 * ‖f (tripleIJ t) - f (tripleJK t)‖ ^ 2
+
+/-- The two source-vertex fixed components in one triangle. -/
+noncomputable def triangleVertexFixedEnergy
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E) (t : Fin 6) : ℝ :=
+  let rik := tripleIK t
+  ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+      (f (tripleIJ t) - f rik) : E)‖ ^ 2 +
+    ‖(KazhdanFixedSpace.fixedProjection rho (A.vertexGroup rik)
+      (f rik - f (tripleJK t)) : E)‖ ^ 2
+
+/-- The two strict root-moving components in one triangle. -/
+noncomputable def triangleRootMovingEnergy
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E) (t : Fin 6) : ℝ :=
+  let rij := tripleIJ t
+  let rjk := tripleJK t
+  let c := f rij - f rjk
+  ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rij) c‖ ^ 2 +
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.rootAt rjk) (-c)‖ ^ 2
+
+/-- Claim 5.7(a) on each of the six explicit ordered triples. -/
+theorem triangleEnergy_le
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
+    (t : Fin 6) :
+    triangleEnergy f t ≤
+      3 * triangleRootMovingEnergy A rho f t +
+        5 * triangleVertexFixedEnergy A rho f t := by
+  have h := triangle_total_energy_le_three_root_add_five_vertex A rho f hf
+    (tripleI t) (tripleJ t) (tripleK t)
+    (tripleI_ne_tripleJ t) (tripleI_ne_tripleK t)
+    (tripleJ_ne_tripleK t)
+  calc
+    triangleEnergy f t ≤
+        5 * triangleVertexFixedEnergy A rho f t +
+          3 * triangleRootMovingEnergy A rho f t := by
+      unfold triangleEnergy triangleRootMovingEnergy triangleVertexFixedEnergy
+      exact h
+    _ = 3 * triangleRootMovingEnergy A rho f t +
+        5 * triangleVertexFixedEnergy A rho f t := add_comm _ _
+
 /-- Difference along an oriented edge of the magic graph. -/
 def edgeDifference (f : A2Root → E) (r : A2Root) (n : Fin 4) : E :=
   f r - f (neighbor r n)
@@ -547,6 +696,81 @@ theorem rootCentered_norm_sq_le_rootLaplacian_norm_sq
 def edgeEnergy (f : A2Root → E) : ℝ :=
   ∑ r : A2Root, ∑ n : Fin 4, ‖edgeDifference f r n‖ ^ 2
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] in
+/-- The six triangle energies enumerate the full directed edge energy. -/
+theorem sum_triangleEnergy (f : A2Root → E) :
+    ∑ t : Fin 6, triangleEnergy f t = edgeEnergy f := by
+  let e : Fin 6 → Fin 4 → ℝ := fun i n ↦
+    ‖f (vertex i) - f (vertex (neighborIndex i n))‖ ^ 2
+  have h0 : (∑ t : Fin 6,
+      ‖f (tripleIJ t) - f (tripleIK t)‖ ^ 2) = ∑ i, e i 0 := by
+    calc
+      _ = ∑ t : Fin 6, e (tripleIKEquiv t) 0 := by
+        apply Finset.sum_congr rfl
+        intro t ht
+        simp only [tripleIJ_eq_vertex, tripleIK_eq_vertex,
+          tripleIKEquiv_apply]
+        unfold e
+        rw [neighborIndex_tripleIK_zero, norm_sub_rev]
+      _ = ∑ i, e i 0 := Equiv.sum_comp tripleIKEquiv (fun i ↦ e i 0)
+  have h1 : (∑ t : Fin 6,
+      ‖f (tripleIK t) - f (tripleJK t)‖ ^ 2) = ∑ i, e i 1 := by
+    calc
+      _ = ∑ t : Fin 6, e (tripleIKEquiv t) 1 := by
+        apply Finset.sum_congr rfl
+        intro t ht
+        simp only [tripleIK_eq_vertex, tripleJK_eq_vertex,
+          tripleIKEquiv_apply]
+        unfold e
+        rw [neighborIndex_tripleIK_one]
+      _ = ∑ i, e i 1 := Equiv.sum_comp tripleIKEquiv (fun i ↦ e i 1)
+  have h2 : (∑ t : Fin 6,
+      ‖f (tripleIJ t) - f (tripleJK t)‖ ^ 2) = ∑ i, e i 2 := by
+    apply Finset.sum_congr rfl
+    intro t ht
+    simp only [tripleIJ_eq_vertex, tripleJK_eq_vertex]
+    unfold e
+    rw [neighborIndex_two]
+  have h3 : (∑ i : Fin 6, e i 3) = ∑ i, e i 2 := by
+    calc
+      _ = ∑ t : Fin 6, e (tripleJKEquiv t) 3 :=
+        (Equiv.sum_comp tripleJKEquiv (fun i ↦ e i 3)).symm
+      _ = ∑ i, e i 2 := by
+        apply Finset.sum_congr rfl
+        intro t ht
+        simp only [tripleJKEquiv_apply]
+        unfold e
+        rw [neighborIndex_tripleJK_three, neighborIndex_two, norm_sub_rev]
+  have hedge : edgeEnergy f =
+      (∑ i, e i 0) + (∑ i, e i 1) + (∑ i, e i 2) + ∑ i, e i 3 := by
+    calc
+      edgeEnergy f = ∑ i : Fin 6, ∑ n : Fin 4, e i n := by
+        unfold edgeEnergy
+        rw [← Equiv.sum_comp vertexEquiv]
+        apply Finset.sum_congr rfl
+        intro i hi
+        apply Finset.sum_congr rfl
+        intro n hn
+        simp [e, edgeDifference]
+      _ = ∑ i : Fin 6, (e i 0 + e i 1 + e i 2 + e i 3) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        simp [Fin.sum_univ_succ]
+        ring
+      _ = (∑ i, e i 0) + (∑ i, e i 1) +
+          (∑ i, e i 2) + ∑ i, e i 3 := by
+        rw [Finset.sum_add_distrib, Finset.sum_add_distrib,
+          Finset.sum_add_distrib]
+  calc
+    ∑ t : Fin 6, triangleEnergy f t =
+        (∑ i, e i 0) + (∑ i, e i 1) + 2 * ∑ i, e i 2 := by
+      unfold triangleEnergy
+      rw [Finset.sum_add_distrib, Finset.sum_add_distrib, h0, h1]
+      rw [← Finset.mul_sum, h2]
+    _ = (∑ i, e i 0) + (∑ i, e i 1) +
+        (∑ i, e i 2) + ∑ i, e i 3 := by rw [h3]; ring
+    _ = edgeEnergy f := hedge.symm
+
 /-- Energy of the source-vertex moving components. -/
 noncomputable def vertexMovingEdgeEnergy
     (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
@@ -561,6 +785,67 @@ noncomputable def vertexFixedEdgeEnergy
   ∑ r : A2Root, ∑ n : Fin 4,
     ‖vertexFixedEdgeComponent A rho f r n‖ ^ 2
 
+/-- The fixed terms selected by the six triangle inequalities are bounded by
+the full source-vertex fixed edge energy; the omitted two incidences at each
+vertex have nonnegative energy. -/
+theorem sum_triangleVertexFixedEnergy_le
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E) :
+    ∑ t : Fin 6, triangleVertexFixedEnergy A rho f t ≤
+      vertexFixedEdgeEnergy A rho f := by
+  let e : Fin 6 → Fin 4 → ℝ := fun i n ↦
+    ‖vertexFixedEdgeComponent A rho f (vertex i) n‖ ^ 2
+  have ht (t : Fin 6) : triangleVertexFixedEnergy A rho f t =
+      e (tripleIKEquiv t) 0 + e (tripleIKEquiv t) 1 := by
+    unfold triangleVertexFixedEnergy e vertexFixedEdgeComponent edgeDifference
+    simp only [tripleIJ_eq_vertex, tripleIK_eq_vertex, tripleJK_eq_vertex,
+      tripleIKEquiv_apply]
+    have hneg : f (vertex t) - f (vertex (tripleIKIndex t)) =
+        -(f (vertex (tripleIKIndex t)) - f (vertex t)) := by module
+    rw [hneg, map_neg]
+    simp only [Submodule.coe_neg, norm_neg]
+    rw [neighbor_vertex_tripleIK_zero, neighbor_vertex_tripleIK_one]
+    rw [tripleIK_eq_vertex]
+    congr 1
+  have hselected : (∑ t : Fin 6,
+      triangleVertexFixedEnergy A rho f t) =
+      (∑ i : Fin 6, e i 0) + ∑ i : Fin 6, e i 1 := by
+    calc
+      _ = ∑ t : Fin 6,
+          (e (tripleIKEquiv t) 0 + e (tripleIKEquiv t) 1) := by
+        apply Finset.sum_congr rfl
+        intro t hmem
+        exact ht t
+      _ = (∑ t : Fin 6, e (tripleIKEquiv t) 0) +
+          ∑ t : Fin 6, e (tripleIKEquiv t) 1 := Finset.sum_add_distrib
+      _ = (∑ i : Fin 6, e i 0) + ∑ i : Fin 6, e i 1 := by
+        rw [Equiv.sum_comp tripleIKEquiv (fun i ↦ e i 0),
+          Equiv.sum_comp tripleIKEquiv (fun i ↦ e i 1)]
+  have hfull : vertexFixedEdgeEnergy A rho f =
+      (∑ i : Fin 6, e i 0) + (∑ i, e i 1) +
+        (∑ i, e i 2) + ∑ i, e i 3 := by
+    calc
+      vertexFixedEdgeEnergy A rho f =
+          ∑ i : Fin 6, ∑ n : Fin 4, e i n := by
+        unfold vertexFixedEdgeEnergy
+        rw [← Equiv.sum_comp vertexEquiv]
+        rfl
+      _ = ∑ i : Fin 6, (e i 0 + e i 1 + e i 2 + e i 3) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        simp [Fin.sum_univ_succ]
+        ring
+      _ = (∑ i : Fin 6, e i 0) + (∑ i, e i 1) +
+          (∑ i, e i 2) + ∑ i, e i 3 := by
+        rw [Finset.sum_add_distrib, Finset.sum_add_distrib,
+          Finset.sum_add_distrib]
+  rw [hselected, hfull]
+  have hn2 : 0 ≤ ∑ i : Fin 6, e i 2 :=
+    Finset.sum_nonneg fun i hi ↦ sq_nonneg _
+  have hn3 : 0 ≤ ∑ i : Fin 6, e i 3 :=
+    Finset.sum_nonneg fun i hi ↦ sq_nonneg _
+  linarith
+
 /-- The strict root-moving energy.  At each vertex these are precisely the
 two incident root edges not containing the central root subgroup. -/
 noncomputable def centralMovingEdgeEnergy
@@ -569,6 +854,72 @@ noncomputable def centralMovingEdgeEnergy
   ∑ r : A2Root,
     (‖centralMovingIncidentComponent A rho f r 2‖ ^ 2 +
       ‖centralMovingIncidentComponent A rho f r 3‖ ^ 2)
+
+/-- The strict terms in the six triangle inequalities enumerate exactly the
+two central-root-moving incidences at every vertex. -/
+theorem sum_triangleRootMovingEnergy
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E) :
+    ∑ t : Fin 6, triangleRootMovingEnergy A rho f t =
+      centralMovingEdgeEnergy A rho f := by
+  let c : Fin 6 → Fin 4 → ℝ := fun i n ↦
+    ‖centralMovingIncidentComponent A rho f (vertex i) n‖ ^ 2
+  have ht (t : Fin 6) : triangleRootMovingEnergy A rho f t =
+      c t 2 + c (tripleJKEquiv t) 3 := by
+    unfold triangleRootMovingEnergy c
+    simp only [tripleIJ_eq_vertex, tripleJK_eq_vertex,
+      tripleJKEquiv_apply]
+    rw [centralMovingIncidentComponent_eq,
+      centralMovingIncidentComponent_eq]
+    rw [neighbor_vertex_two, neighbor_vertex_tripleJK_three]
+    simp only [neg_sub]
+  calc
+    ∑ t : Fin 6, triangleRootMovingEnergy A rho f t =
+        ∑ t : Fin 6, (c t 2 + c (tripleJKEquiv t) 3) := by
+      apply Finset.sum_congr rfl
+      intro t hmem
+      exact ht t
+    _ = (∑ t : Fin 6, c t 2) + ∑ t : Fin 6, c (tripleJKEquiv t) 3 :=
+      Finset.sum_add_distrib
+    _ = (∑ t : Fin 6, c t 2) + ∑ t : Fin 6, c t 3 := by
+      rw [Equiv.sum_comp tripleJKEquiv (fun t ↦ c t 3)]
+    _ = centralMovingEdgeEnergy A rho f := by
+      unfold centralMovingEdgeEnergy
+      rw [← Equiv.sum_comp vertexEquiv]
+      rw [Finset.sum_add_distrib]
+      rfl
+
+/-- EJZ Claim 5.7(a) on the full magic graph, in the directed-edge
+normalization used by the local estimates. -/
+theorem edgeEnergy_le_three_root_add_five_vertex
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (f : A2Root → E)
+    (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r)) :
+    edgeEnergy f ≤
+      3 * centralMovingEdgeEnergy A rho f +
+        5 * vertexFixedEdgeEnergy A rho f := by
+  have hsum : (∑ t : Fin 6, triangleEnergy f t) ≤
+      ∑ t : Fin 6,
+        (3 * triangleRootMovingEnergy A rho f t +
+          5 * triangleVertexFixedEnergy A rho f t) := by
+    apply Finset.sum_le_sum
+    intro t ht
+    exact triangleEnergy_le A rho f hf t
+  have hfixed := sum_triangleVertexFixedEnergy_le A rho f
+  calc
+    edgeEnergy f = ∑ t : Fin 6, triangleEnergy f t :=
+      (sum_triangleEnergy f).symm
+    _ ≤ ∑ t : Fin 6,
+        (3 * triangleRootMovingEnergy A rho f t +
+          5 * triangleVertexFixedEnergy A rho f t) := hsum
+    _ = 3 * centralMovingEdgeEnergy A rho f +
+        5 * ∑ t : Fin 6, triangleVertexFixedEnergy A rho f t := by
+      rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
+        sum_triangleRootMovingEnergy]
+    _ ≤ 3 * centralMovingEdgeEnergy A rho f +
+        5 * vertexFixedEdgeEnergy A rho f := by
+      have hm := mul_le_mul_of_nonneg_left hfixed (by norm_num : (0 : ℝ) ≤ 5)
+      linarith
 
 /-- Energy of the moving projection of the graph Laplacian. -/
 noncomputable def vertexMovingLaplacianEnergy
