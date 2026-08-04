@@ -202,6 +202,63 @@ theorem vertex_four_fixed_norm_sq_le
   exact NormalEdgeCodistance.four_fixed_norm_sq_le rho X Y Z
     hXnorm hYnorm hedge hp hq hs ht
 
+/-- Subtype form of the local four-edge estimate.  This is the version used
+after passing to the moving summand of an arbitrary vertex restriction. -/
+theorem vertex_four_fixed_norm_sq_le_restricted
+    (A : A2System G) (r : A2Root)
+    (rho : A.vertexGroup r →* (E ≃ₗᵢ[ℝ] E)) [CompleteSpace E]
+    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r) rho)
+    {p q s t : E}
+    (hp : p ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.leftEdgeGroup r).subgroupOf (A.vertexGroup r)))
+    (hq : q ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.rightEdgeGroup r).subgroupOf (A.vertexGroup r)))
+    (hs : s ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.leftRootGroup r).subgroupOf (A.vertexGroup r)))
+    (ht : t ∈ KazhdanFixedSpace.fixedSubspace rho
+      ((A.rightRootGroup r).subgroupOf (A.vertexGroup r))) :
+    ‖p + q + s + t‖ ^ 2 ≤
+      2 * (‖p‖ ^ 2 + ‖q‖ ^ 2 + ‖s‖ ^ 2 + ‖t‖ ^ 2) := by
+  let L := A.vertexGroup r
+  let X := (A.leftRootGroup r).subgroupOf L
+  let Y := (A.rightRootGroup r).subgroupOf L
+  let Z := (A.rootAt r).subgroupOf L
+  let H := (A.leftEdgeGroup r).subgroupOf L
+  let K := (A.rightEdgeGroup r).subgroupOf L
+  have hXZ : X ⊔ Z = H := by
+    rw [← Subgroup.subgroupOf_sup (A.leftRoot_le_vertexGroup r)
+      (A.rootAt_le_vertexGroup r)]
+    rfl
+  have hYZ : Y ⊔ Z = K := by
+    rw [← Subgroup.subgroupOf_sup (A.rightRoot_le_vertexGroup r)
+      (A.rootAt_le_vertexGroup r)]
+    rfl
+  have hZcenter : Z ≤ Subgroup.center L := A.rootAt_subgroupOf_le_center r
+  have hXnorm : X ≤ Subgroup.normalizer (Z : Set L) := by
+    intro x hx
+    apply Subgroup.centralizer_le_normalizer (Z : Set L)
+    rw [Subgroup.mem_centralizer_iff]
+    intro z hz
+    exact (Subgroup.mem_center_iff.mp (hZcenter hz) x).symm
+  have hYnorm : Y ≤ Subgroup.normalizer (Z : Set L) := by
+    intro y hy
+    apply Subgroup.centralizer_le_normalizer (Z : Set L)
+    rw [Subgroup.mem_centralizer_iff]
+    intro z hz
+    exact (Subgroup.mem_center_iff.mp (hZcenter hz) y).symm
+  letI : H.Normal := A.leftEdgeGroup_normalIn_vertexGroup r
+  have hedgeHK := KazhdanFixedSpace.fixedSubspaces_isOrtho_of_normal_generate
+    rho H K (A.edgeSubgroups_sup_top r) hno
+  have hedge : KazhdanFixedSpace.fixedSubspace rho (X ⊔ Z) ⟂
+      KazhdanFixedSpace.fixedSubspace rho (Y ⊔ Z) := by
+    simpa [hXZ, hYZ] using hedgeHK
+  apply NormalEdgeCodistance.four_fixed_norm_sq_le rho X Y Z
+    hXnorm hYnorm hedge
+  · simpa [hXZ] using hp
+  · simpa [hYZ] using hq
+  · exact hs
+  · exact ht
+
 /-- A strict uniform codistance bound makes the union of the six vertex
 groups a Kazhdan subset. -/
 theorem vertexSet_isKazhdan_of_codistanceBound

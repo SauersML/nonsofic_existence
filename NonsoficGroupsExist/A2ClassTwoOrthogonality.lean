@@ -22,18 +22,20 @@ variable {G : Type u} [Group G]
 variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [CompleteSpace E]
 
-/-- The two root fixed spaces at every A₂ vertex have angle at most
-`1 / sqrt 2` when all root elements have exponent two. -/
-theorem rootFixedSubspaces_epsilonOrthogonal_of_root_exponent_two
+/-- Subtype form of the root-space angle theorem for a representation of one
+A₂ vertex group. -/
+theorem rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_exponent_two
     (A : A2System G)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
       ∀ g ∈ A.root i j hij, g ^ 2 = 1)
-    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (r : A2Root)
-    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r)
-      (KazhdanFixedSpace.restrictRepresentation rho (A.vertexGroup r))) :
+    (r : A2Root)
+    (rho : A.vertexGroup r →* (E ≃ₗᵢ[ℝ] E))
+    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r) rho) :
     HilbertEpsilonOrthogonality.EpsilonOrthogonal
-      (KazhdanFixedSpace.fixedSubspace rho (A.leftRootGroup r))
-      (KazhdanFixedSpace.fixedSubspace rho (A.rightRootGroup r))
+      (KazhdanFixedSpace.fixedSubspace rho
+        ((A.leftRootGroup r).subgroupOf (A.vertexGroup r)))
+      (KazhdanFixedSpace.fixedSubspace rho
+        ((A.rightRootGroup r).subgroupOf (A.vertexGroup r)))
       (Real.sqrt 2)⁻¹ := by
   let i := r.1.1
   let j := r.1.2
@@ -88,12 +90,30 @@ theorem rootFixedSubspaces_epsilonOrthogonal_of_root_exponent_two
     exact hexp i j r.2 c.1
       (Subgroup.mem_subgroupOf.mp (hcomm hc))
   have hangle := ClassTwoOrthogonality.epsilonOrthogonal
-    (KazhdanFixedSpace.restrictRepresentation rho L)
+    rho
     XL YL hgen hXcomm hYcomm hXexp hYexp hcentral hCexp hno
-  rw [KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho X L
-      (A.leftRoot_le_vertexGroup r),
-    KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho Y L
-      (A.rightRoot_le_vertexGroup r)] at hangle
+  exact hangle
+
+/-- The two root fixed spaces at every A₂ vertex have angle at most
+`1 / sqrt 2` when all root elements have exponent two. -/
+theorem rootFixedSubspaces_epsilonOrthogonal_of_root_exponent_two
+    (A : A2System G)
+    (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (r : A2Root)
+    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r)
+      (KazhdanFixedSpace.restrictRepresentation rho (A.vertexGroup r))) :
+    HilbertEpsilonOrthogonality.EpsilonOrthogonal
+      (KazhdanFixedSpace.fixedSubspace rho (A.leftRootGroup r))
+      (KazhdanFixedSpace.fixedSubspace rho (A.rightRootGroup r))
+      (Real.sqrt 2)⁻¹ := by
+  have hangle :=
+    A.rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_exponent_two
+      hexp r (KazhdanFixedSpace.restrictRepresentation rho (A.vertexGroup r)) hno
+  rw [KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho
+      (A.leftRootGroup r) (A.vertexGroup r) (A.leftRoot_le_vertexGroup r),
+    KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho
+      (A.rightRootGroup r) (A.vertexGroup r) (A.rightRoot_le_vertexGroup r)] at hangle
   exact hangle
 
 /-- The preceding vertex-angle theorem for elementary rank-three groups over
