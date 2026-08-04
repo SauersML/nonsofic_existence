@@ -178,5 +178,27 @@ theorem norm_orbitAverage_average_sub_le [CompleteSpace E]
   apply norm_orbitAverage_le_of_mem_orthogonal hQ S hQS hone hεone ρ
   exact orbitAverage_sub_mem_orthogonal S hone ρ x
 
+/-- Orbit averaging is additive with respect to subtraction. -/
+theorem orbitAverage_sub (S : Finset G) (ρ : G →* (E ≃ₗᵢ[ℝ] E))
+    (x y : E) :
+    IsKazhdanPair.orbitAverage S ρ (x - y) =
+      IsKazhdanPair.orbitAverage S ρ x -
+        IsKazhdanPair.orbitAverage S ρ y := by
+  classical
+  simp [IsKazhdanPair.orbitAverage, Finset.sum_sub_distrib, smul_sub]
+
+/-- Equivalent second-difference form of Kun's orbit-average estimate. -/
+theorem norm_orbitAverage_sq_sub_le [CompleteSpace E]
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
+    (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
+    ‖IsKazhdanPair.orbitAverage S ρ
+        (IsKazhdanPair.orbitAverage S ρ x) -
+      IsKazhdanPair.orbitAverage S ρ x‖ ≤
+      (1 - ε ^ 2 / (4 * S.card)) *
+        ‖IsKazhdanPair.orbitAverage S ρ x - x‖ := by
+  rw [← orbitAverage_sub]
+  exact norm_orbitAverage_average_sub_le hQ S hQS hone hεone ρ x
+
 end KazhdanOrthogonal
 end NonsoficGroupsExist
