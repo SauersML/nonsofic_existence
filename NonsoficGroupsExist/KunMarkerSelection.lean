@@ -407,40 +407,57 @@ distinct separated marker for every one of its crossing stubs. -/
 theorem exists_block_marker_assignment
     {G : Type} [Group G]
     (M : FiniteModel) (τ : G → Equiv.Perm M)
-    (S : Finset G) (r : ℕ) (P : BlockStructure M) (C : Finset M)
+    (S : Finset G) (r : ℕ) (P : BlockStructure M) (C E : Finset M)
     (hlarge :
-      ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+      (E ∩ C).card +
+        ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
           (blockStubs (generatorGraph M S τ) P C).card < C.card) :
     ∃ marker :
         {s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
           s ∈ blockStubs (generatorGraph M S τ) P C} → M,
       Function.Injective marker ∧
-      (∀ s, marker s ∈ C \ blockForbidden M τ S r P C) ∧
+      (∀ s, marker s ∈ C \ (blockForbidden M τ S r P C ∪ E)) ∧
       ∀ s t, s ≠ t →
         Disjoint (forwardNeighborhood M τ S r {marker s})
           (forwardNeighborhood M τ S r {marker t}) := by
   let I := {s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
     s ∈ blockStubs (generatorGraph M S τ) P C}
+  let F := blockForbidden M τ S r P C ∪ (E ∩ C)
   have hforbidden := card_blockForbidden_le M τ S r P C
   have hIcard : Fintype.card I =
       (blockStubs (generatorGraph M S τ) P C).card := Fintype.card_coe _
   have htotal :
-      (blockForbidden M τ S r P C).card +
+      F.card +
           Fintype.card I * (S.card + 1) ^ (2 * r) < C.card := by
     calc
-      (blockForbidden M τ S r P C).card +
+      F.card +
           Fintype.card I * (S.card + 1) ^ (2 * r) ≤
-        (S.card + 1) ^ r *
+        ((S.card + 1) ^ r *
             (blockStubs (generatorGraph M S τ) P C).card +
+          (E ∩ C).card) +
           (blockStubs (generatorGraph M S τ) P C).card *
             (S.card + 1) ^ (2 * r) := by
           rw [hIcard]
-          exact Nat.add_le_add_right hforbidden _
-      _ = ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
-          (blockStubs (generatorGraph M S τ) P C).card := by ring
+          exact Nat.add_le_add_right
+            ((Finset.card_union_le _ _).trans
+              (Nat.add_le_add_right hforbidden _)) _
+      _ = (E ∩ C).card +
+          ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+            (blockStubs (generatorGraph M S τ) P C).card := by ring
       _ < C.card := hlarge
-  exact exists_commonFuture_marker_assignment M τ S r C
-    (blockForbidden M τ S r P C) htotal
+  obtain ⟨marker, hinjective, hmarker, hdisjoint⟩ :=
+    exists_commonFuture_marker_assignment M τ S r C F htotal
+  refine ⟨marker, hinjective, ?_, hdisjoint⟩
+  intro s
+  have hs := hmarker s
+  apply Finset.mem_sdiff.mpr
+  refine ⟨(Finset.mem_sdiff.mp hs).1, ?_⟩
+  intro hbad
+  apply (Finset.mem_sdiff.mp hs).2
+  apply Finset.mem_union.mpr
+  rcases Finset.mem_union.mp hbad with hboundary | hE
+  · exact Or.inl hboundary
+  · exact Or.inr (Finset.mem_inter.mpr ⟨hE, (Finset.mem_sdiff.mp hs).1⟩)
 
 /-- A crossing stub belongs to the stub family indexed by its endpoint's
 partition block. -/
@@ -490,15 +507,17 @@ neighborhoods are disjoint. -/
 theorem exists_global_marker_assignment
     {G : Type} [Group G]
     (M : FiniteModel) (τ : G → Equiv.Perm M)
-    (S : Finset G) (r : ℕ) (P : BlockStructure M)
+    (S : Finset G) (r : ℕ) (P : BlockStructure M) (E : Finset M)
     (hlarge : ∀ y : M,
-      ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+      (E ∩ P.block y).card +
+        ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
           (blockStubs (generatorGraph M S τ) P (P.block y)).card <
         (P.block y).card) :
     ∃ marker : KunRepairGraph.CrossingStub (generatorGraph M S τ) P → M,
       Function.Injective marker ∧
       (∀ s, marker s ≠
         KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s) ∧
+      (∀ s, marker s ∉ E) ∧
       (∀ s, marker s ∈
         P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s)) ∧
       (∀ s, forwardNeighborhood M τ S r {marker s} ⊆
@@ -508,7 +527,8 @@ theorem exists_global_marker_assignment
           (forwardNeighborhood M τ S r {marker t}) := by
   classical
   have hlargeBlock (C : Finset M) (hC : C ∈ P.blocksFinset) :
-      ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
+      (E ∩ C).card +
+        ((S.card + 1) ^ r + (S.card + 1) ^ (2 * r)) *
           (blockStubs (generatorGraph M S τ) P C).card < C.card := by
     obtain ⟨y, rfl⟩ := (P.mem_blocksFinset C).mp hC
     exact hlarge y
@@ -516,10 +536,10 @@ theorem exists_global_marker_assignment
       {s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
         s ∈ blockStubs (generatorGraph M S τ) P C} → M :=
     fun C hC ↦ Classical.choose
-      (exists_block_marker_assignment M τ S r P C (hlargeBlock C hC))
+      (exists_block_marker_assignment M τ S r P C E (hlargeBlock C hC))
   have localMarker_spec (C : Finset M) (hC : C ∈ P.blocksFinset) :=
     Classical.choose_spec
-      (exists_block_marker_assignment M τ S r P C (hlargeBlock C hC))
+      (exists_block_marker_assignment M τ S r P C E (hlargeBlock C hC))
   let localStub (s : KunRepairGraph.CrossingStub (generatorGraph M S τ) P) :
       {t : KunRepairGraph.CrossingStub (generatorGraph M S τ) P //
         t ∈ blockStubs (generatorGraph M S τ) P
@@ -552,10 +572,16 @@ theorem exists_global_marker_assignment
       (generatorGraph M S τ) P) :
       marker s ∉ blockForbidden M τ S r P
         (P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s)) := by
-    exact (Finset.mem_sdiff.mp ((localMarker_spec
+    exact fun hboundary ↦ (Finset.mem_sdiff.mp ((localMarker_spec
       (P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s))
       (P.block_mem_blocksFinset _)).2.1
-        (localStub s))).2
+        (localStub s))).2 (Finset.mem_union_left _ hboundary)
+  have hmarkerE (s : KunRepairGraph.CrossingStub
+      (generatorGraph M S τ) P) : marker s ∉ E := by
+    exact fun hE ↦ (Finset.mem_sdiff.mp ((localMarker_spec
+      (P.block (KunRepairGraph.stubEndpoint (generatorGraph M S τ) P s))
+      (P.block_mem_blocksFinset _)).2.1
+        (localStub s))).2 (Finset.mem_union_right _ hE)
   have hneighborhoodBlock (s : KunRepairGraph.CrossingStub
       (generatorGraph M S τ) P) :
       forwardNeighborhood M τ S r {marker s} ⊆
@@ -609,7 +635,8 @@ theorem exists_global_marker_assignment
     · exact hsameBlockSeparated s t hblock hst
     · exact (P.block_disjoint hblock).mono
         (hneighborhoodBlock s) (hneighborhoodBlock t)
-  refine ⟨marker, ?_, ?_, hmarkerBlock, hneighborhoodBlock, hdisjoint⟩
+  refine ⟨marker, ?_, ?_, hmarkerE, hmarkerBlock,
+    hneighborhoodBlock, hdisjoint⟩
   · intro s t hmarker
     by_contra hst
     have hblock : P.block (KunRepairGraph.stubEndpoint
@@ -642,7 +669,7 @@ theorem exists_global_marker_assignment
         localMarker C hCmem (localStub s) =
             marker s := (marker_eq_local s C rfl hCmem _).symm
         _ = marker t := hmarker
-        _ = localMarker C (P.block_mem_blocksFinset _) tLocal := hmarkerT
+        _ = localMarker C hCmem tLocal := hmarkerT
     have hlocalEq :=
       (localMarker_spec C hCmem).1 hlocalMarkerEq
     exact hst (congrArg Subtype.val hlocalEq)
