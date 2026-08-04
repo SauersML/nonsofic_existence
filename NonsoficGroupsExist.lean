@@ -9,6 +9,7 @@ import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.KazhdanFixedSpace
 import NonsoficGroupsExist.HilbertConvexFixedPoint
+import NonsoficGroupsExist.HilbertEpsilonOrthogonality
 import NonsoficGroupsExist.KazhdanGenerators
 import NonsoficGroupsExist.KazhdanOrthogonal
 import NonsoficGroupsExist.KazhdanFiniteModel
