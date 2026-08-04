@@ -18,6 +18,55 @@ variable {G : Type*} [Group G]
 
 namespace ClassTwoNormalForm
 
+/-- If two ambient subgroups contained in `L` generate `L`, then their
+subgroups inside `L` generate the whole subtype group. -/
+theorem subgroupOf_sup_eq_top (H K L : Subgroup G)
+    (hHL : H ≤ L) (hKL : K ≤ L) (hHK : H ⊔ K = L) :
+    H.subgroupOf L ⊔ K.subgroupOf L = ⊤ := by
+  apply top_unique
+  intro g _
+  have hunionL : (H : Set G) ∪ (K : Set G) ⊆ L := by
+    intro x hx
+    rcases hx with hx | hx
+    · exact hHL hx
+    · exact hKL hx
+  have hclosureL : Subgroup.closure ((H : Set G) ∪ (K : Set G)) ≤ L :=
+    by rw [Subgroup.closure_le]; exact hunionL
+  have hgcl : (g : G) ∈ Subgroup.closure ((H : Set G) ∪ (K : Set G)) := by
+    rw [Subgroup.closure_union, Subgroup.closure_eq, Subgroup.closure_eq, hHK]
+    exact g.2
+  have hall : ∀ x ∈ Subgroup.closure ((H : Set G) ∪ (K : Set G)),
+      ∀ hxL : x ∈ L, (⟨x, hxL⟩ : L) ∈
+        H.subgroupOf L ⊔ K.subgroupOf L := by
+    intro x hx
+    induction hx using Subgroup.closure_induction with
+    | mem x hx =>
+        intro hxL
+        rcases hx with hx | hx
+        · exact (show H.subgroupOf L ≤ H.subgroupOf L ⊔ K.subgroupOf L from
+            le_sup_left) (Subgroup.mem_subgroupOf.mpr hx)
+        · exact (show K.subgroupOf L ≤ H.subgroupOf L ⊔ K.subgroupOf L from
+            le_sup_right) (Subgroup.mem_subgroupOf.mpr hx)
+    | one =>
+        intro
+        exact (H.subgroupOf L ⊔ K.subgroupOf L).one_mem
+    | mul a b ha hb iha ihb =>
+        intro habL
+        have haL : a ∈ L := hclosureL ha
+        have hbL : b ∈ L := hclosureL hb
+        have hm := (H.subgroupOf L ⊔ K.subgroupOf L).mul_mem (iha haL) (ihb hbL)
+        simpa using hm
+    | inv a ha iha =>
+        intro hainvL
+        have haL : a ∈ L := hclosureL ha
+        have hi := (H.subgroupOf L ⊔ K.subgroupOf L).inv_mem (iha haL)
+        have heq : (⟨a⁻¹, hainvL⟩ : L) = (⟨a, haL⟩ : L)⁻¹ := by
+          apply Subtype.ext
+          rfl
+        rw [heq]
+        exact hi
+  simpa using hall g hgcl g.2
+
 /-- If commutators of `Y` with each generator subgroup of `X ⊔ Z` lie in
 `Z`, then `Y` normalizes `X ⊔ Z`. -/
 theorem le_normalizer_sup (X Y Z : Subgroup G)

@@ -136,6 +136,29 @@ theorem rootSet_isKazhdan_of_vertexSet
       have hznear := hnear z hzSet
       linarith
 
+/-- In the restriction to a vertex group with no invariant vectors, the two
+normal edge fixed spaces are orthogonal.  This is the direct formal analogue
+of the normal-subgroup lemma used in the first half of EJZ Claim 5.6. -/
+theorem edgeFixedSubspaces_isOrtho
+    (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E)) [CompleteSpace E]
+    (a : A2Root)
+    (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup a)
+      (KazhdanFixedSpace.restrictRepresentation rho (A.vertexGroup a))) :
+    KazhdanFixedSpace.fixedSubspace rho (A.leftEdgeGroup a) ⟂
+      KazhdanFixedSpace.fixedSubspace rho (A.rightEdgeGroup a) := by
+  let L := A.vertexGroup a
+  let H := (A.leftEdgeGroup a).subgroupOf L
+  let K := (A.rightEdgeGroup a).subgroupOf L
+  letI : H.Normal := A.leftEdgeGroup_normalIn_vertexGroup a
+  have hortho := KazhdanFixedSpace.fixedSubspaces_isOrtho_of_normal_generate
+    (KazhdanFixedSpace.restrictRepresentation rho L) H K
+    (A.edgeSubgroups_sup_top a) hno
+  rw [KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho
+      (A.leftEdgeGroup a) L (A.leftEdgeGroup_le_vertexGroup a),
+    KazhdanFixedSpace.fixedSubspace_subgroupOf_eq rho
+      (A.rightEdgeGroup a) L (A.rightEdgeGroup_le_vertexGroup a)] at hortho
+  exact hortho
+
 /-- The six-vertex fixed-space contraction implies that the union of the root
 subgroups is a Kazhdan subset.  This is the norm-comparison step after the
 spectral estimate, with an explicit (non-optimal) constant. -/
