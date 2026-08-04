@@ -29,6 +29,26 @@ def badSourceEdges (X : FiniteMultiGraph) (B : Finset X.vertex) :
     Finset X.edge :=
   Finset.univ.filter fun e ↦ X.first e ∈ B
 
+/-- A generator graph has at most one source occurrence per generator and
+vertex, so bad-source occurrences are bounded by `|S| |B|`. -/
+theorem card_badSourceEdges_generatorGraph_le
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (B : Finset M) :
+    (badSourceEdges (generatorGraph M S τ) B).card ≤ S.card * B.card := by
+  classical
+  let f : {e : (generatorGraph M S τ).edge //
+      e ∈ badSourceEdges (generatorGraph M S τ) B} →
+      S × {x : M // x ∈ B} := fun e ↦
+    ⟨e.1.1.1, ⟨e.1.1.2, (Finset.mem_filter.mp e.2).2⟩⟩
+  have hf : Function.Injective f := by
+    intro e e' heq
+    apply Subtype.ext
+    apply Subtype.ext
+    exact Prod.ext (congrArg (fun z ↦ z.1) heq)
+      (congrArg (fun z ↦ z.2.1) heq)
+  have hcard := Fintype.card_le_of_injective f hf
+  simpa [Fintype.card_coe, Fintype.card_prod] using hcard
+
 /-- Retained good internal occurrences together with good-side repair stubs. -/
 abbrev SelectiveEdge (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
     (B : Finset X.vertex) :=
