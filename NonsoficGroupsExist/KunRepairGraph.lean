@@ -290,5 +290,137 @@ theorem editDistance_le_six_mul_crossing
   rw [unmatchedCount_editWitness] at h
   omega
 
+/-- Repair stubs whose old endpoint and new marker lie on the same selected
+side of a vertex cut.  These are precisely the redirected stubs that fail to
+replace their old contribution to that cut. -/
+def badStubs (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (marker : CrossingStub X P → X.vertex) (U : Finset X.vertex) :
+    Finset (CrossingStub X P) :=
+  Finset.univ.filter fun s ↦
+    stubEndpoint X P s ∈ U ∧ marker s ∈ U
+
+/-- If markers are distinct, at most `|U|` redirected stubs can fail on `U`.
+The separated-marker argument will improve this crude estimate by charging
+most such markers to repaired boundary edges. -/
+theorem card_badStubs_le
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (marker : CrossingStub X P → X.vertex)
+    (marker_injective : Function.Injective marker)
+    (U : Finset X.vertex) :
+    (badStubs X P marker U).card ≤ U.card := by
+  classical
+  let f : {s : CrossingStub X P // s ∈ badStubs X P marker U} →
+      {y : X.vertex // y ∈ U} :=
+    fun s ↦ ⟨marker s.1, (Finset.mem_filter.mp s.2).2.2⟩
+  have hf : Function.Injective f := by
+    intro s t hst
+    apply Subtype.ext
+    exact marker_injective (congrArg Subtype.val hst)
+  simpa [Fintype.card_coe] using Fintype.card_le_of_injective f hf
+
+/-- Forget whether an encoded original boundary occurrence was paid for by a
+repaired boundary occurrence or by a bad stub. -/
+def encodedOriginal
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (marker : CrossingStub X P → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s)
+    (U : Finset X.vertex) :
+    Sum
+      {e : (graph X P marker marker_ne).edge //
+        e ∈ (graph X P marker marker_ne).boundary U}
+      {s : CrossingStub X P // s ∈ badStubs X P marker U} → X.edge
+  | Sum.inl e =>
+      match e.1 with
+      | Sum.inl a => a.1
+      | Sum.inr s => s.1.1
+  | Sum.inr s => s.1.1.1
+
+/-- Every original boundary occurrence either survives as an internal repaired
+boundary occurrence, is replaced by a repaired stub crossing the cut, or is
+charged to a bad stub whose marker remains on the selected side. -/
+noncomputable def boundaryEncoding
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (marker : CrossingStub X P → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s)
+    (U : Finset X.vertex) :
+    {e : X.edge // e ∈ X.boundary U} →
+      Sum
+        {a : (graph X P marker marker_ne).edge //
+          a ∈ (graph X P marker marker_ne).boundary U}
+        {s : CrossingStub X P // s ∈ badStubs X P marker U} := by
+  classical
+  intro e
+  have heBoundary := (Finset.mem_filter.mp e.2).2
+  by_cases heInternal : e.1 ∈ internalEdges X P
+  · exact Sum.inl ⟨Sum.inl ⟨e.1, heInternal⟩,
+      Finset.mem_filter.mpr ⟨Finset.mem_univ _, heBoundary⟩⟩
+  · have heCrossing : e.1 ∈ X.crossingEdges P.block := by
+      have hne : P.block (X.first e.1) ≠ P.block (X.second e.1) := by
+        intro heq
+        exact heInternal (Finset.mem_filter.mpr ⟨Finset.mem_univ _, heq⟩)
+      exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hne⟩
+    by_cases hfirst : X.first e.1 ∈ U
+    · let s : CrossingStub X P := (⟨e.1, heCrossing⟩, StubSide.first)
+      by_cases hmarker : marker s ∈ U
+      · exact Sum.inr ⟨s, Finset.mem_filter.mpr
+          ⟨Finset.mem_univ _, hfirst, hmarker⟩⟩
+      · exact Sum.inl ⟨Sum.inr s, Finset.mem_filter.mpr
+          ⟨Finset.mem_univ _, Or.inl ⟨hfirst, hmarker⟩⟩⟩
+    · have hsecond : X.second e.1 ∈ U := by
+        rcases heBoundary with h | h
+        · exact False.elim (hfirst h.1)
+        · exact h.1
+      let s : CrossingStub X P := (⟨e.1, heCrossing⟩, StubSide.second)
+      by_cases hmarker : marker s ∈ U
+      · exact Sum.inr ⟨s, Finset.mem_filter.mpr
+          ⟨Finset.mem_univ _, hsecond, hmarker⟩⟩
+      · exact Sum.inl ⟨Sum.inr s, Finset.mem_filter.mpr
+          ⟨Finset.mem_univ _, Or.inl ⟨hsecond, hmarker⟩⟩⟩
+
+@[simp] theorem encodedOriginal_boundaryEncoding
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (marker : CrossingStub X P → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s)
+    (U : Finset X.vertex) (e : {e : X.edge // e ∈ X.boundary U}) :
+    encodedOriginal X P marker marker_ne U
+        (boundaryEncoding X P marker marker_ne U e) = e.1 := by
+  classical
+  by_cases heInternal : e.1 ∈ internalEdges X P
+  · simp [boundaryEncoding, heInternal, encodedOriginal]
+  · have heCrossing : e.1 ∈ X.crossingEdges P.block := by
+      have hne : P.block (X.first e.1) ≠ P.block (X.second e.1) := by
+        intro heq
+        exact heInternal (Finset.mem_filter.mpr ⟨Finset.mem_univ _, heq⟩)
+      exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, hne⟩
+    by_cases hfirst : X.first e.1 ∈ U
+    · let s : CrossingStub X P := (⟨e.1, heCrossing⟩, StubSide.first)
+      by_cases hmarker : marker s ∈ U <;>
+        simp [boundaryEncoding, heInternal, hfirst, s, hmarker,
+          encodedOriginal]
+    · let s : CrossingStub X P := (⟨e.1, heCrossing⟩, StubSide.second)
+      by_cases hmarker : marker s ∈ U <;>
+        simp [boundaryEncoding, heInternal, hfirst, s, hmarker,
+          encodedOriginal]
+
+/-- Cardinal form of the boundary charging map. -/
+theorem boundaryCard_le_repaired_add_badStubs
+    (X : FiniteMultiGraph) (P : BlockStructure X.vertex)
+    (marker : CrossingStub X P → X.vertex)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint X P s)
+    (U : Finset X.vertex) :
+    X.boundaryCard U ≤
+      (graph X P marker marker_ne).boundaryCard U +
+        (badStubs X P marker U).card := by
+  let f := boundaryEncoding X P marker marker_ne U
+  have hf : Function.Injective f := by
+    intro e e' he
+    apply Subtype.ext
+    have h := congrArg (encodedOriginal X P marker marker_ne U) he
+    rw [encodedOriginal_boundaryEncoding, encodedOriginal_boundaryEncoding] at h
+    exact h
+  have hcard := Fintype.card_le_of_injective f hf
+  simpa [FiniteMultiGraph.boundaryCard, Fintype.card_sum,
+    Fintype.card_coe] using hcard
+
 end KunRepairGraph
 end NonsoficGroupsExist
