@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.KazhdanFixedSpace
+import NonsoficGroupsExist.FiniteGroupAverage
 import Mathlib.Analysis.InnerProductSpace.JointEigenspace
 import Mathlib.Algebra.DirectSum.Decomposition
 
@@ -224,6 +224,57 @@ theorem component_fixed [FiniteDimensional ℝ E]
         (components rho C hcentral hexp z chi) =
       components rho C hcentral hexp z chi := by
   rw [← component_equivariant rho C hcentral hexp g z chi, hz]
+
+/-- The orthogonal representation carried by a joint eigenspace. -/
+noncomputable def representation
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    (hcentral : C ≤ Subgroup.center G) (chi : C → ℝ) :
+    G →* (jointEigenspace rho C chi ≃ₗᵢ[ℝ] jointEigenspace rho C chi) :=
+  KazhdanFixedSpace.restrictToInvariantSubspace rho (jointEigenspace rho C chi)
+    (fun g _ hz ↦ map_mem_jointEigenspace rho C hcentral chi g hz)
+
+@[simp] theorem representation_apply_coe
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    (hcentral : C ≤ Subgroup.center G) (chi : C → ℝ)
+    (g : G) (z : jointEigenspace rho C chi) :
+    (representation rho C hcentral chi g z : E) = rho g z.1 := rfl
+
+/-- Taking a joint-eigenspace component commutes with finite subgroup
+averaging. -/
+theorem component_orbitAverage [FiniteDimensional ℝ E]
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (C : Subgroup G)
+    [DecidableEq (C → ℝ)]
+    (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ 2 = 1) (X : Subgroup G) [Finite X]
+    (z : E) (chi : C → ℝ) :
+    components rho C hcentral hexp
+        (FiniteGroupAverage.orbitAverage
+          (KazhdanFixedSpace.restrictRepresentation rho X) z) chi =
+      FiniteGroupAverage.orbitAverage
+        (KazhdanFixedSpace.restrictRepresentation
+          (representation rho C hcentral chi) X)
+        (components rho C hcentral hexp z chi) := by
+  letI := Fintype.ofFinite X
+  unfold FiniteGroupAverage.orbitAverage
+  let D := (LinearEquiv.ofBijective
+    (DirectSum.coeLinearMap (jointEigenspace rho C))
+    (jointEigenspaces_isInternal rho C hcentral hexp)).symm
+  change D ((Nat.card X : ℝ)⁻¹ • ∑ x : X, rho x.1 z) chi =
+    (Nat.card X : ℝ)⁻¹ •
+      ∑ x : X, representation rho C hcentral chi x.1
+        (components rho C hcentral hexp z chi)
+  rw [map_smul, map_sum]
+  have hsumapply : (∑ x : X, D (rho x.1 z)) chi =
+      ∑ x : X, D (rho x.1 z) chi := by
+    have h := congrFun
+      (map_sum (DirectSum.coeFnLinearMap ℝ)
+        (fun x : X ↦ D (rho x.1 z)) Finset.univ) chi
+    simpa only [DirectSum.coeFnLinearMap_apply, Finset.sum_apply] using h
+  rw [DirectSum.smul_apply, hsumapply]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro x _
+  exact component_equivariant rho C hcentral hexp x.1 z chi
 
 /-- Every eigenvalue occurring on a nonzero joint eigenspace of involutions
 is `+1` or `-1`. -/
