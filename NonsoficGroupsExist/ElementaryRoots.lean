@@ -128,4 +128,22 @@ theorem elementaryRoot_commutator (i j k : I)
   apply Subtype.ext
   exact elementaryUnit_commutator i j k hij hjk hik a b
 
+/-- Conjugation by one elementary root performs the corresponding elementary
+shear on an adjacent root. -/
+theorem elementaryRoot_conjugate (i j k : I)
+    (hij : i ≠ j) (hjk : j ≠ k) (hik : i ≠ k) (a b : R) :
+    elementaryRoot i j hij a * elementaryRoot j k hjk b *
+        (elementaryRoot i j hij a)⁻¹ =
+      elementaryRoot i k hik (a * b) * elementaryRoot j k hjk b := by
+  calc
+    elementaryRoot i j hij a * elementaryRoot j k hjk b *
+        (elementaryRoot i j hij a)⁻¹ =
+      ⁅elementaryRoot i j hij a, elementaryRoot j k hjk b⁆ *
+        elementaryRoot j k hjk b := by
+          simp only [commutatorElement_def]
+          group
+    _ = elementaryRoot i k hik (a * b) *
+        elementaryRoot j k hjk b := by
+      rw [elementaryRoot_commutator]
+
 end NonsoficGroupsExist
