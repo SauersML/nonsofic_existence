@@ -155,6 +155,7 @@ import NonsoficGroupsExist.SoficPositiveControl
 import NonsoficGroupsExist.SemanticPositiveControls
 import NonsoficGroupsExist.SoficErrors
 import NonsoficGroupsExist.Whitehead
+import NonsoficGroupsExist.KazhdanCover
 import NonsoficGroupsExist.TableCover
 import NonsoficGroupsExist.LeavittWords
 import NonsoficGroupsExist.PrefixCode

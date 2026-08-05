@@ -294,7 +294,18 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     headline `exists_finitelyPresented_kazhdan_cover` (trivial-group
     branch included), all pending cluster verification
   - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
-    property-`(T)` refinement and quotient claims of Theorem C
+    property-`(T)` refinement and quotient claims of Theorem C.  In
+    progress: `KazhdanCover.lean` is drafted, pending cluster
+    verification — `familyPullbackModel` generalizes the table-model
+    pullback from presented groups to any group carrying a
+    multiplicative separated family over the forbidden table, and
+    `exists_kazhdan_finitelyPresented_nonsofic_cover` imposes the
+    table relators (lifted along a section of the composed surjection)
+    on the Shalom presentation, so the cover is finitely presented by
+    instance, Kazhdan as a quotient of the Shalom cover, and nonsofic
+    by the family pullback.  Remaining for C3: the final Theorem C
+    quotient claims, which await the B-block identification of
+    `L^×` (B4–B6)
   - [ ] C4. Audit
 - [x] Define Thompson's group `V` and identify the manuscript's tree-table
   and corner copies with it (the existence proof currently uses a stronger
