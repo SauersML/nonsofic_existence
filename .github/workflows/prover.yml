@@ -1,0 +1,196 @@
+name: Lean Prover CI
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.lean'
+      - 'lakefile.toml'
+      - 'lean-toolchain'
+      - 'lake-manifest.json'
+      - '.github/workflows/prover.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.lean'
+      - 'lakefile.toml'
+      - 'lean-toolchain'
+      - 'lake-manifest.json'
+      - '.github/workflows/prover.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # NOT cancel-in-progress.  A cancelled job may lose the partial `.lake/build`
+  # it would otherwise have saved, and this build is long enough that throwing
+  # away an hour of oleans to start over is worse than letting the old run
+  # finish and seed the cache for the new one.
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Gate scheduled runs on recent changes
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - id: check
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Event ${{ github.event_name }} is not a schedule; running."
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          latest=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          age_min=$(( (now - latest) / 60 ))
+          window=240
+          if [ "$age_min" -lt "$window" ]; then
+            echo "Last commit ${age_min}m ago (< ${window}m); running scheduled job."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Last commit ${age_min}m ago (>= ${window}m); nothing changed, skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  prove:
+    name: Build and audit
+    needs: gate
+    if: ${{ github.event_name != 'schedule' || needs.gate.outputs.run == 'true' }}
+    runs-on: ubuntu-latest
+    # 151 modules of analysis on top of Mathlib.  A cold first build can run for
+    # hours; every run saves whatever it compiled (see the cache-save steps), so
+    # even a run that hits this ceiling leaves the next one strictly warmer.
+    timeout-minutes: 340
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Cache Lean toolchain
+        id: elan-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: ${{ runner.os }}-elan-${{ hashFiles('lean-toolchain') }}
+
+      - name: Install elan
+        if: steps.elan-cache.outputs.cache-hit != 'true'
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+
+      - name: Add elan to PATH
+        run: echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      # WARM START, part 1: dependencies.
+      #
+      # `restore`/`save` rather than the combined `cache` action, and a key that
+      # is unique per run with a prefix `restore-keys` fallback.  Cache keys are
+      # immutable in GitHub Actions: a combined `cache` step that hits on a
+      # partial entry will never update it, so a build that got 40% of the way
+      # through would restore that same 40% forever.  Unique key + prefix
+      # restore means every run starts from the best entry that exists and
+      # writes back a strictly better one.
+      - name: Restore Lake dependencies
+        id: lake-deps-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake/packages
+          key: ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            ${{ runner.os }}-lake-deps-
+
+      # WARM START, part 2: this project's own oleans.
+      #
+      # Keyed on the sources so an unchanged tree is an exact hit, with the
+      # prefix fallback carrying the previous run's build forward when sources
+      # did change.  Lake's own hashing decides what is actually reusable; a
+      # stale olean is rebuilt, never trusted.
+      - name: Restore compiled project
+        id: build-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake/build
+          key: ${{ runner.os }}-nonsofic-build-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-nonsofic-build-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean') }}-
+            ${{ runner.os }}-nonsofic-build-
+
+      # Mathlib's own oleans, from the upstream build cache.  This is what makes
+      # the very first run warm rather than a from-scratch Mathlib compile:
+      # without it the toolchain would rebuild Mathlib itself, which alone
+      # exceeds this job's timeout.  Run unconditionally and let it no-op when
+      # the dependency cache already had everything.
+      - name: Fetch precompiled Mathlib
+        run: lake exe cache get
+
+      # Saved BEFORE the long build, so a build that times out or fails still
+      # leaves the (expensive, ~5GB unpacked) Mathlib oleans cached for the
+      # next run.  The dependency tree is complete at this point; nothing the
+      # build does improves it.
+      - name: Save Lake dependencies
+        if: always() && steps.lake-deps-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .lake/packages
+          key: ${{ steps.lake-deps-restore.outputs.cache-primary-key }}
+
+      # Source-level guard, before the build, because it is instant and its
+      # failure mode is unambiguous.  `sorry` is caught here in the source text
+      # AND below in the axiom closure; the two see different things (a `sorry`
+      # in an unimported file is invisible to the kernel audit, and a
+      # `sorry`-free file can still reach `sorryAx` through a macro).
+      - name: Forbidden source constructs
+        shell: bash
+        run: |
+          status=0
+          scan() {
+            local label="$1" pattern="$2"
+            local hits
+            hits=$(grep -rnE "$pattern" --include='*.lean' \
+              NonsoficGroupsExist.lean NonsoficGroupsExist/ || true)
+            if [ -n "$hits" ]; then
+              echo "::error::$label"
+              echo "$hits"
+              status=1
+            fi
+          }
+          scan "sorry / sorryAx in library sources" '(^|[^[:alnum:]_])sorry([^[:alnum:]_]|$)|sorryAx'
+          scan "hand-declared axiom in library sources" '^[[:space:]]*axiom[[:space:]]'
+          scan "native_decide (trusts the compiler, not the kernel)" '(^|[^[:alnum:]_])native_decide([^[:alnum:]_]|$)'
+          scan "unsafe / implemented_by / opaque escape hatches" '^[[:space:]]*unsafe[[:space:]]|@\[implemented_by|^[[:space:]]*opaque[[:space:]]'
+          scan "warningAsError disabled in source" 'warningAsError[[:space:]]*(:=)?[[:space:]]*false'
+          exit $status
+
+      # The build itself.  `lakefile.toml` sets `-DwarningAsError=true` for the
+      # library, so an unused variable or a deprecated lemma is a failure here.
+      - name: Build project
+        run: lake build
+
+      # Saved with `always()` so a run that dies partway through still banks the
+      # modules it did compile.  This is the mechanism that lets a build too
+      # long for one job converge over consecutive runs instead of restarting
+      # from zero each time.
+      - name: Save compiled project
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .lake/build
+          key: ${{ steps.build-restore.outputs.cache-primary-key }}
+
+      # A successful `lake build` says every module elaborates.  It says nothing
+      # about what the proof terms rest on.  This step pins the statements of
+      # the three public theorems and walks the transitive axiom closure of the
+      # whole namespace through the kernel environment, rejecting anything
+      # outside `propext` / `Classical.choice` / `Quot.sound`.  Without it,
+      # "0 sorries" is a grep result rather than a fact about the proof.
+      - name: Kernel audit (statements and transitive axiom closure)
+        run: lake env lean scripts/Audit.lean
