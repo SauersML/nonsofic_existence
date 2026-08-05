@@ -195,12 +195,12 @@ theorem abs_scaledPermutationCorrelation_sub_sq_le [Nonempty Y]
   have hdRaw := norm_diagonal_centeredIndicator_sub_sq_le c p q
   have hd : ‖d‖ ^ 2 / Fintype.card Y ≤
       4 * hammingDistance Y p q := by
-    have hdisagree : ((permutationDisagreement p q).card : ℝ) /
+    have hdisagree : ((hammingDisagreement p q).card : ℝ) /
         Fintype.card Y = hammingDistance Y p q := by
-      rw [hammingDistance_eq_permutationDisagreement_ratio]
+      rw [hammingDistance]
     calc
       ‖d‖ ^ 2 / Fintype.card Y ≤
-          (4 * ((permutationDisagreement p q).card : ℝ)) /
+          (4 * ((hammingDisagreement p q).card : ℝ)) /
             Fintype.card Y := by
         apply div_le_div_of_nonneg_right
         · simpa [d, x, graphVector] using hdRaw

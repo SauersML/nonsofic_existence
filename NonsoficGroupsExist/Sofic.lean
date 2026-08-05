@@ -49,30 +49,39 @@ instance finiteModelCoeSort : CoeSort FiniteModel Type := ⟨FiniteModel.carrier
 instance finiteModelFintype (Y : FiniteModel) : Fintype Y := Y.fintype
 instance finiteModelDecidableEq (Y : FiniteModel) : DecidableEq Y := Y.decidableEq
 
+/-- The vertices on which two permutations of a finite type disagree. -/
+def hammingDisagreement {Y : Type*} [Fintype Y] [DecidableEq Y]
+    (p q : Equiv.Perm Y) : Finset Y :=
+  Finset.univ.filter fun y ↦ p y ≠ q y
+
+@[simp] theorem mem_hammingDisagreement {Y : Type*} [Fintype Y] [DecidableEq Y]
+    (p q : Equiv.Perm Y) (y : Y) :
+    y ∈ hammingDisagreement p q ↔ p y ≠ q y := by
+  simp [hammingDisagreement]
+
 /-- Normalized Hamming distance on permutations of a finite set.  On the empty
 set it is defined to be zero by real division; approximation cardinalities are
 separately required to diverge. -/
 noncomputable def hammingDistance (Y : FiniteModel) (p q : Equiv.Perm Y) : ℝ :=
-  ((Finset.univ.filter fun y ↦ p y ≠ q y).card : ℝ) / Fintype.card Y
+  ((hammingDisagreement p q).card : ℝ) / Fintype.card Y
 
 @[simp] theorem hammingDistance_self (Y : FiniteModel) (p : Equiv.Perm Y) :
     hammingDistance Y p p = 0 := by
-  simp [hammingDistance]
+  simp [hammingDistance, hammingDisagreement]
 
 theorem hammingDistance_comm (Y : FiniteModel) (p q : Equiv.Perm Y) :
     hammingDistance Y p q = hammingDistance Y q p := by
   unfold hammingDistance
-  have h : (Finset.univ.filter fun y ↦ p y ≠ q y) =
-      Finset.univ.filter fun y ↦ q y ≠ p y := by
+  have h : hammingDisagreement p q = hammingDisagreement q p := by
     ext y
-    simp [ne_comm]
+    simp only [mem_hammingDisagreement, ne_eq, ne_comm]
   rw [h]
 
-theorem disagreement_eq_support (Y : FiniteModel) (p q : Equiv.Perm Y) :
-    (Finset.univ.filter fun y ↦ p y ≠ q y) = (q⁻¹ * p).support := by
+theorem hammingDisagreement_eq_support {Y : Type*} [Fintype Y] [DecidableEq Y]
+    (p q : Equiv.Perm Y) :
+    hammingDisagreement p q = (q⁻¹ * p).support := by
   ext y
-  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Equiv.Perm.mem_support,
-    Equiv.Perm.mul_apply]
+  simp only [mem_hammingDisagreement, Equiv.Perm.mem_support, Equiv.Perm.mul_apply]
   constructor
   · intro hpq heq
     apply hpq
@@ -85,7 +94,7 @@ theorem disagreement_eq_support (Y : FiniteModel) (p q : Equiv.Perm Y) :
 
 theorem hammingDistance_eq_support (Y : FiniteModel) (p q : Equiv.Perm Y) :
     hammingDistance Y p q = ((q⁻¹ * p).support.card : ℝ) / Fintype.card Y := by
-  rw [hammingDistance, disagreement_eq_support]
+  rw [hammingDistance, hammingDisagreement_eq_support]
 
 theorem hammingDistance_nonnegative (Y : FiniteModel) (p q : Equiv.Perm Y) :
     0 ≤ hammingDistance Y p q := by

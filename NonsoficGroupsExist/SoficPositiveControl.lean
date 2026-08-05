@@ -64,6 +64,7 @@ theorem hammingDistance_mulLeft (G : Type) [Group G] [Fintype G] [DecidableEq G]
     intro hy
     exact hgh (mul_right_cancel hy)
   unfold hammingDistance
+  unfold hammingDisagreement
   change
     ((Finset.univ.filter fun y : G ↦
       (Equiv.mulLeft g) y ≠ (Equiv.mulLeft h) y).card : ℝ) /

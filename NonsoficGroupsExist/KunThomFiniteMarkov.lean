@@ -138,7 +138,7 @@ theorem finiteTranslation_hilbert_error_eventually
     have hdist := hNerr n hnerr g hg
     calc
       ‖e g‖ ^ 2 / Fintype.card (A.model n) ≤
-          (4 * ((permutationDisagreement
+          (4 * ((hammingDisagreement
             (A.map n (s * g, (1 : J)))
             (A.map n (s, 1) * A.map n (g, 1))).card : ℝ)) /
               Fintype.card (A.model n) := by
@@ -148,7 +148,7 @@ theorem finiteTranslation_hilbert_error_eventually
       _ = 4 * hammingDistance (A.model n)
           (A.map n (s * g, (1 : J)))
           (A.map n (s, 1) * A.map n (g, 1)) := by
-        rw [hammingDistance_eq_permutationDisagreement_ratio]
+        rw [hammingDistance]
         ring
       _ ≤ η := by linarith
   have herr' (g : K) (hg : g ∈ a.support) :
@@ -281,7 +281,7 @@ theorem sofic_one_hilbert_error_eventually
           (centeredIndicator (permutationGraph (A.model n) c)) -
         centeredIndicator (permutationGraph (A.model n) c)‖ ^ 2 /
           Fintype.card (A.model n) ≤
-      (4 * ((permutationDisagreement
+      (4 * ((hammingDisagreement
         (A.map n ((1 : K), (1 : J))) 1).card : ℝ)) /
           Fintype.card (A.model n) := by
       apply div_le_div_of_nonneg_right
@@ -289,7 +289,7 @@ theorem sofic_one_hilbert_error_eventually
       · exact hcard.le
     _ = 4 * hammingDistance (A.model n)
         (A.map n ((1 : K), (1 : J))) 1 := by
-      rw [hammingDistance_eq_permutationDisagreement_ratio]
+      rw [hammingDistance]
       ring
     _ < δ := by
       have hclose : hammingDistance (A.model n)

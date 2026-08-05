@@ -117,6 +117,7 @@ theorem hammingDistance_roundRelation_le
     hammingDistance Y (roundRelation Y U c) c ≤
       ((permutationGraph Y c \ U).card : ℝ) / Fintype.card Y := by
   unfold hammingDistance
+  unfold hammingDisagreement
   apply div_le_div_of_nonneg_right _ (by positivity)
   have hcard :
       (Finset.univ.filter fun x ↦ roundRelation Y U c x ≠ c x).card ≤
@@ -1021,11 +1022,11 @@ def badTargetSources (U : Finset (Y × Y))
 
 theorem repairRelation_disagreement_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
-    disagreement Y (repairRelation Y U) c ⊆
+    hammingDisagreement (repairRelation Y U) c ⊆
       missingSources Y U c ∪
         (badRows Y U ∪ badTargetSources Y U c) := by
   intro x hx
-  have hne := (mem_disagreement Y (repairRelation Y U) c x).1 hx
+  have hne := (mem_hammingDisagreement (repairRelation Y U) c x).1 hx
   by_cases hgraph : (x, c x) ∈ U
   · by_cases hrow : rowDegree Y U x = 1
     · by_cases hcol : columnDegree Y U (c x) = 1
@@ -1041,7 +1042,7 @@ theorem repairRelation_disagreement_subset
 
 theorem card_repairRelation_disagreement_le
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
-    (disagreement Y (repairRelation Y U) c).card ≤
+    (hammingDisagreement (repairRelation Y U) c).card ≤
       (permutationGraph Y c \ U).card +
         2 * ((permutationGraph Y c \ U).card +
           (U \ permutationGraph Y c).card) := by
@@ -1062,19 +1063,19 @@ theorem hammingDistance_repairRelation_le
         2 * ((permutationGraph Y c \ U).card +
           (U \ permutationGraph Y c).card) : ℕ) : ℝ) /
             Fintype.card Y := by
-  rw [hammingDistance_eq_disagreement_card]
+  rw [hammingDistance]
   apply div_le_div_of_nonneg_right _ (by positivity)
   exact_mod_cast card_repairRelation_disagreement_le Y U c
 
 theorem missingSources_repairRelation_subset
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     missingSources Y U (repairRelation Y U) ⊆
-      disagreement Y (repairRelation Y U) c ∪ missingSources Y U c := by
+      hammingDisagreement (repairRelation Y U) c ∪ missingSources Y U c := by
   intro x hx
   rw [mem_missingSources] at hx
   by_cases hne : repairRelation Y U x ≠ c x
   · exact Finset.mem_union_left _
-      ((mem_disagreement Y (repairRelation Y U) c x).2 hne)
+      ((mem_hammingDisagreement (repairRelation Y U) c x).2 hne)
   · apply Finset.mem_union_right
     rw [mem_missingSources]
     simpa [not_ne_iff.mp hne] using hx
@@ -1082,7 +1083,7 @@ theorem missingSources_repairRelation_subset
 theorem card_graph_repair_missing_le
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     (permutationGraph Y (repairRelation Y U) \ U).card ≤
-      (disagreement Y (repairRelation Y U) c).card +
+      (hammingDisagreement (repairRelation Y U) c).card +
         (permutationGraph Y c \ U).card := by
   rw [← card_missingSources Y U (repairRelation Y U),
     ← card_missingSources Y U c]
@@ -1090,11 +1091,11 @@ theorem card_graph_repair_missing_le
     (Finset.card_union_le _ _)
 
 def disagreementGraph (r c : Equiv.Perm Y) : Finset (Y × Y) :=
-  (disagreement Y r c).map
+  (hammingDisagreement r c).map
     ⟨fun x ↦ (x, c x), fun _ _ h ↦ congrArg Prod.fst h⟩
 
 @[simp] theorem card_disagreementGraph (r c : Equiv.Perm Y) :
-    (disagreementGraph Y r c).card = (disagreement Y r c).card := by
+    (disagreementGraph Y r c).card = (hammingDisagreement r c).card := by
   simp [disagreementGraph]
 
 theorem repairRelation_excess_subset
@@ -1109,7 +1110,7 @@ theorem repairRelation_excess_subset
     rw [disagreementGraph, Finset.mem_map]
     have hc := (mem_permutationGraph Y c p).1 horiginal
     refine ⟨p.1, ?_, ?_⟩
-    · rw [mem_disagreement]
+    · rw [mem_hammingDisagreement]
       intro heq
       apply hp.2
       rw [mem_permutationGraph]
@@ -1121,7 +1122,7 @@ theorem card_graph_repair_excess_le
     (U : Finset (Y × Y)) (c : Equiv.Perm Y) :
     (U \ permutationGraph Y (repairRelation Y U)).card ≤
       (U \ permutationGraph Y c).card +
-        (disagreement Y (repairRelation Y U) c).card := by
+        (hammingDisagreement (repairRelation Y U) c).card := by
   have hsubset := Finset.card_le_card (repairRelation_excess_subset Y U c)
   have hunion := Finset.card_union_le (U \ permutationGraph Y c)
     (disagreementGraph Y (repairRelation Y U) c)

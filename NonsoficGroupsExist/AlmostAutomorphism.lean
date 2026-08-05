@@ -227,14 +227,6 @@ def agreement (c d : Equiv.Perm Y) : Finset Y :=
     x ∈ agreement Y c d ↔ c x = d x := by
   simp [agreement]
 
-/-- Vertices on which two permutations disagree. -/
-def disagreement (c d : Equiv.Perm Y) : Finset Y :=
-  Finset.univ.filter fun x ↦ c x ≠ d x
-
-@[simp] theorem mem_disagreement (c d : Equiv.Perm Y) (x : Y) :
-    x ∈ disagreement Y c d ↔ c x ≠ d x := by
-  simp [disagreement]
-
 /-- Every label arc crossing the agreement set is bad for at least one of the
 two permutations. -/
 theorem directedBoundary_agreement_subset_badArcs_union
@@ -284,24 +276,24 @@ theorem card_directedBoundary_agreement_le
 
 /-- Agreement and disagreement partition the vertex set. -/
 theorem agreement_union_disagreement (c d : Equiv.Perm Y) :
-    agreement Y c d ∪ disagreement Y c d = Finset.univ := by
+    agreement Y c d ∪ hammingDisagreement c d = Finset.univ := by
   ext x
   by_cases h : c x = d x <;> simp [h]
 
 theorem agreement_disjoint_disagreement (c d : Equiv.Perm Y) :
-    Disjoint (agreement Y c d) (disagreement Y c d) := by
+    Disjoint (agreement Y c d) (hammingDisagreement c d) := by
   exact Finset.disjoint_left.mpr fun x hx hy ↦
-    (mem_disagreement Y c d x).1 hy ((mem_agreement Y c d x).1 hx)
+    (mem_hammingDisagreement c d x).1 hy ((mem_agreement Y c d x).1 hx)
 
 /-- Hamming-count decomposition into agreement and disagreement vertices. -/
 theorem card_agreement_add_card_disagreement (c d : Equiv.Perm Y) :
-    (agreement Y c d).card + (disagreement Y c d).card = Fintype.card Y := by
+    (agreement Y c d).card + (hammingDisagreement c d).card = Fintype.card Y := by
   rw [← Finset.card_union_of_disjoint (agreement_disjoint_disagreement Y c d),
     agreement_union_disagreement]
   exact Finset.card_univ
 
 theorem disagreement_eq_compl_agreement (c d : Equiv.Perm Y) :
-    disagreement Y c d = Finset.univ \ agreement Y c d := by
+    hammingDisagreement c d = Finset.univ \ agreement Y c d := by
   ext x
   by_cases h : c x = d x <;> simp [h]
 
@@ -329,7 +321,7 @@ theorem agreement_or_disagreement_small
     (hexp : HasDirectedExpansionAtScale Y S h m)
     (hbad : (((badArcs Y S c).card + (badArcs Y S d).card : ℕ) : ℝ) <
       h * m) :
-    (agreement Y c d).card < m ∨ (disagreement Y c d).card < m := by
+    (agreement Y c d).card < m ∨ (hammingDisagreement c d).card < m := by
   by_contra hsmall
   push Not at hsmall
   have hboundary := card_directedBoundary_agreement_le Y S c d
@@ -343,28 +335,23 @@ theorem agreement_or_disagreement_small
         ((badArcs Y S c).card + (badArcs Y S d).card : ℕ) := by
       exact_mod_cast hboundary
     linarith
-  · have hhalf' : 2 * (disagreement Y c d).card ≤ Fintype.card Y := by
+  · have hhalf' : 2 * (hammingDisagreement c d).card ≤ Fintype.card Y := by
       have hpartition := card_agreement_add_card_disagreement Y c d
       omega
-    have hexpand := hexp.2 (disagreement Y c d) hsmall.2 hhalf'
-    have hmcast : (m : ℝ) ≤ ((disagreement Y c d).card : ℝ) := by
+    have hexpand := hexp.2 (hammingDisagreement c d) hsmall.2 hhalf'
+    have hmcast : (m : ℝ) ≤ ((hammingDisagreement c d).card : ℝ) := by
       exact_mod_cast hsmall.2
-    have hscale : h * m ≤ h * (disagreement Y c d).card :=
+    have hscale : h * m ≤ h * (hammingDisagreement c d).card :=
       mul_le_mul_of_nonneg_left hmcast hexp.1.le
     have hboundaries :
-        directedBoundary Y S (disagreement Y c d) =
+        directedBoundary Y S (hammingDisagreement c d) =
           directedBoundary Y S (agreement Y c d) := by
       rw [disagreement_eq_compl_agreement, directedBoundary_compl]
-    have hboundarycast : ((directedBoundary Y S (disagreement Y c d)).card : ℝ) ≤
+    have hboundarycast : ((directedBoundary Y S (hammingDisagreement c d)).card : ℝ) ≤
         ((badArcs Y S c).card + (badArcs Y S d).card : ℕ) := by
       rw [hboundaries]
       exact_mod_cast hboundary
     linarith
-
-theorem hammingDistance_eq_disagreement_card (c d : Equiv.Perm Y) :
-    hammingDistance Y c d =
-      ((disagreement Y c d).card : ℝ) / Fintype.card Y := by
-  rfl
 
 /-- Normalized form of the Kun--Thom separation estimate.  If the graph has
 at least five times the chosen small-set scale, two sufficiently good almost
@@ -383,19 +370,19 @@ theorem hammingDistance_small_or_four_mul_le
   rcases agreement_or_disagreement_small Y S c d m hexp hbad with
     hagree | hdisagree
   · right
-    have hfourNat : 4 * m ≤ (disagreement Y c d).card := by
+    have hfourNat : 4 * m ≤ (hammingDisagreement c d).card := by
       have hpartition := card_agreement_add_card_disagreement Y c d
       omega
-    have hfourReal : (4 : ℝ) * m ≤ ((disagreement Y c d).card : ℝ) := by
+    have hfourReal : (4 : ℝ) * m ≤ ((hammingDisagreement c d).card : ℝ) := by
       exact_mod_cast hfourNat
-    rw [hammingDistance_eq_disagreement_card]
+    rw [hammingDistance]
     rw [show 4 * ((m : ℝ) / Fintype.card Y) =
       ((4 : ℝ) * m) / Fintype.card Y by ring]
     exact div_le_div_of_nonneg_right hfourReal hcardReal.le
   · left
-    have hdisagreeReal : ((disagreement Y c d).card : ℝ) < m := by
+    have hdisagreeReal : ((hammingDisagreement c d).card : ℝ) < m := by
       exact_mod_cast hdisagree
-    rw [hammingDistance_eq_disagreement_card]
+    rw [hammingDistance]
     exact div_lt_div_of_pos_right hdisagreeReal hcardReal
 
 theorem hammingDistance_mul_mul_le (a b c d : Equiv.Perm Y) :

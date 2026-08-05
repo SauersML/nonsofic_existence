@@ -78,7 +78,7 @@ theorem wordDisagreement_negligible (w : List G) :
   refine ⟨N, fun n hn ↦ ?_⟩
   change |((S.wordDisagreement w n).card : ℝ) / Fintype.card (S.model n)| < ε
   rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))]
-  simpa only [hammingDistance, wordDisagreement] using hN n hn
+  simpa only [hammingDistance, hammingDisagreement, wordDisagreement] using hN n hn
 
 private theorem evaluateWord_crossing_card_le (w : List G) (n : ℕ) :
     (wordCrossing (P n) (SoficApproximation.evaluateWord (S.map n) w)).card ≤

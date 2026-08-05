@@ -135,28 +135,28 @@ variable {Y : FiniteModel}
 theorem graphDiagonalDisagreement_subset
     (c p q : Equiv.Perm Y) :
     graphDiagonalDisagreement c p q ⊆
-      permutationDisagreement p q ∪
-        permutationPreimage c (permutationDisagreement p q) := by
+      hammingDisagreement p q ∪
+        permutationPreimage c (hammingDisagreement p q) := by
   intro x hx
   simp only [graphDiagonalDisagreement, Finset.mem_filter, Finset.mem_univ,
     true_and, diagonalPerm_apply] at hx
   rw [Finset.mem_union]
   by_cases hfirst : p x ≠ q x
-  · exact Or.inl ((mem_permutationDisagreement p q x).2 hfirst)
+  · exact Or.inl ((mem_hammingDisagreement p q x).2 hfirst)
   · right
     rw [permutationPreimage, Finset.mem_filter]
-    refine ⟨Finset.mem_univ _, (mem_permutationDisagreement p q (c x)).2 ?_⟩
+    refine ⟨Finset.mem_univ _, (mem_hammingDisagreement p q (c x)).2 ?_⟩
     intro hsecond
     exact hx (Prod.ext (not_ne_iff.mp hfirst) hsecond)
 
 theorem card_graphDiagonalDisagreement_le
     (c p q : Equiv.Perm Y) :
     (graphDiagonalDisagreement c p q).card ≤
-      2 * (permutationDisagreement p q).card := by
+      2 * (hammingDisagreement p q).card := by
   have hsubset := Finset.card_le_card
     (graphDiagonalDisagreement_subset c p q)
-  have hunion := Finset.card_union_le (permutationDisagreement p q)
-    (permutationPreimage c (permutationDisagreement p q))
+  have hunion := Finset.card_union_le (hammingDisagreement p q)
+    (permutationPreimage c (hammingDisagreement p q))
   rw [permutationPreimage_card] at hunion
   omega
 
@@ -204,7 +204,7 @@ theorem norm_diagonal_centeredIndicator_sub_sq_le
           (centeredIndicator (permutationGraph Y c)) -
         permutationOperator (diagonalPerm q)
           (centeredIndicator (permutationGraph Y c))‖ ^ 2 ≤
-      4 * (permutationDisagreement p q).card := by
+      4 * (hammingDisagreement p q).card := by
   calc
     ‖permutationOperator (diagonalPerm p)
           (centeredIndicator (permutationGraph Y c)) -
@@ -216,10 +216,10 @@ theorem norm_diagonal_centeredIndicator_sub_sq_le
         (permutationGraph Y c) (diagonalPerm p) (diagonalPerm q)
     _ = 2 * (graphDiagonalDisagreement c p q).card := by
       rw [card_restrictedDiagonalDisagreement_eq]
-    _ ≤ 4 * (permutationDisagreement p q).card := by
+    _ ≤ 4 * (hammingDisagreement p q).card := by
       have h := card_graphDiagonalDisagreement_le c p q
       have hreal : ((graphDiagonalDisagreement c p q).card : ℝ) ≤
-          2 * (permutationDisagreement p q).card := by
+          2 * (hammingDisagreement p q).card := by
         exact_mod_cast h
       linarith
 

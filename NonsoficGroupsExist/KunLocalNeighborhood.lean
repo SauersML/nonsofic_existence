@@ -102,7 +102,7 @@ theorem wordEvaluationError_negligible (w : List G) :
   change |((wordEvaluationError A n w).card : ℝ) /
     Fintype.card (A.model n)| < ε
   rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))]
-  simpa [hammingDistance, wordEvaluationError] using hN n hn
+  simpa [hammingDistance, hammingDisagreement, wordEvaluationError] using hN n hn
 
 /-- All word-evaluation failures for the first `q` canonical witnesses. -/
 noncomputable def wordErrorUnion

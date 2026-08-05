@@ -50,12 +50,14 @@ private theorem hammingDistance_mul (n : ℕ) (g h : G) :
     hammingDistance (S.model n) (S.map n (g * h)) (S.map n g * S.map n h) =
       ((S.multiplicationError n g h).card : ℝ) / Fintype.card (S.model n) := by
   unfold hammingDistance
+  unfold hammingDisagreement
   congr 2
 
 private theorem hammingDistance_one (n : ℕ) (g : G) :
     hammingDistance (S.model n) (S.map n g) 1 =
       ((S.movedVertices n g).card : ℝ) / Fintype.card (S.model n) := by
   unfold hammingDistance
+  unfold hammingDisagreement
   congr 2
 
 theorem multiplicationError_negligible (g h : G) :
@@ -234,6 +236,7 @@ theorem hammingDistance_eq_one_sub_collision (n : ℕ) (g h : G)
         Fintype.card (S.model n) := by
   classical
   unfold hammingDistance collisionError
+  unfold hammingDisagreement
   have hpartition := Finset.card_filter_add_card_filter_not
     (s := (Finset.univ : Finset (S.model n)))
     (fun x : S.model n ↦ S.map n g x = S.map n h x)

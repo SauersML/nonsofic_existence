@@ -108,6 +108,7 @@ theorem hammingDistance_amplify {Y : FiniteModel} {k : ℕ} (hk : 0 < k)
     simp
   have hkR : (0 : ℝ) < k := by exact_mod_cast hk
   unfold hammingDistance
+  unfold hammingDisagreement
   change
     ((Finset.univ.filter fun z : Fin k × Y ↦
       amplifyPerm k p z ≠ amplifyPerm k q z).card : ℝ) /

@@ -147,21 +147,13 @@ theorem norm_permutationOperator_indicator_sub_sq
       (((U.map p.toEmbedding) ∆ U).card : ℝ) := by
   rw [permutationOperator_indicator, norm_indicator_sub_sq]
 
-/-- Points on which two finite permutations disagree. -/
-def permutationDisagreement (p q : Equiv.Perm Y) : Finset Y :=
-  Finset.univ.filter fun y ↦ p y ≠ q y
-
-@[simp] theorem mem_permutationDisagreement (p q : Equiv.Perm Y) (y : Y) :
-    y ∈ permutationDisagreement p q ↔ p y ≠ q y := by
-  simp [permutationDisagreement]
-
 /-- Images of a set under two permutations can differ only through images
 of points where the permutations disagree. -/
 theorem symmDiff_image_subset_disagreement_images
     (p q : Equiv.Perm Y) (U : Finset Y) :
     (U.map p.toEmbedding) ∆ (U.map q.toEmbedding) ⊆
-      (permutationDisagreement p q).map p.toEmbedding ∪
-        (permutationDisagreement p q).map q.toEmbedding := by
+      (hammingDisagreement p q).map p.toEmbedding ∪
+        (hammingDisagreement p q).map q.toEmbedding := by
   intro y hy
   rw [Finset.mem_symmDiff] at hy
   rcases hy with ⟨hp, hnq⟩ | ⟨hq, hnp⟩
@@ -169,7 +161,7 @@ theorem symmDiff_image_subset_disagreement_images
     obtain ⟨x, hx, rfl⟩ := hp
     apply Finset.mem_union_left
     rw [Finset.mem_map]
-    refine ⟨x, (mem_permutationDisagreement p q x).2 ?_, rfl⟩
+    refine ⟨x, (mem_hammingDisagreement p q x).2 ?_, rfl⟩
     intro heq
     apply hnq
     exact Finset.mem_map.mpr ⟨x, hx, heq.symm⟩
@@ -177,7 +169,7 @@ theorem symmDiff_image_subset_disagreement_images
     obtain ⟨x, hx, rfl⟩ := hq
     apply Finset.mem_union_right
     rw [Finset.mem_map]
-    refine ⟨x, (mem_permutationDisagreement p q x).2 ?_, rfl⟩
+    refine ⟨x, (mem_hammingDisagreement p q x).2 ?_, rfl⟩
     intro heq
     apply hnp
     exact Finset.mem_map.mpr ⟨x, hx, heq⟩
@@ -187,16 +179,16 @@ disagreement set. -/
 theorem card_symmDiff_images_le_two_mul_disagreement
     (p q : Equiv.Perm Y) (U : Finset Y) :
     ((U.map p.toEmbedding) ∆ (U.map q.toEmbedding)).card ≤
-      2 * (permutationDisagreement p q).card := by
+      2 * (hammingDisagreement p q).card := by
   calc
     ((U.map p.toEmbedding) ∆ (U.map q.toEmbedding)).card ≤
-        ((permutationDisagreement p q).map p.toEmbedding ∪
-          (permutationDisagreement p q).map q.toEmbedding).card :=
+        ((hammingDisagreement p q).map p.toEmbedding ∪
+          (hammingDisagreement p q).map q.toEmbedding).card :=
       Finset.card_le_card (symmDiff_image_subset_disagreement_images p q U)
-    _ ≤ ((permutationDisagreement p q).map p.toEmbedding).card +
-        ((permutationDisagreement p q).map q.toEmbedding).card :=
+    _ ≤ ((hammingDisagreement p q).map p.toEmbedding).card +
+        ((hammingDisagreement p q).map q.toEmbedding).card :=
       Finset.card_union_le _ _
-    _ = 2 * (permutationDisagreement p q).card := by
+    _ = 2 * (hammingDisagreement p q).card := by
       simp only [Finset.card_map]
       omega
 
@@ -206,7 +198,7 @@ theorem norm_permutationOperators_indicator_sub_sq_le
     (p q : Equiv.Perm Y) (U : Finset Y) :
     ‖permutationOperator p (indicator U) -
         permutationOperator q (indicator U)‖ ^ 2 ≤
-      2 * (permutationDisagreement p q).card := by
+      2 * (hammingDisagreement p q).card := by
   rw [permutationOperator_indicator, permutationOperator_indicator,
     norm_indicator_sub_sq]
   exact_mod_cast card_symmDiff_images_le_two_mul_disagreement p q U
@@ -243,7 +235,7 @@ theorem norm_permutationOperators_centeredIndicator_sub_sq_le
     (p q : Equiv.Perm Y) (U : Finset Y) :
     ‖permutationOperator p (centeredIndicator U) -
         permutationOperator q (centeredIndicator U)‖ ^ 2 ≤
-      2 * (permutationDisagreement p q).card := by
+      2 * (hammingDisagreement p q).card := by
   rw [permutationOperators_centeredIndicator_sub]
   exact norm_permutationOperators_indicator_sub_sq_le p q U
 
@@ -546,13 +538,6 @@ section SoficNormalization
 
 variable {M : FiniteModel}
 
-/-- The local disagreement cardinality is exactly the numerator in normalized
-Hamming distance. -/
-theorem hammingDistance_eq_permutationDisagreement_ratio
-    (p q : Equiv.Perm M) :
-    hammingDistance M p q =
-      ((permutationDisagreement p q).card : ℝ) / Fintype.card M := rfl
-
 /-- Normalized Hilbert error is bounded by twice normalized Hamming error. -/
 theorem normalized_norm_permutationOperators_indicator_sub_sq_le
     [Nonempty M] (p q : Equiv.Perm M) (U : Finset M) :
@@ -562,13 +547,13 @@ theorem normalized_norm_permutationOperators_indicator_sub_sq_le
   have h := norm_permutationOperators_indicator_sub_sq_le p q U
   have hcardNat : 0 < Fintype.card M := Fintype.card_pos
   have hcard : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
-  rw [hammingDistance_eq_permutationDisagreement_ratio]
+  rw [hammingDistance]
   calc
     ‖permutationOperator p (indicator U) -
         permutationOperator q (indicator U)‖ ^ 2 / Fintype.card M ≤
-        (2 * (permutationDisagreement p q).card : ℝ) / Fintype.card M :=
+        (2 * (hammingDisagreement p q).card : ℝ) / Fintype.card M :=
       div_le_div_of_nonneg_right h hcard.le
-    _ = 2 * (((permutationDisagreement p q).card : ℝ) /
+    _ = 2 * (((hammingDisagreement p q).card : ℝ) /
         Fintype.card M) := by ring
 
 /-- The same normalized Hamming control for centered characteristic

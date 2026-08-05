@@ -226,6 +226,7 @@ private theorem hammingDistance_completed_mul (n : ℕ) (g h : H) :
         (D.completedMap n g * D.completedMap n h) =
       ((D.completedMultiplicationBad n g h).card : ℝ) / (D.subset n).card := by
   unfold hammingDistance
+  unfold hammingDisagreement
   rw [D.card_localizedModel]
   congr 2
 
@@ -233,6 +234,7 @@ private theorem hammingDistance_completed_one (n : ℕ) (g : H) :
     hammingDistance (D.localizedModel n) (D.completedMap n g) 1 =
       ((D.completedMoved n g).card : ℝ) / (D.subset n).card := by
   unfold hammingDistance
+  unfold hammingDisagreement
   rw [D.card_localizedModel]
   congr 2
 
