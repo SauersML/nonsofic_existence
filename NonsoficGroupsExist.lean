@@ -131,6 +131,8 @@ import NonsoficGroupsExist.ConservativeMatching
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.UniversalLeavittOver
+import NonsoficGroupsExist.LeavittNormalForm
+import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner

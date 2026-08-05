@@ -184,9 +184,15 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   Kazhdan pair rather than assumed
 - [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required
   ranks, through the following checkpoints:
-  - [ ] B1. Monomial normal form for `L_k(1,2)`: the spanning family
-    `s_α t_β` and the corner arithmetic needed for simplicity
-  - [ ] B2. `L_k(1,2)` is purely infinite simple
+  - [x] B1. Monomial normal form for `L_k(1,2)` (`LeavittNormalForm`):
+    the monomials `s_α t_β` span, exhibited as a subalgebra containing
+    the generators; products of monomials collapse by the prefix
+    trichotomy (`span_monomialSet_eq_top`)
+  - [x] B2. `L_k(1,2)` is purely infinite simple, in the strong
+    two-sided division form `∀ x ≠ 0, ∃ a b, a·x·b = 1`
+    (`LeavittSimplicity.exists_mul_mul_eq_one`): basis-free, via the
+    cylinder partition of unity, a minimal-length monomial extraction,
+    and annihilation of the `s`-tail by the aperiodic word `0^m 1`
   - [ ] B3. GE property of purely infinite simple rings (`thm:agp`(a))
   - [ ] B4. `K₁(L) = 0` in the form used (`thm:agp`(b) plus the rose-graph
     computation)

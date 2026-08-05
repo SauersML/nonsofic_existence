@@ -189,5 +189,16 @@ theorem not_prefix_append_right (a b x y : List (Fin 2))
     rw [hea, List.take_take, Nat.min_eq_left (Nat.le_of_not_ge hle)]
     simp
 
+
+/-- Collapse of a left prefix: `t_α · s_{αγ} = s_γ`. -/
+theorem wordT_mul_wordS_append_left (a e : List (Fin 2)) :
+    L.wordT a * L.wordS (a ++ e) = L.wordS e := by
+  rw [wordS_append, ← mul_assoc, wordT_mul_wordS_self, one_mul]
+
+/-- Collapse of a right prefix: `t_{αγ} · s_α = t_γ`. -/
+theorem wordT_append_mul_wordS (a f : List (Fin 2)) :
+    L.wordT (a ++ f) * L.wordS a = L.wordT f := by
+  rw [wordT_append, mul_assoc, wordT_mul_wordS_self, mul_one]
+
 end LeavittFamily
 end NonsoficGroupsExist
