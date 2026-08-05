@@ -146,6 +146,7 @@ import NonsoficGroupsExist.BinaryLeavittDiagonal
 import NonsoficGroupsExist.StableUnitsGenerators
 import NonsoficGroupsExist.FamilyDiagonalClass
 import NonsoficGroupsExist.FieldMatrixReduction
+import NonsoficGroupsExist.LeavittDegreeZero
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
