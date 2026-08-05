@@ -193,7 +193,14 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`LeavittSimplicity.exists_mul_mul_eq_one`): basis-free, via the
     cylinder partition of unity, a minimal-length monomial extraction,
     and annihilation of the `s`-tail by the aperiodic word `0^m 1`
-  - [ ] B3. GE property of purely infinite simple rings (`thm:agp`(a))
+  - [x] B3. GE property (`thm:agp`(a)) at rank two, with a short direct
+    proof replacing the exchange-ring machinery
+    (`MatrixDiagonalization.exists_elementary_mul_diag`): over any
+    nontrivial ring with two-sided division of the identity by every
+    nonzero element, one column operation makes the `(0,1)` entry
+    left-invertible and one row operation plants a literal `1`; every
+    `GL₂(L_k(1,2))` element is `E·diag(u,1)·F` with `E, F` elementary
+    (`binaryLeavitt_exists_elementary_mul_diag`)
   - [ ] B4. `K₁(L) = 0` in the form used (`thm:agp`(b) plus the rose-graph
     computation)
   - [ ] B5. `L^×` perfect and `GL_r(L) = EL_r(L)` for every `r ≥ 2`
