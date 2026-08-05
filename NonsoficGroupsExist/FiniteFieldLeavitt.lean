@@ -8,20 +8,20 @@ import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.UniversalLeavittOver
 
 /-!
-# The Leavitt compression construction over finite characteristic-two fields
+# The Leavitt compression construction over finite fields
 
 The rank-four algebraic construction is uniform in the coefficient field.
-This module instantiates every field of `CompressionSetup`, the two property
-`(T)` inputs, and the non-LEF witness for `L_k(1,2)` whenever `k` is finite of
-characteristic two.
+This module instantiates every field of `CompressionSetup` and the non-LEF
+witness for `L_k(1,2)` over every finite field.  The property-`(T)` inputs and
+the resulting nonsoficity theorem currently require characteristic two.
 -/
 
 namespace NonsoficGroupsExist
-namespace FiniteCharacteristicTwoLeavitt
+namespace FiniteFieldLeavitt
 
 noncomputable section
 
-variable (k : Type) [Field k] [Finite k] [CharP k 2]
+variable (k : Type) [Field k] [instFinite : Finite k]
 
 abbrev CoefficientRing := BinaryLeavitt.BinaryLeavittAlgebra k
 abbrev Core := RankFour.Core (CoefficientRing k)
@@ -31,10 +31,6 @@ def family : LeavittFamily (CoefficientRing k) :=
   BinaryLeavitt.family k
 
 abbrev Witness := (family k).cornerWitnessSubgroup
-
-instance coefficientCharP : CharP (CoefficientRing k) 2 :=
-  charP_of_injective_algebraMap (R := k)
-    (RingHom.injective (algebraMap k (CoefficientRing k))) 2
 
 private def coreEntries (g : Core k) : List (CoefficientRing k) :=
   let M := (↑(g : (Matrix (Fin 3) (Fin 3) (CoefficientRing k))ˣ) :
@@ -76,12 +72,12 @@ instance witnessCountable : Countable (Witness k) := by
   exact Units.ext h
 
 instance coreFG : Group.FG (Core k) :=
-  finiteCharacteristicTwoElementary_finitelyGenerated
-    (k := k) (A := CoefficientRing k) 3 (by omega)
+  elementaryGroup_finitelyGenerated_finiteField
+    (k := k) (R := CoefficientRing k) 3 (by omega)
 
 instance ambientFG : Group.FG (Ambient k) :=
-  finiteCharacteristicTwoElementary_finitelyGenerated
-    (k := k) (A := CoefficientRing k) 4 (by omega)
+  elementaryGroup_finitelyGenerated_finiteField
+    (k := k) (R := CoefficientRing k) 4 (by omega)
 
 instance witnessFG : Group.FG (Witness k) :=
   (Group.fg_iff').mpr
@@ -97,13 +93,13 @@ instance ambientInfinite : Infinite (Ambient k) :=
 
 def coreEmbedding : Core k →* Ambient k := RankFour.coreEmbedding
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem coreEmbedding_injective : Function.Injective (coreEmbedding k) :=
   RankFour.coreEmbedding_injective
 
 def compressionEnd : Core k →* Core k := RankFour.compressionEnd (family k)
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem compressionEnd_injective : Function.Injective (compressionEnd k) :=
   RankFour.compressionEnd_injective (family k)
 
@@ -115,7 +111,7 @@ def witnessEmbedding : Witness k →* Core k :=
       exact DiagonalElementary.firstDiagonalUnit_mem_of_mem_commutator
         ((family k).cornerWitnessSubgroup_le_commutator j.property))
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem witnessEmbedding_injective : Function.Injective (witnessEmbedding k) := by
   intro x y hxy
   apply Subtype.ext
@@ -123,7 +119,7 @@ theorem witnessEmbedding_injective : Function.Injective (witnessEmbedding k) := 
   exact congrArg (fun z : Core k ↦
     (z : (Matrix (Fin 3) (Fin 3) (CoefficientRing k))ˣ)) hxy
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem compressionEnd_commutes_witnessEmbedding (g : Core k) (j : Witness k) :
     Commute (compressionEnd k g) (witnessEmbedding k j) := by
   obtain ⟨u, hu⟩ :=
@@ -148,7 +144,7 @@ theorem compressionEnd_commutes_witnessEmbedding (g : Core k) (j : Witness k) :
   rw [hj]
   exact (family k).matrixCompression_commutes_firstDiagonalCorner _ u
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem compressionEnd_eq_witnessEmbedding_iff (g : Core k) (j : Witness k) :
     compressionEnd k g = witnessEmbedding k j ↔ g = 1 ∧ j = 1 := by
   constructor
@@ -182,23 +178,24 @@ theorem compressionEnd_eq_witnessEmbedding_iff (g : Core k) (j : Witness k) :
 
 def compressors : Finset (Ambient k) := RankFour.compressorSet (family k)
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem compressor_conjugation (q : Ambient k) (hq : q ∈ compressors k)
     (g : Core k) :
     coreEmbedding k (compressionEnd k g) =
       q * coreEmbedding k g * q⁻¹ :=
   RankFour.compressorSet_conjugation (family k) q hq g
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem core_compressors_generate :
     Subgroup.closure
       (Set.range (coreEmbedding k) ∪ (compressors k : Set (Ambient k))) = ⊤ :=
   RankFour.coreEmbedding_compressorSet_generate (family k)
 
-omit [Finite k] [CharP k 2] in
+omit [Finite k] in
 theorem witness_not_isLEF : ¬ IsLEF (Witness k) :=
   (family k).not_isLEF_cornerWitnessSubgroup
 
+include instFinite in
 private theorem exists_core_generators :
     ∃ S : Finset (Core k),
       1 ∈ S ∧ (∀ g ∈ S, g⁻¹ ∈ S) ∧ Subgroup.closure (S : Set (Core k)) = ⊤ := by
@@ -217,6 +214,7 @@ private theorem exists_core_generators :
     rw [← hS]
     exact Subgroup.closure_mono (by intro g hg; simp [T, hg])
 
+include instFinite in
 private def coreGenerators : Finset (Core k) :=
   Classical.choose (exists_core_generators k)
 
@@ -257,20 +255,22 @@ def compressionSetup : CompressionSetup (Ambient k) (Core k) (Witness k) := by
         exact (compressionEnd_eq_witnessEmbedding_iff k g j).mp
           (coreEmbedding_injective k h') }
 
-theorem core_hasKazhdanPropertyT : HasKazhdanPropertyT.{0, 0} (Core k) :=
+theorem core_hasKazhdanPropertyT [CharP k 2] :
+    HasKazhdanPropertyT.{0, 0} (Core k) :=
   finiteCharacteristicTwoElementaryThree_hasKazhdanPropertyT
     (k := k) (A := CoefficientRing k)
 
-theorem ambient_hasKazhdanPropertyT : HasKazhdanPropertyT.{0, 0} (Ambient k) :=
+theorem ambient_hasKazhdanPropertyT [CharP k 2] :
+    HasKazhdanPropertyT.{0, 0} (Ambient k) :=
   (family k).rankFour_propertyT_of_rankThree (core_hasKazhdanPropertyT k)
 
 /-- `EL₄(L_k(1,2))` is nonsofic for every finite field `k` of
 characteristic two. -/
-theorem ambient_not_isSofic : ¬ IsSofic (Ambient k) :=
+theorem ambient_not_isSofic [CharP k 2] : ¬ IsSofic (Ambient k) :=
   not_isSofic_of_not_isLEF (compressionSetup k)
     (ambient_hasKazhdanPropertyT k) (core_hasKazhdanPropertyT k)
     (witness_not_isLEF k)
 
 end
-end FiniteCharacteristicTwoLeavitt
+end FiniteFieldLeavitt
 end NonsoficGroupsExist

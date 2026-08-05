@@ -42,6 +42,13 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Prove finite generation, infinitude, property `(T)`, and nonsoficity for
   `EL_{m+1}(L_k(1,2))` over every finite characteristic-two field and every
   `m ≥ 1`
+- [x] Prove the complete rank-four compressor, elementary sign correction,
+  involution, conjugation, and generation identities over every ring carrying
+  a binary Leavitt family, with no characteristic assumption and no `K₁`
+  input
+- [ ] Generalize the kernel-checked property-`(T)` theorem from
+  characteristic two to arbitrary finite coefficient fields; this is now the
+  only characteristic restriction in the adjacent-rank nonsoficity route
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
   binary Leavitt family has explicit `M_r(R) ≃ R` for every `r ≥ 1`
 - [x] Prove nonsoficity of `EL₂` by the all-positive-ranks Leavitt equivalence
@@ -78,7 +85,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | An infinite finitely presented nonsofic group surjects onto the explicit ambient group | `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | Formalized |
 | The universal binary Leavitt algebra has the required family | `UniversalLeavitt.family` | Formalized |
 | The corner witness is non-LEF | `UniversalRankFour.witness_not_isLEF` | Formalized by a direct finite obstruction; not identified with `V` |
-| `GL_r = EL_r`, generic nonsoficity over other finite fields, and the rank-two compression construction | — | Manuscript-only |
+| The complete adjacent-rank compression construction works in every characteristic | `RankFour.compressorSet_conjugation`, `RankFour.coreEmbedding_compressorSet_generate` | Formalized |
+| Property `(T)` and hence nonsoficity over finite fields of odd characteristic | — | Manuscript-only; the algebraic compression is already characteristic-free |
+| `GL_r = EL_r` and the separate rank-two compression construction | — | Manuscript-only |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
 
 ## Module architecture
@@ -91,6 +100,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | Kun–Thom obstruction | `KunThomFiniteMarkov` through `KunThomTheorem` and `KunThomEssential` | Extracts LEF from exact-product expansion after repairing the relation to a permutation |
 | Property `(T)` | `FreeRoot*`, `A2*`, `Kazhdan*`, `FreeElementaryPropertyT` | Proves the free characteristic-two `EL₃` Kazhdan input |
 | Universal Leavitt witness | `UniversalLeavitt`, `LeavittRankEquivalence`, `UniversalRankFour`, `UniversalPropertyT`, `UniversalCompressionSetup` | Constructs the closed `EL₄(L_{𝔽₂}(1,2))` setup |
+| Finite-field compression | `FiniteFieldLeavitt` | Constructs the complete rank-four setup over every finite field; property `(T)` and nonsoficity currently specialize to characteristic two |
 | Endpoint and verification | `CriterionAssembly`, `TableCover`, `MainResults`, `Audit`; `scripts/Audit.lean` | Closes nonsoficity, builds the finitely presented cover, and audits statements and axioms |
 
 ## Proof status
@@ -104,6 +114,8 @@ claims not yet formalized are listed separately in “Full manuscript scope.”
 - [x] Explicit cylinder-transposition non-LEF subgroup
 - [x] Injective embedding of that subgroup into the universal-Leavitt `EL₃` core
 - [x] Universal rank-four compression maps and compressor identities
+- [x] Characteristic-free elementary compressor and involution words, using
+  an explicit Leavitt-unit commutator equal to scalar `-1`
 - [x] Closed `UniversalRankFour.compressionSetup`
 - [x] Finite-table theorem turning a finitely generated nonsofic group into a
   finitely presented nonsofic cover
@@ -322,6 +334,13 @@ the required conjugacy identities, generate the ambient `EL₄` together with
 the core, and have the required centralization and trivial-intersection
 properties. `UniversalRankFour.compressionSetup` assembles these facts into a
 closed algebraic setup.
+
+The rank-four compressor and involution are now explicit elementary words in
+every characteristic. The only sign formerly supplied by characteristic two
+is obtained from a proved commutator of two concrete Leavitt units and the
+Whitehead identity. Thus the remaining finite-field restriction comes from
+the current property-`(T)` formalization, not from compressor membership or
+matrix identities.
 
 The analytic development also constructs the GNS Hilbert space of every
 limiting sofic correlation, proves the iterated Kazhdan contraction there,

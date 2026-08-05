@@ -4,7 +4,7 @@ import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.SoficTransfer
 import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.FiniteTypeCharacteristicTwoPropertyT
-import NonsoficGroupsExist.FiniteCharacteristicTwoLeavitt
+import NonsoficGroupsExist.FiniteFieldLeavitt
 
 /-!
 # Unconditional existence theorems
@@ -32,10 +32,10 @@ theorem binaryLeavitt_charTwo_profile (k : Type) [Field k] [Finite k]
       ¬ IsSofic (BinaryLeavittEL k m) := by
   let L := BinaryLeavitt.family k
   let e : BinaryLeavittEL k m ≃*
-      FiniteCharacteristicTwoLeavitt.Ambient k :=
+      FiniteFieldLeavitt.Ambient k :=
     L.rankSuccEquiv m 3 (by omega) (by omega)
   have hfg : Group.FG (BinaryLeavittEL k m) := by
-    letI : Group.FG (FiniteCharacteristicTwoLeavitt.Ambient k) := inferInstance
+    letI : Group.FG (FiniteFieldLeavitt.Ambient k) := inferInstance
     exact Group.fg_of_surjective (f := e.symm.toMonoidHom) e.symm.surjective
   have hinfinite : Infinite (BinaryLeavittEL k m) :=
     elementaryGroup_infinite
@@ -46,10 +46,10 @@ theorem binaryLeavitt_charTwo_profile (k : Type) [Field k] [Finite k]
         norm_num at hval)
   have hT : HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) :=
     L.rankSucc_propertyT_of_rankSucc m 3 (by omega) (by omega)
-      (FiniteCharacteristicTwoLeavitt.ambient_hasKazhdanPropertyT k)
+      (FiniteFieldLeavitt.ambient_hasKazhdanPropertyT k)
   have hnsofic : ¬ IsSofic (BinaryLeavittEL k m) := by
     intro hsofic
-    exact FiniteCharacteristicTwoLeavitt.ambient_not_isSofic k
+    exact FiniteFieldLeavitt.ambient_not_isSofic k
       ((isSofic_mulEquiv_iff e).mp hsofic)
   exact ⟨hfg, hinfinite, hT, hnsofic⟩
 

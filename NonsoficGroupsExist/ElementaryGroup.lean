@@ -239,6 +239,92 @@ theorem elementaryGroup_finitelyGenerated [Algebra.FiniteType (ZMod 2) R]
 
 end FiniteGeneration
 
+/-! ### Finite generation over an arbitrary finite coefficient field -/
+
+section FiniteFieldGeneration
+
+variable {k R : Type*} [Field k] [Finite k] [Ring R] [Algebra k R]
+
+/-- The coefficient set whose elementary root matrices lie in `H` is a
+`k`-subalgebra once all scalar root matrices lie in `H`. -/
+def elementaryCoefficientSubalgebraOver (n : ℕ) (hn : 2 < n)
+    (H : Subgroup (Matrix (Fin n) (Fin n) R)ˣ)
+    (hscalar : ∀ (c : k) (i j : Fin n) (h : i ≠ j),
+      elementaryUnit i j h (algebraMap k R c) ∈ H) :
+    Subalgebra k R where
+  carrier := {a | ∀ (i j : Fin n) (h : i ≠ j), elementaryUnit i j h a ∈ H}
+  add_mem' := by
+    intro a b ha hb i j hij
+    rw [← elementaryUnit_mul]
+    exact H.mul_mem (ha i j hij) (hb i j hij)
+  mul_mem' := by
+    intro a b ha hb i j hij
+    obtain ⟨l, hli, hlj⟩ := Fin.exists_ne_and_ne_of_two_lt i j hn
+    have hil : i ≠ l := hli.symm
+    have hc : ⁅elementaryUnit i l hil a, elementaryUnit l j hlj b⁆ ∈ H := by
+      rw [commutatorElement_def]
+      exact H.mul_mem
+        (H.mul_mem (H.mul_mem (ha i l hil) (hb l j hlj))
+          (H.inv_mem (ha i l hil)))
+        (H.inv_mem (hb l j hlj))
+    rw [elementaryUnit_commutator i l j hil hlj hij a b] at hc
+    exact hc
+  algebraMap_mem' := by
+    intro c
+    exact hscalar c
+
+/-- `EL_n(R)` is finitely generated for every finite field `k`, every
+finite-type `k`-algebra `R`, and every `n ≥ 3`.  The finite generating set
+contains root matrices for the algebra generators and for every scalar in
+the finite coefficient field. -/
+theorem elementaryGroup_finitelyGenerated_finiteField
+    [Algebra.FiniteType k R] (n : ℕ) (hn : 2 < n) :
+    Group.FG (elementaryGroup (Fin n) R) := by
+  classical
+  letI : Fintype k := Fintype.ofFinite k
+  obtain ⟨s, hs⟩ := Algebra.FiniteType.out (R := k) (A := R)
+  let scalars : Finset R := Finset.univ.image (algebraMap k R)
+  let base : Finset R := s ∪ scalars
+  let t : Finset (Matrix (Fin n) (Fin n) R)ˣ :=
+    finiteElementaryGenerators n base
+  let H : Subgroup (Matrix (Fin n) (Fin n) R)ˣ :=
+    Subgroup.closure (t : Set (Matrix (Fin n) (Fin n) R)ˣ)
+  have hscalar : ∀ (c : k) (i j : Fin n) (h : i ≠ j),
+      elementaryUnit i j h (algebraMap k R c) ∈ H := by
+    intro c i j hij
+    apply Subgroup.subset_closure
+    exact (mem_finiteElementaryGenerators n base _).mpr
+      ⟨i, j, hij, algebraMap k R c, Finset.mem_insert_of_mem
+        (Finset.mem_union_right s
+          (Finset.mem_image.mpr ⟨c, Finset.mem_univ c, rfl⟩)), rfl⟩
+  let C : Subalgebra k R :=
+    elementaryCoefficientSubalgebraOver n hn H hscalar
+  have hgen : (s : Set R) ⊆ (C : Set R) := by
+    intro a ha i j hij
+    apply Subgroup.subset_closure
+    exact (mem_finiteElementaryGenerators n base _).mpr
+      ⟨i, j, hij, a, Finset.mem_insert_of_mem
+        (Finset.mem_union_left scalars ha), rfl⟩
+  have hC : C = ⊤ := by
+    apply top_unique
+    rw [← hs]
+    exact Algebra.adjoin_le hgen
+  have heq : H = elementaryGroup (Fin n) R := by
+    apply le_antisymm
+    · rw [Subgroup.closure_le]
+      intro z hz
+      obtain ⟨i, j, hij, a, -, rfl⟩ :=
+        (mem_finiteElementaryGenerators n base z).mp hz
+      exact elementaryUnit_mem i j hij a
+    · rw [elementaryGroup, Subgroup.closure_le]
+      rintro _ ⟨i, j, hij, a, rfl⟩
+      have ha : a ∈ C := by simp [hC]
+      exact ha i j hij
+  apply (Group.fg_iff_subgroup_fg (elementaryGroup (Fin n) R)).mpr
+  exact ⟨t, heq⟩
+
+end FiniteFieldGeneration
+
 /-! ### Transport across ranks and coefficients -/
 
 section Transport
