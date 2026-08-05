@@ -193,6 +193,76 @@ theorem exists_elementary_mul_diag [Nontrivial R]
   · rw [← hEF]
     group
 
+
+/-- The signed swap is a product of three elementary matrices. -/
+theorem exists_elementary_signedSwap :
+    ∃ E ∈ elementaryGroup (Fin 2) R,
+      (E : Matrix (Fin 2) (Fin 2) R) = !![0, -1; 1, 0] := by
+  refine ⟨elementaryUnit (0 : Fin 2) 1 (by decide) (-1) *
+    (elementaryUnit (1 : Fin 2) 0 (by decide) 1 *
+      elementaryUnit (0 : Fin 2) 1 (by decide) (-1)),
+    Subgroup.mul_mem _
+      (elementaryUnit_mem (0 : Fin 2) 1 (by decide) (-1))
+      (Subgroup.mul_mem _
+        (elementaryUnit_mem (1 : Fin 2) 0 (by decide) 1)
+        (elementaryUnit_mem (0 : Fin 2) 1 (by decide) (-1))), ?_⟩
+  simp only [Units.val_mul, elementaryUnit01_val, elementaryUnit10_val]
+  rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp
+
+/-- **The Whitehead lemma**: `diag(u, u⁻¹)` is a product of elementary
+matrices. -/
+theorem exists_elementary_whitehead (u : Rˣ) :
+    ∃ E ∈ elementaryGroup (Fin 2) R,
+      (E : Matrix (Fin 2) (Fin 2) R) =
+        !![(u : R), 0; 0, ((u⁻¹ : Rˣ) : R)] := by
+  obtain ⟨P, hPmem, hPval⟩ :=
+    (exists_elementary_signedSwap (R := R))
+  refine ⟨elementaryUnit (0 : Fin 2) 1 (by decide) (u : R) *
+    (elementaryUnit (1 : Fin 2) 0 (by decide) (-((u⁻¹ : Rˣ) : R)) *
+      elementaryUnit (0 : Fin 2) 1 (by decide) (u : R)) * P,
+    Subgroup.mul_mem _
+      (Subgroup.mul_mem _
+        (elementaryUnit_mem (0 : Fin 2) 1 (by decide) (u : R))
+        (Subgroup.mul_mem _
+          (elementaryUnit_mem (1 : Fin 2) 0 (by decide)
+            (-((u⁻¹ : Rˣ) : R)))
+          (elementaryUnit_mem (0 : Fin 2) 1 (by decide) (u : R))))
+      hPmem, ?_⟩
+  simp only [Units.val_mul, elementaryUnit01_val, elementaryUnit10_val,
+    hPval]
+  rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp
+
+/-- **The unipotent Whitehead lemma**: when `b·a = 0`, the diagonal
+`diag(1 + a·b, 1)` is a product of four elementary matrices. -/
+theorem exists_elementary_unipotent_diag (a b : R) (hba : b * a = 0) :
+    ∃ E ∈ elementaryGroup (Fin 2) R,
+      (E : Matrix (Fin 2) (Fin 2) R) = !![1 + a * b, 0; 0, 1] := by
+  have habab1 : b * (a * b) = 0 := by
+    rw [← mul_assoc, hba, zero_mul]
+  refine ⟨elementaryUnit (0 : Fin 2) 1 (by decide) a *
+    (elementaryUnit (1 : Fin 2) 0 (by decide) b *
+      (elementaryUnit (0 : Fin 2) 1 (by decide) (-a) *
+        elementaryUnit (1 : Fin 2) 0 (by decide) (-b))),
+    Subgroup.mul_mem _
+      (elementaryUnit_mem (0 : Fin 2) 1 (by decide) a)
+      (Subgroup.mul_mem _
+        (elementaryUnit_mem (1 : Fin 2) 0 (by decide) b)
+        (Subgroup.mul_mem _
+          (elementaryUnit_mem (0 : Fin 2) 1 (by decide) (-a))
+          (elementaryUnit_mem (1 : Fin 2) 0 (by decide) (-b)))), ?_⟩
+  simp only [Units.val_mul, elementaryUnit01_val, elementaryUnit10_val]
+  rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
+  ext i j
+  fin_cases i <;> fin_cases j
+  · simp [mul_add, hba, habab1]
+  · simp [mul_add, hba, habab1]
+  · simp [mul_add, hba, habab1]
+  · simp [mul_add, hba, habab1]
+
 /-- **GE for the universal binary Leavitt algebra** (`thm:agp`(a) at rank
 two, in the exact form used): every invertible two-by-two matrix over
 `L_k(1,2)` is carried to `diag(u, 1)` by elementary operations. -/
