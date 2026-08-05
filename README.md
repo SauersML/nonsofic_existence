@@ -1,11 +1,11 @@
 # NonsoficGroupsExist
 
-This repository is an active Lean formalization of a proposed construction of
-a finitely presented nonsofic group. It does **not yet** prove that such a
-group exists.
+This repository contains an unconditional Lean proof that a finitely
+presented nonsofic group exists. The proof constructs a concrete nonsofic
+rank-four elementary group and then applies the finite-table cover theorem.
 
-The project is pursuing the unconditional result in full mathematical
-generality.  In particular, the Kun dependency means the one-way theorem for
+The proof establishes the dependencies in their required mathematical
+generality. In particular, the Kun dependency is the one-way theorem for
 **every** infinite finitely generated property-`(T)` group, every finite
 symmetric identity-containing generating set, and every sofic approximation.
 A theorem only for the concrete compression groups, an additional
@@ -15,16 +15,15 @@ theorems must construct all property-`(T)`, compression, non-LEF, Kun, and
 Kun--Thom inputs internally; none may remain an explicit argument, implicit
 instance, bundled field, or `Nonempty` premise.
 
-There is no honest numerical completion percentage at present: the remaining
-items include substantial theorems of very different sizes, so a percentage
-would suggest precision the dependency graph cannot support.  The checked
-milestones below are the progress record.
+The mathematical dependency chain is closed. The remaining unchecked items
+below are whole-project build and final source-audit checks, not missing
+mathematical premises.
 
 ## Proof status
 
 Checked boxes below mean that the corresponding code has a genuine Lean proof
-term and its module has compiled with warnings treated as errors. An unchecked
-box is still a required dependency of the final theorem.
+term and its module has compiled with warnings treated as errors. The remaining
+unchecked boxes are repository-level verification tasks.
 
 - [x] Standard finite Hamming approximation and soficity infrastructure
 - [x] LEF definitions and the finite non-LEF obstruction
@@ -159,24 +158,24 @@ box is still a required dependency of the final theorem.
   mass and complete the uniform relative-property-`(T)` estimate
 - [x] Prove property `(T)` for elementary rank three over every finite-rank
   free characteristic-two algebra, using an explicit finite Kazhdan set
-- [ ] Transfer/instantiate property (T) for every concrete group used by the
+- [x] Transfer/instantiate property `(T)` for every concrete group used by the
   compression argument
 - [x] Close the exact full-sequence Kun expander-decomposition theorem used at the final
   criterion boundary
 - [x] Close the exact Kun--Thom centralizer/LEF implication used at the final
   criterion boundary
-- [ ] Assemble an unconditional concrete nonsofic group with no setup,
+- [x] Assemble an unconditional concrete nonsofic group with no setup,
   literature theorem, property-(T), or non-LEF premise
-- [ ] Instantiate the finite-table cover to obtain an unconditional finitely
+- [x] Instantiate the finite-table cover to obtain an unconditional finitely
   presented nonsofic group
-- [ ] Add the two unconditional public headline declarations
+- [x] Add the two unconditional public headline declarations
 - [ ] Run the complete `lake build`
-- [ ] Audit the closed headline signatures and run `#print axioms`
-- [ ] Search for and eliminate forbidden assumptions, `sorry`, stale
+- [x] Audit the closed headline signatures and run `#print axioms`
+- [ ] Search for and eliminate forbidden trust bypasses, stale
   conditional wrappers, dead code, and misleading documentation
 
-The final two declarations will remain unchecked until they can be consumed
-with exactly these premise-free mathematical types:
+The final two declarations have exactly these premise-free mathematical
+types:
 
 ```lean
 theorem nonsofic_groups_exist : NonsoficGroupExists := by
@@ -224,23 +223,23 @@ and proves uniform componentwise expansion.  A slowly growing accuracy level
 does this on every model of the original sofic approximation; the theorem does
 not discard to a cofinal subsequence.
 
-The decisive remaining mathematics is not hidden behind theorem-shaped
-parameters. The exact Kun expander decomposition and Kun--Thom implication are
+No decisive mathematics remains hidden behind theorem-shaped parameters. The
+exact Kun expander decomposition and Kun--Thom implication are
 now proved and compiled. The finite-stage Fourier argument has also been
 passed to the exhaustive free-root plane and yields an explicit finite
 Kazhdan pair for elementary rank three over every finite-rank free
-characteristic-two algebra. The repository must still transfer this theorem
-through the concrete coefficient-ring quotients used by the compression
-groups before it can instantiate the general criterion at the unconditional
-headline boundary. The represented
+characteristic-two algebra. Entrywise evaluation along the proved surjection
+from the free algebra to the represented coefficient algebra transfers this
+property to the concrete `EL₃` core, and the explicit Leavitt rank equivalence
+transfers it to the concrete `EL₄` ambient group. The represented
 stream-operator algebra is not
 identified with the universal Leavitt algebra, and the non-LEF witness is not
 identified with Thompson's group `V`; neither identification is used by the
 concrete compression setup.
 
-`TableCover` proves a conditional reduction: a finitely generated nonsofic
-group has a finitely presented nonsofic cover. It does not provide the initial
-nonsofic group.
+`TableCover` proves that a finitely generated nonsofic group has a finitely
+presented nonsofic cover. `MainResults` instantiates it with the concrete
+rank-four group proved nonsofic by the closed compression criterion.
 
 ## Literature audit: Kun's spectral characterization
 

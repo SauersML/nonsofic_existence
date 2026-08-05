@@ -342,7 +342,7 @@ theorem root_commute (A : A2System G) (i j : Fin 3) (hij : i ≠ j) :
 end A2System
 
 /-- Elementary matrices in rank three form an `A₂` system, with every
-axiom discharged by explicit matrix identities. -/
+law discharged by explicit matrix identities. -/
 def elementaryA2System (R : Type*) [Ring R] :
     A2System (elementaryGroup (Fin 3) R) where
   root := fun i j hij ↦ elementaryRootSubgroup i j hij

@@ -264,20 +264,58 @@ theorem elementaryMatrixUnitMap_elementaryUnit (f : R →+* S) (i j : ι)
     if i = k ∧ j = l then f a else 0
   split_ifs <;> simp
 
+/-- Entrywise coefficient maps carry the elementary group into the elementary
+group, without any surjectivity assumption on the coefficient map. -/
+theorem elementaryGroup_map_le (f : R →+* S) :
+    (elementaryGroup ι R).map (elementaryMatrixUnitMap f) ≤
+      elementaryGroup ι S := by
+  rw [elementaryGroup, Subgroup.map_le_iff_le_comap, Subgroup.closure_le]
+  rintro _ ⟨i, j, hij, a, rfl⟩
+  change elementaryMatrixUnitMap f (elementaryUnit i j hij a) ∈
+    elementaryGroup ι S
+  rw [elementaryMatrixUnitMap_elementaryUnit]
+  exact elementaryUnit_mem i j hij (f a)
+
 theorem elementaryGroup_map_eq_of_surjective (f : R →+* S)
     (hf : Function.Surjective f) :
     (elementaryGroup ι R).map (elementaryMatrixUnitMap f) = elementaryGroup ι S := by
   apply le_antisymm
-  · rw [elementaryGroup, Subgroup.map_le_iff_le_comap, Subgroup.closure_le]
-    rintro _ ⟨i, j, hij, a, rfl⟩
-    change elementaryMatrixUnitMap f (elementaryUnit i j hij a) ∈ elementaryGroup ι S
-    rw [elementaryMatrixUnitMap_elementaryUnit]
-    exact elementaryUnit_mem i j hij (f a)
+  · exact elementaryGroup_map_le f
   · rw [elementaryGroup, Subgroup.closure_le]
     rintro _ ⟨i, j, hij, b, rfl⟩
     obtain ⟨a, rfl⟩ := hf b
     exact ⟨elementaryUnit i j hij a, elementaryUnit_mem i j hij a,
       elementaryMatrixUnitMap_elementaryUnit f i j hij a⟩
+
+/-- The group homomorphism on elementary groups induced by a coefficient-ring
+homomorphism. -/
+def elementaryGroupMap (f : R →+* S) :
+    elementaryGroup ι R →* elementaryGroup ι S :=
+  ((elementaryMatrixUnitMap f).comp (elementaryGroup ι R).subtype).codRestrict
+    (elementaryGroup ι S) fun g ↦
+      elementaryGroup_map_le f
+        (Subgroup.apply_coe_mem_map (elementaryMatrixUnitMap f)
+          (elementaryGroup ι R) g)
+
+@[simp] theorem elementaryGroupMap_apply (f : R →+* S)
+    (g : elementaryGroup ι R) :
+    (elementaryGroupMap f g : (Matrix ι ι S)ˣ) =
+      elementaryMatrixUnitMap f g := rfl
+
+/-- A surjective coefficient-ring map induces a surjective map of elementary
+groups. -/
+theorem elementaryGroupMap_surjective_of_surjective (f : R →+* S)
+    (hf : Function.Surjective f) :
+    Function.Surjective (elementaryGroupMap (ι := ι) f) := by
+  intro g
+  have hg : (g : (Matrix ι ι S)ˣ) ∈
+      (elementaryGroup ι R).map (elementaryMatrixUnitMap f) := by
+    rw [elementaryGroup_map_eq_of_surjective f hf]
+    exact g.property
+  obtain ⟨x, hx, hmap⟩ := hg
+  refine ⟨⟨x, hx⟩, ?_⟩
+  apply Subtype.ext
+  exact hmap
 
 /-- Coefficient transport: an isomorphism of rings induces one of elementary
 groups. -/

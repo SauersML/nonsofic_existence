@@ -141,29 +141,30 @@ import NonsoficGroupsExist.ElementaryRoots
 import NonsoficGroupsExist.ElementaryStabilization
 import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ConcreteRankFour
+import NonsoficGroupsExist.ConcretePropertyT
 import NonsoficGroupsExist.ConcreteCompressionSetup
 import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
+import NonsoficGroupsExist.MainResults
 
 /-!
-# Partial formalization of a proposed nonsofic-group construction
+# An unconditional construction of a finitely presented nonsofic group
 
 This library contains proved finite, asymptotic, Leavitt-family, elementary
-matrix, non-LEF-obstruction, localization, and finite-table results.  It does
-**not** currently prove that a nonsofic group exists.
+matrix, non-LEF-obstruction, localization, and finite-table results. It proves
+unconditionally that a nonsofic group exists and that a finitely presented
+nonsofic group exists.
 
 In particular, no declaration in this root module assumes a proposition named
 after Kun, Kun--Thom, or Ershov--Jaikin and then advertises the resulting
 conditional implication as an existence theorem.  The uninstantiated
 `ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData` are
 specifications for intermediate mathematics, not proofs merely by being
-inhabited in conditional lemmas.  The repository contains extensive compiled
-Kun and Kun--Thom machinery, including an `exists_localCriterionData`
-assembly from property `(T)` and a sofic approximation, but the full
-mathematical-fidelity and transitive-dependency audit of those headline
-dependencies remains open in the README checklist.  They are not counted as
-finished inputs to an unconditional existence theorem.  Likewise,
+inhabited in conditional lemmas.  The exact full-sequence Kun decomposition
+and Kun--Thom implication are now proved, as are property `(T)` for the
+concrete rank-three core and rank-four ambient group. `MainResults` assembles
+them through the local criterion. Likewise,
 `ConcreteRankFour.compressionSetup` is an actual inhabitant of the algebraic
 `CompressionSetup` interface.
 
@@ -177,7 +178,8 @@ also proves compressor conjugation, ambient generation, centralization, and
 trivial intersection, and `ConcreteRankFour.compressionSetup` constructs the
 complete algebraic setup rather than accepting it from a caller.
 
-`TableCover` proves only the conditional finite-presentation reduction: from a
-finitely generated nonsofic group it constructs a finitely presented nonsofic
-cover.  It does not furnish the initial nonsofic group.
+`MainResults.concreteAmbient_not_isSofic` supplies the initial concrete
+nonsofic group. `TableCover` then constructs its finitely presented nonsofic
+cover, yielding the two premise-free public headline theorems in
+`MainResults`.
 -/

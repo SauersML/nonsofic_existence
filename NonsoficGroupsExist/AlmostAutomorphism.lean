@@ -23,7 +23,7 @@ namespace AlmostAutomorphism
 
 variable (Y : FiniteModel)
 
-/-- Finitely many eventual assertions admit one common threshold. -/
+/-- Finitely many eventual assertions have one common threshold. -/
 theorem eventually_finset {ι : Type*} (s : Finset ι) (P : ι → ℕ → Prop)
     (h : ∀ i ∈ s, ∃ N, ∀ n ≥ N, P i n) :
     ∃ N, ∀ n ≥ N, ∀ i ∈ s, P i n := by
