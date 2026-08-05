@@ -516,3 +516,29 @@ funnel to canonical (green machinery) → one flip-round (flip green,
 element-pivot needs the block dictionary) → kill (green move
 families) → balanced → H (green).  ScalarReduction follows; B4, B5,
 B6 and Theorem C assemble; the manuscript is complete.
+
+## Session 13: normal-form loop in closed form + the flag condition
+GREEN: ResidualNormalForm.lean (exists_prefix_kill: z free mod L·t₀;
+exists_corner_transport: [1+s₁βt₁] = [1+β] with corner inverse
+t₁u⁻¹s₁, x = 1 − βx two-sided trick).
+DERIVATION HARVEST:
+- Normal form: every residual class = [1 + s₁z], z ∈ window[−1,0].
+- THE LOOP in closed form: z ↦ û_L⁻¹(1−t_L)z₀ (left-sr1 pivot û_L,
+  balanced part transforms z₀ ↦ û_L⁻¹z₀).  All level-preserving moves
+  leave rank(z₀·p₁ mod L₀p₀) invariant — the kill succeeds iff
+  z₀p₁ ≡ 0 mod the free ideal, i.e. iff p₀û_L⁻¹p₁ = 0 for the
+  canonical-converted form.
+- BLOCK-FLAG ANALYSIS: p₀M⁻¹p₁ = 0 ⟺ M(p₁V) = p₁V ⟺ colsp(cp₁) =
+  p₁-coordinate half (M := û_L has Mp₁ = cp₁).  (R2) gives cp₁ full
+  column rank; block-diagonal balanced conjugation can rotate
+  colsp(cp₁) onto p₁V iff colsp(cp₁) ∩ p₀V = 0 ⟺ corner block
+  c₁₁ = p₁cp₁ injective.  So the remaining question is now:
+  (*) can the pre-moves always achieve c₁₁ invertible (or dually
+  colsp(cp₁) transverse to p₀V)?  Candidates: sr1 inside the corner
+  (c₁₁ + correction·(stuff) invertible via corner-unimodularity from
+  (R2): p₁y₀·cp₁ = p₁ IS corner-left-unimodularity of (c₀₁-stack) —
+  transversality via one more sr1-pivot with the s₁p₀-tail as the
+  perturbation: u ↦ u(1 + s₁Y t₀)-moves change cp₁?? (they change
+  c-columns only in p₀?): check which moves move colsp(cp₁).
+- Non-units found: 1 + s₀ (stream surjectivity), 1 + s₁s₀t₁ (flip to
+  1 + s₀).  Unit-ness genuinely constrains z₀.
