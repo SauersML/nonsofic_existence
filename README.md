@@ -134,9 +134,13 @@ box is still a required dependency of the final theorem.
   under refinement and conjugation, derive both concrete per-leading-fiber
   mass bounds, and prove that below the top-degree boundary restriction
   preserves every leading generator and the canonical least leading index
-- [ ] Prove the transported leading-fiber images are pairwise disjoint below
-  that boundary, control the top-degree boundary in the increasing-stage
-  limit, and derive Kassabov's corresponding disjoint mass-sum inequalities
+- [x] Prove the actual transported leading-fiber image sets are pairwise
+  disjoint below the top-degree boundary, charge each interior fiber only to
+  its concrete image set, and prove arbitrary selected Fourier projections
+  are contractive and have the required squared-mass continuity estimate
+- [ ] Remove spurious invalid-sign mass from the transported image sets,
+  control the top-degree boundary in the increasing-stage limit, and derive
+  Kassabov's final disjoint mass-sum inequalities
 - [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
   for the two-root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group

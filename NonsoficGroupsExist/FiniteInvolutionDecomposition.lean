@@ -84,6 +84,21 @@ theorem iteratedPart_add
       split <;> simp only [positivePart, negativePart, map_add]
       all_goals module
 
+theorem iteratedPart_neg
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (sign : Fin n → Bool) (z : E) :
+    iteratedPart rho c sign (-z) = -iteratedPart rho c sign z := by
+  have hsum : iteratedPart rho c sign z + iteratedPart rho c sign (-z) = 0 := by
+    rw [← iteratedPart_add, add_neg_cancel, iteratedPart_zero]
+  exact eq_neg_of_add_eq_zero_left (by simpa [add_comm] using hsum)
+
+theorem iteratedPart_sub
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (sign : Fin n → Bool) (z w : E) :
+    iteratedPart rho c sign (z - w) =
+      iteratedPart rho c sign z - iteratedPart rho c sign w := by
+  rw [sub_eq_add_neg, iteratedPart_add, iteratedPart_neg, sub_eq_add_neg]
+
 /-- Simultaneous sign projection distributes over every finite sum. -/
 theorem iteratedPart_finset_sum
     (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
@@ -436,6 +451,74 @@ theorem norm_sum_iteratedPart_sq
             norm_add_sq_eq_norm_sq_add_norm_sq_real hinner
         _ = ‖iteratedPart rho c sign z‖ ^ 2 +
             ∑ tau ∈ A, ‖iteratedPart rho c tau z‖ ^ 2 := by rw [ih]
+
+/-- Summing any selected sign components is an orthogonal projection and
+therefore cannot increase the norm. -/
+theorem norm_sum_iteratedPart_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (A : Finset (Fin n → Bool)) (z : E) :
+    ‖∑ sign ∈ A, iteratedPart rho c sign z‖ ≤ ‖z‖ := by
+  have hmass : ∑ sign ∈ A, ‖iteratedPart rho c sign z‖ ^ 2 ≤
+      ∑ sign, ‖iteratedPart rho c sign z‖ ^ 2 :=
+    Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ A)
+      (fun _ _ _ ↦ sq_nonneg _)
+  rw [← norm_sum_iteratedPart_sq rho n c hc hcomm A z,
+    sum_norm_iteratedPart_sq rho n c hc z] at hmass
+  nlinarith [norm_nonneg (∑ sign ∈ A, iteratedPart rho c sign z),
+    norm_nonneg z]
+
+/-- Every selected simultaneous Fourier projection is `1`-Lipschitz. -/
+theorem norm_sum_iteratedPart_sub_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (A : Finset (Fin n → Bool)) (z w : E) :
+    ‖(∑ sign ∈ A, iteratedPart rho c sign z) -
+        ∑ sign ∈ A, iteratedPart rho c sign w‖ ≤ ‖z - w‖ := by
+  calc
+    ‖(∑ sign ∈ A, iteratedPart rho c sign z) -
+        ∑ sign ∈ A, iteratedPart rho c sign w‖ =
+        ‖∑ sign ∈ A,
+          (iteratedPart rho c sign z - iteratedPart rho c sign w)‖ := by
+      rw [Finset.sum_sub_distrib]
+    _ = ‖∑ sign ∈ A, iteratedPart rho c sign (z - w)‖ := by
+      apply congrArg norm
+      apply Finset.sum_congr rfl
+      intro sign _
+      rw [iteratedPart_sub]
+    _ ≤ ‖z - w‖ := norm_sum_iteratedPart_le rho n c hc hcomm A (z - w)
+
+/-- Quantitative continuity of the squared mass of any selected sign set. -/
+theorem abs_sum_norm_iteratedPart_sq_sub_le
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (n : ℕ) (c : Fin n → G)
+    (hc : ∀ i, c i ^ 2 = 1)
+    (hcomm : Pairwise (Function.onFun Commute c))
+    (A : Finset (Fin n → Bool)) (z w : E) :
+    |∑ sign ∈ A, ‖iteratedPart rho c sign z‖ ^ 2 -
+        ∑ sign ∈ A, ‖iteratedPart rho c sign w‖ ^ 2| ≤
+      (‖z‖ + ‖w‖) * ‖z - w‖ := by
+  rw [← norm_sum_iteratedPart_sq rho n c hc hcomm A z,
+    ← norm_sum_iteratedPart_sq rho n c hc hcomm A w]
+  let pz := ∑ sign ∈ A, iteratedPart rho c sign z
+  let pw := ∑ sign ∈ A, iteratedPart rho c sign w
+  have hrev : |‖pz‖ - ‖pw‖| ≤ ‖pz - pw‖ := abs_norm_sub_norm_le pz pw
+  have hdiff : ‖pz - pw‖ ≤ ‖z - w‖ :=
+    norm_sum_iteratedPart_sub_le rho n c hc hcomm A z w
+  have hpz : ‖pz‖ ≤ ‖z‖ := norm_sum_iteratedPart_le rho n c hc hcomm A z
+  have hpw : ‖pw‖ ≤ ‖w‖ := norm_sum_iteratedPart_le rho n c hc hcomm A w
+  calc
+    |‖pz‖ ^ 2 - ‖pw‖ ^ 2| = |‖pz‖ - ‖pw‖| * (‖pz‖ + ‖pw‖) := by
+      rw [sq_sub_sq, abs_mul, abs_of_nonneg (add_nonneg (norm_nonneg _) (norm_nonneg _))]
+      ring
+    _ ≤ ‖pz - pw‖ * (‖pz‖ + ‖pw‖) :=
+      mul_le_mul_of_nonneg_right hrev (add_nonneg (norm_nonneg _) (norm_nonneg _))
+    _ ≤ ‖z - w‖ * (‖pz‖ + ‖pw‖) :=
+      mul_le_mul_of_nonneg_right hdiff (add_nonneg (norm_nonneg _) (norm_nonneg _))
+    _ ≤ ‖z - w‖ * (‖z‖ + ‖w‖) :=
+      mul_le_mul_of_nonneg_left (add_le_add hpz hpw) (norm_nonneg _)
+    _ = (‖z‖ + ‖w‖) * ‖z - w‖ := by ring
 
 /-- Pythagoras for one coarse component refined into all of its compatible
 fine components. -/

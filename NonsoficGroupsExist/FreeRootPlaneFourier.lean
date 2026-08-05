@@ -383,6 +383,20 @@ theorem sum_norm_planeComponent_sq
   sum_norm_iteratedPart_sq rho _ _
     (planeFamily_sq X i j k hij hik hjk n) z
 
+/-- Squared mass of any selected finite-plane sign set varies by at most the
+standard projection Lipschitz bound. -/
+theorem abs_sum_norm_planeComponent_sq_sub_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (A : Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z w : E) :
+    |∑ sign ∈ A, ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 -
+        ∑ sign ∈ A, ‖planeComponent X i j k hij hik hjk n rho sign w‖ ^ 2| ≤
+      (‖z‖ + ‖w‖) * ‖z - w‖ :=
+  abs_sum_norm_iteratedPart_sq_sub_le rho _ _
+    (planeFamily_sq X i j k hij hik hjk n)
+    (planeFamily_pairwise_commute X i j k hij hik hjk n) A z w
+
 /-- Every plane component has its prescribed sign under every element of the
 finite plane stage. -/
 theorem action_planeComponent
