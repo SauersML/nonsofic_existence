@@ -365,7 +365,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
           (fun g ↦ bseq g k) (fun g h ↦ (hcoc k).norm_inv_mul g h)
           ht.le).2 F c
   -- Descend to the base group and bound the ultralimit.
-  set s : G → FreeGroup (Fin n) := Function.surjInv hβ with hs
+  set s : G → FreeGroup (Fin n) := Function.surjInv hβ
   set ψG : G → ℝ := fun γ ↦ ψ (s γ) with hψG
   have hcomp : ∀ g : FreeGroup (Fin n), ψG (β g) = ψ g := by
     intro g
@@ -399,7 +399,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
     rw [← hcomp g]
     exact hR (β g)
   -- The orbit is seminorm-bounded; run the approximate circumcenter.
-  set D : ℝ := Real.sqrt R with hD
+  set D : ℝ := Real.sqrt R
   have hR0 : 0 ≤ R := le_trans (hψnn 1) (hψR 1)
   have hOD : ∀ g : FreeGroup (Fin n), seqNorm (bseq g) ≤ D := by
     intro g
@@ -597,7 +597,7 @@ theorem exists_presented_kazhdan_cover
     refine ⟨0, ∅, 1, ?_, hasKazhdanPropertyT_of_subsingleton⟩
     intro g
     exact ⟨1, by rw [htriv g]; rfl⟩
-  · set n := S.card with hncard
+  · set n := S.card
     have hn0 : n ≠ 0 := hS
     set gens : Fin n → G := fun i ↦ (S.equivFin.symm i : G) with hgens
     set β : FreeGroup (Fin n) →* G := FreeGroup.lift gens with hβdef
@@ -606,7 +606,7 @@ theorem exists_presented_kazhdan_cover
         Subgroup.closure_le]
       intro g hg
       refine ⟨FreeGroup.of (S.equivFin ⟨g, hg⟩), ?_⟩
-      rw [hβdef, FreeGroup.lift.of, hgens]
+      rw [hβdef, FreeGroup.lift_apply_of, hgens]
       simp
     haveI : Nonempty ↥β.ker := ⟨⟨1, β.ker.one_mem⟩⟩
     obtain ⟨e, he⟩ := exists_surjective_nat ↥β.ker
@@ -637,7 +637,7 @@ theorem exists_presented_kazhdan_cover
               ((rels k : Finset (FreeGroup (Fin n))) :
                 Set (FreeGroup (Fin n))) (FreeGroup.of i) =
               PresentedGroup.of i from rfl,
-            PresentedGroup.toGroup_of, FreeGroup.lift.of]
+            PresentedGroup.toGroup.of, FreeGroup.lift_apply_of]
         · intro i hi
           rw [map_inv, map_inv, hi, ← map_inv]
         · intro a b ha hb
@@ -669,7 +669,7 @@ theorem exists_presented_kazhdan_cover
           ∀ y : E, y ≠ 0 → ∃ γ, ρ γ y ≠ y := by
       intro k
       have h := hfailpair k
-      rw [IsKazhdanPair] at h
+      simp only [IsKazhdanPair] at h
       push Not at h
       exact h (by positivity)
     choose Ek instNk instIk instCk ρ x hxnorm hxnear hxmoved
@@ -678,7 +678,7 @@ theorem exists_presented_kazhdan_cover
     letI := instIk
     letI := instCk
     set σ : ∀ k, FreeGroup (Fin n) →* (Ek k ≃ₗᵢ[ℝ] Ek k) := fun k ↦
-      (ρ k).comp (PresentedGroup.mk _) with hσ
+      (ρ k).comp (PresentedGroup.mk _)
     have hnoinv : ∀ k, ∀ y : Ek k, (∀ g, σ k g y = y) → y = 0 := by
       intro k y hy
       by_contra h0

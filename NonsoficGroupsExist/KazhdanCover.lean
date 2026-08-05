@@ -133,7 +133,7 @@ theorem presentedGroup_toGroup_mk {rels : Set (FreeGroup α)}
   rw [MonoidHom.comp_apply,
     show PresentedGroup.mk rels (FreeGroup.of i) =
       PresentedGroup.of i from rfl,
-    PresentedGroup.toGroup_of, FreeGroup.lift.of]
+    PresentedGroup.toGroup.of, FreeGroup.lift_apply_of]
 
 end HomExt
 
@@ -180,7 +180,7 @@ theorem exists_kazhdan_finitelyPresented_nonsofic_cover
     intro r hr
     have hlifteq : ∀ w, FreeGroup.lift
         (fun i ↦ θhat (FreeGroup.of i)) w = θhat w :=
-      freeGroup_hom_eq_on fun i ↦ by rw [FreeGroup.lift.of]
+      freeGroup_hom_eq_on fun i ↦ by rw [FreeGroup.lift_apply_of]
     rw [hlifteq]
     rw [Finset.mem_coe, hrelsH, Finset.mem_union] at hr
     rcases hr with hr | hr
@@ -199,7 +199,7 @@ theorem exists_kazhdan_finitelyPresented_nonsofic_cover
   have hφmk : ∀ w, φ (PresentedGroup.mk _ w) = θhat w := by
     intro w
     rw [hφ, presentedGroup_toGroup_mk]
-    exact freeGroup_hom_eq_on (fun i ↦ by rw [FreeGroup.lift.of]) w
+    exact freeGroup_hom_eq_on (fun i ↦ by rw [FreeGroup.lift_apply_of]) w
   have hφsurj : Function.Surjective φ := by
     intro g
     obtain ⟨w, hw⟩ := hθhatsurj g
@@ -217,7 +217,7 @@ theorem exists_kazhdan_finitelyPresented_nonsofic_cover
             Set (FreeGroup (Fin m))))) w =
         PresentedGroup.mk _ w :=
       freeGroup_hom_eq_on fun i ↦ by
-        rw [FreeGroup.lift.of]
+        rw [FreeGroup.lift_apply_of]
         rfl
     rw [hlifteq]
     apply PresentedGroup.one_of_mem
@@ -234,7 +234,7 @@ theorem exists_kazhdan_finitelyPresented_nonsofic_cover
     refine ⟨PresentedGroup.mk _ w, ?_⟩
     rw [hεPH, presentedGroup_toGroup_mk, ← hw]
     exact freeGroup_hom_eq_on (fun i ↦ by
-      rw [FreeGroup.lift.of]
+      rw [FreeGroup.lift_apply_of]
       rfl) w
   -- The multiplicative separated family.
   set y : G → PresentedGroup ((relsH : Finset (FreeGroup (Fin m))) :
