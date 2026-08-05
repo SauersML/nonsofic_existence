@@ -1102,6 +1102,136 @@ theorem sum_planeMass_C_le_sum_B (z : E) :
   exact ⟨Finset.mem_univ _,
     pairRegion_comp_unitShearForward_symm_of_C X K n χ hχ.2⟩
 
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- **The descent classification**: a fine character over a coarse
+region-`B` character, whose first functional descends by exactly one along
+the chosen generator, lies in the opposite region `A` — or in `D` at the
+lowest level.  This is the region movement that powers the finite-stage
+induction. -/
+theorem fine_pairRegion_of_coarse_B_forward (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1)))
+    (hB : pairRegion X K
+        (firstCoordinateChar X K n (χ'.comp (forwardShear X K n x)))
+        (secondCoordinateChar X K n (χ'.comp (forwardShear X K n x))) =
+        .B)
+    (hlead : valuation X K
+        (leftDerived X K (firstCoordinateChar X K (n + 1) χ') x) + 1 =
+      valuation X K (firstCoordinateChar X K (n + 1) χ')) :
+    pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .A ∨
+      pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .D := by
+  obtain ⟨hz, h1ne, h2ne, heq⟩ := pairRegion_B_data X K _ _ hB
+  rw [firstCoordinateChar_comp_forwardShear X K n x χ'] at hz h1ne heq
+  rw [secondCoordinateChar_comp_forwardShear X K n x χ'] at hz h2ne heq
+  set φ₁ := firstCoordinateChar X K (n + 1) χ' with hφ₁
+  set φ₂ := secondCoordinateChar X K (n + 1) χ' with hφ₂
+  set d := valuation X K (restrictSucc X K φ₁) with hd
+  have hdlen : d ≤ n + 1 := valuation_le_succ X K _
+  have hdn : d ≤ n := by
+    by_contra hgt
+    have h2 : valuation X K
+        (leftDerived X K φ₁ x + restrictSucc X K φ₂) = d := heq.symm
+    exact hz ⟨by omega, by omega⟩
+  have hval₁ : valuation X K φ₁ = d := by
+    have := valuation_restrictSucc_eq_min X K φ₁
+    rw [← hd] at this
+    omega
+  have hdpos : 1 ≤ d := by
+    rcases Nat.eq_zero_or_pos d with h0 | h1
+    · exact absurd h0 h1ne
+    · exact h1
+  have hderived : valuation X K (leftDerived X K φ₁ x) = d - 1 := by
+    omega
+  have hval₂' : valuation X K (restrictSucc X K φ₂) = d - 1 := by
+    by_contra hne
+    rcases Nat.lt_or_ge (valuation X K (restrictSucc X K φ₂)) (d - 1)
+      with hlt | hge
+    · have := valuation_add_of_lt X K (restrictSucc X K φ₂)
+        (leftDerived X K φ₁ x) (by omega)
+      rw [show restrictSucc X K φ₂ + leftDerived X K φ₁ x =
+        leftDerived X K φ₁ x + restrictSucc X K φ₂ by abel] at this
+      omega
+    · have hgt : d - 1 < valuation X K (restrictSucc X K φ₂) := by
+        omega
+      have := valuation_add_of_lt X K (leftDerived X K φ₁ x)
+        (restrictSucc X K φ₂) (by omega)
+      omega
+  have hval₂ : valuation X K φ₂ = d - 1 := by
+    have := valuation_restrictSucc_eq_min X K φ₂
+    rw [hval₂'] at this
+    omega
+  rcases Nat.eq_or_lt_of_le hdpos with h1 | h2
+  · right
+    exact pairRegion_eq_D_of_right_zero X K _ _ (by omega)
+  · left
+    exact pairRegion_eq_A_of_pos_of_lt X K _ _ (by omega) (by omega)
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- The symmetric descent classification along the opposite shear: a fine
+character over a coarse region-`B` character, whose second functional
+descends by exactly one, lies in region `C` — or in `D` at the lowest
+level. -/
+theorem fine_pairRegion_of_coarse_B_opposite (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1)))
+    (hB : pairRegion X K
+        (firstCoordinateChar X K n (χ'.comp (oppositeShear X K n x)))
+        (secondCoordinateChar X K n (χ'.comp (oppositeShear X K n x))) =
+        .B)
+    (hlead : valuation X K
+        (leftDerived X K (secondCoordinateChar X K (n + 1) χ') x) + 1 =
+      valuation X K (secondCoordinateChar X K (n + 1) χ')) :
+    pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .C ∨
+      pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .D := by
+  obtain ⟨hz, h1ne, h2ne, heq⟩ := pairRegion_B_data X K _ _ hB
+  rw [firstCoordinateChar_comp_oppositeShear X K n x χ'] at hz h1ne heq
+  rw [secondCoordinateChar_comp_oppositeShear X K n x χ'] at hz h2ne heq
+  set φ₁ := firstCoordinateChar X K (n + 1) χ' with hφ₁
+  set φ₂ := secondCoordinateChar X K (n + 1) χ' with hφ₂
+  set d := valuation X K (restrictSucc X K φ₂) with hd
+  have hdlen : d ≤ n + 1 := valuation_le_succ X K _
+  have hdn : d ≤ n := by
+    by_contra hgt
+    exact hz ⟨by omega, by omega⟩
+  have hval₂ : valuation X K φ₂ = d := by
+    have := valuation_restrictSucc_eq_min X K φ₂
+    rw [← hd] at this
+    omega
+  have hdpos : 1 ≤ d := by
+    rcases Nat.eq_zero_or_pos d with h0 | h1
+    · exact absurd h0 h2ne
+    · exact h1
+  have hderived : valuation X K (leftDerived X K φ₂ x) = d - 1 := by
+    omega
+  have hval₁' : valuation X K (restrictSucc X K φ₁) = d - 1 := by
+    by_contra hne
+    rcases Nat.lt_or_ge (valuation X K (restrictSucc X K φ₁)) (d - 1)
+      with hlt | hge
+    · have := valuation_add_of_lt X K (restrictSucc X K φ₁)
+        (leftDerived X K φ₂ x) (by omega)
+      omega
+    · have hgt : d - 1 < valuation X K (restrictSucc X K φ₁) := by
+        omega
+      have := valuation_add_of_lt X K (leftDerived X K φ₂ x)
+        (restrictSucc X K φ₁) (by omega)
+      rw [show leftDerived X K φ₂ x + restrictSucc X K φ₁ =
+        restrictSucc X K φ₁ + leftDerived X K φ₂ x by abel] at this
+      omega
+  have hval₁ : valuation X K φ₁ = d - 1 := by
+    have := valuation_restrictSucc_eq_min X K φ₁
+    rw [hval₁'] at this
+    omega
+  rcases Nat.eq_or_lt_of_le hdpos with h1 | h2
+  · right
+    exact pairRegion_eq_D_of_left_zero X K _ _ (by omega)
+  · left
+    exact pairRegion_eq_C_of_pos_of_lt X K _ _ (by omega) (by omega)
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist

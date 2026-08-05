@@ -145,8 +145,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`sum_fiber_zero_ne_eq_drop`), the quantitative mass-continuity bound
     (`CharacterMass.abs_mass_sub_mass_le`), and the summed region bounds
     `A ≤ B` and `C ≤ B` under the two unit conjugations
-    (`sum_planeMass_A_le_sum_B`/`_C_le_sum_B`); the assembled finite-stage
-    inequalities are pending
+    (`sum_planeMass_A_le_sum_B`/`_C_le_sum_B`), and the two descent
+    classifications: a fine character over a coarse region-`B` character
+    whose selected functional descends by exactly one lies in the opposite
+    region or in `D`
+    (`fine_pairRegion_of_coarse_B_forward`/`_opposite`); the assembled
+    finite-stage inequalities are pending
   - [ ] A8. The limiting two-root moving-mass bound and the uniform
     relative-property-`(T)` estimate over `ZMod p`
   - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
