@@ -278,3 +278,22 @@ REMAINING, in order:
   args; attribute [irreducible] seqNorm seqNormSq fixed the whnf blowup.
 - Still to verify: DelormeFixedPoint, ShalomFinitePresentation, KazhdanCover,
   GLIsElementary, BinaryLeavittDiagonal, DiagonalDescent (first builds).
+
+## Residual-class derivation state (sixth session, in progress)
+For u = c + β (β := s₁s₀t₀, c balanced), y := u⁻¹ with canonical
+components y_d (graded_independence_all now green):
+- β² = 0 (t₀s₁ = 0 inside).
+- Component equations: c·y_e + β·y_{e−1} = [e=0] and
+  y_e·c + y_{e−1}·β = [e=0].
+- Top degree N ≥ 1 (toward contradiction/reduction): β·y_N = 0 and
+  y_N·β = 0; β·x = 0 ⟹ t₀x = 0 ∧ p₀x = 0 ∧ x = p₁x (extract via
+  t₀t₁·β = t₀); annihilation chain β·y_{e−1} = −c·y_e for 1 ≤ e ≤ N.
+- Factorizations: y_e = B_e·s_{0^e} with B_e := y_e·t_{0^e} satisfying
+  B_e = B_e·p_{0^e} (right-supported); y_N·s₁·p₀ = 0.
+- Next: push the chain into the fixed-level M_{2^m}(k) picture (all
+  B_e, c at common depth m) and run the rank bound: B_N = p₁B_N p_{0^N}
+  gives rank ≤ 2^{m−N}; combine the uy = 1 degree-0 equation
+  c·y₀ + β·y₋₁ = 1 with the chain to force N ≤ 0 dually M ≤ ... then
+  the [0,0]-case is a balanced unit (done). Alternative if rank path
+  stalls: multiply chain by t₁-extractions to convert into explicit
+  matrix equations over k.
