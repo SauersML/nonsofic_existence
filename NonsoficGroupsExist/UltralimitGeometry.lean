@@ -247,6 +247,119 @@ theorem eventually_le_id (C : ℕ) :
     simpa [Set.mem_Iio, not_le] using hk
   exact (Set.finite_Iio C).subset hsub
 
+/-- A standard-part bound strictly below `r` holds eventually along the
+hyperfilter, by the ultrafilter dichotomy. -/
+theorem eventually_lt_of_stdPart_lt {s : ℕ → ℝ}
+    (hfin : 0 ≤ ArchimedeanClass.mk (Hyperreal.ofSeq s)) {r : ℝ}
+    (h : ArchimedeanClass.stdPart (Hyperreal.ofSeq s) < r) :
+    ∀ᶠ k in ↑(Filter.hyperfilter ℕ), s k < r := by
+  by_contra hcon
+  have hnot : {k : ℕ | s k < r} ∉ Filter.hyperfilter ℕ := hcon
+  have hmem : {k : ℕ | s k < r}ᶜ ∈ Filter.hyperfilter ℕ :=
+    Ultrafilter.compl_mem_iff_not_mem.mpr hnot
+  have hmem' : {k : ℕ | r ≤ s k} ∈ Filter.hyperfilter ℕ := by
+    have hset : {k : ℕ | s k < r}ᶜ = {k : ℕ | r ≤ s k} := by
+      ext k
+      simp [not_lt]
+    rwa [hset] at hmem
+  have hge : ((r : Hyperreal)) ≤ Hyperreal.ofSeq s := by
+    change Hyperreal.ofSeq (fun _ : ℕ ↦ r) ≤ _
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact hmem'
+  have hle := ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom
+    hfin hge
+  linarith
+
+/-- The mirror transfer: a standard part strictly above `r` forces the
+sequence above `r` eventually along the hyperfilter. -/
+theorem eventually_lt_stdPart_of_lt {s : ℕ → ℝ}
+    (hfin : 0 ≤ ArchimedeanClass.mk (Hyperreal.ofSeq s)) {r : ℝ}
+    (h : r < ArchimedeanClass.stdPart (Hyperreal.ofSeq s)) :
+    ∀ᶠ k in ↑(Filter.hyperfilter ℕ), r < s k := by
+  by_contra hcon
+  have hnot : {k : ℕ | r < s k} ∉ Filter.hyperfilter ℕ := hcon
+  have hmem : {k : ℕ | r < s k}ᶜ ∈ Filter.hyperfilter ℕ :=
+    Ultrafilter.compl_mem_iff_not_mem.mpr hnot
+  have hmem' : {k : ℕ | s k ≤ r} ∈ Filter.hyperfilter ℕ := by
+    have hset : {k : ℕ | r < s k}ᶜ = {k : ℕ | s k ≤ r} := by
+      ext k
+      simp [not_lt]
+    rwa [hset] at hmem
+  have hle' : Hyperreal.ofSeq s ≤ ((r : Hyperreal)) := by
+    change _ ≤ Hyperreal.ofSeq (fun _ : ℕ ↦ r)
+    rw [Hyperreal.ofSeq_le_ofSeq]
+    exact hmem'
+  have hle := ArchimedeanClass.stdPart_le_of_le Hyperreal.coeRingHom
+    hfin hle'
+  linarith
+
+/-- **The exponential commutes with standard parts** of bounded
+sequences: both bounds follow from eventual monotone comparison, and a
+squeeze along `δ = 1/(n+1)` finishes. -/
+theorem stdPart_exp {s : ℕ → ℝ} {a b : ℝ}
+    (h1 : ∀ k, a ≤ s k) (h2 : ∀ k, s k ≤ b) :
+    ArchimedeanClass.stdPart (Hyperreal.ofSeq fun k ↦ Real.exp (s k)) =
+      Real.exp (ArchimedeanClass.stdPart (Hyperreal.ofSeq s)) := by
+  have hfin := ofSeq_finite_of_bounds h1 h2
+  have hfinExp : 0 ≤ ArchimedeanClass.mk
+      (Hyperreal.ofSeq fun k ↦ Real.exp (s k)) :=
+    ofSeq_finite_of_bounds (fun k ↦ (Real.exp_pos (s k)).le)
+      (fun k ↦ Real.exp_le_exp.mpr (h2 k))
+  set L := ArchimedeanClass.stdPart (Hyperreal.ofSeq s) with hL
+  set X := ArchimedeanClass.stdPart
+    (Hyperreal.ofSeq fun k ↦ Real.exp (s k)) with hX
+  have hkey : ∀ δ : ℝ, 0 < δ →
+      Real.exp (L - δ) ≤ X ∧ X ≤ Real.exp (L + δ) := by
+    intro δ hδ
+    have hup : ∀ᶠ k in ↑(Filter.hyperfilter ℕ), s k < L + δ :=
+      eventually_lt_of_stdPart_lt hfin (by rw [← hL]; linarith)
+    have hdown : ∀ᶠ k in ↑(Filter.hyperfilter ℕ), L - δ < s k :=
+      eventually_lt_stdPart_of_lt hfin (by rw [← hL]; linarith)
+    constructor
+    · have hev : ∀ᶠ k in ↑(Filter.hyperfilter ℕ),
+          Real.exp (L - δ) ≤ Real.exp (s k) := by
+        filter_upwards [hdown] with k hk
+        exact Real.exp_le_exp.mpr hk.le
+      have hge : ((Real.exp (L - δ) : ℝ) : Hyperreal) ≤
+          Hyperreal.ofSeq fun k ↦ Real.exp (s k) := by
+        change Hyperreal.ofSeq (fun _ : ℕ ↦ Real.exp (L - δ)) ≤ _
+        rw [Hyperreal.ofSeq_le_ofSeq]
+        exact hev
+      exact ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom
+        hfinExp hge
+    · have hev : ∀ᶠ k in ↑(Filter.hyperfilter ℕ),
+          Real.exp (s k) ≤ Real.exp (L + δ) := by
+        filter_upwards [hup] with k hk
+        exact Real.exp_le_exp.mpr hk.le
+      have hle : Hyperreal.ofSeq (fun k ↦ Real.exp (s k)) ≤
+          ((Real.exp (L + δ) : ℝ) : Hyperreal) := by
+        change _ ≤ Hyperreal.ofSeq (fun _ : ℕ ↦ Real.exp (L + δ))
+        rw [Hyperreal.ofSeq_le_ofSeq]
+        exact hev
+      exact ArchimedeanClass.stdPart_le_of_le Hyperreal.coeRingHom
+        hfinExp hle
+  have htend1 : Filter.Tendsto
+      (fun n : ℕ ↦ Real.exp (L + 1 / ((n : ℝ) + 1)))
+      Filter.atTop (nhds (Real.exp L)) := by
+    have h0 : Filter.Tendsto (fun n : ℕ ↦ L + 1 / ((n : ℝ) + 1))
+        Filter.atTop (nhds L) := by
+      simpa using tendsto_one_div_add_atTop_nhds_zero_nat.const_add L
+    exact (Real.continuous_exp.tendsto L).comp h0
+  have htend2 : Filter.Tendsto
+      (fun n : ℕ ↦ Real.exp (L - 1 / ((n : ℝ) + 1)))
+      Filter.atTop (nhds (Real.exp L)) := by
+    have h0 : Filter.Tendsto (fun n : ℕ ↦ L - 1 / ((n : ℝ) + 1))
+        Filter.atTop (nhds L) := by
+      simpa using tendsto_one_div_add_atTop_nhds_zero_nat.const_sub L
+    exact (Real.continuous_exp.tendsto L).comp h0
+  have hXle : X ≤ Real.exp L := by
+    refine ge_of_tendsto' htend1 fun n ↦ ?_
+    exact (hkey (1 / ((n : ℝ) + 1)) (by positivity)).2
+  have hXge : Real.exp L ≤ X := by
+    refine le_of_tendsto' htend2 fun n ↦ ?_
+    exact (hkey (1 / ((n : ℝ) + 1)) (by positivity)).1
+  linarith
+
 theorem seqNorm_neg (v : ∀ k, H k) :
     seqNorm (fun k ↦ -v k) = seqNorm v := by
   unfold seqNorm
