@@ -166,7 +166,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`FiniteFieldLeavitt.ambient_not_isSofic`), and every elementary rank
     `≥ 2` over `L_k(1,2)` is finitely generated, infinite, Kazhdan, and
     nonsofic (`binaryLeavitt_finiteField_profile`)
-  - [x] A10. Full build and audit re-run (3672 jobs, 165 modules, kernel
+  - [x] A10. Full build and audit re-run (3678 jobs, 171 modules, kernel
     closure `[propext, Classical.choice, Quot.sound]`); claim map updated:
     Theorem B's elementary-rank claims are Lean-backed for all finite
     fields, and its unit-group/`GL_r` claims over fields other than `𝔽₂`
@@ -237,7 +237,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
     property-`(T)` refinement and quotient claims of Theorem C
   - [ ] C4. Audit
-- [ ] Define Thompson's group `V` and identify the manuscript's tree-table
+- [x] Define Thompson's group `V` and identify the manuscript's tree-table
   and corner copies with it (the existence proof currently uses a stronger
   direct finite obstruction instead), through the following checkpoints:
   - [x] D1. Thompson's `V` defined concretely (`ThompsonV`): the
@@ -294,13 +294,14 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | A finitely presented nonsofic group exists | `exists_finitelyPresented_nonsofic_group` | Formalized |
 | An infinite finitely presented nonsofic group surjects onto the explicit ambient group | `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | Formalized |
 | The universal binary Leavitt algebra has the required family | `UniversalLeavitt.family` | Formalized |
-| The corner witness is non-LEF | `UniversalRankFour.witness_not_isLEF` | Formalized by a direct finite obstruction; not identified with `V` |
+| The corner witness is non-LEF | `UniversalRankFour.witness_not_isLEF` | Formalized by a direct finite obstruction; identified inside `V` via `cornerWitness_le_deltaPermUnits` and `swapPerm_mem_thompsonV` |
+| Thompson's group `V` is not LEF | `BinaryLeavitt.thompsonV_not_isLEF` | Formalized unconditionally, audit-pinned; no cited simplicity or finite-presentation inputs |
 | The complete adjacent-rank compression construction works in every characteristic | `RankFour.compressorSet_conjugation`, `RankFour.coreEmbedding_compressorSet_generate` | Formalized |
 | Kun's edited expander graphs have one uniform degree bound | `ExpanderDecomposition.degree_le`, `KunDecomposition.exists_expanderDecomposition` | Formalized |
-| Property `(T)` and hence nonsoficity over finite fields of odd characteristic | — | Manuscript-only; the algebraic compression is already characteristic-free |
-| The rank-two compression theorem: `GL₂(A) = EL₂(A)` Kazhdan with Kazhdan units is nonsofic | `LeavittFamily.rankTwo_not_isSofic` | Formalized; its `K₁`/GE hypotheses over finite fields remain manuscript-only |
+| Property `(T)` and hence nonsoficity over every finite field, in every characteristic | `FiniteFieldElementaryPropertyT.finiteFieldElementaryThree_hasKazhdanPropertyT`, `FiniteFieldLeavitt.ambient_not_isSofic`, `binaryLeavitt_finiteField_profile` | Formalized |
+| The rank-two compression theorem: `GL₂(A) = EL₂(A)` Kazhdan with Kazhdan units is nonsofic | `LeavittFamily.rankTwo_not_isSofic` | Formalized; the GE form `E·A·F = diag(u,1)` is Lean-backed (`MatrixDiagonalization.exists_elementary_mul_diag`), the `K₁(L) = 0` input remains manuscript-only |
 | Property `(T)` forces finite generation | `KazhdanFiniteGeneration.exists_symmetric_generating_finset` | Formalized |
-| `GL_r = EL_r` over the binary Leavitt algebra | — | Manuscript-only |
+| `GL_r = EL_r` over the binary Leavitt algebra | `MatrixDiagonalization.binaryLeavitt_exists_elementary_mul_diag` | GE form at rank two Lean-backed; the diagonal-unit collapse (`K₁(L) = 0`) remains manuscript-only |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
 
 ## TeX ↔ Lean alignment
@@ -313,9 +314,9 @@ so.
 | TeX item | Lean declaration(s) | Notes |
 | --- | --- | --- |
 | `def:sofic` | `SoficApproximation`, `IsSofic` (`Sofic`) | |
-| `lem:normalization` | `Localization.involutiveCompletion`, `LocalizedApproximation.toSoficApproximation` | absorbed into the localization step, which constructs the exact identity/inverse/involution normalizations where they are used |
-| `lem:word` | `word_close` (`Sofic`), `exists_local_word_control` (`LEF`), `BlockWordCrossing.permutationPreimage` | |
-| `lem:coarea` | `DirectedCoarea.nonnegative_coarea`, `DirectedCoarea.coarea_mul` | |
+| `lem:normalization` | `SoficApproximation.inverseError_negligible` (`InverseNormalization`), `SoficApproximation.map_one_close` (`Sofic`), `Localization.involutiveCompletion`, `LocalizedApproximation.toSoficApproximation` | |
+| `lem:word` | `word_close` (`Sofic`), `exists_local_word_control` (`LEF`), `BlockWordCrossing.wordCrossing_mul_card_le`, `SoficApproximation.wordDisagreement_negligible`, `SoficApproximation.all_wordCrossing_negligible` | |
+| `lem:coarea` | `FiniteMultiGraph.coarea`, `FiniteMultiGraph.coarea_mul` (`FiniteGraph`); directed analogues `DirectedCoarea.nonnegative_coarea`, `DirectedCoarea.coarea_mul` for the Kun--Thom step | |
 | `lem:fplef` | — | not needed: the non-LEF witness is proved by a direct finite obstruction rather than through residual finiteness of finitely presented LEF groups |
 | `thm:kun` | `KunDecomposition.exists_expanderDecomposition`, `KunFixedDecomposition.expanderDecomposition` | proved internally, full-sequence, one-way form; see the literature audit below |
 | `thm:kunthom` | `KunThomTheorem.isLEF_of_exactProductExpansion`, `KunThomEssential.isLEF_of_matchingCertificate` | proved internally with the matching-core repair |
@@ -330,23 +331,24 @@ so.
 | `lem:diverge` | `ComponentDivergence.smallBlockVertices_negligible` | |
 | `lem:leaf` | `LeavittWords.wordT_mul_wordS_self`, `LeavittWords.wordT_mul_wordS_of_incomparable`, `LeavittWords.cylinder_split` | |
 | `prop:selfsim` | `MatrixSelfSimilarity.ringEquivMatrix`, `LeavittSelfSimilarity.binaryMatrixRingEquiv` | every positive rank, explicit inverse |
-| `lem:whitehead` | `Whitehead.whitehead_diagonal`, `Whitehead.whitehead_commutator`, `elementaryUnit_commutator` (`ElementaryGroup`) | |
+| `lem:whitehead` | `elementaryUnit_commutator` (`ElementaryGroup`), `DiagonalElementary.firstDiagonalUnit_commutator`, `MatrixDiagonalization.exists_elementary_whitehead`, `MatrixDiagonalization.exists_elementary_unipotent_diag` | |
 | `lem:elfg` | `elementaryGroup_finitelyGenerated` (`ElementaryGroup`) | |
 | `thm:ejz` | `FreeElementaryPropertyT.controlSet_isKazhdanPair` and the `FiniteTypeCharacteristicTwoPropertyT` endpoints | proved internally for the characteristic-two cases the endpoints need; the arbitrary-finitely-generated-ring statement is manuscript-only |
 | `lem:chartwo` | `LeavittFamily.characteristicTwo_involution`, `LeavittFamily.characteristicTwo_compressor`, `LeavittFamily.compressor_factorization` | the last is the characteristic-free strengthening |
-| `prop:vembed` | `ThompsonWitness` cylinder-swap/prefix-insertion units | tree-table units are formalized; their identification with Thompson's `V` is manuscript-only |
+| `prop:vembed` | `BinaryLeavitt.vEmbedding`, `vEmbedding_injective` (`ThompsonVEmbedding`), `ThompsonV.tableEquiv`, `LeavittFamily.isComplete_of_covers` | `V` defined concretely and embedded in `L_k(1,2)^×` through the faithful stream action |
 | `lem:corner` | `LeavittFamily.cornerHom`, `t1_cornerHom_s1`, `cornerHom_s0`, `t0_cornerHom` (`LeavittCorner`) | |
-| `prop:vnotlef` | `Scheme.not_isLEF_cornerSubgroup`, `ThompsonWitness.not_isLEF_cornerWitnessSubgroup` | strengthened: direct finite obstruction, no Higman presentation input |
+| `prop:vnotlef` | `BinaryLeavitt.thompsonV_not_isLEF` (`ThompsonVWitness`), via `Scheme.not_isLEF_cornerSubgroup`, `ThompsonWitness.not_isLEF_cornerWitnessSubgroup`, `isLEF_of_injective` | strengthened: proved for `V` itself, unconditionally, with no Higman presentation input |
 | `lem:uinv`, `prop:compress` | `LeavittMatrixCompression.matrixCompressionHom`, `RankFour.compressorSet_conjugation` | |
 | `lem:zinv` | `LeavittFamily.z_sq`, `DiagonalCornerCompression.matrixCompression_commutes_firstDiagonalCorner` | |
 | `prop:gen` | `RankFour.coreEmbedding_compressorSet_generate` | |
-| `prop:JinGamma` | `UniversalRankFour.witnessEmbedding` with `Whitehead.whitehead_diagonal` | |
+| `prop:JinGamma` | `UniversalRankFour.witnessEmbedding` with `DiagonalElementary.firstDiagonalUnit_mem_of_mem_commutator` | |
 | `prop:KJ` | `Scheme.commute_compressed_corner`, `Scheme.compressed_inf_corner`, `DiagonalCornerCompression.matrixCompression_eq_firstDiagonalCorner_iff` | |
 | `thm:corner`, `cor:fgring` | `CompressionSetup`, `UniversalRankFour.compressionSetup`, `not_isSofic_of_not_isLEF` | |
 | `prop:ufact`, `lem:zfact` | `RankFourCompressors` compressor and involution words | explicit elementary words in every characteristic |
 | `thm:spine`, `thm:A` | `universalLeavitt_profile`, `universalLeavittEL4_not_isSofic`, `binaryLeavitt_finiteField_profile` | |
 | `thm:2x2` | `LeavittFamily.rankTwo_not_isSofic` (`RankTwoCompression`), with `eq:p0upper`/`eq:p0lower` as `rankTwoInvolution_conj_upperNil`/`rankTwoInvolution_conj_lowerNil` | finite generation of `Aˣ` derived via `KazhdanFiniteGeneration.exists_symmetric_generating_finset` |
-| `thm:agp`, `prop:glel` | — | manuscript-only (`K₁(L) = 0`, GE property of purely infinite simple rings) |
+| `thm:agp`(a) (GE) | `MatrixDiagonalization.exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag`, from `BinaryLeavitt.exists_mul_mul_eq_one` (`LeavittSimplicity`) | rank-two form Lean-backed with a new direct proof |
+| `thm:agp`(b), `prop:glel` | — | manuscript-only: `K₁(L) = 0` and the diagonal-unit collapse; the membership machinery around it is recorded in the `B4` checkpoint |
 | `thm:allranks`, `thm:B` | `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic` | proved over every finite field via self-similarity, without `K₁`/GE: all elementary ranks `≥ 2`, the full unit group, and every positive-rank `GL_r` |
 | `thm:el2` (rank two, `thm:2x2` discharge) | `RankTwoCompression.rankTwo_not_isSofic` | criterion formalized; its GE and property-`(T)` hypotheses over `L_k(1,2)` are the `B`-block |
 | `def:model`, `lem:models` | `TableCover.TableModel`, `TableCover.tableModel_of_isSofic`, `TableCover.exists_table_obstruction` | |
@@ -540,7 +542,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3256
+The current complete MSI build reports `Build completed successfully (3678
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -548,7 +550,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The source audit covers all 164 project modules, and
+proposition interface. The source audit covers all 171 project modules, and
 the whole-namespace kernel audit traverses every project declaration and
 reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after

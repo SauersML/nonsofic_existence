@@ -30,6 +30,8 @@ import NonsoficGroupsExist.KazhdanFiniteGeneration
 import NonsoficGroupsExist.CharacterMass
 import NonsoficGroupsExist.RankTwoCompression
 import NonsoficGroupsExist.KazhdanControl
+import NonsoficGroupsExist.AlmostMinimalDisplacement
+import NonsoficGroupsExist.HilbertCircumcenter
 import NonsoficGroupsExist.KazhdanFixedSpace
 import NonsoficGroupsExist.HilbertConvexFixedPoint
 import NonsoficGroupsExist.InvolutionSplitting
