@@ -43,7 +43,7 @@ private theorem posSemidef_of_quadForm (A : Matrix ι ι ℝ)
     ext i j
     rw [Matrix.conjTranspose_apply, star_trivial]
     exact hsymm j i
-  refine ⟨hAH, fun x ↦ ?_⟩
+  refine Matrix.PosSemidef.of_dotProduct_mulVec_nonneg hAH fun x ↦ ?_
   rw [star_dotProduct_eq]
   exact h x
 
@@ -53,7 +53,7 @@ private theorem quadForm_nonneg_of_posSemidef {A : Matrix ι ι ℝ}
     (hA : A.PosSemidef) (x : ι → ℝ) :
     0 ≤ ∑ i, ∑ j, x i * x j * A i j := by
   rw [← star_dotProduct_eq]
-  exact hA.2 x
+  exact hA.dotProduct_mulVec_nonneg x
 
 /-- Entrywise powers of a positive semidefinite real matrix are positive
 semidefinite: the Schur product theorem, iterated. -/
@@ -156,11 +156,11 @@ theorem posSemidef_exp_entry {A : Matrix ι ι ℝ} (hA : A.PosSemidef) :
       x i * x j * ∑ n ∈ Finset.range N, A i j ^ n / n !)
       Filter.atTop
       (nhds (∑ i, ∑ j, x i * x j * Real.exp (A i j))) := by
-    refine tendsto_finset_sum _ fun i _ ↦ tendsto_finset_sum _ fun j _ ↦ ?_
+    refine tendsto_finsetSum _ fun i _ ↦ tendsto_finsetSum _ fun j _ ↦ ?_
     have hexp : HasSum (fun n : ℕ ↦ A i j ^ n / n !)
         (Real.exp (A i j)) := by
       rw [Real.exp_eq_exp_ℝ]
-      exact NormedSpace.expSeries_div_hasSum_exp ℝ (A i j)
+      exact NormedSpace.expSeries_div_hasSum_exp (A i j)
     exact hexp.tendsto_sum_nat.const_mul (x i * x j)
   exact ge_of_tendsto' hlim hpartial
 
@@ -217,9 +217,9 @@ theorem isPositiveDefinite_exp_neg_norm_sq (b : G → H)
             (c q * Real.exp (-t * ‖b q‖ ^ 2)) *
             Real.exp (⟪Real.sqrt (2 * t) • b p,
               Real.sqrt (2 * t) • b q⟫_ℝ) := by
-      rw [Finset.sum_subtype F fun x ↦ Iff.rfl]
+      rw [← Finset.sum_coe_sort F]
       refine Finset.sum_congr rfl fun p _ ↦ ?_
-      rw [Finset.sum_subtype F fun x ↦ Iff.rfl]
+      rw [← Finset.sum_coe_sort F]
       refine Finset.sum_congr rfl fun q _ ↦ ?_
       rw [hfact]
       ring
