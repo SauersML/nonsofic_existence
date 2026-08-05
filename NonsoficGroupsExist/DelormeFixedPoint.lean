@@ -71,6 +71,15 @@ theorem norm_inv_mul (hb : IsCocycle π b) (g h : G) :
 
 end IsCocycle
 
+/-- The orbit map of any vector is a cocycle for the linear action. -/
+theorem isCocycle_orbit (π : G →* (E ≃ₗᵢ[ℝ] E)) (ξ : E) :
+    IsCocycle π (fun g ↦ π g ξ - ξ) := by
+  intro g h
+  rw [map_mul]
+  have hcomp : (π g * π h) ξ = π g (π h ξ) := rfl
+  rw [hcomp, map_sub]
+  abel
+
 end Cocycle
 
 section Bound

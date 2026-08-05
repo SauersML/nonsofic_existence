@@ -368,6 +368,18 @@ theorem seqNorm_neg (v : ∀ k, H k) :
   funext k
   rw [norm_neg]
 
+/-- Sequences with pointwise equal norms have the same seminorm; in
+particular pointwise isometric images do. -/
+theorem seqNorm_congr_norm {H' : ℕ → Type*}
+    [∀ k, NormedAddCommGroup (H' k)] [∀ k, InnerProductSpace ℝ (H' k)]
+    {u : ∀ k, H k} {u' : ∀ k, H' k} (h : ∀ k, ‖u k‖ = ‖u' k‖) :
+    seqNorm u = seqNorm u' := by
+  unfold seqNorm
+  congr 1
+  apply congrArg Hyperreal.ofSeq
+  funext k
+  exact h k
+
 /-- Scaling of the squared seminorm. -/
 theorem seqNormSq_smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
     seqNormSq (fun k ↦ c • v k) = c ^ 2 * seqNormSq v := by
