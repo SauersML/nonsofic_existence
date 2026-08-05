@@ -2786,6 +2786,176 @@ theorem sum_planeMass_CB_le_coarse_AD (hψ : ψ ≠ 1) (z : E) :
       rw [← herr]
       linarith
 
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The finite-stage Kassabov estimate**: the total mass in all four
+nonzero valuation regions is controlled by the displacements of the
+explicit unit and generator elements, the scalar unit displacements at
+the character gap, and the two vanishing boundary layers. -/
+theorem sum_planeMass_nonzero_le_explicit_errors (hψ : ψ ≠ 1) (z : E) :
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = .A),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ z) +
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = .B),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ z) +
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = .C),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ z) +
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = .D),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ z) ≤
+    4 * ((CharacterMass.gap ψ)⁻¹ *
+      ((∑ t : K, ‖rho (planePoint X K i j k hik hjk (n + 2)
+          (t • unitVectorFirst X K (n + 2))) z - z‖ ^ 2) +
+        ∑ t : K, ‖rho (planePoint X K i j k hik hjk (n + 2)
+          (t • unitVectorSecond X K (n + 2))) z - z‖ ^ 2)) +
+    (3 : ℝ) / 2 *
+      ((∑ x : X, 2 * ‖z‖ *
+        ‖rho (elementaryRoot j i hij.symm (FreeAlgebra.ι K x)) z - z‖) +
+      ∑ x : X, 2 * ‖z‖ *
+        ‖rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z - z‖) +
+    2 * ‖z‖ *
+      ‖rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) z - z‖ +
+    2 * ‖z‖ *
+      ‖rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) z - z‖ +
+    (9 : ℝ) / 2 *
+      (firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z +
+        secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z) := by
+  have hsplit : ∀ (m : ℕ) (r s : ValuationRegion), r ≠ s →
+      (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K m) ↦
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = r ∨
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = s),
+        planeMass X K i j k hik hjk m rho ψ χ z) =
+      (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K m) ↦
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = r),
+        planeMass X K i j k hik hjk m rho ψ χ z) +
+      ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K m) ↦
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = s),
+        planeMass X K i j k hik hjk m rho ψ χ z := by
+    intro m r s hrs
+    rw [show (Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K m) ↦
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = r ∨
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = s)) =
+      (Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K m) ↦
+          pairRegion X K (firstCoordinateChar X K m χ)
+            (secondCoordinateChar X K m χ) = r)) ∪
+        Finset.univ.filter
+          (fun χ : Module.Dual K (PlaneVector X K m) ↦
+            pairRegion X K (firstCoordinateChar X K m χ)
+              (secondCoordinateChar X K m χ) = s) from by
+      ext χ
+      simp only [Finset.mem_filter, Finset.mem_union, Finset.mem_univ,
+        true_and]]
+    refine Finset.sum_union ?_
+    refine Finset.disjoint_left.2 fun χ h1 h2 ↦ ?_
+    rw [Finset.mem_filter] at h1 h2
+    exact hrs (by rw [← h1.2, h2.2])
+  have hAB := sum_planeMass_AB_le_coarse_CD X K i j k hij hik hjk n
+    rho ψ hψ z
+  have hCB := sum_planeMass_CB_le_coarse_AD X K i j k hij hik hjk n
+    rho ψ hψ z
+  have hliftCD := sum_planeMass_region_le_succ_add_boundaries
+    X K i j k hik hjk (n + 1) rho ψ hψ z
+    (fun r ↦ r = ValuationRegion.C ∨ r = ValuationRegion.D)
+  have hliftAD := sum_planeMass_region_le_succ_add_boundaries
+    X K i j k hik hjk (n + 1) rho ψ hψ z
+    (fun r ↦ r = ValuationRegion.A ∨ r = ValuationRegion.D)
+  beta_reduce at hliftCD hliftAD
+  simp only [show n + 1 + 1 = n + 2 from rfl] at hliftCD hliftAD
+  -- unit-shear conversions to the same vector
+  have hcontinuity : ∀ (g : elementaryGroup (Fin 3) (FreeAlgebra K X))
+      (r : ValuationRegion),
+      (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = r),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ (rho g z)) ≤
+      (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = r),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ z) +
+        2 * ‖z‖ * ‖rho g z - z‖ := by
+    intro g r
+    have habs := CharacterMass.abs_sum_mass_sub_sum_mass_le ψ
+      (planeAction X K i j k hik hjk (n + 2) rho)
+      (planeAction_add X K i j k hik hjk (n + 2) rho) hψ
+      (Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = r))
+      (rho g z) z
+    have hnorm : ‖rho g z‖ = ‖z‖ := (rho g).norm_map z
+    have h1 := (abs_le.1 habs).2
+    rw [hnorm] at h1
+    change (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = r),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ (rho g z)) -
+      (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+            (secondCoordinateChar X K (n + 2) χ) = r),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ z) ≤
+      (‖z‖ + ‖z‖) * ‖rho g z - z‖ at h1
+    linarith
+  have hA := sum_planeMass_A_le_sum_B X K i j k hij hik hjk (n + 2)
+    rho ψ z
+  have hAcont := hcontinuity
+    (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) .B
+  have hC := sum_planeMass_C_le_sum_B X K i j k hij hik hjk (n + 2)
+    rho ψ z
+  have hCcont := hcontinuity
+    (elementaryRoot i j hij (1 : FreeAlgebra K X)) .B
+  have hgapD := gap_mul_sum_planeMass_D_le X K i j k hik hjk (n + 2)
+    rho ψ hψ z
+  have hgap := CharacterMass.gap_pos ψ
+  have hD : (∑ χ ∈ Finset.univ.filter
+      (fun χ : Module.Dual K (PlaneVector X K (n + 2)) ↦
+        pairRegion X K (firstCoordinateChar X K (n + 2) χ)
+          (secondCoordinateChar X K (n + 2) χ) = .D),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ z) ≤
+    (CharacterMass.gap ψ)⁻¹ *
+      ((∑ t : K, ‖rho (planePoint X K i j k hik hjk (n + 2)
+          (t • unitVectorFirst X K (n + 2))) z - z‖ ^ 2) +
+        ∑ t : K, ‖rho (planePoint X K i j k hik hjk (n + 2)
+          (t • unitVectorSecond X K (n + 2))) z - z‖ ^ 2) := by
+    have hmul := mul_le_mul_of_nonneg_left hgapD
+      (inv_nonneg.2 hgap.le)
+    rw [← mul_assoc, inv_mul_cancel₀ hgap.ne', one_mul] at hmul
+    exact hmul
+  rw [hsplit (n + 2) .A .B (by simp), hsplit (n + 1) .C .D (by simp)]
+    at hAB
+  rw [hsplit (n + 2) .C .B (by simp), hsplit (n + 1) .A .D (by simp)]
+    at hCB
+  rw [hsplit (n + 1) .C .D (by simp), hsplit (n + 2) .C .D (by simp)]
+    at hliftCD
+  rw [hsplit (n + 1) .A .D (by simp), hsplit (n + 2) .A .D (by simp)]
+    at hliftAD
+  linarith
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist
