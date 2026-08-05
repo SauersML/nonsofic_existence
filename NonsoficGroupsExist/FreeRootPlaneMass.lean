@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.FreeRootPlane
 import NonsoficGroupsExist.FreeRootFunctionalValuation
 import NonsoficGroupsExist.CharacterMass
+import NonsoficGroupsExist.KazhdanFixedSpace
 
 /-!
 # Character masses on the two-root coefficient plane
@@ -2955,6 +2956,306 @@ theorem sum_planeMass_nonzero_le_explicit_errors (hψ : ψ ≠ 1) (z : E) :
   rw [hsplit (n + 1) .A .D (by simp), hsplit (n + 2) .A .D (by simp)]
     at hliftAD
   linarith
+
+
+/-! ### The limiting two-root moving-mass bound -/
+
+open Classical in
+/-- **The trivial mass is the fixed projection**: the trivial-character
+mass at any stage is the squared norm of the orthogonal projection onto
+the subspace fixed by that stage's plane subgroup. -/
+theorem planeMass_zero_eq_norm_fixedProjection_sq [CompleteSpace E]
+    (z : E) :
+    planeMass X K i j k hik hjk n rho ψ 0 z =
+      ‖(KazhdanFixedSpace.fixedProjection rho
+        (FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk n)
+          z : E)‖ ^ 2 := by
+  set H := FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk n
+    with hH
+  set U := KazhdanFixedSpace.fixedSubspace rho H with hU
+  set avg : E := (Fintype.card (PlaneVector X K n) : ℝ)⁻¹ •
+    ∑ v : PlaneVector X K n, planeAction X K i j k hik hjk n rho v z
+    with havg
+  have hmass : planeMass X K i j k hik hjk n rho ψ 0 z = ‖avg‖ ^ 2 :=
+    CharacterMass.mass_zero_eq_norm_average_sq ψ _
+      (planeAction_add X K i j k hik hjk n rho) z
+  have hfixaction : ∀ v₀ : PlaneVector X K n,
+      planeAction X K i j k hik hjk n rho v₀ avg = avg := by
+    intro v₀
+    rw [havg, map_smul, map_sum]
+    congr 1
+    calc
+      (∑ v : PlaneVector X K n,
+          planeAction X K i j k hik hjk n rho v₀
+            (planeAction X K i j k hik hjk n rho v z)) =
+          ∑ v : PlaneVector X K n,
+            planeAction X K i j k hik hjk n rho (v₀ + v) z := by
+        refine Finset.sum_congr rfl fun v _ ↦ ?_
+        rw [planeAction_add]
+        rfl
+      _ = ∑ v : PlaneVector X K n,
+          planeAction X K i j k hik hjk n rho v z :=
+        Equiv.sum_comp (Equiv.addLeft v₀)
+          (fun w ↦ planeAction X K i j k hik hjk n rho w z)
+  have hfix : avg ∈ U := by
+    rw [hU, KazhdanFixedSpace.mem_fixedSubspace_iff]
+    intro h hh
+    obtain ⟨v₀, rfl⟩ :=
+      planePoint_surjective X K i j k hij hik hjk n h hh
+    exact hfixaction v₀
+  have horth : z - avg ∈ Uᗮ := by
+    rw [Submodule.mem_orthogonal]
+    intro u hu
+    rw [hU, KazhdanFixedSpace.mem_fixedSubspace_iff] at hu
+    have hinner : ∀ v : PlaneVector X K n,
+        inner ℝ u (planeAction X K i j k hik hjk n rho v z) =
+          inner ℝ u z := by
+      intro v
+      have hufix : planeAction X K i j k hik hjk n rho v u = u :=
+        hu _ (planePoint_mem X K i j k hij hik hjk n v)
+      calc
+        inner ℝ u (planeAction X K i j k hik hjk n rho v z) =
+            inner ℝ (planeAction X K i j k hik hjk n rho v u)
+              (planeAction X K i j k hik hjk n rho v z) := by
+          rw [hufix]
+        _ = inner ℝ u z :=
+          (planeAction X K i j k hik hjk n rho v).inner_map_map u z
+    have hcard : ((Fintype.card (PlaneVector X K n) : ℝ)) ≠ 0 := by
+      exact_mod_cast Fintype.card_ne_zero
+    rw [inner_sub_right, havg, inner_smul_right, inner_sum]
+    rw [Finset.sum_congr rfl fun v _ ↦ hinner v, Finset.sum_const,
+      Finset.card_univ, nsmul_eq_mul, inv_mul_cancel_left₀ hcard]
+    exact sub_self _
+  letI : CompleteSpace U :=
+    (KazhdanFixedSpace.isClosed_fixedSubspace rho H).completeSpace_coe
+  have hproj : (KazhdanFixedSpace.fixedProjection rho H z : E) = avg := by
+    change U.starProjection z = avg
+    exact U.eq_starProjection_of_mem_orthogonal hfix horth
+  rw [hmass, hproj]
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The moving-mass identity**: the total mass in the four nonzero
+valuation regions is exactly the squared norm of the moving projection
+for the stage plane subgroup. -/
+theorem sum_planeMass_nonzero_eq_norm_movingProjection_sq
+    [CompleteSpace E] (hψ : ψ ≠ 1) (z : E) :
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .A),
+      planeMass X K i j k hik hjk n rho ψ χ z) +
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .B),
+      planeMass X K i j k hik hjk n rho ψ χ z) +
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .C),
+      planeMass X K i j k hik hjk n rho ψ χ z) +
+    (∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .D),
+      planeMass X K i j k hik hjk n rho ψ χ z) =
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho
+      (FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk n)
+        z‖ ^ 2 := by
+  have hconserv := sum_planeMass X K i j k hik hjk n rho ψ hψ z
+  have hfiber := Finset.sum_fiberwise Finset.univ
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ))
+    (fun χ ↦ planeMass X K i j k hik hjk n rho ψ χ z)
+  rw [show (Finset.univ : Finset ValuationRegion) =
+    {ValuationRegion.zero, ValuationRegion.A, ValuationRegion.B,
+      ValuationRegion.C, ValuationRegion.D} from by decide] at hfiber
+  rw [Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_insert (by decide), Finset.sum_insert (by decide),
+    Finset.sum_singleton] at hfiber
+  have hzerofilter : Finset.univ.filter
+      (fun χ : Module.Dual K (PlaneVector X K n) ↦
+        pairRegion X K (firstCoordinateChar X K n χ)
+          (secondCoordinateChar X K n χ) = ValuationRegion.zero) =
+    {(0 : Module.Dual K (PlaneVector X K n))} := by
+    ext χ
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and,
+      Finset.mem_singleton]
+    constructor
+    · intro h
+      obtain ⟨h1, h2⟩ := (pairRegion_eq_zero_iff X K _ _).1 h
+      rw [valuation_eq_succ_iff] at h1 h2
+      by_contra hne
+      rcases coordinateChar_ne_zero_of_ne_zero X K n χ hne with hc | hc
+      · exact hc h1
+      · exact hc h2
+    · rintro rfl
+      refine (pairRegion_eq_zero_iff X K _ _).2 ⟨?_, ?_⟩ <;>
+        rw [valuation_eq_succ_iff] <;>
+        exact LinearMap.zero_comp _
+  rw [hzerofilter, Finset.sum_singleton] at hfiber
+  have hzero := planeMass_zero_eq_norm_fixedProjection_sq
+    X K i j k hij hik hjk n rho ψ z
+  have hpyth := KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
+    rho (FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk n) z
+  linarith
+
+omit [Fintype K] in
+/-- The scalar multiples of the first unit plane vector parametrize the
+stage-independent scalar first-root elements. -/
+theorem planePoint_smul_unitVectorFirst (t : K) :
+    planePoint X K i j k hik hjk n (t • unitVectorFirst X K n) =
+      elementaryRoot i k hik (t • (1 : FreeAlgebra K X)) := by
+  unfold planePoint unitVectorFirst
+  rw [show (((t • ((wordMonomialInDegree X K n 1 : degreeLE X K n),
+        (0 : degreeLE X K n)) : PlaneVector X K n)).1 :
+      FreeAlgebra K X) = t • (1 : FreeAlgebra K X) from by
+    change ((t • wordMonomialInDegree X K n 1 : degreeLE X K n) :
+      FreeAlgebra K X) = t • (1 : FreeAlgebra K X)
+    rw [Submodule.coe_smul, wordMonomialInDegree_one_val]]
+  rw [show (((t • ((wordMonomialInDegree X K n 1 : degreeLE X K n),
+        (0 : degreeLE X K n)) : PlaneVector X K n)).2 :
+      FreeAlgebra K X) = 0 from by
+    change ((t • (0 : degreeLE X K n) : degreeLE X K n) :
+      FreeAlgebra K X) = 0
+    rw [smul_zero]
+    rfl]
+  rw [elementaryRoot_zero, mul_one]
+
+omit [Fintype K] in
+/-- The scalar multiples of the second unit plane vector parametrize the
+stage-independent scalar second-root elements. -/
+theorem planePoint_smul_unitVectorSecond (t : K) :
+    planePoint X K i j k hik hjk n (t • unitVectorSecond X K n) =
+      elementaryRoot j k hjk (t • (1 : FreeAlgebra K X)) := by
+  unfold planePoint unitVectorSecond
+  rw [show (((t • ((0 : degreeLE X K n),
+        (wordMonomialInDegree X K n 1 : degreeLE X K n)) :
+          PlaneVector X K n)).1 : FreeAlgebra K X) = 0 from by
+    change ((t • (0 : degreeLE X K n) : degreeLE X K n) :
+      FreeAlgebra K X) = 0
+    rw [smul_zero]
+    rfl]
+  rw [show (((t • ((0 : degreeLE X K n),
+        (wordMonomialInDegree X K n 1 : degreeLE X K n)) :
+          PlaneVector X K n)).2 : FreeAlgebra K X) =
+      t • (1 : FreeAlgebra K X) from by
+    change ((t • wordMonomialInDegree X K n 1 : degreeLE X K n) :
+      FreeAlgebra K X) = t • (1 : FreeAlgebra K X)
+    rw [Submodule.coe_smul, wordMonomialInDegree_one_val]]
+  rw [elementaryRoot_zero, one_mul]
+
+open Classical in
+/-- **The limiting two-root moving-mass bound**: the squared norm of the
+moving projection for the join of the two full column-root subgroups is
+controlled by the displacements of the explicit scalar, unit, and
+generator elements alone.  The boundary layers vanish along the
+exhaustive degree filtration. -/
+theorem norm_joinRootMovingProjection_sq_le_explicit_errors
+    [CompleteSpace E] (hψ : ψ ≠ 1) (z : E) :
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z‖ ^ 2 ≤
+      4 * ((CharacterMass.gap ψ)⁻¹ *
+        ((∑ t : K, ‖rho (elementaryRoot i k hik
+            (t • (1 : FreeAlgebra K X))) z - z‖ ^ 2) +
+          ∑ t : K, ‖rho (elementaryRoot j k hjk
+            (t • (1 : FreeAlgebra K X))) z - z‖ ^ 2)) +
+      (3 : ℝ) / 2 *
+        ((∑ x : X, 2 * ‖z‖ *
+          ‖rho (elementaryRoot j i hij.symm
+            (FreeAlgebra.ι K x)) z - z‖) +
+        ∑ x : X, 2 * ‖z‖ *
+          ‖rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z - z‖) +
+      2 * ‖z‖ *
+        ‖rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) z - z‖ +
+      2 * ‖z‖ *
+        ‖rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) z - z‖ := by
+  set C : ℝ :=
+    4 * ((CharacterMass.gap ψ)⁻¹ *
+      ((∑ t : K, ‖rho (elementaryRoot i k hik
+          (t • (1 : FreeAlgebra K X))) z - z‖ ^ 2) +
+        ∑ t : K, ‖rho (elementaryRoot j k hjk
+          (t • (1 : FreeAlgebra K X))) z - z‖ ^ 2)) +
+    (3 : ℝ) / 2 *
+      ((∑ x : X, 2 * ‖z‖ *
+        ‖rho (elementaryRoot j i hij.symm
+          (FreeAlgebra.ι K x)) z - z‖) +
+      ∑ x : X, 2 * ‖z‖ *
+        ‖rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z - z‖) +
+    2 * ‖z‖ *
+      ‖rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) z - z‖ +
+    2 * ‖z‖ *
+      ‖rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) z - z‖
+    with hC
+  have hfinite : ∀ m : ℕ,
+      ‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk
+          (m + 2)) z‖ ^ 2 ≤
+      C + (9 : ℝ) / 2 *
+        (firstBoundaryMass X K i j k hik hjk (m + 2) rho ψ z +
+          secondBoundaryMass X K i j k hik hjk (m + 2) rho ψ z) := by
+    intro m
+    have hid := sum_planeMass_nonzero_eq_norm_movingProjection_sq
+      X K i j k hij hik hjk (m + 2) rho ψ hψ z
+    have hest := sum_planeMass_nonzero_le_explicit_errors
+      X K i j k hij hik hjk m rho ψ hψ z
+    have hfirstsum : (∑ t : K, ‖rho (planePoint X K i j k hik hjk (m + 2)
+        (t • unitVectorFirst X K (m + 2))) z - z‖ ^ 2) =
+      ∑ t : K, ‖rho (elementaryRoot i k hik
+        (t • (1 : FreeAlgebra K X))) z - z‖ ^ 2 :=
+      Finset.sum_congr rfl fun t _ ↦ by
+        rw [planePoint_smul_unitVectorFirst X K i j k hik hjk (m + 2) t]
+    have hsecondsum : (∑ t : K, ‖rho (planePoint X K i j k hik hjk (m + 2)
+        (t • unitVectorSecond X K (m + 2))) z - z‖ ^ 2) =
+      ∑ t : K, ‖rho (elementaryRoot j k hjk
+        (t • (1 : FreeAlgebra K X))) z - z‖ ^ 2 :=
+      Finset.sum_congr rfl fun t _ ↦ by
+        rw [planePoint_smul_unitVectorSecond X K i j k hik hjk (m + 2) t]
+    rw [hfirstsum, hsecondsum, ← hC] at hest
+    linarith
+  have hleft : Filter.Tendsto
+      (fun m ↦ ‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk
+          (m + 2)) z‖ ^ 2)
+      Filter.atTop
+      (nhds (‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z‖ ^ 2)) := by
+    have h := KazhdanFixedSpace.tendsto_subgroupMovingProjection_iSup
+      rho (FreeRootPlane.rootPlaneDegreeSubgroup X K i j k hij hik hjk)
+      (elementaryRootSubgroup i k hik ⊔ elementaryRootSubgroup j k hjk)
+      (FreeRootPlane.rootPlaneDegreeSubgroup_mono X K i j k hij hik hjk)
+      (FreeRootPlane.iSup_rootPlaneDegreeSubgroup X K i j k hij hik hjk)
+      z
+    have hsq := h.norm.pow 2
+    exact (Filter.tendsto_add_atTop_iff_nat 2).2 hsq
+  have hfirstb : Filter.Tendsto
+      (fun m ↦ firstBoundaryMass X K i j k hik hjk (m + 2) rho ψ z)
+      Filter.atTop (nhds 0) :=
+    (Filter.tendsto_add_atTop_iff_nat 1).2
+      (tendsto_firstBoundaryMass_zero X K i j k hik hjk rho ψ hψ z)
+  have hsecondb : Filter.Tendsto
+      (fun m ↦ secondBoundaryMass X K i j k hik hjk (m + 2) rho ψ z)
+      Filter.atTop (nhds 0) :=
+    (Filter.tendsto_add_atTop_iff_nat 1).2
+      (tendsto_secondBoundaryMass_zero X K i j k hik hjk rho ψ hψ z)
+  have hright : Filter.Tendsto
+      (fun m ↦ C + (9 : ℝ) / 2 *
+        (firstBoundaryMass X K i j k hik hjk (m + 2) rho ψ z +
+          secondBoundaryMass X K i j k hik hjk (m + 2) rho ψ z))
+      Filter.atTop (nhds C) := by
+    have hscaled : Filter.Tendsto
+        (fun m ↦ (9 : ℝ) / 2 *
+          (firstBoundaryMass X K i j k hik hjk (m + 2) rho ψ z +
+            secondBoundaryMass X K i j k hik hjk (m + 2) rho ψ z))
+        Filter.atTop (nhds 0) := by
+      simpa using tendsto_const_nhds.mul (hfirstb.add hsecondb)
+    simpa using tendsto_const_nhds.add hscaled
+  exact le_of_tendsto_of_tendsto hleft hright
+    (Filter.Eventually.of_forall hfinite)
 
 end FreeRootPlaneMass
 

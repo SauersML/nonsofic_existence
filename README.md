@@ -143,8 +143,19 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     inequality charging every coarse `B`-character through the forward
     shear of its canonical least leading generator
     (`sum_planeMass_B_le_sum_fine`)
-  - [ ] A8. The limiting two-root moving-mass bound and the uniform
-    relative-property-`(T)` estimate over `ZMod p`
+  - [x] A8. The limiting two-root moving-mass bound over every finite
+    coefficient field (`FreeRootPlaneMass`): summed character-mass
+    continuity by a bilinear Cauchy--Schwarz argument with no cardinality
+    factor (`CharacterMass.abs_sum_mass_sub_sum_mass_le`), the two
+    same-vector descent estimates `A ∪ B ≤ C ∪ D` and `C ∪ B ≤ A ∪ D`
+    with one generator displacement per alphabet letter, the cross-stage
+    region lift, the finite-stage Kassabov estimate
+    (`sum_planeMass_nonzero_le_explicit_errors`), the moving-mass
+    identity through the stage fixed projections, and the limiting bound
+    (`norm_joinRootMovingProjection_sq_le_explicit_errors`): the squared
+    moving projection for the join of the two column roots is controlled
+    by scalar, unit, and generator displacements alone, at the character
+    gap of any nontrivial additive character
   - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
     explicit Kazhdan pair; transfer to all ranks over `L_k(1,2)` for every
     finite field `k`; nonsoficity endpoints over every finite field
