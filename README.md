@@ -52,6 +52,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Replace the irreducible class-two sign-character shortcut by a
   characteristic-free cyclic-orbit argument for central commutators of any
   positive bounded exponent
+- [x] Replace the finite-dimensional sign-eigenspace recombination by an
+  orthogonal irreducible decomposition with dimension induction, so the
+  finite class-two `1 / sqrt 2` estimate and the universal class-two
+  orthogonality theorem now hold for central commutators of any one positive
+  bounded exponent; the former central-involution eigenspace module is
+  removed as dead code
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route
@@ -129,7 +135,9 @@ claims not yet formalized are listed separately in “Full manuscript scope.”
 - [x] GNS/Kazhdan finite-model contraction and rounding infrastructure
 - [x] Terminating Kun finite partition recursion and cut accounting
 - [x] Six-vertex A₂ magic graph and its exact Laplacian estimates
-- [x] Characteristic-two class-two orthogonality estimate
+- [x] Class-two orthogonality estimate for central commutators of any one
+  positive bounded exponent (instantiated at exponent two by the
+  characteristic-two route)
 - [x] Strict A₂ local and global moving-energy defect
 - [x] Genuine Hilbert direct sum, fixed-family subspace, and compressed
   Laplacian
@@ -280,7 +288,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3256
+The current complete MSI build reports `Build completed successfully (3245
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or

@@ -91,7 +91,7 @@ theorem rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_exponent_two
       (Subgroup.mem_subgroupOf.mp (hcomm hc))
   have hangle := ClassTwoOrthogonality.epsilonOrthogonal
     rho
-    XL YL hgen hXcomm hYcomm hXexp hYexp hcentral hCexp hno
+    XL YL 2 (by omega) hgen hXcomm hYcomm hXexp hYexp hcentral hCexp hno
   exact hangle
 
 /-- The two root fixed spaces at every A₂ vertex have angle at most

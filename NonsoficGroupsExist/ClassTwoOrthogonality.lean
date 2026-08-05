@@ -3,12 +3,13 @@ import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.FiniteClassTwoDecompositionBound
 
 /-!
-# Universal class-two fixed-space orthogonality in exponent two
+# Universal class-two fixed-space orthogonality
 
-Finite subsets of the two generating abelian exponent-two subgroups produce
-finite class-two stages.  The finite `1 / sqrt 2` theorem is applied in each
-stage's moving representation, and the directed projection theorem passes to
-the full (possibly infinitely generated) group.
+Finite subsets of the two generating abelian bounded-exponent subgroups
+produce finite class-two stages.  The finite `1 / sqrt 2` theorem is applied
+in each stage's moving representation, and the directed projection theorem
+passes to the full (possibly infinitely generated) group.  One positive
+exponent bound suffices, so every finite characteristic is covered.
 -/
 
 namespace NonsoficGroupsExist
@@ -23,17 +24,18 @@ variable {G : Type u} [Group G]
 variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [CompleteSpace E]
 
-/-- Universal `1 / sqrt 2` orthogonality for two abelian exponent-two
-subgroups whose cross-commutator is central of exponent two. -/
+/-- Universal `1 / sqrt 2` orthogonality for two abelian bounded-exponent
+subgroups whose cross-commutator is central of the same bounded exponent. -/
 theorem epsilonOrthogonal
     (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y : Subgroup G)
+    (n : ℕ) (hn : 0 < n)
     (hgen : X ⊔ Y = ⊤)
     (hXcomm : ∀ x ∈ X, ∀ x' ∈ X, Commute x x')
     (hYcomm : ∀ y ∈ Y, ∀ y' ∈ Y, Commute y y')
-    (hXexp : ∀ x ∈ X, x ^ 2 = 1)
-    (hYexp : ∀ y ∈ Y, y ^ 2 = 1)
+    (hXexp : ∀ x ∈ X, x ^ n = 1)
+    (hYexp : ∀ y ∈ Y, y ^ n = 1)
     (hcentral : ⁅Y, X⁆ ≤ Subgroup.center G)
-    (hCexp : ∀ c ∈ ⁅Y, X⁆, c ^ 2 = 1)
+    (hCexp : ∀ c ∈ ⁅Y, X⁆, c ^ n = 1)
     (hno : IsKazhdanPair.HasNoInvariantVectors G rho) :
     HilbertEpsilonOrthogonality.EpsilonOrthogonal
       (KazhdanFixedSpace.fixedSubspace rho X)
@@ -51,20 +53,20 @@ theorem epsilonOrthogonal
       (ClassTwoApproximation.rightStage_le X Y a)
       (ClassTwoApproximation.leftStage_le X Y a)
   letI : Finite X₀ :=
-    ClassTwoApproximation.finite_leftStage X Y a 2 (by omega) hXcomm hXexp
+    ClassTwoApproximation.finite_leftStage X Y a n hn hXcomm hXexp
   letI : Finite Y₀ :=
-    ClassTwoApproximation.finite_rightStage X Y a 2 (by omega) hYcomm hYexp
+    ClassTwoApproximation.finite_rightStage X Y a n hn hYcomm hYexp
   have hC₀fg : C₀.FG :=
     ClassTwoApproximation.commutator_fg_of_finite Y₀ X₀
   have hC₀comm : ∀ c ∈ C₀, ∀ d ∈ C₀, Commute c d := by
     intro c hc d hd
     exact (Subgroup.mem_center_iff.mp (hcentral (hC₀C hc)) d).symm
-  have hC₀exp : ∀ c ∈ C₀, c ^ 2 = 1 := by
+  have hC₀exp : ∀ c ∈ C₀, c ^ n = 1 := by
     intro c hc
     exact hCexp c (hC₀C hc)
   letI : Finite C₀ :=
     ClassTwoApproximation.finite_of_fg_commute_boundedExponent
-      C₀ 2 (by omega) hC₀fg hC₀comm hC₀exp
+      C₀ n hn hC₀fg hC₀comm hC₀exp
   have hYX : ⁅Y₀, X₀⁆ ≤ C₀ := le_rfl
   have hXC : ⁅X₀, C₀⁆ ≤ C₀ := by
     apply Subgroup.commutator_le.mpr
@@ -103,7 +105,7 @@ theorem epsilonOrthogonal
     apply Subtype.ext
     exact Subgroup.mem_center_iff.mp
       (hcentral (hC₀C (Subgroup.mem_subgroupOf.mp hc))) g.1
-  have hCLexp : ∀ c ∈ CL, c ^ 2 = 1 := by
+  have hCLexp : ∀ c ∈ CL, c ^ n = 1 := by
     intro c hc
     apply Subtype.ext
     exact hC₀exp c.1 (Subgroup.mem_subgroupOf.mp hc)
@@ -138,7 +140,7 @@ theorem epsilonOrthogonal
     exact (KazhdanFixedSpace.mem_fixedSubspace_iff rho Y₀ pv).mp
       hpvY₀ y.1 (Subgroup.mem_subgroupOf.mp hy)
   have heps := FiniteClassTwoDecompositionBound.epsilonOrthogonal
-    rhoW XL YL CL hgenK hcommK hcentralK hCLexp
+    rhoW XL YL CL n hn hgenK hcommK hcentralK hCLexp
       (KazhdanFixedSpace.subgroupMovingRepresentation_hasNoInvariantVectors rho K)
   have hbound := heps uW huW vW hvW
   exact hbound
