@@ -306,6 +306,20 @@ def isHeadlineName : Name → Bool
   | .str (.str .anonymous _) _ => true
   | _ => false
 
+/-- Does this name promise the headline result?
+
+Matched against the LAST COMPONENT, never the full name.  Matching
+`n.toString` tests the NAMESPACE too, and this corpus is called
+`NonsoficGroupsExist` -- so the claim word "nonsofic" matched every single
+declaration at the root and the scan reported 99 of them, `mul_mem_tableDomain`
+first.  A corpus named after its own headline claim makes that mistake
+invisible in the count and obvious in the first example. -/
+def promisesClaim (n : Name) : Bool :=
+  isHeadlineName n &&
+    (match n with
+     | .str _ f => claimWords.any fun w ↦ (f.toLower.splitOn w).length > 1
+     | _ => false)
+
 /-- Empty types: a premise of one makes the theorem vacuous. -/
 def emptyTypes : List Name := [``False, ``Empty, ``PEmpty]
 
@@ -340,7 +354,6 @@ def declScan (env : Environment) (names : Array Name) : MetaM (Array Finding) :=
   for n in names do
     let some ci := env.find? n | continue
     unless (match ci with | .thmInfo _ => true | _ => false) do continue
-    let nameStr := n.toString.toLower
 
     -- TAUTOLOGY / UNCONDITIONAL / INSTANCE_PREMISE / EMPTY_PREMISE / TRIVIAL
     let shape ← forallTelescope ci.type fun args body ↦ do
@@ -371,8 +384,7 @@ def declScan (env : Environment) (names : Array Name) : MetaM (Array Finding) :=
       out := out.push
         { tag := "TAUTOLOGY", fatal := true, decl := n,
           detail := "the conclusion is syntactically one of the premises" }
-    let promisesUnconditional :=
-      isHeadlineName n && claimWords.any fun w ↦ (nameStr.splitOn w).length > 1
+    let promisesUnconditional := promisesClaim n
     if propPremise && promisesUnconditional then
       out := out.push
         { tag := "UNCONDITIONAL", fatal := true, decl := n,
