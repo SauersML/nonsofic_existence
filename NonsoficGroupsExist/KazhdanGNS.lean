@@ -118,17 +118,6 @@ def leftGroupEquiv (s : G) : G ≃ G where
   left_inv g := by simp
   right_inv g := by simp
 
-/-- Kernel vectors are the images of the corresponding free generators in
-the Hilbert completion. -/
-theorem kernelVector_eq_coe (p : PositiveDefiniteFunction G) (g : G) :
-    letI : SeminormedAddCommGroup (PreHilbertSpace p) :=
-      preHilbertSeminormed p
-    letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
-      preHilbertInnerProduct p
-    kernelVector p g = UniformSpace.Completion.coe'
-      (Finsupp.single (g, (1 : ℝ)) 1 : PreHilbertSpace p) := by
-  rfl
-
 /-- Left translation on finitely supported kernel generators. -/
 noncomputable def preTranslationLinearEquiv (p : PositiveDefiniteFunction G) (s : G) :
     PreHilbertSpace p ≃ₗ[ℝ] PreHilbertSpace p :=
@@ -163,8 +152,12 @@ theorem inner_kernelVector (p : PositiveDefiniteFunction G) (g h : G) :
     preHilbertSeminormed p
   letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
     preHilbertInnerProduct p
-  rw [kernelVector_eq_coe, kernelVector_eq_coe,
-    UniformSpace.Completion.inner_coe, inner_single]
+  change inner ℝ
+    (UniformSpace.Completion.coe'
+      (Finsupp.single (g, (1 : ℝ)) 1 : PreHilbertSpace p))
+    (UniformSpace.Completion.coe'
+      (Finsupp.single (h, (1 : ℝ)) 1 : PreHilbertSpace p)) = _
+  rw [UniformSpace.Completion.inner_coe, inner_single]
   simp
 
 /-- Left translation preserves the pre-Hilbert inner product. -/
@@ -345,8 +338,11 @@ noncomputable def representation (p : PositiveDefiniteFunction G) :
     preHilbertSeminormed p
   letI : InnerProductSpace ℝ (PreHilbertSpace p) :=
     preHilbertInnerProduct p
-  rw [kernelVector_eq_coe, kernelVector_eq_coe]
-  change translationOperator p s (UniformSpace.Completion.coe' _) = _
+  change translationOperator p s
+    (UniformSpace.Completion.coe'
+      (Finsupp.single (g, (1 : ℝ)) 1 : PreHilbertSpace p)) =
+    UniformSpace.Completion.coe'
+      (Finsupp.single (s * g, (1 : ℝ)) 1 : PreHilbertSpace p)
   rw [translationOperator_coe, preTranslationLinearEquiv_single]
   change UniformSpace.Completion.coe'
     (Finsupp.single (s * g, (1 : ℝ)) 1 : PreHilbertSpace p) = _

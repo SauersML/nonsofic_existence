@@ -576,7 +576,7 @@ theorem exists_finitelyPresented_obstruction [Group.FG G]
 /-- Premise-explicit finite-presentation reduction in Mathlib's standard
 `Group.IsFinitelyPresented` predicate.  The sole substantive premise is the
 supplied finitely generated nonsofic group. -/
-theorem exists_finitelyPresented_nonsofic_cover
+theorem exists_finitelyPresented_cover_of_not_isSofic
     [Group.FG G] (h : ¬ IsSofic G) :
     ∃ (H : Type u) (_ : Group H), Group.IsFinitelyPresented H ∧ ¬ IsSofic H := by
   obtain ⟨F, h₁, _, _, _, hnsofic, _⟩ :=
@@ -587,7 +587,7 @@ theorem exists_finitelyPresented_nonsofic_cover
 /-- The finite-table construction retains its quotient map.  When the
 original finitely generated nonsofic group is infinite, the presented cover is
 therefore infinite as well. -/
-theorem exists_infinite_finitelyPresented_nonsofic_cover
+theorem exists_infinite_finitelyPresented_cover_of_not_isSofic
     [Group.FG G] [Infinite G] (h : ¬ IsSofic G) :
     ∃ (H : Type u) (_ : Group H),
       Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬ IsSofic H ∧

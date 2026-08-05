@@ -7,6 +7,7 @@ import NonsoficGroupsExist.HilbertEpsilonOrthogonality
 import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.KazhdanFiniteModel
 import NonsoficGroupsExist.KazhdanImprovement
+import NonsoficGroupsExist.KunSpectralCounterexample
 import NonsoficGroupsExist.MaximalCutRepair
 import NonsoficGroupsExist.SoficPositiveControl
 import NonsoficGroupsExist.TableCover
@@ -389,9 +390,29 @@ theorem unit_constantTrue_isPlaneCharacterSign :
   simp [FreeRootPlaneFourier.planeEigenvalue]
 
 /-- The universal Leavitt relation family has a concrete member. -/
-theorem universalLeavitt_relation_isInhabited :
-    ∃ a b : UniversalLeavitt.Free, UniversalLeavitt.Relation a b := by
-  exact ⟨_, _, BinaryLeavitt.Relation.t0_s0⟩
+theorem universalLeavitt_t0_s0_relation :
+    UniversalLeavitt.Relation
+      (FreeAlgebra.ι (ZMod 2) BinaryLeavitt.t0 *
+        FreeAlgebra.ι (ZMod 2) BinaryLeavitt.s0) 1 :=
+  BinaryLeavitt.Relation.t0_s0
+
+/-- Both switching predicates are realized by their named edge occurrences. -/
+theorem kunSpectral_firstSwitch_exists :
+    KunSpectral.isFirstSwitch
+      ((0, 0) : KunSpectral.Ix 0 × KunSpectral.Ix 0) :=
+  ⟨rfl, rfl⟩
+
+theorem kunSpectral_secondSwitch_exists :
+    KunSpectral.isSecondSwitch
+      ((1, 1) : KunSpectral.Ix 0 × KunSpectral.Ix 0) :=
+  ⟨rfl, rfl⟩
+
+/-- An edgeless two-vertex graph is concretely bipartite. -/
+theorem boolEmptyGraph_isBipartite :
+    KunSpectral.IsBipartite boolEmptyGraph := by
+  refine ⟨fun _ ↦ false, ?_⟩
+  intro e
+  exact Fin.elim0 e
 
 /-- The trivial orthogonal action on the real line is irreducible. -/
 theorem real_trivial_isOrthogonallyIrreducible :

@@ -245,10 +245,6 @@ noncomputable def generatorShearedFirstCoordinate
     coefficientSucc X (0 : degreeLE X n) = 0 := by
   rfl
 
-theorem coefficientSucc_add {n : ℕ} (a b : degreeLE X n) :
-    coefficientSucc X (a + b) = coefficientSucc X a + coefficientSucc X b := by
-  rfl
-
 @[simp] theorem generatorMulCoefficientSucc_val {n : ℕ} (x : X)
     (a : degreeLE X n) :
     (generatorMulCoefficientSucc X x a).1 =

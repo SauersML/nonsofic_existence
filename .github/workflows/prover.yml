@@ -201,25 +201,9 @@ jobs:
       - name: Kernel audit (statements, axiom closure, environment scans)
         run: lake env lean scripts/Audit.lean
 
-      # lean4checker replays every olean through the kernel from scratch, so a
-      # result that survives it does not rest on the ELABORATOR being correct
-      # -- only on the kernel.  For a claim this size that is the difference
-      # between "Lean accepted it" and "Lean's trusted core accepted it", and
-      # it is the standard bar for formalizations of open problems.
-      #
-      # Pinned to the project's own toolchain: a checker built against a
-      # different Lean cannot read these oleans, and if the tag is missing this
-      # step FAILS rather than skipping.  A gate that skips itself is not a
-      # weaker gate, it is no gate wearing the failure mode of infrastructure
-      # noise.
-      - name: Independent kernel re-check (lean4checker)
-        run: |
-          set -euo pipefail
-          version="$(cut -d: -f2 lean-toolchain)"
-          git clone --depth 1 --branch "toolchain/${version}" \
-            https://github.com/leanprover/lean4checker.git ../lean4checker
-          cd ../lean4checker
-          lake build
-          cd "$GITHUB_WORKSPACE"
-          LEAN_PATH="$(lake env printenv LEAN_PATH)" \
-            ../lean4checker/.lake/build/bin/lean4checker NonsoficGroupsExist
+      # The toolchain's built-in checker replays every olean through a fresh
+      # kernel environment, so a result that survives it does not rest on the
+      # elaborator being correct.  It is shipped with Lean from v4.28 onward;
+      # using the pinned toolchain also guarantees olean compatibility.
+      - name: Fresh kernel re-check (leanchecker)
+        run: lake env leanchecker --fresh NonsoficGroupsExist

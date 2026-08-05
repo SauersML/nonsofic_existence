@@ -137,7 +137,7 @@ noncomputable abbrev UniversalLeavittEL (m : ℕ) :=
 rank.** For every `m ≥ 1`,
 `EL_{m+1}(L_{𝔽₂}(1,2))` is infinite, finitely generated, has property `(T)`,
 and is nonsofic. -/
-theorem universalLeavitt_theoremA (m : ℕ) (hm : 1 ≤ m) :
+theorem universalLeavitt_profile (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (UniversalLeavittEL m) ∧
       Infinite (UniversalLeavittEL m) ∧
       HasKazhdanPropertyT.{0, 0} (UniversalLeavittEL m) ∧
@@ -177,7 +177,7 @@ existence theorem. -/
 theorem exists_finitelyPresented_nonsofic_group :
     ∃ (G : Type) (_ : Group G),
       Group.IsFinitelyPresented G ∧ ¬ IsSofic G := by
-  exact exists_finitelyPresented_nonsofic_cover
+  exact exists_finitelyPresented_cover_of_not_isSofic
     universalLeavittEL4_not_isSofic
 
 /-- A finitely presented nonsofic group covering the explicit infinite
@@ -188,7 +188,7 @@ theorem exists_infinite_finitelyPresented_nonsofic_ambient_cover :
       Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬ IsSofic H ∧
         ∃ π : H →* UniversalRankFour.Ambient,
           Function.Surjective π := by
-  exact exists_infinite_finitelyPresented_nonsofic_cover
+  exact exists_infinite_finitelyPresented_cover_of_not_isSofic
     universalLeavittEL4_not_isSofic
 
 end NonsoficGroupsExist

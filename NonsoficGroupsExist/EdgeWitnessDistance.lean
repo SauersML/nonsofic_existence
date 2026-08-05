@@ -23,7 +23,7 @@ def edgeSetMultiplicity (E : Finset X.edge) (x y : X.vertex) : ℕ :=
     (X.first a = x ∧ X.second a = y) ∨
       (X.first a = y ∧ X.second a = x)).card
 
-theorem edgeSetMultiplicity_univ (x y : X.vertex) :
+@[simp] theorem edgeSetMultiplicity_univ (x y : X.vertex) :
     X.edgeSetMultiplicity Finset.univ x y = X.edgeMultiplicity x y := rfl
 
 theorem edgeSetMultiplicity_union {E F : Finset X.edge} (hEF : Disjoint E F)

@@ -585,6 +585,15 @@ theorem matchingIndex_candidates_nonempty (n : ℕ) :
   simp only [Finset.sum_empty] at hmass
   nlinarith [D.matchingIndex_card_pos n]
 
+/-- The canonical shifted index has a concrete acceptable component.  This
+closes the semantic interface without adding a hypothesis to callers. -/
+theorem chosenMatchingComponent_acceptable (n : ℕ) :
+    D.ComponentAcceptable (D.matchingIndex n)
+      (D.matchingThreshold (D.matchingIndex n))
+      (Classical.choose (D.matchingIndex_candidates_nonempty n)) := by
+  apply D.mem_acceptableComponents.mp
+  exact Classical.choose_spec (D.matchingIndex_candidates_nonempty n)
+
 noncomputable def matchingCoefficient (η : ℝ) : ℝ :=
   2 * η + 8 * η / (1 - 2 * η) ^ 2
 

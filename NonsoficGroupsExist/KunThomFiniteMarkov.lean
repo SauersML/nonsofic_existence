@@ -386,7 +386,7 @@ theorem finiteAveragingIterate_hilbert_error_eventually
 /-- Displacement transfer between two trajectories, normalized at an
 arbitrary positive scale. -/
 theorem displacement_sq_div_scale_le_of_close
-    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+    {E : Type*} [SeminormedAddCommGroup E]
     (D : ℝ) (hD : 0 < D) (C₀ C₁ X₀ X₁ : E) :
     ‖X₁ - X₀‖ ^ 2 / D ≤
       2 * (‖C₁ - C₀‖ ^ 2 / D) +

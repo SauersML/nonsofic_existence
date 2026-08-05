@@ -515,11 +515,6 @@ noncomputable def constantFamily (x : E) : Family E :=
 @[simp] theorem constantFamily_apply (x : E) (i : Fin 6) :
     constantFamily x i = x := rfl
 
-theorem constantFamily_mem (x : E) :
-    constantFamily x ∈ constantSubspace (E := E) := by
-  intro i
-  rfl
-
 theorem norm_constantFamily_sq (x : E) :
     ‖constantFamily x‖ ^ 2 = 6 * ‖x‖ ^ 2 := by
   rw [PiLp.norm_sq_eq_of_L2]

@@ -95,7 +95,7 @@ theorem subset_forbidden_union_biUnion_of_maximal
 /-- A uniform bound on conflict-neighborhood size converts the covering lemma
 into an explicit lower bound for a separated packing. -/
 theorem exists_separated_of_card
-    {V : Type} [Fintype V] [DecidableEq V]
+    {V : Type} [DecidableEq V]
     (C F : Finset V) (N : V → Finset V) (R m : ℕ)
     (hself : ∀ x, x ∈ N x)
     (hsymm : ∀ x y, y ∈ N x ↔ x ∈ N y)
@@ -125,7 +125,7 @@ theorem exists_separated_of_card
 /-- Assign a distinct separated marker to every element of a finite index
 type.  This is the form consumed by crossing stubs. -/
 theorem exists_marker_assignment
-    {V I : Type} [Fintype V] [DecidableEq V] [Fintype I]
+    {V I : Type} [DecidableEq V] [Fintype I]
     (C F : Finset V) (N : V → Finset V) (R : ℕ)
     (hself : ∀ x, x ∈ N x)
     (hsymm : ∀ x y, y ∈ N x ↔ x ∈ N y)
@@ -867,7 +867,7 @@ theorem sum_card_forwardNeighborhood_inter_le
 /-- If each selected marker contributes at least `q` tested vertices, their
 number is at most `|U| / q` in multiplication form. -/
 theorem mul_card_le_of_card_inter_forwardNeighborhood
-    {G I : Type} [Fintype I] [DecidableEq I]
+    {G I : Type}
     (M : FiniteModel) (τ : G → Equiv.Perm M)
     (S : Finset G) (r q : ℕ) (marker : I → M)
     (hdisjoint : ∀ i j, i ≠ j →

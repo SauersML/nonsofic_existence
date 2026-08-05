@@ -53,7 +53,7 @@ example (m : ℕ) (hm : 1 ≤ m) :
       Infinite (UniversalLeavittEL m) ∧
       HasKazhdanPropertyT.{0, 0} (UniversalLeavittEL m) ∧
       ¬ IsSofic (UniversalLeavittEL m) :=
-  universalLeavitt_theoremA m hm
+  universalLeavitt_profile m hm
 
 example (k : Type) [Field k] [Finite k] [CharP k 2]
     (m : ℕ) (hm : 1 ≤ m) :
@@ -148,7 +148,7 @@ def headlineTheorems : List Name :=
    ``universalLeavittEL3_not_isSofic,
    ``universalLeavittUnits_not_isSofic,
    ``universalLeavittGL_not_isSofic,
-   ``universalLeavitt_theoremA,
+   ``universalLeavitt_profile,
    ``binaryLeavitt_charTwo_profile,
    ``ambient_profile,
    ``ambient_full_profile]
@@ -214,18 +214,19 @@ def budgets : List (String × Option Nat) :=
   [ ("AXIOM", some 0)            -- anything here is a trust bypass
   , ("TAUTOLOGY", some 0)        -- a proof that is its own premise is never intended
   , ("EMPTY_PREMISE", some 0)    -- a vacuously true theorem is never intended
-  , ("UNCONDITIONAL", none)      -- conditional lemmas legitimately say "exists"
-  , ("LAUNDERED_PROP", none)
-  , ("UNWITNESSED", none)
-  , ("ASSUMPTION_INSTANCE", none)
-  , ("UNUSED", none)
-  , ("TRIVIAL", none)
-  , ("DUPLICATE", none)
-  , ("RFL", none) ]
+  , ("UNCONDITIONAL", some 0)
+  , ("LAUNDERED_PROP", some 0)
+  , ("UNWITNESSED", some 0)
+  -- Audited structural `[Nonempty ...]` inputs used to obtain positive finite
+  -- cardinalities or select an index.  This is a ratchet, not report-only.
+  , ("ASSUMPTION_INSTANCE", some 19)
+  , ("UNUSED", some 0)
+  , ("TRIVIAL", some 0)
+  , ("DUPLICATE", some 0)
+  , ("RFL", some 0) ]
 
-/-- How many declarations to name per tag.  The count is the finding; the
-examples are only somewhere to start reading. -/
-def examplesPerTag : Nat := 8
+/-- Keep this above every ratcheted budget so a failing log names all hits. -/
+def examplesPerTag : Nat := 64
 
 run_cmd do
   let env ← getEnv

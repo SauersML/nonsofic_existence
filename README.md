@@ -69,7 +69,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | `EL₃(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittEL3_not_isSofic` | Formalized |
 | The explicit ambient group is finitely generated, infinite, Kazhdan, and nonsofic | `ambient_profile` | Formalized |
 | The explicit ambient group is countable, finitely generated, infinite, Kazhdan, and nonsofic | `ambient_full_profile` | Formalized |
-| For every `m ≥ 1`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_theoremA` | Formalized |
+| For every `m ≥ 1`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_profile` | Formalized |
 | The full unit group `L_{𝔽₂}(1,2)ˣ` is nonsofic | `universalLeavittUnits_not_isSofic` | Formalized |
 | Every positive-rank `GL_r(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittGL_not_isSofic` | Formalized |
 | Over every finite characteristic-two field, `EL_{m+1}(L_k(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic for `m ≥ 1` | `binaryLeavitt_charTwo_profile` | Formalized |
@@ -261,7 +261,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3254
+The current complete MSI build reports `Build completed successfully (3256
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -269,7 +269,8 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The whole-namespace kernel audit traverses 5,322
+proposition interface. The source audit covers all 159 project modules, and
+the whole-namespace kernel audit traverses 5,448
 project declarations and reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
 each later manuscript-scope checkpoint.
@@ -297,12 +298,12 @@ printed by `NonsoficGroupsExist.Audit` must report exactly `propext`,
 `Classical.choice`, and `Quot.sound`; `scripts/Audit.lean` additionally rejects
 any other axiom in the transitive closure of the entire namespace.
 
-CI also clones the `lean4checker` branch matching the pinned toolchain and
-replays `NonsoficGroupsExist.olean` independently. The exact command is in
-`.github/workflows/prover.yml`; success is exit status zero with every imported
-olean accepted. A cold dependency download requires several gigabytes, and a
-cold project build can take hours; subsequent cached builds are substantially
-faster.
+CI also runs the pinned Lean toolchain's built-in `leanchecker --fresh` on
+`NonsoficGroupsExist.olean`. The exact command is in
+`.github/workflows/prover.yml`; success is exit status zero after every
+imported olean has been replayed into a fresh kernel environment. A cold
+dependency download requires several gigabytes, and a cold project build can
+take hours; subsequent cached builds are substantially faster.
 
 The `official/` directory contains OpenAI's proof documents. They are not
 imported by Lean and are distinct from the main
