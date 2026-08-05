@@ -224,6 +224,25 @@ V_C := Σ s_{c_i} t_{ℓ_i} vs leftComb by induction on leaf-splitting.
    finite matrix-rank computation. Derive fully on paper next turn
    BEFORE coding; then formalize 1 → 3 → 4 in that order.
 
+STATUS UPDATE (fourth session): item 1 IS FORMALIZED AND GREEN —
+LeavittWindowReduction (degreeMonomials windows, exists_decomp_top/bot,
+wrap_mem_span, corner_terms_mem_span, exists_top_cut/bot_cut,
+exists_window_reduction) + BinaryLeavittWindow
+(exists_narrow_representative: every unit of L_k(1,2) ≡ mod H to a
+[−1,1]-window unit). Audit green at 6731 decls, ratchet still 26.
+GRADED INDEPENDENCE (item 3) refined plan for FINITE fields (𝔽₂!):
+scaled stream representations ρ_c (s_i ↦ c•P_i, t_i ↦ c⁻¹•D_i) over
+K := RatFunc k give ρ_c(x_d) = c^d • ρ_1(x_d) on pure degree d; the
+∀c-relation Σ c^d v_d = 0 over the INFINITE field K forces v_d = 0
+(coordinate functional via Basis.extend + Polynomial.funext /
+eq_zero_of_infinite_isRoot on Kˣ); ρ_1 over L_K faithful by simplicity
+(kernel ideal + 1 ↦ id ≠ 0); base change β : L_k → L_K (lift of
+family K along Algebra k L_K := RingHom.toAlgebra of composed
+algebraMaps) is injective by simplicity of L_k, and maps degree-d
+spans to degree-d spans — transports independence back to any k.
+Then item 4 (residual class R = {c + s₁s₀t₀}) via componentwise unit
+equations.
+
 ## Iteration log (continued)
 - GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
   AlmostMinimalDisplacement, UltralimitGeometry, HilbertCircumcenter,
