@@ -1232,6 +1232,162 @@ theorem fine_pairRegion_of_coarse_B_opposite (x : X)
   · left
     exact pairRegion_eq_C_of_pos_of_lt X K _ _ (by omega) (by omega)
 
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The assembled region-`B` descent inequality**: the total coarse
+region-`B` mass at a stage is bounded by the total fine opposite-region
+(`A` or `D`) mass of the generator-conjugated vectors at the next stage,
+summed over the alphabet.  Every coarse `B`-character is charged through
+the forward shear of its canonical least leading generator; the fibers of
+distinct coarse characters are disjoint, and the descent classification
+places every receiving fine character in region `A` or `D`. -/
+theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
+    ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 1) χ)
+            (secondCoordinateChar X K (n + 1) χ) = .B),
+      planeMass X K i j k hik hjk (n + 1) rho ψ χ z ≤
+    ∑ x : X, ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+            (secondCoordinateChar X K (n + 2) χ') = .A ∨
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+            (secondCoordinateChar X K (n + 2) χ') = .D),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ'
+        (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z) := by
+  set B := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K (n + 1)) ↦
+      pairRegion X K (firstCoordinateChar X K (n + 1) χ)
+        (secondCoordinateChar X K (n + 1) χ) = .B) with hB
+  set sel : Module.Dual K (PlaneVector X K (n + 1)) → X := fun χ ↦
+    if h : leastLeadingGeneratorIndex X K
+        (firstCoordinateChar X K (n + 1) χ) < Fintype.card X then
+      generatorEnumeration X
+        ⟨leastLeadingGeneratorIndex X K
+          (firstCoordinateChar X K (n + 1) χ), h⟩
+    else Classical.arbitrary X with hsel
+  have hleadset : ∀ χ ∈ B,
+      (leadingGeneratorIndexSet X K
+        (firstCoordinateChar X K (n + 1) χ)).Nonempty := by
+    intro χ hχ
+    rw [hB, Finset.mem_filter] at hχ
+    obtain ⟨hz, h1ne, h2ne, heq⟩ := pairRegion_B_data X K _ _ hχ.2
+    have hle : valuation X K (firstCoordinateChar X K (n + 1) χ) ≤
+        n + 1 := by
+      have := valuation_le_succ X K
+        (firstCoordinateChar X K (n + 1) χ)
+      have h2b := valuation_le_succ X K
+        (secondCoordinateChar X K (n + 1) χ)
+      omega
+    refine leadingGeneratorIndexSet_nonempty X K _ ?_ (by omega)
+    by_contra hnone
+    have := valuation_eq_succ_of_not_exists X K _ hnone
+    omega
+  have hpartition : (∑ χ ∈ B,
+      planeMass X K i j k hik hjk (n + 1) rho ψ χ z) =
+    ∑ x : X, ∑ χ ∈ B.filter (fun χ ↦ sel χ = x),
+      planeMass X K i j k hik hjk (n + 1) rho ψ χ z :=
+    (Finset.sum_fiberwise B sel _).symm
+  rw [hpartition]
+  refine Finset.sum_le_sum fun x _ ↦ ?_
+  set Bx := B.filter (fun χ ↦ sel χ = x) with hBx
+  have htransport : (∑ χ ∈ Bx,
+      planeMass X K i j k hik hjk (n + 1) rho ψ χ z) =
+    ∑ χ ∈ Bx, ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          χ'.comp (forwardShear X K (n + 1) x) = χ),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ'
+        (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z) := by
+    refine Finset.sum_congr rfl fun χ _ ↦ ?_
+    exact planeMass_eq_sum_fiber_forwardShear X K i j k hij hik hjk
+      (n + 1) rho ψ hψ x z χ
+  rw [htransport]
+  have hdisj : (Bx : Set (Module.Dual K (PlaneVector X K (n + 1)))).PairwiseDisjoint
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          χ'.comp (forwardShear X K (n + 1) x) = χ)) := by
+    intro χ₁ _ χ₂ _ hne
+    refine Finset.disjoint_left.2 fun χ' h1 h2 ↦ ?_
+    rw [Finset.mem_filter] at h1 h2
+    exact hne (h1.2 ▸ h2.2)
+  rw [← Finset.sum_biUnion hdisj]
+  refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+    fun χ' _ _ ↦ planeMass_nonneg X K i j k hik hjk (n + 2) rho ψ χ' _
+  intro χ' hχ'
+  obtain ⟨χ, hχBx, hχ'fiber⟩ := Finset.mem_biUnion.1 hχ'
+  rw [Finset.mem_filter] at hχ'fiber
+  have hfib : χ'.comp (forwardShear X K (n + 1) x) = χ := hχ'fiber.2
+  rw [hBx, Finset.mem_filter] at hχBx
+  obtain ⟨hχB, hχsel⟩ := hχBx
+  have hχB' := hχB
+  rw [hB, Finset.mem_filter] at hχB'
+  have hBcoarse : pairRegion X K
+      (firstCoordinateChar X K (n + 1)
+        (χ'.comp (forwardShear X K (n + 1) x)))
+      (secondCoordinateChar X K (n + 1)
+        (χ'.comp (forwardShear X K (n + 1) x))) = .B := by
+    rw [hfib]
+    exact hχB'.2
+  -- the selector realizes exact descent on the fine first functional
+  have hfirstid : firstCoordinateChar X K (n + 1) χ =
+      restrictSucc X K (firstCoordinateChar X K (n + 2) χ') := by
+    rw [← hfib]
+    exact firstCoordinateChar_comp_forwardShear X K (n + 1) x χ'
+  obtain ⟨hz2, h1ne, h2ne, heq⟩ := pairRegion_B_data X K _ _ hχB'.2
+  have hdle : valuation X K (firstCoordinateChar X K (n + 1) χ) ≤
+      n + 1 := by
+    have := valuation_le_succ X K (firstCoordinateChar X K (n + 1) χ)
+    have h2b := valuation_le_succ X K
+      (secondCoordinateChar X K (n + 1) χ)
+    omega
+  have hfineval : valuation X K
+      (firstCoordinateChar X K (n + 2) χ') ≤ n + 2 - 1 := by
+    have hmin := valuation_restrictSucc_eq_min X K
+      (firstCoordinateChar X K (n + 2) χ')
+    rw [← hfirstid] at hmin
+    omega
+  have hsetseq : leadingGeneratorIndexSet X K
+      (firstCoordinateChar X K (n + 1) χ) =
+    leadingGeneratorIndexSet X K
+      (firstCoordinateChar X K (n + 2) χ') := by
+    rw [hfirstid]
+    exact leadingGeneratorIndexSet_restrictSucc X K
+      (firstCoordinateChar X K (n + 2) χ') (by omega)
+  have hleasteq : leastLeadingGeneratorIndex X K
+      (firstCoordinateChar X K (n + 1) χ) =
+    leastLeadingGeneratorIndex X K
+      (firstCoordinateChar X K (n + 2) χ') := by
+    rw [hfirstid]
+    exact leastLeadingGeneratorIndex_restrictSucc X K
+      (firstCoordinateChar X K (n + 2) χ') (by omega)
+  have hne : (leadingGeneratorIndexSet X K
+      (firstCoordinateChar X K (n + 2) χ')).Nonempty := by
+    rw [← hsetseq]
+    exact hleadset χ hχB
+  have hltcard : leastLeadingGeneratorIndex X K
+      (firstCoordinateChar X K (n + 1) χ) < Fintype.card X := by
+    rw [hleasteq]
+    exact leastLeadingGeneratorIndex_lt_card X K _ hne
+  have hxval : x = generatorEnumeration X
+      ⟨leastLeadingGeneratorIndex X K
+        (firstCoordinateChar X K (n + 2) χ'),
+        leastLeadingGeneratorIndex_lt_card X K _ hne⟩ := by
+    rw [← hχsel, hsel]
+    beta_reduce
+    rw [dif_pos hltcard]
+    congr 1
+    exact Fin.ext hleasteq
+  have hlead : valuation X K
+      (leftDerived X K (firstCoordinateChar X K (n + 2) χ') x) + 1 =
+    valuation X K (firstCoordinateChar X K (n + 2) χ') := by
+    rw [hxval]
+    exact leastLeadingGeneratorIndex_spec X K _ hne
+  rcases fine_pairRegion_of_coarse_B_forward X K (n + 1) x χ'
+      hBcoarse hlead with hA | hD
+  · exact Finset.mem_filter.2 ⟨Finset.mem_univ _, Or.inl hA⟩
+  · exact Finset.mem_filter.2 ⟨Finset.mem_univ _, Or.inr hD⟩
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist

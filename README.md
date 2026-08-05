@@ -130,27 +130,19 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`planeMass_eq_sum_fiber_forwardShear`/`_oppositeShear`), and the
     identification of both dual shears on coordinate functionals with the
     valuation module's restriction and generator-derived functionals
-  - [ ] A7. Boundary-layer vanishing and the two full finite-stage
-    Kassabov inequalities over every finite coefficient field; done so far:
-    the vanishing-below-valuation law, valuation of negation, the min rule
-    `valuation (φ + ξ) = valuation φ` for strictly larger `valuation ξ`
-    (`FreeRootFunctionalValuation`), the two same-stage unit shears with
-    their plane-point conjugation identities and mass transport
-    (`planeMass_unitShearForward`/`_Opposite`), their dual coordinate
-    formulas, the exact region movements `C → B` and `A → B`
-    (`pairRegion_comp_unitShear*`), the region-`D` mass control by the
-    scalar unit-vector displacements (`gap_mul_sum_planeMass_D_le`), the
-    nested trivial-mass monotonicity along the forward shear conjugation
-    (`planeMass_zero_conj_le`), the exact boundary-layer drop identity
-    (`sum_fiber_zero_ne_eq_drop`), the quantitative mass-continuity bound
-    (`CharacterMass.abs_mass_sub_mass_le`), and the summed region bounds
-    `A ≤ B` and `C ≤ B` under the two unit conjugations
-    (`sum_planeMass_A_le_sum_B`/`_C_le_sum_B`), and the two descent
-    classifications: a fine character over a coarse region-`B` character
-    whose selected functional descends by exactly one lies in the opposite
-    region or in `D`
-    (`fine_pairRegion_of_coarse_B_forward`/`_opposite`); the assembled
-    finite-stage inequalities are pending
+  - [x] A7. The finite-stage Kassabov transport inequalities over every
+    finite coefficient field (`FreeRootPlaneMass`,
+    `FreeRootFunctionalValuation`): the vanishing-below-valuation law, the
+    valuation min rule and negation invariance, the two same-stage unit
+    shears with conjugation identities, mass transport, dual coordinate
+    formulas and the exact region movements `C → B` and `A → B` in summed
+    form, region-`D` control by scalar unit displacements, nested
+    trivial-mass monotonicity with the exact boundary-layer drop identity,
+    quantitative mass continuity, the two descent classifications into the
+    opposite region or `D`, and the assembled region-`B` descent
+    inequality charging every coarse `B`-character through the forward
+    shear of its canonical least leading generator
+    (`sum_planeMass_B_le_sum_fine`)
   - [ ] A8. The limiting two-root moving-mass bound and the uniform
     relative-property-`(T)` estimate over `ZMod p`
   - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
