@@ -255,6 +255,95 @@ private noncomputable abbrev boolEmptyGraph : FiniteMultiGraph where
   second := Fin.elim0
   loopless := fun e ↦ Fin.elim0 e
 
+private abbrev twoPointModel := pairedModel 0
+
+private def twoPointSwap : Equiv.Perm twoPointModel :=
+  pairedMap 0 c2Generator
+
+private theorem twoPointModel_card : Fintype.card twoPointModel = 2 := by
+  simp [twoPointModel, pairedModel, pairedCarrier, regularModel,
+    Fintype.card_multiplicative, ZMod.card]
+
+private theorem twoPointSwap_ne (y : twoPointModel) : twoPointSwap y ≠ y :=
+  pairedMap_generator_ne 0 y
+
+/-- The exact two-point swap has directed Cheeger constant one.  Unlike the
+singleton branch probe, this has an admissible cut and an actual crossing. -/
+theorem twoPointSwap_hasDirectedCheegerLowerBound :
+    DirectedCoarea.HasCheegerLowerBound twoPointModel {twoPointSwap} 1 := by
+  classical
+  refine ⟨by norm_num, ?_⟩
+  intro U hUne hhalf
+  rw [twoPointModel_card] at hhalf
+  have hUpos : 0 < U.card := Finset.card_pos.mpr hUne
+  have hUcard : U.card = 1 := by omega
+  obtain ⟨u, hu⟩ := hUne
+  have hUeq : U = {u} := by
+    obtain ⟨w, hw⟩ := Finset.card_eq_one.mp hUcard
+    have huw : u = w := by simpa [hw] using hu
+    simpa [huw] using hw
+  let p : Equiv.Perm twoPointModel × twoPointModel := (twoPointSwap, u)
+  have hp : p ∈ AlmostAutomorphism.directedBoundary
+      twoPointModel {twoPointSwap} U := by
+    rw [AlmostAutomorphism.mem_directedBoundary]
+    refine ⟨by simp [p], ?_⟩
+    left
+    constructor
+    · exact hu
+    · simp [hUeq, p, twoPointSwap_ne]
+  have hboundary : 1 ≤
+      (AlmostAutomorphism.directedBoundary
+        twoPointModel {twoPointSwap} U).card :=
+    Finset.one_le_card.mpr ⟨p, hp⟩
+  norm_num [hUcard]
+  exact_mod_cast hboundary
+
+/-- The same real crossing supplies expansion at the cluster scale `m = 1`. -/
+theorem twoPointSwap_hasDirectedExpansionAtScale :
+    AlmostAutomorphism.HasDirectedExpansionAtScale
+      twoPointModel {twoPointSwap} 1 1 := by
+  refine ⟨by norm_num, ?_⟩
+  intro U hm hhalf
+  apply twoPointSwap_hasDirectedCheegerLowerBound.2 U
+  · exact Finset.card_pos.mpr (by omega)
+  · exact hhalf
+
+/-- Directed Cheeger expansion gives a closed `ℓ¹` Poincare control. -/
+theorem twoPointSwap_hasL1PoincareAtOne :
+    KazhdanImprovement.HasL1PoincareAtOne
+      twoPointModel {twoPointSwap} 1 :=
+  KazhdanImprovement.hasL1PoincareAtOne_of_cheeger
+    twoPointModel {twoPointSwap} twoPointSwap_hasDirectedCheegerLowerBound
+
+private def twoPointAction : C2 →* Equiv.Perm twoPointModel where
+  toFun := pairedMap 0
+  map_one' := by
+    apply Equiv.ext
+    intro x
+    change (1 : pairedCarrier 0) * x = x
+    rw [one_mul]
+  map_mul' := pairedMap_mul 0
+
+/-- The regular action of `C₂` on two points has labelled action expansion;
+the unique admissible cut moves to its disjoint complement. -/
+theorem twoPointAction_hasActionExpansion :
+    KazhdanFiniteModel.HasActionExpansion
+      twoPointAction {c2Generator} 1 := by
+  classical
+  intro U hUne hhalf
+  rw [twoPointModel_card] at hhalf
+  have hUpos : 0 < U.card := Finset.card_pos.mpr hUne
+  have hUcard : U.card = 1 := by omega
+  obtain ⟨u, hu⟩ := hUne
+  have hUeq : U = {u} := by
+    obtain ⟨w, hw⟩ := Finset.card_eq_one.mp hUcard
+    have huw : u = w := by simpa [hw] using hu
+    simpa [huw] using hw
+  have hne : twoPointAction c2Generator u ≠ u := twoPointSwap_ne u
+  rw [hUeq]
+  simp [KazhdanFiniteModel.actionBoundarySize, twoPointAction,
+    twoPointSwap, hne]
+
 /-- Cauchy--Schwarz gives a nonzero, nonvacuous epsilon-orthogonality
 control on the full real line. -/
 theorem real_top_epsilonOrthogonal :
@@ -266,9 +355,11 @@ theorem real_top_epsilonOrthogonal :
 /-- A singleton in a two-vertex edgeless graph is an actual sparse cut. -/
 theorem boolEmptyGraph_hasSparseCut :
     MaximalCutRepair.IsSparseCut boolEmptyGraph 1
-      (Finset.singleton (show boolEmptyGraph.vertex from false)) := by
-  refine ⟨Finset.singleton_nonempty _, ?_, ?_⟩
-  · norm_num [boolEmptyGraph, boolModel, Fintype.card_bool]
+      ({show boolEmptyGraph.vertex from false} :
+        Finset boolEmptyGraph.vertex) := by
+  refine ⟨by simp, ?_, ?_⟩
+  · change 2 ≤ Fintype.card Bool
+    norm_num [Fintype.card_bool]
   · norm_num [boolEmptyGraph, boolModel, FiniteMultiGraph.boundaryCard,
       FiniteMultiGraph.boundary]
 
