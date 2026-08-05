@@ -91,7 +91,14 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
   binary Leavitt family has explicit `M_r(R) ≃ R` for every `r ≥ 1`
 - [x] Prove nonsoficity of `EL₂` by the all-positive-ranks Leavitt equivalence
-- [ ] Prove a separate rank-two compression theorem
+- [x] Prove the separate rank-two compression theorem at its stated
+  generality: over every countable nontrivial ring carrying a binary Leavitt
+  family, if `Aˣ` and the rank-two unit group are Kazhdan and every
+  invertible two-by-two matrix is elementary, then `GL₂(A) = EL₂(A)` is not
+  sofic; the compressor, involution, generation, commuting-corner, and
+  trivial-intersection identities are all proved by explicit two-by-two
+  matrix computation, and finite generation of `Aˣ` is derived from its
+  Kazhdan pair rather than assumed
 - [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required ranks
 - [x] Prove the full unit group and every positive-rank `GL_r` nonsofic
 - [x] Prove every finitely generated nonsofic group has a finitely presented
@@ -127,7 +134,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | The complete adjacent-rank compression construction works in every characteristic | `RankFour.compressorSet_conjugation`, `RankFour.coreEmbedding_compressorSet_generate` | Formalized |
 | Kun's edited expander graphs have one uniform degree bound | `ExpanderDecomposition.degree_le`, `KunDecomposition.exists_expanderDecomposition` | Formalized |
 | Property `(T)` and hence nonsoficity over finite fields of odd characteristic | — | Manuscript-only; the algebraic compression is already characteristic-free |
-| `GL_r = EL_r` and the separate rank-two compression construction | — | Manuscript-only |
+| The rank-two compression theorem: `GL₂(A) = EL₂(A)` Kazhdan with Kazhdan units is nonsofic | `LeavittFamily.rankTwo_not_isSofic` | Formalized; its `K₁`/GE hypotheses over finite fields remain manuscript-only |
+| Property `(T)` forces finite generation | `KazhdanFiniteGeneration.exists_symmetric_generating_finset` | Formalized |
+| `GL_r = EL_r` over the binary Leavitt algebra | — | Manuscript-only |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
 
 ## Module architecture
@@ -324,7 +333,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The source audit covers all 160 project modules, and
+proposition interface. The source audit covers all 161 project modules, and
 the whole-namespace kernel audit traverses every project declaration and
 reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
