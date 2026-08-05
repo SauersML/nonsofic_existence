@@ -453,3 +453,39 @@ FORMALIZATION order once termination nailed: rectangular sr1 →
 2×2-unimodularity extraction (needs component-calculus for toMatrix
 of products — straightforward with graded independence) → Whitehead
 flip → the loop.
+
+## Session 11: element-level identification + level bookkeeping
+- The "2×2 balanced unimodularity" IS the degree-0 component of
+  u·y = 1 directly: for u = c + h (h := degree-1 part, h = s₀h₀+s₁h₁):
+  c·y₀ + h·y₋₁ = 1, with h·y₋₁ balanced.  No matrix detour needed for
+  the STATEMENT; the matrix picture is needed to APPLY sr1 (the
+  pivot-parameter t ranges over window[−1,−1], and {h·t} corresponds
+  to the rectangular block family B·T via the block dictionary:
+  t_i(h·t)s_j = h_i·(t·s_j), t ↔ (ts₀, ts₁) bijective).
+- RECTANGULAR sr1 (g : W →ₗ V arbitrary fin-dim source) — same proof
+  as exists_isUnit_add_comp_of_sup_range verbatim; gives the ELEMENT
+  pivot: ∃ t ∈ window[−1,−1]-span, û := c + h·t unit with balanced
+  inverse [via block dictionary + level-m matrices].
+- FLIP STEP: u = û + h(1−t): [u] = [1 + û⁻¹h(1−t)] = (flip, GREEN) =
+  [1 + (1−t)û⁻¹h] = [c' + h'] with c' := 1 − tû⁻¹h balanced and
+  h' := û⁻¹h — one full round, all pieces formalizable NOW.
+- LEVEL BOOKKEEPING (important correction): the round maps the level
+  pair (level c, level H) as (m, low-canonical) → then the C̃-level
+  drops by one per round but the H-level FOLLOWS one behind and the
+  pair PLATEAUS around (m−2, m−1).  The naive level-induction does
+  NOT terminate by itself.
+- BASE-CASE INSIGHT (works, formalizable): scalar-coefficient
+  residuals γ + λ₀s₀ + λ₁s₁ (γ, λᵢ ∈ k, some λᵢ ≠ 0) are NEVER units:
+  the stream representation image γ + Σλᵢ·prefixOperator is not
+  surjective (the recursion f(w) = γ⁻¹(g(w) − λ_{w₀}f(tail w)) cannot
+  terminate on constant streams; concrete non-preimage witness
+  exists).  So IF the loop reaches scalar level, tails must vanish
+  and u ≡ central ∈ H.
+- REMAINING GAP (the one unknown): the plateau — show the loop
+  composed with level-m moves strictly reduces a finite measure at
+  the plateau level (candidates: rank of the kill-obstruction of H
+  against rowsp(p₀c'); the affine self-map H ↦ Û(H)⁻¹H analyzed as
+  the ABC09 transition action, ker(1−φ₀) = 0 realized as eventual
+  solvability).  Alternatively strengthen the non-unit argument:
+  characterize which (c, h) at the plateau admit units and show the
+  kill is always solvable there.
