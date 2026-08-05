@@ -61,6 +61,7 @@ import NonsoficGroupsExist.KunThomFiniteMarkov
 import NonsoficGroupsExist.KunThomRounding
 import NonsoficGroupsExist.KunThomParameters
 import NonsoficGroupsExist.KunThomTheorem
+import NonsoficGroupsExist.KunSpectralCounterexample
 import NonsoficGroupsExist.MaximalCutRepair
 import NonsoficGroupsExist.SoficRestriction
 import NonsoficGroupsExist.EssentialExpanderRepair
