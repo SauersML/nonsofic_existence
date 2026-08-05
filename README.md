@@ -143,11 +143,12 @@ box is still a required dependency of the final theorem.
   image families, prove the valid images lie in the required target regions,
   and derive the two disjoint below-boundary mass-sum inequalities with the
   target mass counted once rather than once per free generator
-- [ ] Control the top-degree boundary in the increasing-stage limit and use
-  the compiled disjoint interior estimates to obtain Kassabov's uniform
-  relative-property-`(T)` inequality
-- [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
-  for the two-root subgroup
+- [x] Identify each top-degree boundary as the exact drop of a nested
+  nonnegative trivial-character mass, prove both boundary masses tend to
+  zero, and combine them with the disjoint interior estimates into the two
+  full finite-stage Kassabov inequalities
+- [ ] Pass the finite-stage inequalities to the limiting two-root moving
+  mass and complete the uniform relative-property-`(T)` estimate
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument

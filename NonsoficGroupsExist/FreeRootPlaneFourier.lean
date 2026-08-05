@@ -383,6 +383,33 @@ theorem sum_norm_planeComponent_sq
   sum_norm_iteratedPart_sq rho _ _
     (planeFamily_sq X i j k hij hik hjk n) z
 
+/-- Exact squared-mass conservation when an arbitrary coarse sign set is
+refined along the ordinary inclusion of consecutive plane stages. -/
+theorem sum_norm_planeRestriction_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (coarseSigns :
+      Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (planeSuccIndex X i j k hij hik hjk n) coarseSigns,
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign z‖ ^ 2 :=
+  sum_norm_fineRestrictionSignSet_sq rho
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk (n + 1))
+    (planeFamily X i j k hij hik hjk n)
+    (planeSuccIndex X i j k hij hik hjk n)
+    (planeFamily_succIndex X i j k hij hik hjk n)
+    (planeFamily_sq X i j k hij hik hjk (n + 1))
+    (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
+    coarseSigns z
+
 /-- Squared mass of any selected finite-plane sign set varies by at most the
 standard projection Lipschitz bound. -/
 theorem abs_sum_norm_planeComponent_sq_sub_le
@@ -418,6 +445,20 @@ def planeEigenvalue
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (g : Plane X i j k hij hik hjk n) : ℝ :=
   if sign ((planeEnumeration X i j k hij hik hjk n).symm g) then 1 else -1
+
+/-- Restricting a next-stage sign assignment along the ordinary plane
+inclusion computes its eigenvalue on the included element. -/
+theorem planeEigenvalue_succRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (g : Plane X i j k hij hik hjk n) :
+    planeEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign (planeSuccIndex X i j k hij hik hjk n q)) g =
+      planeEigenvalue X i j k hij hik hjk (n + 1) fineSign
+        (planeSucc X i j k hij hik hjk n g) := by
+  unfold planeEigenvalue planeSuccIndex
+  simp only [Equiv.apply_symm_apply]
 
 /-- Restricting a fine sign assignment along the forward conjugated index map
 computes exactly the fine eigenvalue of the concretely conjugated element. -/

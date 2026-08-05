@@ -1319,6 +1319,407 @@ theorem planeComponent_eq_zero_of_not_isPlaneCharacterSign
   exact hinvalid (isPlaneCharacterSign_of_component_ne_zero
     X i j k hij hik hjk n rho sign z hv)
 
+/-- Ordinary plane restriction is exactly coefficient-character restriction
+on the first root coordinate. -/
+theorem firstCoefficientEigenvalue_succRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign (planeSuccIndex X i j k hij hik hjk n q)) =
+      restrictCharacterSucc X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) := by
+  funext a
+  rw [firstCoefficientEigenvalue, planeEigenvalue_succRestriction]
+  have hsucc : planeSucc X i j k hij hik hjk n
+      (firstCoordinate X i j k hij hik hjk n a) =
+      firstCoordinate X i j k hij hik hjk (n + 1) (coefficientSucc X a) := by
+    apply Subtype.ext
+    rfl
+  rw [hsucc]
+  rfl
+
+/-- Ordinary plane restriction is exactly coefficient-character restriction
+on the second root coordinate. -/
+theorem secondCoefficientEigenvalue_succRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign (planeSuccIndex X i j k hij hik hjk n q)) =
+      restrictCharacterSucc X
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) := by
+  funext b
+  rw [secondCoefficientEigenvalue, planeEigenvalue_succRestriction]
+  have hsucc : planeSucc X i j k hij hik hjk n
+      (secondCoordinate X i j k hij hik hjk n b) =
+      secondCoordinate X i j k hij hik hjk (n + 1) (coefficientSucc X b) := by
+    apply Subtype.ext
+    rfl
+  rw [hsucc]
+  rfl
+
+/-- First-coordinate valuation under ordinary restriction is truncation at
+the coarse sentinel. -/
+theorem firstCoefficientValuation_succRestriction_eq_min
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) :
+    firstCoefficientValuation X i j k hij hik hjk n
+        (fun q ↦ fineSign (planeSuccIndex X i j k hij hik hjk n q)) =
+      min (firstCoefficientValuation X i j k hij hik hjk (n + 1) fineSign)
+        (n + 1) := by
+  unfold firstCoefficientValuation
+  rw [firstCoefficientEigenvalue_succRestriction]
+  exact characterValuation_restrictCharacterSucc_eq_min X _
+
+/-- Second-coordinate valuation obeys the same exact truncation law. -/
+theorem secondCoefficientValuation_succRestriction_eq_min
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) :
+    secondCoefficientValuation X i j k hij hik hjk n
+        (fun q ↦ fineSign (planeSuccIndex X i j k hij hik hjk n q)) =
+      min (secondCoefficientValuation X i j k hij hik hjk (n + 1) fineSign)
+        (n + 1) := by
+  unfold secondCoefficientValuation
+  rw [secondCoefficientEigenvalue_succRestriction]
+  exact characterValuation_restrictCharacterSucc_eq_min X _
+
+/-- Sign assignments whose first coefficient character is trivial throughout
+the current finite stage. -/
+noncomputable def planeFirstTrivialSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  Finset.univ.filter fun sign ↦
+    firstCoefficientValuation X i j k hij hik hjk n sign = n + 1
+
+/-- Sign assignments whose second coefficient character is trivial
+throughout the current finite stage. -/
+noncomputable def planeSecondTrivialSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  Finset.univ.filter fun sign ↦
+    secondCoefficientValuation X i j k hij hik hjk n sign = n + 1
+
+/-- Fine-stage signs whose first character is detected for the first time in
+the top word degree. -/
+noncomputable def planeFirstTopBoundarySignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  Finset.univ.filter fun sign ↦
+    firstCoefficientValuation X i j k hij hik hjk n sign = n
+
+/-- Fine-stage signs whose second character is detected for the first time in
+the top word degree. -/
+noncomputable def planeSecondTopBoundarySignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  Finset.univ.filter fun sign ↦
+    secondCoefficientValuation X i j k hij hik hjk n sign = n
+
+/-- Refining a first-coordinate-trivial stage splits exactly into the next
+top-degree layer and the still-trivial next stage. -/
+theorem fineRestriction_planeFirstTrivialSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    fineRestrictionSignSet
+        (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+        (Nat.card (Plane X i j k hij hik hjk n))
+        (planeSuccIndex X i j k hij hik hjk n)
+        (planeFirstTrivialSignSet X i j k hij hik hjk n) =
+      planeFirstTopBoundarySignSet X i j k hij hik hjk (n + 1) ∪
+        planeFirstTrivialSignSet X i j k hij hik hjk (n + 1) := by
+  classical
+  ext fineSign
+  simp only [fineRestrictionSignSet, planeFirstTrivialSignSet,
+    planeFirstTopBoundarySignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and, Finset.mem_union]
+  rw [firstCoefficientValuation_succRestriction_eq_min]
+  have hbound := characterValuation_le_succ X
+    (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+  change firstCoefficientValuation X i j k hij hik hjk (n + 1) fineSign ≤
+    n + 2 at hbound
+  omega
+
+/-- The same exact refinement split for the second coordinate. -/
+theorem fineRestriction_planeSecondTrivialSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    fineRestrictionSignSet
+        (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+        (Nat.card (Plane X i j k hij hik hjk n))
+        (planeSuccIndex X i j k hij hik hjk n)
+        (planeSecondTrivialSignSet X i j k hij hik hjk n) =
+      planeSecondTopBoundarySignSet X i j k hij hik hjk (n + 1) ∪
+        planeSecondTrivialSignSet X i j k hij hik hjk (n + 1) := by
+  classical
+  ext fineSign
+  simp only [fineRestrictionSignSet, planeSecondTrivialSignSet,
+    planeSecondTopBoundarySignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and, Finset.mem_union]
+  rw [secondCoefficientValuation_succRestriction_eq_min]
+  have hbound := characterValuation_le_succ X
+    (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+  change secondCoefficientValuation X i j k hij hik hjk (n + 1) fineSign ≤
+    n + 2 at hbound
+  omega
+
+theorem planeFirstTopBoundarySignSet_disjoint_trivial
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Disjoint (planeFirstTopBoundarySignSet X i j k hij hik hjk n)
+      (planeFirstTrivialSignSet X i j k hij hik hjk n) := by
+  classical
+  rw [Finset.disjoint_left]
+  intro sign htop htrivial
+  simp only [planeFirstTopBoundarySignSet, planeFirstTrivialSignSet,
+    Finset.mem_filter, Finset.mem_univ, true_and] at htop htrivial
+  omega
+
+theorem planeSecondTopBoundarySignSet_disjoint_trivial
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Disjoint (planeSecondTopBoundarySignSet X i j k hij hik hjk n)
+      (planeSecondTrivialSignSet X i j k hij hik hjk n) := by
+  classical
+  rw [Finset.disjoint_left]
+  intro sign htop htrivial
+  simp only [planeSecondTopBoundarySignSet, planeSecondTrivialSignSet,
+    Finset.mem_filter, Finset.mem_univ, true_and] at htop htrivial
+  omega
+
+/-- Exact telescoping identity for first-coordinate trivial Fourier mass. -/
+theorem sum_norm_planeFirstTrivialSignSet_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ planeFirstTrivialSignSet X i j k hij hik hjk n,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+      (∑ sign ∈ planeFirstTopBoundarySignSet
+          X i j k hij hik hjk (n + 1),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+      ∑ sign ∈ planeFirstTrivialSignSet X i j k hij hik hjk (n + 1),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 := by
+  classical
+  calc
+    _ = ∑ sign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (planeSuccIndex X i j k hij hik hjk n)
+          (planeFirstTrivialSignSet X i j k hij hik hjk n),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 :=
+      (sum_norm_planeRestriction_sq X i j k hij hik hjk n rho
+        (planeFirstTrivialSignSet X i j k hij hik hjk n) z).symm
+    _ = ∑ sign ∈ (planeFirstTopBoundarySignSet
+          X i j k hij hik hjk (n + 1) ∪
+          planeFirstTrivialSignSet X i j k hij hik hjk (n + 1)),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 := by
+      rw [fineRestriction_planeFirstTrivialSignSet]
+    _ = _ := Finset.sum_union
+      (planeFirstTopBoundarySignSet_disjoint_trivial
+        X i j k hij hik hjk (n + 1))
+
+/-- Exact telescoping identity for second-coordinate trivial Fourier mass. -/
+theorem sum_norm_planeSecondTrivialSignSet_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ planeSecondTrivialSignSet X i j k hij hik hjk n,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+      (∑ sign ∈ planeSecondTopBoundarySignSet
+          X i j k hij hik hjk (n + 1),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+      ∑ sign ∈ planeSecondTrivialSignSet X i j k hij hik hjk (n + 1),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 := by
+  classical
+  calc
+    _ = ∑ sign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (planeSuccIndex X i j k hij hik hjk n)
+          (planeSecondTrivialSignSet X i j k hij hik hjk n),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 :=
+      (sum_norm_planeRestriction_sq X i j k hij hik hjk n rho
+        (planeSecondTrivialSignSet X i j k hij hik hjk n) z).symm
+    _ = ∑ sign ∈ (planeSecondTopBoundarySignSet
+          X i j k hij hik hjk (n + 1) ∪
+          planeSecondTrivialSignSet X i j k hij hik hjk (n + 1)),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 := by
+      rw [fineRestriction_planeSecondTrivialSignSet]
+    _ = _ := Finset.sum_union
+      (planeSecondTopBoundarySignSet_disjoint_trivial
+        X i j k hij hik hjk (n + 1))
+
+/-- Squared Fourier mass on signs whose first coefficient remains trivial at
+stage `n`. -/
+noncomputable def planeFirstTrivialMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) : ℝ :=
+  ∑ sign ∈ planeFirstTrivialSignSet X i j k hij hik hjk n,
+    ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+/-- The analogous second-coordinate trivial mass. -/
+noncomputable def planeSecondTrivialMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) : ℝ :=
+  ∑ sign ∈ planeSecondTrivialSignSet X i j k hij hik hjk n,
+    ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+/-- First-coordinate mass newly detected in the top degree of stage `n`. -/
+noncomputable def planeFirstTopBoundaryMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) : ℝ :=
+  ∑ sign ∈ planeFirstTopBoundarySignSet X i j k hij hik hjk n,
+    ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+/-- Second-coordinate mass newly detected in the top degree of stage `n`. -/
+noncomputable def planeSecondTopBoundaryMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) : ℝ :=
+  ∑ sign ∈ planeSecondTopBoundarySignSet X i j k hij hik hjk n,
+    ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+theorem planeFirstTrivialMass_step
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    planeFirstTrivialMass X i j k hij hik hjk rho z n =
+      planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 1) +
+        planeFirstTrivialMass X i j k hij hik hjk rho z (n + 1) :=
+  sum_norm_planeFirstTrivialSignSet_sq X i j k hij hik hjk n rho z
+
+theorem planeSecondTrivialMass_step
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    planeSecondTrivialMass X i j k hij hik hjk rho z n =
+      planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 1) +
+        planeSecondTrivialMass X i j k hij hik hjk rho z (n + 1) :=
+  sum_norm_planeSecondTrivialSignSet_sq X i j k hij hik hjk n rho z
+
+theorem planeFirstTopBoundaryMass_nonneg
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    0 ≤ planeFirstTopBoundaryMass X i j k hij hik hjk rho z n :=
+  Finset.sum_nonneg fun _ _ ↦ sq_nonneg _
+
+theorem planeSecondTopBoundaryMass_nonneg
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    0 ≤ planeSecondTopBoundaryMass X i j k hij hik hjk rho z n :=
+  Finset.sum_nonneg fun _ _ ↦ sq_nonneg _
+
+theorem planeFirstTrivialMass_nonneg
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    0 ≤ planeFirstTrivialMass X i j k hij hik hjk rho z n :=
+  Finset.sum_nonneg fun _ _ ↦ sq_nonneg _
+
+theorem planeSecondTrivialMass_nonneg
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    0 ≤ planeSecondTrivialMass X i j k hij hik hjk rho z n :=
+  Finset.sum_nonneg fun _ _ ↦ sq_nonneg _
+
+theorem antitone_planeFirstTrivialMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    Antitone (planeFirstTrivialMass X i j k hij hik hjk rho z) := by
+  apply antitone_nat_of_succ_le
+  intro n
+  rw [planeFirstTrivialMass_step X i j k hij hik hjk rho z n]
+  exact le_add_of_nonneg_left
+    (planeFirstTopBoundaryMass_nonneg X i j k hij hik hjk rho z (n + 1))
+
+theorem antitone_planeSecondTrivialMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    Antitone (planeSecondTrivialMass X i j k hij hik hjk rho z) := by
+  apply antitone_nat_of_succ_le
+  intro n
+  rw [planeSecondTrivialMass_step X i j k hij hik hjk rho z n]
+  exact le_add_of_nonneg_left
+    (planeSecondTopBoundaryMass_nonneg X i j k hij hik hjk rho z (n + 1))
+
+/-- First-coordinate top-degree boundary mass vanishes along the exhaustive
+filtration.  This is a consequence of an actual nonnegative telescoping
+identity, not an assumed boundary condition. -/
+theorem tendsto_planeFirstTopBoundaryMass_succ_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    Filter.Tendsto
+      (fun n ↦ planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 1))
+      Filter.atTop (nhds 0) := by
+  let mass := planeFirstTrivialMass X i j k hij hik hjk rho z
+  have hanti : Antitone mass :=
+    antitone_planeFirstTrivialMass X i j k hij hik hjk rho z
+  have hbdd : BddBelow (Set.range mass) := by
+    refine ⟨0, ?_⟩
+    rintro _ ⟨n, rfl⟩
+    exact planeFirstTrivialMass_nonneg X i j k hij hik hjk rho z n
+  let limit : ℝ := ⨅ n, mass n
+  have hlimit : Filter.Tendsto mass Filter.atTop (nhds limit) :=
+    tendsto_atTop_ciInf hanti hbdd
+  have hlimitSucc : Filter.Tendsto (fun n ↦ mass (n + 1))
+      Filter.atTop (nhds limit) :=
+    (Filter.tendsto_add_atTop_iff_nat 1).2 hlimit
+  have hdiff : Filter.Tendsto (fun n ↦ mass n - mass (n + 1))
+      Filter.atTop (nhds 0) := by
+    simpa using hlimit.sub hlimitSucc
+  convert hdiff using 1
+  funext n
+  change planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 1) =
+    planeFirstTrivialMass X i j k hij hik hjk rho z n -
+      planeFirstTrivialMass X i j k hij hik hjk rho z (n + 1)
+  rw [planeFirstTrivialMass_step X i j k hij hik hjk rho z n]
+  ring
+
+/-- The symmetric second-coordinate top-degree boundary also vanishes. -/
+theorem tendsto_planeSecondTopBoundaryMass_succ_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    Filter.Tendsto
+      (fun n ↦ planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 1))
+      Filter.atTop (nhds 0) := by
+  let mass := planeSecondTrivialMass X i j k hij hik hjk rho z
+  have hanti : Antitone mass :=
+    antitone_planeSecondTrivialMass X i j k hij hik hjk rho z
+  have hbdd : BddBelow (Set.range mass) := by
+    refine ⟨0, ?_⟩
+    rintro _ ⟨n, rfl⟩
+    exact planeSecondTrivialMass_nonneg X i j k hij hik hjk rho z n
+  let limit : ℝ := ⨅ n, mass n
+  have hlimit : Filter.Tendsto mass Filter.atTop (nhds limit) :=
+    tendsto_atTop_ciInf hanti hbdd
+  have hlimitSucc : Filter.Tendsto (fun n ↦ mass (n + 1))
+      Filter.atTop (nhds limit) :=
+    (Filter.tendsto_add_atTop_iff_nat 1).2 hlimit
+  have hdiff : Filter.Tendsto (fun n ↦ mass n - mass (n + 1))
+      Filter.atTop (nhds 0) := by
+    simpa using hlimit.sub hlimitSucc
+  convert hdiff using 1
+  funext n
+  change planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 1) =
+    planeSecondTrivialMass X i j k hij hik hjk rho z n -
+      planeSecondTrivialMass X i j k hij hik hjk rho z (n + 1)
+  rw [planeSecondTrivialMass_step X i j k hij hik hjk rho z n]
+  ring
+
 /-- The first-character opposite-shear formula needs only algebraic character
 validity. -/
 theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction_of_valid
@@ -2246,6 +2647,375 @@ theorem sum_norm_planeCBInteriorLeadingSignSet_sq_le_target_add_error
         ∑ q : Fin (Fintype.card X), 2 * ‖z‖ * ‖moved q - z‖ :=
       add_le_add htarget (le_refl _)
     _ = _ := by rfl
+
+/-- The omitted part of an `A ∪ B` leading fiber consists exactly of signs
+whose second character is first detected in the fine stage's top degree. -/
+noncomputable def planeABTopBoundaryLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool) :=
+  (planeABLeadingSignSet X i j k hij hik hjk (n + 1) q).filter
+    fun sign ↦
+      secondCoefficientValuation X i j k hij hik hjk (n + 2) sign = n + 2
+
+/-- Symmetrically, the omitted `C ∪ B` part is the top-degree first-character
+layer. -/
+noncomputable def planeCBTopBoundaryLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool) :=
+  (planeCBLeadingSignSet X i j k hij hik hjk (n + 1) q).filter
+    fun sign ↦
+      firstCoefficientValuation X i j k hij hik hjk (n + 2) sign = n + 2
+
+theorem secondCoefficientValuation_le_top_of_mem_planeABLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool)
+    (hsign : sign ∈ planeABLeadingSignSet X i j k hij hik hjk (n + 1) q) :
+    secondCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤ n + 2 := by
+  simp only [planeABLeadingSignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and] at hsign
+  have hfirstBound := characterValuation_le_succ X
+    (firstCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+  have hsecondBound := characterValuation_le_succ X
+    (secondCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+  change firstCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤
+    n + 3 at hfirstBound
+  change secondCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤
+    n + 3 at hsecondBound
+  rcases hsign.1 with hA | hB
+  · have hdata := characterPairRegion_A_data X (n + 2)
+      (firstCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+      (secondCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign) hA
+    exact Nat.le_of_lt_succ (hdata.2.2.2.trans_le hfirstBound)
+  · have hdata := characterPairRegion_B_data X (n + 2)
+      (firstCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+      (secondCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign) hB
+    by_contra hnot
+    have hsecond : secondCoefficientValuation X i j k hij hik hjk (n + 2) sign =
+        n + 3 := by omega
+    have hfirst : firstCoefficientValuation X i j k hij hik hjk (n + 2) sign =
+        n + 3 := hdata.2.2.2.trans hsecond
+    exact hdata.1 ⟨hfirst, hsecond⟩
+
+theorem firstCoefficientValuation_le_top_of_mem_planeCBLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool)
+    (hsign : sign ∈ planeCBLeadingSignSet X i j k hij hik hjk (n + 1) q) :
+    firstCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤ n + 2 := by
+  simp only [planeCBLeadingSignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and] at hsign
+  have hfirstBound := characterValuation_le_succ X
+    (firstCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+  have hsecondBound := characterValuation_le_succ X
+    (secondCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+  change firstCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤
+    n + 3 at hfirstBound
+  change secondCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤
+    n + 3 at hsecondBound
+  rcases hsign.1 with hC | hB
+  · have hdata := characterPairRegion_C_data X (n + 2)
+      (firstCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+      (secondCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign) hC
+    exact Nat.le_of_lt_succ (hdata.2.2.2.trans_le hsecondBound)
+  · have hdata := characterPairRegion_B_data X (n + 2)
+      (firstCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign)
+      (secondCoefficientEigenvalue X i j k hij hik hjk (n + 2) sign) hB
+    by_contra hnot
+    have hfirst : firstCoefficientValuation X i j k hij hik hjk (n + 2) sign =
+        n + 3 := by omega
+    have hsecond : secondCoefficientValuation X i j k hij hik hjk (n + 2) sign =
+        n + 3 := hdata.2.2.2.symm.trans hfirst
+    exact hdata.1 ⟨hfirst, hsecond⟩
+
+theorem planeABLeadingSignSet_eq_interior_union_topBoundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    planeABLeadingSignSet X i j k hij hik hjk (n + 1) q =
+      planeABInteriorLeadingSignSet X i j k hij hik hjk n q ∪
+        planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n q := by
+  classical
+  ext sign
+  simp only [planeABInteriorLeadingSignSet,
+    planeABTopBoundaryLeadingSignSet, Finset.mem_filter, Finset.mem_union]
+  constructor
+  · intro hsign
+    have hbound := secondCoefficientValuation_le_top_of_mem_planeABLeadingSignSet
+      X i j k hij hik hjk n q sign hsign
+    by_cases hle : secondCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤
+        n + 1
+    · exact Or.inl ⟨hsign, hle⟩
+    · exact Or.inr ⟨hsign, by omega⟩
+  · rintro (⟨hsign, _⟩ | ⟨hsign, _⟩) <;> exact hsign
+
+theorem planeCBLeadingSignSet_eq_interior_union_topBoundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    planeCBLeadingSignSet X i j k hij hik hjk (n + 1) q =
+      planeCBInteriorLeadingSignSet X i j k hij hik hjk n q ∪
+        planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n q := by
+  classical
+  ext sign
+  simp only [planeCBInteriorLeadingSignSet,
+    planeCBTopBoundaryLeadingSignSet, Finset.mem_filter, Finset.mem_union]
+  constructor
+  · intro hsign
+    have hbound := firstCoefficientValuation_le_top_of_mem_planeCBLeadingSignSet
+      X i j k hij hik hjk n q sign hsign
+    by_cases hle : firstCoefficientValuation X i j k hij hik hjk (n + 2) sign ≤
+        n + 1
+    · exact Or.inl ⟨hsign, hle⟩
+    · exact Or.inr ⟨hsign, by omega⟩
+  · rintro (⟨hsign, _⟩ | ⟨hsign, _⟩) <;> exact hsign
+
+theorem planeABInteriorLeadingSignSet_disjoint_topBoundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    Disjoint (planeABInteriorLeadingSignSet X i j k hij hik hjk n q)
+      (planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n q) := by
+  classical
+  rw [Finset.disjoint_left]
+  intro sign hinterior htop
+  simp only [planeABInteriorLeadingSignSet,
+    planeABTopBoundaryLeadingSignSet, Finset.mem_filter] at hinterior htop
+  omega
+
+theorem planeCBInteriorLeadingSignSet_disjoint_topBoundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    Disjoint (planeCBInteriorLeadingSignSet X i j k hij hik hjk n q)
+      (planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n q) := by
+  classical
+  rw [Finset.disjoint_left]
+  intro sign hinterior htop
+  simp only [planeCBInteriorLeadingSignSet,
+    planeCBTopBoundaryLeadingSignSet, Finset.mem_filter] at hinterior htop
+  omega
+
+theorem planeABTopBoundaryLeadingSignSet_pairwise_disjoint
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Pairwise (fun q r : Fin (Fintype.card X) ↦
+      Disjoint (planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n q)
+        (planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n r)) := by
+  intro q r hqr
+  exact (planeABLeadingSignSet_pairwise_disjoint
+    X i j k hij hik hjk (n + 1) hqr).mono
+      (Finset.filter_subset _ _) (Finset.filter_subset _ _)
+
+theorem planeCBTopBoundaryLeadingSignSet_pairwise_disjoint
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Pairwise (fun q r : Fin (Fintype.card X) ↦
+      Disjoint (planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n q)
+        (planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n r)) := by
+  intro q r hqr
+  exact (planeCBLeadingSignSet_pairwise_disjoint
+    X i j k hij hik hjk (n + 1) hqr).mono
+      (Finset.filter_subset _ _) (Finset.filter_subset _ _)
+
+theorem sum_planeABLeadingSignSet_eq_interior_add_topBoundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (f : (Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool) → ℝ) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeABLeadingSignSet X i j k hij hik hjk (n + 1) q,
+          f sign) =
+      (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeABInteriorLeadingSignSet X i j k hij hik hjk n q,
+          f sign) +
+      ∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n q,
+          f sign := by
+  classical
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro q _
+  rw [planeABLeadingSignSet_eq_interior_union_topBoundary]
+  exact Finset.sum_union
+    (planeABInteriorLeadingSignSet_disjoint_topBoundary
+      X i j k hij hik hjk n q)
+
+theorem sum_planeCBLeadingSignSet_eq_interior_add_topBoundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (f : (Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool) → ℝ) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeCBLeadingSignSet X i j k hij hik hjk (n + 1) q,
+          f sign) =
+      (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeCBInteriorLeadingSignSet X i j k hij hik hjk n q,
+          f sign) +
+      ∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n q,
+          f sign := by
+  classical
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro q _
+  rw [planeCBLeadingSignSet_eq_interior_union_topBoundary]
+  exact Finset.sum_union
+    (planeCBInteriorLeadingSignSet_disjoint_topBoundary
+      X i j k hij hik hjk n q)
+
+theorem sum_norm_planeABTopBoundaryLeadingSignSet_sq_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeABTopBoundaryLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho sign z‖ ^ 2) ≤
+      planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) := by
+  classical
+  have hpair :
+      ((Finset.univ : Finset (Fin (Fintype.card X))) : Set _).PairwiseDisjoint
+        (planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n) := by
+    intro q _ r _ hqr
+    exact planeABTopBoundaryLeadingSignSet_pairwise_disjoint
+      X i j k hij hik hjk n hqr
+  rw [← Finset.sum_biUnion hpair]
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro sign hsign
+    simp only [Finset.mem_biUnion, Finset.mem_univ, true_and] at hsign
+    obtain ⟨q, hq⟩ := hsign
+    simp only [planeABTopBoundaryLeadingSignSet, Finset.mem_filter] at hq
+    simpa [planeSecondTopBoundarySignSet] using hq.2
+  · intro _ _ _
+    exact sq_nonneg _
+
+theorem sum_norm_planeCBTopBoundaryLeadingSignSet_sq_le
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeCBTopBoundaryLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho sign z‖ ^ 2) ≤
+      planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) := by
+  classical
+  have hpair :
+      ((Finset.univ : Finset (Fin (Fintype.card X))) : Set _).PairwiseDisjoint
+        (planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n) := by
+    intro q _ r _ hqr
+    exact planeCBTopBoundaryLeadingSignSet_pairwise_disjoint
+      X i j k hij hik hjk n hqr
+  rw [← Finset.sum_biUnion hpair]
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro sign hsign
+    simp only [Finset.mem_biUnion, Finset.mem_univ, true_and] at hsign
+    obtain ⟨q, hq⟩ := hsign
+    simp only [planeCBTopBoundaryLeadingSignSet, Finset.mem_filter] at hq
+    simpa [planeFirstTopBoundarySignSet] using hq.2
+  · intro _ _ _
+    exact sq_nonneg _
+
+/-- Full finite-stage `A ∪ B` estimate: the only term not controlled by the
+fixed adjacent generators is the explicit second-coordinate top-degree layer,
+which tends to zero by the telescoping theorem above. -/
+theorem sum_norm_planeABRegion_sq_le_target_add_error_add_boundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 2) .A ∪
+          planeRegionSignSet X i j k hij hik hjk (n + 2) .B),
+        ‖planeComponent X i j k hij hik hjk (n + 2) rho sign z‖ ^ 2) ≤
+      ((∑ sign ∈
+          (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X),
+          2 * ‖z‖ *
+            ‖rho (elementaryRoot j i hij.symm
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) := by
+  classical
+  let componentMass := fun sign :
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool ↦
+    ‖planeComponent X i j k hij hik hjk (n + 2) rho sign z‖ ^ 2
+  calc
+    _ = ∑ q : Fin (Fintype.card X),
+          ∑ sign ∈ planeABLeadingSignSet X i j k hij hik hjk (n + 1) q,
+            componentMass sign :=
+      sum_planeABLeadingSignSet X i j k hij hik hjk (n + 1) componentMass
+    _ = (∑ q : Fin (Fintype.card X),
+          ∑ sign ∈ planeABInteriorLeadingSignSet X i j k hij hik hjk n q,
+            componentMass sign) +
+        ∑ q : Fin (Fintype.card X),
+          ∑ sign ∈ planeABTopBoundaryLeadingSignSet X i j k hij hik hjk n q,
+            componentMass sign :=
+      sum_planeABLeadingSignSet_eq_interior_add_topBoundary
+        X i j k hij hik hjk n componentMass
+    _ ≤ ((∑ sign ∈
+            (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+              planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+          ∑ q : Fin (Fintype.card X),
+            2 * ‖z‖ *
+              ‖rho (elementaryRoot j i hij.symm
+                (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+          planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) :=
+      add_le_add
+        (sum_norm_planeABInteriorLeadingSignSet_sq_le_target_add_error
+          X i j k hij hik hjk n rho z)
+        (sum_norm_planeABTopBoundaryLeadingSignSet_sq_le
+          X i j k hij hik hjk n rho z)
+
+/-- Symmetric full `C ∪ B` estimate with its explicit first-coordinate
+top-degree boundary. -/
+theorem sum_norm_planeCBRegion_sq_le_target_add_error_add_boundary
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 2) .C ∪
+          planeRegionSignSet X i j k hij hik hjk (n + 2) .B),
+        ‖planeComponent X i j k hij hik hjk (n + 2) rho sign z‖ ^ 2) ≤
+      ((∑ sign ∈
+          (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X),
+          2 * ‖z‖ *
+            ‖rho (elementaryRoot i j hij
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) := by
+  classical
+  let componentMass := fun sign :
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool ↦
+    ‖planeComponent X i j k hij hik hjk (n + 2) rho sign z‖ ^ 2
+  calc
+    _ = ∑ q : Fin (Fintype.card X),
+          ∑ sign ∈ planeCBLeadingSignSet X i j k hij hik hjk (n + 1) q,
+            componentMass sign :=
+      sum_planeCBLeadingSignSet X i j k hij hik hjk (n + 1) componentMass
+    _ = (∑ q : Fin (Fintype.card X),
+          ∑ sign ∈ planeCBInteriorLeadingSignSet X i j k hij hik hjk n q,
+            componentMass sign) +
+        ∑ q : Fin (Fintype.card X),
+          ∑ sign ∈ planeCBTopBoundaryLeadingSignSet X i j k hij hik hjk n q,
+            componentMass sign :=
+      sum_planeCBLeadingSignSet_eq_interior_add_topBoundary
+        X i j k hij hik hjk n componentMass
+    _ ≤ ((∑ sign ∈
+            (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+              planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+          ∑ q : Fin (Fintype.card X),
+            2 * ‖z‖ *
+              ‖rho (elementaryRoot i j hij
+                (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+          planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) :=
+      add_le_add
+        (sum_norm_planeCBInteriorLeadingSignSet_sq_le_target_add_error
+          X i j k hij hik hjk n rho z)
+        (sum_norm_planeCBTopBoundaryLeadingSignSet_sq_le
+          X i j k hij hik hjk n rho z)
 
 /-- The squared mass of one `A ∪ B` leading-generator fiber is bounded by
 the coarse `C ∪ D` mass after acting by its opposite adjacent generator.
