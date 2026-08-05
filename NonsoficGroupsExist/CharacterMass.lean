@@ -624,6 +624,145 @@ theorem gap_mul_sum_mass_ne_zero_le (hψ : ψ ≠ 1) (z : E) (w : V) :
       mul_sum_mass_le_of_gap ψ ρ hρ hψ z (t • w) _ (gap ψ)
         fun χ hχ ↦ gap_le ψ (Finset.mem_filter.1 hχ).2
 
+
+/-- **Summed mass continuity**: the total mass over any set of characters
+is quadratically continuous in the vector, with the same constant as a
+single mass.  The proof runs through the Cauchy--Schwarz inequality for
+the positive-semidefinite symmetric bilinear form obtained by polarizing
+the set mass, so no cardinality factor appears. -/
+theorem abs_sum_mass_sub_sum_mass_le (hψ : ψ ≠ 1)
+    (S : Finset (Module.Dual K V)) (z w : E) :
+    |(∑ χ ∈ S, mass ψ ρ χ z) - ∑ χ ∈ S, mass ψ ρ χ w| ≤
+      (‖z‖ + ‖w‖) * ‖z - w‖ := by
+  set B : E → E → ℝ := fun u t ↦
+    (Fintype.card V : ℝ)⁻¹ *
+      ∑ χ ∈ S, ∑ v : V, (ψ (χ v)).re * inner ℝ u (ρ v t) with hB
+  have hdiag : ∀ u : E, B u u = ∑ χ ∈ S, mass ψ ρ χ u := by
+    intro u
+    rw [hB]
+    beta_reduce
+    rw [Finset.mul_sum]
+    rfl
+  have hswap : ∀ (u t : E) (v : V),
+      inner ℝ u (ρ v t) = inner ℝ t (ρ (-v) u) := by
+    intro u t v
+    calc
+      inner ℝ u (ρ v t) = inner ℝ (ρ (-v) u) (ρ (-v) (ρ v t)) :=
+        ((ρ (-v)).inner_map_map u (ρ v t)).symm
+      _ = inner ℝ (ρ (-v) u) t := by
+        rw [show ρ (-v) (ρ v t) = (ρ (-v) * ρ v) t from rfl, ← hρ,
+          neg_add_cancel, action_zero ρ hρ]
+        rfl
+      _ = inner ℝ t (ρ (-v) u) := real_inner_comm _ _
+  have hsymm : ∀ u t : E, B u t = B t u := by
+    intro u t
+    rw [hB]
+    beta_reduce
+    congr 1
+    refine Finset.sum_congr rfl fun χ _ ↦ ?_
+    calc
+      (∑ v : V, (ψ (χ v)).re * inner ℝ u (ρ v t)) =
+          ∑ v : V, (ψ (χ v)).re * inner ℝ t (ρ (-v) u) := by
+        refine Finset.sum_congr rfl fun v _ ↦ ?_
+        rw [hswap u t v]
+      _ = ∑ v : V, (ψ (χ (-v))).re * inner ℝ t (ρ v u) :=
+        Fintype.sum_equiv (Equiv.neg V) _ _ fun v ↦ by
+          simp only [Equiv.neg_apply, neg_neg]
+      _ = ∑ v : V, (ψ (χ v)).re * inner ℝ t (ρ v u) := by
+        refine Finset.sum_congr rfl fun v _ ↦ ?_
+        rw [map_neg, ← conj_apply, Complex.conj_re]
+  have haddr : ∀ u t t' : E, B u (t + t') = B u t + B u t' := by
+    intro u t t'
+    rw [hB]
+    beta_reduce
+    rw [← mul_add, ← Finset.sum_add_distrib]
+    congr 1
+    refine Finset.sum_congr rfl fun χ _ ↦ ?_
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun v _ ↦ ?_
+    rw [map_add, inner_add_right]
+    ring
+  have haddl : ∀ u u' t : E, B (u + u') t = B u t + B u' t := by
+    intro u u' t
+    rw [hsymm (u + u') t, haddr t u u', hsymm t u, hsymm t u']
+  have hsmulr : ∀ (x : ℝ) (u t : E), B u (x • t) = x * B u t := by
+    intro x u t
+    rw [hB]
+    beta_reduce
+    rw [show (∑ χ ∈ S, ∑ v : V,
+        (ψ (χ v)).re * inner ℝ u (ρ v (x • t))) =
+      x * ∑ χ ∈ S, ∑ v : V, (ψ (χ v)).re * inner ℝ u (ρ v t) from by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun χ _ ↦ ?_
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun v _ ↦ ?_
+      rw [map_smul, inner_smul_right]
+      ring]
+    ring
+  have hsmull : ∀ (x : ℝ) (u t : E), B (x • u) t = x * B u t := by
+    intro x u t
+    rw [hsymm (x • u) t, hsmulr x t u, hsymm t u]
+  have hpsd : ∀ u : E, 0 ≤ B u u := by
+    intro u
+    rw [hdiag u]
+    exact Finset.sum_nonneg fun χ _ ↦ mass_nonneg ψ ρ hρ χ u
+  have hle : ∀ u : E, B u u ≤ ‖u‖ ^ 2 := by
+    intro u
+    rw [hdiag u]
+    calc
+      (∑ χ ∈ S, mass ψ ρ χ u) ≤
+          ∑ χ : Module.Dual K V, mass ψ ρ χ u :=
+        Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ S)
+          fun χ _ _ ↦ mass_nonneg ψ ρ hρ χ u
+      _ = ‖u‖ ^ 2 := sum_mass ψ ρ hρ hψ u
+  have hcs : ∀ u t : E, B u t ^ 2 ≤ B u u * B t t := by
+    intro u t
+    have hquad : ∀ x : ℝ,
+        0 ≤ B t t * (x * x) + 2 * B u t * x + B u u := by
+      intro x
+      have hexp : B (u + x • t) (u + x • t) =
+          B t t * (x * x) + 2 * B u t * x + B u u := by
+        rw [haddl u (x • t) (u + x • t), haddr u u (x • t),
+          haddr (x • t) u (x • t), hsmulr x u t, hsmull x t u,
+          hsmull x t (x • t), hsmulr x t t, hsymm t u]
+        ring
+      rw [← hexp]
+      exact hpsd _
+    have hdisc := discrim_le_zero hquad
+    rw [discrim] at hdisc
+    nlinarith [hdisc]
+  have hdelta : B z z - B w w = B (z - w) (z + w) := by
+    have h1 : z - w = z + (-1 : ℝ) • w := by
+      rw [neg_one_smul]
+      abel
+    rw [h1, haddl z ((-1 : ℝ) • w) (z + w), haddr z z w,
+      hsmull (-1) w (z + w), haddr w z w, hsymm w z]
+    ring
+  have hbound : |B (z - w) (z + w)| ≤ ‖z - w‖ * ‖z + w‖ := by
+    have hsq : B (z - w) (z + w) ^ 2 ≤
+        (‖z - w‖ * ‖z + w‖) ^ 2 := by
+      calc
+        B (z - w) (z + w) ^ 2 ≤ B (z - w) (z - w) * B (z + w) (z + w) :=
+          hcs _ _
+        _ ≤ ‖z - w‖ ^ 2 * ‖z + w‖ ^ 2 :=
+          mul_le_mul (hle _) (hle _) (hpsd _) (by positivity)
+        _ = (‖z - w‖ * ‖z + w‖) ^ 2 := by ring
+    calc
+      |B (z - w) (z + w)| = Real.sqrt (B (z - w) (z + w) ^ 2) :=
+        (Real.sqrt_sq_eq_abs _).symm
+      _ ≤ Real.sqrt ((‖z - w‖ * ‖z + w‖) ^ 2) :=
+        Real.sqrt_le_sqrt hsq
+      _ = ‖z - w‖ * ‖z + w‖ := by
+        rw [Real.sqrt_sq (by positivity)]
+  calc
+    |(∑ χ ∈ S, mass ψ ρ χ z) - ∑ χ ∈ S, mass ψ ρ χ w| =
+        |B (z - w) (z + w)| := by
+      rw [← hdiag z, ← hdiag w, hdelta]
+    _ ≤ ‖z - w‖ * ‖z + w‖ := hbound
+    _ ≤ ‖z - w‖ * (‖z‖ + ‖w‖) :=
+      mul_le_mul_of_nonneg_left (norm_add_le z w) (norm_nonneg _)
+    _ = (‖z‖ + ‖w‖) * ‖z - w‖ := by ring
+
 end Action
 
 omit [DecidableEq V] in
