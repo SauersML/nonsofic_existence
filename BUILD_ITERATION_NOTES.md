@@ -329,3 +329,46 @@ components y_d (graded_independence_all now green):
   swap; (iv) failing exact kill, split c by vN-regular idempotents of
   p₀c and reduce the failure rank inductively (rank strictly drops,
   fixed level m, ≤ 2^m steps).
+
+## Residual endgame, session 8 — unimodular matrix picture (KEY)
+For u = c + s₁p₀ (c balanced), U := toMatrix(u) at depth 1 is
+  U = [[a, b], [d + s₀, e]],  a := t₀cs₀, b := t₀cs₁, d := t₁cs₀,
+  e := t₁cs₁ — ALL BALANCED, single tail entry s₀ at (2,1).
+- (R1) ⟹ the ROW (a,b) is right-unimodular OVER THE BALANCED
+  SUBALGEBRA: a·z₀ + b·z₁ = 1, z_j := t_jZs₀ balanced.
+- (R2) ⟹ the COLUMN (b,e) is left-unimodular balanced:
+  w₀·b + w₁·e = 1, w_j := t₁y₀s_j balanced.
+- STABLE RANK 1 for L₀ = ⋃M_{2^m}(k) (formalizable, elementary):
+  A·Z₀ + B·Z₁ = 1 in M_N(k) ⟹ ∃ T, A + BT invertible.  Proof: pick
+  complement K' of ker A, complement W of im A; dim ker A = dim W
+  (rank-nullity); im A + im B = k^N ⟹ basis w_i of W with
+  w_i ≡ B u_i mod im A; T := (ker A ∋ e_i ↦ u_i, 0 on K');
+  A + BT injective ⟹ invertible.  Inverse at the SAME level ⟹
+  balanced.  Mathlib: finrank_range_add_finrank_ker,
+  Submodule.exists_isCompl.
+- PIVOT: col-op c₁ += c₂·t makes â := a + bt balanced-invertible;
+  clearing row/col (free E-moves) gives [u] = [ê],
+  ê = (e − d̂â⁻¹b) − s₀·(â⁻¹b) = ẽ − s₀g, ẽ,g BALANCED.
+  Dually pivot on e via (R2) gives â' = b̃ + h·s₀ shape.
+- For ê = ẽ − s₀g: t₁ê = t₁ẽ (t₁s₀ = 0) ⟹ (t₁ẽ)(ê⁻¹s₁) = 1 right-
+  invertible; e := ê⁻¹s₁t₁ẽ = ê⁻¹p₁ê (p₁s₀ = 0!) idempotent conjugate
+  to p₁; kill-move solvability for the tail ⟺ g·e = g.  Free move
+  X := g·(ê⁻¹s₁) adds s₀·g·e EXACTLY, leaving tail −s₀·g(1−e) — but
+  e is NOT balanced, so the balanced-shape bookkeeping breaks; the
+  swap-conjugate converts s₀g-tails to s₁g'-tails (general residual
+  shape u = c + s₁g).
+- CHIRALITY WARNING (recurring): unit relations give RIGHT inverses
+  where the kill-moves need LEFT division and vice versa.  The sr1
+  pivot is the tool that BREAKS the symmetry: it converts
+  unimodularity (which we do get from unit-ness) into an honest
+  invertible balanced entry.  Next session: iterate the sr1-pivot on
+  the [0,1]-shape ê = ẽ − s₀g itself: its depth-1 matrix has row
+  (t₀ẽs₀ − gs₀?, ...) — NO: first swap-normalize to s₁-tail
+  c' + s₁g', then matrixify: entries t_i(s₁g')s_j = δ_{i1}g's_j not
+  balanced unless g' = p₀-shaped.  ALTERNATIVE next attack: use BOTH
+  unimodularities at once — 2×2 over balanced with ONE non-balanced
+  entry and both a-row and e-column completable: after making â
+  invertible AND ê'-column invertible simultaneously (two independent
+  sr1 choices), the Whitehead-style factorization of U may land in
+  E₂(balanced)·diag(balanced-unit, unit-with-tail-in-p₀-corner) where
+  the tail sits INSIDE a corner killed by rank descent at fixed level.
