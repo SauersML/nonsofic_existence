@@ -2025,6 +2025,767 @@ theorem coarse_pairRegion_of_fine_CB_forward (x : X)
   · left
     exact pairRegion_eq_A_of_pos_of_lt X K _ _ (by omega) (by omega)
 
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The same-vector `A ∪ B` descent estimate**: the total fine mass in
+regions `A` and `B` is bounded by the coarse mass in regions `C` and `D`
+of the same vector, plus one opposite-generator displacement error per
+alphabet letter, plus the second boundary layer.  Every interior fine
+character is charged through the opposite shear of the canonical least
+leading generator of its second functional; the receiving coarse
+characters remember that generator, so the images over distinct letters
+are disjoint. -/
+theorem sum_planeMass_AB_le_coarse_CD (hψ : ψ ≠ 1) (z : E) :
+    ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+            (secondCoordinateChar X K (n + 2) χ') = .A ∨
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+            (secondCoordinateChar X K (n + 2) χ') = .B),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ' z ≤
+    (∑ η ∈ Finset.univ.filter
+        (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .C ∨
+          pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .D),
+      planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+      (∑ x : X, 2 * ‖z‖ *
+        ‖rho (elementaryRoot j i hij.symm (FreeAlgebra.ι K x)) z - z‖) +
+      secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+  set S := Finset.univ.filter
+    (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+      pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+        (secondCoordinateChar X K (n + 2) χ') = .A ∨
+      pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+        (secondCoordinateChar X K (n + 2) χ') = .B) with hS
+  set CD := Finset.univ.filter
+    (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+      pairRegion X K (firstCoordinateChar X K (n + 1) η)
+        (secondCoordinateChar X K (n + 1) η) = .C ∨
+      pairRegion X K (firstCoordinateChar X K (n + 1) η)
+        (secondCoordinateChar X K (n + 1) η) = .D) with hCD
+  -- interior/boundary split of the fine source
+  have hsplit := Finset.sum_filter_add_sum_filter_not S
+    (fun χ' ↦ valuation X K
+      (secondCoordinateChar X K (n + 2) χ') ≤ n + 1)
+    (fun χ' ↦ planeMass X K i j k hik hjk (n + 2) rho ψ χ' z)
+  set Si := S.filter
+    (fun χ' ↦ valuation X K
+      (secondCoordinateChar X K (n + 2) χ') ≤ n + 1) with hSi
+  have hboundary : (∑ χ' ∈ S.filter
+      (fun χ' ↦ ¬ valuation X K
+        (secondCoordinateChar X K (n + 2) χ') ≤ n + 1),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+    secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+      fun χ' _ _ ↦ planeMass_nonneg X K i j k hik hjk (n + 2) rho ψ χ' z
+    intro χ' hχ'
+    rw [Finset.mem_filter, hS, Finset.mem_filter] at hχ'
+    obtain ⟨⟨-, hreg⟩, htop⟩ := hχ'
+    have hne : valuation X K
+        (secondCoordinateChar X K (n + 2) χ') ≠ 0 ∧
+        ¬(valuation X K (firstCoordinateChar X K (n + 2) χ') = n + 3 ∧
+          valuation X K (secondCoordinateChar X K (n + 2) χ') = n + 3) ∧
+        valuation X K (secondCoordinateChar X K (n + 2) χ') ≤
+          valuation X K (firstCoordinateChar X K (n + 2) χ') := by
+      rcases hreg with hA | hB
+      · obtain ⟨hz2, -, h2ne, hlt⟩ := pairRegion_A_data X K _ _ hA
+        exact ⟨h2ne, hz2, hlt.le⟩
+      · obtain ⟨hz2, -, h2ne, heq⟩ := pairRegion_B_data X K _ _ hB
+        exact ⟨h2ne, hz2, heq.symm.le⟩
+    obtain ⟨h2ne, hz2, hle2⟩ := hne
+    have hb1 := valuation_le_succ X K
+      (firstCoordinateChar X K (n + 2) χ')
+    have hb2 := valuation_le_succ X K
+      (secondCoordinateChar X K (n + 2) χ')
+    refine Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩
+    omega
+  -- selector partition of the interior part
+  set selIdx : Module.Dual K (PlaneVector X K (n + 2)) →
+      Fin (Fintype.card X + 1) := fun χ' ↦
+    if h : leastLeadingGeneratorIndex X K
+        (secondCoordinateChar X K (n + 2) χ') < Fintype.card X then
+      ⟨leastLeadingGeneratorIndex X K
+        (secondCoordinateChar X K (n + 2) χ'), Nat.lt_succ_of_lt h⟩
+    else Fin.last (Fintype.card X) with hselIdx
+  have hleadset : ∀ χ' ∈ Si,
+      (leadingGeneratorIndexSet X K
+        (secondCoordinateChar X K (n + 2) χ')).Nonempty := by
+    intro χ' hχ'
+    rw [hSi, Finset.mem_filter, hS, Finset.mem_filter] at hχ'
+    obtain ⟨⟨-, hreg⟩, hint⟩ := hχ'
+    have h2ne : valuation X K
+        (secondCoordinateChar X K (n + 2) χ') ≠ 0 := by
+      rcases hreg with hA | hB
+      · exact (pairRegion_A_data X K _ _ hA).2.2.1
+      · exact (pairRegion_B_data X K _ _ hB).2.2.1
+    refine leadingGeneratorIndexSet_nonempty X K _ ?_ (by omega)
+    by_contra hnone
+    have := valuation_eq_succ_of_not_exists X K _ hnone
+    omega
+  have hpartition : (∑ χ' ∈ Si,
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) =
+    ∑ q : Fin (Fintype.card X + 1),
+      ∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ' z :=
+    (Finset.sum_fiberwise Si selIdx _).symm
+  have hlast : Si.filter
+      (fun χ' ↦ selIdx χ' = Fin.last (Fintype.card X)) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro χ' hχ'
+    have hlt := leastLeadingGeneratorIndex_lt_card X K
+      (secondCoordinateChar X K (n + 2) χ') (hleadset χ' hχ')
+    rw [hselIdx]
+    beta_reduce
+    rw [dif_pos hlt]
+    intro hcontra
+    have := congrArg Fin.val hcontra
+    simp only [Fin.val_last] at this
+    omega
+  -- the per-letter charge
+  have hperq : ∀ q : Fin (Fintype.card X),
+      (∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q.castSucc),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+      (∑ η ∈ Finset.univ.filter
+          (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .C ∨
+            pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .D) ∧
+            leastLeadingGeneratorIndex X K
+              (secondCoordinateChar X K (n + 1) η) = (q : ℕ)),
+        planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+        2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm
+          (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖ := by
+    intro q
+    set x := generatorEnumeration X q with hx
+    set u := rho (elementaryRoot j i hij.symm (FreeAlgebra.ι K x))
+      with hu
+    set Sq := Si.filter (fun χ' ↦ selIdx χ' = q.castSucc) with hSq
+    set Uq := Finset.univ.filter
+      (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+          (secondCoordinateChar X K (n + 1) η) = .C ∨
+        pairRegion X K (firstCoordinateChar X K (n + 1) η)
+          (secondCoordinateChar X K (n + 1) η) = .D) ∧
+        leastLeadingGeneratorIndex X K
+          (secondCoordinateChar X K (n + 1) η) = (q : ℕ)) with hUq
+    -- facts shared by every member of the fiber part
+    have hmem : ∀ χ' ∈ Sq,
+        χ'.comp (oppositeShear X K (n + 1) x) ∈ Uq := by
+      intro χ' hχ'
+      rw [hSq, Finset.mem_filter] at hχ'
+      obtain ⟨hSi', hsel⟩ := hχ'
+      rw [hSi, Finset.mem_filter, hS, Finset.mem_filter] at hSi'
+      obtain ⟨⟨-, hreg⟩, hint⟩ := hSi'
+      have hne : (leadingGeneratorIndexSet X K
+          (secondCoordinateChar X K (n + 2) χ')).Nonempty :=
+        hleadset χ' (by
+          rw [hSi, Finset.mem_filter, hS, Finset.mem_filter]
+          exact ⟨⟨Finset.mem_univ _, hreg⟩, hint⟩)
+      have hltcard := leastLeadingGeneratorIndex_lt_card X K
+        (secondCoordinateChar X K (n + 2) χ') hne
+      have hidx : leastLeadingGeneratorIndex X K
+          (secondCoordinateChar X K (n + 2) χ') = (q : ℕ) := by
+        have := hsel
+        rw [hselIdx] at this
+        beta_reduce at this
+        rw [dif_pos hltcard] at this
+        have hval := congrArg Fin.val this
+        simpa using hval
+      have hqfin : q = (⟨leastLeadingGeneratorIndex X K
+          (secondCoordinateChar X K (n + 2) χ'), hltcard⟩ :
+            Fin (Fintype.card X)) := by
+        apply Fin.ext
+        show (q : ℕ) = leastLeadingGeneratorIndex X K
+          (secondCoordinateChar X K (n + 2) χ')
+        omega
+      have hxval : x = generatorEnumeration X
+          ⟨leastLeadingGeneratorIndex X K
+            (secondCoordinateChar X K (n + 2) χ'), hltcard⟩ := by
+        rw [hx, hqfin]
+      have hlead : valuation X K
+          (leftDerived X K
+            (secondCoordinateChar X K (n + 2) χ') x) + 1 =
+        valuation X K (secondCoordinateChar X K (n + 2) χ') := by
+        rw [hxval]
+        exact leastLeadingGeneratorIndex_spec X K _ hne
+      have hregion := coarse_pairRegion_of_fine_AB_opposite
+        X K (n + 1) x χ' hreg hint hlead
+      have hsecondid : secondCoordinateChar X K (n + 1)
+          (χ'.comp (oppositeShear X K (n + 1) x)) =
+        restrictSucc X K (secondCoordinateChar X K (n + 2) χ') :=
+        secondCoordinateChar_comp_oppositeShear X K (n + 1) x χ'
+      have htag : leastLeadingGeneratorIndex X K
+          (secondCoordinateChar X K (n + 1)
+            (χ'.comp (oppositeShear X K (n + 1) x))) = (q : ℕ) := by
+        rw [hsecondid,
+          leastLeadingGeneratorIndex_restrictSucc X K
+            (secondCoordinateChar X K (n + 2) χ') (by omega)]
+        exact hidx
+      exact Finset.mem_filter.2 ⟨Finset.mem_univ _, hregion, htag⟩
+    -- fibers over distinct coarse characters are disjoint
+    have hdisj : (Uq : Set (Module.Dual K
+        (PlaneVector X K (n + 1)))).PairwiseDisjoint
+        (fun η ↦ Finset.univ.filter
+          (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+            χ''.comp (oppositeShear X K (n + 1) x) = η)) := by
+      intro η₁ _ η₂ _ hne
+      refine Finset.disjoint_left.2 fun χ'' h1 h2 ↦ ?_
+      rw [Finset.mem_filter] at h1 h2
+      exact hne (h1.2 ▸ h2.2)
+    have huu : ∀ w : E, u (u⁻¹ w) = w := by
+      intro w
+      change (u * u⁻¹) w = w
+      rw [mul_inv_cancel]
+      rfl
+    have htransport : ∀ η ∈ Uq,
+        planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) =
+        ∑ χ'' ∈ Finset.univ.filter
+            (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+              χ''.comp (oppositeShear X K (n + 1) x) = η),
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ'' z := by
+      intro η _
+      have h := planeMass_eq_sum_fiber_oppositeShear X K i j k hij
+        hik hjk (n + 1) rho ψ hψ x (u⁻¹ z) η
+      rw [← hu] at h
+      rw [huu z] at h
+      exact h
+    have hchain : (∑ χ' ∈ Sq,
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+      ∑ η ∈ Uq, planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) := by
+      calc
+        (∑ χ' ∈ Sq,
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+          ∑ χ' ∈ Uq.biUnion
+            (fun η ↦ Finset.univ.filter
+              (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+                χ''.comp (oppositeShear X K (n + 1) x) = η)),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z := by
+          refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+            fun χ' _ _ ↦
+              planeMass_nonneg X K i j k hik hjk (n + 2) rho ψ χ' z
+          intro χ' hχ'
+          refine Finset.mem_biUnion.2
+            ⟨χ'.comp (oppositeShear X K (n + 1) x), hmem χ' hχ', ?_⟩
+          exact Finset.mem_filter.2 ⟨Finset.mem_univ _, rfl⟩
+        _ = ∑ η ∈ Uq, ∑ χ'' ∈ Finset.univ.filter
+            (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+              χ''.comp (oppositeShear X K (n + 1) x) = η),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ'' z :=
+          Finset.sum_biUnion hdisj
+        _ = ∑ η ∈ Uq,
+            planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) :=
+          (Finset.sum_congr rfl htransport).symm
+    have hcont : (∑ η ∈ Uq,
+        planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z)) ≤
+      (∑ η ∈ Uq, planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+        2 * ‖z‖ * ‖u z - z‖ := by
+      have habs := CharacterMass.abs_sum_mass_sub_sum_mass_le ψ
+        (planeAction X K i j k hik hjk (n + 1) rho)
+        (planeAction_add X K i j k hik hjk (n + 1) rho) hψ
+        Uq (u⁻¹ z) z
+      have hnorm1 : ‖(u⁻¹ : E ≃ₗᵢ[ℝ] E) z‖ = ‖z‖ :=
+        (u⁻¹ : E ≃ₗᵢ[ℝ] E).norm_map z
+      have hnorm2 : ‖(u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z‖ = ‖u z - z‖ := by
+        have hmap : u ((u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z) = z - u z := by
+          rw [map_sub, huu z]
+        calc
+          ‖(u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z‖ =
+              ‖u ((u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z)‖ :=
+            (u.norm_map _).symm
+          _ = ‖z - u z‖ := by rw [hmap]
+          _ = ‖u z - z‖ := norm_sub_rev _ _
+      have hle := abs_le.1 habs
+      have h1 := hle.2
+      rw [hnorm1, hnorm2] at h1
+      change (∑ η ∈ Uq,
+          planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z)) -
+        (∑ η ∈ Uq, planeMass X K i j k hik hjk (n + 1) rho ψ η z) ≤
+        (‖z‖ + ‖z‖) * ‖u z - z‖ at h1
+      linarith
+    calc
+      (∑ χ' ∈ Sq,
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+        ∑ η ∈ Uq,
+          planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) := hchain
+      _ ≤ (∑ η ∈ Uq,
+            planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          2 * ‖z‖ * ‖u z - z‖ := hcont
+  -- assemble the per-letter charges
+  have htags : (∑ q : Fin (Fintype.card X),
+      ∑ η ∈ Finset.univ.filter
+        (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .C ∨
+          pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .D) ∧
+          leastLeadingGeneratorIndex X K
+            (secondCoordinateChar X K (n + 1) η) = (q : ℕ)),
+        planeMass X K i j k hik hjk (n + 1) rho ψ η z) ≤
+      ∑ η ∈ CD, planeMass X K i j k hik hjk (n + 1) rho ψ η z := by
+    have hdisjq : ((Finset.univ : Finset (Fin (Fintype.card X))) :
+        Set (Fin (Fintype.card X))).PairwiseDisjoint
+        (fun q ↦ Finset.univ.filter
+          (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .C ∨
+            pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .D) ∧
+            leastLeadingGeneratorIndex X K
+              (secondCoordinateChar X K (n + 1) η) = (q : ℕ))) := by
+      intro q₁ _ q₂ _ hne
+      refine Finset.disjoint_left.2 fun η h1 h2 ↦ ?_
+      rw [Finset.mem_filter] at h1 h2
+      exact hne (Fin.ext (by omega))
+    rw [← Finset.sum_biUnion hdisjq]
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+      fun η _ _ ↦ planeMass_nonneg X K i j k hik hjk (n + 1) rho ψ η z
+    intro η hη
+    obtain ⟨q, -, hqmem⟩ := Finset.mem_biUnion.1 hη
+    rw [Finset.mem_filter] at hqmem
+    exact Finset.mem_filter.2 ⟨Finset.mem_univ _, hqmem.2.1⟩
+  have herr : (∑ q : Fin (Fintype.card X),
+      2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm
+        (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖) =
+    ∑ x : X, 2 * ‖z‖ *
+      ‖rho (elementaryRoot j i hij.symm (FreeAlgebra.ι K x)) z - z‖ :=
+    Fintype.sum_equiv (generatorEnumeration X) _ _ fun q ↦ rfl
+  calc
+    (∑ χ' ∈ S, planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) =
+        (∑ χ' ∈ Si,
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) +
+        ∑ χ' ∈ S.filter
+          (fun χ' ↦ ¬ valuation X K
+            (secondCoordinateChar X K (n + 2) χ') ≤ n + 1),
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ' z := hsplit.symm
+    _ ≤ (∑ q : Fin (Fintype.card X + 1),
+          ∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) +
+        secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [← hpartition]
+      linarith
+    _ = (∑ q : Fin (Fintype.card X),
+          ∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q.castSucc),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) +
+        secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [Fin.sum_univ_castSucc, hlast, Finset.sum_empty, add_zero]
+    _ ≤ (∑ q : Fin (Fintype.card X),
+          ((∑ η ∈ Finset.univ.filter
+            (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+              (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .C ∨
+              pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .D) ∧
+              leastLeadingGeneratorIndex X K
+                (secondCoordinateChar X K (n + 1) η) = (q : ℕ)),
+            planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm
+            (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖)) +
+        secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      have hsum := Finset.sum_le_sum fun q (_ : q ∈ Finset.univ) ↦
+        hperq q
+      linarith
+    _ = ((∑ q : Fin (Fintype.card X),
+          ∑ η ∈ Finset.univ.filter
+            (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+              (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .C ∨
+              pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .D) ∧
+              leastLeadingGeneratorIndex X K
+                (secondCoordinateChar X K (n + 1) η) = (q : ℕ)),
+            planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          ∑ q : Fin (Fintype.card X),
+            2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm
+              (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖) +
+        secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [Finset.sum_add_distrib]
+    _ ≤ ((∑ η ∈ CD,
+          planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          ∑ x : X, 2 * ‖z‖ *
+            ‖rho (elementaryRoot j i hij.symm
+              (FreeAlgebra.ι K x)) z - z‖) +
+        secondBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [← herr]
+      linarith
+
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The same-vector `C ∪ B` descent estimate**: the mirror of the
+`A ∪ B` estimate, charging through the forward shear of the canonical
+least leading generator of the first functional. -/
+theorem sum_planeMass_CB_le_coarse_AD (hψ : ψ ≠ 1) (z : E) :
+    ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+            (secondCoordinateChar X K (n + 2) χ') = .C ∨
+          pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+            (secondCoordinateChar X K (n + 2) χ') = .B),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ' z ≤
+    (∑ η ∈ Finset.univ.filter
+        (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .A ∨
+          pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .D),
+      planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+      (∑ x : X, 2 * ‖z‖ *
+        ‖rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z - z‖) +
+      firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+  set S := Finset.univ.filter
+    (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+      pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+        (secondCoordinateChar X K (n + 2) χ') = .C ∨
+      pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+        (secondCoordinateChar X K (n + 2) χ') = .B) with hS
+  set AD := Finset.univ.filter
+    (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+      pairRegion X K (firstCoordinateChar X K (n + 1) η)
+        (secondCoordinateChar X K (n + 1) η) = .A ∨
+      pairRegion X K (firstCoordinateChar X K (n + 1) η)
+        (secondCoordinateChar X K (n + 1) η) = .D) with hAD
+  have hsplit := Finset.sum_filter_add_sum_filter_not S
+    (fun χ' ↦ valuation X K
+      (firstCoordinateChar X K (n + 2) χ') ≤ n + 1)
+    (fun χ' ↦ planeMass X K i j k hik hjk (n + 2) rho ψ χ' z)
+  set Si := S.filter
+    (fun χ' ↦ valuation X K
+      (firstCoordinateChar X K (n + 2) χ') ≤ n + 1) with hSi
+  have hboundary : (∑ χ' ∈ S.filter
+      (fun χ' ↦ ¬ valuation X K
+        (firstCoordinateChar X K (n + 2) χ') ≤ n + 1),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+    firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+      fun χ' _ _ ↦ planeMass_nonneg X K i j k hik hjk (n + 2) rho ψ χ' z
+    intro χ' hχ'
+    rw [Finset.mem_filter, hS, Finset.mem_filter] at hχ'
+    obtain ⟨⟨-, hreg⟩, htop⟩ := hχ'
+    have hne : valuation X K
+        (firstCoordinateChar X K (n + 2) χ') ≠ 0 ∧
+        ¬(valuation X K (firstCoordinateChar X K (n + 2) χ') = n + 3 ∧
+          valuation X K (secondCoordinateChar X K (n + 2) χ') = n + 3) ∧
+        valuation X K (firstCoordinateChar X K (n + 2) χ') ≤
+          valuation X K (secondCoordinateChar X K (n + 2) χ') := by
+      rcases hreg with hC | hB
+      · obtain ⟨hz2, h1ne, -, hlt⟩ := pairRegion_C_data X K _ _ hC
+        exact ⟨h1ne, hz2, hlt.le⟩
+      · obtain ⟨hz2, h1ne, -, heq⟩ := pairRegion_B_data X K _ _ hB
+        exact ⟨h1ne, hz2, heq.le⟩
+    obtain ⟨h1ne, hz2, hle1⟩ := hne
+    have hb1 := valuation_le_succ X K
+      (firstCoordinateChar X K (n + 2) χ')
+    have hb2 := valuation_le_succ X K
+      (secondCoordinateChar X K (n + 2) χ')
+    refine Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩
+    omega
+  set selIdx : Module.Dual K (PlaneVector X K (n + 2)) →
+      Fin (Fintype.card X + 1) := fun χ' ↦
+    if h : leastLeadingGeneratorIndex X K
+        (firstCoordinateChar X K (n + 2) χ') < Fintype.card X then
+      ⟨leastLeadingGeneratorIndex X K
+        (firstCoordinateChar X K (n + 2) χ'), Nat.lt_succ_of_lt h⟩
+    else Fin.last (Fintype.card X) with hselIdx
+  have hleadset : ∀ χ' ∈ Si,
+      (leadingGeneratorIndexSet X K
+        (firstCoordinateChar X K (n + 2) χ')).Nonempty := by
+    intro χ' hχ'
+    rw [hSi, Finset.mem_filter, hS, Finset.mem_filter] at hχ'
+    obtain ⟨⟨-, hreg⟩, hint⟩ := hχ'
+    have h1ne : valuation X K
+        (firstCoordinateChar X K (n + 2) χ') ≠ 0 := by
+      rcases hreg with hC | hB
+      · exact (pairRegion_C_data X K _ _ hC).2.1
+      · exact (pairRegion_B_data X K _ _ hB).2.1
+    refine leadingGeneratorIndexSet_nonempty X K _ ?_ (by omega)
+    by_contra hnone
+    have := valuation_eq_succ_of_not_exists X K _ hnone
+    omega
+  have hpartition : (∑ χ' ∈ Si,
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) =
+    ∑ q : Fin (Fintype.card X + 1),
+      ∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ' z :=
+    (Finset.sum_fiberwise Si selIdx _).symm
+  have hlast : Si.filter
+      (fun χ' ↦ selIdx χ' = Fin.last (Fintype.card X)) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro χ' hχ'
+    have hlt := leastLeadingGeneratorIndex_lt_card X K
+      (firstCoordinateChar X K (n + 2) χ') (hleadset χ' hχ')
+    rw [hselIdx]
+    beta_reduce
+    rw [dif_pos hlt]
+    intro hcontra
+    have := congrArg Fin.val hcontra
+    simp only [Fin.val_last] at this
+    omega
+  have hperq : ∀ q : Fin (Fintype.card X),
+      (∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q.castSucc),
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+      (∑ η ∈ Finset.univ.filter
+          (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .A ∨
+            pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .D) ∧
+            leastLeadingGeneratorIndex X K
+              (firstCoordinateChar X K (n + 1) η) = (q : ℕ)),
+        planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+        2 * ‖z‖ * ‖rho (elementaryRoot i j hij
+          (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖ := by
+    intro q
+    set x := generatorEnumeration X q with hx
+    set u := rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) with hu
+    set Sq := Si.filter (fun χ' ↦ selIdx χ' = q.castSucc) with hSq
+    set Uq := Finset.univ.filter
+      (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+          (secondCoordinateChar X K (n + 1) η) = .A ∨
+        pairRegion X K (firstCoordinateChar X K (n + 1) η)
+          (secondCoordinateChar X K (n + 1) η) = .D) ∧
+        leastLeadingGeneratorIndex X K
+          (firstCoordinateChar X K (n + 1) η) = (q : ℕ)) with hUq
+    have hmem : ∀ χ' ∈ Sq,
+        χ'.comp (forwardShear X K (n + 1) x) ∈ Uq := by
+      intro χ' hχ'
+      rw [hSq, Finset.mem_filter] at hχ'
+      obtain ⟨hSi', hsel⟩ := hχ'
+      rw [hSi, Finset.mem_filter, hS, Finset.mem_filter] at hSi'
+      obtain ⟨⟨-, hreg⟩, hint⟩ := hSi'
+      have hne : (leadingGeneratorIndexSet X K
+          (firstCoordinateChar X K (n + 2) χ')).Nonempty :=
+        hleadset χ' (by
+          rw [hSi, Finset.mem_filter, hS, Finset.mem_filter]
+          exact ⟨⟨Finset.mem_univ _, hreg⟩, hint⟩)
+      have hltcard := leastLeadingGeneratorIndex_lt_card X K
+        (firstCoordinateChar X K (n + 2) χ') hne
+      have hidx : leastLeadingGeneratorIndex X K
+          (firstCoordinateChar X K (n + 2) χ') = (q : ℕ) := by
+        have := hsel
+        rw [hselIdx] at this
+        beta_reduce at this
+        rw [dif_pos hltcard] at this
+        have hval := congrArg Fin.val this
+        simpa using hval
+      have hqfin : q = (⟨leastLeadingGeneratorIndex X K
+          (firstCoordinateChar X K (n + 2) χ'), hltcard⟩ :
+            Fin (Fintype.card X)) := by
+        apply Fin.ext
+        show (q : ℕ) = leastLeadingGeneratorIndex X K
+          (firstCoordinateChar X K (n + 2) χ')
+        omega
+      have hxval : x = generatorEnumeration X
+          ⟨leastLeadingGeneratorIndex X K
+            (firstCoordinateChar X K (n + 2) χ'), hltcard⟩ := by
+        rw [hx, hqfin]
+      have hlead : valuation X K
+          (leftDerived X K
+            (firstCoordinateChar X K (n + 2) χ') x) + 1 =
+        valuation X K (firstCoordinateChar X K (n + 2) χ') := by
+        rw [hxval]
+        exact leastLeadingGeneratorIndex_spec X K _ hne
+      have hregion := coarse_pairRegion_of_fine_CB_forward
+        X K (n + 1) x χ' hreg hint hlead
+      have hfirstid : firstCoordinateChar X K (n + 1)
+          (χ'.comp (forwardShear X K (n + 1) x)) =
+        restrictSucc X K (firstCoordinateChar X K (n + 2) χ') :=
+        firstCoordinateChar_comp_forwardShear X K (n + 1) x χ'
+      have htag : leastLeadingGeneratorIndex X K
+          (firstCoordinateChar X K (n + 1)
+            (χ'.comp (forwardShear X K (n + 1) x))) = (q : ℕ) := by
+        rw [hfirstid,
+          leastLeadingGeneratorIndex_restrictSucc X K
+            (firstCoordinateChar X K (n + 2) χ') (by omega)]
+        exact hidx
+      exact Finset.mem_filter.2 ⟨Finset.mem_univ _, hregion, htag⟩
+    have hdisj : (Uq : Set (Module.Dual K
+        (PlaneVector X K (n + 1)))).PairwiseDisjoint
+        (fun η ↦ Finset.univ.filter
+          (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+            χ''.comp (forwardShear X K (n + 1) x) = η)) := by
+      intro η₁ _ η₂ _ hne
+      refine Finset.disjoint_left.2 fun χ'' h1 h2 ↦ ?_
+      rw [Finset.mem_filter] at h1 h2
+      exact hne (h1.2 ▸ h2.2)
+    have huu : ∀ w : E, u (u⁻¹ w) = w := by
+      intro w
+      change (u * u⁻¹) w = w
+      rw [mul_inv_cancel]
+      rfl
+    have htransport : ∀ η ∈ Uq,
+        planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) =
+        ∑ χ'' ∈ Finset.univ.filter
+            (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+              χ''.comp (forwardShear X K (n + 1) x) = η),
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ'' z := by
+      intro η _
+      have h := planeMass_eq_sum_fiber_forwardShear X K i j k hij
+        hik hjk (n + 1) rho ψ hψ x (u⁻¹ z) η
+      rw [← hu] at h
+      rw [huu z] at h
+      exact h
+    have hchain : (∑ χ' ∈ Sq,
+        planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+      ∑ η ∈ Uq, planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) := by
+      calc
+        (∑ χ' ∈ Sq,
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+          ∑ χ' ∈ Uq.biUnion
+            (fun η ↦ Finset.univ.filter
+              (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+                χ''.comp (forwardShear X K (n + 1) x) = η)),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z := by
+          refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+            fun χ' _ _ ↦
+              planeMass_nonneg X K i j k hik hjk (n + 2) rho ψ χ' z
+          intro χ' hχ'
+          refine Finset.mem_biUnion.2
+            ⟨χ'.comp (forwardShear X K (n + 1) x), hmem χ' hχ', ?_⟩
+          exact Finset.mem_filter.2 ⟨Finset.mem_univ _, rfl⟩
+        _ = ∑ η ∈ Uq, ∑ χ'' ∈ Finset.univ.filter
+            (fun χ'' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+              χ''.comp (forwardShear X K (n + 1) x) = η),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ'' z :=
+          Finset.sum_biUnion hdisj
+        _ = ∑ η ∈ Uq,
+            planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) :=
+          (Finset.sum_congr rfl htransport).symm
+    have hcont : (∑ η ∈ Uq,
+        planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z)) ≤
+      (∑ η ∈ Uq, planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+        2 * ‖z‖ * ‖u z - z‖ := by
+      have habs := CharacterMass.abs_sum_mass_sub_sum_mass_le ψ
+        (planeAction X K i j k hik hjk (n + 1) rho)
+        (planeAction_add X K i j k hik hjk (n + 1) rho) hψ
+        Uq (u⁻¹ z) z
+      have hnorm1 : ‖(u⁻¹ : E ≃ₗᵢ[ℝ] E) z‖ = ‖z‖ :=
+        (u⁻¹ : E ≃ₗᵢ[ℝ] E).norm_map z
+      have hnorm2 : ‖(u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z‖ = ‖u z - z‖ := by
+        have hmap : u ((u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z) = z - u z := by
+          rw [map_sub, huu z]
+        calc
+          ‖(u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z‖ =
+              ‖u ((u⁻¹ : E ≃ₗᵢ[ℝ] E) z - z)‖ :=
+            (u.norm_map _).symm
+          _ = ‖z - u z‖ := by rw [hmap]
+          _ = ‖u z - z‖ := norm_sub_rev _ _
+      have hle := abs_le.1 habs
+      have h1 := hle.2
+      rw [hnorm1, hnorm2] at h1
+      change (∑ η ∈ Uq,
+          planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z)) -
+        (∑ η ∈ Uq, planeMass X K i j k hik hjk (n + 1) rho ψ η z) ≤
+        (‖z‖ + ‖z‖) * ‖u z - z‖ at h1
+      linarith
+    calc
+      (∑ χ' ∈ Sq,
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) ≤
+        ∑ η ∈ Uq,
+          planeMass X K i j k hik hjk (n + 1) rho ψ η (u⁻¹ z) := hchain
+      _ ≤ (∑ η ∈ Uq,
+            planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          2 * ‖z‖ * ‖u z - z‖ := hcont
+  have htags : (∑ q : Fin (Fintype.card X),
+      ∑ η ∈ Finset.univ.filter
+        (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .A ∨
+          pairRegion X K (firstCoordinateChar X K (n + 1) η)
+            (secondCoordinateChar X K (n + 1) η) = .D) ∧
+          leastLeadingGeneratorIndex X K
+            (firstCoordinateChar X K (n + 1) η) = (q : ℕ)),
+        planeMass X K i j k hik hjk (n + 1) rho ψ η z) ≤
+      ∑ η ∈ AD, planeMass X K i j k hik hjk (n + 1) rho ψ η z := by
+    have hdisjq : ((Finset.univ : Finset (Fin (Fintype.card X))) :
+        Set (Fin (Fintype.card X))).PairwiseDisjoint
+        (fun q ↦ Finset.univ.filter
+          (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .A ∨
+            pairRegion X K (firstCoordinateChar X K (n + 1) η)
+              (secondCoordinateChar X K (n + 1) η) = .D) ∧
+            leastLeadingGeneratorIndex X K
+              (firstCoordinateChar X K (n + 1) η) = (q : ℕ))) := by
+      intro q₁ _ q₂ _ hne
+      refine Finset.disjoint_left.2 fun η h1 h2 ↦ ?_
+      rw [Finset.mem_filter] at h1 h2
+      exact hne (Fin.ext (by omega))
+    rw [← Finset.sum_biUnion hdisjq]
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+      fun η _ _ ↦ planeMass_nonneg X K i j k hik hjk (n + 1) rho ψ η z
+    intro η hη
+    obtain ⟨q, -, hqmem⟩ := Finset.mem_biUnion.1 hη
+    rw [Finset.mem_filter] at hqmem
+    exact Finset.mem_filter.2 ⟨Finset.mem_univ _, hqmem.2.1⟩
+  have herr : (∑ q : Fin (Fintype.card X),
+      2 * ‖z‖ * ‖rho (elementaryRoot i j hij
+        (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖) =
+    ∑ x : X, 2 * ‖z‖ *
+      ‖rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z - z‖ :=
+    Fintype.sum_equiv (generatorEnumeration X) _ _ fun q ↦ rfl
+  calc
+    (∑ χ' ∈ S, planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) =
+        (∑ χ' ∈ Si,
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) +
+        ∑ χ' ∈ S.filter
+          (fun χ' ↦ ¬ valuation X K
+            (firstCoordinateChar X K (n + 2) χ') ≤ n + 1),
+          planeMass X K i j k hik hjk (n + 2) rho ψ χ' z := hsplit.symm
+    _ ≤ (∑ q : Fin (Fintype.card X + 1),
+          ∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) +
+        firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [← hpartition]
+      linarith
+    _ = (∑ q : Fin (Fintype.card X),
+          ∑ χ' ∈ Si.filter (fun χ' ↦ selIdx χ' = q.castSucc),
+            planeMass X K i j k hik hjk (n + 2) rho ψ χ' z) +
+        firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [Fin.sum_univ_castSucc, hlast, Finset.sum_empty, add_zero]
+    _ ≤ (∑ q : Fin (Fintype.card X),
+          ((∑ η ∈ Finset.univ.filter
+            (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+              (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .A ∨
+              pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .D) ∧
+              leastLeadingGeneratorIndex X K
+                (firstCoordinateChar X K (n + 1) η) = (q : ℕ)),
+            planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          2 * ‖z‖ * ‖rho (elementaryRoot i j hij
+            (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖)) +
+        firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      have hsum := Finset.sum_le_sum fun q (_ : q ∈ Finset.univ) ↦
+        hperq q
+      linarith
+    _ = ((∑ q : Fin (Fintype.card X),
+          ∑ η ∈ Finset.univ.filter
+            (fun η : Module.Dual K (PlaneVector X K (n + 1)) ↦
+              (pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .A ∨
+              pairRegion X K (firstCoordinateChar X K (n + 1) η)
+                (secondCoordinateChar X K (n + 1) η) = .D) ∧
+              leastLeadingGeneratorIndex X K
+                (firstCoordinateChar X K (n + 1) η) = (q : ℕ)),
+            planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          ∑ q : Fin (Fintype.card X),
+            2 * ‖z‖ * ‖rho (elementaryRoot i j hij
+              (FreeAlgebra.ι K (generatorEnumeration X q))) z - z‖) +
+        firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [Finset.sum_add_distrib]
+    _ ≤ ((∑ η ∈ AD,
+          planeMass X K i j k hik hjk (n + 1) rho ψ η z) +
+          ∑ x : X, 2 * ‖z‖ *
+            ‖rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z - z‖) +
+        firstBoundaryMass X K i j k hik hjk (n + 2) rho ψ z := by
+      rw [← herr]
+      linarith
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist
