@@ -110,7 +110,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   direct finite obstruction instead)
 - [x] State and prove the bounded-degree form of the expander decomposition:
   the edited multigraphs carry one explicit occurrence-counting degree bound
-- [ ] Align every TeX theorem and verification claim with its exact Lean declaration
+- [x] Align every TeX theorem and verification claim with its exact Lean
+  declaration or an explicit manuscript-only status: see the
+  “TeX ↔ Lean alignment” table below
 - [ ] Re-run the complete MSI build and final axiom/source audit after all
   manuscript-scope additions
 
@@ -138,6 +140,56 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | Property `(T)` forces finite generation | `KazhdanFiniteGeneration.exists_symmetric_generating_finset` | Formalized |
 | `GL_r = EL_r` over the binary Leavitt algebra | — | Manuscript-only |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
+
+## TeX ↔ Lean alignment
+
+Every numbered statement of `nonsofic_groups_exist.tex` is listed here with
+its exact Lean counterpart or an explicit manuscript-only status.  Where the
+Lean development proves a stronger or restructured statement, the note says
+so.
+
+| TeX item | Lean declaration(s) | Notes |
+| --- | --- | --- |
+| `def:sofic` | `SoficApproximation`, `IsSofic` (`Sofic`) | |
+| `lem:normalization` | `Localization.involutiveCompletion`, `LocalizedApproximation.toSoficApproximation` | absorbed into the localization step, which constructs the exact identity/inverse/involution normalizations where they are used |
+| `lem:word` | `word_close` (`Sofic`), `exists_local_word_control` (`LEF`), `BlockWordCrossing.permutationPreimage` | |
+| `lem:coarea` | `DirectedCoarea.nonnegative_coarea`, `DirectedCoarea.coarea_mul` | |
+| `lem:fplef` | — | not needed: the non-LEF witness is proved by a direct finite obstruction rather than through residual finiteness of finitely presented LEF groups |
+| `thm:kun` | `KunDecomposition.exists_expanderDecomposition`, `KunFixedDecomposition.expanderDecomposition` | proved internally, full-sequence, one-way form; see the literature audit below |
+| `thm:kunthom` | `KunThomTheorem.isLEF_of_exactProductExpansion`, `KunThomEssential.isLEF_of_matchingCertificate` | proved internally with the matching-core repair |
+| `lem:refine` | `Refinement.exists_dominant_cell`, `Refinement.le_crossing_of_cell`, `ComponentRefinement.refineComponent` | |
+| `lem:conserve` | `PermutationConservation.permutation_conservation_full` | |
+| `lem:pin` | `Pinning.median_pinning`, `ComponentPinning.normalized_pinning_global` | |
+| `lem:select` | `Selection.exists_selection`, `Selection.diagonalLevel_error` | full-sequence diagonal form |
+| `lem:complete` | `Localization.exists_completion`, `LocalizedApproximation.toSoficApproximation` | |
+| `thm:local` | `LocalCriterion.LocalCriterionData`, `CriterionAssembly.isLEF_of_soficApproximation` | |
+| `cor:kazhdan` / `thm:D` | `isLEF_of_isSofic`, `not_isSofic_of_not_isLEF` (`CriterionAssembly`) | |
+| `prop:match` | `MedianNormalization.medianNormalize`, `MatchingPreparation.acceptable_symmDiff_le`, `Criterion.symmDiff_le_of_pinned`, `Criterion.matching_injective` | |
+| `lem:diverge` | `ComponentDivergence.smallBlockVertices_negligible` | |
+| `lem:leaf` | `LeavittWords.wordT_mul_wordS_self`, `LeavittWords.wordT_mul_wordS_of_incomparable`, `LeavittWords.cylinder_split` | |
+| `prop:selfsim` | `MatrixSelfSimilarity.ringEquivMatrix`, `LeavittSelfSimilarity.binaryMatrixRingEquiv` | every positive rank, explicit inverse |
+| `lem:whitehead` | `Whitehead.whitehead_diagonal`, `Whitehead.whitehead_commutator`, `elementaryUnit_commutator` (`ElementaryGroup`) | |
+| `lem:elfg` | `elementaryGroup_finitelyGenerated` (`ElementaryGroup`) | |
+| `thm:ejz` | `FreeElementaryPropertyT.controlSet_isKazhdanPair` and the `FiniteTypeCharacteristicTwoPropertyT` endpoints | proved internally for the characteristic-two cases the endpoints need; the arbitrary-finitely-generated-ring statement is manuscript-only |
+| `lem:chartwo` | `LeavittFamily.characteristicTwo_involution`, `LeavittFamily.characteristicTwo_compressor`, `LeavittFamily.compressor_factorization` | the last is the characteristic-free strengthening |
+| `prop:vembed` | `ThompsonWitness` cylinder-swap/prefix-insertion units | tree-table units are formalized; their identification with Thompson's `V` is manuscript-only |
+| `lem:corner` | `LeavittFamily.cornerHom`, `t1_cornerHom_s1`, `cornerHom_s0`, `t0_cornerHom` (`LeavittCorner`) | |
+| `prop:vnotlef` | `Scheme.not_isLEF_cornerSubgroup`, `ThompsonWitness.not_isLEF_cornerWitnessSubgroup` | strengthened: direct finite obstruction, no Higman presentation input |
+| `lem:uinv`, `prop:compress` | `LeavittMatrixCompression.matrixCompressionHom`, `RankFour.compressorSet_conjugation` | |
+| `lem:zinv` | `LeavittFamily.z_sq`, `DiagonalCornerCompression.matrixCompression_commutes_firstDiagonalCorner` | |
+| `prop:gen` | `RankFour.coreEmbedding_compressorSet_generate` | |
+| `prop:JinGamma` | `UniversalRankFour.witnessEmbedding` with `Whitehead.whitehead_diagonal` | |
+| `prop:KJ` | `Scheme.commute_compressed_corner`, `Scheme.compressed_inf_corner`, `DiagonalCornerCompression.matrixCompression_eq_firstDiagonalCorner_iff` | |
+| `thm:corner`, `cor:fgring` | `CompressionSetup`, `UniversalRankFour.compressionSetup`, `not_isSofic_of_not_isLEF` | |
+| `prop:ufact`, `lem:zfact` | `RankFourCompressors` compressor and involution words | explicit elementary words in every characteristic |
+| `thm:spine`, `thm:A` | `universalLeavitt_profile`, `universalLeavittEL4_not_isSofic`, `binaryLeavitt_charTwo_profile` | |
+| `thm:2x2` | `LeavittFamily.rankTwo_not_isSofic` (`RankTwoCompression`), with `eq:p0upper`/`eq:p0lower` as `rankTwoInvolution_conj_upperNil`/`rankTwoInvolution_conj_lowerNil` | finite generation of `Aˣ` derived via `KazhdanFiniteGeneration.exists_symmetric_generating_finset` |
+| `thm:agp`, `prop:glel` | — | manuscript-only (`K₁(L) = 0`, GE property of purely infinite simple rings) |
+| `thm:el2`, `thm:allranks`, `thm:B` | `universalLeavittUnits_not_isSofic`, `universalLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic`, `binaryLeavitt_charTwo_profile` | proved over `𝔽₂` and all characteristic-two finite fields via self-similarity, without `K₁`/GE; odd-characteristic finite fields are manuscript-only pending the generalized property-`(T)` input |
+| `def:model`, `lem:models` | `TableCover.TableModel`, `TableCover.tableModel_of_isSofic`, `TableCover.exists_table_obstruction` | |
+| `thm:table` | `TableCover.tableGroup_no_model`, `TableCover.exists_finitelyPresented_obstruction`, `exists_finitelyPresented_nonsofic_group` | |
+| `thm:kcover` | — | manuscript-only (Shalom's finitely presented Kazhdan covers) |
+| `thm:C` | `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | first assertion and the surjection; the Kazhdan refinement is manuscript-only |
 
 ## Module architecture
 
