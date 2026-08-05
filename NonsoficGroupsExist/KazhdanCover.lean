@@ -18,6 +18,8 @@ table admits no accurate model of the family's image table.
 
 namespace NonsoficGroupsExist
 
+set_option linter.unusedSectionVars false
+
 universe u
 
 variable {G : Type u} [Group G]
@@ -38,6 +40,7 @@ theorem y_mem_familyTestSet {g : G} (hg : g ∈ F) :
 
 variable (hymul : ∀ g ∈ F, ∀ h ∈ F, y g * y h = y (g * h))
 
+include hymul in
 theorem y_mem_familyDomain (g : ↥(tableDomain F)) :
     y g.1 ∈ tableDomain (familyTestSet F y) := by
   classical
@@ -52,6 +55,7 @@ theorem y_mem_familyDomain (g : ↥(tableDomain F)) :
 
 variable (hysep : ∀ g ∈ F, ∀ h ∈ F, g ≠ h → y g ≠ y h)
 
+include hymul in
 /-- Pulling a model of the family's image table back along the family
 produces a model of the original table. -/
 noncomputable def familyPullbackModel {ε : ℝ}
@@ -91,6 +95,7 @@ noncomputable def familyPullbackModel {ε : ℝ}
     exact M.separated (y g) (y_mem_familyTestSet F y hg)
       (y h) (y_mem_familyTestSet F y hh) (hysep g hg h hh hne)
 
+include y hymul hysep in
 /-- A group carrying a multiplicative separated family over a table with
 no accurate models is itself not sofic. -/
 theorem not_isSofic_of_family {ε : ℝ} (hε : 0 < ε)
@@ -152,7 +157,7 @@ theorem exists_kazhdan_finitelyPresented_nonsofic_cover
   classical
   obtain ⟨F, ε, -, hε, hbad⟩ := exists_table_obstruction hns
   obtain ⟨S, -, -, hgen⟩ :=
-    KazhdanFiniteGeneration.exists_symmetric_generating_finset hT
+    KazhdanFiniteGeneration.exists_symmetric_generating_finset G hT
   obtain ⟨m, relsP, θ, hθsurj, hθT⟩ :=
     Shalom.exists_presented_kazhdan_cover S hgen hT
   set θhat : FreeGroup (Fin m) →* G :=
@@ -164,9 +169,11 @@ theorem exists_kazhdan_finitelyPresented_nonsofic_cover
   have hlift : ∀ g : G, θhat (yhat g) = g := by
     intro g
     by_cases hg : g = 1
-    · rw [hyhat]
-      simp only [hg, if_pos rfl]
-      rw [map_one]
+    · subst hg
+      have h1 : yhat 1 = 1 := by
+        rw [hyhat]
+        simp
+      rw [h1, map_one]
     · rw [hyhat]
       simp only [if_neg hg]
       exact Function.surjInv_eq hθhatsurj g
