@@ -1242,7 +1242,7 @@ summed over the alphabet.  Every coarse `B`-character is charged through
 the forward shear of its canonical least leading generator; the fibers of
 distinct coarse characters are disjoint, and the descent classification
 places every receiving fine character in region `A` or `D`. -/
-theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
+theorem sum_planeMass_B_le_sum_fine (hψ : ψ ≠ 1) (z : E) :
     ∑ χ ∈ Finset.univ.filter
         (fun χ : Module.Dual K (PlaneVector X K (n + 1)) ↦
           pairRegion X K (firstCoordinateChar X K (n + 1) χ)
@@ -1260,13 +1260,13 @@ theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
     (fun χ : Module.Dual K (PlaneVector X K (n + 1)) ↦
       pairRegion X K (firstCoordinateChar X K (n + 1) χ)
         (secondCoordinateChar X K (n + 1) χ) = .B) with hB
-  set sel : Module.Dual K (PlaneVector X K (n + 1)) → X := fun χ ↦
+  set selIdx : Module.Dual K (PlaneVector X K (n + 1)) →
+      Fin (Fintype.card X + 1) := fun χ ↦
     if h : leastLeadingGeneratorIndex X K
         (firstCoordinateChar X K (n + 1) χ) < Fintype.card X then
-      generatorEnumeration X
-        ⟨leastLeadingGeneratorIndex X K
-          (firstCoordinateChar X K (n + 1) χ), h⟩
-    else Classical.arbitrary X with hsel
+      ⟨leastLeadingGeneratorIndex X K
+        (firstCoordinateChar X K (n + 1) χ), Nat.lt_succ_of_lt h⟩
+    else Fin.last (Fintype.card X) with hselIdx
   have hleadset : ∀ χ ∈ B,
       (leadingGeneratorIndexSet X K
         (firstCoordinateChar X K (n + 1) χ)).Nonempty := by
@@ -1286,12 +1286,46 @@ theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
     omega
   have hpartition : (∑ χ ∈ B,
       planeMass X K i j k hik hjk (n + 1) rho ψ χ z) =
-    ∑ x : X, ∑ χ ∈ B.filter (fun χ ↦ sel χ = x),
-      planeMass X K i j k hik hjk (n + 1) rho ψ χ z :=
-    (Finset.sum_fiberwise B sel _).symm
-  rw [hpartition]
-  refine Finset.sum_le_sum fun x _ ↦ ?_
-  set Bx := B.filter (fun χ ↦ sel χ = x) with hBx
+    ∑ q : Fin (Fintype.card X + 1),
+      ∑ χ ∈ B.filter (fun χ ↦ selIdx χ = q),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ z :=
+    (Finset.sum_fiberwise B selIdx _).symm
+  rw [hpartition, Fin.sum_univ_castSucc]
+  have hlast : B.filter
+      (fun χ ↦ selIdx χ = Fin.last (Fintype.card X)) = ∅ := by
+    rw [Finset.filter_eq_empty_iff]
+    intro χ hχ
+    have hlt := leastLeadingGeneratorIndex_lt_card X K
+      (firstCoordinateChar X K (n + 1) χ) (hleadset χ hχ)
+    rw [hselIdx]
+    beta_reduce
+    rw [dif_pos hlt]
+    intro hcontra
+    have := congrArg Fin.val hcontra
+    simp only [Fin.val_last] at this
+    omega
+  rw [hlast, Finset.sum_empty, add_zero]
+  rw [show (∑ x : X, ∑ χ' ∈ Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+        pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+          (secondCoordinateChar X K (n + 2) χ') = .A ∨
+        pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+          (secondCoordinateChar X K (n + 2) χ') = .D),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ'
+        (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z)) =
+    ∑ q : Fin (Fintype.card X), ∑ χ' ∈ Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
+        pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+          (secondCoordinateChar X K (n + 2) χ') = .A ∨
+        pairRegion X K (firstCoordinateChar X K (n + 2) χ')
+          (secondCoordinateChar X K (n + 2) χ') = .D),
+      planeMass X K i j k hik hjk (n + 2) rho ψ χ'
+        (rho (elementaryRoot i j hij
+          (FreeAlgebra.ι K (generatorEnumeration X q))) z) from
+    (Fintype.sum_equiv (generatorEnumeration X) _ _ fun q ↦ rfl).symm]
+  refine Finset.sum_le_sum fun q _ ↦ ?_
+  set x := generatorEnumeration X q with hx
+  set Bx := B.filter (fun χ ↦ selIdx χ = q.castSucc) with hBx
   have htransport : (∑ χ ∈ Bx,
       planeMass X K i j k hik hjk (n + 1) rho ψ χ z) =
     ∑ χ ∈ Bx, ∑ χ' ∈ Finset.univ.filter
@@ -1303,7 +1337,8 @@ theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
     exact planeMass_eq_sum_fiber_forwardShear X K i j k hij hik hjk
       (n + 1) rho ψ hψ x z χ
   rw [htransport]
-  have hdisj : (Bx : Set (Module.Dual K (PlaneVector X K (n + 1)))).PairwiseDisjoint
+  have hdisj : (Bx : Set (Module.Dual K
+      (PlaneVector X K (n + 1)))).PairwiseDisjoint
       (fun χ ↦ Finset.univ.filter
         (fun χ' : Module.Dual K (PlaneVector X K (n + 2)) ↦
           χ'.comp (forwardShear X K (n + 1) x) = χ)) := by
@@ -1329,7 +1364,6 @@ theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
         (χ'.comp (forwardShear X K (n + 1) x))) = .B := by
     rw [hfib]
     exact hχB'.2
-  -- the selector realizes exact descent on the fine first functional
   have hfirstid : firstCoordinateChar X K (n + 1) χ =
       restrictSucc X K (firstCoordinateChar X K (n + 2) χ') := by
     rw [← hfib]
@@ -1347,19 +1381,19 @@ theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
       (firstCoordinateChar X K (n + 2) χ')
     rw [← hfirstid] at hmin
     omega
-  have hsetseq : leadingGeneratorIndexSet X K
-      (firstCoordinateChar X K (n + 1) χ) =
-    leadingGeneratorIndexSet X K
-      (firstCoordinateChar X K (n + 2) χ') := by
-    rw [hfirstid]
-    exact leadingGeneratorIndexSet_restrictSucc X K
-      (firstCoordinateChar X K (n + 2) χ') (by omega)
   have hleasteq : leastLeadingGeneratorIndex X K
       (firstCoordinateChar X K (n + 1) χ) =
     leastLeadingGeneratorIndex X K
       (firstCoordinateChar X K (n + 2) χ') := by
     rw [hfirstid]
     exact leastLeadingGeneratorIndex_restrictSucc X K
+      (firstCoordinateChar X K (n + 2) χ') (by omega)
+  have hsetseq : leadingGeneratorIndexSet X K
+      (firstCoordinateChar X K (n + 1) χ) =
+    leadingGeneratorIndexSet X K
+      (firstCoordinateChar X K (n + 2) χ') := by
+    rw [hfirstid]
+    exact leadingGeneratorIndexSet_restrictSucc X K
       (firstCoordinateChar X K (n + 2) χ') (by omega)
   have hne : (leadingGeneratorIndexSet X K
       (firstCoordinateChar X K (n + 2) χ')).Nonempty := by
@@ -1369,15 +1403,27 @@ theorem sum_planeMass_B_le_sum_fine [Nonempty X] (hψ : ψ ≠ 1) (z : E) :
       (firstCoordinateChar X K (n + 1) χ) < Fintype.card X := by
     rw [hleasteq]
     exact leastLeadingGeneratorIndex_lt_card X K _ hne
+  have hidx : leastLeadingGeneratorIndex X K
+      (firstCoordinateChar X K (n + 1) χ) = (q : ℕ) := by
+    have := hχsel
+    rw [hselIdx] at this
+    beta_reduce at this
+    rw [dif_pos hltcard] at this
+    have hval := congrArg Fin.val this
+    simpa using hval
+  have hqfin : q = (⟨leastLeadingGeneratorIndex X K
+      (firstCoordinateChar X K (n + 2) χ'),
+      leastLeadingGeneratorIndex_lt_card X K _ hne⟩ :
+        Fin (Fintype.card X)) := by
+    apply Fin.ext
+    show (q : ℕ) = leastLeadingGeneratorIndex X K
+      (firstCoordinateChar X K (n + 2) χ')
+    omega
   have hxval : x = generatorEnumeration X
       ⟨leastLeadingGeneratorIndex X K
         (firstCoordinateChar X K (n + 2) χ'),
         leastLeadingGeneratorIndex_lt_card X K _ hne⟩ := by
-    rw [← hχsel, hsel]
-    beta_reduce
-    rw [dif_pos hltcard]
-    congr 1
-    exact Fin.ext hleasteq
+    rw [hx, hqfin]
   have hlead : valuation X K
       (leftDerived X K (firstCoordinateChar X K (n + 2) χ') x) + 1 =
     valuation X K (firstCoordinateChar X K (n + 2) χ') := by
