@@ -1,8 +1,10 @@
 # NonsoficGroupsExist
 
 This repository contains an unconditional Lean proof that a finitely
-presented nonsofic group exists. The proof constructs a concrete nonsofic
-rank-four elementary group and then applies the finite-table cover theorem.
+presented nonsofic group exists. The initial nonsofic group is now the
+rank-four elementary group over the actual universal binary Leavitt algebra
+`L_{𝔽₂}(1,2)`, defined as the quotient by its five displayed relations. The
+proof then applies the finite-table cover theorem.
 
 The proof establishes the dependencies in their required mathematical
 generality. In particular, the Kun dependency is the one-way theorem for
@@ -15,9 +17,36 @@ theorems must construct all property-`(T)`, compression, non-LEF, Kun, and
 Kun--Thom inputs internally; none may remain an explicit argument, implicit
 instance, bundled field, or `Nonempty` premise.
 
-The mathematical dependency chain is closed. The remaining unchecked items
-below are whole-project build and final source-audit checks, not missing
-mathematical premises.
+The premise-free existence dependency chain is closed. Work is continuing on
+the stronger objective of formalizing every result in
+`nonsofic_groups_exist.tex` at its stated generality. Unchecked items in the
+first checklist below are genuine manuscript-scope results not yet in Lean.
+
+## Full manuscript scope
+
+- [x] Define the universal algebra `L_{𝔽₂}(1,2)` as the presented quotient
+- [x] Prove the universal quotient is nontrivial using its stream representation
+- [x] Instantiate the full compression construction directly over the universal quotient
+- [x] Prove `EL₄(L_{𝔽₂}(1,2))` is nonsofic and has property `(T)`
+- [ ] Generalize Theorem A to `EL_{m+1}(L_{𝔽₂}(1,2))` for every `m ≥ 3`
+- [ ] Define `L_k(1,2)` uniformly for every finite field `k`
+- [ ] Formalize the arbitrary finite-leaf self-similarity isomorphisms
+  `M_r(L_k(1,2)) ≃ L_k(1,2)` for every `r ≥ 1`
+- [ ] Prove the rank-two compression theorem and nonsoficity of `EL₂`
+- [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required ranks
+- [ ] Deduce the unit-group and all-ranks panorama of Theorem B
+- [x] Prove every finitely generated nonsofic group has a finitely presented
+  nonsofic cover
+- [ ] Formalize Shalom's property-`(T)` finitely presented cover theorem
+- [ ] Prove the property-`(T)` refinement and quotient claims of Theorem C
+- [ ] Define Thompson's group `V` and identify the manuscript's tree-table
+  and corner copies with it (the existence proof currently uses a stronger
+  direct finite obstruction instead)
+- [ ] State and prove the exact bounded-degree form of the expander
+  decomposition exported in the manuscript
+- [ ] Align every TeX theorem and verification claim with its exact Lean declaration
+- [ ] Re-run the complete MSI build and final axiom/source audit after all
+  manuscript-scope additions
 
 ## Proof status
 
@@ -28,9 +57,9 @@ unchecked boxes are repository-level verification tasks.
 - [x] Standard finite Hamming approximation and soficity infrastructure
 - [x] LEF definitions and the finite non-LEF obstruction
 - [x] Explicit cylinder-transposition non-LEF subgroup
-- [x] Injective embedding of that subgroup into the concrete `EL₃` core
-- [x] Concrete rank-four compression maps and compressor identities
-- [x] Closed `ConcreteRankFour.compressionSetup`
+- [x] Injective embedding of that subgroup into the universal-Leavitt `EL₃` core
+- [x] Universal rank-four compression maps and compressor identities
+- [x] Closed `UniversalRankFour.compressionSetup`
 - [x] Finite-table theorem turning a finitely generated nonsofic group into a
   finitely presented nonsofic cover
 - [x] GNS/Kazhdan finite-model contraction and rounding infrastructure
@@ -158,20 +187,20 @@ unchecked boxes are repository-level verification tasks.
   mass and complete the uniform relative-property-`(T)` estimate
 - [x] Prove property `(T)` for elementary rank three over every finite-rank
   free characteristic-two algebra, using an explicit finite Kazhdan set
-- [x] Transfer/instantiate property `(T)` for every concrete group used by the
+- [x] Transfer/instantiate property `(T)` for every universal-Leavitt group used by the
   compression argument
 - [x] Close the exact full-sequence Kun expander-decomposition theorem used at the final
   criterion boundary
 - [x] Close the exact Kun--Thom centralizer/LEF implication used at the final
   criterion boundary
-- [x] Assemble an unconditional concrete nonsofic group with no setup,
+- [x] Assemble an unconditional universal-Leavitt nonsofic group with no setup,
   literature theorem, property-(T), or non-LEF premise
 - [x] Instantiate the finite-table cover to obtain an unconditional finitely
   presented nonsofic group
 - [x] Add the two unconditional public headline declarations
-- [x] Run the complete `lake build`
-- [x] Audit the closed headline signatures and run `#print axioms`
-- [x] Search for and eliminate forbidden trust bypasses, stale
+- [x] Run the complete `lake build` for the premise-free existence baseline
+- [x] Audit the baseline closed headline signatures and run `#print axioms`
+- [x] Search the baseline for and eliminate forbidden trust bypasses, stale
   conditional wrappers, dead code, and misleading documentation
 
 The final two declarations have exactly these premise-free mathematical
@@ -187,27 +216,31 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The complete remote build reports `Build completed successfully (3246
-jobs).` The transitive axiom reports for both headline theorems are exactly
+The current complete MSI build reports `Build completed successfully (3249
+jobs).` The transitive axiom reports for both headline theorems and for
+`universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
 unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface.
+proposition interface. The whole-namespace kernel audit traverses 5,246
+project declarations and reports no disallowed axiom. This build and audit are
+the current universal-quotient integration checkpoint; both will be rerun after
+each later manuscript-scope checkpoint.
 
 ## What is already formalized
 
 What is kernel-checked includes finite Hamming/sofic bookkeeping, localization,
-finite-table covers, a represented algebra satisfying the binary Leavitt
-relations, elementary-matrix embeddings and compression maps, and a genuine
+finite-table covers, the universal binary Leavitt quotient and its canonical
+family, elementary-matrix embeddings and compression maps, and a genuine
 two-generator non-LEF subgroup built from cylinder transpositions.  That
-subgroup is embedded injectively into the concrete `EL₃` core by explicit
+subgroup is embedded injectively into the universal-Leavitt `EL₃` core by explicit
 commutator and Whitehead identities.  The rank-four compressor words satisfy
 the required conjugacy identities, generate the ambient `EL₄` together with
 the core, and have the required centralization and trivial-intersection
-properties.  `ConcreteRankFour.compressionSetup` assembles these facts into a
-closed concrete algebraic setup.
+properties. `UniversalRankFour.compressionSetup` assembles these facts into a
+closed algebraic setup.
 
 The analytic development also constructs the GNS Hilbert space of every
 limiting sofic correlation, proves the iterated Kazhdan contraction there,
@@ -237,18 +270,17 @@ exact Kun expander decomposition and Kun--Thom implication are
 now proved and compiled. The finite-stage Fourier argument has also been
 passed to the exhaustive free-root plane and yields an explicit finite
 Kazhdan pair for elementary rank three over every finite-rank free
-characteristic-two algebra. Entrywise evaluation along the proved surjection
-from the free algebra to the represented coefficient algebra transfers this
-property to the concrete `EL₃` core, and the explicit Leavitt rank equivalence
-transfers it to the concrete `EL₄` ambient group. The represented
-stream-operator algebra is not
-identified with the universal Leavitt algebra, and the non-LEF witness is not
-identified with Thompson's group `V`; neither identification is used by the
-concrete compression setup.
+characteristic-two algebra. The universal quotient map from the free algebra
+transfers this property to the universal-Leavitt `EL₃` core, and the explicit
+Leavitt rank equivalence transfers it to the `EL₄` ambient group. The stream
+representation is used only to prove that the presented quotient is
+nontrivial. The non-LEF witness is not yet identified with Thompson's group
+`V`; the closed existence proof instead uses its directly proved finite
+obstruction.
 
 `TableCover` proves that a finitely generated nonsofic group has a finitely
-presented nonsofic cover. `MainResults` instantiates it with the concrete
-rank-four group proved nonsofic by the closed compression criterion.
+presented nonsofic cover. `MainResults` instantiates it with
+`EL₄(L_{𝔽₂}(1,2))`, proved nonsofic by the closed compression criterion.
 
 ## Literature audit: Kun's spectral characterization
 

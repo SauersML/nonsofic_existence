@@ -1,19 +1,19 @@
-import NonsoficGroupsExist.ConcreteRankEquivalence
-import NonsoficGroupsExist.ConcreteRankFour
+import NonsoficGroupsExist.LeavittRankEquivalence
+import NonsoficGroupsExist.UniversalRankFour
 import NonsoficGroupsExist.FreeElementaryPropertyT
 
 /-!
-# Property `(T)` for the concrete compression groups
+# Property `(T)` for the universal Leavitt compression groups
 
-The four-generator free characteristic-two algebra surjects onto the concrete
-stream-operator algebra.  Entrywise coefficient evaluation therefore gives a
+The four-generator free characteristic-two algebra surjects onto the universal
+binary Leavitt quotient. Entrywise coefficient evaluation therefore gives a
 surjection of elementary rank-three groups.  Property `(T)` passes across this
 actual quotient, and the proved Leavitt rank equivalence transfers it from the
 rank-three core to the rank-four ambient group.
 -/
 
 namespace NonsoficGroupsExist
-namespace ConcreteRankFour
+namespace UniversalRankFour
 
 open FreeRootFiltration
 
@@ -23,29 +23,28 @@ noncomputable section
 to their characteristic-two ring instances.  Elementary matrices are indexed
 by the latter.  Fix that coherent instance path for the coefficient map. -/
 local instance freeCoefficientSemiring :
-    Semiring (FreeRootFiltration.FreeRing ConcreteLeavitt.Generator) :=
+    Semiring (FreeRootFiltration.FreeRing UniversalLeavitt.Generator) :=
   (inferInstance : Ring
-    (FreeRootFiltration.FreeRing ConcreteLeavitt.Generator)).toSemiring
+    (FreeRootFiltration.FreeRing UniversalLeavitt.Generator)).toSemiring
 
 local instance concreteCoefficientSemiring : Semiring CoefficientRing :=
   (inferInstance : Ring CoefficientRing).toSemiring
 
-/-- The concrete presentation, restated with the ring instances used by the
-elementary-matrix construction.  This is the same evaluation function, not an
-additional quotient assumption. -/
+/-- The universal quotient map, restated with the ring instances used by the
+elementary-matrix construction. -/
 noncomputable def coefficientMap :
-    FreeRootFiltration.FreeRing ConcreteLeavitt.Generator →+*
+    FreeRootFiltration.FreeRing UniversalLeavitt.Generator →+*
       CoefficientRing where
-  toFun := ConcreteLeavitt.presentation
-  map_one' := ConcreteLeavitt.presentation.map_one
-  map_mul' := ConcreteLeavitt.presentation.map_mul
-  map_zero' := ConcreteLeavitt.presentation.map_zero
-  map_add' := ConcreteLeavitt.presentation.map_add
+  toFun := UniversalLeavitt.quotientMap
+  map_one' := UniversalLeavitt.quotientMap.map_one
+  map_mul' := UniversalLeavitt.quotientMap.map_mul
+  map_zero' := UniversalLeavitt.quotientMap.map_zero
+  map_add' := UniversalLeavitt.quotientMap.map_add
 
 /-- Evaluation of the four free generators is surjective onto the represented
 coefficient algebra. -/
 theorem coefficientMap_surjective : Function.Surjective coefficientMap :=
-  ConcreteLeavitt.presentation_surjective
+  RingQuot.mkAlgHom_surjective (ZMod 2) UniversalLeavitt.Relation
 
 /-- The coefficient-evaluation map is onto the concrete elementary core. -/
 theorem freeCoreMap_surjective :
@@ -61,12 +60,12 @@ theorem core_hasKazhdanPropertyT : HasKazhdanPropertyT.{0, 0} Core := by
     (elementaryGroupMap (ι := Fin 3)
       coefficientMap) freeCoreMap_surjective
     (FreeElementaryPropertyT.freeElementary_hasKazhdanPropertyT
-      ConcreteLeavitt.Generator)
+      UniversalLeavitt.Generator)
 
 /-- The concrete rank-four ambient compression group has property `(T)`. -/
 theorem ambient_hasKazhdanPropertyT : HasKazhdanPropertyT.{0, 0} Ambient :=
   family.rankFour_propertyT_of_rankThree core_hasKazhdanPropertyT
 
 end
-end ConcreteRankFour
+end UniversalRankFour
 end NonsoficGroupsExist

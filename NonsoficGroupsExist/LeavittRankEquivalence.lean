@@ -2,7 +2,7 @@ import NonsoficGroupsExist.PrefixCode
 import NonsoficGroupsExist.Kazhdan
 
 /-!
-# Equivalence of the concrete ranks three and four
+# Leavitt equivalence of ranks three and four
 
 A binary Leavitt family gives complete prefix codes with any positive finite
 number of leaves.  The explicit three- and four-leaf codes below identify

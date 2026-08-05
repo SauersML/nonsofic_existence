@@ -35,8 +35,8 @@ example : ∃ (G : Type) (_ : Group G), ¬ IsSofic G :=
 example : ∃ (G : Type) (_ : Group G), Group.IsFinitelyPresented G ∧ ¬ IsSofic G :=
   exists_finitelyPresented_nonsofic_group
 
-example : ¬ IsSofic ConcreteRankFour.Ambient :=
-  concreteAmbient_not_isSofic
+example : ¬ IsSofic UniversalRankFour.Ambient :=
+  universalLeavittEL4_not_isSofic
 
 /-- The positive control, pinned here so that it cannot be deleted while the
 negative results remain.  Every other occurrence of `IsSofic` in the library is
@@ -64,7 +64,7 @@ that a CI log records exactly what each headline theorem rests on. -/
 def headlineTheorems : List Name :=
   [``nonsofic_groups_exist,
    ``exists_finitelyPresented_nonsofic_group,
-   ``concreteAmbient_not_isSofic]
+   ``universalLeavittEL4_not_isSofic]
 
 /-- Every declaration of this development, taken from the environment rather
 than from a hand-maintained list, so that a new module cannot escape the
@@ -73,11 +73,15 @@ def projectDeclarations (env : Environment) : Array Name :=
   env.constants.fold (init := #[]) fun acc n _ =>
     if (`NonsoficGroupsExist).isPrefixOf n then acc.push n else acc
 
-/-- Axioms reachable from `roots`, sharing one `visited` set across all of
-them so that the whole-namespace sweep stays a single traversal. -/
-def axiomClosure (env : Environment) (roots : Array Name) : Array Name :=
-  let (_, s) := ((roots.forM CollectAxioms.collect).run env).run {}
-  s.axioms
+/-- The union of the transitive axiom closures of `roots`. -/
+def axiomClosure (roots : Array Name) : CommandElabM (Array Name) := do
+  let mut result := #[]
+  for n in roots do
+    let axioms ← collectAxioms n
+    for a in axioms do
+      unless result.contains a do
+        result := result.push a
+  return result
 
 def disallowed (axioms : Array Name) : Array Name :=
   axioms.filter fun a => !allowedAxioms.contains a
@@ -98,7 +102,8 @@ run_cmd do
   if decls.size < 100 then
     throwError "only {decls.size} declarations found in the `NonsoficGroupsExist` \
 namespace; the audit is not seeing the library"
-  let bad := disallowed (axiomClosure env decls)
+  let axioms ← axiomClosure decls
+  let bad := disallowed axioms
   unless bad.isEmpty do
     throwError "the `NonsoficGroupsExist` namespace depends on disallowed \
 axioms: {bad.toList}"

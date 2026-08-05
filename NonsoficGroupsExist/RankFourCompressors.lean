@@ -14,7 +14,7 @@ that conjugation by either compressor word implements `compressionEnd` on the
 embedded core.  They also prove that the two words together with the core
 generate the ambient elementary group.  The complementary non-LEF subgroup is
 specific to the stream-operator coefficient ring and is supplied in
-`ConcreteRankFour`; `ConcreteCompressionSetup` combines both parts.
+`UniversalRankFour`; `UniversalCompressionSetup` combines both parts.
 -/
 
 namespace NonsoficGroupsExist

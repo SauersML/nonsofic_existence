@@ -122,7 +122,7 @@ import NonsoficGroupsExist.ConservativeMatching
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.ConcreteLeavitt
-import NonsoficGroupsExist.ConcreteRankEquivalence
+import NonsoficGroupsExist.LeavittRankEquivalence
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittMatrixCompression
@@ -141,9 +141,10 @@ import NonsoficGroupsExist.ElementaryGroup
 import NonsoficGroupsExist.ElementaryRoots
 import NonsoficGroupsExist.ElementaryStabilization
 import NonsoficGroupsExist.RankFourCompressors
-import NonsoficGroupsExist.ConcreteRankFour
-import NonsoficGroupsExist.ConcretePropertyT
-import NonsoficGroupsExist.ConcreteCompressionSetup
+import NonsoficGroupsExist.UniversalLeavitt
+import NonsoficGroupsExist.UniversalRankFour
+import NonsoficGroupsExist.UniversalPropertyT
+import NonsoficGroupsExist.UniversalCompressionSetup
 import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
@@ -164,22 +165,24 @@ conditional implication as an existence theorem.  The uninstantiated
 specifications for intermediate mathematics, not proofs merely by being
 inhabited in conditional lemmas.  The exact full-sequence Kun decomposition
 and Kun--Thom implication are now proved, as are property `(T)` for the
-concrete rank-three core and rank-four ambient group. `MainResults` assembles
+universal-Leavitt rank-three core and rank-four ambient group. `MainResults` assembles
 them through the local criterion. Likewise,
-`ConcreteRankFour.compressionSetup` is an actual inhabitant of the algebraic
+`UniversalRankFour.compressionSetup` is an actual inhabitant of the algebraic
 `CompressionSetup` interface.
 
-The concrete stream-operator algebra proves the binary Leavitt relations but
-has not been identified with the universal Leavitt algebra.  The two explicit
+The coefficient ring used by the headline group is now the actual universal
+binary Leavitt algebra, defined as the presented quotient of the free algebra.
+Its stream-operator representation proves that quotient nontrivial; no
+faithfulness claim is needed. The two explicit
 cylinder units prove a genuine finite non-LEF obstruction for their generated
 corner subgroup; the development does not identify that subgroup with
 Thompson's group `V`.  Their generated subgroup is now embedded in `EL₃` by
 explicit cylinder-commutator and Whitehead identities.  The rank-four module
 also proves compressor conjugation, ambient generation, centralization, and
-trivial intersection, and `ConcreteRankFour.compressionSetup` constructs the
+trivial intersection, and `UniversalRankFour.compressionSetup` constructs the
 complete algebraic setup rather than accepting it from a caller.
 
-`MainResults.concreteAmbient_not_isSofic` supplies the initial concrete
+`MainResults.universalLeavittEL4_not_isSofic` supplies the initial
 nonsofic group. `TableCover` then constructs its finitely presented nonsofic
 cover, yielding the two premise-free public headline theorems in
 `MainResults`.

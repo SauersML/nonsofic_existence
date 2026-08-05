@@ -34,10 +34,10 @@ outright, not a definition that is accidentally too strong on infinite groups.
 namespace NonsoficGroupsExist
 
 /-- A finite group, viewed as a permutation model of itself. -/
-def regularModel (G : Type) [Fintype G] [DecidableEq G] : FiniteModel :=
+abbrev regularModel (G : Type) [Group G] [Fintype G] [DecidableEq G] : FiniteModel :=
   ⟨G, inferInstance, inferInstance⟩
 
-@[simp] theorem regularModel_carrier (G : Type) [Fintype G] [DecidableEq G] :
+@[simp] theorem regularModel_carrier (G : Type) [Group G] [Fintype G] [DecidableEq G] :
     (regularModel G).carrier = G := rfl
 
 /-- The left regular representation is an exact homomorphism, so the model is
@@ -45,13 +45,14 @@ multiplicative with error `0` rather than merely `ε`. -/
 theorem mulLeft_mul (G : Type) [Group G] (g h : G) :
     (Equiv.mulLeft (g * h) : Equiv.Perm G) = Equiv.mulLeft g * Equiv.mulLeft h := by
   ext x
-  simp [Equiv.Perm.mul_apply, mul_assoc]
+  simp [Equiv.Perm.mul_apply]
 
 /-- Left translation by distinct elements disagrees *everywhere*: the model
 separates with error `0` rather than merely `1 - ε`. -/
 theorem hammingDistance_mulLeft (G : Type) [Group G] [Fintype G] [DecidableEq G]
     {g h : G} (hgh : g ≠ h) :
-    hammingDistance (regularModel G) (Equiv.mulLeft g) (Equiv.mulLeft h) = 1 := by
+    hammingDistance (regularModel G) (Equiv.mulLeft g : Equiv.Perm G)
+      (Equiv.mulLeft h : Equiv.Perm G) = 1 := by
   have hpos : 0 < Fintype.card G := Fintype.card_pos_iff.mpr ⟨1⟩
   have hcard : (Fintype.card G : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hpos.ne'
   have hfilter :
@@ -62,7 +63,12 @@ theorem hammingDistance_mulLeft (G : Type) [Group G] [Fintype G] [DecidableEq G]
     simp only [Equiv.coe_mulLeft, ne_eq]
     intro hy
     exact hgh (mul_right_cancel hy)
-  rw [hammingDistance, hfilter, Finset.card_univ]
+  unfold hammingDistance
+  change
+    ((Finset.univ.filter fun y : G ↦
+      (Equiv.mulLeft g) y ≠ (Equiv.mulLeft h) y).card : ℝ) /
+        Fintype.card G = 1
+  rw [hfilter, Finset.card_univ]
   exact div_self hcard
 
 /-- **Positive control.**  Every finite group is sofic, witnessed by its own
@@ -84,10 +90,6 @@ theorem isSofic_of_fintype (G : Type) [Group G] [Fintype G] [DecidableEq G] :
     exact hε.le
   · intro g _ h _ hgh
     rw [hammingDistance_mulLeft G hgh]
-    linarith
-
-/-- The trivial group is sofic, as the smallest instance of the control. -/
-theorem isSofic_punit : IsSofic PUnit :=
-  isSofic_of_fintype PUnit
+    exact sub_le_self 1 hε.le
 
 end NonsoficGroupsExist

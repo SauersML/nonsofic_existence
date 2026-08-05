@@ -1,8 +1,8 @@
 import NonsoficGroupsExist.CompressionSetup
-import NonsoficGroupsExist.ConcreteRankFour
+import NonsoficGroupsExist.UniversalRankFour
 
 /-!
-# The constructed rank-four compression setup
+# The universal Leavitt rank-four compression setup
 
 This module closes the algebraic specification consumed by the local matching
 argument.  Every field is instantiated by the concrete stream-operator
@@ -10,7 +10,7 @@ algebra, the explicit rank-four compressor words, and the cylinder witness.
 -/
 
 namespace NonsoficGroupsExist
-namespace ConcreteRankFour
+namespace UniversalRankFour
 
 private theorem exists_core_generators :
     ∃ S : Finset Core,
@@ -85,5 +85,5 @@ noncomputable def compressionSetup : CompressionSetup Ambient Core Witness := by
         exact (compressionEnd_eq_witnessEmbedding_iff g j).mp
           (coreEmbedding_injective h') }
 
-end ConcreteRankFour
+end UniversalRankFour
 end NonsoficGroupsExist

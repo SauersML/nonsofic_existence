@@ -1,14 +1,14 @@
-import NonsoficGroupsExist.ConcreteLeavitt
+import NonsoficGroupsExist.UniversalLeavitt
 import NonsoficGroupsExist.DiagonalCornerCompression
 import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ThompsonWitness
 import Mathlib.Algebra.CharP.Algebra
 
 /-!
-# The concrete rank-four candidate group
+# The universal binary Leavitt rank-four group
 
 This module specializes the proved rank-four matrix calculations to the
-stream-operator algebra.  It constructs the coefficient ring, `EL₃` core,
+universal binary Leavitt algebra over `ZMod 2`. It constructs the coefficient ring, `EL₃` core,
 `EL₄` ambient group, finite-generation instances, infinitude instances, the
 two concrete compressor elements, and proves that the core and compressors
 generate the ambient group.  It also embeds the explicit non-LEF cylinder
@@ -17,15 +17,15 @@ trivial-intersection assertions.  Property `(T)` is not asserted here.
 -/
 
 namespace NonsoficGroupsExist
-namespace ConcreteRankFour
+namespace UniversalRankFour
 
-noncomputable abbrev CoefficientRing := ConcreteLeavitt.StreamOperatorAlgebra
+noncomputable abbrev CoefficientRing := UniversalLeavitt.BinaryLeavittAlgebra
 noncomputable abbrev Core := RankFour.Core CoefficientRing
 noncomputable abbrev Ambient := RankFour.Ambient CoefficientRing
 
-/-- The kernel-checked Leavitt family of stream operators. -/
+/-- The canonical Leavitt family in the presented universal quotient. -/
 noncomputable def family : LeavittFamily CoefficientRing :=
-  ConcreteLeavitt.family
+  UniversalLeavitt.family
 
 /-- The concrete two-generated subgroup carrying the finite non-LEF
 obstruction. -/
@@ -220,5 +220,5 @@ theorem core_compressors_generate :
 theorem witness_not_isLEF : ¬ IsLEF Witness :=
   family.not_isLEF_cornerWitnessSubgroup
 
-end ConcreteRankFour
+end UniversalRankFour
 end NonsoficGroupsExist
