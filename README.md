@@ -240,11 +240,16 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     of Bekka–de la Harpe–Valette Lemma 3.2.5, discrete case:
     `exists_displacement_one_of_almost_invariant` produces a
     displacement-one vector whose `M`-neighbourhood has displacement
-    above one half) are drafted and committed, pending cluster
-    verification (cluster access currently blocked on reauthentication).
-    Remaining: Gaussian-kernel positive-definiteness via the Schur
-    product theorem (`Matrix.PosSemidef.hadamard`), the Delorme
-    direction, and the Shalom assembly
+    above one half), `GaussianPositiveDefinite` (Gaussian kernels along
+    a cocycle are positive-definite, via the Schur product theorem
+    `Matrix.PosSemidef.hadamard` and the exponential series), and
+    `DelormeFixedPoint` (Delorme's theorem: under a Kazhdan pair every
+    isometric cocycle is bounded — the GNS cyclic vector of the small-`t`
+    Gaussian has small moving component, bounding the Gaussian below by
+    `1/2` uniformly — and the bounded orbit has a fixed circumcenter,
+    `exists_fixed_point_of_hasKazhdanPropertyT`) are drafted and
+    committed, pending cluster verification (cluster access currently
+    blocked on reauthentication).  Remaining: the Shalom assembly
   - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
     property-`(T)` refinement and quotient claims of Theorem C
   - [ ] C4. Audit
