@@ -1434,6 +1434,391 @@ theorem sum_planeMass_B_le_sum_fine (hψ : ψ ≠ 1) (z : E) :
   · exact Finset.mem_filter.2 ⟨Finset.mem_univ _, Or.inl hA⟩
   · exact Finset.mem_filter.2 ⟨Finset.mem_univ _, Or.inr hD⟩
 
+
+/-! ### The stage inclusion, nested trivial masses, and the boundary layer -/
+
+open FreeRootFunctionalValuation in
+/-- The stage inclusion on plane vectors. -/
+noncomputable def planeStageInclusion :
+    PlaneVector X K n →ₗ[K] PlaneVector X K (n + 1) :=
+  LinearMap.prod
+    ((stageInclusion X K n).comp (LinearMap.fst K _ _))
+    ((stageInclusion X K n).comp (LinearMap.snd K _ _))
+
+omit [Fintype K] in
+/-- Plane points are unchanged by the stage inclusion. -/
+theorem planePoint_planeStageInclusion (v : PlaneVector X K n) :
+    planePoint X K i j k hik hjk (n + 1)
+        (planeStageInclusion X K n v) =
+      planePoint X K i j k hik hjk n v := rfl
+
+omit [Fintype K] in
+/-- The first coordinate of a stage-included character is the restriction
+of its first coordinate. -/
+theorem firstCoordinateChar_comp_planeStageInclusion
+    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
+    firstCoordinateChar X K n
+        (χ'.comp (planeStageInclusion X K n)) =
+      FreeRootFunctionalValuation.restrictSucc X K
+        (firstCoordinateChar X K (n + 1) χ') := rfl
+
+omit [Fintype K] in
+/-- The second coordinate of a stage-included character is the restriction
+of its second coordinate. -/
+theorem secondCoordinateChar_comp_planeStageInclusion
+    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
+    secondCoordinateChar X K n
+        (χ'.comp (planeStageInclusion X K n)) =
+      FreeRootFunctionalValuation.restrictSucc X K
+        (secondCoordinateChar X K (n + 1) χ') := rfl
+
+open Classical in
+/-- **Nested mass transport**: the stage-`n` plane mass of `z` at a coarse
+character is the total stage-`n+1` plane mass of the same vector over the
+dual stage-inclusion fiber.  No conjugation is involved: the stage-`n`
+plane is a subgroup of the stage-`n+1` plane. -/
+theorem planeMass_eq_sum_fiber_stageInclusion (hψ : ψ ≠ 1) (z : E)
+    (χ : Module.Dual K (PlaneVector X K n)) :
+    planeMass X K i j k hik hjk n rho ψ χ z =
+      ∑ χ' ∈ Finset.univ.filter
+          (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            χ'.comp (planeStageInclusion X K n) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' z := by
+  calc
+    planeMass X K i j k hik hjk n rho ψ χ z =
+        CharacterMass.mass ψ
+          (fun v ↦ planeAction X K i j k hik hjk (n + 1) rho
+            (planeStageInclusion X K n v)) χ z := rfl
+    _ = ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+      (CharacterMass.sum_mass_fiber_comp ψ _
+        (planeAction_add X K i j k hik hjk (n + 1) rho) hψ
+        (planeStageInclusion X K n) z χ).symm
+
+open Classical in
+/-- The total mass of the characters trivial on the first coordinate. -/
+noncomputable def firstTrivialMass (z : E) : ℝ :=
+  ∑ χ ∈ Finset.univ.filter
+      (fun χ : Module.Dual K (PlaneVector X K n) ↦
+        firstCoordinateChar X K n χ = 0),
+    planeMass X K i j k hik hjk n rho ψ χ z
+
+open Classical in
+/-- The total mass of the characters trivial on the second coordinate. -/
+noncomputable def secondTrivialMass (z : E) : ℝ :=
+  ∑ χ ∈ Finset.univ.filter
+      (fun χ : Module.Dual K (PlaneVector X K n) ↦
+        secondCoordinateChar X K n χ = 0),
+    planeMass X K i j k hik hjk n rho ψ χ z
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- The total mass of the characters whose first coordinate is detected
+exactly in the top degree of the stage. -/
+noncomputable def firstBoundaryMass (z : E) : ℝ :=
+  ∑ χ ∈ Finset.univ.filter
+      (fun χ : Module.Dual K (PlaneVector X K n) ↦
+        valuation X K (firstCoordinateChar X K n χ) = n),
+    planeMass X K i j k hik hjk n rho ψ χ z
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- The total mass of the characters whose second coordinate is detected
+exactly in the top degree of the stage. -/
+noncomputable def secondBoundaryMass (z : E) : ℝ :=
+  ∑ χ ∈ Finset.univ.filter
+      (fun χ : Module.Dual K (PlaneVector X K n) ↦
+        valuation X K (secondCoordinateChar X K n χ) = n),
+    planeMass X K i j k hik hjk n rho ψ χ z
+
+theorem firstTrivialMass_nonneg (z : E) :
+    0 ≤ firstTrivialMass X K i j k hik hjk n rho ψ z :=
+  Finset.sum_nonneg fun χ _ ↦
+    planeMass_nonneg X K i j k hik hjk n rho ψ χ z
+
+theorem secondTrivialMass_nonneg (z : E) :
+    0 ≤ secondTrivialMass X K i j k hik hjk n rho ψ z :=
+  Finset.sum_nonneg fun χ _ ↦
+    planeMass_nonneg X K i j k hik hjk n rho ψ χ z
+
+theorem firstBoundaryMass_nonneg (z : E) :
+    0 ≤ firstBoundaryMass X K i j k hik hjk n rho ψ z :=
+  Finset.sum_nonneg fun χ _ ↦
+    planeMass_nonneg X K i j k hik hjk n rho ψ χ z
+
+theorem secondBoundaryMass_nonneg (z : E) :
+    0 ≤ secondBoundaryMass X K i j k hik hjk n rho ψ z :=
+  Finset.sum_nonneg fun χ _ ↦
+    planeMass_nonneg X K i j k hik hjk n rho ψ χ z
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The first-coordinate telescoping identity**: the trivial mass at one
+stage splits exactly into the next trivial mass plus the boundary-layer
+mass newly detected in the top degree. -/
+theorem firstTrivialMass_eq_add_boundary (hψ : ψ ≠ 1) (z : E) :
+    firstTrivialMass X K i j k hik hjk n rho ψ z =
+      firstTrivialMass X K i j k hik hjk (n + 1) rho ψ z +
+        firstBoundaryMass X K i j k hik hjk (n + 1) rho ψ z := by
+  set T := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      firstCoordinateChar X K n χ = 0) with hT
+  have h1 : firstTrivialMass X K i j k hik hjk n rho ψ z =
+      ∑ χ ∈ T, ∑ χ' ∈ Finset.univ.filter
+          (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            χ'.comp (planeStageInclusion X K n) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+    Finset.sum_congr rfl fun χ _ ↦
+      planeMass_eq_sum_fiber_stageInclusion X K i j k hik hjk n rho ψ
+        hψ z χ
+  have hdisj : (T : Set (Module.Dual K
+      (PlaneVector X K n))).PairwiseDisjoint
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ)) := by
+    intro χ₁ _ χ₂ _ hne
+    refine Finset.disjoint_left.2 fun χ' hm1 hm2 ↦ ?_
+    rw [Finset.mem_filter] at hm1 hm2
+    exact hne (hm1.2 ▸ hm2.2)
+  have h2 : T.biUnion
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ)) =
+    Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        firstCoordinateChar X K (n + 1) χ' = 0 ∨
+          valuation X K (firstCoordinateChar X K (n + 1) χ') = n + 1) := by
+    ext χ'
+    simp only [Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ,
+      true_and, hT]
+    constructor
+    · rintro ⟨χ, hχ, rfl⟩
+      have hres : restrictSucc X K
+          (firstCoordinateChar X K (n + 1) χ') = 0 := by
+        rw [← firstCoordinateChar_comp_planeStageInclusion]
+        exact hχ
+      have hval : valuation X K (restrictSucc X K
+          (firstCoordinateChar X K (n + 1) χ')) = n + 1 :=
+        (valuation_eq_succ_iff X K _).2 hres
+      have hmin := valuation_restrictSucc_eq_min X K
+        (firstCoordinateChar X K (n + 1) χ')
+      have hle := valuation_le_succ X K
+        (firstCoordinateChar X K (n + 1) χ')
+      by_cases hz : firstCoordinateChar X K (n + 1) χ' = 0
+      · exact Or.inl hz
+      · refine Or.inr ?_
+        have := valuation_le_stage_of_ne_zero X K hz
+        omega
+    · intro h
+      refine ⟨χ'.comp (planeStageInclusion X K n), ?_, rfl⟩
+      rw [firstCoordinateChar_comp_planeStageInclusion]
+      rcases h with hz | hval
+      · rw [hz]
+        rfl
+      · rw [← valuation_eq_succ_iff X K
+          (restrictSucc X K (firstCoordinateChar X K (n + 1) χ'))]
+        have hmin := valuation_restrictSucc_eq_min X K
+          (firstCoordinateChar X K (n + 1) χ')
+        omega
+  have h3 : (Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        firstCoordinateChar X K (n + 1) χ' = 0 ∨
+          valuation X K (firstCoordinateChar X K (n + 1) χ') = n + 1)) =
+    (Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        firstCoordinateChar X K (n + 1) χ' = 0)) ∪
+      Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          valuation X K (firstCoordinateChar X K (n + 1) χ') = n + 1) := by
+    ext χ'
+    simp only [Finset.mem_filter, Finset.mem_union, Finset.mem_univ,
+      true_and]
+  have h4 : Disjoint
+      (Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          firstCoordinateChar X K (n + 1) χ' = 0))
+      (Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          valuation X K (firstCoordinateChar X K (n + 1) χ') = n + 1)) := by
+    refine Finset.disjoint_left.2 fun χ' hm1 hm2 ↦ ?_
+    rw [Finset.mem_filter] at hm1 hm2
+    have := (valuation_eq_succ_iff X K
+      (firstCoordinateChar X K (n + 1) χ')).2 hm1.2
+    omega
+  rw [firstTrivialMass] at h1 ⊢
+  rw [h1, ← Finset.sum_biUnion hdisj, h2, h3, Finset.sum_union h4]
+  rfl
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **The second-coordinate telescoping identity**. -/
+theorem secondTrivialMass_eq_add_boundary (hψ : ψ ≠ 1) (z : E) :
+    secondTrivialMass X K i j k hik hjk n rho ψ z =
+      secondTrivialMass X K i j k hik hjk (n + 1) rho ψ z +
+        secondBoundaryMass X K i j k hik hjk (n + 1) rho ψ z := by
+  set T := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      secondCoordinateChar X K n χ = 0) with hT
+  have h1 : secondTrivialMass X K i j k hik hjk n rho ψ z =
+      ∑ χ ∈ T, ∑ χ' ∈ Finset.univ.filter
+          (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            χ'.comp (planeStageInclusion X K n) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+    Finset.sum_congr rfl fun χ _ ↦
+      planeMass_eq_sum_fiber_stageInclusion X K i j k hik hjk n rho ψ
+        hψ z χ
+  have hdisj : (T : Set (Module.Dual K
+      (PlaneVector X K n))).PairwiseDisjoint
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ)) := by
+    intro χ₁ _ χ₂ _ hne
+    refine Finset.disjoint_left.2 fun χ' hm1 hm2 ↦ ?_
+    rw [Finset.mem_filter] at hm1 hm2
+    exact hne (hm1.2 ▸ hm2.2)
+  have h2 : T.biUnion
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ)) =
+    Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        secondCoordinateChar X K (n + 1) χ' = 0 ∨
+          valuation X K (secondCoordinateChar X K (n + 1) χ') = n + 1) := by
+    ext χ'
+    simp only [Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ,
+      true_and, hT]
+    constructor
+    · rintro ⟨χ, hχ, rfl⟩
+      have hres : restrictSucc X K
+          (secondCoordinateChar X K (n + 1) χ') = 0 := by
+        rw [← secondCoordinateChar_comp_planeStageInclusion]
+        exact hχ
+      have hval : valuation X K (restrictSucc X K
+          (secondCoordinateChar X K (n + 1) χ')) = n + 1 :=
+        (valuation_eq_succ_iff X K _).2 hres
+      have hmin := valuation_restrictSucc_eq_min X K
+        (secondCoordinateChar X K (n + 1) χ')
+      have hle := valuation_le_succ X K
+        (secondCoordinateChar X K (n + 1) χ')
+      by_cases hz : secondCoordinateChar X K (n + 1) χ' = 0
+      · exact Or.inl hz
+      · refine Or.inr ?_
+        have := valuation_le_stage_of_ne_zero X K hz
+        omega
+    · intro h
+      refine ⟨χ'.comp (planeStageInclusion X K n), ?_, rfl⟩
+      rw [secondCoordinateChar_comp_planeStageInclusion]
+      rcases h with hz | hval
+      · rw [hz]
+        rfl
+      · rw [← valuation_eq_succ_iff X K
+          (restrictSucc X K (secondCoordinateChar X K (n + 1) χ'))]
+        have hmin := valuation_restrictSucc_eq_min X K
+          (secondCoordinateChar X K (n + 1) χ')
+        omega
+  have h3 : (Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        secondCoordinateChar X K (n + 1) χ' = 0 ∨
+          valuation X K (secondCoordinateChar X K (n + 1) χ') = n + 1)) =
+    (Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        secondCoordinateChar X K (n + 1) χ' = 0)) ∪
+      Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          valuation X K (secondCoordinateChar X K (n + 1) χ') = n + 1) := by
+    ext χ'
+    simp only [Finset.mem_filter, Finset.mem_union, Finset.mem_univ,
+      true_and]
+  have h4 : Disjoint
+      (Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          secondCoordinateChar X K (n + 1) χ' = 0))
+      (Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          valuation X K (secondCoordinateChar X K (n + 1) χ') = n + 1)) := by
+    refine Finset.disjoint_left.2 fun χ' hm1 hm2 ↦ ?_
+    rw [Finset.mem_filter] at hm1 hm2
+    have := (valuation_eq_succ_iff X K
+      (secondCoordinateChar X K (n + 1) χ')).2 hm1.2
+    omega
+  rw [secondTrivialMass] at h1 ⊢
+  rw [h1, ← Finset.sum_biUnion hdisj, h2, h3, Finset.sum_union h4]
+  rfl
+
+/-- **The first boundary layer vanishes in the limit**: the nested trivial
+masses are nonincreasing and bounded, so their consecutive drops tend to
+zero. -/
+theorem tendsto_firstBoundaryMass_zero (hψ : ψ ≠ 1) (z : E) :
+    Filter.Tendsto
+      (fun m ↦ firstBoundaryMass X K i j k hik hjk (m + 1) rho ψ z)
+      Filter.atTop (nhds 0) := by
+  set T : ℕ → ℝ := fun m ↦ firstTrivialMass X K i j k hik hjk m rho ψ z
+    with hTdef
+  have hanti : Antitone T := by
+    refine antitone_nat_of_succ_le fun m ↦ ?_
+    have := firstTrivialMass_eq_add_boundary X K i j k hik hjk m rho ψ
+      hψ z
+    have hb := firstBoundaryMass_nonneg X K i j k hik hjk (m + 1) rho ψ z
+    rw [hTdef]
+    beta_reduce
+    linarith
+  have hbdd : BddBelow (Set.range T) := by
+    refine ⟨0, ?_⟩
+    rintro _ ⟨m, rfl⟩
+    exact firstTrivialMass_nonneg X K i j k hik hjk m rho ψ z
+  have hconv := tendsto_atTop_ciInf hanti hbdd
+  have hsucc : Filter.Tendsto (fun m ↦ T (m + 1)) Filter.atTop
+      (nhds (⨅ m, T m)) :=
+    (Filter.tendsto_add_atTop_iff_nat 1).2 hconv
+  have heq : (fun m ↦
+      firstBoundaryMass X K i j k hik hjk (m + 1) rho ψ z) =
+    fun m ↦ T m - T (m + 1) := by
+    funext m
+    have := firstTrivialMass_eq_add_boundary X K i j k hik hjk m rho ψ
+      hψ z
+    rw [hTdef]
+    beta_reduce
+    linarith
+  rw [heq]
+  simpa using hconv.sub hsucc
+
+/-- **The second boundary layer vanishes in the limit**. -/
+theorem tendsto_secondBoundaryMass_zero (hψ : ψ ≠ 1) (z : E) :
+    Filter.Tendsto
+      (fun m ↦ secondBoundaryMass X K i j k hik hjk (m + 1) rho ψ z)
+      Filter.atTop (nhds 0) := by
+  set T : ℕ → ℝ := fun m ↦ secondTrivialMass X K i j k hik hjk m rho ψ z
+    with hTdef
+  have hanti : Antitone T := by
+    refine antitone_nat_of_succ_le fun m ↦ ?_
+    have := secondTrivialMass_eq_add_boundary X K i j k hik hjk m rho ψ
+      hψ z
+    have hb := secondBoundaryMass_nonneg X K i j k hik hjk (m + 1) rho ψ z
+    rw [hTdef]
+    beta_reduce
+    linarith
+  have hbdd : BddBelow (Set.range T) := by
+    refine ⟨0, ?_⟩
+    rintro _ ⟨m, rfl⟩
+    exact secondTrivialMass_nonneg X K i j k hik hjk m rho ψ z
+  have hconv := tendsto_atTop_ciInf hanti hbdd
+  have hsucc : Filter.Tendsto (fun m ↦ T (m + 1)) Filter.atTop
+      (nhds (⨅ m, T m)) :=
+    (Filter.tendsto_add_atTop_iff_nat 1).2 hconv
+  have heq : (fun m ↦
+      secondBoundaryMass X K i j k hik hjk (m + 1) rho ψ z) =
+    fun m ↦ T m - T (m + 1) := by
+    funext m
+    have := secondTrivialMass_eq_add_boundary X K i j k hik hjk m rho ψ
+      hψ z
+    rw [hTdef]
+    beta_reduce
+    linarith
+  rw [heq]
+  simpa using hconv.sub hsucc
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist
