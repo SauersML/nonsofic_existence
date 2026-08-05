@@ -267,7 +267,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     `V`; here it is kernel-checked with no cited inputs: LEF passes to
     subgroups (`isLEF_of_injective`) and the finite-obstruction witness
     embeds into `V` through the faithful stream action
-  - [ ] D5. Audit
+  - [x] D5. Audit re-run: 6295 declarations, kernel closure exactly
+    `[propext, Classical.choice, Quot.sound]`, all scan budgets at
+    baseline, `thompsonV_not_isLEF` statement-pinned
 - [x] State and prove the bounded-degree form of the expander decomposition:
   the edited multigraphs carry one explicit occurrence-counting degree bound
 - [x] Align every TeX theorem and verification claim with its exact Lean
