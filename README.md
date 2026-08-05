@@ -160,9 +160,9 @@ box is still a required dependency of the final theorem.
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
-- [ ] Close the exact Kun expander-decomposition theorem used at the final
+- [x] Close the exact full-sequence Kun expander-decomposition theorem used at the final
   criterion boundary
-- [ ] Close the exact Kun--Thom centralizer/LEF implication used at the final
+- [x] Close the exact Kun--Thom centralizer/LEF implication used at the final
   criterion boundary
 - [ ] Assemble an unconditional concrete nonsofic group with no setup,
   literature theorem, property-(T), or non-LEF premise
@@ -217,15 +217,18 @@ resulting rounding theorem therefore has a fixed admissible input-cut
 threshold even as the requested boundary ratio tends to zero.  Kun's complete
 terminating finite partition recursion constructs blocks with a uniform global
 cut inequality and a linear small-boundary budget.  The development charges
-all inter-block generator edges to exceptional incidence or reference cuts and
-constructs an explicit edit witness deleting them.  It does not yet perform
-Kun's subsequent matching repair that turns the additive block inequalities
-into genuine componentwise expansion.
+all inter-block generator edges to exceptional incidence or reference cuts,
+constructs an explicit edit witness, performs the selective matching repair,
+and proves uniform componentwise expansion.  A slowly growing accuracy level
+does this on every model of the original sofic approximation; the theorem does
+not discard to a cofinal subsequence.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
-parameters. In particular, the repository currently lacks proofs of the
-required expander decomposition and Kun--Thom implication and the relevant
-property `(T)` results.  The represented stream-operator algebra is not
+parameters. The exact Kun expander decomposition and Kun--Thom implication are
+now proved and compiled; the repository still lacks the relevant concrete
+property `(T)` results and therefore cannot yet instantiate those general
+theorems at the unconditional headline boundary.  The represented
+stream-operator algebra is not
 identified with the universal Leavitt algebra, and the non-LEF witness is not
 identified with Thompson's group `V`; neither identification is used by the
 concrete compression setup.
@@ -259,15 +262,37 @@ Proposition 11 establishes condition `(2)`, and the proof of Theorem 1 needs
 only the forward combinatorial implications `(2) -> (3) -> (4)`.  The invalid
 spectral implication `(4) -> (1)` is the reverse direction.  This repository's
 required Kun dependency is therefore the one-way expander-decomposition
-result, and it must be checked from the forward partition-and-repair argument
-without appealing to the false equivalence.  The corresponding completion
-checkbox remains open above until that exact Lean dependency is compiled and
-wired into the final theorem.
+result.  The compiled Lean proof derives it from the forward property-`(T)`
+partition-and-repair argument without appealing to the false equivalence.  It
+also uses a full-sequence diagonal accuracy choice, so its conclusion applies
+to the given approximation rather than only a subsequence.
 
-The target here is the full-generality one-way theorem: for every infinite
+The proved result is the full-generality one-way theorem: for every infinite
 finitely generated property-`(T)` group, every finite symmetric generating set
 containing the identity, and every sofic approximation, construct an
 asymptotically edge-equivalent bounded-degree multigraph whose connected
-components have one uniform positive Cheeger constant.  Proving only the
-particular instances needed by the proposed nonsofic construction would not
-close this checkbox; the development is pursuing the general theorem directly.
+components have one uniform positive Cheeger constant.  The fully explicit
+headline declaration for an arbitrary generated set is
+`KunDecomposition.exists_expanderDecomposition`; the generated-set wrapper is
+`KunFixedDecomposition.expanderDecomposition`.
+
+## Literature proof gaps and compiled repairs
+
+The false spectral converse above is not the only issue in the cited proofs.
+Kun's proof of the forward expander-decomposition result normalizes a Markov
+defect in Lemma 10 without first excluding the case in which that defect is
+zero.  The Lean development splits off the zero-vector case before
+normalization and proves the homogeneous displacement estimate separately in
+`Kazhdan.lean`; the subsequent finite-model partition and graph-repair chain
+uses that total estimate.  Thus the compiled proof of Result A does not inherit
+the division-by-zero gap.
+
+The published Kun--Thom centralizer argument also constructs a general
+relation but later treats it as though it were already the graph of a
+permutation.  The Lean proof measures the row and column fibers of the improved
+relation itself, extracts its injective matching core, and completes that core
+to the genuine permutation `repairRelation`.  The theorem
+`KunThomTheorem.isLEF_of_exactProductExpansion`, and its essential-expander
+wrapper `KunThomEssential.isLEF_of_matchingCertificate`, compile without an
+assumed Kun--Thom theorem.  These are repairs of gaps in proofs of the results;
+they do not make the false spectral equivalence true.

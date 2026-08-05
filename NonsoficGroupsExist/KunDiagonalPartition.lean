@@ -1,12 +1,16 @@
 import NonsoficGroupsExist.KunFinitePartition
+import NonsoficGroupsExist.Selection
 
 /-!
-# A diagonal sequence of Kun partitions
+# A full-sequence diagonal family of Kun partitions
 
-The finite partition theorem is eventual for each requested accuracy.  We
-choose the accuracy `1/(n+1)` and reindex beyond its finite threshold.  The
-result is one sofic approximation carrying partitions whose crossing density
-actually tends to zero while retaining a uniform block cut constant.
+The finite partition theorem is eventual for each requested accuracy.  A
+slowly increasing diagonal level chooses, on every original finite model, the
+finest accuracy that is already available there.  Before the first available
+level we use the singleton partition.  Thus no subsequence or reindexing is
+needed: the resulting partitions live on the given sofic approximation,
+their crossing density tends to zero, and every block retains the same
+uniform cut constant.
 -/
 
 namespace NonsoficGroupsExist
@@ -37,34 +41,36 @@ theorem densityScale_vanishing : Vanishing densityScale := by
       exact_mod_cast Nat.add_le_add_right hn 1
     _ < η := by simpa using hk
 
-/-- A property-(T) finite-model partition sequence after a cofinal reindexing.
+/-- The singleton partition, used only on the finitely many models before the
+first quantitative property-`(T)` partition is available. -/
+noncomputable def singletonPartition (Y : FiniteModel) : BlockStructure Y where
+  block y := {y}
+  self_mem y := by simp
+  eq_of_mem x y hy := by
+    have : y = x := by simpa using hy
+    subst y
+    rfl
+
+/-- A property-`(T)` partition on every model of the original approximation.
 The partitions have negligible generator crossings and retain the same
 positive cut constant in every block. -/
-theorem exists_reindexed_partition
+theorem exists_partition
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{0, 0} G Q ε)
     (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
     (A : SoficApproximation G) :
-    ∃ (φ : ℕ → ℕ) (hφ : ∀ n, n ≤ φ n)
-      (P : ∀ n, BlockStructure ((A.reindex φ hφ).model n)),
+    ∃ P : ∀ n, BlockStructure (A.model n),
       Negligible
-        (fun n ↦ (Fintype.card ((A.reindex φ hφ).model n) : ℝ))
-        (fun n ↦ (((generatorGraph ((A.reindex φ hφ).model n) S
-          ((A.reindex φ hφ).map n)).crossingEdges (P n).block).card : ℝ)) ∧
-      ∀ n (y : (A.reindex φ hφ).model n)
-        (U : Finset ((A.reindex φ hφ).model n)),
+        (fun n ↦ (Fintype.card (A.model n) : ℝ))
+        (fun n ↦ (((generatorGraph (A.model n) S
+          (A.map n)).crossingEdges (P n).block).card : ℝ)) ∧
+      ∀ n (y : A.model n) (U : Finset (A.model n)),
         U ⊆ (P n).block y → U.Nonempty →
         2 * U.card ≤ ((P n).block y).card →
         uniformInputCutThreshold S (movementConstant S ε + 1) * U.card ≤
-          (generatorGraph ((A.reindex φ hφ).model n) S
-            ((A.reindex φ hφ).map n)).boundaryCard U := by
+          (generatorGraph (A.model n) S (A.map n)).boundaryCard U := by
   classical
-  have hstage (m : ℕ) :=
-    finiteModel_propertyT_partition_with_density hQ S hQS hone hεone A
-      (densityScale m) (densityScale m)
-      (densityScale_pos m) (densityScale_pos m)
-  let threshold : ℕ → ℕ := fun m ↦ Classical.choose (hstage m)
-  have threshold_spec (m : ℕ) : ∀ n ≥ threshold m,
-      ∃ P : BlockStructure (A.model n),
+  let Good : ℕ → ℕ → Prop := fun n m ↦
+    ∃ P : BlockStructure (A.model n),
         (((generatorGraph (A.model n) S (A.map n)).crossingEdges
             P.block).card : ℝ) ≤
           (2 * (S.card : ℝ) * densityScale m + 2 * densityScale m) *
@@ -73,55 +79,114 @@ theorem exists_reindexed_partition
           U ⊆ P.block y → U.Nonempty →
           2 * U.card ≤ (P.block y).card →
           uniformInputCutThreshold S (movementConstant S ε + 1) * U.card ≤
-            (generatorGraph (A.model n) S (A.map n)).boundaryCard U :=
-    Classical.choose_spec (hstage m)
-  let φ : ℕ → ℕ := fun m ↦ max m (threshold m)
-  have hφ : ∀ m, m ≤ φ m := fun m ↦ le_max_left _ _
-  have hchosen (m : ℕ) :
-      ∃ P : BlockStructure (A.model (φ m)),
-        (((generatorGraph (A.model (φ m)) S (A.map (φ m))).crossingEdges
-            P.block).card : ℝ) ≤
-          (2 * (S.card : ℝ) * densityScale m + 2 * densityScale m) *
-            Fintype.card (A.model (φ m)) ∧
-        ∀ y : A.model (φ m), ∀ U : Finset (A.model (φ m)),
-          U ⊆ P.block y → U.Nonempty →
-          2 * U.card ≤ (P.block y).card →
-          uniformInputCutThreshold S (movementConstant S ε + 1) * U.card ≤
-            (generatorGraph (A.model (φ m)) S (A.map (φ m))).boundaryCard U :=
-    threshold_spec m (φ m) (le_max_right _ _)
-  let P : ∀ m, BlockStructure ((A.reindex φ hφ).model m) :=
-    fun m ↦ Classical.choose (hchosen m)
-  have P_spec (m : ℕ) := Classical.choose_spec (hchosen m)
-  refine ⟨φ, hφ, P, ?_, ?_⟩
+            (generatorGraph (A.model n) S (A.map n)).boundaryCard U
+  have hGood_eventually (m : ℕ) : ∃ N, ∀ n ≥ N, Good n m := by
+    simpa only [Good] using
+      finiteModel_propertyT_partition_with_density hQ S hQS hone hεone A
+        (densityScale m) (densityScale m)
+        (densityScale_pos m) (densityScale_pos m)
+  let unavailable : ℕ → ℕ → ℝ := fun n m ↦ if Good n m then 0 else 1
+  have hunavailable (m : ℕ) : Vanishing fun n ↦ unavailable n m := by
+    intro η hη
+    obtain ⟨N, hN⟩ := hGood_eventually m
+    refine ⟨N, fun n hn ↦ ?_⟩
+    simpa [unavailable, hN n hn] using hη
+  let level : ℕ → ℕ := diagonalLevel unavailable
+  have hlevel : ∀ k, ∃ N, ∀ n ≥ N, k ≤ level n := by
+    simpa only [level] using diagonalLevel_diverges unavailable hunavailable
+  have hlevelDensity : Vanishing fun n ↦ densityScale (level n) := by
+    intro η hη
+    obtain ⟨k, hk⟩ := exists_nat_one_div_lt hη
+    obtain ⟨N, hN⟩ := hlevel k
+    refine ⟨N, fun n hn ↦ ?_⟩
+    rw [abs_of_pos (densityScale_pos (level n))]
+    calc
+      densityScale (level n) ≤ 1 / ((k : ℝ) + 1) := by
+        unfold densityScale
+        apply one_div_le_one_div_of_le (by positivity)
+        exact_mod_cast Nat.add_le_add_right (hN n hn) 1
+      _ < η := by simpa using hk
+  have hunavailable_nonneg : ∀ n m, 0 ≤ unavailable n m := by
+    intro n m
+    simp only [unavailable]
+    split <;> norm_num
+  have hselectedError : Vanishing fun n ↦ unavailable n (level n) := by
+    simpa only [level] using
+      diagonalLevel_error unavailable hunavailable_nonneg hunavailable
+  obtain ⟨Nselected, hNselected⟩ := hselectedError (1 / 2) (by norm_num)
+  have hselected : ∀ n ≥ Nselected, Good n (level n) := by
+    intro n hn
+    by_contra hbad
+    have herr := hNselected n hn
+    norm_num [unavailable, hbad] at herr
+  let P : ∀ n, BlockStructure (A.model n) := fun n ↦
+    if h : Good n (level n) then Classical.choose h
+    else singletonPartition (A.model n)
+  have P_spec (n : ℕ) (h : Good n (level n)) :
+      (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+          (P n).block).card : ℝ) ≤
+        (2 * (S.card : ℝ) * densityScale (level n) +
+          2 * densityScale (level n)) * Fintype.card (A.model n) ∧
+      ∀ y : A.model n, ∀ U : Finset (A.model n),
+        U ⊆ (P n).block y → U.Nonempty →
+        2 * U.card ≤ ((P n).block y).card →
+        uniformInputCutThreshold S (movementConstant S ε + 1) * U.card ≤
+          (generatorGraph (A.model n) S (A.map n)).boundaryCard U := by
+    simpa only [P, dif_pos h] using Classical.choose_spec h
+  refine ⟨P, ?_, ?_⟩
   · let C : ℝ := 2 * (S.card : ℝ) + 2
-    have hvanish : Vanishing fun n ↦ C * densityScale n :=
-      Vanishing.const_mul C densityScale_vanishing
-    apply Vanishing.squeeze
-      (fun n ↦ div_nonneg (by positivity) (by positivity)) _ hvanish
-    intro n
+    have hC : 0 ≤ C := by
+      dsimp only [C]
+      positivity
+    have hvanish : Vanishing fun n ↦ C * densityScale (level n) :=
+      Vanishing.const_mul C hlevelDensity
+    apply Vanishing.squeeze_eventually hvanish Nselected
+    intro n hn
+    have hnum : (0 : ℝ) ≤
+        ((generatorGraph (A.model n) S (A.map n)).crossingEdges
+          (P n).block).card := by
+      exact_mod_cast Nat.zero_le
+        ((generatorGraph (A.model n) S (A.map n)).crossingEdges
+          (P n).block).card
+    have hden : (0 : ℝ) ≤ Fintype.card (A.model n) := by
+      exact_mod_cast Nat.zero_le (Fintype.card (A.model n))
+    refine ⟨div_nonneg hnum hden, ?_⟩
+    change
+      (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+          (P n).block).card : ℝ) /
+        (Fintype.card (A.model n) : ℝ) ≤ C * densityScale (level n)
+    have hspec := (P_spec n (hselected n hn)).1
     by_cases hcardZero :
-        Fintype.card ((A.reindex φ hφ).model n) = 0
+        Fintype.card (A.model n) = 0
     · have hcardReal :
-          (Fintype.card ((A.reindex φ hφ).model n) : ℝ) = 0 := by
+          (Fintype.card (A.model n) : ℝ) = 0 := by
         exact_mod_cast hcardZero
       rw [hcardReal, div_zero]
-      exact mul_nonneg (by dsimp [C]; positivity) (densityScale_pos n).le
+      exact mul_nonneg hC (densityScale_pos (level n)).le
     have hcardPos : (0 : ℝ) <
-        Fintype.card ((A.reindex φ hφ).model n) := by
+        Fintype.card (A.model n) := by
       exact_mod_cast Nat.pos_of_ne_zero hcardZero
-    apply (div_le_iff₀ hcardPos).2
-    calc
-      (((generatorGraph ((A.reindex φ hφ).model n) S
-          ((A.reindex φ hφ).map n)).crossingEdges
-          (P n).block).card : ℝ) ≤
-        (2 * (S.card : ℝ) * densityScale n + 2 * densityScale n) *
-          Fintype.card ((A.reindex φ hφ).model n) := (P_spec n).1
-      _ = (C * densityScale n) *
-          Fintype.card ((A.reindex φ hφ).model n) := by
-        dsimp [C]
-        ring
+    have hbound :
+        (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+            (P n).block).card : ℝ) ≤
+          (C * densityScale (level n)) * Fintype.card (A.model n) := by
+      calc
+        (((generatorGraph (A.model n) S (A.map n)).crossingEdges
+            (P n).block).card : ℝ) ≤
+          (2 * (S.card : ℝ) * densityScale (level n) +
+            2 * densityScale (level n)) * Fintype.card (A.model n) := hspec
+        _ = (C * densityScale (level n)) * Fintype.card (A.model n) := by
+          dsimp only [C]
+          ring
+    exact (div_le_iff₀ hcardPos).2 hbound
   · intro n y U hU hUne hhalf
-    exact (P_spec n).2 y U hU hUne hhalf
+    by_cases h : Good n (level n)
+    · exact (P_spec n h).2 y U hU hUne hhalf
+    · have hcardPos : 0 < U.card := Finset.card_pos.mpr hUne
+      have hblock : (P n).block y = {y} := by simp [P, h, singletonPartition]
+      rw [hblock] at hhalf
+      simp only [Finset.card_singleton] at hhalf
+      omega
 
 end KunDiagonalPartition
 end NonsoficGroupsExist

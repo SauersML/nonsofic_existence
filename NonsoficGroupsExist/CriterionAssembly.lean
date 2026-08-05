@@ -1,5 +1,4 @@
 import NonsoficGroupsExist.ConservativeMatching
-import NonsoficGroupsExist.ExpanderReindex
 import NonsoficGroupsExist.KunFixedDecomposition
 import NonsoficGroupsExist.TableCover
 
@@ -7,10 +6,8 @@ import NonsoficGroupsExist.TableCover
 # Constructing the local criterion data
 
 The two decompositions consumed by the finite matching argument are derived
-here from property `(T)`.  The subgroup decomposition is constructed first;
-the ambient decomposition is then constructed on its cofinal subsequence, and
-the first decomposition is reindexed once more so that both refer to exactly
-the same finite models.
+here from property `(T)` on the same original finite models.  No subsequence
+or compatibility reindexing is required.
 -/
 
 namespace NonsoficGroupsExist
@@ -27,30 +24,16 @@ theorem exists_localCriterionData
     Nonempty (LocalCriterionData G Γ J) := by
   letI : Infinite Γ := C.infiniteΓ
   letI : Infinite G := Infinite.of_injective C.embedΓ C.embedΓ_injective
-  obtain ⟨φ, hφ, ⟨DΓ⟩⟩ := KunFixedDecomposition.exists_reindexed hTΓ
+  obtain ⟨DΓ⟩ := KunFixedDecomposition.expanderDecomposition hTΓ
     C.generatorsΓ C.generatorsΓ_one C.generatorsΓ_symmetric
     C.generatorsΓ_generate (A.comap C.embedΓ C.embedΓ_injective)
-  have DΓ' : ExpanderDecomposition
-      ((A.reindex φ hφ).comap C.embedΓ C.embedΓ_injective) C.generatorsΓ := by
-    rw [← SoficApproximation.comap_reindex A C.embedΓ C.embedΓ_injective φ hφ]
-    exact DΓ
-  obtain ⟨ψ, hψ, ⟨DG⟩⟩ := KunFixedDecomposition.exists_reindexed hTG
+  obtain ⟨DG⟩ := KunFixedDecomposition.expanderDecomposition hTG
     C.ambientGenerators C.ambientGenerators_one C.ambientGenerators_symmetric
-    C.ambientGenerators_generate (A.reindex φ hφ)
-  let B : SoficApproximation G := (A.reindex φ hφ).reindex ψ hψ
-  have DΓ'' := DΓ'.reindex ψ hψ
-  have DΓfinal : ExpanderDecomposition
-      (B.comap C.embedΓ C.embedΓ_injective) C.generatorsΓ := by
-    change ExpanderDecomposition
-      (((A.reindex φ hφ).reindex ψ hψ).comap C.embedΓ C.embedΓ_injective)
-      C.generatorsΓ
-    rw [← SoficApproximation.comap_reindex (A.reindex φ hφ)
-      C.embedΓ C.embedΓ_injective ψ hψ]
-    exact DΓ''
+    C.ambientGenerators_generate A
   exact ⟨{
     setup := C
-    approximation := B
-    gammaDecomposition := DΓfinal
+    approximation := A
+    gammaDecomposition := DΓ
     ambientDecomposition := DG }⟩
 
 /-- The fully constructed local criterion forces the witness subgroup to be

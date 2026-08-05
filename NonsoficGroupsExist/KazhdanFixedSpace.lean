@@ -362,6 +362,41 @@ noncomputable def subgroupMovingProjection [CompleteSpace E]
   letI : CompleteSpace U := (isClosed_fixedSubspace ρ H).completeSpace_coe
   exact Uᗮ.starProjection
 
+/-- For a monotone exhaustive family of subgroups, the corresponding moving
+projections converge strongly to the moving projection of the supremum
+subgroup. -/
+theorem tendsto_subgroupMovingProjection_iSup
+    {ι : Type*} [Preorder ι] [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : ι → Subgroup G) (K : Subgroup G)
+    (hmono : Monotone H) (hsup : ⨆ i, H i = K) (x : E) :
+    Filter.Tendsto (fun i ↦ subgroupMovingProjection ρ (H i) x)
+      Filter.atTop (nhds (subgroupMovingProjection ρ K x)) := by
+  let W : ι → Submodule ℝ E := fun i ↦ (fixedSubspace ρ (H i))ᗮ
+  let WK : Submodule ℝ E := (fixedSubspace ρ K)ᗮ
+  have hW : Monotone W := by
+    intro a b hab
+    exact Submodule.orthogonal_le (antitone ρ (hmono hab))
+  have horth : (⨆ i, W i)ᗮ = fixedSubspace ρ K := by
+    rw [← Submodule.iInf_orthogonal]
+    simp_rw [W, Submodule.orthogonal_orthogonal_eq_closure]
+    have hclosed : ∀ i,
+        (fixedSubspace ρ (H i)).topologicalClosure = fixedSubspace ρ (H i) :=
+      fun i ↦ (isClosed_fixedSubspace ρ (H i)).submodule_topologicalClosure_eq
+    simp_rw [hclosed]
+    rw [← fixedSubspace_iSup, hsup]
+  have hclosure : (⨆ i, W i).topologicalClosure = WK := by
+    rw [← Submodule.orthogonal_orthogonal_eq_closure, horth]
+  let L := (⨆ i, W i).topologicalClosure
+  have hproj : WK.starProjection x = L.starProjection x := by
+    apply WK.eq_starProjection_of_mem_orthogonal
+    · rw [← hclosure]
+      exact L.starProjection_apply_mem x
+    · rw [← hclosure]
+      exact L.sub_starProjection_mem_orthogonal x
+  have ht := Submodule.starProjection_tendsto_closure_iSup W hW x
+  rw [← hproj] at ht
+  simpa [W, WK, L, subgroupMovingProjection, subgroupMovingSubspace] using ht
+
 /-- The moving projection is the residual after orthogonal projection onto
 the subgroup-fixed space. -/
 theorem subgroupMovingProjection_eq_sub_fixedProjection [CompleteSpace E]

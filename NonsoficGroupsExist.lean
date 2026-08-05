@@ -118,7 +118,6 @@ import NonsoficGroupsExist.GeneratorGraphEditing
 import NonsoficGroupsExist.CompletionGraphEditing
 import NonsoficGroupsExist.SelectedGraphComparison
 import NonsoficGroupsExist.ConservativeMatching
-import NonsoficGroupsExist.ExpanderReindex
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.ConcreteLeavitt

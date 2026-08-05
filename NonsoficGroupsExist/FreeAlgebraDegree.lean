@@ -242,6 +242,17 @@ omit [Fintype X] in
   exact (FreeAlgebra.equivMonoidAlgebraFreeMonoid
     (R := ZMod 2) (X := X)).symm.map_one
 
+/-- The empty-word monomial has coefficient value one in every finite degree
+stage. -/
+@[simp] theorem wordMonomialInDegree_one_val (n : ℕ) :
+    (wordMonomialInDegree X n 1).1 = 1 := by
+  have hlen : freeWordLength X (1 : FreeMonoid X) ≤ n := by
+    rw [(freeWordLength_eq_zero_iff X 1).2 rfl]
+    exact Nat.zero_le n
+  rw [wordMonomialInDegree_of_le X 1 hlen]
+  change wordMonomial X 1 = 1
+  exact wordMonomial_one X
+
 omit [Fintype X] in
 /-- A length-zero basis monomial is the unit coefficient. -/
 theorem wordMonomial_eq_one_of_freeWordLength_eq_zero

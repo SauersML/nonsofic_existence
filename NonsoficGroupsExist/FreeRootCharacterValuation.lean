@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.FreeRootPlaneFourier
+import NonsoficGroupsExist.KazhdanFixedSpace
 
 /-!
 # Valuations of finite-stage free-root characters
@@ -1017,6 +1018,53 @@ noncomputable def planeRegionSignSet
   Finset.univ.filter fun sign ↦
     planeCharacterRegion X i j k hij hik hjk n sign = region
 
+/-- All finite-plane signs outside the all-trivial character region. -/
+noncomputable def planeNonzeroRegionSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  Finset.univ.filter fun sign ↦
+    planeCharacterRegion X i j k hij hik hjk n sign ≠ .zero
+
+theorem planeNonzeroRegionSignSet_eq_union
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    planeNonzeroRegionSignSet X i j k hij hik hjk n =
+      ((planeRegionSignSet X i j k hij hik hjk n .A ∪
+          planeRegionSignSet X i j k hij hik hjk n .B) ∪
+        planeRegionSignSet X i j k hij hik hjk n .C) ∪
+      planeRegionSignSet X i j k hij hik hjk n .D := by
+  classical
+  ext sign
+  simp only [planeNonzeroRegionSignSet, planeRegionSignSet,
+    Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union]
+  cases planeCharacterRegion X i j k hij hik hjk n sign <;> simp
+
+theorem planeCharacterRegion_const_true_eq_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
+    planeCharacterRegion X i j k hij hik hjk n (fun _ ↦ true) = .zero := by
+  unfold planeCharacterRegion
+  apply (characterPairRegion_eq_zero_iff X n _ _).2
+  constructor
+  · apply characterValuation_eq_succ_of_not_exists
+    rintro ⟨d, w, _hwd, _hwn, hneg⟩
+    simp [firstCoefficientEigenvalue, planeEigenvalue] at hneg
+    norm_num at hneg
+  · apply characterValuation_eq_succ_of_not_exists
+    rintro ⟨d, w, _hwd, _hwn, hneg⟩
+    simp [secondCoefficientEigenvalue, planeEigenvalue] at hneg
+    norm_num at hneg
+
+theorem sign_ne_const_true_of_mem_planeNonzeroRegionSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hsign : sign ∈ planeNonzeroRegionSignSet X i j k hij hik hjk n) :
+    sign ≠ fun _ ↦ true := by
+  intro htrue
+  subst sign
+  simp only [planeNonzeroRegionSignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and] at hsign
+  exact hsign (planeCharacterRegion_const_true_eq_zero
+    X i j k hij hik hjk n)
+
 /-- A binary assignment on an exhaustive finite plane is a genuine group
 character exactly when its assigned eigenvalues are multiplicative.  This is
 an algebraic validity condition, not a certificate containing any analytic or
@@ -1817,6 +1865,329 @@ theorem planeRegionUnionMass_eq_add
   simpa [planeRegionUnionMass, planeRegionMass] using
     Finset.sum_union
       (planeRegionSignSet_disjoint X i j k hij hik hjk n r s hrs)
+
+/-- The sum of all finite-stage Fourier components with nontrivial plane
+character. -/
+noncomputable def planeMovingPart
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) : E :=
+  ∑ sign ∈ planeNonzeroRegionSignSet X i j k hij hik hjk n,
+    planeComponent X i j k hij hik hjk n rho sign z
+
+/-- The moving-part norm is exactly the sum of the four nonzero valuation
+region masses. -/
+theorem norm_planeMovingPart_sq_eq_sum_regionMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    ‖planeMovingPart X i j k hij hik hjk rho z n‖ ^ 2 =
+      planeRegionMass X i j k hij hik hjk rho z n .A +
+        planeRegionMass X i j k hij hik hjk rho z n .B +
+        planeRegionMass X i j k hij hik hjk rho z n .C +
+        planeRegionMass X i j k hij hik hjk rho z n .D := by
+  classical
+  let A := planeRegionSignSet X i j k hij hik hjk n .A
+  let B := planeRegionSignSet X i j k hij hik hjk n .B
+  let C := planeRegionSignSet X i j k hij hik hjk n .C
+  let D := planeRegionSignSet X i j k hij hik hjk n .D
+  have hAB : Disjoint A B := by
+    exact planeRegionSignSet_disjoint X i j k hij hik hjk n .A .B (by decide)
+  have hAC : Disjoint A C := by
+    exact planeRegionSignSet_disjoint X i j k hij hik hjk n .A .C (by decide)
+  have hBC : Disjoint B C := by
+    exact planeRegionSignSet_disjoint X i j k hij hik hjk n .B .C (by decide)
+  have hAD : Disjoint A D := by
+    exact planeRegionSignSet_disjoint X i j k hij hik hjk n .A .D (by decide)
+  have hBD : Disjoint B D := by
+    exact planeRegionSignSet_disjoint X i j k hij hik hjk n .B .D (by decide)
+  have hCD : Disjoint C D := by
+    exact planeRegionSignSet_disjoint X i j k hij hik hjk n .C .D (by decide)
+  have hAB_C : Disjoint (A ∪ B) C := by
+    rw [Finset.disjoint_left]
+    intro sign hab hc
+    rcases Finset.mem_union.mp hab with ha | hb
+    · exact (Finset.disjoint_left.mp hAC) ha hc
+    · exact (Finset.disjoint_left.mp hBC) hb hc
+  have hABC_D : Disjoint ((A ∪ B) ∪ C) D := by
+    rw [Finset.disjoint_left]
+    intro sign habc hd
+    rcases Finset.mem_union.mp habc with hab | hc
+    · rcases Finset.mem_union.mp hab with ha | hb
+      · exact (Finset.disjoint_left.mp hAD) ha hd
+      · exact (Finset.disjoint_left.mp hBD) hb hd
+    · exact (Finset.disjoint_left.mp hCD) hc hd
+  unfold planeMovingPart
+  change ‖∑ sign ∈ planeNonzeroRegionSignSet X i j k hij hik hjk n,
+      iteratedPart rho (planeFamily X i j k hij hik hjk n) sign z‖ ^ 2 = _
+  rw [norm_sum_iteratedPart_sq rho _ _
+      (planeFamily_sq X i j k hij hik hjk n)
+      (planeFamily_pairwise_commute X i j k hij hik hjk n)]
+  change (∑ sign ∈ planeNonzeroRegionSignSet X i j k hij hik hjk n,
+      ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) = _
+  rw [planeNonzeroRegionSignSet_eq_union]
+  change (∑ sign ∈ ((A ∪ B) ∪ C) ∪ D,
+      ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) = _
+  rw [Finset.sum_union hABC_D, Finset.sum_union hAB_C,
+    Finset.sum_union hAB]
+  rfl
+
+theorem sign_eq_const_true_of_component_ne_zero_of_region_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
+    (hzero : planeCharacterRegion X i j k hij hik hjk n sign = .zero) :
+    sign = fun _ ↦ true := by
+  let chi := firstCoefficientEigenvalue X i j k hij hik hjk n sign
+  let psi := secondCoefficientEigenvalue X i j k hij hik hjk n sign
+  have hvals : characterValuation X chi = n + 1 ∧
+      characterValuation X psi = n + 1 := by
+    exact (characterPairRegion_eq_zero_iff X n chi psi).mp hzero
+  have hchiOne : ∀ a, chi a = 1 :=
+    eq_one_of_characterValuation_eq_succ X chi
+      (firstCoefficientEigenvalue_zero_of_component_ne_zero
+        X i j k hij hik hjk n rho sign z hv)
+      (firstCoefficientEigenvalue_add_of_component_ne_zero
+        X i j k hij hik hjk n rho sign z hv)
+      (firstCoefficientEigenvalue_eq_one_or_neg_one
+        X i j k hij hik hjk n sign) hvals.1
+  have hpsiOne : ∀ b, psi b = 1 :=
+    eq_one_of_characterValuation_eq_succ X psi
+      (secondCoefficientEigenvalue_zero_of_component_ne_zero
+        X i j k hij hik hjk n rho sign z hv)
+      (secondCoefficientEigenvalue_add_of_component_ne_zero
+        X i j k hij hik hjk n rho sign z hv)
+      (secondCoefficientEigenvalue_eq_one_or_neg_one
+        X i j k hij hik hjk n sign) hvals.2
+  funext q
+  let g : Plane X i j k hij hik hjk n :=
+    planeEnumeration X i j k hij hik hjk n q
+  obtain ⟨a, b, hab⟩ := exists_coordinate_factorization
+    X i j k hij hik hjk n g
+  have hmul := planeEigenvalue_mul_of_component_ne_zero
+    X i j k hij hik hjk n rho sign z hv
+      (firstCoordinate X i j k hij hik hjk n a)
+      (secondCoordinate X i j k hij hik hjk n b)
+  have heig : planeEigenvalue X i j k hij hik hjk n sign g = 1 := by
+    rw [← hab, hmul]
+    change chi a * psi b = 1
+    rw [hchiOne a, hpsiOne b, one_mul]
+  unfold planeEigenvalue at heig
+  simp only [g, Equiv.symm_apply_apply] at heig
+  cases hq : sign q
+  · norm_num [hq] at heig
+  · rfl
+
+theorem planeComponent_eq_zero_of_region_zero_of_sign_ne_true
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hzero : planeCharacterRegion X i j k hij hik hjk n sign = .zero)
+    (hne : sign ≠ fun _ ↦ true) :
+    planeComponent X i j k hij hik hjk n rho sign z = 0 := by
+  by_contra hv
+  exact hne (sign_eq_const_true_of_component_ne_zero_of_region_zero
+    X i j k hij hik hjk rho z n sign hv hzero)
+
+theorem inner_planeComponent_eq_zero_of_fixed_of_mem_nonzero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z y : E) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hsign : sign ∈ planeNonzeroRegionSignSet X i j k hij hik hjk n)
+    (hy : y ∈ KazhdanFixedSpace.fixedSubspace rho
+      (rootPlaneDegreeSubgroup X i j k hij hik hjk n)) :
+    inner ℝ y (planeComponent X i j k hij hik hjk n rho sign z) = 0 := by
+  have hne := sign_ne_const_true_of_mem_planeNonzeroRegionSignSet
+    X i j k hij hik hjk n sign hsign
+  have hexists : ∃ q, sign q = false := by
+    by_contra hnone
+    apply hne
+    funext q
+    cases hq : sign q
+    · exact False.elim (hnone ⟨q, hq⟩)
+    · rfl
+  obtain ⟨q, hq⟩ := hexists
+  have hyact : rho (planeFamily X i j k hij hik hjk n q) y = y :=
+    (KazhdanFixedSpace.mem_fixedSubspace_iff rho
+      (rootPlaneDegreeSubgroup X i j k hij hik hjk n) y).mp hy
+      (planeFamily X i j k hij hik hjk n q)
+      (planeEnumeration X i j k hij hik hjk n q).property
+  have hvact := action_planeComponent X i j k hij hik hjk n rho sign z q
+  simp [hq] at hvact
+  have hiso := (rho (planeFamily X i j k hij hik hjk n q)).inner_map_map y
+    (planeComponent X i j k hij hik hjk n rho sign z)
+  rw [hyact, hvact] at hiso
+  simp only [inner_neg_right] at hiso
+  linarith
+
+/-- The Fourier moving part lies in the orthogonal complement of the
+stage-fixed subspace. -/
+theorem planeMovingPart_mem_fixedSubspace_orthogonal
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    planeMovingPart X i j k hij hik hjk rho z n ∈
+      (KazhdanFixedSpace.fixedSubspace rho
+        (rootPlaneDegreeSubgroup X i j k hij hik hjk n))ᗮ := by
+  rw [Submodule.mem_orthogonal]
+  intro y hy
+  unfold planeMovingPart
+  rw [inner_sum]
+  apply Finset.sum_eq_zero
+  intro sign hsign
+  exact inner_planeComponent_eq_zero_of_fixed_of_mem_nonzero
+    X i j k hij hik hjk rho z y n sign hsign hy
+
+/-- The single all-positive Fourier component. -/
+noncomputable def planeTrivialPart
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) : E :=
+  planeComponent X i j k hij hik hjk n rho (fun _ ↦ true) z
+
+theorem planeTrivialPart_mem_fixedSubspace
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    planeTrivialPart X i j k hij hik hjk rho z n ∈
+      KazhdanFixedSpace.fixedSubspace rho
+        (rootPlaneDegreeSubgroup X i j k hij hik hjk n) := by
+  rw [KazhdanFixedSpace.mem_fixedSubspace_iff]
+  intro g hg
+  obtain ⟨q, hq⟩ := exists_planeFamily_eq X i j k hij hik hjk n ⟨g, hg⟩
+  have hq' : planeFamily X i j k hij hik hjk n q = g := by
+    simpa using hq
+  unfold planeTrivialPart
+  rw [← hq']
+  simpa using action_planeComponent X i j k hij hik hjk n rho
+    (fun _ ↦ true) z q
+
+theorem sum_planeRegionSignSet_zero_eq_trivialPart
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .zero,
+        planeComponent X i j k hij hik hjk n rho sign z) =
+      planeTrivialPart X i j k hij hik hjk rho z n := by
+  classical
+  unfold planeTrivialPart
+  rw [Finset.sum_eq_single (fun _ ↦ true)]
+  · intro sign hsign hne
+    have hzero : planeCharacterRegion X i j k hij hik hjk n sign = .zero := by
+      simpa [planeRegionSignSet] using hsign
+    exact planeComponent_eq_zero_of_region_zero_of_sign_ne_true
+      X i j k hij hik hjk rho z n sign hzero hne
+  · simp [planeRegionSignSet, planeCharacterRegion_const_true_eq_zero]
+
+/-- Exact fixed-plus-moving reconstruction at every finite stage. -/
+theorem planeTrivialPart_add_movingPart
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    planeTrivialPart X i j k hij hik hjk rho z n +
+      planeMovingPart X i j k hij hik hjk rho z n = z := by
+  classical
+  let nonzero := planeNonzeroRegionSignSet X i j k hij hik hjk n
+  let zero := planeRegionSignSet X i j k hij hik hjk n .zero
+  have hpartition : (Finset.univ : Finset
+      (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)) =
+      nonzero ∪ zero := by
+    ext sign
+    simp only [nonzero, zero, planeNonzeroRegionSignSet, planeRegionSignSet,
+      Finset.mem_univ, Finset.mem_filter, true_and, Finset.mem_union]
+    by_cases hzero : planeCharacterRegion X i j k hij hik hjk n sign = .zero
+    · simp [hzero]
+    · simp [hzero]
+  have hdisjoint : Disjoint nonzero zero := by
+    rw [Finset.disjoint_left]
+    intro sign hn hz
+    simp only [nonzero, planeNonzeroRegionSignSet, Finset.mem_filter,
+      Finset.mem_univ, true_and] at hn
+    simp only [zero, planeRegionSignSet, Finset.mem_filter,
+      Finset.mem_univ, true_and] at hz
+    exact hn hz
+  have htotal := sum_planeComponent X i j k hij hik hjk n rho z
+  change (∑ sign ∈ (Finset.univ : Finset
+      (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)),
+      planeComponent X i j k hij hik hjk n rho sign z) = z at htotal
+  rw [hpartition, Finset.sum_union hdisjoint] at htotal
+  rw [sum_planeRegionSignSet_zero_eq_trivialPart
+    X i j k hij hik hjk rho z n] at htotal
+  simpa [nonzero, planeMovingPart, add_comm] using htotal
+
+/-- The Fourier moving part is the genuine orthogonal projection onto the
+complement of the stage-fixed space. -/
+theorem planeMovingPart_eq_subgroupMovingProjection [CompleteSpace E]
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) :
+    planeMovingPart X i j k hij hik hjk rho z n =
+      KazhdanFixedSpace.subgroupMovingProjection rho
+        (rootPlaneDegreeSubgroup X i j k hij hik hjk n) z := by
+  let H := rootPlaneDegreeSubgroup X i j k hij hik hjk n
+  let U := KazhdanFixedSpace.fixedSubspace rho H
+  let fixed := planeTrivialPart X i j k hij hik hjk rho z n
+  let moving := planeMovingPart X i j k hij hik hjk rho z n
+  have hfixed : fixed ∈ U :=
+    planeTrivialPart_mem_fixedSubspace X i j k hij hik hjk rho z n
+  have hmoving : moving ∈ Uᗮ :=
+    planeMovingPart_mem_fixedSubspace_orthogonal
+      X i j k hij hik hjk rho z n
+  have hreconstruct : fixed + moving = z :=
+    planeTrivialPart_add_movingPart X i j k hij hik hjk rho z n
+  have hres : z - fixed = moving := by
+    rw [← hreconstruct]
+    abel
+  have hresOrth : z - fixed ∈ Uᗮ := by
+    rw [hres]
+    exact hmoving
+  letI : CompleteSpace U :=
+    (KazhdanFixedSpace.isClosed_fixedSubspace rho H).completeSpace_coe
+  have hfixedProjection : (KazhdanFixedSpace.fixedProjection rho H z : E) =
+      fixed := by
+    change U.starProjection z = fixed
+    exact U.eq_starProjection_of_mem_orthogonal hfixed hresOrth
+  rw [KazhdanFixedSpace.subgroupMovingProjection_eq_sub_fixedProjection,
+    hfixedProjection, hres]
+
+/-- The finite Fourier moving parts converge to the genuine moving projection
+for the join of the two full column-root subgroups.  Thus no mass can escape
+through the increasing degree filtration. -/
+theorem tendsto_planeMovingPart [CompleteSpace E]
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    Filter.Tendsto
+      (fun n ↦ planeMovingPart X i j k hij hik hjk rho z n)
+      Filter.atTop
+      (nhds (KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z)) := by
+  have h := KazhdanFixedSpace.tendsto_subgroupMovingProjection_iSup rho
+    (rootPlaneDegreeSubgroup X i j k hij hik hjk)
+    (elementaryRootSubgroup i k hik ⊔ elementaryRootSubgroup j k hjk)
+    (rootPlaneDegreeSubgroup_mono X i j k hij hik hjk)
+    (iSup_rootPlaneDegreeSubgroup X i j k hij hik hjk) z
+  simpa only [planeMovingPart_eq_subgroupMovingProjection
+    X i j k hij hik hjk rho z] using h
+
+/-- Squared moving mass converges to the squared norm of the full two-root
+moving projection. -/
+theorem tendsto_norm_planeMovingPart_sq [CompleteSpace E]
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    Filter.Tendsto
+      (fun n ↦ ‖planeMovingPart X i j k hij hik hjk rho z n‖ ^ 2)
+      Filter.atTop
+      (nhds (‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z‖ ^ 2)) := by
+  exact (tendsto_planeMovingPart X i j k hij hik hjk rho z).norm.pow 2
 
 private theorem sum_union_le_sum_add_sum
     {α : Type*} [DecidableEq α] (f : α → ℝ) (hf : ∀ x, 0 ≤ f x)
