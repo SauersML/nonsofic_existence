@@ -1319,6 +1319,41 @@ theorem planeComponent_eq_zero_of_not_isPlaneCharacterSign
   exact hinvalid (isPlaneCharacterSign_of_component_ne_zero
     X i j k hij hik hjk n rho sign z hv)
 
+/-- The genuine multiplicative characters contained in an arbitrary finite
+collection of plane signs. -/
+noncomputable def planeValidSignSubset
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (signs : Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) := by
+  classical
+  exact signs.filter (IsPlaneCharacterSign X i j k hij hik hjk n)
+
+/-- Filtering an arbitrary finite collection of plane signs to the genuine
+multiplicative characters preserves its Fourier mass exactly. -/
+theorem sum_norm_planeSignSet_eq_filter_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (signs : Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z : E) :
+    (∑ sign ∈ signs,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+      ∑ sign ∈ planeValidSignSubset X i j k hij hik hjk n signs,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := by
+  classical
+  rw [planeValidSignSubset]
+  induction signs using Finset.induction_on with
+  | empty => simp
+  | @insert sign signs hnot ih =>
+      by_cases hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign
+      · rw [Finset.filter_insert]
+        simp [hnot, hvalid, ih]
+      · have hzero := planeComponent_eq_zero_of_not_isPlaneCharacterSign
+          X i j k hij hik hjk n rho sign z hvalid
+        rw [Finset.filter_insert]
+        simp [hnot, hvalid, hzero, ih]
+
 /-- Ordinary plane restriction is exactly coefficient-character restriction
 on the first root coordinate. -/
 theorem firstCoefficientEigenvalue_succRestriction
@@ -1386,6 +1421,111 @@ theorem secondCoefficientValuation_succRestriction_eq_min
   rw [secondCoefficientEigenvalue_succRestriction]
   exact characterValuation_restrictCharacterSucc_eq_min X _
 
+/-- Away from characters first detected in the newly added top degree,
+ordinary restriction preserves the valuation region exactly.  A still-trivial
+fine character (valuation `n+2`) remains the coarse sentinel (`n+1`), so it is
+correctly included in this stability statement. -/
+theorem characterPairRegion_restrictCharacterSucc_eq_of_ne_top
+    (n : ℕ) (chi psi : degreeLE X (n + 1) → ℝ)
+    (hchi : characterValuation X chi ≠ n + 1)
+    (hpsi : characterValuation X psi ≠ n + 1) :
+    characterPairRegion X n (restrictCharacterSucc X chi)
+        (restrictCharacterSucc X psi) =
+      characterPairRegion X (n + 1) chi psi := by
+  have hchiBound := characterValuation_le_succ X chi
+  have hpsiBound := characterValuation_le_succ X psi
+  by_cases hchiLe : characterValuation X chi ≤ n
+  · have hchiRestrict :
+        characterValuation X (restrictCharacterSucc X chi) =
+          characterValuation X chi := by
+      rw [characterValuation_restrictCharacterSucc_eq_min,
+        min_eq_left (hchiLe.trans (Nat.le_succ n))]
+    by_cases hpsiLe : characterValuation X psi ≤ n
+    · have hpsiRestrict :
+          characterValuation X (restrictCharacterSucc X psi) =
+            characterValuation X psi := by
+        rw [characterValuation_restrictCharacterSucc_eq_min,
+          min_eq_left (hpsiLe.trans (Nat.le_succ n))]
+      unfold characterPairRegion
+      dsimp only
+      rw [hchiRestrict, hpsiRestrict]
+      have hcoarseZero : ¬ (characterValuation X chi = n + 1 ∧
+          characterValuation X psi = n + 1) := by omega
+      have hfineZero : ¬ (characterValuation X chi = n + 1 + 1 ∧
+          characterValuation X psi = n + 1 + 1) := by omega
+      rw [if_neg hcoarseZero, if_neg hfineZero]
+    · have hpsiTop : characterValuation X psi = n + 2 := by omega
+      have hpsiRestrict :
+          characterValuation X (restrictCharacterSucc X psi) = n + 1 := by
+        rw [characterValuation_restrictCharacterSucc_eq_min, hpsiTop]
+        omega
+      unfold characterPairRegion
+      dsimp only
+      rw [hchiRestrict, hpsiRestrict, hpsiTop]
+      have hcoarseZero : ¬ (characterValuation X chi = n + 1 ∧
+          n + 1 = n + 1) := by omega
+      have hfineZero : ¬ (characterValuation X chi = n + 1 + 1 ∧
+          n + 2 = n + 1 + 1) := by omega
+      rw [if_neg hcoarseZero, if_neg hfineZero]
+      by_cases hchiZero : characterValuation X chi = 0
+      · simp [hchiZero]
+      · have hcoarseLt : ¬ n + 1 < characterValuation X chi := by omega
+        have hcoarseEq : characterValuation X chi ≠ n + 1 := by omega
+        have hfineLt : ¬ n + 2 < characterValuation X chi := by omega
+        have hfineEq : characterValuation X chi ≠ n + 2 := by omega
+        simp [hchiZero, hcoarseLt, hcoarseEq, hfineLt, hfineEq]
+  · have hchiTop : characterValuation X chi = n + 2 := by omega
+    have hchiRestrict :
+        characterValuation X (restrictCharacterSucc X chi) = n + 1 := by
+      rw [characterValuation_restrictCharacterSucc_eq_min, hchiTop]
+      omega
+    by_cases hpsiLe : characterValuation X psi ≤ n
+    · have hpsiRestrict :
+          characterValuation X (restrictCharacterSucc X psi) =
+            characterValuation X psi := by
+        rw [characterValuation_restrictCharacterSucc_eq_min,
+          min_eq_left (hpsiLe.trans (Nat.le_succ n))]
+      unfold characterPairRegion
+      dsimp only
+      rw [hchiRestrict, hpsiRestrict, hchiTop]
+      have hcoarseZero : ¬ (n + 1 = n + 1 ∧
+          characterValuation X psi = n + 1) := by omega
+      have hfineZero : ¬ (n + 2 = n + 1 + 1 ∧
+          characterValuation X psi = n + 1 + 1) := by omega
+      rw [if_neg hcoarseZero, if_neg hfineZero]
+      by_cases hpsiZero : characterValuation X psi = 0
+      · simp [hpsiZero]
+      · have hcoarseLt : characterValuation X psi < n + 1 := by omega
+        have hfineLt : characterValuation X psi < n + 2 := by omega
+        simp [hpsiZero, hcoarseLt, hfineLt]
+    · have hpsiTop : characterValuation X psi = n + 2 := by omega
+      have hpsiRestrict :
+          characterValuation X (restrictCharacterSucc X psi) = n + 1 := by
+        rw [characterValuation_restrictCharacterSucc_eq_min, hpsiTop]
+        omega
+      unfold characterPairRegion
+      dsimp only
+      rw [hchiRestrict, hpsiRestrict, hchiTop, hpsiTop]
+      simp
+
+/-- Plane-region specialization of the preceding numerical stability lemma. -/
+theorem planeCharacterRegion_succRestriction_eq_of_ne_top
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (hfirst : firstCoefficientValuation X i j k hij hik hjk (n + 1) fineSign ≠
+      n + 1)
+    (hsecond : secondCoefficientValuation X i j k hij hik hjk (n + 1) fineSign ≠
+      n + 1) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun q ↦ fineSign (planeSuccIndex X i j k hij hik hjk n q)) =
+      planeCharacterRegion X i j k hij hik hjk (n + 1) fineSign := by
+  unfold planeCharacterRegion
+  rw [firstCoefficientEigenvalue_succRestriction,
+    secondCoefficientEigenvalue_succRestriction]
+  exact characterPairRegion_restrictCharacterSucc_eq_of_ne_top X n _ _
+    hfirst hsecond
+
 /-- Sign assignments whose first coefficient character is trivial throughout
 the current finite stage. -/
 noncomputable def planeFirstTrivialSignSet
@@ -1417,6 +1557,56 @@ noncomputable def planeSecondTopBoundarySignSet
     Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
   Finset.univ.filter fun sign ↦
     secondCoefficientValuation X i j k hij hik hjk n sign = n
+
+/-- Valid fine signs refining a union of two coarse valuation regions either
+remain in the same region union or lie on one of the two new top-degree
+layers. -/
+theorem filter_valid_fineRestriction_regionUnion_subset
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (r s : ValuationRegion) :
+    planeValidSignSubset X i j k hij hik hjk (n + 1)
+      (fineRestrictionSignSet
+        (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+        (Nat.card (Plane X i j k hij hik hjk n))
+        (planeSuccIndex X i j k hij hik hjk n)
+        (planeRegionSignSet X i j k hij hik hjk n r ∪
+          planeRegionSignSet X i j k hij hik hjk n s)) ⊆
+      (planeRegionSignSet X i j k hij hik hjk (n + 1) r ∪
+          planeRegionSignSet X i j k hij hik hjk (n + 1) s) ∪
+        (planeFirstTopBoundarySignSet X i j k hij hik hjk (n + 1) ∪
+          planeSecondTopBoundarySignSet X i j k hij hik hjk (n + 1)) := by
+  classical
+  intro sign hsign
+  rw [planeValidSignSubset] at hsign
+  obtain ⟨hpre, _hvalid⟩ := Finset.mem_filter.mp hsign
+  by_cases hfirst :
+      firstCoefficientValuation X i j k hij hik hjk (n + 1) sign = n + 1
+  · exact Finset.mem_union_right _
+      (Finset.mem_union_left _ (by
+        simpa [planeFirstTopBoundarySignSet] using hfirst))
+  by_cases hsecond :
+      secondCoefficientValuation X i j k hij hik hjk (n + 1) sign = n + 1
+  · exact Finset.mem_union_right _
+      (Finset.mem_union_right _ (by
+        simpa [planeSecondTopBoundarySignSet] using hsecond))
+  · have hstable := planeCharacterRegion_succRestriction_eq_of_ne_top
+        X i j k hij hik hjk n sign hfirst hsecond
+    have hcoarseRegions :
+        planeCharacterRegion X i j k hij hik hjk n
+              (fun q ↦ sign (planeSuccIndex X i j k hij hik hjk n q)) = r ∨
+          planeCharacterRegion X i j k hij hik hjk n
+              (fun q ↦ sign (planeSuccIndex X i j k hij hik hjk n q)) = s := by
+      simpa [fineRestrictionSignSet, planeRegionSignSet] using hpre
+    apply Finset.mem_union_left
+      (planeFirstTopBoundarySignSet X i j k hij hik hjk (n + 1) ∪
+        planeSecondTopBoundarySignSet X i j k hij hik hjk (n + 1))
+    rcases hcoarseRegions with hr | hs
+    · apply Finset.mem_union_left
+        (planeRegionSignSet X i j k hij hik hjk (n + 1) s)
+      simpa [planeRegionSignSet] using hstable.symm.trans hr
+    · apply Finset.mem_union_right
+        (planeRegionSignSet X i j k hij hik hjk (n + 1) r)
+      simpa [planeRegionSignSet] using hstable.symm.trans hs
 
 /-- Refining a first-coordinate-trivial stage splits exactly into the next
 top-degree layer and the still-trivial next stage. -/
@@ -1585,6 +1775,165 @@ noncomputable def planeSecondTopBoundaryMass
     (z : E) (n : ℕ) : ℝ :=
   ∑ sign ∈ planeSecondTopBoundarySignSet X i j k hij hik hjk n,
     ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+/-- Squared Fourier mass in one Kassabov valuation region. -/
+noncomputable def planeRegionMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) (region : ValuationRegion) : ℝ :=
+  ∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n region,
+    ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+/-- Squared Fourier mass in the union of two valuation regions. -/
+noncomputable def planeRegionUnionMass
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) (r s : ValuationRegion) : ℝ :=
+  ∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk n r ∪
+      planeRegionSignSet X i j k hij hik hjk n s),
+    ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2
+
+theorem planeRegionSignSet_disjoint
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (r s : ValuationRegion) (hrs : r ≠ s) :
+    Disjoint (planeRegionSignSet X i j k hij hik hjk n r)
+      (planeRegionSignSet X i j k hij hik hjk n s) := by
+  classical
+  rw [Finset.disjoint_left]
+  intro sign hr hs
+  simp only [planeRegionSignSet, Finset.mem_filter, Finset.mem_univ,
+    true_and] at hr hs
+  apply hrs
+  exact hr.symm.trans hs
+
+theorem planeRegionUnionMass_eq_add
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) (n : ℕ) (r s : ValuationRegion) (hrs : r ≠ s) :
+    planeRegionUnionMass X i j k hij hik hjk rho z n r s =
+      planeRegionMass X i j k hij hik hjk rho z n r +
+        planeRegionMass X i j k hij hik hjk rho z n s := by
+  classical
+  simpa [planeRegionUnionMass, planeRegionMass] using
+    Finset.sum_union
+      (planeRegionSignSet_disjoint X i j k hij hik hjk n r s hrs)
+
+private theorem sum_union_le_sum_add_sum
+    {α : Type*} [DecidableEq α] (f : α → ℝ) (hf : ∀ x, 0 ≤ f x)
+    (a b : Finset α) :
+    (∑ x ∈ a ∪ b, f x) ≤ (∑ x ∈ a, f x) + ∑ x ∈ b, f x := by
+  have hab : a ∪ b = a ∪ (b \ a) := by
+    ext x
+    simp
+  have hdisjoint : Disjoint a (b \ a) := by
+    rw [Finset.disjoint_left]
+    intro x ha hba
+    exact (Finset.mem_sdiff.mp hba).2 ha
+  have hdiff : (∑ x ∈ b \ a, f x) ≤ ∑ x ∈ b, f x :=
+    Finset.sum_le_sum_of_subset_of_nonneg Finset.sdiff_subset
+      (fun x _ _ ↦ hf x)
+  rw [hab, Finset.sum_union hdisjoint]
+  simpa [add_comm] using add_le_add_left hdiff (∑ x ∈ a, f x)
+
+/-- After one refinement, the mass over two coarse regions is supported on
+the same two fine regions together with the two new top-degree layers. -/
+theorem sum_norm_planeRegionUnion_sq_le_succ_union_topBoundarySignSets
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (r s : ValuationRegion)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk n r ∪
+          planeRegionSignSet X i j k hij hik hjk n s),
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      ∑ sign ∈
+          ((planeRegionSignSet X i j k hij hik hjk (n + 1) r ∪
+              planeRegionSignSet X i j k hij hik hjk (n + 1) s) ∪
+            (planeFirstTopBoundarySignSet X i j k hij hik hjk (n + 1) ∪
+              planeSecondTopBoundarySignSet X i j k hij hik hjk (n + 1))),
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2 := by
+  classical
+  let coarse := planeRegionSignSet X i j k hij hik hjk n r ∪
+    planeRegionSignSet X i j k hij hik hjk n s
+  let fine := planeRegionSignSet X i j k hij hik hjk (n + 1) r ∪
+    planeRegionSignSet X i j k hij hik hjk (n + 1) s
+  let preimage := fineRestrictionSignSet
+    (Nat.card (Plane X i j k hij hik hjk (n + 1)))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeSuccIndex X i j k hij hik hjk n) coarse
+  let validPreimage := planeValidSignSubset X i j k hij hik hjk (n + 1) preimage
+  let firstTop := planeFirstTopBoundarySignSet X i j k hij hik hjk (n + 1)
+  let secondTop := planeSecondTopBoundarySignSet X i j k hij hik hjk (n + 1)
+  let mass := fun sign :
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool ↦
+    ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2
+  have hremove :
+      (∑ sign ∈ preimage, mass sign) =
+        ∑ sign ∈ validPreimage, mass sign := by
+    simpa [validPreimage, mass] using
+      sum_norm_planeSignSet_eq_filter_valid
+        X i j k hij hik hjk (n + 1) rho preimage z
+  have hsubset : validPreimage ⊆ fine ∪ (firstTop ∪ secondTop) := by
+    simpa [validPreimage, preimage, coarse, fine, firstTop, secondTop] using
+      filter_valid_fineRestriction_regionUnion_subset
+        X i j k hij hik hjk n r s
+  calc
+    (∑ sign ∈ coarse,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+        ∑ sign ∈ preimage, mass sign :=
+      (sum_norm_planeRestriction_sq X i j k hij hik hjk n rho coarse z).symm
+    _ = ∑ sign ∈ validPreimage, mass sign := hremove
+    _ ≤ ∑ sign ∈ fine ∪ (firstTop ∪ secondTop), mass sign :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset
+        (fun _ _ _ ↦ sq_nonneg _)
+
+/-- Refining the mass in any union of two valuation regions changes the
+region only on the two newly exposed top-degree character layers.  Invalid
+binary assignments are discarded here using their proved zero Fourier
+component; no character-validity premise is supplied by the caller. -/
+theorem sum_norm_planeRegionUnion_sq_le_succ_add_topBoundaries
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (r s : ValuationRegion)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk n r ∪
+          planeRegionSignSet X i j k hij hik hjk n s),
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      (∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 1) r ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) s),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) +
+        planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 1) +
+        planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 1) := by
+  classical
+  let fine := planeRegionSignSet X i j k hij hik hjk (n + 1) r ∪
+    planeRegionSignSet X i j k hij hik hjk (n + 1) s
+  let firstTop := planeFirstTopBoundarySignSet X i j k hij hik hjk (n + 1)
+  let secondTop := planeSecondTopBoundarySignSet X i j k hij hik hjk (n + 1)
+  let mass := fun sign :
+      Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool ↦
+    ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2
+  calc
+    _ ≤ ∑ sign ∈ fine ∪ (firstTop ∪ secondTop), mass sign := by
+      simpa [fine, firstTop, secondTop, mass] using
+        sum_norm_planeRegionUnion_sq_le_succ_union_topBoundarySignSets
+          X i j k hij hik hjk n r s rho z
+    _ ≤ (∑ sign ∈ fine, mass sign) +
+          ∑ sign ∈ firstTop ∪ secondTop, mass sign :=
+      sum_union_le_sum_add_sum mass (fun _ ↦ sq_nonneg _) fine
+        (firstTop ∪ secondTop)
+    _ ≤ (∑ sign ∈ fine, mass sign) +
+          ((∑ sign ∈ firstTop, mass sign) +
+            ∑ sign ∈ secondTop, mass sign) :=
+      by
+        have hexception : (∑ sign ∈ firstTop ∪ secondTop, mass sign) ≤
+            (∑ sign ∈ firstTop, mass sign) +
+              ∑ sign ∈ secondTop, mass sign :=
+          sum_union_le_sum_add_sum mass (fun _ ↦ sq_nonneg _) firstTop secondTop
+        simpa [add_comm] using add_le_add_left hexception
+          (∑ sign ∈ fine, mass sign)
+    _ = _ := by
+      simp only [fine, firstTop, secondTop, mass,
+        planeFirstTopBoundaryMass, planeSecondTopBoundaryMass]
+      rw [add_assoc]
 
 theorem planeFirstTrivialMass_step
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
@@ -3017,6 +3366,70 @@ theorem sum_norm_planeCBRegion_sq_le_target_add_error_add_boundary
         (sum_norm_planeCBTopBoundaryLeadingSignSet_sq_le
           X i j k hij hik hjk n rho z)
 
+/-- Full `A ∪ B` estimate with source and target at the same finite stage.
+The price of replacing the coarse target is exactly the two proved
+top-degree boundary masses. -/
+theorem planeABMass_le_sameStage_CDMass_add_errors
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .A .B ≤
+      planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .C .D +
+        (∑ q : Fin (Fintype.card X),
+          2 * ‖z‖ *
+            ‖rho (elementaryRoot j i hij.symm
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+        2 * planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) := by
+  have hfull := sum_norm_planeABRegion_sq_le_target_add_error_add_boundary
+    X i j k hij hik hjk n rho z
+  have hrefine := sum_norm_planeRegionUnion_sq_le_succ_add_topBoundaries
+    X i j k hij hik hjk (n + 1) .C .D rho z
+  change planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .A .B ≤
+    planeRegionUnionMass X i j k hij hik hjk rho z (n + 1) .C .D +
+      (∑ q : Fin (Fintype.card X),
+        2 * ‖z‖ *
+          ‖rho (elementaryRoot j i hij.symm
+            (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+      planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) at hfull
+  change planeRegionUnionMass X i j k hij hik hjk rho z (n + 1) .C .D ≤
+    planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .C .D +
+      planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+      planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) at hrefine
+  linarith
+
+/-- Symmetric same-stage `C ∪ B` estimate. -/
+theorem planeCBMass_le_sameStage_ADMass_add_errors
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .C .B ≤
+      planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .A .D +
+        (∑ q : Fin (Fintype.card X),
+          2 * ‖z‖ *
+            ‖rho (elementaryRoot i j hij
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        2 * planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+        planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) := by
+  have hfull := sum_norm_planeCBRegion_sq_le_target_add_error_add_boundary
+    X i j k hij hik hjk n rho z
+  have hrefine := sum_norm_planeRegionUnion_sq_le_succ_add_topBoundaries
+    X i j k hij hik hjk (n + 1) .A .D rho z
+  change planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .C .B ≤
+    planeRegionUnionMass X i j k hij hik hjk rho z (n + 1) .A .D +
+      (∑ q : Fin (Fintype.card X),
+        2 * ‖z‖ *
+          ‖rho (elementaryRoot i j hij
+            (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+      planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) at hfull
+  change planeRegionUnionMass X i j k hij hik hjk rho z (n + 1) .A .D ≤
+    planeRegionUnionMass X i j k hij hik hjk rho z (n + 2) .A .D +
+      planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+      planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2) at hrefine
+  linarith
+
 /-- The part of region `D` detected on the first unit coefficient. -/
 noncomputable def planeDFirstSignSet
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
@@ -3325,10 +3738,9 @@ theorem planeCharacterRegion_forwardUnitConjugatedRestriction_eq_B_of_valid
 noncomputable def planeValidRegionSignSet
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
     (n : ℕ) (region : ValuationRegion) :
-    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) := by
-  classical
-  exact (planeRegionSignSet X i j k hij hik hjk n region).filter
-    (IsPlaneCharacterSign X i j k hij hik hjk n)
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  planeValidSignSubset X i j k hij hik hjk n
+    (planeRegionSignSet X i j k hij hik hjk n region)
 
 /-- Invalid binary assignments contribute zero, so every valuation region has
 exactly the same mass after filtering to genuine multiplicative signs. -/
@@ -3342,18 +3754,9 @@ theorem sum_norm_planeRegionSignSet_eq_valid
       ∑ sign ∈ planeValidRegionSignSet X i j k hij hik hjk n region,
         ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := by
   classical
-  rw [planeValidRegionSignSet]
-  generalize planeRegionSignSet X i j k hij hik hjk n region = signs
-  induction signs using Finset.induction_on with
-  | empty => simp
-  | @insert sign signs hnot ih =>
-      by_cases hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign
-      · rw [Finset.filter_insert]
-        simp [hnot, hvalid, ih]
-      · have hzero := planeComponent_eq_zero_of_not_isPlaneCharacterSign
-          X i j k hij hik hjk n rho sign z hvalid
-        rw [Finset.filter_insert]
-        simp [hnot, hvalid, hzero, ih]
+  simpa [planeValidRegionSignSet] using
+    sum_norm_planeSignSet_eq_filter_valid X i j k hij hik hjk n rho
+      (planeRegionSignSet X i j k hij hik hjk n region) z
 
 /-- Same-stage unit transport gives the quantitative `A → B` mass estimate
 from Kassabov's argument. -/
@@ -3503,6 +3906,95 @@ theorem sum_norm_planeRegionSignSet_C_sq_le_B_add_unit_error
           ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
         2 * ‖z‖ * ‖moved - z‖ := by rw [hnorm]; ring
     _ = _ := by rfl
+
+/-- Adding the two same-stage generator-shear inequalities cancels regions
+`A` and `C`, leaving a direct bound for the diagonal region `B`. -/
+theorem planeRegionMass_B_le_D_add_generatorErrors_add_boundaries
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    planeRegionMass X i j k hij hik hjk rho z (n + 2) .B ≤
+      planeRegionMass X i j k hij hik hjk rho z (n + 2) .D +
+        (2 : ℝ)⁻¹ *
+          ((∑ q : Fin (Fintype.card X),
+              2 * ‖z‖ *
+                ‖rho (elementaryRoot j i hij.symm
+                  (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+            ∑ q : Fin (Fintype.card X),
+              2 * ‖z‖ *
+                ‖rho (elementaryRoot i j hij
+                  (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        (3 : ℝ) / 2 *
+          (planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+            planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2)) := by
+  have hab := planeABMass_le_sameStage_CDMass_add_errors
+    X i j k hij hik hjk n rho z
+  have hcb := planeCBMass_le_sameStage_ADMass_add_errors
+    X i j k hij hik hjk n rho z
+  rw [planeRegionUnionMass_eq_add X i j k hij hik hjk rho z (n + 2)
+      .A .B (by decide),
+    planeRegionUnionMass_eq_add X i j k hij hik hjk rho z (n + 2)
+      .C .D (by decide)] at hab
+  rw [planeRegionUnionMass_eq_add X i j k hij hik hjk rho z (n + 2)
+      .C .B (by decide),
+    planeRegionUnionMass_eq_add X i j k hij hik hjk rho z (n + 2)
+      .A .D (by decide)] at hcb
+  linarith
+
+/-- Finite-stage Kassabov estimate for the total mass in all four nonzero
+valuation regions.  Every term on the right is the displacement of an
+explicit elementary generator, except the two boundary masses already proved
+to converge to zero. -/
+theorem sum_planeRegionMass_nonzero_le_explicit_errors
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    planeRegionMass X i j k hij hik hjk rho z (n + 2) .A +
+        planeRegionMass X i j k hij hik hjk rho z (n + 2) .B +
+        planeRegionMass X i j k hij hik hjk rho z (n + 2) .C +
+        planeRegionMass X i j k hij hik hjk rho z (n + 2) .D ≤
+      ‖rho (firstCoordinate X i j k hij hik hjk (n + 2)
+          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 +
+        ‖rho (secondCoordinate X i j k hij hik hjk (n + 2)
+          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 +
+        (3 : ℝ) / 2 *
+          ((∑ q : Fin (Fintype.card X),
+              2 * ‖z‖ *
+                ‖rho (elementaryRoot j i hij.symm
+                  (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+            ∑ q : Fin (Fintype.card X),
+              2 * ‖z‖ *
+                ‖rho (elementaryRoot i j hij
+                  (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm 1) z - z‖ +
+        2 * ‖z‖ * ‖rho (elementaryRoot i j hij 1) z - z‖ +
+        (9 : ℝ) / 2 *
+          (planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+            planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2)) := by
+  have hA := sum_norm_planeRegionSignSet_A_sq_le_B_add_unit_error
+    X i j k hij hik hjk (n + 2) rho z
+  have hC := sum_norm_planeRegionSignSet_C_sq_le_B_add_unit_error
+    X i j k hij hik hjk (n + 2) rho z
+  have hB := planeRegionMass_B_le_D_add_generatorErrors_add_boundaries
+    X i j k hij hik hjk n rho z
+  have hD := sum_norm_planeRegionSignSet_D_sq_le_unit_displacements
+    X i j k hij hik hjk (n + 2) rho z
+  change planeRegionMass X i j k hij hik hjk rho z (n + 2) .A ≤
+    planeRegionMass X i j k hij hik hjk rho z (n + 2) .B +
+      2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm 1) z - z‖ at hA
+  change planeRegionMass X i j k hij hik hjk rho z (n + 2) .C ≤
+    planeRegionMass X i j k hij hik hjk rho z (n + 2) .B +
+      2 * ‖z‖ * ‖rho (elementaryRoot i j hij 1) z - z‖ at hC
+  change planeRegionMass X i j k hij hik hjk rho z (n + 2) .D ≤
+    (4 : ℝ)⁻¹ *
+        ‖rho (firstCoordinate X i j k hij hik hjk (n + 2)
+          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 +
+      (4 : ℝ)⁻¹ *
+        ‖rho (secondCoordinate X i j k hij hik hjk (n + 2)
+          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 at hD
+  linarith
 
 /-- The squared mass of one `A ∪ B` leading-generator fiber is bounded by
 the coarse `C ∪ D` mass after acting by its opposite adjacent generator.

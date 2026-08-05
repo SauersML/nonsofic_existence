@@ -150,6 +150,11 @@ box is still a required dependency of the final theorem.
 - [x] Construct the two same-stage unit-root conjugations, prove their exact
   Fourier transport sends `A` and `C` into `B`, and bound region `D` by the
   two unit-coordinate displacements
+- [x] Prove ordinary refinement preserves every valid valuation region away
+  from the two new top-degree layers, charge coarse target mass to the
+  same-stage target plus those already-vanishing layers, and combine both
+  generator shears with the unit shears into a single explicit finite-stage
+  bound for all four nonzero valuation regions
 - [ ] Pass the finite-stage inequalities to the limiting two-root moving
   mass and complete the uniform relative-property-`(T)` estimate
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group
