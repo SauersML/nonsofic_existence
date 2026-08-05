@@ -47,7 +47,7 @@ jobs:
     outputs:
       run: ${{ steps.check.outputs.run }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
       - id: check
@@ -74,14 +74,14 @@ jobs:
     needs: gate
     if: ${{ github.event_name != 'schedule' || needs.gate.outputs.run == 'true' }}
     runs-on: ubuntu-latest
-    # 151 modules of analysis on top of Mathlib.  A cold first build can run for
+    # 198 modules of analysis on top of Mathlib.  A cold first build can run for
     # hours; every run saves whatever it compiled (see the cache-save steps), so
     # even a run that hits this ceiling leaves the next one strictly warmer.
     timeout-minutes: 340
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Cache Lean toolchain
         id: elan-cache
@@ -191,8 +191,10 @@ jobs:
       # CALIBRATION BEFORE VERDICT, the third time in this file.  The scans in
       # Audit.Scan report nothing on a clean corpus, and a scan that reports
       # nothing because it is broken looks exactly the same.  Audit.Plants
-      # carries eleven planted defects that must each be reported under their
-      # own tag, and four clean declarations that must be reported by nothing.
+      # carries twelve planted defects that must each be reported under their
+      # own tag, five shapes that must NOT be reported under a named tag (one
+      # row per false positive the first real run emitted), and four clean
+      # declarations that must be reported by nothing.
       # Needs no Mathlib and no corpus, so it still runs when the library does
       # not build -- which is when a broken detector is most likely to be
       # blamed on the corpus.

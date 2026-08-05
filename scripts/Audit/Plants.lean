@@ -47,7 +47,15 @@ the conclusion says. -/
 theorem plantedVacuous (h : False) : (0 : Nat) = 1 := h.elim
 
 /-- TRIVIAL + UNUSED: concludes `True`, and its premise occurs in neither the
-rest of the type nor the proof term. -/
+rest of the type nor the proof term.
+
+The linter is disabled for this declaration alone, and `h` deliberately keeps
+its leading-underscore-free name: the underscore is exactly the admission the
+UNUSED scan accepts (`Audit.Scan.deliberate`), so a plant that spelled it `_h`
+would no longer be the defect it exists to plant.  Renaming the binder or
+widening this `set_option` past the one declaration silently decalibrates the
+UNUSED scan. -/
+set_option linter.unusedVariables false in
 theorem plantedUnusedHypothesis (h : (0 : Nat) = 0) : True := trivial
 
 /-- DUPLICATE + RFL. -/

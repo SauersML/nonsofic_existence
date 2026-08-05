@@ -26,7 +26,13 @@ jobs:
   build-pdf:
     name: Build and validate PDF
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # A typical run is 1-3 minutes, nearly all of it `apt-get`.  Run
+    # 30979154338 spent all 25 minutes inside that install -- `lmodern` alone
+    # took 4.5 minutes off a slow Azure mirror -- and was killed before latexmk
+    # ever started, leaving the committed PDF stale against the `.tex` that
+    # triggered it.  The ceiling exists to catch a wedged latexmk, not to race
+    # a mirror, so it sits well above any real compile.
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository
@@ -39,8 +45,12 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends \
+          # Retries and a per-connection timeout so one unresponsive mirror
+          # costs seconds rather than the whole job; see the note on
+          # `timeout-minutes` above for the run that made this necessary.
+          retry='-o Acquire::Retries=5 -o Acquire::http::Timeout=30'
+          sudo apt-get $retry update
+          sudo apt-get $retry install --yes --no-install-recommends \
             latexmk \
             lmodern \
             poppler-utils \
