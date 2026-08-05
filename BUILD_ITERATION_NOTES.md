@@ -243,6 +243,26 @@ spans to degree-d spans — transports independence back to any k.
 Then item 4 (residual class R = {c + s₁s₀t₀}) via componentwise unit
 equations.
 
+STATUS (fifth session): GREEN — VandermondeExtraction
+(eq_zero_of_forall_units_zpow_smul; pin quirks: Module.Basis namespace
+needs `open Module`; linearIndepOn_singleton_iff takes explicit R;
+deprecations eval_finsetSum/finsetSum_coeff/Infinite.sdiff; rw of
+b i₀ = v d₀ under dependent i₀-type needs congrArg-not-rw) and
+GradedIndependence (graded_independence over [Infinite K]; supply
+K,V explicitly to the extraction lemma).
+REMAINING, in order:
+(b) base change: letI : Algebra k (BinaryLeavittAlgebra (RatFunc k))
+  := RingHom.toAlgebra ((algebraMap _ _).comp (algebraMap k _));
+  β := lift (family (RatFunc k)); β on wordS/wordT by lift_generator
+  induction; β injective by exists_mul_mul_eq_one k + Nontrivial;
+  β maps degree-d spans into degree-d spans (span_induction; k-smul
+  becomes algebraMap k K •[K]); Infinite (RatFunc k) via X-powers or
+  Polynomial infinite + IsFractionRing injectivity. Conclusion:
+  graded_independence for EVERY field.
+(c) residual endgame for u = c + β₀ (β₀ := s₁s₀t₀, c balanced):
+  canonical components now available — write u⁻¹'s components, cascade
+  from top degree, fixed-level rank argument. Derive on paper first.
+
 ## Iteration log (continued)
 - GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
   AlmostMinimalDisplacement, UltralimitGeometry, HilbertCircumcenter,
