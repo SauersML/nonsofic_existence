@@ -118,5 +118,103 @@ theorem cylinderSwap_mem_deltaPermUnits (a b : List (Fin 2))
     rw [swapPerm_apply]
     exact finsuppStreamRep_cylinderSwap_single k a b hab hba x c⟩
 
+
+section Insertion
+
+variable {A : Type*} [Ring A] (L : LeavittFamily A)
+
+/-- Prefix insertion carries a cylinder swap to the swap of the inserted
+cylinders. -/
+theorem prefixInsertionUnit_cylinderSwap (l a b : List (Fin 2))
+    (hab : ¬ a <+: b) (hba : ¬ b <+: a) :
+    L.prefixInsertionUnit l (L.cylinderSwap a b hab hba) =
+      L.cylinderSwap (l ++ a) (l ++ b)
+        (fun h ↦ hab ((List.prefix_append_right_inj l).1 h))
+        (fun h ↦ hba ((List.prefix_append_right_inj l).1 h)) := by
+  apply Units.ext
+  show L.wordS l *
+      transpositionValue (L.wordS a) (L.wordT a) (L.wordS b)
+        (L.wordT b) * L.wordT l + (1 - L.cylinder l) =
+    transpositionValue (L.wordS (l ++ a)) (L.wordT (l ++ a))
+      (L.wordS (l ++ b)) (L.wordT (l ++ b))
+  have hc : L.cylinder l = L.wordS l * L.wordT l := rfl
+  rw [transpositionValue, transpositionValue, L.wordS_append l a,
+    L.wordS_append l b, L.wordT_append l a, L.wordT_append l b, hc]
+  noncomm_ring
+
+/-- The corner homomorphism is prefix insertion at the cylinder `[1]`. -/
+theorem cornerHom_eq_prefixInsertionUnit (u : Aˣ) :
+    L.cornerHom u = L.prefixInsertionUnit [1] u := by
+  apply Units.ext
+  show L.p0 + L.s1 * (↑u : A) * L.t1 =
+    L.wordS [1] * (↑u : A) * L.wordT [1] + (1 - L.cylinder [1])
+  have h1 : L.wordS [1] = L.s1 := by
+    rw [L.wordS_cons, L.wordS_nil, mul_one]
+    rfl
+  have h2 : L.wordT [1] = L.t1 := by
+    rw [L.wordT_cons, L.wordT_nil, one_mul]
+    rfl
+  have hc : L.cylinder [1] = L.wordS [1] * L.wordT [1] := rfl
+  have hp : L.p0 = 1 - L.s1 * L.t1 :=
+    eq_sub_of_add_eq L.p0_add_s1t1
+  rw [h1, h2, hc, h1, h2, hp]
+  noncomm_ring
+
+end Insertion
+
+section WitnessMembership
+
+open Classical
+
+variable (k : Type) [Field k]
+
+theorem cornerHom_cylinderSwap_mem (a b : List (Fin 2))
+    (hab : ¬ a <+: b) (hba : ¬ b <+: a) :
+    (family k).cornerHom ((family k).cylinderSwap a b hab hba) ∈
+      deltaPermUnits k := by
+  rw [cornerHom_eq_prefixInsertionUnit,
+    prefixInsertionUnit_cylinderSwap]
+  exact cylinderSwap_mem_deltaPermUnits k _ _ _ _
+
+theorem cornerHom_insertion_cylinderSwap_mem (l a b : List (Fin 2))
+    (hab : ¬ a <+: b) (hba : ¬ b <+: a) :
+    (family k).cornerHom ((family k).prefixInsertionUnit l
+      ((family k).cylinderSwap a b hab hba)) ∈ deltaPermUnits k := by
+  rw [prefixInsertionUnit_cylinderSwap]
+  exact cornerHom_cylinderSwap_mem k _ _ _ _
+
+/-- **The corner witness consists of basis-permuting units** (checkpoint
+`D3`, first half): the two-generated non-LEF witness subgroup lies inside
+the units permuting the stream basis. -/
+theorem cornerWitness_le_deltaPermUnits :
+    (family k).cornerWitnessSubgroup ≤ deltaPermUnits k := by
+  rw [LeavittFamily.cornerWitnessSubgroup, Subgroup.closure_le]
+  rintro x (rfl | rfl)
+  · show (family k).cornerHom (family k).generatorA ∈ _
+    rw [LeavittFamily.generatorA, map_inv]
+    refine Subgroup.inv_mem _ ?_
+    rw [LeavittFamily.rootRotation, map_mul, map_mul]
+    exact Subgroup.mul_mem _
+      (Subgroup.mul_mem _
+        (cornerHom_cylinderSwap_mem k [0] [1, 0] (by decide) (by decide))
+        (cornerHom_cylinderSwap_mem k [0] [1, 1] (by decide) (by decide)))
+      (cornerHom_cylinderSwap_mem k [0] [1] (by decide) (by decide))
+  · show (family k).cornerHom (family k).generatorB ∈ _
+    rw [LeavittFamily.generatorB, LeavittFamily.rightRotation, map_inv]
+    refine Subgroup.inv_mem _ ?_
+    rw [LeavittFamily.rootRotation, map_mul, map_mul, map_mul, map_mul,
+      LeavittFamily.prefixInsertion_apply, LeavittFamily.prefixInsertion_apply,
+      LeavittFamily.prefixInsertion_apply]
+    exact Subgroup.mul_mem _
+      (Subgroup.mul_mem _
+        (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 0]
+          (by decide) (by decide))
+        (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 1]
+          (by decide) (by decide)))
+      (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1]
+        (by decide) (by decide))
+
+end WitnessMembership
+
 end BinaryLeavitt
 end NonsoficGroupsExist
