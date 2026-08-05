@@ -270,8 +270,8 @@ declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
 proposition interface. The source audit covers all 159 project modules, and
-the whole-namespace kernel audit traverses 5,448
-project declarations and reports no disallowed axiom. This build and audit are
+the whole-namespace kernel audit traverses every project declaration and
+reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
 each later manuscript-scope checkpoint.
 
