@@ -80,6 +80,59 @@ theorem re_mul_re_add_im_mul_im (a b : K) :
   simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im]
   ring
 
+theorem re_lt_one_of_ne_one {c : K} (hc : ψ c ≠ 1) : (ψ c).re < 1 := by
+  rcases lt_or_eq_of_le
+    ((Complex.re_le_norm (ψ c)).trans_eq (norm_apply ψ c)) with h | h
+  · exact h
+  · exfalso
+    apply hc
+    have hnormSq : (ψ c).re ^ 2 + (ψ c).im ^ 2 = 1 := by
+      have := congrArg (· ^ 2) (norm_apply ψ c)
+      rwa [← Complex.normSq_eq_norm_sq, Complex.normSq_apply, one_pow,
+        ← pow_two, ← pow_two] at this
+    have him : (ψ c).im = 0 := by nlinarith
+    apply Complex.ext
+    · rw [h, Complex.one_re]
+    · rw [him, Complex.one_im]
+
+open Finset in
+/-- The positive angle gap of a character: the least value of
+`2 * (1 - Re ψ(c))` over the elements where `ψ` is nontrivial. -/
+noncomputable def gap : ℝ :=
+  if h : (Finset.univ.filter fun c : K ↦ ψ c ≠ 1).Nonempty then
+    (Finset.univ.filter fun c : K ↦ ψ c ≠ 1).inf' h
+      (fun c ↦ 2 * (1 - (ψ c).re))
+  else 1
+
+theorem gap_pos : 0 < gap ψ := by
+  unfold gap
+  split_ifs with h
+  · rw [Finset.lt_inf'_iff]
+    intro c hc
+    have := re_lt_one_of_ne_one ψ (Finset.mem_filter.1 hc).2
+    linarith
+  · norm_num
+
+theorem gap_le {c : K} (hc : ψ c ≠ 1) :
+    gap ψ ≤ 2 * (1 - (ψ c).re) := by
+  have hmem : c ∈ Finset.univ.filter fun c : K ↦ ψ c ≠ 1 :=
+    Finset.mem_filter.2 ⟨Finset.mem_univ c, hc⟩
+  unfold gap
+  rw [dif_pos ⟨c, hmem⟩]
+  exact Finset.inf'_le _ hmem
+
+/-- A nontrivial character is nontrivial on some scalar multiple of every
+nonzero element. -/
+theorem exists_smul_ne_one (hψ : ψ ≠ 1) {c : K} (hc : c ≠ 0) :
+    ∃ t : K, ψ (t * c) ≠ 1 := by
+  by_contra hall
+  push Not at hall
+  apply hψ
+  refine DFunLike.ext _ _ fun x ↦ ?_
+  have := hall (x * c⁻¹)
+  rw [mul_assoc, inv_mul_cancel₀ hc, mul_one] at this
+  simp only [this, AddChar.one_apply]
+
 variable {V : Type*} [AddCommGroup V] [Module K V] [Fintype V]
 variable [DecidableEq V]
 
@@ -465,6 +518,56 @@ theorem mul_sum_mass_le_of_gap (hψ : ψ ≠ 1) (z : E) (w : V)
         2 * (1 - (ψ (χ w)).re) * mass ψ ρ χ z :=
       Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ S)
         fun χ _ _ ↦ hterm χ
+
+open Classical in
+/-- **Scalar-orbit moving-mass control**: the total mass of all characters
+nonvanishing at `w` is bounded by the sum of the squared displacements of
+the scalar multiples of `w`, at the character's positive gap constant.
+Passing to the scalar orbit is what handles a nontrivial character whose
+kernel is a proper subgroup of the coefficient field. -/
+theorem gap_mul_sum_mass_ne_zero_le (hψ : ψ ≠ 1) (z : E) (w : V) :
+    gap ψ * ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K V ↦ χ w ≠ 0), mass ψ ρ χ z ≤
+      ∑ t : K, ‖ρ (t • w) z - z‖ ^ 2 := by
+  classical
+  set A : Finset (Module.Dual K V) :=
+    Finset.univ.filter fun χ : Module.Dual K V ↦ χ w ≠ 0 with hA
+  have hsel : ∀ χ ∈ A, ∃ t : K, ψ (t * χ w) ≠ 1 := by
+    intro χ hχ
+    exact exists_smul_ne_one ψ hψ ((Finset.mem_filter.1 hχ).2)
+  set tsel : Module.Dual K V → K := fun χ ↦
+    if hχ : χ ∈ A then Classical.choose (hsel χ hχ) else 0 with htsel
+  have htspec : ∀ χ ∈ A, ψ (χ (tsel χ • w)) ≠ 1 := by
+    intro χ hχ
+    rw [map_smul, smul_eq_mul]
+    simp only [htsel]
+    rw [dif_pos hχ]
+    exact Classical.choose_spec (hsel χ hχ)
+  have hpartition : ∑ χ ∈ A, mass ψ ρ χ z =
+      ∑ t : K, ∑ χ ∈ A.filter (fun χ ↦ tsel χ = t), mass ψ ρ χ z :=
+    (Finset.sum_fiberwise A tsel (fun χ ↦ mass ψ ρ χ z)).symm
+  rw [hpartition, Finset.mul_sum]
+  refine Finset.sum_le_sum fun t _ ↦ ?_
+  have hsubset : A.filter (fun χ ↦ tsel χ = t) ⊆
+      Finset.univ.filter
+        (fun χ : Module.Dual K V ↦ ψ (χ (t • w)) ≠ 1) := by
+    intro χ hχ
+    obtain ⟨hχA, hχt⟩ := Finset.mem_filter.1 hχ
+    refine Finset.mem_filter.2 ⟨Finset.mem_univ χ, ?_⟩
+    rw [← hχt]
+    exact htspec χ hχA
+  calc
+    gap ψ * ∑ χ ∈ A.filter (fun χ ↦ tsel χ = t), mass ψ ρ χ z ≤
+        gap ψ * ∑ χ ∈ Finset.univ.filter
+          (fun χ : Module.Dual K V ↦ ψ (χ (t • w)) ≠ 1),
+            mass ψ ρ χ z :=
+      mul_le_mul_of_nonneg_left
+        (Finset.sum_le_sum_of_subset_of_nonneg hsubset
+          fun χ _ _ ↦ mass_nonneg ψ ρ hρ χ z)
+        (gap_pos ψ).le
+    _ ≤ ‖ρ (t • w) z - z‖ ^ 2 :=
+      mul_sum_mass_le_of_gap ψ ρ hρ hψ z (t • w) _ (gap ψ)
+        fun χ hχ ↦ gap_le ψ (Finset.mem_filter.1 hχ).2
 
 end Action
 

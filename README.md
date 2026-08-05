@@ -104,9 +104,13 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     every orthogonal representation of the elementary group, coordinate
     characters, and nontriviality of a nonzero plane character on one of
     the two coefficient functionals (`FreeRootPlaneMass`)
-  - [ ] A4. Moving-mass control: generator and unit-root displacement
-    bounds the mass of characters nontrivial on the plane, with the
-    explicit `2 * (1 - cos (2π/p))` constant
+  - [x] A4. Moving-mass control: an explicit positive character gap
+    constant (the finite minimum of `2 * (1 - Re ψ(c))` over nontrivial
+    values), and the scalar-orbit theorem bounding the total mass of all
+    characters nonvanishing at a vector by the summed squared displacements
+    of its scalar multiples, on any acting space and on the plane
+    (`CharacterMass.gap_mul_sum_mass_ne_zero_le`,
+    `FreeRootPlaneMass.gap_mul_sum_planeMass_ne_zero_le`)
   - [ ] A5. Finite-stage character valuation regions `A/B/C/D` over
     `ZMod p` and the least-detected-degree descent (port of
     `FreeRootCharacterValuation`)

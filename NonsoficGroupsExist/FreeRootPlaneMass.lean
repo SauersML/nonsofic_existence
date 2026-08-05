@@ -143,6 +143,22 @@ theorem mul_sum_planeMass_le_of_gap (hψ : ψ ≠ 1) (z : E)
   exact CharacterMass.mul_sum_mass_le_of_gap ψ _
     (planeAction_add X K i j k hik hjk n rho) hψ z w S δ hδ
 
+open Classical in
+/-- **Scalar-orbit moving-mass control on the plane**: the total mass of
+all characters nonvanishing at a plane vector is bounded, at the
+character's positive gap constant, by the summed squared displacements of
+the scalar multiples of that vector. -/
+theorem gap_mul_sum_planeMass_ne_zero_le (hψ : ψ ≠ 1) (z : E)
+    (w : PlaneVector X K n) :
+    CharacterMass.gap ψ *
+        ∑ χ ∈ Finset.univ.filter
+          (fun χ : Module.Dual K (PlaneVector X K n) ↦ χ w ≠ 0),
+          planeMass X K i j k hik hjk n rho ψ χ z ≤
+      ∑ t : K,
+        ‖rho (planePoint X K i j k hik hjk n (t • w)) z - z‖ ^ 2 :=
+  CharacterMass.gap_mul_sum_mass_ne_zero_le ψ _
+    (planeAction_add X K i j k hik hjk n rho) hψ z w
+
 /-- The first coordinate functional of a plane character. -/
 noncomputable def firstCoordinateChar
     (χ : Module.Dual K (PlaneVector X K n)) :
