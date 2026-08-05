@@ -443,7 +443,7 @@ private theorem concreteA2_exponentTwo :
     ∀ (i j : Fin 3) (hij : i ≠ j),
       ∀ g ∈ concreteA2.root i j hij, g ^ 2 = 1 := by
   intro i j hij g hg
-  exact elementaryRootSubgroup_sq i j hij g hg
+  exact elementaryRootSubgroup_pow_char 2 i j hij g hg
 
 private theorem concreteA2_existsConstantProjectionBound :
     ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧

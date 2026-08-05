@@ -135,7 +135,7 @@ theorem elementary_rootFixedSubspaces_epsilonOrthogonal
   apply rootFixedSubspaces_epsilonOrthogonal_of_root_exponent_two
     (elementaryA2System R)
   intro i j hij g hg
-  exact elementaryRootSubgroup_sq i j hij g hg
+  exact elementaryRootSubgroup_pow_char 2 i j hij g hg
   exact hno
 
 end A2System

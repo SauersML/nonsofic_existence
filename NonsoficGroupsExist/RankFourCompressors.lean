@@ -2,12 +2,13 @@ import NonsoficGroupsExist.ElementaryStabilization
 import NonsoficGroupsExist.LeavittMatrixCompression
 
 /-!
-# The explicit rank-four compressor words
+# The explicit characteristic-free rank-four compressor words
 
-Two compressor matrices for the characteristic-two construction are defined
-here as literal words in elementary transvections, so their membership
-in `EL₄` is proved.  We use `Fin 4`, with the first three coordinates forming
-the core; `ElementaryStabilization` followed by reindexing embeds that core.
+Two compressor matrices over any ring carrying a binary Leavitt family are
+defined here as literal words in elementary transvections, so their membership
+in `EL₄` is proved without a characteristic or `K₁` assumption.  We use
+`Fin 4`, with the first three coordinates forming the core;
+`ElementaryStabilization` followed by reindexing embeds that core.
 
 The matrix calculations below prove that the involution squares to one and
 that conjugation by either compressor word implements `compressionEnd` on the

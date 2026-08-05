@@ -104,11 +104,14 @@ theorem rightStage_fg (X Y : Subgroup G) (a : StageIndex X Y) :
     (rightStage X Y a).FG :=
   ⟨a.2.image Subtype.val, rfl⟩
 
-/-- A finitely generated commuting subgroup of exponent two is finite. -/
-theorem finite_of_fg_commute_exponent_two (H : Subgroup G)
+/-- A finitely generated commuting subgroup of one fixed positive exponent is
+finite.  This is the finite-stage reduction needed over every finite
+characteristic, not only in exponent two. -/
+theorem finite_of_fg_commute_boundedExponent (H : Subgroup G)
+    (n : ℕ) (hn : 0 < n)
     (hfg : H.FG)
     (hcomm : ∀ x ∈ H, ∀ y ∈ H, Commute x y)
-    (hexp : ∀ x ∈ H, x ^ 2 = 1) :
+    (hexp : ∀ x ∈ H, x ^ n = 1) :
     Finite H := by
   let groupH : Group H := inferInstance
   letI : CommGroup H :=
@@ -118,16 +121,17 @@ theorem finite_of_fg_commute_exponent_two (H : Subgroup G)
   apply CommGroup.finite_of_fg_torsion H
   intro x
   rw [isOfFinOrder_iff_pow_eq_one]
-  refine ⟨2, by omega, ?_⟩
+  refine ⟨n, hn, ?_⟩
   apply Subtype.ext
   exact hexp x.1 x.2
 
-/-- Finite stages inside a commuting exponent-two subgroup are finite. -/
+/-- Finite stages inside a commuting bounded-exponent subgroup are finite. -/
 theorem finite_leftStage (X Y : Subgroup G) (a : StageIndex X Y)
+    (n : ℕ) (hn : 0 < n)
     (hcomm : ∀ x ∈ X, ∀ y ∈ X, Commute x y)
-    (hexp : ∀ x ∈ X, x ^ 2 = 1) :
+    (hexp : ∀ x ∈ X, x ^ n = 1) :
     Finite (leftStage X Y a) := by
-  apply finite_of_fg_commute_exponent_two (leftStage X Y a)
+  apply finite_of_fg_commute_boundedExponent (leftStage X Y a) n hn
     (leftStage_fg X Y a)
   · intro x hx y hy
     exact hcomm x ((leftStage_le X Y a) hx) y ((leftStage_le X Y a) hy)
@@ -135,10 +139,11 @@ theorem finite_leftStage (X Y : Subgroup G) (a : StageIndex X Y)
     exact hexp x ((leftStage_le X Y a) hx)
 
 theorem finite_rightStage (X Y : Subgroup G) (a : StageIndex X Y)
+    (n : ℕ) (hn : 0 < n)
     (hcomm : ∀ x ∈ Y, ∀ y ∈ Y, Commute x y)
-    (hexp : ∀ x ∈ Y, x ^ 2 = 1) :
+    (hexp : ∀ x ∈ Y, x ^ n = 1) :
     Finite (rightStage X Y a) := by
-  apply finite_of_fg_commute_exponent_two (rightStage X Y a)
+  apply finite_of_fg_commute_boundedExponent (rightStage X Y a) n hn
     (rightStage_fg X Y a)
   · intro x hx y hy
     exact hcomm x ((rightStage_le X Y a) hx) y ((rightStage_le X Y a) hy)

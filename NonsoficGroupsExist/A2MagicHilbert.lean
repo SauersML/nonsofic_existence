@@ -805,7 +805,7 @@ theorem elementary_exists_rootSet_isKazhdan
         (elementaryA2System R).rootSet kappa := by
   apply exists_rootSet_isKazhdan (elementaryA2System R)
   intro i j hij g hg
-  exact elementaryRootSubgroup_sq i j hij g hg
+  exact elementaryRootSubgroup_pow_char 2 i j hij g hg
 
 end A2MagicHilbert
 end NonsoficGroupsExist

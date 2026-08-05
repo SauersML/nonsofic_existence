@@ -51,9 +51,9 @@ theorem epsilonOrthogonal
       (ClassTwoApproximation.rightStage_le X Y a)
       (ClassTwoApproximation.leftStage_le X Y a)
   letI : Finite X₀ :=
-    ClassTwoApproximation.finite_leftStage X Y a hXcomm hXexp
+    ClassTwoApproximation.finite_leftStage X Y a 2 (by omega) hXcomm hXexp
   letI : Finite Y₀ :=
-    ClassTwoApproximation.finite_rightStage X Y a hYcomm hYexp
+    ClassTwoApproximation.finite_rightStage X Y a 2 (by omega) hYcomm hYexp
   have hC₀fg : C₀.FG :=
     ClassTwoApproximation.commutator_fg_of_finite Y₀ X₀
   have hC₀comm : ∀ c ∈ C₀, ∀ d ∈ C₀, Commute c d := by
@@ -63,8 +63,8 @@ theorem epsilonOrthogonal
     intro c hc
     exact hCexp c (hC₀C hc)
   letI : Finite C₀ :=
-    ClassTwoApproximation.finite_of_fg_commute_exponent_two
-      C₀ hC₀fg hC₀comm hC₀exp
+    ClassTwoApproximation.finite_of_fg_commute_boundedExponent
+      C₀ 2 (by omega) hC₀fg hC₀comm hC₀exp
   have hYX : ⁅Y₀, X₀⁆ ≤ C₀ := le_rfl
   have hXC : ⁅X₀, C₀⁆ ≤ C₀ := by
     apply Subgroup.commutator_le.mpr

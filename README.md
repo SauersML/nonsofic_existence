@@ -46,6 +46,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   involution, conjugation, and generation identities over every ring carrying
   a binary Leavitt family, with no characteristic assumption and no `K₁`
   input
+- [x] Generalize elementary-root exponent identities and the finite
+  class-two stage reduction from exponent two to arbitrary positive bounded
+  exponent
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route

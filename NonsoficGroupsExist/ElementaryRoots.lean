@@ -39,11 +39,21 @@ theorem elementaryRoot_mul (i j : I) (hij : i ≠ j) (a b : R) :
   rw [elementaryRoot_mul]
   simp
 
-/-- In characteristic two every elementary root element is an involution. -/
-theorem elementaryRoot_sq [CharP R 2]
+/-- Powers in an elementary root group are additive multiples of the root
+coefficient. -/
+theorem elementaryRoot_pow (i j : I) (hij : i ≠ j) (a : R) (n : ℕ) :
+    elementaryRoot i j hij a ^ n = elementaryRoot i j hij (n • a) := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [pow_succ, ih, elementaryRoot_mul, succ_nsmul]
+
+/-- In characteristic `p`, every elementary root element has exponent
+dividing `p`. -/
+theorem elementaryRoot_pow_char (p : ℕ) [CharP R p]
     (i j : I) (hij : i ≠ j) (a : R) :
-    elementaryRoot i j hij a ^ 2 = 1 := by
-  rw [pow_two, elementaryRoot_mul, CharTwo.add_self_eq_zero,
+    elementaryRoot i j hij a ^ p = 1 := by
+  rw [elementaryRoot_pow, nsmul_eq_mul, CharP.cast_eq_zero, zero_mul,
     elementaryRoot_zero]
 
 /-- The additive elementary root subgroup `Xᵢⱼ`. -/
@@ -63,14 +73,14 @@ theorem mem_elementaryRootSubgroup_iff (i j : I) (hij : i ≠ j)
     g ∈ elementaryRootSubgroup i j hij ↔
       ∃ a : R, elementaryRoot i j hij a = g := Iff.rfl
 
-/-- Every element of an elementary root subgroup has exponent two in
-characteristic two. -/
-theorem elementaryRootSubgroup_sq [CharP R 2]
+/-- Every element of an elementary root subgroup has exponent dividing the
+characteristic. -/
+theorem elementaryRootSubgroup_pow_char (p : ℕ) [CharP R p]
     (i j : I) (hij : i ≠ j) (g : elementaryGroup I R)
     (hg : g ∈ elementaryRootSubgroup i j hij) :
-    g ^ 2 = 1 := by
+    g ^ p = 1 := by
   obtain ⟨a, rfl⟩ := hg
-  exact elementaryRoot_sq i j hij a
+  exact elementaryRoot_pow_char p i j hij a
 
 /-- The union of all elementary root subgroups. -/
 def elementaryRootSet (I R : Type*) [Fintype I] [DecidableEq I] [Ring R] :
