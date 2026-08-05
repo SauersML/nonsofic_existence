@@ -273,7 +273,11 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     property `(T)` internally rather than hypothesized.  The final
     Theorem C quotient claims (surjections onto the Theorem B list)
     await the `B4` scalar input
-  - [ ] C4. Audit
+  - [x] C4. Audit: the full aggregator builds (3690 jobs), the source
+    scan passes, and the kernel audit covers 6575 declarations with
+    closure exactly `[propext, Classical.choice, Quot.sound]`, all
+    scans at zero and the structural-`Nonempty` ratchet tightened to
+    the audited count
 - [x] Define Thompson's group `V` and identify the manuscript's tree-table
   and corner copies with it (the existence proof currently uses a stronger
   direct finite obstruction instead), through the following checkpoints:
