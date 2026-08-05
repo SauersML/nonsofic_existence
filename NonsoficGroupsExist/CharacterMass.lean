@@ -1,10 +1,12 @@
 import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
+import Mathlib.Analysis.InnerProductSpace.LinearMap
+import Mathlib.Analysis.Complex.Basic
+import Mathlib.Algebra.Group.AddChar
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.FieldTheory.Finiteness
 
 /-!
-# Character masses of finite prime-exponent orthogonal actions
+# Character masses of finite-field orthogonal actions
 
 The characteristic-two Fourier machinery decomposes a real orthogonal
 representation of an elementary abelian `2`-group into simultaneous `±1`
@@ -12,14 +14,19 @@ eigenspaces.  In odd characteristic the irreducible real pieces are rotation
 planes, so sign eigenspaces do not exist; the correct replacement is the
 family of character masses: the discrete Fourier coefficients of the
 autocorrelation function `v ↦ ⟪z, ρ v z⟫` over the dual of the acting
-`ZMod p`-vector space.  This file proves the four foundational facts of that
-calculus, for every prime `p`:
+vector space.  This file proves the foundational facts of that calculus over
+an arbitrary finite coefficient field `K`, relative to one fixed nontrivial
+complex additive character of `K`:
 
 * positivity — each mass is a genuine sum of two squared component norms;
 * conservation — the masses of `z` sum to `‖z‖ ^ 2`;
 * inversion — the autocorrelation is recovered from the masses;
 * displacement — `‖ρ w z - z‖ ^ 2` is the mass-weighted sum of
-  `2 * (1 - Re χ(w))`.
+  `2 * (1 - Re χ(w))`;
+* equivariance — masses are invariant under conjugating the action and
+  transported functorially under automorphisms of the acting space;
+* moving-mass control — a uniform angle gap converts one displacement into
+  a bound on the total mass of any set of characters.
 
 The displacement identity is what converts small generator displacement into
 concentration of mass at characters vanishing on the generator, which is the
@@ -28,119 +35,105 @@ engine of the finite-stage relative-property-`(T)` argument.
 
 namespace NonsoficGroupsExist
 
-namespace PrimeCharacterMass
+namespace CharacterMass
 
 open Finset
 
-variable {p : ℕ} [Fact p.Prime]
+variable {K : Type*} [Field K] [Fintype K]
+variable (ψ : AddChar K ℂ)
 
-instance (priority := 90) : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+/-- Every value of a complex additive character of a finite group is a root
+of unity, hence has norm one. -/
+theorem norm_apply (c : K) : ‖ψ c‖ = 1 := by
+  have hpow : ψ c ^ Fintype.card K = 1 := by
+    rw [← AddChar.map_nsmul_eq_pow, card_nsmul_eq_zero,
+      AddChar.map_zero_eq_one]
+  exact Complex.norm_eq_one_of_pow_eq_one hpow Fintype.card_ne_zero
 
-/-- The standard complex character value of a `ZMod p` element. -/
-noncomputable def weight (m : ZMod p) : ℂ := ZMod.stdAddChar m
-
-theorem weight_zero : weight (0 : ZMod p) = 1 :=
-  AddChar.map_zero_eq_one _
-
-theorem weight_add (a b : ZMod p) :
-    weight (a + b) = weight a * weight b :=
-  AddChar.map_add_eq_mul _ a b
-
-theorem weight_ne_one {m : ZMod p} (hm : m ≠ 0) : weight m ≠ 1 := by
-  intro h
-  apply hm
-  apply ZMod.injective_stdAddChar (N := p)
-  rw [show ZMod.stdAddChar (0 : ZMod p) = 1 from AddChar.map_zero_eq_one _]
-  exact h
-
-theorem norm_weight (m : ZMod p) : ‖weight m‖ = 1 := by
-  rw [weight, ZMod.stdAddChar_apply]
-  exact Circle.norm_coe _
-
-theorem conj_weight (m : ZMod p) :
-    (starRingEnd ℂ) (weight m) = weight (-m) := by
-  have hmul : weight m * weight (-m) = 1 := by
-    rw [← weight_add, add_neg_cancel, weight_zero]
-  have hinv : weight (-m) = (weight m)⁻¹ :=
+theorem conj_apply (c : K) :
+    (starRingEnd ℂ) (ψ c) = ψ (-c) := by
+  have hmul : ψ c * ψ (-c) = 1 := by
+    rw [← AddChar.map_add_eq_mul, add_neg_cancel, AddChar.map_zero_eq_one]
+  have hinv : ψ (-c) = (ψ c)⁻¹ :=
     eq_inv_of_mul_eq_one_right hmul
-  rw [hinv, Complex.inv_def, Complex.normSq_eq_norm_sq, norm_weight]
+  rw [hinv, Complex.inv_def, Complex.normSq_eq_norm_sq, norm_apply]
   simp
 
 /-- The product of real parts, resolved through the character algebra. -/
-theorem weight_re_mul_re (a b : ZMod p) :
-    (weight a).re * (weight b).re =
-      ((weight (a - b)).re + (weight (a + b)).re) / 2 := by
-  have h1 : weight (a - b) = weight a * (starRingEnd ℂ) (weight b) := by
-    rw [conj_weight, ← weight_add, sub_eq_add_neg]
-  have h2 : weight (a + b) = weight a * weight b := weight_add a b
+theorem re_mul_re (a b : K) :
+    (ψ a).re * (ψ b).re =
+      ((ψ (a - b)).re + (ψ (a + b)).re) / 2 := by
+  have h1 : ψ (a - b) = ψ a * (starRingEnd ℂ) (ψ b) := by
+    rw [conj_apply, ← AddChar.map_add_eq_mul, sub_eq_add_neg]
+  have h2 : ψ (a + b) = ψ a * ψ b := AddChar.map_add_eq_mul ψ a b
   rw [h1, h2]
   simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im]
   ring
 
 /-- The cosine-difference resolution used for the component expansion. -/
-theorem weight_re_mul_re_add_im_mul_im (a b : ZMod p) :
-    (weight a).re * (weight b).re + (weight a).im * (weight b).im =
-      (weight (a - b)).re := by
-  have h1 : weight (a - b) = weight a * (starRingEnd ℂ) (weight b) := by
-    rw [conj_weight, ← weight_add, sub_eq_add_neg]
+theorem re_mul_re_add_im_mul_im (a b : K) :
+    (ψ a).re * (ψ b).re + (ψ a).im * (ψ b).im =
+      (ψ (a - b)).re := by
+  have h1 : ψ (a - b) = ψ a * (starRingEnd ℂ) (ψ b) := by
+    rw [conj_apply, ← AddChar.map_add_eq_mul, sub_eq_add_neg]
   rw [h1]
   simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im]
   ring
 
-variable {V : Type*} [AddCommGroup V] [Module (ZMod p) V] [Fintype V]
+variable {V : Type*} [AddCommGroup V] [Module K V] [Fintype V]
 variable [DecidableEq V]
 
-noncomputable instance : Fintype (Module.Dual (ZMod p) V) := by
-  haveI : Finite (Module.Dual (ZMod p) V) :=
-    Finite.of_injective (fun φ ↦ (φ : V → ZMod p)) DFunLike.coe_injective
+noncomputable instance : Fintype (Module.Dual K V) := by
+  haveI : Finite (Module.Dual K V) :=
+    Finite.of_injective (fun φ ↦ (φ : V → K)) DFunLike.coe_injective
   exact Fintype.ofFinite _
 
 omit [DecidableEq V] in
-/-- The dual of a finite `ZMod p`-vector space has the same cardinality. -/
+/-- The dual of a finite vector space has the same cardinality. -/
 theorem card_dual :
-    Fintype.card (Module.Dual (ZMod p) V) = Fintype.card V := by
-  haveI : Module.Finite (ZMod p) V := Module.Finite.of_finite
-  rw [Module.card_eq_pow_finrank (K := ZMod p)
-      (V := Module.Dual (ZMod p) V),
-    Module.card_eq_pow_finrank (K := ZMod p) (V := V),
+    Fintype.card (Module.Dual K V) = Fintype.card V := by
+  haveI : Module.Finite K V := Module.Finite.of_finite
+  rw [Module.card_eq_pow_finrank (K := K) (V := Module.Dual K V),
+    Module.card_eq_pow_finrank (K := K) (V := V),
     Subspace.dual_finrank_eq]
 
-/-- Orthogonality over the dual: the character sum at a point detects
-zero. -/
-theorem sum_dual_weight (a : V) :
-    ∑ φ : Module.Dual (ZMod p) V, weight (φ a) =
+/-- Orthogonality over the dual: for a nontrivial character, the dual
+character sum at a point detects zero. -/
+theorem sum_dual_apply (hψ : ψ ≠ 1) (a : V) :
+    ∑ φ : Module.Dual K V, ψ (φ a) =
       if a = 0 then (Fintype.card V : ℂ) else 0 := by
   rcases eq_or_ne a 0 with rfl | ha
-  · simp [weight_zero, card_dual]
+  · simp [card_dual]
   · rw [if_neg ha]
-    obtain ⟨φ₀, hφ₀⟩ : ∃ φ₀ : Module.Dual (ZMod p) V, φ₀ a ≠ 0 := by
-      by_contra hall
-      push Not at hall
-      exact ha ((Module.forall_dual_apply_eq_zero_iff (ZMod p) a).1 hall)
+    obtain ⟨c, hc⟩ := AddChar.ne_one_iff.1 hψ
+    obtain ⟨φ', hφ'⟩ := Module.Projective.exists_dual_eq_one K ha
+    have hφ₀ : ψ ((c • φ') a) ≠ 1 := by
+      rw [LinearMap.smul_apply, hφ', smul_eq_mul, mul_one]
+      exact hc
     have hreindex :
-        ∑ φ : Module.Dual (ZMod p) V, weight ((φ + φ₀) a) =
-          ∑ φ : Module.Dual (ZMod p) V, weight (φ a) :=
-      Fintype.sum_equiv (Equiv.addRight φ₀) _ _ (fun φ ↦ rfl)
+        ∑ φ : Module.Dual K V, ψ ((φ + c • φ') a) =
+          ∑ φ : Module.Dual K V, ψ (φ a) :=
+      Fintype.sum_equiv (Equiv.addRight (c • φ')) _ _ (fun φ ↦ rfl)
     have hshift :
-        ∑ φ : Module.Dual (ZMod p) V, weight ((φ + φ₀) a) =
-          (∑ φ : Module.Dual (ZMod p) V, weight (φ a)) * weight (φ₀ a) := by
+        ∑ φ : Module.Dual K V, ψ ((φ + c • φ') a) =
+          (∑ φ : Module.Dual K V, ψ (φ a)) * ψ ((c • φ') a) := by
       rw [Finset.sum_mul]
       apply Finset.sum_congr rfl
       intro φ _
-      rw [LinearMap.add_apply, weight_add]
+      rw [LinearMap.add_apply, AddChar.map_add_eq_mul]
     have hzero :
-        (∑ φ : Module.Dual (ZMod p) V, weight (φ a)) *
-          (1 - weight (φ₀ a)) = 0 := by
+        (∑ φ : Module.Dual K V, ψ (φ a)) *
+          (1 - ψ ((c • φ') a)) = 0 := by
       rw [mul_sub, mul_one, ← hshift, hreindex, sub_self]
     rcases mul_eq_zero.1 hzero with h | h
     · exact h
-    · exact absurd (sub_eq_zero.1 h).symm (weight_ne_one hφ₀)
+    · exact absurd (sub_eq_zero.1 h).symm hφ₀
 
 /-- Real-part form of the dual orthogonality. -/
-theorem sum_dual_weight_re (a : V) :
-    ∑ φ : Module.Dual (ZMod p) V, (weight (φ a)).re =
+theorem sum_dual_apply_re (hψ : ψ ≠ 1) (a : V) :
+    ∑ φ : Module.Dual K V, (ψ (φ a)).re =
       if a = 0 then (Fintype.card V : ℝ) else 0 := by
-  have h := congrArg Complex.re (sum_dual_weight (p := p) a)
+  have h := congrArg Complex.re (sum_dual_apply ψ hψ a)
   rw [Complex.re_sum] at h
   rcases eq_or_ne a 0 with rfl | ha
   · simpa using h
@@ -151,9 +144,42 @@ variable (ρ : V → (E ≃ₗᵢ[ℝ] E))
 
 /-- The character mass of a vector at a dual functional: the Fourier
 coefficient of the autocorrelation function of the orbit. -/
-noncomputable def mass (χ : Module.Dual (ZMod p) V) (z : E) : ℝ :=
+noncomputable def mass (χ : Module.Dual K V) (z : E) : ℝ :=
   (Fintype.card V : ℝ)⁻¹ *
-    ∑ v : V, (weight (χ v)).re * inner ℝ z (ρ v z)
+    ∑ v : V, (ψ (χ v)).re * inner ℝ z (ρ v z)
+
+omit [Fintype K] [DecidableEq V] in
+/-- **Equivariance under conjugation**: conjugating the action and the
+vector by one isometry leaves every character mass unchanged. -/
+theorem mass_conj (g : E ≃ₗᵢ[ℝ] E) (χ : Module.Dual K V) (z : E) :
+    mass ψ (fun v ↦ g * ρ v * g⁻¹) χ (g z) = mass ψ ρ χ z := by
+  unfold mass
+  congr 1
+  refine Finset.sum_congr rfl fun v _ ↦ ?_
+  congr 1
+  have happly : (g * ρ v * g⁻¹) (g z) = g (ρ v z) := by
+    change g (ρ v (g⁻¹ (g z))) = g (ρ v z)
+    congr 1
+    change ρ v (g.symm (g z)) = ρ v z
+    rw [g.symm_apply_apply]
+  rw [happly]
+  exact g.inner_map_map z (ρ v z)
+
+omit [Fintype K] [DecidableEq V] in
+/-- **Equivariance under automorphisms**: precomposing the action with a
+linear automorphism of the acting space transports each mass to the mass at
+the precomposed dual functional. -/
+theorem mass_precomp (σ : V ≃ₗ[K] V) (χ : Module.Dual K V) (z : E) :
+    mass ψ (fun v ↦ ρ (σ v)) χ z =
+      mass ψ ρ (χ.comp (σ.symm : V →ₗ[K] V)) z := by
+  unfold mass
+  congr 1
+  refine Fintype.sum_equiv σ.toEquiv _ _ fun v ↦ ?_
+  congr 2
+  rw [LinearMap.comp_apply]
+  congr 1
+  change χ v = χ (σ.symm (σ v))
+  rw [σ.symm_apply_apply]
 
 section Action
 
@@ -161,7 +187,7 @@ variable (hρ : ∀ v w : V, ρ (v + w) = ρ v * ρ w)
 
 include hρ
 
-omit [Module (ZMod p) V] [Fintype V] [DecidableEq V] in
+omit [Module K V] [Fintype V] [DecidableEq V] in
 theorem action_zero : ρ 0 = 1 := by
   have h := hρ 0 0
   rw [add_zero] at h
@@ -170,13 +196,13 @@ theorem action_zero : ρ 0 = 1 := by
     _ = ρ 0 * (ρ 0)⁻¹ := by rw [← h]
     _ = 1 := by group
 
-omit [Module (ZMod p) V] [Fintype V] [DecidableEq V] in
+omit [Module K V] [Fintype V] [DecidableEq V] in
 theorem action_neg (v : V) : ρ (-v) = (ρ v)⁻¹ := by
   have h : ρ (-v) * ρ v = 1 := by
     rw [← hρ, neg_add_cancel, action_zero ρ hρ]
   exact eq_inv_of_mul_eq_one_left h
 
-omit [Module (ZMod p) V] [Fintype V] [DecidableEq V] in
+omit [Module K V] [Fintype V] [DecidableEq V] in
 /-- The autocorrelation is an even function. -/
 theorem autocorrelation_neg (z : E) (v : V) :
     inner ℝ z (ρ (-v) z) = inner ℝ z (ρ v z) := by
@@ -189,7 +215,7 @@ theorem autocorrelation_neg (z : E) (v : V) :
       rfl
     _ = inner ℝ z (ρ v z) := real_inner_comm _ _
 
-omit [Module (ZMod p) V] [Fintype V] [DecidableEq V] in
+omit [Module K V] [Fintype V] [DecidableEq V] in
 /-- The two-point correlation depends only on the difference. -/
 theorem inner_action_action (z : E) (v w : V) :
     inner ℝ (ρ v z) (ρ w z) = inner ℝ z (ρ (w - v) z) := by
@@ -207,18 +233,18 @@ theorem inner_action_action (z : E) (v w : V) :
 omit [DecidableEq V] in
 /-- **Positivity**: each mass is the squared norm of the cosine component
 plus the squared norm of the sine component. -/
-theorem mass_eq_norm_sq_add_norm_sq (χ : Module.Dual (ZMod p) V) (z : E) :
-    mass ρ χ z =
+theorem mass_eq_norm_sq_add_norm_sq (χ : Module.Dual K V) (z : E) :
+    mass ψ ρ χ z =
       ‖(Fintype.card V : ℝ)⁻¹ •
-          ∑ v : V, (weight (χ v)).re • ρ v z‖ ^ 2 +
+          ∑ v : V, (ψ (χ v)).re • ρ v z‖ ^ 2 +
         ‖(Fintype.card V : ℝ)⁻¹ •
-          ∑ v : V, (weight (χ v)).im • ρ v z‖ ^ 2 := by
+          ∑ v : V, (ψ (χ v)).im • ρ v z‖ ^ 2 := by
   have hcard : ((Fintype.card V : ℝ)) ≠ 0 := by
     exact_mod_cast Fintype.card_ne_zero
   have hre : ‖(Fintype.card V : ℝ)⁻¹ •
-      ∑ v : V, (weight (χ v)).re • ρ v z‖ ^ 2 =
+      ∑ v : V, (ψ (χ v)).re • ρ v z‖ ^ 2 =
     (Fintype.card V : ℝ)⁻¹ ^ 2 * ∑ v : V, ∑ w : V,
-      (weight (χ v)).re * (weight (χ w)).re *
+      (ψ (χ v)).re * (ψ (χ w)).re *
         inner ℝ z (ρ (w - v) z) := by
     rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs,
       ← real_inner_self_eq_norm_sq, sum_inner]
@@ -230,9 +256,9 @@ theorem mass_eq_norm_sq_add_norm_sq (χ : Module.Dual (ZMod p) V) (z : E) :
       inner_action_action ρ hρ]
     ring
   have him : ‖(Fintype.card V : ℝ)⁻¹ •
-      ∑ v : V, (weight (χ v)).im • ρ v z‖ ^ 2 =
+      ∑ v : V, (ψ (χ v)).im • ρ v z‖ ^ 2 =
     (Fintype.card V : ℝ)⁻¹ ^ 2 * ∑ v : V, ∑ w : V,
-      (weight (χ v)).im * (weight (χ w)).im *
+      (ψ (χ v)).im * (ψ (χ w)).im *
         inner ℝ z (ρ (w - v) z) := by
     rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs,
       ← real_inner_self_eq_norm_sq, sum_inner]
@@ -245,30 +271,30 @@ theorem mass_eq_norm_sq_add_norm_sq (χ : Module.Dual (ZMod p) V) (z : E) :
     ring
   rw [hre, him, ← mul_add, ← Finset.sum_add_distrib]
   have hinner : ∀ v : V, ((∑ w : V,
-      (weight (χ v)).re * (weight (χ w)).re *
+      (ψ (χ v)).re * (ψ (χ w)).re *
         inner ℝ z (ρ (w - v) z)) +
       ∑ w : V,
-        (weight (χ v)).im * (weight (χ w)).im *
+        (ψ (χ v)).im * (ψ (χ w)).im *
           inner ℝ z (ρ (w - v) z)) =
-      ∑ u : V, (weight (χ u)).re * inner ℝ z (ρ u z) := by
+      ∑ u : V, (ψ (χ u)).re * inner ℝ z (ρ u z) := by
     intro v
     rw [← Finset.sum_add_distrib]
     calc
-      (∑ w : V, ((weight (χ v)).re * (weight (χ w)).re *
+      (∑ w : V, ((ψ (χ v)).re * (ψ (χ w)).re *
             inner ℝ z (ρ (w - v) z) +
-          (weight (χ v)).im * (weight (χ w)).im *
+          (ψ (χ v)).im * (ψ (χ w)).im *
             inner ℝ z (ρ (w - v) z))) =
-          ∑ w : V, (weight (χ (v - w))).re *
+          ∑ w : V, (ψ (χ (v - w))).re *
             inner ℝ z (ρ (w - v) z) := by
         refine Finset.sum_congr rfl fun w _ ↦ ?_
-        rw [map_sub χ v w, ← weight_re_mul_re_add_im_mul_im (χ v) (χ w)]
+        rw [map_sub χ v w, ← re_mul_re_add_im_mul_im ψ (χ v) (χ w)]
         ring
-      _ = ∑ u : V, (weight (χ u)).re *
+      _ = ∑ u : V, (ψ (χ u)).re *
             inner ℝ z (ρ (v - u - v) z) :=
         (Fintype.sum_equiv (Equiv.subLeft v) _ _ (fun u ↦ by
           rw [Equiv.subLeft_apply]
           rw [show v - (v - u) = u by abel])).symm
-      _ = ∑ u : V, (weight (χ u)).re * inner ℝ z (ρ u z) := by
+      _ = ∑ u : V, (ψ (χ u)).re * inner ℝ z (ρ u z) := by
         refine Finset.sum_congr rfl fun u _ ↦ ?_
         rw [show v - u - v = -u by abel, autocorrelation_neg ρ hρ]
   rw [Finset.sum_congr rfl fun v _ ↦ hinner v, Finset.sum_const,
@@ -276,24 +302,33 @@ theorem mass_eq_norm_sq_add_norm_sq (χ : Module.Dual (ZMod p) V) (z : E) :
   field_simp
 
 omit [DecidableEq V] in
-theorem mass_nonneg (χ : Module.Dual (ZMod p) V) (z : E) :
-    0 ≤ mass ρ χ z := by
-  rw [mass_eq_norm_sq_add_norm_sq ρ hρ]
+theorem mass_nonneg (χ : Module.Dual K V) (z : E) :
+    0 ≤ mass ψ ρ χ z := by
+  rw [mass_eq_norm_sq_add_norm_sq ψ ρ hρ]
   positivity
 
+omit [DecidableEq V] in
+/-- The trivial-character mass is exactly the squared norm of the orbit
+average. -/
+theorem mass_zero_eq_norm_average_sq (z : E) :
+    mass ψ ρ (0 : Module.Dual K V) z =
+      ‖(Fintype.card V : ℝ)⁻¹ • ∑ v : V, ρ v z‖ ^ 2 := by
+  rw [mass_eq_norm_sq_add_norm_sq ψ ρ hρ]
+  simp
+
 /-- **Conservation**: the masses sum to the squared norm. -/
-theorem sum_mass (z : E) :
-    ∑ χ : Module.Dual (ZMod p) V, mass ρ χ z = ‖z‖ ^ 2 := by
+theorem sum_mass (hψ : ψ ≠ 1) (z : E) :
+    ∑ χ : Module.Dual K V, mass ψ ρ χ z = ‖z‖ ^ 2 := by
   have hcard : ((Fintype.card V : ℝ)) ≠ 0 := by
     exact_mod_cast Fintype.card_ne_zero
   unfold mass
   rw [← Finset.mul_sum, Finset.sum_comm]
-  rw [show (∑ v : V, ∑ χ : Module.Dual (ZMod p) V,
-      (weight (χ v)).re * inner ℝ z (ρ v z)) =
+  rw [show (∑ v : V, ∑ χ : Module.Dual K V,
+      (ψ (χ v)).re * inner ℝ z (ρ v z)) =
     ∑ v : V, (if v = 0 then (Fintype.card V : ℝ) else 0) *
       inner ℝ z (ρ v z) from
     Finset.sum_congr rfl fun v _ ↦ by
-      rw [← Finset.sum_mul, sum_dual_weight_re]]
+      rw [← Finset.sum_mul, sum_dual_apply_re ψ hψ]]
   rw [show (∑ v : V, (if v = 0 then (Fintype.card V : ℝ) else 0) *
       inner ℝ z (ρ v z)) =
     ∑ v : V, (if v = 0 then
@@ -310,17 +345,17 @@ theorem sum_mass (z : E) :
   field_simp
 
 /-- **Inversion**: the autocorrelation is recovered from the masses. -/
-theorem sum_weight_re_mass (z : E) (w : V) :
-    ∑ χ : Module.Dual (ZMod p) V, (weight (χ w)).re * mass ρ χ z =
+theorem sum_apply_re_mass (hψ : ψ ≠ 1) (z : E) (w : V) :
+    ∑ χ : Module.Dual K V, (ψ (χ w)).re * mass ψ ρ χ z =
       inner ℝ z (ρ w z) := by
   have hcard : ((Fintype.card V : ℝ)) ≠ 0 := by
     exact_mod_cast Fintype.card_ne_zero
   unfold mass
-  have h1 : ∀ χ : Module.Dual (ZMod p) V,
-      (weight (χ w)).re * ((Fintype.card V : ℝ)⁻¹ *
-          ∑ v : V, (weight (χ v)).re * inner ℝ z (ρ v z)) =
+  have h1 : ∀ χ : Module.Dual K V,
+      (ψ (χ w)).re * ((Fintype.card V : ℝ)⁻¹ *
+          ∑ v : V, (ψ (χ v)).re * inner ℝ z (ρ v z)) =
         (Fintype.card V : ℝ)⁻¹ *
-          ∑ v : V, ((weight (χ w)).re * (weight (χ v)).re) *
+          ∑ v : V, ((ψ (χ w)).re * (ψ (χ v)).re) *
             inner ℝ z (ρ v z) := by
     intro χ
     rw [mul_left_comm]
@@ -330,22 +365,22 @@ theorem sum_weight_re_mass (z : E) (w : V) :
   rw [Finset.sum_congr rfl fun χ _ ↦ h1 χ, ← Finset.mul_sum,
     Finset.sum_comm]
   have h2 : ∀ v : V,
-      (∑ χ : Module.Dual (ZMod p) V,
-        ((weight (χ w)).re * (weight (χ v)).re) * inner ℝ z (ρ v z)) =
+      (∑ χ : Module.Dual K V,
+        ((ψ (χ w)).re * (ψ (χ v)).re) * inner ℝ z (ρ v z)) =
       (((if w - v = 0 then (Fintype.card V : ℝ) else 0) +
         (if w + v = 0 then (Fintype.card V : ℝ) else 0)) / 2) *
           inner ℝ z (ρ v z) := by
     intro v
     rw [← Finset.sum_mul]
     congr 1
-    rw [show (∑ χ : Module.Dual (ZMod p) V,
-        (weight (χ w)).re * (weight (χ v)).re) =
-      ∑ χ : Module.Dual (ZMod p) V,
-        ((weight (χ (w - v))).re + (weight (χ (w + v))).re) / 2 from
+    rw [show (∑ χ : Module.Dual K V,
+        (ψ (χ w)).re * (ψ (χ v)).re) =
+      ∑ χ : Module.Dual K V,
+        ((ψ (χ (w - v))).re + (ψ (χ (w + v))).re) / 2 from
       Finset.sum_congr rfl fun χ _ ↦ by
-        rw [weight_re_mul_re, ← map_sub, ← map_add]]
+        rw [re_mul_re, ← map_sub, ← map_add]]
     rw [← Finset.sum_div, Finset.sum_add_distrib,
-      sum_dual_weight_re (p := p), sum_dual_weight_re (p := p)]
+      sum_dual_apply_re ψ hψ, sum_dual_apply_re ψ hψ]
   rw [Finset.sum_congr rfl fun v _ ↦ h2 v]
   have h3 : ∀ v : V,
       (((if w - v = 0 then (Fintype.card V : ℝ) else 0) +
@@ -390,22 +425,49 @@ theorem sum_weight_re_mass (z : E) (w : V) :
 /-- **Displacement identity**: the squared displacement under one group
 element is the mass-weighted sum of `2 * (1 - Re χ(w))`.  Small displacement
 therefore forces the mass to concentrate on characters vanishing at `w`. -/
-theorem norm_action_sub_sq (z : E) (w : V) :
+theorem norm_action_sub_sq (hψ : ψ ≠ 1) (z : E) (w : V) :
     ‖ρ w z - z‖ ^ 2 =
-      ∑ χ : Module.Dual (ZMod p) V,
-        2 * (1 - (weight (χ w)).re) * mass ρ χ z := by
+      ∑ χ : Module.Dual K V,
+        2 * (1 - (ψ (χ w)).re) * mass ψ ρ χ z := by
   have hnorm : ‖ρ w z‖ = ‖z‖ := (ρ w).norm_map z
   have hexp : ‖ρ w z - z‖ ^ 2 =
       2 * ‖z‖ ^ 2 - 2 * inner ℝ z (ρ w z) := by
     rw [norm_sub_sq_real, hnorm, real_inner_comm]
     ring
-  rw [hexp, ← sum_mass (p := p) ρ hρ z,
-    ← sum_weight_re_mass (p := p) ρ hρ z w,
+  rw [hexp, ← sum_mass ψ ρ hρ hψ z,
+    ← sum_apply_re_mass ψ ρ hρ hψ z w,
     Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
   exact Finset.sum_congr rfl fun χ _ ↦ by ring
 
+/-- **Moving-mass control**: any uniform positive angle gap over a set of
+characters converts one displacement into a bound on the set's total
+mass. -/
+theorem mul_sum_mass_le_of_gap (hψ : ψ ≠ 1) (z : E) (w : V)
+    (S : Finset (Module.Dual K V)) (δ : ℝ)
+    (hδ : ∀ χ ∈ S, δ ≤ 2 * (1 - (ψ (χ w)).re)) :
+    δ * ∑ χ ∈ S, mass ψ ρ χ z ≤ ‖ρ w z - z‖ ^ 2 := by
+  have hterm : ∀ χ : Module.Dual K V,
+      0 ≤ 2 * (1 - (ψ (χ w)).re) * mass ψ ρ χ z := by
+    intro χ
+    have hre : (ψ (χ w)).re ≤ 1 := by
+      calc
+        (ψ (χ w)).re ≤ ‖ψ (χ w)‖ := Complex.re_le_norm _
+        _ = 1 := norm_apply _ _
+    have h1 : 0 ≤ 2 * (1 - (ψ (χ w)).re) := by linarith
+    exact mul_nonneg h1 (mass_nonneg ψ ρ hρ χ z)
+  rw [norm_action_sub_sq ψ ρ hρ hψ, Finset.mul_sum]
+  calc
+    ∑ χ ∈ S, δ * mass ψ ρ χ z ≤
+        ∑ χ ∈ S, 2 * (1 - (ψ (χ w)).re) * mass ψ ρ χ z :=
+      Finset.sum_le_sum fun χ hχ ↦
+        mul_le_mul_of_nonneg_right (hδ χ hχ) (mass_nonneg ψ ρ hρ χ z)
+    _ ≤ ∑ χ : Module.Dual K V,
+        2 * (1 - (ψ (χ w)).re) * mass ψ ρ χ z :=
+      Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ S)
+        fun χ _ _ ↦ hterm χ
+
 end Action
 
-end PrimeCharacterMass
+end CharacterMass
 
 end NonsoficGroupsExist

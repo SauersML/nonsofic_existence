@@ -89,12 +89,15 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   characteristic two to arbitrary finite coefficient fields (the only
   characteristic restriction left in the adjacent-rank nonsoficity route),
   through the following checkpoints:
-  - [x] A1. Character-mass foundation for prime-exponent orthogonal
+  - [x] A1. Character-mass foundation for finite-field orthogonal
     actions: positivity, conservation, Fourier inversion, and the
-    displacement identity over the dual of a finite `ZMod p`-vector space
-    (`PrimeCharacterMass`)
-  - [ ] A2. Mass equivariance under conjugating the representation and
-    under automorphisms of the acting vector space
+    displacement identity over the dual of a finite vector space, relative
+    to any nontrivial complex additive character of any finite coefficient
+    field (`CharacterMass`)
+  - [x] A2. Mass equivariance under conjugating the representation and
+    under automorphisms of the acting vector space, the identification of
+    the trivial-character mass with the squared norm of the orbit average,
+    and the abstract moving-mass gap bound (`CharacterMass`)
   - [ ] A3. Simultaneous masses for the two-root coefficient plane over
     `ZMod p`, coordinate characters, and factorization of plane characters
     through the two coefficient functionals
@@ -432,7 +435,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3669
+The current complete MSI build reports `Build completed successfully (3254
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
