@@ -572,16 +572,22 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
   have hcontra := hiso k (ξ k + v k) hζnear
   linarith
 
-/-- **Shalom's theorem** (Bekka–de la Harpe–Valette, Theorem 3.4.5):
-every finitely generated group with Kazhdan's property `(T)` is a
-quotient of a finitely presented group with property `(T)`. -/
-theorem exists_finitelyPresented_kazhdan_cover
+/-- **Shalom's theorem, presentation form** (Bekka–de la Harpe–Valette,
+Theorem 3.4.5): every finitely generated group with Kazhdan's property
+`(T)` is a quotient of a group presented by finitely many generators
+and relators with property `(T)`.  The concrete presentation is exposed
+so that further finite sets of relators can be imposed downstream. -/
+theorem exists_presented_kazhdan_cover
     {G : Type u} [Group G] (S : Finset G)
     (hgen : Subgroup.closure (S : Set G) = ⊤)
     (hT : HasKazhdanPropertyT.{u, u} G) :
-    ∃ (Γ : Type) (_ : Group Γ) (φ : Γ →* G),
-      Function.Surjective φ ∧ Group.IsFinitelyPresented Γ ∧
-        HasKazhdanPropertyT.{0, 0} Γ := by
+    ∃ (n : ℕ) (rels : Finset (FreeGroup (Fin n)))
+      (φ : PresentedGroup ((rels : Finset (FreeGroup (Fin n))) :
+        Set (FreeGroup (Fin n))) →* G),
+      Function.Surjective φ ∧
+        HasKazhdanPropertyT.{0, 0}
+          (PresentedGroup ((rels : Finset (FreeGroup (Fin n))) :
+            Set (FreeGroup (Fin n)))) := by
   classical
   by_cases hS : S.card = 0
   · -- The trivial group covers itself.
@@ -598,10 +604,7 @@ theorem exists_finitelyPresented_kazhdan_cover
     haveI : Subsingleton (PresentedGroup
         ((∅ : Finset (FreeGroup (Fin 0))) : Set (FreeGroup (Fin 0)))) :=
       (PresentedGroup.mk_surjective _).subsingleton
-    refine ⟨PresentedGroup
-      ((∅ : Finset (FreeGroup (Fin 0))) : Set (FreeGroup (Fin 0))),
-      inferInstance, 1, ?_, inferInstance,
-      hasKazhdanPropertyT_of_subsingleton⟩
+    refine ⟨0, ∅, 1, ?_, hasKazhdanPropertyT_of_subsingleton⟩
     intro g
     exact ⟨1, by rw [htriv g]; rfl⟩
   · set n := S.card with hncard
@@ -649,8 +652,7 @@ theorem exists_finitelyPresented_kazhdan_cover
           rw [map_inv, map_inv, hi, ← map_inv]
         · intro a b ha hb
           rw [map_mul, map_mul, ha, hb, ← map_mul]
-      refine ⟨_, inferInstance, PresentedGroup.toGroup hkillrel, ?_,
-        inferInstance, hk⟩
+      refine ⟨n, rels k, PresentedGroup.toGroup hkillrel, ?_, hk⟩
       intro g
       obtain ⟨w, hw⟩ := hβ g
       refine ⟨PresentedGroup.mk _ w, ?_⟩
@@ -729,6 +731,20 @@ theorem exists_finitelyPresented_kazhdan_cover
     obtain ⟨Q, ε', hQpair⟩ := hT
     exact core_contradiction hn0 β hβ hQpair Ek instNk instIk σ hkill ξ
       hξ1 (fun k η hη ↦ hξiso k η hη)
+
+/-- **Shalom's theorem** (Bekka–de la Harpe–Valette, Theorem 3.4.5):
+every finitely generated group with Kazhdan's property `(T)` is a
+quotient of a finitely presented group with property `(T)`. -/
+theorem exists_finitelyPresented_kazhdan_cover
+    {G : Type u} [Group G] (S : Finset G)
+    (hgen : Subgroup.closure (S : Set G) = ⊤)
+    (hT : HasKazhdanPropertyT.{u, u} G) :
+    ∃ (Γ : Type) (_ : Group Γ) (φ : Γ →* G),
+      Function.Surjective φ ∧ Group.IsFinitelyPresented Γ ∧
+        HasKazhdanPropertyT.{0, 0} Γ := by
+  obtain ⟨n, rels, φ, hsurj, hT'⟩ :=
+    exists_presented_kazhdan_cover S hgen hT
+  exact ⟨_, inferInstance, φ, hsurj, inferInstance, hT'⟩
 
 end Shalom
 end NonsoficGroupsExist
