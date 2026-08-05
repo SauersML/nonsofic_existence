@@ -201,8 +201,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     left-invertible and one row operation plants a literal `1`; every
     `GL₂(L_k(1,2))` element is `E·diag(u,1)·F` with `E, F` elementary
     (`binaryLeavitt_exists_elementary_mul_diag`)
-  - [ ] B4. `K₁(L) = 0` in the form used (`thm:agp`(b) plus the rose-graph
-    computation)
+  - [ ] B4. `K₁(L) = 0` in the form used: `diag(u,1) ∈ EL₂(L)` for every
+    unit `u`.  Groundwork formalized in `MatrixDiagonalization`: the
+    signed swap, the Whitehead lemma `diag(u, u⁻¹) ∈ E₂`, and the
+    unipotent Whitehead lemma `diag(1 + ab, 1) ∈ E₂` when `ba = 0` (which
+    puts every prefix-code transvection image `1 + s_w r t_{w'}` in the
+    kernel of the diagonal class map)
   - [ ] B5. `L^×` perfect and `GL_r(L) = EL_r(L)` for every `r ≥ 2`
     (`prop:glel`)
   - [ ] B6. Discharge the rank-two theorem's GE and property-`(T)`
