@@ -27,24 +27,18 @@ theorem division :
       ∃ p q : BinaryLeavittAlgebra k, p * x * q = 1 :=
   fun _ hx ↦ exists_mul_mul_eq_one k hx
 
-/-- The rose-graph `K₁` input, isolated: every unit of `L_k(1,2)` is a
-central unit modulo the diagonal class group. -/
-def ScalarReduction : Prop :=
-  ∀ u : (BinaryLeavittAlgebra k)ˣ, ∃ c : (BinaryLeavittAlgebra k)ˣ,
-    (∀ x : BinaryLeavittAlgebra k, (c : BinaryLeavittAlgebra k) * x =
-      x * (c : BinaryLeavittAlgebra k)) ∧
-      c⁻¹ * u ∈ stableUnits (BinaryLeavittAlgebra k)
-
 /-- **Checkpoint `B4` endpoint**: given the rose-graph `K₁` input, every
 unit has elementary diagonal stabilization. -/
-theorem stableUnits_eq_top (hscalar : ScalarReduction k) :
+theorem stableUnits_eq_top
+    (hscalar : ScalarReduction (BinaryLeavittAlgebra k)) :
     ∀ u : (BinaryLeavittAlgebra k)ˣ,
       u ∈ stableUnits (BinaryLeavittAlgebra k) :=
   (family k).stableUnits_eq_top (division k) hscalar
 
 /-- **`prop:glel` at rank two**, conditional on the rose-graph `K₁`
 input: `GL₂(L_k(1,2)) = EL₂(L_k(1,2))`. -/
-theorem glTwo_eq_elementary (hscalar : ScalarReduction k)
+theorem glTwo_eq_elementary
+    (hscalar : ScalarReduction (BinaryLeavittAlgebra k))
     (A : (Matrix (Fin 2) (Fin 2) (BinaryLeavittAlgebra k))ˣ) :
     A ∈ elementaryGroup (Fin 2) (BinaryLeavittAlgebra k) :=
   mem_elementaryGroup_of_division_of_stable (division k)
@@ -53,7 +47,8 @@ theorem glTwo_eq_elementary (hscalar : ScalarReduction k)
 /-- **`prop:glel` at rank four**, conditional on the rose-graph `K₁`
 input: `GL₄(L_k(1,2)) = EL₄(L_k(1,2))`, through the self-similarity
 isomorphism. -/
-theorem glFour_eq_elementary (hscalar : ScalarReduction k)
+theorem glFour_eq_elementary
+    (hscalar : ScalarReduction (BinaryLeavittAlgebra k))
     (A : (Matrix (Fin 4) (Fin 4) (BinaryLeavittAlgebra k))ˣ) :
     A ∈ elementaryGroup (Fin 4) (BinaryLeavittAlgebra k) :=
   (family k).glFour_eq_elementary_of_stable (division k)

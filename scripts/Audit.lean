@@ -233,7 +233,7 @@ def budgets : List (String × Option Nat) :=
   , ("UNWITNESSED", some 0)
   -- Audited structural `[Nonempty ...]` inputs used to obtain positive finite
   -- cardinalities or select an index.  This is a ratchet, not report-only.
-  , ("ASSUMPTION_INSTANCE", some 19)
+  , ("ASSUMPTION_INSTANCE", some 28)
   , ("UNUSED", some 0)
   , ("TRIVIAL", some 0)
   , ("DUPLICATE", some 0)

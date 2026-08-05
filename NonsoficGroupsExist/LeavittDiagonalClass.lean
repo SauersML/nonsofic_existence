@@ -104,7 +104,7 @@ def kappaUnit (u : Aˣ) : Aˣ where
     rw [add_zero, zero_add]
     abel
 
-theorem kappaUnit_val (u : Aˣ) :
+@[simp] theorem kappaUnit_val (u : Aˣ) :
     (L.kappaUnit w u : A) =
       L.wordS w * (u : A) * L.wordT w +
         (1 - L.wordS w * L.wordT w) := rfl

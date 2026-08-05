@@ -16,14 +16,13 @@ orbit fixes the circumcenter of that orbit.
 namespace NonsoficGroupsExist
 namespace Circumcenter
 
-set_option linter.unusedSectionVars false
-
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 /-- The covering radius of a set from a point. -/
 noncomputable def coveringRadius (S : Set E) (x : E) : ℝ :=
   sSup ((fun s ↦ dist x s) '' S)
 
+omit [InnerProductSpace ℝ E] in
 theorem dist_le_coveringRadius {S : Set E} (hbdd : Bornology.IsBounded S)
     (x : E) {s : E} (hs : s ∈ S) : dist x s ≤ coveringRadius S x := by
   apply le_csSup
@@ -33,6 +32,7 @@ theorem dist_le_coveringRadius {S : Set E} (hbdd : Bornology.IsBounded S)
       exact Metric.mem_closedBall'.mp (hR ht)⟩
   · exact ⟨s, hs, rfl⟩
 
+omit [InnerProductSpace ℝ E] in
 theorem coveringRadius_le {S : Set E} (hne : S.Nonempty) {x : E} {r : ℝ}
     (h : ∀ s ∈ S, dist x s ≤ r) : coveringRadius S x ≤ r := by
   apply csSup_le
@@ -40,12 +40,14 @@ theorem coveringRadius_le {S : Set E} (hne : S.Nonempty) {x : E} {r : ℝ}
   · rintro _ ⟨s, hs, rfl⟩
     exact h s hs
 
+omit [InnerProductSpace ℝ E] in
 theorem coveringRadius_nonneg {S : Set E} (hne : S.Nonempty)
     (hbdd : Bornology.IsBounded S) (x : E) :
     0 ≤ coveringRadius S x := by
   obtain ⟨s, hs⟩ := hne
   exact le_trans dist_nonneg (dist_le_coveringRadius hbdd x hs)
 
+omit [InnerProductSpace ℝ E] in
 theorem coveringRadius_lipschitz {S : Set E} (hne : S.Nonempty)
     (hbdd : Bornology.IsBounded S) (x y : E) :
     coveringRadius S x ≤ coveringRadius S y + dist x y := by
@@ -143,6 +145,7 @@ theorem coveringRadius_midpoint_sq {S : Set E} (hne : S.Nonempty)
 noncomputable def chebyshevRadius (S : Set E) : ℝ :=
   ⨅ x : E, coveringRadius S x
 
+omit [InnerProductSpace ℝ E] in
 theorem coveringRadius_bddBelow (S : Set E) (hne : S.Nonempty)
     (hbdd : Bornology.IsBounded S) :
     BddBelow (Set.range (coveringRadius S)) := by
@@ -150,11 +153,13 @@ theorem coveringRadius_bddBelow (S : Set E) (hne : S.Nonempty)
   rintro _ ⟨y, rfl⟩
   exact coveringRadius_nonneg hne hbdd y
 
+omit [InnerProductSpace ℝ E] in
 theorem chebyshevRadius_le {S : Set E} (hne : S.Nonempty)
     (hbdd : Bornology.IsBounded S) (x : E) :
     chebyshevRadius S ≤ coveringRadius S x :=
   ciInf_le (coveringRadius_bddBelow S hne hbdd) x
 
+omit [InnerProductSpace ℝ E] in
 theorem exists_coveringRadius_lt {S : Set E} [Nonempty E] {r : ℝ}
     (hr : chebyshevRadius S < r) :
     ∃ x : E, coveringRadius S x < r := by
@@ -290,6 +295,7 @@ theorem existsUnique_center [CompleteSpace E] {S : Set E}
     nlinarith [dist_nonneg (x := c') (y := c)]
   exact dist_eq_zero.1 this
 
+omit [InnerProductSpace ℝ E] in
 /-- Covering radii transform along isometries. -/
 theorem coveringRadius_image {f : E → E} (hf : Isometry f)
     (S : Set E) (x : E) :

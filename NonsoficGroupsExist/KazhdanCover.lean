@@ -18,8 +18,6 @@ table admits no accurate model of the family's image table.
 
 namespace NonsoficGroupsExist
 
-set_option linter.unusedSectionVars false
-
 universe u
 
 variable {G : Type u} [Group G]
@@ -33,6 +31,7 @@ noncomputable def familyTestSet : Finset H := by
   classical
   exact F.attach.image fun g ↦ y g.1
 
+omit [Group G] [Group H] in
 theorem y_mem_familyTestSet {g : G} (hg : g ∈ F) :
     y g ∈ familyTestSet F y := by
   classical
@@ -147,7 +146,7 @@ group with property `(T)` is covered by an infinite finitely presented
 property-`(T)` group that is not sofic.  Finite generation is not a
 hypothesis: property `(T)` forces it
 (`KazhdanFiniteGeneration.exists_symmetric_generating_finset`). -/
-theorem exists_kazhdan_finitelyPresented_nonsofic_cover
+theorem exists_kazhdan_finitelyPresented_cover_of_not_isSofic
     [Infinite G] (hns : ¬ IsSofic G)
     (hT : HasKazhdanPropertyT.{u, u} G) :
     ∃ (Γ : Type) (_ : Group Γ) (φ : Γ →* G),

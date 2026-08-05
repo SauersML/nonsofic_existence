@@ -203,6 +203,22 @@ theorem elementaryGroup_normal_of_division [Nontrivial R]
   intro E hE X
   exact conj_mem_elementaryGroup_of_division hdiv X hE
 
+/-- The reduction of units to central ones modulo the diagonal class:
+for the binary Leavitt algebra this is the rose-graph `K₁`
+computation. -/
+def ScalarReduction (R : Type*) [Ring R] : Prop :=
+  ∀ u : Rˣ, ∃ c : Rˣ, (∀ x : R, (c : R) * x = x * (c : R)) ∧
+    c⁻¹ * u ∈ stableUnits R
+
+/-- Positive control: commutative rings satisfy the scalar reduction,
+with every unit its own central scalar. -/
+theorem scalarReduction_of_commRing (R : Type*) [CommRing R] :
+    ScalarReduction R := by
+  intro u
+  refine ⟨u, fun x ↦ mul_comm _ x, ?_⟩
+  rw [inv_mul_cancel]
+  exact one_mem _
+
 /-- The two-slot diagonal unit `diag(u, v)`. -/
 def diagPair (u v : Rˣ) : (Matrix (Fin 2) (Fin 2) R)ˣ where
   val := !![(u : R), 0; 0, (v : R)]

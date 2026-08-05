@@ -17,8 +17,6 @@ by the sofic correlation limits.
 namespace NonsoficGroupsExist
 namespace Ultralimit
 
-set_option linter.unusedSectionVars false
-
 open KazhdanFiniteModel
 
 /-- Germ addition on hyperreal sequences. -/
@@ -38,7 +36,6 @@ theorem ofSeq_mul (s t : ℕ → ℝ) :
   exact h
 
 variable {H : ℕ → Type*} [∀ k, NormedAddCommGroup (H k)]
-  [∀ k, InnerProductSpace ℝ (H k)]
 
 /-- A sequence of vectors with uniformly bounded norms. -/
 def IsBoundedSeq (v : ∀ k, H k) : Prop :=
@@ -61,7 +58,8 @@ theorem IsBoundedSeq.sub {v w : ∀ k, H k} (hv : IsBoundedSeq v)
   obtain ⟨D, hD⟩ := hw
   exact ⟨C + D, fun k ↦ (norm_sub_le _ _).trans (add_le_add (hC k) (hD k))⟩
 
-theorem IsBoundedSeq.smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
+theorem IsBoundedSeq.smul [∀ k, InnerProductSpace ℝ (H k)]
+    {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
     IsBoundedSeq (fun k ↦ c • v k) := by
   obtain ⟨C, hC⟩ := hv
   refine ⟨|c| * C, fun k ↦ ?_⟩
@@ -186,7 +184,8 @@ theorem seqNorm_sub_rev (v w : ∀ k, H k) :
   rw [norm_sub_rev]
 
 /-- Pointwise parallelogram law, passed to standard parts. -/
-theorem seqNormSq_parallelogram {v w : ∀ k, H k} (hv : IsBoundedSeq v)
+theorem seqNormSq_parallelogram [∀ k, InnerProductSpace ℝ (H k)]
+    {v w : ∀ k, H k} (hv : IsBoundedSeq v)
     (hw : IsBoundedSeq w) :
     seqNormSq (fun k ↦ v k + w k) + seqNormSq (fun k ↦ v k - w k) =
       2 * seqNormSq v + 2 * seqNormSq w := by
@@ -377,7 +376,7 @@ theorem seqNorm_neg (v : ∀ k, H k) :
 /-- Sequences with pointwise equal norms have the same seminorm; in
 particular pointwise isometric images do. -/
 theorem seqNorm_congr_norm {H' : ℕ → Type*}
-    [∀ k, NormedAddCommGroup (H' k)] [∀ k, InnerProductSpace ℝ (H' k)]
+    [∀ k, NormedAddCommGroup (H' k)]
     {u : ∀ k, H k} {u' : ∀ k, H' k} (h : ∀ k, ‖u k‖ = ‖u' k‖) :
     seqNorm u = seqNorm u' := by
   unfold seqNorm
@@ -387,7 +386,8 @@ theorem seqNorm_congr_norm {H' : ℕ → Type*}
   exact h k
 
 /-- Scaling of the squared seminorm. -/
-theorem seqNormSq_smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
+theorem seqNormSq_smul [∀ k, InnerProductSpace ℝ (H k)]
+    {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
     seqNormSq (fun k ↦ c • v k) = c ^ 2 * seqNormSq v := by
   have hconst : ((c ^ 2 : ℝ) : Hyperreal) =
       Hyperreal.ofSeq (fun _ : ℕ ↦ (c ^ 2 : ℝ)) := rfl
@@ -403,11 +403,11 @@ theorem seqNormSq_smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
       (ofSeq_norm_sq_finite hv), stdPart_coe]
   rfl
 
-theorem seqNorm_def (v : ∀ k, H k) :
+@[simp] theorem seqNorm_def (v : ∀ k, H k) :
     seqNorm v =
       ArchimedeanClass.stdPart (Hyperreal.ofSeq fun k ↦ ‖v k‖) := rfl
 
-theorem seqNormSq_def (v : ∀ k, H k) :
+@[simp] theorem seqNormSq_def (v : ∀ k, H k) :
     seqNormSq v =
       ArchimedeanClass.stdPart
         (Hyperreal.ofSeq fun k ↦ ‖v k‖ ^ 2) := rfl
@@ -416,7 +416,7 @@ attribute [irreducible] seqNorm seqNormSq
 
 section Center
 
-variable {ι : Type*} [Nonempty ι]
+variable {ι : Type*}
 
 /-- The covering radius of a sequence over an indexed orbit, in the
 hyperreal seminorm. -/
@@ -451,12 +451,13 @@ theorem le_orbitRadius (hOb : ∀ i, IsBoundedSeq (O i))
     seqNorm (fun k ↦ v k - O i k) ≤ orbitRadius O v :=
   le_csSup (bddAbove_orbit_seqNorm hOb hOD hv) (Set.mem_range_self i)
 
-theorem orbitRadius_le {v : ∀ k, H k} {r : ℝ}
+theorem orbitRadius_le [Nonempty ι] {v : ∀ k, H k} {r : ℝ}
     (h : ∀ i, seqNorm (fun k ↦ v k - O i k) ≤ r) :
     orbitRadius O v ≤ r :=
   csSup_le (Set.range_nonempty _) (by rintro s ⟨i, rfl⟩; exact h i)
 
-theorem orbitRadius_nonneg (hOb : ∀ i, IsBoundedSeq (O i))
+theorem orbitRadius_nonneg [Nonempty ι]
+    (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
     (hv : IsBoundedSeq v) :
     0 ≤ orbitRadius O v := by
@@ -464,21 +465,24 @@ theorem orbitRadius_nonneg (hOb : ∀ i, IsBoundedSeq (O i))
   exact (seqNorm_nonneg (hv.sub (hOb i))).trans
     (le_orbitRadius hOb hOD hv i)
 
-theorem bddBelow_radius_image (hOb : ∀ i, IsBoundedSeq (O i))
+theorem bddBelow_radius_image [Nonempty ι]
+    (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) :
     BddBelow (orbitRadius O '' {v | IsBoundedSeq v}) := by
   refine ⟨0, ?_⟩
   rintro r ⟨v, hv, rfl⟩
   exact orbitRadius_nonneg hOb hOD hv
 
-theorem centerRadius_le (hOb : ∀ i, IsBoundedSeq (O i))
+theorem centerRadius_le [Nonempty ι]
+    (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
     (hv : IsBoundedSeq v) :
     centerRadius O ≤ orbitRadius O v :=
   csInf_le (bddBelow_radius_image hOb hOD) ⟨v, hv, rfl⟩
 
 /-- Near-optimal centers exist. -/
-theorem exists_near_center (hOb : ∀ i, IsBoundedSeq (O i))
+theorem exists_near_center [Nonempty ι]
+    (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {δ : ℝ} (hδ : 0 < δ) :
     ∃ v : ∀ k, H k, IsBoundedSeq v ∧
       orbitRadius O v < centerRadius O + δ := by
@@ -494,6 +498,7 @@ theorem exists_near_center (hOb : ∀ i, IsBoundedSeq (O i))
 centers are close, quantitatively, by the parallelogram law applied
 against every orbit point. -/
 theorem seqNormSq_sub_le_of_near_center
+    [∀ k, InnerProductSpace ℝ (H k)] [Nonempty ι]
     (hOb : ∀ i, IsBoundedSeq (O i)) (hOD : ∀ i, seqNorm (O i) ≤ D)
     {v w : ∀ k, H k} (hv : IsBoundedSeq v) (hw : IsBoundedSeq w)
     {ρ : ℝ} (hrv : orbitRadius O v ≤ ρ) (hrw : orbitRadius O w ≤ ρ) :
