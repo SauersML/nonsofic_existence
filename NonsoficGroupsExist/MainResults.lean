@@ -26,14 +26,22 @@ manuscript panorama over every finite characteristic-two field.  Nonsoficity
 for this general coefficient field is deliberately not included until the
 generic compression setup is instantiated below this layer. -/
 theorem binaryLeavitt_charTwo_profile (k : Type) [Field k] [Finite k]
-    [CharP k 2] (m : ℕ) (hm : 2 ≤ m) :
+    [CharP k 2] (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (BinaryLeavittEL k m) ∧
       Infinite (BinaryLeavittEL k m) ∧
       HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) := by
   let L := BinaryLeavitt.family k
-  have hfg : Group.FG (BinaryLeavittEL k m) :=
+  let e : BinaryLeavittEL k m ≃*
+      elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k) :=
+    L.rankSuccEquiv m 2 (by omega) (by omega)
+  have hfg3 : Group.FG
+      (elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k)) :=
     finiteCharacteristicTwoElementary_finitelyGenerated
-      (k := k) (A := BinaryLeavitt.BinaryLeavittAlgebra k) (m + 1) (by omega)
+      (k := k) (A := BinaryLeavitt.BinaryLeavittAlgebra k) 3 (by omega)
+  have hfg : Group.FG (BinaryLeavittEL k m) := by
+    letI : Group.FG
+        (elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k)) := hfg3
+    exact Group.fg_of_surjective (f := e.symm.toMonoidHom) e.symm.surjective
   have hinfinite : Infinite (BinaryLeavittEL k m) :=
     elementaryGroup_infinite
       (R := BinaryLeavitt.BinaryLeavittAlgebra k)

@@ -55,6 +55,13 @@ example (m : ℕ) (hm : 1 ≤ m) :
       ¬ IsSofic (UniversalLeavittEL m) :=
   universalLeavitt_theoremA m hm
 
+example (k : Type) [Field k] [Finite k] [CharP k 2]
+    (m : ℕ) (hm : 1 ≤ m) :
+    Group.FG (BinaryLeavittEL k m) ∧
+      Infinite (BinaryLeavittEL k m) ∧
+      HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) :=
+  binaryLeavitt_charTwo_profile k m hm
+
 example :
     Group.FG UniversalRankFour.Ambient ∧
       Infinite UniversalRankFour.Ambient ∧
