@@ -192,6 +192,38 @@ Alternative fallback for C if V-generation is painful: every
 code-permutation unit U = U_{C'→leftComb} · U_{leftComb→C}⁻¹; reduce to
 V_C := Σ s_{c_i} t_{ℓ_i} vs leftComb by induction on leaf-splitting.
 
+## Step A DERIVATION RESULTS (third session — the state of the math)
+1. WIDTH ≥ 2 IS ALREADY REDUCIBLE with the proved exists_corner_move:
+   u with degrees in [−M, N], N ≥ 2: factor positive part = b·σ
+   (monomial_factor_s0, b degrees [0, N−1]), apply the move with
+   (v, w) := (−b, σ): result degrees max(N−1, 1) on top, negatives not
+   grown. Mirror: (v, w) := (τ, −c) with negative part = τ·c kills
+   bottom to max(−(M−1), −1), top unchanged. So mod H every unit
+   reaches degrees ⊆ [−1, 1] — NO new math, just the induction to
+   formalize (measure: max monomial |α|−|β| spread of a REPRESENTATION;
+   representation-directed, no canonical components needed).
+2. THE RESIDUAL CLASS: one more move funnels [−1,1] units to
+   R := {units with value c + s₁s₀t₀, c balanced} (fixed universal
+   tail β := s₁s₀t₀; note 1 + β ∈ H already: unipotent with A := s₁,
+   B := s₀t₀, BA = 0). Remaining gap = R ⊆ H·(balanced units).
+3. GRADED INDEPENDENCE IS FORMALIZABLE: weight the existing
+   streamFamily (UniversalLeavittOver) over K := RatFunc k with
+   s_i ↦ X·prefixOperator, t_i ↦ X⁻¹·deleteOperator (relations still
+   hold); a finite sum Σ x_d of pure-degree elements maps to
+   Σ X^d·ρ₀(x_d) with ρ₀ the unweighted action, so vanishing forces
+   ρ₀(x_d) = 0 by X-transcendence, and ρ₀ is INJECTIVE because L₂ is
+   simple (kernel is an ideal; 1 acts as identity ≠ 0 — simplicity is
+   already proved: exists_mul_mul_eq_one). Gives canonical degree
+   components, componentwise unit equations.
+4. R-ENDGAME plan: for u = c + β ∈ R with inverse y = Σ y_d
+   (canonical components by 3): top-degree cascade βy_{d*} = 0 forces
+   support conditions (βx = 0 ⟹ t₀x = 0 and p₀x = 0 ⟹ x = p₁x);
+   combine the cascade with the fixed-level M_{2^m}(k) rank argument
+   (scalar-entry extraction + Matrix.rank + rank_mul_le) to force
+   y = y₀ + y₋₁-shape and then solve. This replaces K₀-patching by a
+   finite matrix-rank computation. Derive fully on paper next turn
+   BEFORE coding; then formalize 1 → 3 → 4 in that order.
+
 ## Iteration log (continued)
 - GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
   AlmostMinimalDisplacement, UltralimitGeometry, HilbertCircumcenter,
