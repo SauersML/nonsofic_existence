@@ -122,15 +122,14 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     specification and restriction invariance, and the five-way
     `zero/A/B/C/D` region partition with exact numerical data and
     constructors for every region
-  - [ ] A6. Stage-to-stage mass transport under the dual shears (port of
-    `FreeRootPlaneFourier`); the core transport law is done: group-side
-    character orthogonality, negation symmetry of masses, and the exact
-    fiber covariance theorem — the mass of a pulled-back action at a coarse
-    character is the total mass over the dual-restriction fiber
-    (`CharacterMass.sum_mass_fiber_comp`), which is the mass form of
-    “an acted-on coarse component is the sum of precisely its fine
-    extensions”; the plane shear instantiation and per-fiber bounds are
-    pending
+  - [x] A6. Stage-to-stage mass transport under the dual shears: the exact
+    fiber covariance law (`CharacterMass.sum_mass_fiber_comp`, with
+    group-side orthogonality and mass negation symmetry), the two adjacent
+    shears as linear stage maps with their plane-point conjugation
+    identities, the forward and opposite plane mass-transport theorems
+    (`planeMass_eq_sum_fiber_forwardShear`/`_oppositeShear`), and the
+    identification of both dual shears on coordinate functionals with the
+    valuation module's restriction and generator-derived functionals
   - [ ] A7. Boundary-layer vanishing and the two full finite-stage
     Kassabov inequalities over `ZMod p`
   - [ ] A8. The limiting two-root moving-mass bound and the uniform

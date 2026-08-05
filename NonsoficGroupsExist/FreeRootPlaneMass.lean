@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.FreeRootPlane
+import NonsoficGroupsExist.FreeRootFunctionalValuation
 import NonsoficGroupsExist.CharacterMass
 
 /-!
@@ -196,6 +197,315 @@ theorem coordinateChar_ne_zero_of_ne_zero
   refine LinearMap.ext fun v ↦ ?_
   rw [char_eq_coordinate_sum X K n χ v, hboth.1, hboth.2]
   simp
+
+
+/-! ### The two adjacent shears as linear stage maps, and mass transport -/
+
+open FreeRootFunctionalValuation in
+/-- The forward adjacent shear on plane coefficients:
+`(a, b) ↦ (a + x·b, b)`, landing in the next stage. -/
+noncomputable def forwardShear (x : X) :
+    PlaneVector X K n →ₗ[K] PlaneVector X K (n + 1) :=
+  LinearMap.prod
+    ((stageInclusion X K n).comp (LinearMap.fst K _ _) +
+      (generatorMulLinear X K n x).comp (LinearMap.snd K _ _))
+    ((stageInclusion X K n).comp (LinearMap.snd K _ _))
+
+open FreeRootFunctionalValuation in
+/-- The opposite adjacent shear on plane coefficients:
+`(a, b) ↦ (a, x·a + b)`, landing in the next stage. -/
+noncomputable def oppositeShear (x : X) :
+    PlaneVector X K n →ₗ[K] PlaneVector X K (n + 1) :=
+  LinearMap.prod
+    ((stageInclusion X K n).comp (LinearMap.fst K _ _))
+    ((generatorMulLinear X K n x).comp (LinearMap.fst K _ _) +
+      (stageInclusion X K n).comp (LinearMap.snd K _ _))
+
+omit [Fintype K] in
+/-- Conjugation by the forward adjacent generator root realizes the forward
+shear on plane points. -/
+theorem planePoint_forwardShear (x : X) (v : PlaneVector X K n) :
+    elementaryRoot i j hij (FreeAlgebra.ι K x) *
+        planePoint X K i j k hik hjk n v *
+        (elementaryRoot i j hij (FreeAlgebra.ι K x))⁻¹ =
+      planePoint X K i j k hik hjk (n + 1)
+        (forwardShear X K n x v) := by
+  set g := elementaryRoot i j hij (FreeAlgebra.ι K x) with hg
+  have hsplit : g * planePoint X K i j k hik hjk n v * g⁻¹ =
+      (g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹) *
+        (g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹) := by
+    unfold planePoint
+    group
+  have hfirst : g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot i k hik (v.1 : FreeAlgebra K X) := by
+    have hcomm := elementaryRoot_commute_of_ne i j i k hij hik
+      hij.symm hik.symm (FreeAlgebra.ι K x) (v.1 : FreeAlgebra K X)
+    rw [hg, hcomm.eq]
+    group
+  have hsecond : g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot i k hik
+          (FreeAlgebra.ι K x * (v.2 : FreeAlgebra K X)) *
+        elementaryRoot j k hjk (v.2 : FreeAlgebra K X) := by
+    rw [hg]
+    exact FreeRootActions.conjugate_by_generator X K i j k hij hjk hik x _
+  rw [hsplit, hfirst, hsecond]
+  unfold planePoint forwardShear
+  rw [show ((LinearMap.prod
+      ((FreeRootFunctionalValuation.stageInclusion X K n).comp
+        (LinearMap.fst K _ _) +
+        (FreeRootFunctionalValuation.generatorMulLinear X K n x).comp
+          (LinearMap.snd K _ _))
+      ((FreeRootFunctionalValuation.stageInclusion X K n).comp
+        (LinearMap.snd K _ _))) v).1 =
+    FreeRootFunctionalValuation.stageInclusion X K n v.1 +
+      FreeRootFunctionalValuation.generatorMulLinear X K n x v.2 from rfl]
+  rw [show (((FreeRootFunctionalValuation.stageInclusion X K n v.1 +
+      FreeRootFunctionalValuation.generatorMulLinear X K n x v.2) :
+        degreeLE X K (n + 1)) : FreeAlgebra K X) =
+    (v.1 : FreeAlgebra K X) +
+      FreeAlgebra.ι K x * (v.2 : FreeAlgebra K X) from rfl]
+  rw [← elementaryRoot_mul i k hik]
+  rw [show ((LinearMap.prod
+      ((FreeRootFunctionalValuation.stageInclusion X K n).comp
+        (LinearMap.fst K _ _) +
+        (FreeRootFunctionalValuation.generatorMulLinear X K n x).comp
+          (LinearMap.snd K _ _))
+      ((FreeRootFunctionalValuation.stageInclusion X K n).comp
+        (LinearMap.snd K _ _)) : PlaneVector X K n →ₗ[K]
+          PlaneVector X K (n + 1)) v).2 =
+    FreeRootFunctionalValuation.stageInclusion X K n v.2 from rfl]
+  rw [show ((FreeRootFunctionalValuation.stageInclusion X K n v.2 :
+      degreeLE X K (n + 1)) : FreeAlgebra K X) =
+    (v.2 : FreeAlgebra K X) from rfl]
+  rw [mul_assoc]
+
+omit [Fintype K] in
+/-- Conjugation by the opposite adjacent generator root realizes the
+opposite shear on plane points. -/
+theorem planePoint_oppositeShear (x : X) (v : PlaneVector X K n) :
+    elementaryRoot j i hij.symm (FreeAlgebra.ι K x) *
+        planePoint X K i j k hik hjk n v *
+        (elementaryRoot j i hij.symm (FreeAlgebra.ι K x))⁻¹ =
+      planePoint X K i j k hik hjk (n + 1)
+        (oppositeShear X K n x v) := by
+  set g := elementaryRoot j i hij.symm (FreeAlgebra.ι K x) with hg
+  have hsplit : g * planePoint X K i j k hik hjk n v * g⁻¹ =
+      (g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹) *
+        (g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹) := by
+    unfold planePoint
+    group
+  have hfirst : g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot i k hik (v.1 : FreeAlgebra K X) *
+        elementaryRoot j k hjk
+          (FreeAlgebra.ι K x * (v.1 : FreeAlgebra K X)) := by
+    rw [hg, FreeRootActions.conjugate_by_generator X K j i k
+      hij.symm hik hjk x _]
+    exact (elementaryRoot_commute_of_ne j k i k hjk hik
+      hik.symm hjk.symm _ _).eq
+  have hsecond : g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot j k hjk (v.2 : FreeAlgebra K X) := by
+    have hcomm := elementaryRoot_commute_of_ne j i j k hij.symm hjk
+      hij hjk.symm (FreeAlgebra.ι K x) (v.2 : FreeAlgebra K X)
+    rw [hg, hcomm.eq]
+    group
+  rw [hsplit, hfirst, hsecond]
+  unfold planePoint oppositeShear
+  rw [show ((LinearMap.prod
+      ((FreeRootFunctionalValuation.stageInclusion X K n).comp
+        (LinearMap.fst K _ _))
+      ((FreeRootFunctionalValuation.generatorMulLinear X K n x).comp
+        (LinearMap.fst K _ _) +
+        (FreeRootFunctionalValuation.stageInclusion X K n).comp
+          (LinearMap.snd K _ _)) : PlaneVector X K n →ₗ[K]
+            PlaneVector X K (n + 1)) v).1 =
+    FreeRootFunctionalValuation.stageInclusion X K n v.1 from rfl]
+  rw [show ((FreeRootFunctionalValuation.stageInclusion X K n v.1 :
+      degreeLE X K (n + 1)) : FreeAlgebra K X) =
+    (v.1 : FreeAlgebra K X) from rfl]
+  rw [show ((LinearMap.prod
+      ((FreeRootFunctionalValuation.stageInclusion X K n).comp
+        (LinearMap.fst K _ _))
+      ((FreeRootFunctionalValuation.generatorMulLinear X K n x).comp
+        (LinearMap.fst K _ _) +
+        (FreeRootFunctionalValuation.stageInclusion X K n).comp
+          (LinearMap.snd K _ _)) : PlaneVector X K n →ₗ[K]
+            PlaneVector X K (n + 1)) v).2 =
+    FreeRootFunctionalValuation.generatorMulLinear X K n x v.1 +
+      FreeRootFunctionalValuation.stageInclusion X K n v.2 from rfl]
+  rw [show (((FreeRootFunctionalValuation.generatorMulLinear X K n x v.1 +
+      FreeRootFunctionalValuation.stageInclusion X K n v.2) :
+        degreeLE X K (n + 1)) : FreeAlgebra K X) =
+    FreeAlgebra.ι K x * (v.1 : FreeAlgebra K X) +
+      (v.2 : FreeAlgebra K X) from rfl]
+  rw [← elementaryRoot_mul j k hjk, mul_assoc]
+
+open Classical in
+/-- **Forward mass transport**: the stage-`n` plane mass of `z` at a coarse
+character is the total stage-`n+1` plane mass of the conjugated vector over
+the forward dual-shear fiber. -/
+theorem planeMass_eq_sum_fiber_forwardShear (hψ : ψ ≠ 1) (x : X) (z : E)
+    (χ : Module.Dual K (PlaneVector X K n)) :
+    planeMass X K i j k hik hjk n rho ψ χ z =
+      ∑ χ' ∈ Finset.univ.filter
+          (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            χ'.comp (forwardShear X K n x) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ'
+          (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z) := by
+  set u := rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) with hu
+  have hconj : ∀ v : PlaneVector X K n,
+      planeAction X K i j k hik hjk n rho v =
+        u⁻¹ * planeAction X K i j k hik hjk (n + 1) rho
+          (forwardShear X K n x v) * (u⁻¹)⁻¹ := by
+    intro v
+    unfold planeAction
+    rw [inv_inv, hu, ← map_inv, ← map_mul, ← map_mul,
+      ← planePoint_forwardShear X K i j k hij hik hjk n x v]
+    congr 1
+    group
+  have hz : z = u⁻¹ (u z) := by
+    change z = (u⁻¹ * u) z
+    rw [inv_mul_cancel]
+    rfl
+  calc
+    planeMass X K i j k hik hjk n rho ψ χ z =
+        CharacterMass.mass ψ
+          (fun v ↦ u⁻¹ * planeAction X K i j k hik hjk (n + 1) rho
+            (forwardShear X K n x v) * (u⁻¹)⁻¹) χ (u⁻¹ (u z)) := by
+      rw [planeMass, ← hz]
+      congr 1
+      funext v
+      exact hconj v
+    _ = CharacterMass.mass ψ
+        (fun v ↦ planeAction X K i j k hik hjk (n + 1) rho
+          (forwardShear X K n x v)) χ (u z) :=
+      CharacterMass.mass_conj ψ _ u⁻¹ χ (u z)
+    _ = ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (forwardShear X K n x) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' (u z) :=
+      (CharacterMass.sum_mass_fiber_comp ψ _
+        (planeAction_add X K i j k hik hjk (n + 1) rho) hψ
+        (forwardShear X K n x) (u z) χ).symm
+
+open Classical in
+/-- **Opposite mass transport**: the same law along the opposite dual
+shear. -/
+theorem planeMass_eq_sum_fiber_oppositeShear (hψ : ψ ≠ 1) (x : X) (z : E)
+    (χ : Module.Dual K (PlaneVector X K n)) :
+    planeMass X K i j k hik hjk n rho ψ χ z =
+      ∑ χ' ∈ Finset.univ.filter
+          (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            χ'.comp (oppositeShear X K n x) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ'
+          (rho (elementaryRoot j i hij.symm (FreeAlgebra.ι K x)) z) := by
+  set u := rho (elementaryRoot j i hij.symm (FreeAlgebra.ι K x)) with hu
+  have hconj : ∀ v : PlaneVector X K n,
+      planeAction X K i j k hik hjk n rho v =
+        u⁻¹ * planeAction X K i j k hik hjk (n + 1) rho
+          (oppositeShear X K n x v) * (u⁻¹)⁻¹ := by
+    intro v
+    unfold planeAction
+    rw [inv_inv, hu, ← map_inv, ← map_mul, ← map_mul,
+      ← planePoint_oppositeShear X K i j k hij hik hjk n x v]
+    congr 1
+    group
+  have hz : z = u⁻¹ (u z) := by
+    change z = (u⁻¹ * u) z
+    rw [inv_mul_cancel]
+    rfl
+  calc
+    planeMass X K i j k hik hjk n rho ψ χ z =
+        CharacterMass.mass ψ
+          (fun v ↦ u⁻¹ * planeAction X K i j k hik hjk (n + 1) rho
+            (oppositeShear X K n x v) * (u⁻¹)⁻¹) χ (u⁻¹ (u z)) := by
+      rw [planeMass, ← hz]
+      congr 1
+      funext v
+      exact hconj v
+    _ = CharacterMass.mass ψ
+        (fun v ↦ planeAction X K i j k hik hjk (n + 1) rho
+          (oppositeShear X K n x v)) χ (u z) :=
+      CharacterMass.mass_conj ψ _ u⁻¹ χ (u z)
+    _ = ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (oppositeShear X K n x) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' (u z) :=
+      (CharacterMass.sum_mass_fiber_comp ψ _
+        (planeAction_add X K i j k hik hjk (n + 1) rho) hψ
+        (oppositeShear X K n x) (u z) χ).symm
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- The forward dual shear on the first coordinate functional: restriction
+to the previous stage. -/
+theorem firstCoordinateChar_comp_forwardShear (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
+    firstCoordinateChar X K n (χ'.comp (forwardShear X K n x)) =
+      restrictSucc X K (firstCoordinateChar X K (n + 1) χ') := by
+  refine LinearMap.ext fun a ↦ ?_
+  show χ' (forwardShear X K n x (a, 0)) =
+    χ' (stageInclusion X K n a, 0)
+  congr 1
+  show (stageInclusion X K n a + generatorMulLinear X K n x 0,
+      stageInclusion X K n (0 : degreeLE X K n)) =
+    (stageInclusion X K n a, 0)
+  rw [map_zero, map_zero, add_zero]
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- The forward dual shear on the second coordinate functional: the
+generator-derived first functional plus the restricted second functional —
+the algebraic dual shear of the valuation analysis. -/
+theorem secondCoordinateChar_comp_forwardShear (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
+    secondCoordinateChar X K n (χ'.comp (forwardShear X K n x)) =
+      leftDerived X K (firstCoordinateChar X K (n + 1) χ') x +
+        restrictSucc X K (secondCoordinateChar X K (n + 1) χ') := by
+  refine LinearMap.ext fun b ↦ ?_
+  show χ' (forwardShear X K n x (0, b)) =
+    χ' (generatorMulLinear X K n x b, 0) +
+      χ' (0, stageInclusion X K n b)
+  rw [← map_add]
+  congr 1
+  show (stageInclusion X K n 0 + generatorMulLinear X K n x b,
+      stageInclusion X K n b) =
+    (generatorMulLinear X K n x b + 0, 0 + stageInclusion X K n b)
+  rw [map_zero, zero_add, add_zero, zero_add]
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- The opposite dual shear on the first coordinate functional. -/
+theorem firstCoordinateChar_comp_oppositeShear (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
+    firstCoordinateChar X K n (χ'.comp (oppositeShear X K n x)) =
+      restrictSucc X K (firstCoordinateChar X K (n + 1) χ') +
+        leftDerived X K (secondCoordinateChar X K (n + 1) χ') x := by
+  refine LinearMap.ext fun a ↦ ?_
+  show χ' (oppositeShear X K n x (a, 0)) =
+    χ' (stageInclusion X K n a, 0) +
+      χ' (0, generatorMulLinear X K n x a)
+  rw [← map_add]
+  congr 1
+  show (stageInclusion X K n a,
+      generatorMulLinear X K n x a + stageInclusion X K n 0) =
+    (stageInclusion X K n a + 0, 0 + generatorMulLinear X K n x a)
+  rw [map_zero, add_zero, add_zero, zero_add]
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- The opposite dual shear on the second coordinate functional. -/
+theorem secondCoordinateChar_comp_oppositeShear (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
+    secondCoordinateChar X K n (χ'.comp (oppositeShear X K n x)) =
+      restrictSucc X K (secondCoordinateChar X K (n + 1) χ') := by
+  refine LinearMap.ext fun b ↦ ?_
+  show χ' (oppositeShear X K n x (0, b)) =
+    χ' (0, stageInclusion X K n b)
+  congr 1
+  show (stageInclusion X K n (0 : degreeLE X K n),
+      generatorMulLinear X K n x 0 + stageInclusion X K n b) =
+    (0, stageInclusion X K n b)
+  rw [map_zero, map_zero, zero_add]
 
 end FreeRootPlaneMass
 
