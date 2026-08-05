@@ -1,7 +1,9 @@
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Algebra.CharP.Two
+import Mathlib.GroupTheory.Commutator.Basic
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.NoncommRing
 
 /-!
 # The finite Leavitt-algebra calculations
@@ -33,6 +35,7 @@ namespace LeavittFamily
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
 
 open scoped CharTwo
+open scoped commutatorElement
 
 attribute [simp] t0_s0 t0_s1 t1_s0 t1_s1
 
@@ -94,6 +97,137 @@ def p1 : A := L.s1 * L.t1
 
 @[simp] theorem t1_mul_p1 : L.t1 * L.p1 = L.t1 := by
   simp [p1, ← mul_assoc]
+
+@[simp] theorem p0_mul_s0t1 : L.p0 * (L.s0 * L.t1) = L.s0 * L.t1 := by
+  rw [← mul_assoc, L.p0_mul_s0]
+
+@[simp] theorem p1_mul_s0t1 : L.p1 * (L.s0 * L.t1) = 0 := by
+  rw [← mul_assoc, L.p1_mul_s0, zero_mul]
+
+@[simp] theorem p0_mul_s1t0 : L.p0 * (L.s1 * L.t0) = 0 := by
+  rw [← mul_assoc, L.p0_mul_s1, zero_mul]
+
+@[simp] theorem p1_mul_s1t0 : L.p1 * (L.s1 * L.t0) = L.s1 * L.t0 := by
+  rw [← mul_assoc, L.p1_mul_s1]
+
+@[simp] theorem s0t1_mul_p0 : (L.s0 * L.t1) * L.p0 = 0 := by
+  rw [mul_assoc, L.t1_mul_p0, mul_zero]
+
+@[simp] theorem s0t1_mul_p1 : (L.s0 * L.t1) * L.p1 = L.s0 * L.t1 := by
+  rw [mul_assoc, L.t1_mul_p1]
+
+@[simp] theorem s1t0_mul_p0 : (L.s1 * L.t0) * L.p0 = L.s1 * L.t0 := by
+  rw [mul_assoc, L.t0_mul_p0]
+
+@[simp] theorem s1t0_mul_p1 : (L.s1 * L.t0) * L.p1 = 0 := by
+  rw [mul_assoc, L.t0_mul_p1, mul_zero]
+
+@[simp] theorem s0t1_sq : (L.s0 * L.t1) * (L.s0 * L.t1) = 0 := by
+  calc
+    (L.s0 * L.t1) * (L.s0 * L.t1) =
+        L.s0 * ((L.t1 * L.s0) * L.t1) := by noncomm_ring
+    _ = 0 := by rw [L.t1_s0]; simp
+
+@[simp] theorem s1t0_sq : (L.s1 * L.t0) * (L.s1 * L.t0) = 0 := by
+  calc
+    (L.s1 * L.t0) * (L.s1 * L.t0) =
+        L.s1 * ((L.t0 * L.s1) * L.t0) := by noncomm_ring
+    _ = 0 := by rw [L.t0_s1]; simp
+
+@[simp] theorem s0t1_mul_s1t0 :
+    (L.s0 * L.t1) * (L.s1 * L.t0) = L.p0 := by
+  calc
+    (L.s0 * L.t1) * (L.s1 * L.t0) =
+        L.s0 * ((L.t1 * L.s1) * L.t0) := by noncomm_ring
+    _ = L.p0 := by rw [L.t1_s1]; simp [p0]
+
+@[simp] theorem s1t0_mul_s0t1 :
+    (L.s1 * L.t0) * (L.s0 * L.t1) = L.p1 := by
+  calc
+    (L.s1 * L.t0) * (L.s0 * L.t1) =
+        L.s1 * ((L.t0 * L.s0) * L.t1) := by noncomm_ring
+    _ = L.p1 := by rw [L.t0_s0]; simp [p1]
+
+/-! ### A characteristic-free sign commutator -/
+
+/-- The unit which is `-1` on the `p₀` corner and `1` on the `p₁` corner. -/
+def cornerSign : Aˣ where
+  val := -L.p0 + L.p1
+  inv := -L.p0 + L.p1
+  val_inv := by
+    change (-L.p0 + L.p1) * (-L.p0 + L.p1) = 1
+    calc
+      (-L.p0 + L.p1) * (-L.p0 + L.p1) = L.p0 + L.p1 := by
+        noncomm_ring [L.p0_mul_p0, L.p1_mul_p1,
+          L.p0_mul_p1, L.p1_mul_p0]
+      _ = 1 := L.p0_add_p1
+  inv_val := by
+    change (-L.p0 + L.p1) * (-L.p0 + L.p1) = 1
+    calc
+      (-L.p0 + L.p1) * (-L.p0 + L.p1) = L.p0 + L.p1 := by
+        noncomm_ring [L.p0_mul_p0, L.p1_mul_p1,
+          L.p0_mul_p1, L.p1_mul_p0]
+      _ = 1 := L.p0_add_p1
+
+/-- The unit interchanging the two Leavitt corners. -/
+def cornerSwap : Aˣ where
+  val := L.s0 * L.t1 + L.s1 * L.t0
+  inv := L.s0 * L.t1 + L.s1 * L.t0
+  val_inv := by
+    change (L.s0 * L.t1 + L.s1 * L.t0) *
+      (L.s0 * L.t1 + L.s1 * L.t0) = 1
+    calc
+      (L.s0 * L.t1 + L.s1 * L.t0) *
+          (L.s0 * L.t1 + L.s1 * L.t0) = L.p0 + L.p1 := by
+        noncomm_ring [L.s0t1_sq, L.s1t0_sq,
+          L.s0t1_mul_s1t0, L.s1t0_mul_s0t1]
+      _ = 1 := L.p0_add_p1
+  inv_val := by
+    change (L.s0 * L.t1 + L.s1 * L.t0) *
+      (L.s0 * L.t1 + L.s1 * L.t0) = 1
+    calc
+      (L.s0 * L.t1 + L.s1 * L.t0) *
+          (L.s0 * L.t1 + L.s1 * L.t0) = L.p0 + L.p1 := by
+        noncomm_ring [L.s0t1_sq, L.s1t0_sq,
+          L.s0t1_mul_s1t0, L.s1t0_mul_s0t1]
+      _ = 1 := L.p0_add_p1
+
+/-- The scalar `-1` is one explicit commutator in the unit group of every
+ring carrying a binary Leavitt family. -/
+theorem cornerSign_commutator_cornerSwap :
+    ⁅L.cornerSign, L.cornerSwap⁆ = (-1 : Aˣ) := by
+  apply Units.ext
+  change (-L.p0 + L.p1) * (L.s0 * L.t1 + L.s1 * L.t0) *
+      (-L.p0 + L.p1) * (L.s0 * L.t1 + L.s1 * L.t0) = -1
+  have hsignSwap :
+      (-L.p0 + L.p1) * (L.s0 * L.t1 + L.s1 * L.t0) =
+        -L.s0 * L.t1 + L.s1 * L.t0 := by
+    change (-(L.s0 * L.t0) + L.s1 * L.t1) *
+      (L.s0 * L.t1 + L.s1 * L.t0) =
+        -L.s0 * L.t1 + L.s1 * L.t0
+    change (-L.p0 + L.p1) *
+      (L.s0 * L.t1 + L.s1 * L.t0) =
+        -L.s0 * L.t1 + L.s1 * L.t0
+    noncomm_ring [L.p0_mul_s0t1, L.p0_mul_s1t0,
+      L.p1_mul_s0t1, L.p1_mul_s1t0]
+  rw [hsignSwap]
+  have hswapSign :
+      (-L.s0 * L.t1 + L.s1 * L.t0) * (-L.p0 + L.p1) =
+        -(L.s0 * L.t1 + L.s1 * L.t0) := by
+    change (-L.s0 * L.t1 + L.s1 * L.t0) *
+      (-(L.s0 * L.t0) + L.s1 * L.t1) =
+        -(L.s0 * L.t1 + L.s1 * L.t0)
+    change (-L.s0 * L.t1 + L.s1 * L.t0) * (-L.p0 + L.p1) =
+      -(L.s0 * L.t1 + L.s1 * L.t0)
+    noncomm_ring [L.s0t1_mul_p0, L.s0t1_mul_p1,
+      L.s1t0_mul_p0, L.s1t0_mul_p1]
+  rw [hswapSign, neg_mul]
+  exact congrArg Neg.neg (L.cornerSwap.val_inv)
+
+theorem negOne_mem_commutator (L : LeavittFamily A) :
+    (-1 : Aˣ) ∈ commutator Aˣ := by
+  rw [← cornerSign_commutator_cornerSwap L]
+  exact Subgroup.commutator_mem_commutator (by simp) (by simp)
 
 theorem t0_pow_mul_s0_pow (n : ℕ) : L.t0 ^ n * L.s0 ^ n = 1 := by
   induction n with
@@ -195,6 +329,25 @@ theorem characteristicTwo_compressor
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [hcancel, hzero, mul_add]
+
+/-- The compressor block has a four-elementary factorization in every
+characteristic.  In characteristic two this specializes to the word above. -/
+theorem compressor_factorization :
+    x21 (L.t0 - 1) * x12 1 * x21 (L.s0 - 1) * x12 (-L.t0) =
+      !![L.s0, L.p1; 0, L.t0] := by
+  have hp1 : -L.p0 + 1 = L.p1 := by
+    rw [← L.p0_add_p1]
+    abel
+  have hzero : L.t0 - 1 + L.t0 * (L.s0 - 1) = 0 := by
+    noncomm_ring [L.t0_s0]
+  unfold x12 x21
+  rw [Matrix.mul_fin_two, Matrix.mul_fin_two, Matrix.mul_fin_two]
+  ext i j
+  fin_cases i <;> fin_cases j
+  · simp
+  · simpa [p0] using hp1
+  · simpa using hzero
+  · simp [hzero]
 
 /-- The two-by-two matrix called `z` in both the adjacent-rank and rank-two
 constructions. -/
