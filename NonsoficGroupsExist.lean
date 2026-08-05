@@ -152,6 +152,7 @@ import NonsoficGroupsExist.LeavittGradingSpans
 import NonsoficGroupsExist.LeavittBalancedUnits
 import NonsoficGroupsExist.LeavittWindowReduction
 import NonsoficGroupsExist.BinaryLeavittWindow
+import NonsoficGroupsExist.ScaledStreamRepresentation
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
