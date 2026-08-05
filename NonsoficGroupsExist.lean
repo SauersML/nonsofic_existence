@@ -13,6 +13,7 @@ import NonsoficGroupsExist.FreeRootFiltration
 import NonsoficGroupsExist.FreeRootActions
 import NonsoficGroupsExist.FreeRootPlane
 import NonsoficGroupsExist.FreeRootPlaneMass
+import NonsoficGroupsExist.FreeRootFunctionalValuation
 import NonsoficGroupsExist.FreeRootPlaneFourier
 import NonsoficGroupsExist.FreeRootCharacterValuation
 import NonsoficGroupsExist.FreeElementaryPropertyT

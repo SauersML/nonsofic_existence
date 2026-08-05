@@ -111,9 +111,14 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     of its scalar multiples, on any acting space and on the plane
     (`CharacterMass.gap_mul_sum_mass_ne_zero_le`,
     `FreeRootPlaneMass.gap_mul_sum_planeMass_ne_zero_le`)
-  - [ ] A5. Finite-stage character valuation regions `A/B/C/D` over
-    `ZMod p` and the least-detected-degree descent (port of
-    `FreeRootCharacterValuation`)
+  - [ ] A5. Finite-stage character valuation regions `A/B/C/D` over every
+    finite coefficient field and the least-detected-degree descent (port of
+    `FreeRootCharacterValuation`); the functional valuation itself — its
+    detection calculus, the sentinel characterization of the zero
+    functional, unit-coefficient detection at valuation zero, exact stage
+    restriction below the top layer, and the leading-letter descent by
+    exactly one — is done (`FreeRootFunctionalValuation`); the region
+    partition and least-leading-generator selector are pending
   - [ ] A6. Stage-to-stage mass transport under the dual shears:
     covariance, fiber disjointness, and per-fiber mass bounds (port of
     `FreeRootPlaneFourier`)
@@ -442,7 +447,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3255
+The current complete MSI build reports `Build completed successfully (3256
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -450,7 +455,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The source audit covers all 163 project modules, and
+proposition interface. The source audit covers all 164 project modules, and
 the whole-namespace kernel audit traverses every project declaration and
 reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after

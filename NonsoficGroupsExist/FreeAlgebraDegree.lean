@@ -384,6 +384,43 @@ theorem eq_sum_support_degreeWordMonomial {n : ℕ}
           (R := ZMod 2) (X := X) p.1).coeff.support},
       wordMonomial X (ZMod 2) w.1 := (Finset.sum_attach _ _).symm
 
+/-- A degree-bounded free polynomial is, inside its degree submodule, the
+scalar combination of the basis words in its support. -/
+theorem eq_sum_support_smul_degreeWordMonomial {n : ℕ}
+    (p : degreeLE X k n) :
+    let q := (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+      (R := k) (X := X) p.1).coeff
+    let term : {w // w ∈ q.support} → degreeLE X k n := fun w ↦
+      q w.1 • ⟨wordMonomial X k w.1, wordMonomial_mem_degreeLE X k
+        (((mem_degreeLE_iff X k p.1 n).1 p.2) w.1 w.2)⟩
+    p = ∑ w, term w := by
+  dsimp only
+  apply Subtype.ext
+  rw [show (((∑ w : {w // w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+      (R := k) (X := X) p.1).coeff.support},
+      (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := k) (X := X) p.1).coeff w.1 •
+        (⟨wordMonomial X k w.1, wordMonomial_mem_degreeLE X k
+          (((mem_degreeLE_iff X k p.1 n).1 p.2) w.1 w.2)⟩ :
+            degreeLE X k n)) : degreeLE X k n) : FreeAlgebra k X) =
+    ∑ w : {w // w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := k) (X := X) p.1).coeff.support},
+      (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := k) (X := X) p.1).coeff w.1 • wordMonomial X k w.1 by
+    rw [Submodule.coe_sum]
+    exact Finset.sum_congr rfl fun w _ ↦ rfl]
+  calc
+    p.1 = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := k) (X := X) p.1).coeff.support,
+        ((FreeAlgebra.equivMonoidAlgebraFreeMonoid
+          (R := k) (X := X) p.1).coeff w) • wordMonomial X k w :=
+      eq_sum_support_smul_wordMonomial X k p.1
+    _ = ∑ w : {w // w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := k) (X := X) p.1).coeff.support},
+      (FreeAlgebra.equivMonoidAlgebraFreeMonoid
+        (R := k) (X := X) p.1).coeff w.1 • wordMonomial X k w.1 :=
+      (Finset.sum_attach _ _).symm
+
 /-- Every free polynomial lies in some finite degree stage. -/
 theorem exists_mem_degreeLE (p : FreeAlgebra k X) :
     ∃ n, p ∈ degreeLE X k n := by
