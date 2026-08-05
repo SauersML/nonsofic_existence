@@ -135,6 +135,7 @@ import NonsoficGroupsExist.MatrixSelfSimilarity
 import NonsoficGroupsExist.PermutationConservation
 import NonsoficGroupsExist.Sofic
 import NonsoficGroupsExist.SoficPositiveControl
+import NonsoficGroupsExist.SemanticPositiveControls
 import NonsoficGroupsExist.SoficErrors
 import NonsoficGroupsExist.Whitehead
 import NonsoficGroupsExist.TableCover
