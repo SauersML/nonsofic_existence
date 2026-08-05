@@ -86,8 +86,36 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   the characteristic; the `±1` Fourier analysis of the planes is now the
   only remaining `ZMod 2`-specific layer
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
-  characteristic two to arbitrary finite coefficient fields; this is now the
-  only characteristic restriction in the adjacent-rank nonsoficity route
+  characteristic two to arbitrary finite coefficient fields (the only
+  characteristic restriction left in the adjacent-rank nonsoficity route),
+  through the following checkpoints:
+  - [x] A1. Character-mass foundation for prime-exponent orthogonal
+    actions: positivity, conservation, Fourier inversion, and the
+    displacement identity over the dual of a finite `ZMod p`-vector space
+    (`PrimeCharacterMass`)
+  - [ ] A2. Mass equivariance under conjugating the representation and
+    under automorphisms of the acting vector space
+  - [ ] A3. Simultaneous masses for the two-root coefficient plane over
+    `ZMod p`, coordinate characters, and factorization of plane characters
+    through the two coefficient functionals
+  - [ ] A4. Moving-mass control: generator and unit-root displacement
+    bounds the mass of characters nontrivial on the plane, with the
+    explicit `2 * (1 - cos (2π/p))` constant
+  - [ ] A5. Finite-stage character valuation regions `A/B/C/D` over
+    `ZMod p` and the least-detected-degree descent (port of
+    `FreeRootCharacterValuation`)
+  - [ ] A6. Stage-to-stage mass transport under the dual shears:
+    covariance, fiber disjointness, and per-fiber mass bounds (port of
+    `FreeRootPlaneFourier`)
+  - [ ] A7. Boundary-layer vanishing and the two full finite-stage
+    Kassabov inequalities over `ZMod p`
+  - [ ] A8. The limiting two-root moving-mass bound and the uniform
+    relative-property-`(T)` estimate over `ZMod p`
+  - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
+    explicit Kazhdan pair; transfer to all ranks over `L_k(1,2)` for every
+    finite field `k`; nonsoficity endpoints over every finite field
+  - [ ] A10. Full build and audit re-run; claim map updated so Theorem B
+    is Lean-backed for all finite fields
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
   binary Leavitt family has explicit `M_r(R) ≃ R` for every `r ≥ 1`
 - [x] Prove nonsoficity of `EL₂` by the all-positive-ranks Leavitt equivalence
@@ -99,15 +127,42 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   trivial-intersection identities are all proved by explicit two-by-two
   matrix computation, and finite generation of `Aˣ` is derived from its
   Kazhdan pair rather than assumed
-- [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required ranks
+- [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required
+  ranks, through the following checkpoints:
+  - [ ] B1. Monomial normal form for `L_k(1,2)`: the spanning family
+    `s_α t_β` and the corner arithmetic needed for simplicity
+  - [ ] B2. `L_k(1,2)` is purely infinite simple
+  - [ ] B3. GE property of purely infinite simple rings (`thm:agp`(a))
+  - [ ] B4. `K₁(L) = 0` in the form used (`thm:agp`(b) plus the rose-graph
+    computation)
+  - [ ] B5. `L^×` perfect and `GL_r(L) = EL_r(L)` for every `r ≥ 2`
+    (`prop:glel`)
+  - [ ] B6. Discharge the rank-two theorem's GE and property-`(T)`
+    hypotheses over every finite field; audit
 - [x] Prove the full unit group and every positive-rank `GL_r` nonsofic
 - [x] Prove every finitely generated nonsofic group has a finitely presented
   nonsofic cover
 - [ ] Formalize Shalom's property-`(T)` finitely presented cover theorem
-- [ ] Prove the property-`(T)` refinement and quotient claims of Theorem C
+  and the Theorem C refinement, through the following checkpoints:
+  - [ ] C1. Property `(T)` descends along surjections in the repository's
+    Kazhdan-pair form
+  - [ ] C2. Shalom's theorem: every Kazhdan group is a quotient of a
+    finitely presented Kazhdan group
+  - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
+    property-`(T)` refinement and quotient claims of Theorem C
+  - [ ] C4. Audit
 - [ ] Define Thompson's group `V` and identify the manuscript's tree-table
   and corner copies with it (the existence proof currently uses a stronger
-  direct finite obstruction instead)
+  direct finite obstruction instead), through the following checkpoints:
+  - [ ] D1. Define `V` concretely as the group of prefix-substitution
+    bijections given by tree tables
+  - [ ] D2. Identify the Leavitt tree-table units with a faithful
+    `V`-action (`prop:vembed` at full strength)
+  - [ ] D3. Identify the corner witness subgroup with the corner copy of
+    the corresponding subgroup of `V`
+  - [ ] D4. Simplicity, finite presentation, and two-generation of `V`,
+    and the literal `prop:vnotlef` through `lem:fplef`
+  - [ ] D5. Audit
 - [x] State and prove the bounded-degree form of the expander decomposition:
   the edited multigraphs carry one explicit occurrence-counting degree bound
 - [x] Align every TeX theorem and verification claim with its exact Lean
@@ -377,7 +432,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3245
+The current complete MSI build reports `Build completed successfully (3669
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -385,7 +440,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The source audit covers all 161 project modules, and
+proposition interface. The source audit covers all 162 project modules, and
 the whole-namespace kernel audit traverses every project declaration and
 reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after

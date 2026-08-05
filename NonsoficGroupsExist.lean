@@ -24,6 +24,7 @@ import NonsoficGroupsExist.DirectedCoarea
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.KazhdanFiniteGeneration
+import NonsoficGroupsExist.PrimeCharacterMass
 import NonsoficGroupsExist.RankTwoCompression
 import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.KazhdanFixedSpace

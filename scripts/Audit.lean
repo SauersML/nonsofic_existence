@@ -218,8 +218,12 @@ def budgets : List (String × Option Nat) :=
   , ("LAUNDERED_PROP", some 0)
   , ("UNWITNESSED", some 0)
   -- Audited structural `[Nonempty ...]` inputs used to obtain positive finite
-  -- cardinalities or select an index.  This is a ratchet, not report-only.
-  , ("ASSUMPTION_INSTANCE", some 19)
+  -- cardinalities or select an index, plus the standard Mathlib
+  -- `[Fact p.Prime]`/`[NeZero p]` primality instances carried by the
+  -- prime-character-mass module (16 declarations; they parametrize `ZMod p`
+  -- and are discharged by `Fact.mk` at every concrete prime).  This is a
+  -- ratchet, not report-only.
+  , ("ASSUMPTION_INSTANCE", some 35)
   , ("UNUSED", some 0)
   , ("TRIVIAL", some 0)
   , ("DUPLICATE", some 0)
