@@ -93,6 +93,22 @@ theorem exists_expanderDecomposition
   let marker_ne : ∀ n (s : GoodCrossingStub (X n) (P n) (B n)),
       marker n s ≠ stubEndpoint (X n) (P n) s.1 :=
     fun n ↦ (marker_spec n).1
+  have marker_injective (n : ℕ) : Function.Injective (marker n) := by
+    intro s t hst
+    by_contra hne
+    have hdisjoint := (marker_spec n).2.2.2.2 s t hne
+    rw [Finset.disjoint_left] at hdisjoint
+    have hs0 : marker n s ∈
+        forwardNeighborhood (A.model n) (A.map n) S 0 {marker n s} := by
+      simp [forwardNeighborhood]
+    have ht0 : marker n t ∈
+        forwardNeighborhood (A.model n) (A.map n) S 0 {marker n t} := by
+      simp [forwardNeighborhood]
+    have hs := forwardNeighborhood_mono_time
+      (A.model n) (A.map n) S (Nat.zero_le r) {marker n s} hs0
+    have ht := forwardNeighborhood_mono_time
+      (A.model n) (A.map n) S (Nat.zero_le r) {marker n t} ht0
+    exact hdisjoint hs (by simpa [hst] using ht)
   let Z : ℕ → FiniteMultiGraph := fun n ↦
     graph (X n) (P n) (B n) (marker n) (marker_ne n)
   have hE : Negligible (fun n ↦ (Fintype.card (A.model n) : ℝ))
@@ -154,6 +170,12 @@ theorem exists_expanderDecomposition
     cheeger_pos := div_pos hγ (by norm_num)
     graph := Z
     vertexEquiv := fun n ↦ Equiv.refl (A.model n)
+    degreeBound := 2 * (2 * S.card) + 1
+    degree_le := by
+      intro n
+      exact graph_hasDegreeBound (X n) (P n) (B n) (marker n)
+        (marker_ne n) (marker_injective n)
+        (generatorGraph_hasDegreeBound (A.model n) S (A.map n))
     edit_negligible := by
       apply Negligible.congr hedit
       intro n

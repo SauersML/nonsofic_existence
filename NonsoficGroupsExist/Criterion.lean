@@ -178,6 +178,73 @@ noncomputable def generatorGraphVertexEquiv {G : Type} [Group G]
   change Y ≃ Y
   exact Equiv.refl Y
 
+/-- A generator multigraph has degree at most twice the number of labels:
+at a fixed vertex there is at most one outgoing and one incoming occurrence
+for each permutation label. -/
+theorem generatorGraph_degree_le {G : Type} [Group G]
+    (Y : FiniteModel) (T : Finset G) (act : G → Equiv.Perm Y)
+    (x : Y) : (generatorGraph Y T act).degree x ≤ 2 * T.card := by
+  classical
+  let f : {e : (generatorGraph Y T act).edge //
+      e ∈ (generatorGraph Y T act).incidentEdges x} → T × Bool := fun e ↦
+    if (generatorGraph Y T act).first e.1 = x then
+      (e.1.1.1, false)
+    else
+      (e.1.1.1, true)
+  have hf : Function.Injective f := by
+    intro e e' heq
+    by_cases he : (generatorGraph Y T act).first e.1 = x
+    · have he' : (generatorGraph Y T act).first e'.1 = x := by
+        by_contra hne'
+        have htag := congrArg (fun z : T × Bool ↦ z.2) heq
+        rw [show f e = (e.1.1.1, false) from dif_pos he,
+          show f e' = (e'.1.1.1, true) from dif_neg hne'] at htag
+        exact Bool.noConfusion htag
+      have hs : e.1.1.1 = e'.1.1.1 := by
+        have hfirst := congrArg (fun z : T × Bool ↦ z.1) heq
+        rw [show f e = (e.1.1.1, false) from dif_pos he,
+          show f e' = (e'.1.1.1, false) from dif_pos he'] at hfirst
+        exact hfirst
+      apply Subtype.ext
+      apply Subtype.ext
+      exact Prod.ext hs (he.trans he'.symm)
+    · have he' : (generatorGraph Y T act).first e'.1 ≠ x := by
+        intro he'x
+        have htag := congrArg (fun z : T × Bool ↦ z.2) heq
+        rw [show f e = (e.1.1.1, true) from dif_neg he,
+          show f e' = (e'.1.1.1, false) from dif_pos he'x] at htag
+        exact Bool.noConfusion htag
+      have hs : e.1.1.1 = e'.1.1.1 := by
+        have hfirst := congrArg (fun z : T × Bool ↦ z.1) heq
+        rw [show f e = (e.1.1.1, true) from dif_neg he,
+          show f e' = (e'.1.1.1, true) from dif_neg he'] at hfirst
+        exact hfirst
+      have hsecond : (generatorGraph Y T act).second e.1 = x := by
+        have hi := (Finset.mem_filter.mp e.2).2
+        exact hi.resolve_left he
+      have hsecond' : (generatorGraph Y T act).second e'.1 = x := by
+        have hi := (Finset.mem_filter.mp e'.2).2
+        exact hi.resolve_left he'
+      have hsval : e.1.1.1.1 = e'.1.1.1.1 := congrArg Subtype.val hs
+      change act e.1.1.1.1 e.1.1.2 = x at hsecond
+      change act e'.1.1.1.1 e'.1.1.2 = x at hsecond'
+      have hsource : e.1.1.2 = e'.1.1.2 := by
+        rw [hsval] at hsecond
+        apply (act e'.1.1.1.1).injective
+        exact hsecond.trans hsecond'.symm
+      apply Subtype.ext
+      apply Subtype.ext
+      exact Prod.ext hs hsource
+  have hcard := Fintype.card_le_of_injective f hf
+  simpa [FiniteMultiGraph.degree, Fintype.card_coe, Fintype.card_prod,
+    Nat.mul_comm]
+    using hcard
+
+theorem generatorGraph_hasDegreeBound {G : Type} [Group G]
+    (Y : FiniteModel) (T : Finset G) (act : G → Equiv.Perm Y) :
+    (generatorGraph Y T act).HasDegreeBound (2 * T.card) :=
+  generatorGraph_degree_le Y T act
+
 /-- An expander decomposition in the precise form consumed by the subsequent
 finite matching argument.  `KunDecomposition` constructs this data from
 property `(T)`; this structure merely records the resulting interface. -/
@@ -188,6 +255,8 @@ structure ExpanderDecomposition {G : Type} [Group G]
   cheeger_pos : 0 < cheeger
   graph : ℕ → FiniteMultiGraph
   vertexEquiv : ∀ n, (graph n).vertex ≃ S.model n
+  degreeBound : ℕ
+  degree_le : ∀ n, (graph n).HasDegreeBound degreeBound
   /-- The edited graph is occurrence-close to the actual generator graph. -/
   edit_negligible : S.cardScale.Negligible
     fun n ↦ ((generatorGraph (S.model n) T (S.map n)).editDistance

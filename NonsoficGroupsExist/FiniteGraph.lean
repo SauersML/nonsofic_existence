@@ -55,6 +55,23 @@ end EdgeEditWitness
 
 namespace FiniteMultiGraph
 
+/-- Edge occurrences incident to a vertex.  Parallel occurrences are counted
+separately, exactly as they are in boundaries and edit distances. -/
+def incidentEdges (X : FiniteMultiGraph) (x : X.vertex) : Finset X.edge :=
+  Finset.univ.filter fun e ↦ X.first e = x ∨ X.second e = x
+
+/-- The occurrence-counting degree of a vertex. -/
+def degree (X : FiniteMultiGraph) (x : X.vertex) : ℕ :=
+  (X.incidentEdges x).card
+
+/-- A uniform upper bound for all occurrence-counting vertex degrees. -/
+def HasDegreeBound (X : FiniteMultiGraph) (d : ℕ) : Prop :=
+  ∀ x, X.degree x ≤ d
+
+theorem hasDegreeBound_mono {X : FiniteMultiGraph} {d e : ℕ}
+    (hX : X.HasDegreeBound d) (hde : d ≤ e) : X.HasDegreeBound e :=
+  fun x ↦ (hX x).trans hde
+
 /-- The occurrence-sensitive subgraph induced by a finite vertex set. -/
 def induce (X : FiniteMultiGraph) (U : Finset X.vertex) : FiniteMultiGraph where
   vertex :=

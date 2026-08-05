@@ -209,6 +209,11 @@ noncomputable def c2_expanderDecomposition :
     generatorGraph (pairedModel n) {c2Generator} (pairedMap n)
   vertexEquiv := fun n ↦
     generatorGraphVertexEquiv (pairedModel n) {c2Generator} (pairedMap n)
+  degreeBound := 2
+  degree_le := by
+    intro n
+    simpa using generatorGraph_hasDegreeBound
+      (pairedModel n) {c2Generator} (pairedMap n)
   edit_negligible := by
     apply Negligible.congr (Negligible.zero)
     intro n

@@ -62,8 +62,8 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [ ] Define Thompson's group `V` and identify the manuscript's tree-table
   and corner copies with it (the existence proof currently uses a stronger
   direct finite obstruction instead)
-- [ ] State and prove the exact bounded-degree form of the expander
-  decomposition exported in the manuscript
+- [x] State and prove the bounded-degree form of the expander decomposition:
+  the edited multigraphs carry one explicit occurrence-counting degree bound
 - [ ] Align every TeX theorem and verification claim with its exact Lean declaration
 - [ ] Re-run the complete MSI build and final axiom/source audit after all
   manuscript-scope additions
@@ -86,6 +86,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | The universal binary Leavitt algebra has the required family | `UniversalLeavitt.family` | Formalized |
 | The corner witness is non-LEF | `UniversalRankFour.witness_not_isLEF` | Formalized by a direct finite obstruction; not identified with `V` |
 | The complete adjacent-rank compression construction works in every characteristic | `RankFour.compressorSet_conjugation`, `RankFour.coreEmbedding_compressorSet_generate` | Formalized |
+| Kun's edited expander graphs have one uniform degree bound | `ExpanderDecomposition.degree_le`, `KunDecomposition.exists_expanderDecomposition` | Formalized |
 | Property `(T)` and hence nonsoficity over finite fields of odd characteristic | — | Manuscript-only; the algebraic compression is already characteristic-free |
 | `GL_r = EL_r` and the separate rank-two compression construction | — | Manuscript-only |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
