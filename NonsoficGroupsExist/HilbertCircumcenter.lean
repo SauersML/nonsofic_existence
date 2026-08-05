@@ -30,7 +30,7 @@ theorem dist_le_coveringRadius {S : Set E} (hbdd : Bornology.IsBounded S)
   · obtain ⟨R, hR⟩ := (Metric.isBounded_iff_subset_closedBall x).1 hbdd
     exact ⟨R, by
       rintro _ ⟨t, ht, rfl⟩
-      exact hR ht⟩
+      exact Metric.mem_closedBall'.mp (hR ht)⟩
   · exact ⟨s, hs, rfl⟩
 
 theorem coveringRadius_le {S : Set E} (hne : S.Nonempty) {x : E} {r : ℝ}
@@ -54,7 +54,7 @@ theorem coveringRadius_lipschitz {S : Set E} (hne : S.Nonempty)
   calc
     dist x s ≤ dist x y + dist y s := dist_triangle x y s
     _ ≤ dist x y + coveringRadius S y :=
-      add_le_add_left (dist_le_coveringRadius hbdd y hs) _
+      add_le_add le_rfl (dist_le_coveringRadius hbdd y hs)
     _ = coveringRadius S y + dist x y := by ring
 
 /-- The parallelogram estimate for covering radii: the radius at a
@@ -205,10 +205,10 @@ theorem existsUnique_center [CompleteSpace E] {S : Set E}
     have hn1 : (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
     have hm2 : 1 / ((m : ℝ) + 1) ≤ 1 := by
       rw [div_le_one (by positivity)]
-      linarith [Nat.cast_nonneg m]
+      linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ (m : ℝ))]
     have hn2 : 1 / ((n : ℝ) + 1) ≤ 1 := by
       rw [div_le_one (by positivity)]
-      linarith [Nat.cast_nonneg n]
+      linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ (n : ℝ))]
     nlinarith
   have hcauchy : CauchySeq x := by
     rw [Metric.cauchySeq_iff]
@@ -318,7 +318,9 @@ theorem exists_fixed_of_bounded_orbit [CompleteSpace E] {G : Type*}
     ext y
     constructor
     · rintro ⟨_, ⟨h, rfl⟩, rfl⟩
-      exact ⟨g * h, by exact (hmul g h x₀).symm⟩
+      refine ⟨g * h, ?_⟩
+      show φ (g * h) x₀ = φ g (φ h x₀)
+      exact (hmul g h x₀).symm
     · rintro ⟨h, rfl⟩
       exact ⟨φ (g⁻¹ * h) x₀, ⟨g⁻¹ * h, rfl⟩, by
         rw [← hmul, mul_inv_cancel_left]⟩

@@ -403,6 +403,8 @@ theorem seqNormSq_smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
       (ofSeq_norm_sq_finite hv), stdPart_coe]
   rfl
 
+attribute [irreducible] seqNorm seqNormSq
+
 section Center
 
 variable {ι : Type*} [Nonempty ι]
@@ -418,7 +420,6 @@ noncomputable def centerRadius (O : ι → ∀ k, H k) : ℝ :=
 
 variable {O : ι → ∀ k, H k} {D : ℝ}
 
-set_option maxHeartbeats 1000000 in
 theorem bddAbove_orbit_seqNorm (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
     (hv : IsBoundedSeq v) :

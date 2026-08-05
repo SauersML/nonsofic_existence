@@ -28,8 +28,9 @@ noncomputable def displacement (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
 
 theorem norm_le_displacement (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
     (hQ : Q.Nonempty) (ξ : E) {g : G} (hg : g ∈ Q) :
-    ‖ρ g ξ - ξ‖ ≤ displacement ρ Q hQ ξ :=
-  Finset.le_sup' _ hg
+    ‖ρ g ξ - ξ‖ ≤ displacement ρ Q hQ ξ := by
+  unfold displacement
+  exact Finset.le_sup' (fun g ↦ ‖ρ g ξ - ξ‖) hg
 
 theorem displacement_le (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
     (hQ : Q.Nonempty) (ξ : E) {r : ℝ}
@@ -71,7 +72,7 @@ theorem displacement_le_add (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
       rw [(ρ g).norm_map]
       ring
     _ ≤ displacement ρ Q hQ η + 2 * ‖ξ - η‖ :=
-      add_le_add_right (norm_le_displacement ρ Q hQ η hg) _
+      add_le_add (norm_le_displacement ρ Q hQ η hg) le_rfl
 
 theorem displacement_lipschitz (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
     (hQ : Q.Nonempty) (ξ η : E) :

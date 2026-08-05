@@ -70,6 +70,60 @@ theorem diagUnit_conj_elementary10 (u : Rˣ) (a : R) :
   ext i j
   fin_cases i <;> fin_cases j <;> simp
 
+/-- The general diagonal conjugation formula for elementary units. -/
+theorem diagUnit_conj_elementaryUnit (u : Rˣ) (i j : Fin 2)
+    (hij : i ≠ j) (a : R) :
+    diagUnit u * elementaryUnit i j hij a * (diagUnit u)⁻¹ =
+      elementaryUnit i j hij
+        (![(u : R), 1] i * a * ![((u⁻¹ : Rˣ) : R), 1] j) := by
+  have hdd : ∀ p : Fin 2,
+      ![(u : R), 1] p * ![((u⁻¹ : Rˣ) : R), 1] p = 1 := by
+    intro p
+    fin_cases p <;> simp
+  apply Units.ext
+  have hval : (diagUnit u : Matrix (Fin 2) (Fin 2) R) =
+      Matrix.diagonal ![(u : R), 1] := by
+    ext r c
+    fin_cases r <;> fin_cases c <;> simp [Matrix.diagonal]
+  have hval' : (((diagUnit u)⁻¹ : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+      Matrix (Fin 2) (Fin 2) R) =
+      Matrix.diagonal ![((u⁻¹ : Rˣ) : R), 1] := by
+    ext r c
+    fin_cases r <;> fin_cases c <;> simp [Matrix.diagonal]
+  rw [Units.val_mul, Units.val_mul, hval, hval']
+  show Matrix.diagonal ![(u : R), 1] * (1 + Matrix.single i j a) *
+      Matrix.diagonal ![((u⁻¹ : Rˣ) : R), 1] =
+    1 + Matrix.single i j
+      (![(u : R), 1] i * a * ![((u⁻¹ : Rˣ) : R), 1] j)
+  ext r c
+  rw [Matrix.mul_diagonal, Matrix.diagonal_mul, Matrix.add_apply,
+    Matrix.add_apply]
+  by_cases hr : r = i
+  · subst hr
+    by_cases hc : c = j
+    · subst hc
+      rw [Matrix.single_apply_same, Matrix.single_apply_same,
+        Matrix.one_apply_ne hij, Matrix.one_apply_ne hij]
+      noncomm_ring
+    · rw [Matrix.single_apply_of_ne (fun h ↦ hc h.2),
+        Matrix.single_apply_of_ne (fun h ↦ hc h.2)]
+      by_cases hic : r = c
+      · subst hic
+        rw [Matrix.one_apply_eq, Matrix.one_apply_eq]
+        rw [add_zero, add_zero, mul_one]
+        exact hdd r
+      · rw [Matrix.one_apply_ne hic, Matrix.one_apply_ne hic]
+        noncomm_ring
+  · rw [Matrix.single_apply_of_ne (fun h ↦ hr h.1),
+      Matrix.single_apply_of_ne (fun h ↦ hr h.1)]
+    by_cases hrc : r = c
+    · subst hrc
+      rw [Matrix.one_apply_eq, Matrix.one_apply_eq]
+      rw [add_zero, add_zero, mul_one]
+      exact hdd r
+    · rw [Matrix.one_apply_ne hrc, Matrix.one_apply_ne hrc]
+      noncomm_ring
+
 /-- Diagonal conjugates of rank-two elementaries are elementary. -/
 theorem diagUnit_conj_mem {E : (Matrix (Fin 2) (Fin 2) R)ˣ}
     (hE : E ∈ elementaryGroup (Fin 2) R) (u : Rˣ) :
@@ -77,17 +131,8 @@ theorem diagUnit_conj_mem {E : (Matrix (Fin 2) (Fin 2) R)ˣ}
   induction hE using Subgroup.closure_induction with
   | mem z hz =>
     obtain ⟨i, j, hij, a, rfl⟩ := hz
-    fin_cases i <;> fin_cases j
-    · exact absurd rfl hij
-    · rw [show elementaryUnit (0 : Fin 2) 1 hij a =
-        elementaryUnit (0 : Fin 2) 1 (by decide) a from rfl,
-        diagUnit_conj_elementary01]
-      exact elementaryUnit_mem _ _ _ _
-    · rw [show elementaryUnit (1 : Fin 2) 0 hij a =
-        elementaryUnit (1 : Fin 2) 0 (by decide) a from rfl,
-        diagUnit_conj_elementary10]
-      exact elementaryUnit_mem _ _ _ _
-    · exact absurd rfl hij
+    rw [diagUnit_conj_elementaryUnit u i j hij a]
+    exact elementaryUnit_mem _ _ _ _
   | one =>
     rw [mul_one, mul_inv_cancel]
     exact one_mem _
@@ -114,11 +159,10 @@ instance stableUnits_normal : (stableUnits R).Normal := by
   constructor
   intro u hu g
   rw [mem_stableUnits_iff] at hu ⊢
+  have hinv : diagUnit (g⁻¹) = (diagUnit g)⁻¹ := map_inv diagUnitHom g
   rw [show diagUnit (g * u * g⁻¹) =
     diagUnit g * diagUnit u * (diagUnit g)⁻¹ from by
-      rw [diagUnit_mul, diagUnit_mul]
-      congr 1
-      exact map_inv diagUnitHom g]
+      rw [diagUnit_mul, diagUnit_mul, hinv]]
   exact diagUnit_conj_mem hu g
 
 /-- Under strong division, every invertible two-by-two matrix normalizes
@@ -173,7 +217,7 @@ theorem diagPair_mul (u v u' v' : Rˣ) :
   show !![(u : R), 0; 0, (v : R)] * !![(u' : R), 0; 0, (v' : R)] = _
   rw [Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp
+  fin_cases i <;> fin_cases j <;> simp [Units.val_mul]
 
 theorem diagPair_inv (u v : Rˣ) :
     (diagPair u v)⁻¹ = diagPair u⁻¹ v⁻¹ := by
