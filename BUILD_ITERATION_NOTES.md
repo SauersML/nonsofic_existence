@@ -95,6 +95,44 @@ ABC09 §4 specialized to the 2-rose (no sinks, no sources, e₀ = 1):
 Their explicit Δ_n/Ω_n transition matrices (proof of thm:skewle) are the
 concrete forms to formalize for step 3-4.
 
+## Rose-K₁ status (2026-08-05, after degree-zero milestone)
+DONE and green (modules StableUnitsGenerators, FamilyDiagonalClass,
+FieldMatrixReduction, LeavittDegreeZero):
+- pairKappaUnit: corner insertion along ANY pair t*s = 1, with the
+  GL₂-intertwiner coset identity (generalizes word-kappa).
+- mem_stableUnits_of_val_unipotent: units 1 + a·b with b·a = 0 are in H.
+- centralClassGroup A ≤ Aˣ: units = central·H; ScalarReduction A ⟺ all
+  units in it (scalarReduction_of_forall_mem_centralClassGroup).
+- CompleteMatrixFamily transvection pullback → H; diagonal-with-central-
+  entries pullback → centralClassGroup (Finset-induction corner-sum
+  factorization Π κᵢ(dᵢ)).
+- unitsEquiv_field_matrix_mem_centralClassGroup: any unit identified by a
+  family with a matrix over a FIELD (Mathlib Matrix.Pivot transvection
+  decomposition) lies in centralClassGroup.
+- fullBinaryCode n (all 2ⁿ words, complete) + entry scalar extraction:
+  any unit with value in span{s_α t_β : |α|=|β|=n} is in centralClassGroup
+  (mem_centralClassGroup_of_val_mem_levelSpan). With the proved central
+  collapse c̄ = c̄² ⇒ c̄ = 1̄, degree-zero units are IN H.
+
+REMAINING (the one frontier): Laurent width-reduction — arbitrary unit of
+L₂ ≡ degree-zero unit modulo E-moves. Sharpened plan:
+- Grading facts (all trivial identities): t₀^d s₀^d = 1; L_d = L₀·s₀^d for
+  d ≥ 0, L_{−d} = t₀^d·L₀; normal form u = Σ_{e>0} t₀^e A_{−e} + A₀ +
+  Σ_{d>0} A_d s₀^d, A_i ∈ L₀-span.
+- Padding: span{balanced ≤ n} = span{balanced = n} via 1 = Σ_c s_c t_c
+  (needed to feed mem_centralClassGroup_of_val_mem_levelSpan).
+- Width reduction: E-move [[1,v],[0,1]]·diag(u,1)·[[1,0],[w,1]] =
+  [[u+vw, v],[w,1]] with v := −A_N s₀^{N−1}, w := s₀ kills the top
+  s₀-degree (and dually t₀ side); iterate at growing matrix size
+  (Higman linearization) until all entries degree-zero; then
+  fromMatrix(V) is degree-zero (s_γ(balanced)t_δ) → in H; descend via
+  the (to-be-generalized to 2^m) mem_stableUnits_of_diagUnit_mem.
+- KEY structural fact (why no ℤ-winding survives): L₂ has NO units of
+  nonzero pure degree — rank obstruction in L₀ = ⋃ M_{2^m}(k)
+  (a·p₀·b = 1 impossible: rank ≤ 2^{m−1}); ker(1−φ₀ on K₀) = 0 in ABC09
+  terms. λ(u) = Σ s_b u t_b ≡ u² mod H for EVERY unit (fromMatrix of
+  diag(u,u) = κ₀(u)κ₁(u)) — the c ↦ c² mechanism at unit level.
+
 ## Iteration log (continued)
 - GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
   AlmostMinimalDisplacement, UltralimitGeometry, HilbertCircumcenter,
