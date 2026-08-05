@@ -8,15 +8,21 @@ import NonsoficGroupsExist.HilbertCircumcenter
 
 The Delorme direction of the Delorme–Guichardet theorem: a group with
 Kazhdan's property `(T)` fixes a point in every affine isometric action
-on a real Hilbert space.  The proof is quantitative.  For a cocycle `b`
-the Gaussians `g ↦ exp (-t * ‖b g‖ ^ 2)` are positive-definite
-(`GaussianPositiveDefinite`); their GNS representations
-(`KazhdanGNS.representation`) carry cyclic vectors whose displacement is
-controlled by `t` on the Kazhdan set, so for small `t` the Kazhdan
-spectral gap forces the moving component of the cyclic vector below any
-threshold, which bounds the Gaussian below uniformly on the group and
-hence bounds the cocycle.  A bounded orbit has a fixed circumcenter
-(`Circumcenter.exists_fixed_of_bounded_orbit`).
+on a real Hilbert space.  The proof is quantitative and factors through
+an abstract boundedness principle: any nonnegative function `ψ`
+vanishing at the identity whose Gaussians `exp (-t * ψ)` are all
+positive-definite is bounded on a Kazhdan group
+(`bounded_of_gaussian_isPositiveDefinite`).  Indeed the GNS
+representation (`KazhdanGNS.representation`) of the small-`t` Gaussian
+carries a cyclic vector whose displacement is controlled by `t` on the
+Kazhdan set, so the Kazhdan spectral gap forces its moving component
+below any threshold, which bounds the Gaussian below uniformly on the
+group.  For a cocycle `b` the Gaussians of `ψ = ‖b ·‖ ^ 2` are
+positive-definite (`GaussianPositiveDefinite`), so `b` is bounded, and a
+bounded orbit has a fixed circumcenter
+(`Circumcenter.exists_fixed_of_bounded_orbit`).  The abstract form is
+stated separately because Shalom's finite-presentability argument
+applies it to an ultralimit function that is not presented as a cocycle.
 -/
 
 namespace NonsoficGroupsExist
@@ -71,29 +77,31 @@ section Bound
 
 open KazhdanGNS KazhdanFixedSpace
 
-variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-
-/-- **Delorme's boundedness estimate.**  Under a Kazhdan pair, every
-isometric cocycle is bounded: for small `t` the GNS cyclic vector of the
-Gaussian `exp (-t * ‖b ·‖ ^ 2)` is almost invariant on the Kazhdan set,
-so its moving component is small, so the Gaussian is at least `1 / 2`
-everywhere. -/
-theorem norm_sq_cocycle_bounded_of_isKazhdanPair
+/-- **The Gaussian boundedness principle.**  On a group with a Kazhdan
+pair, any nonnegative function `ψ` vanishing at the identity all of
+whose Gaussians `exp (-t * ψ)` are positive-definite is bounded: the GNS
+cyclic vector of the small-`t` Gaussian is almost invariant on the
+Kazhdan set, so its moving component is small, so the Gaussian is at
+least `1 / 2` everywhere. -/
+theorem bounded_of_gaussian_isPositiveDefinite
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
-    (π : G →* (E ≃ₗᵢ[ℝ] E)) {b : G → E} (hb : IsCocycle π b) :
-    ∃ R : ℝ, ∀ g : G, ‖b g‖ ^ 2 ≤ R := by
+    (ψ : G → ℝ) (hψ1 : ψ 1 = 0) (hψnn : ∀ g : G, 0 ≤ ψ g)
+    (hpd : ∀ t : ℝ, 0 < t →
+      KazhdanFiniteModel.IsPositiveDefinite
+        (fun g ↦ Real.exp (-t * ψ g))) :
+    ∃ R : ℝ, ∀ g : G, ψ g ≤ R := by
   classical
   have hε := hQ.1
-  set B : ℝ := (∑ q ∈ Q, ‖b q‖ ^ 2) + 1 with hB
-  have hsumnn : 0 ≤ ∑ q ∈ Q, ‖b q‖ ^ 2 :=
-    Finset.sum_nonneg fun q _ ↦ sq_nonneg _
+  set B : ℝ := (∑ q ∈ Q, ψ q) + 1 with hB
+  have hsumnn : 0 ≤ ∑ q ∈ Q, ψ q :=
+    Finset.sum_nonneg fun q _ ↦ hψnn q
   have hBpos : 0 < B := by
     rw [hB]
     linarith
-  have hBq : ∀ q ∈ Q, ‖b q‖ ^ 2 ≤ B := by
+  have hBq : ∀ q ∈ Q, ψ q ≤ B := by
     intro q hq
-    have hle := Finset.single_le_sum (f := fun q ↦ ‖b q‖ ^ 2)
-      (fun i _ ↦ sq_nonneg _) hq
+    have hle := Finset.single_le_sum (f := fun q ↦ ψ q)
+      (fun i _ ↦ hψnn i) hq
     rw [hB]
     linarith
   set t : ℝ := ε ^ 2 / (32 * B) with ht
@@ -102,16 +110,14 @@ theorem norm_sq_cocycle_bounded_of_isKazhdanPair
     exact div_pos (pow_pos hε 2) (by linarith)
   -- The Gaussian positive-definite function and its GNS data.
   set p : PositiveDefiniteFunction G :=
-    ⟨fun g ↦ Real.exp (-t * ‖b g‖ ^ 2),
-      GaussianKernel.isPositiveDefinite_exp_neg_norm_sq b
-        (fun g h ↦ hb.norm_inv_mul g h) htpos.le⟩ with hp
-  have hpapply : ∀ g : G, p g = Real.exp (-t * ‖b g‖ ^ 2) := fun g ↦ rfl
+    ⟨fun g ↦ Real.exp (-t * ψ g), hpd t htpos⟩ with hp
+  have hpapply : ∀ g : G, p g = Real.exp (-t * ψ g) := fun g ↦ rfl
   set ρ := representation p with hρ
   set ξ := kernelVector p 1 with hξ
   have hξsq : inner ℝ ξ ξ = 1 := by
     rw [hξ, inner_kernelVector]
-    show Real.exp (-t * ‖b (1⁻¹ * 1)‖ ^ 2) = 1
-    rw [inv_one, one_mul, hb.apply_one]
+    show Real.exp (-t * ψ (1⁻¹ * 1)) = 1
+    rw [inv_one, one_mul, hψ1]
     simp
   have hnormξsq : ‖ξ‖ ^ 2 = 1 := by
     rw [← real_inner_self_eq_norm_sq]
@@ -125,19 +131,19 @@ theorem norm_sq_cocycle_bounded_of_isKazhdanPair
       rw [hξ, inner_kernelVector, inv_one, one_mul]
     have hkq : ‖kernelVector p q‖ ^ 2 = 1 := by
       rw [← real_inner_self_eq_norm_sq, inner_kernelVector, inv_mul_cancel]
-      show Real.exp (-t * ‖b 1‖ ^ 2) = 1
-      rw [hb.apply_one]
+      show Real.exp (-t * ψ 1) = 1
+      rw [hψ1]
       simp
     rw [norm_sub_rev, norm_sub_sq_real, hρξ, hinner, hnormξsq, hkq]
     ring
   have hdispQ : ∀ q ∈ Q, ‖ρ q ξ - ξ‖ ^ 2 ≤ 2 * t * B := by
     intro q hq
     rw [hdisp q]
-    have hple : 1 - t * ‖b q‖ ^ 2 ≤ p q := by
+    have hple : 1 - t * ψ q ≤ p q := by
       rw [hpapply q]
-      have hexp := Real.add_one_le_exp (-t * ‖b q‖ ^ 2)
+      have hexp := Real.add_one_le_exp (-t * ψ q)
       linarith
-    have htB : t * ‖b q‖ ^ 2 ≤ t * B :=
+    have htB : t * ψ q ≤ t * B :=
       mul_le_mul_of_nonneg_left (hBq q hq) htpos.le
     linarith
   -- The moving component of the cyclic vector.
@@ -237,11 +243,11 @@ theorem norm_sq_cocycle_bounded_of_isKazhdanPair
     nlinarith
   -- Invert the exponential.
   refine ⟨Real.log 2 / t, fun g ↦ ?_⟩
-  have hpg : (1 : ℝ) / 2 ≤ Real.exp (-t * ‖b g‖ ^ 2) := by
+  have hpg : (1 : ℝ) / 2 ≤ Real.exp (-t * ψ g) := by
     have hlow := hlower g
     rw [hpapply g] at hlow
     linarith [hm16]
-  have h12 : Real.exp (Real.log (1 / 2)) ≤ Real.exp (-t * ‖b g‖ ^ 2) := by
+  have h12 : Real.exp (Real.log (1 / 2)) ≤ Real.exp (-t * ψ g) := by
     rw [Real.exp_log (by norm_num : (0 : ℝ) < 1 / 2)]
     exact hpg
   have hlog := Real.exp_le_exp.mp h12
@@ -249,6 +255,23 @@ theorem norm_sq_cocycle_bounded_of_isKazhdanPair
     rw [one_div, Real.log_inv]] at hlog
   rw [le_div_iff₀ htpos]
   nlinarith
+
+variable {E : Type v} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+
+/-- **Delorme's boundedness estimate**: under a Kazhdan pair, every
+isometric cocycle is bounded. -/
+theorem norm_sq_cocycle_bounded_of_isKazhdanPair
+    {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε)
+    (π : G →* (E ≃ₗᵢ[ℝ] E)) {b : G → E} (hb : IsCocycle π b) :
+    ∃ R : ℝ, ∀ g : G, ‖b g‖ ^ 2 ≤ R := by
+  apply bounded_of_gaussian_isPositiveDefinite hQ
+    (fun g ↦ ‖b g‖ ^ 2)
+  · rw [hb.apply_one, norm_zero]
+    ring
+  · exact fun g ↦ sq_nonneg _
+  · exact fun t ht ↦
+      GaussianKernel.isPositiveDefinite_exp_neg_norm_sq b
+        (fun g h ↦ hb.norm_inv_mul g h) ht.le
 
 end Bound
 

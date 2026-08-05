@@ -230,8 +230,10 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   nonsofic cover
 - [ ] Formalize Shalom's property-`(T)` finitely presented cover theorem
   and the Theorem C refinement, through the following checkpoints:
-  - [ ] C1. Property `(T)` descends along surjections in the repository's
-    Kazhdan-pair form
+  - [x] C1. Property `(T)` descends along surjections in the repository's
+    Kazhdan-pair form (`HasKazhdanPropertyT.of_surjective` in
+    `Kazhdan.lean`: push the Kazhdan set forward along the surjection,
+    pull representations back)
   - [ ] C2. Shalom's theorem: every Kazhdan group is a quotient of a
     finitely presented Kazhdan group.  In progress: `HilbertCircumcenter`
     (Chebyshev centers of bounded sets and fixed points of bounded
