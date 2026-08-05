@@ -25,8 +25,8 @@ noncomputable def blocksFinset : Finset (Finset Y) :=
 theorem block_mem_blocksFinset (y : Y) : P.block y ∈ P.blocksFinset :=
   P.mem_blocksFinset (P.block y) |>.2 ⟨y, rfl⟩
 
-theorem blocksFinset_nonempty [Nonempty Y] : P.blocksFinset.Nonempty := by
-  obtain ⟨y⟩ := ‹Nonempty Y›
+theorem blocksFinset_nonempty (hY : Nonempty Y) : P.blocksFinset.Nonempty := by
+  obtain ⟨y⟩ := hY
   exact ⟨P.block y, P.block_mem_blocksFinset y⟩
 
 theorem blocksFinset_pairwise_disjoint :

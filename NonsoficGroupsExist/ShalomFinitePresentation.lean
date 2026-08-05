@@ -373,10 +373,10 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
   have hc0 : 0 ≤ centerRadius bseq := by
     refine le_csInf ⟨orbitRadius bseq (bseq 1), bseq 1, hbound 1, rfl⟩ ?_
     rintro r ⟨v, hv, rfl⟩
-    exact orbitRadius_nonneg hbound hOD hv
+    exact orbitRadius_nonneg ⟨1⟩ hbound hOD hv
   have hcD : centerRadius bseq ≤ D := by
-    refine le_trans (centerRadius_le hbound hOD (hbound 1)) ?_
-    apply orbitRadius_le
+    refine le_trans (centerRadius_le ⟨1⟩ hbound hOD (hbound 1)) ?_
+    apply orbitRadius_le ⟨1⟩
     intro g
     have : seqNorm (fun k ↦ bseq 1 k - bseq g k) =
         seqNorm (bseq g) := by
@@ -395,7 +395,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
     rw [hδdef]
     apply div_pos one_pos
     nlinarith
-  obtain ⟨v, hvb, hvr⟩ := exists_near_center hbound hOD hδ0
+  obtain ⟨v, hvb, hvr⟩ := exists_near_center ⟨1⟩ hbound hOD hδ0
   -- Every generator moves the near-center little.
   have hsmall : ∀ i : Fin n,
       seqNormSq (fun k ↦ v k -
@@ -414,7 +414,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
             rw [(σ k _).norm_map]
         _ ≤ Cv + 1 := add_le_add (hCv k) (hgenbound i k)
     have hwr : orbitRadius bseq w ≤ c + δ := by
-      apply orbitRadius_le
+      apply orbitRadius_le ⟨1⟩
       intro g
       have hshift : seqNorm (fun k ↦ w k - bseq g k) =
           seqNorm (fun k ↦ v k - bseq ((FreeGroup.of i)⁻¹ * g) k) := by
@@ -443,7 +443,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
         exact (σ k _).norm_map _
       rw [hshift]
       exact le_trans (le_orbitRadius hbound hOD hvb _) hvr.le
-    have := seqNormSq_sub_le_of_near_center hbound hOD hvb hwb
+    have := seqNormSq_sub_le_of_near_center ⟨1⟩ hbound hOD hvb hwb
       (ρ := c + δ) hvr.le hwr
     rw [hcdef] at this ⊢
     exact this

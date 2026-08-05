@@ -160,9 +160,10 @@ theorem chebyshevRadius_le {S : Set E} (hne : S.Nonempty)
   ciInf_le (coveringRadius_bddBelow S hne hbdd) x
 
 omit [InnerProductSpace ℝ E] in
-theorem exists_coveringRadius_lt {S : Set E} [Nonempty E] {r : ℝ}
+theorem exists_coveringRadius_lt {S : Set E} (hE : Nonempty E) {r : ℝ}
     (hr : chebyshevRadius S < r) :
     ∃ x : E, coveringRadius S x < r := by
+  haveI := hE
   by_contra hall
   push Not at hall
   have hge : r ≤ chebyshevRadius S := le_ciInf hall

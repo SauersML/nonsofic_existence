@@ -451,54 +451,55 @@ theorem le_orbitRadius (hOb : ∀ i, IsBoundedSeq (O i))
     seqNorm (fun k ↦ v k - O i k) ≤ orbitRadius O v :=
   le_csSup (bddAbove_orbit_seqNorm hOb hOD hv) (Set.mem_range_self i)
 
-theorem orbitRadius_le [Nonempty ι] {v : ∀ k, H k} {r : ℝ}
+theorem orbitRadius_le (hι : Nonempty ι) {v : ∀ k, H k} {r : ℝ}
     (h : ∀ i, seqNorm (fun k ↦ v k - O i k) ≤ r) :
     orbitRadius O v ≤ r :=
+  haveI := hι
   csSup_le (Set.range_nonempty _) (by rintro s ⟨i, rfl⟩; exact h i)
 
-theorem orbitRadius_nonneg [Nonempty ι]
+theorem orbitRadius_nonneg (hι : Nonempty ι)
     (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
     (hv : IsBoundedSeq v) :
     0 ≤ orbitRadius O v := by
-  obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+  obtain ⟨i⟩ := hι
   exact (seqNorm_nonneg (hv.sub (hOb i))).trans
     (le_orbitRadius hOb hOD hv i)
 
-theorem bddBelow_radius_image [Nonempty ι]
+theorem bddBelow_radius_image (hι : Nonempty ι)
     (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) :
     BddBelow (orbitRadius O '' {v | IsBoundedSeq v}) := by
   refine ⟨0, ?_⟩
   rintro r ⟨v, hv, rfl⟩
-  exact orbitRadius_nonneg hOb hOD hv
+  exact orbitRadius_nonneg hι hOb hOD hv
 
-theorem centerRadius_le [Nonempty ι]
+theorem centerRadius_le (hι : Nonempty ι)
     (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
     (hv : IsBoundedSeq v) :
     centerRadius O ≤ orbitRadius O v :=
-  csInf_le (bddBelow_radius_image hOb hOD) ⟨v, hv, rfl⟩
+  csInf_le (bddBelow_radius_image hι hOb hOD) ⟨v, hv, rfl⟩
 
 /-- Near-optimal centers exist. -/
-theorem exists_near_center [Nonempty ι]
+theorem exists_near_center (hι : Nonempty ι)
     (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {δ : ℝ} (hδ : 0 < δ) :
     ∃ v : ∀ k, H k, IsBoundedSeq v ∧
       orbitRadius O v < centerRadius O + δ := by
-  obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+  obtain ⟨i⟩ := hι
   have hne : (orbitRadius O '' {v | IsBoundedSeq v}).Nonempty :=
     ⟨orbitRadius O (O i), O i, hOb i, rfl⟩
   have hlt : centerRadius O < centerRadius O + δ := by linarith
   obtain ⟨r, ⟨v, hv, rfl⟩, hrlt⟩ :=
-    (csInf_lt_iff (bddBelow_radius_image hOb hOD) hne).mp hlt
+    (csInf_lt_iff (bddBelow_radius_image ⟨i⟩ hOb hOD) hne).mp hlt
   exact ⟨v, hv, hrlt⟩
 
 /-- **The approximate-circumcenter estimate**: any two near-optimal
 centers are close, quantitatively, by the parallelogram law applied
 against every orbit point. -/
 theorem seqNormSq_sub_le_of_near_center
-    [∀ k, InnerProductSpace ℝ (H k)] [Nonempty ι]
+    [∀ k, InnerProductSpace ℝ (H k)] (hι : Nonempty ι)
     (hOb : ∀ i, IsBoundedSeq (O i)) (hOD : ∀ i, seqNorm (O i) ≤ D)
     {v w : ∀ k, H k} (hv : IsBoundedSeq v) (hw : IsBoundedSeq w)
     {ρ : ℝ} (hrv : orbitRadius O v ≤ ρ) (hrw : orbitRadius O w ≤ ρ) :
@@ -540,14 +541,14 @@ theorem seqNormSq_sub_le_of_near_center
     nlinarith [hpar, hva, hwa]
   -- The midpoint radius squeezes the optimal radius.
   have hB0 : 0 ≤ ρ ^ 2 - q / 4 := by
-    obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+    obtain ⟨i⟩ := hι
     have := hkey i
     have h0 : 0 ≤ seqNormSq (fun k ↦ mid k - O i k) := by
       rw [seqNormSq_eq_sq (hmidb.sub (hOb i))]
       exact sq_nonneg _
     nlinarith
   have hmidr : orbitRadius O mid ≤ Real.sqrt (ρ ^ 2 - q / 4) := by
-    apply orbitRadius_le
+    apply orbitRadius_le hι
     intro i
     have h1 := hkey i
     have h2 : seqNormSq (fun k ↦ mid k - O i k) ≤ ρ ^ 2 - q / 4 := by
@@ -557,13 +558,13 @@ theorem seqNormSq_sub_le_of_near_center
         Real.sqrt (ρ ^ 2 - q / 4) := Real.sqrt_le_sqrt h2
     rwa [Real.sqrt_sq (seqNorm_nonneg (hmidb.sub (hOb i)))] at h3
   have hcle : centerRadius O ≤ Real.sqrt (ρ ^ 2 - q / 4) :=
-    (centerRadius_le hOb hOD hmidb).trans hmidr
+    (centerRadius_le hι hOb hOD hmidb).trans hmidr
   have hsq : centerRadius O ^ 2 ≤ ρ ^ 2 - q / 4 := by
     have h0 : 0 ≤ centerRadius O := by
-      obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+      obtain ⟨i⟩ := hι
       refine le_csInf ⟨orbitRadius O (O i), O i, hOb i, rfl⟩ ?_
       rintro r ⟨v, hv, rfl⟩
-      exact orbitRadius_nonneg hOb hOD hv
+      exact orbitRadius_nonneg ⟨i⟩ hOb hOD hv
     have hs := Real.sq_sqrt hB0
     nlinarith [mul_self_le_mul_self h0 hcle,
       Real.sqrt_nonneg (ρ ^ 2 - q / 4)]

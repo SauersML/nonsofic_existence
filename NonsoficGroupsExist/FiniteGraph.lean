@@ -475,11 +475,11 @@ def IsMedian {Y : FiniteModel} (f : Y → ℝ) (c : ℝ) : Prop :=
 
 /-- The audited one-vertex endpoint of the co-area argument: the two median
 inequalities force the unique value to equal the median. -/
-theorem IsMedian.eq_of_subsingleton {Y : FiniteModel} [Nonempty Y] [Subsingleton Y]
+theorem IsMedian.eq_of_subsingleton {Y : FiniteModel} (hY : Nonempty Y) [Subsingleton Y]
     {f : Y → ℝ} {c : ℝ} (hc : IsMedian f c) : ∀ y, f y = c := by
   intro y
   letI : Unique Y :=
-    { default := Classical.choice (inferInstance : Nonempty Y)
+    { default := Classical.choice hY
       uniq := fun _ ↦ Subsingleton.elim _ _ }
   have hcard : Fintype.card Y = 1 := Fintype.card_unique
   have hnotGreater : ¬c < f y := by

@@ -159,6 +159,7 @@ import NonsoficGroupsExist.BaseChangeIndependence
 import NonsoficGroupsExist.StableRankOne
 import NonsoficGroupsExist.BalancedStableRank
 import NonsoficGroupsExist.WhiteheadFlip
+import NonsoficGroupsExist.ResidualNormalForm
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
