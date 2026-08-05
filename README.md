@@ -58,6 +58,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   orthogonality theorem now hold for central commutators of any one positive
   bounded exponent; the former central-involution eigenspace module is
   removed as dead code
+- [x] Generalize the entire A₂ vertex-angle, magic-graph defect,
+  compressed-Laplacian gap, and root Kazhdan-subset chain from exponent-two
+  roots to roots of any one positive bounded exponent; the elementary
+  rank-three Kazhdan-subset theorem now holds over every ring of positive
+  characteristic, so the remaining characteristic-two dependence is confined
+  to the free-root Fourier relative-property-`(T)` transport
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route
@@ -153,8 +159,9 @@ claims not yet formalized are listed separately in “Full manuscript scope.”
   contraction factor below `1`
 - [x] Transfer the projection contraction to strict vertex codistance and a
   genuine Kazhdan-subset bound for the union of the six root subgroups
-- [x] Instantiate the root Kazhdan-subset theorem for every characteristic-two
-  elementary rank-three group; no exponent-law premise remains
+- [x] Instantiate the root Kazhdan-subset theorem for the elementary
+  rank-three group over every ring of positive characteristic; no
+  exponent-law premise remains
 - [x] Construct finite word-degree stages of the free characteristic-two
   algebra and prove that they are finite, monotone, and exhaustive (the
   algebraic filtration for the relative-property-`(T)` proof)

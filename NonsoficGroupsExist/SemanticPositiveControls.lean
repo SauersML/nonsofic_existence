@@ -449,7 +449,7 @@ private theorem concreteA2_existsConstantProjectionBound :
     ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧
       A2MagicHilbert.ConstantProjectionBound.{0, 0} concreteA2 gamma := by
   exact A2MagicHilbert.exists_constantProjectionBound
-    concreteA2 concreteA2_exponentTwo
+    concreteA2 2 (by omega) concreteA2_exponentTwo
 
 private noncomputable def concreteA2ProjectionGamma : ℝ :=
   Classical.choose concreteA2_existsConstantProjectionBound

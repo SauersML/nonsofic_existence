@@ -257,7 +257,8 @@ theorem controlSet_isKazhdanPair :
       IsKazhdanPair (elementaryGroup (Fin 3) (FreeRing X))
         (controlSet X) epsilon := by
   obtain ⟨kappa, hkappa⟩ :=
-    A2MagicHilbert.elementary_exists_rootSet_isKazhdan (FreeRing X)
+    A2MagicHilbert.elementary_exists_rootSet_isKazhdan (FreeRing X) 2
+      (by omega)
   let C : ℝ := 12 * Fintype.card X + 13
   have hC : 0 < C := by
     dsimp only [C]

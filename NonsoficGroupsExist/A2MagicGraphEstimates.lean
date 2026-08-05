@@ -95,11 +95,12 @@ theorem incidentMovingProjection_norm_sq_le
   simpa [Fin.sum_univ_succ, add_assoc] using hlocal
 
 /-- On the component orthogonal to the central sum-root fixed space, the two
-root components satisfy the strict characteristic-two bound. -/
-theorem centerMovingRoot_norm_sq_le_of_root_exponent_two
+root components satisfy the strict bounded-exponent bound. -/
+theorem centerMovingRoot_norm_sq_le_of_root_boundedExponent
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (r : A2Root)
     (rho : A.vertexGroup r →* (E ≃ₗᵢ[ℝ] E))
     (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r) rho)
@@ -159,8 +160,8 @@ theorem centerMovingRoot_norm_sq_le_of_root_exponent_two
   have htNY : tN ∈ KazhdanFixedSpace.fixedSubspace rho Y :=
     (KazhdanFixedSpace.fixedSubspace rho Y).sub_mem ht htLY
   have hangle :=
-    A.rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_exponent_two
-      hexp r rho hno
+    A.rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_boundedExponent
+      n hn hexp r rho hno
   exact HilbertEpsilonOrthogonality.norm_add_sq_le
     (by positivity) hangle hsNX htNY
 
@@ -169,8 +170,9 @@ vertex group.  The deficit is exactly the energy of the two root-edge
 components orthogonal to the central root fixed space. -/
 theorem vertex_four_fixed_norm_sq_le_restricted_with_defect
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (r : A2Root)
     (rho : A.vertexGroup r →* (E ≃ₗᵢ[ℝ] E))
     (hno : IsKazhdanPair.HasNoInvariantVectors (A.vertexGroup r) rho)
@@ -223,8 +225,8 @@ theorem vertex_four_fixed_norm_sq_le_restricted_with_defect
       KazhdanFixedSpace.fixedSubspace rho (Y ⊔ Z) := by
     simpa [hXZ, hYZ] using hedgeHK
   have hangle :=
-    A.rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_exponent_two
-      hexp r rho hno
+    A.rootFixedSubspaces_epsilonOrthogonal_restricted_of_root_boundedExponent
+      n hn hexp r rho hno
   apply NormalEdgeCodistance.four_fixed_norm_sq_le_with_defect
     rho X Y Z (by positivity) hXnorm hYnorm hedge
   · simpa [X, Y] using hangle
@@ -261,8 +263,9 @@ of a vertex-fixed family.  All projections here are constructed from the
 given representation; no local no-invariants hypothesis is supplied. -/
 theorem incidentMovingProjection_norm_sq_le_with_defect
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (f : A2Root → E)
     (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
@@ -299,7 +302,7 @@ theorem incidentMovingProjection_norm_sq_le_with_defect
     exact KazhdanFixedSpace.subgroupMovingProjection_mem_restricted_fixedSubspace
       rho (edgeGroup A r n) L (edgeGroup_le_sourceVertex A r n) (hd n)
   have hlocal := vertex_four_fixed_norm_sq_le_restricted_with_defect
-    A hexp r rhoW
+    A n hn hexp r rhoW
     (KazhdanFixedSpace.subgroupMovingRepresentation_hasNoInvariantVectors rho L)
     (p := p 0) (q := p 1) (s := p 2) (t := p 3)
     (by simpa [edgeGroup] using hp 0)
@@ -315,8 +318,9 @@ edge components is the moving projection of the graph Laplacian at the
 vertex. -/
 theorem incidentMovingLaplacian_norm_sq_le_with_defect
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (f : A2Root → E)
     (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r))
@@ -328,7 +332,8 @@ theorem incidentMovingLaplacian_norm_sq_le_with_defect
         (1 - (Real.sqrt 2)⁻¹) *
           (‖centralMovingIncidentComponent A rho f r 2‖ ^ 2 +
             ‖centralMovingIncidentComponent A rho f r 3‖ ^ 2) := by
-  have h := incidentMovingProjection_norm_sq_le_with_defect A hexp rho f hf r
+  have h := incidentMovingProjection_norm_sq_le_with_defect
+    A n hn hexp rho f hf r
   simpa [KazhdanFixedSpace.subgroupMovingProjection] using h
 
 /-- The moving components of the first two incident edges are orthogonal.

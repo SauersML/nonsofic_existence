@@ -4,7 +4,7 @@ import NonsoficGroupsExist.A2MagicLaplacian
 /-!
 # Global energy bookkeeping for the A₂ magic graph
 
-This file sums the proved local characteristic-two defect over the concrete
+This file sums the proved local bounded-exponent defect over the concrete
 six-vertex graph.  The definitions separate the fixed and moving components
 of every oriented edge difference; their energy decomposition is orthogonal
 Pythagoras, not an assumed graph certificate.
@@ -945,11 +945,12 @@ theorem edgeEnergy_eq_moving_add_fixed
     rho (A.vertexGroup r) (edgeDifference f r n)
 
 /-- The summed local estimate: the borderline coefficient `2` loses a
-strict multiple of the characteristic-two root-moving energy. -/
+strict multiple of the bounded-exponent root-moving energy. -/
 theorem vertexMovingLaplacianEnergy_le_with_defect
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (f : A2Root → E)
     (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r)) :
@@ -973,7 +974,7 @@ theorem vertexMovingLaplacianEnergy_le_with_defect
         apply Finset.sum_le_sum
         intro r hr
         exact incidentMovingLaplacian_norm_sq_le_with_defect
-          A hexp rho f hf r
+          A n hn hexp rho f hf r
     _ = 2 * ∑ r : A2Root, ∑ n : Fin 4,
           ‖KazhdanFixedSpace.subgroupMovingProjection rho (A.vertexGroup r)
             (f r - f (neighbor r n))‖ ^ 2 -
@@ -987,8 +988,9 @@ theorem vertexMovingLaplacianEnergy_le_with_defect
 coefficient strictly below the borderline value `2`. -/
 theorem vertexMovingLaplacianEnergy_lt_two_mul_edgeEnergy
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (f : A2Root → E)
     (hf : ∀ r, f r ∈ KazhdanFixedSpace.fixedSubspace rho (A.vertexGroup r)) :
@@ -1026,7 +1028,7 @@ theorem vertexMovingLaplacianEnergy_lt_two_mul_edgeEnergy
       _ ≤ c * R + 2 * F := by linarith
   have hsplit : D = M + F := edgeEnergy_eq_moving_add_fixed A rho f
   have hlocal : vertexMovingLaplacianEnergy A rho f ≤ 2 * M - c * R := by
-    exact vertexMovingLaplacianEnergy_le_with_defect A hexp rho f hf
+    exact vertexMovingLaplacianEnergy_le_with_defect A n hn hexp rho f hf
   change vertexMovingLaplacianEnergy A rho f ≤ (2 - c / 3) * D
   nlinarith
 

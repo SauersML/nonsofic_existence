@@ -438,12 +438,13 @@ theorem norm_laplacianFamily_sq_eq_compressed_add_moving [CompleteSpace E]
   exact KazhdanFixedSpace.norm_sq_fixedProjection_add_movingProjection
     rho (A.vertexGroup (vertex i)) (A2MagicLaplacian.laplacian (f : Family E) i)
 
-/-- The characteristic-two local defect creates a strict spectral gap for
+/-- The bounded-exponent local defect creates a strict spectral gap for
 the compressed Laplacian. -/
 theorem compressedLaplacian_quadratic_gap [CompleteSpace E]
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (f : vertexFixedSubspace A rho) :
     (2 * (1 - (Real.sqrt 2)⁻¹) / 3) *
@@ -460,7 +461,7 @@ theorem compressedLaplacian_quadratic_gap [CompleteSpace E]
     rootReindex_mem_vertexFixedSubspace A rho f r
   have hstrict : B ≤ beta * D := by
     have h := A2MagicEnergy.vertexMovingLaplacianEnergy_lt_two_mul_edgeEnergy
-      A hexp rho (rootReindex (f : Family E)) hfixed
+      A n hn hexp rho (rootReindex (f : Family E)) hfixed
     rw [edgeEnergy_rootReindex] at h
     exact h
   have hgraph : 2 * D ≤ ‖laplacianFamily (f : Family E)‖ ^ 2 := by
@@ -612,8 +613,9 @@ theorem compressedLaplacian_eq_zero_imp [CompleteSpace E]
 an explicit bounded inverse estimate for the compressed Laplacian. -/
 theorem norm_le_inverseGap_mul_norm_compressedLaplacian [CompleteSpace E]
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1)
+      ∀ g ∈ A.root i j hij, g ^ n = 1)
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (hno : IsKazhdanPair.HasNoInvariantVectors G rho)
     (f : vertexFixedSubspace A rho) :
@@ -647,7 +649,7 @@ theorem norm_le_inverseGap_mul_norm_compressedLaplacian [CompleteSpace E]
       compressedLaplacian_energy_nonneg A rho x
   · intro x
     simpa [c, PositiveOperatorGap.energy] using
-      compressedLaplacian_quadratic_gap A hexp rho x
+      compressedLaplacian_quadratic_gap A n hn hexp rho x
   · intro x
     simpa [PositiveOperatorGap.energy] using
       compressedLaplacian_energy_le_eight_norm_sq A rho x
@@ -663,8 +665,9 @@ spaces.  The contraction factor is constructed explicitly from the
 compressed-Laplacian inverse bound. -/
 theorem exists_constantProjectionBound
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1) :
+      ∀ g ∈ A.root i j hij, g ^ n = 1) :
     ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧
       ConstantProjectionBound.{u, v} A gamma := by
   let c : ℝ := 2 * (1 - (Real.sqrt 2)⁻¹) / 3
@@ -749,7 +752,7 @@ theorem exists_constantProjectionBound
       _ = ‖laplacianFamily q‖ := hnormL
       _ ≤ 8 * ‖q‖ := norm_laplacianFamily_le_eight q
   have hinverse := norm_le_inverseGap_mul_norm_compressedLaplacian
-    A hexp rho hno p
+    A n hn hexp rho hno p
   change ‖p₀‖ ≤ K * ‖compressedLaplacian A rho p‖ at hinverse
   have hpq : ‖p₀‖ ≤ a * ‖q‖ := by
     calc
@@ -771,41 +774,44 @@ theorem exists_constantProjectionBound
 the six vertex fixed spaces. -/
 theorem exists_vertexCodistanceBound
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1) :
+      ∀ g ∈ A.root i j hij, g ^ n = 1) :
     ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧
       A2System.VertexCodistanceBound.{u, v} A gamma := by
   obtain ⟨gamma, hgamma0, hgamma1, hprojection⟩ :=
-    exists_constantProjectionBound A hexp
+    exists_constantProjectionBound A n hn hexp
   exact ⟨gamma, hgamma0, hgamma1,
     A.vertexCodistanceBound_of_projectionBound hgamma0
       (vertexProjectionBound_of_constantProjectionBound A hprojection)⟩
 
-/-- The union of the six A₂ root subgroups is a genuine Kazhdan subset in
-characteristic two. -/
+/-- The union of the six A₂ root subgroups is a genuine Kazhdan subset when
+all root elements have one positive bounded exponent. -/
 theorem exists_rootSet_isKazhdan
     (A : A2System G)
+    (n : ℕ) (hn : 0 < n)
     (hexp : ∀ (i j : Fin 3) (hij : i ≠ j),
-      ∀ g ∈ A.root i j hij, g ^ 2 = 1) :
+      ∀ g ∈ A.root i j hij, g ^ n = 1) :
     ∃ kappa : ℝ, IsKazhdanSubset.{u, v} G A.rootSet kappa := by
   obtain ⟨gamma, hgamma0, hgamma1, hcodistance⟩ :=
-    exists_vertexCodistanceBound A hexp
+    exists_vertexCodistanceBound A n hn hexp
   exact ⟨(1 - gamma) / 32,
     A.rootSet_isKazhdan_of_vertexCodistanceBound
       hgamma0 hgamma1 hcodistance⟩
 
-/-- For every characteristic-two ring, the union of the six elementary
-rank-three root subgroups is a Kazhdan subset.  The exponent-two input is
-discharged by the elementary-matrix multiplication identity. -/
+/-- For every ring of positive characteristic, the union of the six
+elementary rank-three root subgroups is a Kazhdan subset.  The
+bounded-exponent input is discharged by the elementary-matrix multiplication
+identity at the characteristic. -/
 theorem elementary_exists_rootSet_isKazhdan
-    (R : Type*) [Ring R] [CharP R 2] :
+    (R : Type*) [Ring R] (p : ℕ) (hp : 0 < p) [CharP R p] :
     ∃ kappa : ℝ,
       IsKazhdanSubset
         (elementaryGroup (Fin 3) R)
         (elementaryA2System R).rootSet kappa := by
-  apply exists_rootSet_isKazhdan (elementaryA2System R)
+  apply exists_rootSet_isKazhdan (elementaryA2System R) p hp
   intro i j hij g hg
-  exact elementaryRootSubgroup_pow_char 2 i j hij g hg
+  exact elementaryRootSubgroup_pow_char p i j hij g hg
 
 end A2MagicHilbert
 end NonsoficGroupsExist
