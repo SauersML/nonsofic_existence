@@ -186,6 +186,8 @@ theorem isPositiveDefinite_exp_neg_norm_sq (b : G → H)
       (fun g ↦ Real.exp (-t * ‖b g‖ ^ 2)) := by
   constructor
   · intro g h
+    show Real.exp (-t * ‖b (g⁻¹ * h)‖ ^ 2) =
+      Real.exp (-t * ‖b (h⁻¹ * g)‖ ^ 2)
     rw [hb g h, hb h g, norm_sub_rev]
   · intro F c
     classical
@@ -230,9 +232,9 @@ theorem isPositiveDefinite_exp_neg_norm_sq (b : G → H)
 finite quadratic forms of the quotient function are among those of the
 pullback, via any set-theoretic section. -/
 theorem isPositiveDefinite_of_comp_surjective {G' : Type*} [Group G']
-    (f : G →* G') (hf : Function.Surjective f) {φ : G' → ℝ}
-    (h : KazhdanFiniteModel.IsPositiveDefinite (fun g ↦ φ (f g))) :
-    KazhdanFiniteModel.IsPositiveDefinite φ := by
+    (f : G →* G') (hf : Function.Surjective f) {χ : G' → ℝ}
+    (h : KazhdanFiniteModel.IsPositiveDefinite (fun g ↦ χ (f g))) :
+    KazhdanFiniteModel.IsPositiveDefinite χ := by
   classical
   constructor
   · intro a b
@@ -245,9 +247,9 @@ theorem isPositiveDefinite_of_comp_surjective {G' : Type*} [Group G']
     have hsinj : Function.Injective s := Function.injective_surjInv hf
     have hform := h.2 (F.image s) (c ∘ f)
     simp only [Function.comp_apply] at hform
-    have key : ∑ a ∈ F, ∑ b ∈ F, c a * c b * φ (a⁻¹ * b) =
+    have key : ∑ a ∈ F, ∑ b ∈ F, c a * c b * χ (a⁻¹ * b) =
         ∑ i ∈ F.image s, ∑ j ∈ F.image s,
-          c (f i) * c (f j) * φ (f (i⁻¹ * j)) := by
+          c (f i) * c (f j) * χ (f (i⁻¹ * j)) := by
       rw [Finset.sum_image (fun x _ y _ hxy ↦ hsinj hxy)]
       refine Finset.sum_congr rfl fun a _ ↦ ?_
       rw [Finset.sum_image (fun x _ y _ hxy ↦ hsinj hxy)]

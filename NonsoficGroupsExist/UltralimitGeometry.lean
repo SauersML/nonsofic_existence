@@ -428,9 +428,13 @@ theorem bddAbove_orbit_seqNorm (hOb : ∀ i, IsBoundedSeq (O i))
   rintro r ⟨i, rfl⟩
   have htri : seqNorm (fun k ↦ v k - O i k) ≤
       seqNorm v + seqNorm (fun k ↦ -O i k) := by
-    exact seqNorm_add_le hv (hOb i).neg
+    have h := seqNorm_add_le hv (hOb i).neg
+    have heq : (fun k ↦ v k + -O i k) = fun k ↦ v k - O i k := by
+      funext k
+      rw [← sub_eq_add_neg]
+    rwa [heq] at h
   rw [seqNorm_neg] at htri
-  exact htri.trans (add_le_add_left (hOD i) _)
+  exact htri.trans (add_le_add le_rfl (hOD i))
 
 theorem le_orbitRadius (hOb : ∀ i, IsBoundedSeq (O i))
     (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}

@@ -18,6 +18,8 @@ diagonal class (`stableUnits_eq_top` below) — the rose-graph `K₁`
 computation.
 -/
 
+open scoped commutatorElement
+
 namespace NonsoficGroupsExist
 namespace LeavittFamily
 

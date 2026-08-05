@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.MatrixDiagonalization
+import Mathlib.Algebra.Group.Commutator
 
 /-!
 # The diagonal class group of a ring
@@ -13,6 +14,8 @@ and a diagonal.  The remaining `B4` content — that for the binary
 Leavitt algebra this subgroup is everything — reduces modulo this file
 to the rose-graph `K₁` computation.
 -/
+
+open scoped commutatorElement
 
 namespace NonsoficGroupsExist
 namespace MatrixDiagonalization
@@ -84,12 +87,14 @@ theorem diagUnit_conj_elementaryUnit (u : Rˣ) (i j : Fin 2)
   have hval : (diagUnit u : Matrix (Fin 2) (Fin 2) R) =
       Matrix.diagonal ![(u : R), 1] := by
     ext r c
-    fin_cases r <;> fin_cases c <;> simp [Matrix.diagonal]
+    fin_cases r <;> fin_cases c <;>
+      simp [diagUnit]
   have hval' : (((diagUnit u)⁻¹ : (Matrix (Fin 2) (Fin 2) R)ˣ) :
       Matrix (Fin 2) (Fin 2) R) =
       Matrix.diagonal ![((u⁻¹ : Rˣ) : R), 1] := by
     ext r c
-    fin_cases r <;> fin_cases c <;> simp [Matrix.diagonal]
+    fin_cases r <;> fin_cases c <;>
+      simp [diagUnit, Units.inv_mk]
   rw [Units.val_mul, Units.val_mul, hval, hval']
   show Matrix.diagonal ![(u : R), 1] * (1 + Matrix.single i j a) *
       Matrix.diagonal ![((u⁻¹ : Rˣ) : R), 1] =
@@ -103,25 +108,25 @@ theorem diagUnit_conj_elementaryUnit (u : Rˣ) (i j : Fin 2)
     by_cases hc : c = j
     · subst hc
       rw [Matrix.single_apply_same, Matrix.single_apply_same,
-        Matrix.one_apply_ne hij, Matrix.one_apply_ne hij]
+        Matrix.one_apply_ne hij]
       noncomm_ring
-    · rw [Matrix.single_apply_of_ne (fun h ↦ hc h.2),
-        Matrix.single_apply_of_ne (fun h ↦ hc h.2)]
+    · rw [Matrix.single_apply_of_col_ne r r (Ne.symm hc) a,
+        Matrix.single_apply_of_col_ne r r (Ne.symm hc)
+          (![(u : R), 1] r * a * ![((u⁻¹ : Rˣ) : R), 1] j)]
       by_cases hic : r = c
       · subst hic
-        rw [Matrix.one_apply_eq, Matrix.one_apply_eq]
-        rw [add_zero, add_zero, mul_one]
+        rw [Matrix.one_apply_eq, add_zero, mul_one]
         exact hdd r
-      · rw [Matrix.one_apply_ne hic, Matrix.one_apply_ne hic]
+      · rw [Matrix.one_apply_ne hic]
         noncomm_ring
-  · rw [Matrix.single_apply_of_ne (fun h ↦ hr h.1),
-      Matrix.single_apply_of_ne (fun h ↦ hr h.1)]
+  · rw [Matrix.single_apply_of_row_ne (Ne.symm hr) j c a,
+      Matrix.single_apply_of_row_ne (Ne.symm hr) j c
+        (![(u : R), 1] i * a * ![((u⁻¹ : Rˣ) : R), 1] j)]
     by_cases hrc : r = c
     · subst hrc
-      rw [Matrix.one_apply_eq, Matrix.one_apply_eq]
-      rw [add_zero, add_zero, mul_one]
+      rw [Matrix.one_apply_eq, add_zero, mul_one]
       exact hdd r
-    · rw [Matrix.one_apply_ne hrc, Matrix.one_apply_ne hrc]
+    · rw [Matrix.one_apply_ne hrc]
       noncomm_ring
 
 /-- Diagonal conjugates of rank-two elementaries are elementary. -/
@@ -217,7 +222,7 @@ theorem diagPair_mul (u v u' v' : Rˣ) :
   show !![(u : R), 0; 0, (v : R)] * !![(u' : R), 0; 0, (v' : R)] = _
   rw [Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp [Units.val_mul]
+  fin_cases i <;> fin_cases j <;> simp [diagPair]
 
 theorem diagPair_inv (u v : Rˣ) :
     (diagPair u v)⁻¹ = diagPair u⁻¹ v⁻¹ := by
@@ -253,8 +258,7 @@ theorem diagUnit_mul_swap_inv_mem (u v : Rˣ) :
       diagPair_inv, diagPair_inv, diagPair_mul, diagPair_mul,
       diagPair_mul]
     congr 1
-    · group
-    · group
+    group
   rw [hkey]
   exact mul_mem (mul_mem (diagPair_inv_self_mem u)
     (diagPair_inv_self_mem v)) (inv_mem (diagPair_inv_self_mem (v * u)))
@@ -267,9 +271,9 @@ theorem diagUnit_commutator_mem (u v : Rˣ) :
     group
   have hsplit : diagUnit ((u * v) * (v * u)⁻¹) =
       diagUnit (u * v) * (diagUnit (v * u))⁻¹ := by
-    rw [diagUnit_mul]
-    congr 1
-    exact map_inv diagUnitHom (v * u)
+    have hinv : diagUnit ((v * u)⁻¹) = (diagUnit (v * u))⁻¹ :=
+      map_inv diagUnitHom (v * u)
+    rw [diagUnit_mul, hinv]
   rw [hcomm, hsplit]
   exact diagUnit_mul_swap_inv_mem u v
 
@@ -326,8 +330,10 @@ theorem commutator_mem_elementaryGroup_of_division [Nontrivial R]
       (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) = 1 := by
     rw [show ((⁅X, Y⁆ : (Matrix (Fin 2) (Fin 2) R)ˣ) :
         (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) =
-      ⁅((X : (Matrix (Fin 2) (Fin 2) R)ˣ) : _ ⧸ _),
-        ((Y : (Matrix (Fin 2) (Fin 2) R)ˣ) : _ ⧸ _)⁆ from
+      ⁅((X : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+          (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R),
+        ((Y : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+          (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R)⁆ from
       map_commutatorElement (QuotientGroup.mk' _) X Y]
     exact commutatorElement_eq_one_iff_mul_comm.mpr (hcomm _ _)
   exact (QuotientGroup.eq_one_iff _).mp hone

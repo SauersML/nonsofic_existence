@@ -67,7 +67,7 @@ theorem displacement_le_add (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
       rw [h1]
       exact norm_add_le _ _
     _ ≤ ‖ρ g η - η‖ + (‖ρ g (ξ - η)‖ + ‖ξ - η‖) :=
-      add_le_add_left (norm_sub_le _ _) _
+      add_le_add le_rfl (norm_sub_le _ _)
     _ = ‖ρ g η - η‖ + 2 * ‖ξ - η‖ := by
       rw [(ρ g).norm_map]
       ring

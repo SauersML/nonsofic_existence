@@ -320,7 +320,7 @@ theorem exists_fixed_of_bounded_orbit [CompleteSpace E] {G : Type*}
     · rintro ⟨_, ⟨h, rfl⟩, rfl⟩
       refine ⟨g * h, ?_⟩
       show φ (g * h) x₀ = φ g (φ h x₀)
-      exact (hmul g h x₀).symm
+      exact hmul g h x₀
     · rintro ⟨h, rfl⟩
       exact ⟨φ (g⁻¹ * h) x₀, ⟨g⁻¹ * h, rfl⟩, by
         rw [← hmul, mul_inv_cancel_left]⟩
