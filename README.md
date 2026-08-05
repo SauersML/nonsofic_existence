@@ -156,9 +156,16 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     moving projection for the join of the two column roots is controlled
     by scalar, unit, and generator displacements alone, at the character
     gap of any nontrivial additive character
-  - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
-    explicit Kazhdan pair; transfer to all ranks over `L_k(1,2)` for every
-    finite field `k`; nonsoficity endpoints over every finite field
+  - [x] A9. Property `(T)` for `EL₃` of the free algebra over every
+    finite field with an explicit Kazhdan pair
+    (`FiniteFieldElementaryPropertyT`): the control set of all scalar-unit
+    and generator root elements, the column-plane moving-projection bound
+    at the character gap, descent to every finite-type algebra
+    (`finiteFieldElementaryThree_hasKazhdanPropertyT`), and the endpoints:
+    `EL₄(L_k(1,2))` is nonsofic for every finite field
+    (`FiniteFieldLeavitt.ambient_not_isSofic`), and every elementary rank
+    `≥ 2` over `L_k(1,2)` is finitely generated, infinite, Kazhdan, and
+    nonsofic (`binaryLeavitt_finiteField_profile`)
   - [ ] A10. Full build and audit re-run; claim map updated so Theorem B
     is Lean-backed for all finite fields
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
@@ -227,7 +234,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | For every `m ≥ 1`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_profile` | Formalized |
 | The full unit group `L_{𝔽₂}(1,2)ˣ` is nonsofic | `universalLeavittUnits_not_isSofic` | Formalized |
 | Every positive-rank `GL_r(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittGL_not_isSofic` | Formalized |
-| Over every finite characteristic-two field, `EL_{m+1}(L_k(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic for `m ≥ 1` | `binaryLeavitt_charTwo_profile` | Formalized |
+| Over every finite field, `EL_{m+1}(L_k(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic for `m ≥ 1` | `binaryLeavitt_finiteField_profile` | Formalized |
 | A nonsofic group exists | `nonsofic_groups_exist` | Formalized |
 | A finitely presented nonsofic group exists | `exists_finitelyPresented_nonsofic_group` | Formalized |
 | An infinite finitely presented nonsofic group surjects onto the explicit ambient group | `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | Formalized |
@@ -282,10 +289,10 @@ so.
 | `prop:KJ` | `Scheme.commute_compressed_corner`, `Scheme.compressed_inf_corner`, `DiagonalCornerCompression.matrixCompression_eq_firstDiagonalCorner_iff` | |
 | `thm:corner`, `cor:fgring` | `CompressionSetup`, `UniversalRankFour.compressionSetup`, `not_isSofic_of_not_isLEF` | |
 | `prop:ufact`, `lem:zfact` | `RankFourCompressors` compressor and involution words | explicit elementary words in every characteristic |
-| `thm:spine`, `thm:A` | `universalLeavitt_profile`, `universalLeavittEL4_not_isSofic`, `binaryLeavitt_charTwo_profile` | |
+| `thm:spine`, `thm:A` | `universalLeavitt_profile`, `universalLeavittEL4_not_isSofic`, `binaryLeavitt_finiteField_profile` | |
 | `thm:2x2` | `LeavittFamily.rankTwo_not_isSofic` (`RankTwoCompression`), with `eq:p0upper`/`eq:p0lower` as `rankTwoInvolution_conj_upperNil`/`rankTwoInvolution_conj_lowerNil` | finite generation of `Aˣ` derived via `KazhdanFiniteGeneration.exists_symmetric_generating_finset` |
 | `thm:agp`, `prop:glel` | — | manuscript-only (`K₁(L) = 0`, GE property of purely infinite simple rings) |
-| `thm:el2`, `thm:allranks`, `thm:B` | `universalLeavittUnits_not_isSofic`, `universalLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic`, `binaryLeavitt_charTwo_profile` | proved over `𝔽₂` and all characteristic-two finite fields via self-similarity, without `K₁`/GE; odd-characteristic finite fields are manuscript-only pending the generalized property-`(T)` input |
+| `thm:el2`, `thm:allranks`, `thm:B` | `universalLeavittUnits_not_isSofic`, `universalLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic`, `binaryLeavitt_finiteField_profile` | proved over every finite field via self-similarity, without `K₁`/GE: all elementary ranks `≥ 2`; the full unit group and all `GL_r` remain Lean-backed over `𝔽₂`, with other finite fields' unit groups pending the `B`-block |
 | `def:model`, `lem:models` | `TableCover.TableModel`, `TableCover.tableModel_of_isSofic`, `TableCover.exists_table_obstruction` | |
 | `thm:table` | `TableCover.tableGroup_no_model`, `TableCover.exists_finitelyPresented_obstruction`, `exists_finitelyPresented_nonsofic_group` | |
 | `thm:kcover` | — | manuscript-only (Shalom's finitely presented Kazhdan covers) |

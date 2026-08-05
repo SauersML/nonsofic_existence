@@ -2,6 +2,8 @@ import NonsoficGroupsExist.A2MagicHilbert
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.FreeRootPlaneMass
 import NonsoficGroupsExist.KazhdanControl
+import NonsoficGroupsExist.ElementaryGroup
+import Mathlib.RingTheory.FiniteType
 
 /-!
 # Property `(T)` for elementary groups over finite free algebras
@@ -337,4 +339,23 @@ theorem freeElementary_hasKazhdanPropertyT :
 
 end
 end FiniteFieldElementaryPropertyT
+
+/-- **The rank-three Ershov--Jaikin-Zapirain theorem over every finite
+field**: the elementary group of any finite-type algebra over any finite
+field has Kazhdan's property `(T)`, by descent from the free algebra. -/
+theorem finiteFieldElementaryThree_hasKazhdanPropertyT
+    {k A : Type} [Field k] [Finite k] [Ring A] [Algebra k A]
+    [Algebra.FiniteType k A] :
+    HasKazhdanPropertyT.{0, 0} (elementaryGroup (Fin 3) A) := by
+  letI : Fintype k := Fintype.ofFinite k
+  obtain ⟨X, hX, f, hf⟩ :=
+    (Algebra.FiniteType.iff_quotient_freeAlgebra'
+      (R := k) (A := A)).mp inferInstance
+  letI : Fintype X := hX
+  exact HasKazhdanPropertyT.of_surjective
+    (elementaryGroupMap (ι := Fin 3) f.toRingHom)
+    (elementaryGroupMap_surjective_of_surjective f.toRingHom hf)
+    (FiniteFieldElementaryPropertyT.freeElementary_hasKazhdanPropertyT X k)
+
+
 end NonsoficGroupsExist

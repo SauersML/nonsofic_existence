@@ -55,13 +55,13 @@ example (m : ℕ) (hm : 1 ≤ m) :
       ¬ IsSofic (UniversalLeavittEL m) :=
   universalLeavitt_profile m hm
 
-example (k : Type) [Field k] [Finite k] [CharP k 2]
+example (k : Type) [Field k] [Finite k]
     (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (BinaryLeavittEL k m) ∧
       Infinite (BinaryLeavittEL k m) ∧
       HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) ∧
       ¬ IsSofic (BinaryLeavittEL k m) :=
-  binaryLeavitt_charTwo_profile k m hm
+  binaryLeavitt_finiteField_profile k m hm
 
 example :
     Group.FG UniversalRankFour.Ambient ∧
@@ -149,7 +149,7 @@ def headlineTheorems : List Name :=
    ``universalLeavittUnits_not_isSofic,
    ``universalLeavittGL_not_isSofic,
    ``universalLeavitt_profile,
-   ``binaryLeavitt_charTwo_profile,
+   ``binaryLeavitt_finiteField_profile,
    ``ambient_profile,
    ``ambient_full_profile]
 

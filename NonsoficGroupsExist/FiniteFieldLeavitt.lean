@@ -1,7 +1,7 @@
 import NonsoficGroupsExist.CompressionSetup
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.DiagonalCornerCompression
-import NonsoficGroupsExist.FiniteTypeCharacteristicTwoPropertyT
+import NonsoficGroupsExist.FiniteFieldElementaryPropertyT
 import NonsoficGroupsExist.LeavittRankEquivalence
 import NonsoficGroupsExist.RankFourCompressors
 import NonsoficGroupsExist.ThompsonWitness
@@ -11,9 +11,9 @@ import NonsoficGroupsExist.UniversalLeavittOver
 # The Leavitt compression construction over finite fields
 
 The rank-four algebraic construction is uniform in the coefficient field.
-This module instantiates every field of `CompressionSetup` and the non-LEF
-witness for `L_k(1,2)` over every finite field.  The property-`(T)` inputs and
-the resulting nonsoficity theorem currently require characteristic two.
+This module instantiates every field of `CompressionSetup`, the non-LEF
+witness, the property-`(T)` inputs, and the nonsoficity theorem for
+`L_k(1,2)` over every finite field.
 -/
 
 namespace NonsoficGroupsExist
@@ -255,18 +255,17 @@ def compressionSetup : CompressionSetup (Ambient k) (Core k) (Witness k) := by
         exact (compressionEnd_eq_witnessEmbedding_iff k g j).mp
           (coreEmbedding_injective k h') }
 
-theorem core_hasKazhdanPropertyT [CharP k 2] :
+theorem core_hasKazhdanPropertyT :
     HasKazhdanPropertyT.{0, 0} (Core k) :=
-  finiteCharacteristicTwoElementaryThree_hasKazhdanPropertyT
+  finiteFieldElementaryThree_hasKazhdanPropertyT
     (k := k) (A := CoefficientRing k)
 
-theorem ambient_hasKazhdanPropertyT [CharP k 2] :
+theorem ambient_hasKazhdanPropertyT :
     HasKazhdanPropertyT.{0, 0} (Ambient k) :=
   (family k).rankFour_propertyT_of_rankThree (core_hasKazhdanPropertyT k)
 
-/-- `EL₄(L_k(1,2))` is nonsofic for every finite field `k` of
-characteristic two. -/
-theorem ambient_not_isSofic [CharP k 2] : ¬ IsSofic (Ambient k) :=
+/-- `EL₄(L_k(1,2))` is nonsofic for every finite field `k`. -/
+theorem ambient_not_isSofic : ¬ IsSofic (Ambient k) :=
   not_isSofic_of_not_isLEF (compressionSetup k)
     (ambient_hasKazhdanPropertyT k) (core_hasKazhdanPropertyT k)
     (witness_not_isLEF k)

@@ -22,10 +22,10 @@ algebra over `k`. -/
 noncomputable abbrev BinaryLeavittEL (k : Type) [Field k] (m : ℕ) :=
   elementaryGroup (Fin (m + 1)) (BinaryLeavitt.BinaryLeavittAlgebra k)
 
-/-- Over every finite characteristic-two field, every elementary rank at
-least two is finitely generated, infinite, Kazhdan, and nonsofic. -/
-theorem binaryLeavitt_charTwo_profile (k : Type) [Field k] [Finite k]
-    [CharP k 2] (m : ℕ) (hm : 1 ≤ m) :
+/-- Over every finite field, every elementary rank at least two over
+`L_k(1,2)` is finitely generated, infinite, Kazhdan, and nonsofic. -/
+theorem binaryLeavitt_finiteField_profile (k : Type) [Field k] [Finite k]
+    (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (BinaryLeavittEL k m) ∧
       Infinite (BinaryLeavittEL k m) ∧
       HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) ∧

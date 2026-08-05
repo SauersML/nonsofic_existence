@@ -22,7 +22,7 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.ambient_profile
 #print axioms NonsoficGroupsExist.ambient_full_profile
 #print axioms NonsoficGroupsExist.universalLeavitt_profile
-#print axioms NonsoficGroupsExist.binaryLeavitt_charTwo_profile
+#print axioms NonsoficGroupsExist.binaryLeavitt_finiteField_profile
 #print axioms NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group
 #print axioms NonsoficGroupsExist.exists_infinite_finitelyPresented_nonsofic_ambient_cover
 #print axioms NonsoficGroupsExist.KunDecomposition.exists_expanderDecomposition
