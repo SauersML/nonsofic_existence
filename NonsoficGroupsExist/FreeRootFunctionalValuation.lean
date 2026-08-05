@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.FreeAlgebraDegree
 import Mathlib.LinearAlgebra.Dual.Defs
+import Mathlib.Tactic.DeriveFintype
 
 /-!
 # Kassabov valuations of dual functionals on degree stages
@@ -264,6 +265,26 @@ theorem valuation_restrictSucc_eq {n : ℕ}
       (by omega : valuation X K (restrictSucc X K φ) < valuation X K φ)
       (hasDetection_of_hasDetection_restrictSucc X K φ ⟨w, hwd, hwn, hφ⟩)
 
+/-- Restriction computes the valuation as a minimum with the stage
+sentinel. -/
+theorem valuation_restrictSucc_eq_min {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1))) :
+    valuation X K (restrictSucc X K φ) =
+      min (valuation X K φ) (n + 1) := by
+  by_cases hle : valuation X K φ ≤ n
+  · rw [valuation_restrictSucc_eq X K φ hle]
+    omega
+  · have hnone : ¬ ∃ d, HasDetectionAtDegree X K (restrictSucc X K φ) d := by
+      rintro ⟨d, hd⟩
+      have hdn : d ≤ n := by
+        obtain ⟨w, hwd, hwn, -⟩ := hd
+        omega
+      have := valuation_le_of_hasDetection X K φ
+        (hasDetection_of_hasDetection_restrictSucc X K φ hd)
+      omega
+    rw [valuation_eq_succ_of_not_exists X K _ hnone]
+    omega
+
 /-! ### The leading-letter descent -/
 
 /-- Left multiplication by a free generator, as a linear map into the next
@@ -365,6 +386,319 @@ theorem exists_leftDerived_valuation_succ {n : ℕ}
     exact not_hasDetection_of_lt_valuation X K φ
       (by omega : valuation X K (leftDerived X K φ x) + 1 <
         valuation X K φ) this
+
+/-- The derived functional commutes with stage restriction. -/
+theorem leftDerived_restrictSucc {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 2))) (x : X) :
+    leftDerived X K (restrictSucc X K φ) x =
+      restrictSucc X K (leftDerived X K φ x) := by
+  refine LinearMap.ext fun a ↦ ?_
+  rfl
+
+/-- Descent in the sentinel-free additive form. -/
+theorem exists_leftDerived_valuation_add_one {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1)))
+    (hExists : ∃ d, HasDetectionAtDegree X K φ d)
+    (hpos : 0 < valuation X K φ) :
+    ∃ x : X,
+      valuation X K (leftDerived X K φ x) + 1 = valuation X K φ := by
+  have hle := valuation_le_stage_of_exists X K φ hExists
+  obtain ⟨x, hx⟩ := exists_leftDerived_valuation_succ X K φ
+    (show valuation X K φ = (valuation X K φ - 1) + 1 by omega)
+    (by omega)
+  exact ⟨x, by omega⟩
+
+/-! ### The canonical leading-generator selector -/
+
+/-- A fixed exhaustive enumeration of the finite free-generator alphabet. -/
+noncomputable def generatorEnumeration : Fin (Fintype.card X) ≃ X :=
+  (Fintype.equivFin X).symm
+
+/-- All generator indices realizing the exact one-step valuation descent. -/
+noncomputable def leadingGeneratorIndexSet {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1))) :
+    Finset (Fin (Fintype.card X)) :=
+  Finset.univ.filter fun q ↦
+    valuation X K (leftDerived X K φ (generatorEnumeration X q)) + 1 =
+      valuation X K φ
+
+theorem mem_leadingGeneratorIndexSet_iff {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1)))
+    (q : Fin (Fintype.card X)) :
+    q ∈ leadingGeneratorIndexSet X K φ ↔
+      valuation X K (leftDerived X K φ (generatorEnumeration X q)) + 1 =
+        valuation X K φ := by
+  simp [leadingGeneratorIndexSet]
+
+/-- Away from the top-degree boundary, restriction preserves exactly the
+set of generators realizing leading-term valuation descent. -/
+theorem mem_leadingGeneratorIndexSet_restrictSucc_iff {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 2)))
+    (hle : valuation X K φ ≤ n + 1)
+    (q : Fin (Fintype.card X)) :
+    q ∈ leadingGeneratorIndexSet X K (restrictSucc X K φ) ↔
+      q ∈ leadingGeneratorIndexSet X K φ := by
+  rw [mem_leadingGeneratorIndexSet_iff, mem_leadingGeneratorIndexSet_iff]
+  have hφ : valuation X K (restrictSucc X K φ) = valuation X K φ :=
+    valuation_restrictSucc_eq X K φ hle
+  rw [hφ, leftDerived_restrictSucc X K φ (generatorEnumeration X q),
+    valuation_restrictSucc_eq_min X K
+      (leftDerived X K φ (generatorEnumeration X q))]
+  constructor
+  · intro h
+    have := valuation_le_succ X K
+      (leftDerived X K φ (generatorEnumeration X q))
+    omega
+  · intro h
+    omega
+
+theorem leadingGeneratorIndexSet_restrictSucc {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 2)))
+    (hle : valuation X K φ ≤ n + 1) :
+    leadingGeneratorIndexSet X K (restrictSucc X K φ) =
+      leadingGeneratorIndexSet X K φ := by
+  ext q
+  exact mem_leadingGeneratorIndexSet_restrictSucc_iff X K φ hle q
+
+/-- Positive detected valuation makes the leading-generator index set
+nonempty. -/
+theorem leadingGeneratorIndexSet_nonempty {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1)))
+    (hExists : ∃ d, HasDetectionAtDegree X K φ d)
+    (hpos : 0 < valuation X K φ) :
+    (leadingGeneratorIndexSet X K φ).Nonempty := by
+  obtain ⟨x, hx⟩ :=
+    exists_leftDerived_valuation_add_one X K φ hExists hpos
+  refine ⟨(generatorEnumeration X).symm x, ?_⟩
+  rw [mem_leadingGeneratorIndexSet_iff]
+  simpa using hx
+
+/-- The least enumerated leading generator, with `card X` as a total
+sentinel when no generator realizes valuation descent. -/
+noncomputable def leastLeadingGeneratorIndex {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1))) : ℕ :=
+  if h : (leadingGeneratorIndexSet X K φ).Nonempty then
+    ((leadingGeneratorIndexSet X K φ).min' h).val
+  else
+    Fintype.card X
+
+theorem leastLeadingGeneratorIndex_lt_card {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1)))
+    (h : (leadingGeneratorIndexSet X K φ).Nonempty) :
+    leastLeadingGeneratorIndex X K φ < Fintype.card X := by
+  rw [leastLeadingGeneratorIndex, dif_pos h]
+  exact ((leadingGeneratorIndexSet X K φ).min' h).isLt
+
+/-- The total least-index selector genuinely realizes valuation descent
+whenever the leading-generator set is nonempty. -/
+theorem leastLeadingGeneratorIndex_spec {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 1)))
+    (h : (leadingGeneratorIndexSet X K φ).Nonempty) :
+    valuation X K
+        (leftDerived X K φ
+          (generatorEnumeration X
+            ⟨leastLeadingGeneratorIndex X K φ,
+              leastLeadingGeneratorIndex_lt_card X K φ h⟩)) + 1 =
+      valuation X K φ := by
+  have hmem := Finset.min'_mem (leadingGeneratorIndexSet X K φ) h
+  rw [mem_leadingGeneratorIndexSet_iff] at hmem
+  simpa [leastLeadingGeneratorIndex, h] using hmem
+
+/-- Below the top-degree boundary, the canonical least leading generator is
+unchanged by restriction to the preceding stage. -/
+theorem leastLeadingGeneratorIndex_restrictSucc {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K (n + 2)))
+    (hle : valuation X K φ ≤ n + 1) :
+    leastLeadingGeneratorIndex X K (restrictSucc X K φ) =
+      leastLeadingGeneratorIndex X K φ := by
+  unfold leastLeadingGeneratorIndex
+  rw [leadingGeneratorIndexSet_restrictSucc X K φ hle]
+
+/-! ### The valuation regions -/
+
+/-- Kassabov's four nonzero valuation regions, together with the
+all-trivial pair.  Keeping `zero` separate is essential: the argument
+partitions the complement of `(0, 0)`, and the invariant Fourier component
+must never be charged to region `B`. -/
+inductive ValuationRegion
+  | zero | A | B | C | D
+  deriving DecidableEq, Fintype
+
+/-- Classify an arbitrary pair of finite-stage dual functionals. -/
+noncomputable def pairRegion {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n)) : ValuationRegion :=
+  let a := valuation X K φ
+  let b := valuation X K χ
+  if a = n + 1 ∧ b = n + 1 then .zero
+  else if a = 0 ∨ b = 0 then .D
+  else if b < a then .A
+  else if a = b then .B
+  else .C
+
+theorem pairRegion_eq_zero_iff {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n)) :
+    pairRegion X K φ χ = .zero ↔
+      valuation X K φ = n + 1 ∧ valuation X K χ = n + 1 := by
+  constructor
+  · intro h
+    by_cases hz : valuation X K φ = n + 1 ∧ valuation X K χ = n + 1
+    · exact hz
+    · exfalso
+      rw [pairRegion, if_neg hz] at h
+      by_cases hd : valuation X K φ = 0 ∨ valuation X K χ = 0
+      · rw [if_pos hd] at h
+        cases h
+      · rw [if_neg hd] at h
+        by_cases hba : valuation X K χ < valuation X K φ
+        · rw [if_pos hba] at h
+          cases h
+        · rw [if_neg hba] at h
+          by_cases heq : valuation X K φ = valuation X K χ
+          · rw [if_pos heq] at h
+            cases h
+          · rw [if_neg heq] at h
+            cases h
+  · intro h
+    simp [pairRegion, h]
+
+/-- Exact numerical data carried by membership in region `A`. -/
+theorem pairRegion_A_data {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (h : pairRegion X K φ χ = .A) :
+      ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) ∧
+      valuation X K φ ≠ 0 ∧ valuation X K χ ≠ 0 ∧
+      valuation X K χ < valuation X K φ := by
+  by_cases hz : valuation X K φ = n + 1 ∧ valuation X K χ = n + 1
+  · rw [pairRegion, if_pos hz] at h
+    cases h
+  · by_cases hd : valuation X K φ = 0 ∨ valuation X K χ = 0
+    · rw [pairRegion, if_neg hz, if_pos hd] at h
+      cases h
+    · by_cases hba : valuation X K χ < valuation X K φ
+      · exact ⟨hz, (not_or.mp hd).1, (not_or.mp hd).2, hba⟩
+      · by_cases heq : valuation X K φ = valuation X K χ
+        · rw [pairRegion, if_neg hz, if_neg hd, if_neg hba,
+            if_pos heq] at h
+          cases h
+        · rw [pairRegion, if_neg hz, if_neg hd, if_neg hba,
+            if_neg heq] at h
+          cases h
+
+/-- Exact numerical data carried by membership in region `B`. -/
+theorem pairRegion_B_data {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (h : pairRegion X K φ χ = .B) :
+      ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) ∧
+      valuation X K φ ≠ 0 ∧ valuation X K χ ≠ 0 ∧
+      valuation X K φ = valuation X K χ := by
+  by_cases hz : valuation X K φ = n + 1 ∧ valuation X K χ = n + 1
+  · rw [pairRegion, if_pos hz] at h
+    cases h
+  · by_cases hd : valuation X K φ = 0 ∨ valuation X K χ = 0
+    · rw [pairRegion, if_neg hz, if_pos hd] at h
+      cases h
+    · by_cases hba : valuation X K χ < valuation X K φ
+      · rw [pairRegion, if_neg hz, if_neg hd, if_pos hba] at h
+        cases h
+      · by_cases heq : valuation X K φ = valuation X K χ
+        · exact ⟨hz, (not_or.mp hd).1, (not_or.mp hd).2, heq⟩
+        · rw [pairRegion, if_neg hz, if_neg hd, if_neg hba,
+            if_neg heq] at h
+          cases h
+
+/-- Exact numerical data carried by membership in region `C`. -/
+theorem pairRegion_C_data {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (h : pairRegion X K φ χ = .C) :
+      ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) ∧
+      valuation X K φ ≠ 0 ∧ valuation X K χ ≠ 0 ∧
+      valuation X K φ < valuation X K χ := by
+  by_cases hz : valuation X K φ = n + 1 ∧ valuation X K χ = n + 1
+  · rw [pairRegion, if_pos hz] at h
+    cases h
+  · by_cases hd : valuation X K φ = 0 ∨ valuation X K χ = 0
+    · rw [pairRegion, if_neg hz, if_pos hd] at h
+      cases h
+    · by_cases hba : valuation X K χ < valuation X K φ
+      · rw [pairRegion, if_neg hz, if_neg hd, if_pos hba] at h
+        cases h
+      · by_cases heq : valuation X K φ = valuation X K χ
+        · rw [pairRegion, if_neg hz, if_neg hd, if_neg hba,
+            if_pos heq] at h
+          cases h
+        · refine ⟨hz, (not_or.mp hd).1, (not_or.mp hd).2, ?_⟩
+          omega
+
+/-- Exact zero-coordinate alternative carried by membership in region
+`D`. -/
+theorem pairRegion_D_data {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (h : pairRegion X K φ χ = .D) :
+    valuation X K φ = 0 ∨ valuation X K χ = 0 := by
+  by_cases hz : valuation X K φ = n + 1 ∧ valuation X K χ = n + 1
+  · rw [pairRegion, if_pos hz] at h
+    cases h
+  · by_cases hd : valuation X K φ = 0 ∨ valuation X K χ = 0
+    · exact hd
+    · by_cases hba : valuation X K χ < valuation X K φ
+      · rw [pairRegion, if_neg hz, if_neg hd, if_pos hba] at h
+        cases h
+      · by_cases heq : valuation X K φ = valuation X K χ
+        · rw [pairRegion, if_neg hz, if_neg hd, if_neg hba,
+            if_pos heq] at h
+          cases h
+        · rw [pairRegion, if_neg hz, if_neg hd, if_neg hba,
+            if_neg heq] at h
+          cases h
+
+theorem pairRegion_eq_A_of_pos_of_lt {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (hχ : 0 < valuation X K χ)
+    (hlt : valuation X K χ < valuation X K φ) :
+    pairRegion X K φ χ = .A := by
+  have hz : ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) := by
+    omega
+  have hd : ¬(valuation X K φ = 0 ∨ valuation X K χ = 0) := by omega
+  rw [pairRegion, if_neg hz, if_neg hd, if_pos hlt]
+
+theorem pairRegion_eq_B_of_data {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (hz : ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1))
+    (hφ : valuation X K φ ≠ 0) (hχ : valuation X K χ ≠ 0)
+    (heq : valuation X K φ = valuation X K χ) :
+    pairRegion X K φ χ = .B := by
+  have hd : ¬(valuation X K φ = 0 ∨ valuation X K χ = 0) :=
+    not_or.mpr ⟨hφ, hχ⟩
+  have hba : ¬ valuation X K χ < valuation X K φ := by omega
+  rw [pairRegion, if_neg hz, if_neg hd, if_neg hba, if_pos heq]
+
+theorem pairRegion_eq_C_of_pos_of_lt {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (hφ : 0 < valuation X K φ)
+    (hlt : valuation X K φ < valuation X K χ) :
+    pairRegion X K φ χ = .C := by
+  have hz : ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) := by
+    omega
+  have hd : ¬(valuation X K φ = 0 ∨ valuation X K χ = 0) := by omega
+  have hba : ¬ valuation X K χ < valuation X K φ := by omega
+  have heq : valuation X K φ ≠ valuation X K χ := by omega
+  rw [pairRegion, if_neg hz, if_neg hd, if_neg hba, if_neg heq]
+
+theorem pairRegion_eq_D_of_left_zero {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (hφ : valuation X K φ = 0) :
+    pairRegion X K φ χ = .D := by
+  have hz : ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) := by
+    omega
+  rw [pairRegion, if_neg hz, if_pos (Or.inl hφ)]
+
+theorem pairRegion_eq_D_of_right_zero {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K n))
+    (hχ : valuation X K χ = 0) :
+    pairRegion X K φ χ = .D := by
+  have hz : ¬(valuation X K φ = n + 1 ∧ valuation X K χ = n + 1) := by
+    omega
+  rw [pairRegion, if_neg hz, if_pos (Or.inr hχ)]
 
 end FreeRootFunctionalValuation
 

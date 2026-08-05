@@ -111,14 +111,17 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     of its scalar multiples, on any acting space and on the plane
     (`CharacterMass.gap_mul_sum_mass_ne_zero_le`,
     `FreeRootPlaneMass.gap_mul_sum_planeMass_ne_zero_le`)
-  - [ ] A5. Finite-stage character valuation regions `A/B/C/D` over every
-    finite coefficient field and the least-detected-degree descent (port of
-    `FreeRootCharacterValuation`); the functional valuation itself — its
-    detection calculus, the sentinel characterization of the zero
-    functional, unit-coefficient detection at valuation zero, exact stage
-    restriction below the top layer, and the leading-letter descent by
-    exactly one — is done (`FreeRootFunctionalValuation`); the region
-    partition and least-leading-generator selector are pending
+  - [x] A5. Finite-stage character valuation regions `A/B/C/D` over every
+    finite coefficient field and the least-detected-degree descent
+    (`FreeRootFunctionalValuation`): the functional valuation with its full
+    detection calculus, a satisfiability positive control, the sentinel
+    characterization of the zero functional, unit-coefficient detection at
+    valuation zero, exact stage restriction below the top layer with the
+    min-form boundary law, the leading-letter descent by exactly one, the
+    canonical least-leading-generator selector with its descent
+    specification and restriction invariance, and the five-way
+    `zero/A/B/C/D` region partition with exact numerical data and
+    constructors for every region
   - [ ] A6. Stage-to-stage mass transport under the dual shears:
     covariance, fiber disjointness, and per-fiber mass bounds (port of
     `FreeRootPlaneFourier`)
