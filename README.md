@@ -137,9 +137,13 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`FreeRootFunctionalValuation`), the two same-stage unit shears with
     their plane-point conjugation identities and mass transport
     (`planeMass_unitShearForward`/`_Opposite`), their dual coordinate
-    formulas, and the exact region movements `C → B` and `A → B`
-    (`pairRegion_comp_unitShear*`); the boundary layers and the assembled
-    inequalities are pending
+    formulas, the exact region movements `C → B` and `A → B`
+    (`pairRegion_comp_unitShear*`), the region-`D` mass control by the
+    scalar unit-vector displacements (`gap_mul_sum_planeMass_D_le`), the
+    nested trivial-mass monotonicity along the forward shear conjugation
+    (`planeMass_zero_conj_le`), and the exact boundary-layer drop identity
+    (`sum_fiber_zero_ne_eq_drop`); the assembled finite-stage inequalities
+    are pending
   - [ ] A8. The limiting two-root moving-mass bound and the uniform
     relative-property-`(T)` estimate over `ZMod p`
   - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an

@@ -826,6 +826,169 @@ theorem pairRegion_comp_unitShearOpposite_symm_of_A
   · exact hχ2
   · omega
 
+
+/-! ### Region `D` control and the trivial-mass boundary layer -/
+
+/-- The first unit plane vector. -/
+noncomputable def unitVectorFirst : PlaneVector X K n :=
+  (wordMonomialInDegree X K n 1, 0)
+
+/-- The second unit plane vector. -/
+noncomputable def unitVectorSecond : PlaneVector X K n :=
+  (0, wordMonomialInDegree X K n 1)
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- A region-`D` character does not vanish at one of the two unit plane
+vectors. -/
+theorem apply_unitVector_ne_zero_of_D
+    (χ : Module.Dual K (PlaneVector X K n))
+    (h : pairRegion X K (firstCoordinateChar X K n χ)
+      (secondCoordinateChar X K n χ) = .D) :
+    χ (unitVectorFirst X K n) ≠ 0 ∨ χ (unitVectorSecond X K n) ≠ 0 := by
+  rcases pairRegion_D_data X K _ _ h with h0 | h0
+  · left
+    have := (valuation_eq_zero_iff X K _).1 h0
+    exact this
+  · right
+    have := (valuation_eq_zero_iff X K _).1 h0
+    exact this
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **Region `D` mass control**: the total region-`D` mass is bounded by
+the summed squared displacements of the scalar multiples of the two unit
+plane vectors, at the character gap constant. -/
+theorem gap_mul_sum_planeMass_D_le (hψ : ψ ≠ 1) (z : E) :
+    CharacterMass.gap ψ *
+        ∑ χ ∈ Finset.univ.filter
+          (fun χ : Module.Dual K (PlaneVector X K n) ↦
+            pairRegion X K (firstCoordinateChar X K n χ)
+              (secondCoordinateChar X K n χ) = .D),
+          planeMass X K i j k hik hjk n rho ψ χ z ≤
+      (∑ t : K, ‖rho (planePoint X K i j k hik hjk n
+          (t • unitVectorFirst X K n)) z - z‖ ^ 2) +
+        ∑ t : K, ‖rho (planePoint X K i j k hik hjk n
+          (t • unitVectorSecond X K n)) z - z‖ ^ 2 := by
+  set D := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ) = .D) with hD
+  set E₁ := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      χ (unitVectorFirst X K n) ≠ 0) with hE₁
+  set E₂ := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      χ (unitVectorSecond X K n) ≠ 0) with hE₂
+  have hsubset : D ⊆ E₁ ∪ E₂ := by
+    intro χ hχ
+    rw [hD, Finset.mem_filter] at hχ
+    rcases apply_unitVector_ne_zero_of_D X K n χ hχ.2 with h | h
+    · exact Finset.mem_union_left _
+        (Finset.mem_filter.2 ⟨Finset.mem_univ _, h⟩)
+    · exact Finset.mem_union_right _
+        (Finset.mem_filter.2 ⟨Finset.mem_univ _, h⟩)
+  have hDle : (∑ χ ∈ D, planeMass X K i j k hik hjk n rho ψ χ z) ≤
+      (∑ χ ∈ E₁, planeMass X K i j k hik hjk n rho ψ χ z) +
+        ∑ χ ∈ E₂, planeMass X K i j k hik hjk n rho ψ χ z := by
+    have h1 : (∑ χ ∈ D, planeMass X K i j k hik hjk n rho ψ χ z) ≤
+        ∑ χ ∈ E₁ ∪ E₂, planeMass X K i j k hik hjk n rho ψ χ z :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset
+        fun χ _ _ ↦ planeMass_nonneg X K i j k hik hjk n rho ψ χ z
+    have h2 : (∑ χ ∈ E₁ ∪ E₂,
+        planeMass X K i j k hik hjk n rho ψ χ z) +
+        ∑ χ ∈ E₁ ∩ E₂, planeMass X K i j k hik hjk n rho ψ χ z =
+      (∑ χ ∈ E₁, planeMass X K i j k hik hjk n rho ψ χ z) +
+        ∑ χ ∈ E₂, planeMass X K i j k hik hjk n rho ψ χ z :=
+      Finset.sum_union_inter
+    have h3 : 0 ≤ ∑ χ ∈ E₁ ∩ E₂,
+        planeMass X K i j k hik hjk n rho ψ χ z :=
+      Finset.sum_nonneg fun χ _ ↦
+        planeMass_nonneg X K i j k hik hjk n rho ψ χ z
+    linarith
+  calc
+    CharacterMass.gap ψ *
+        ∑ χ ∈ D, planeMass X K i j k hik hjk n rho ψ χ z ≤
+        CharacterMass.gap ψ *
+          ((∑ χ ∈ E₁, planeMass X K i j k hik hjk n rho ψ χ z) +
+            ∑ χ ∈ E₂, planeMass X K i j k hik hjk n rho ψ χ z) :=
+      mul_le_mul_of_nonneg_left hDle (CharacterMass.gap_pos ψ).le
+    _ = CharacterMass.gap ψ *
+          (∑ χ ∈ E₁, planeMass X K i j k hik hjk n rho ψ χ z) +
+        CharacterMass.gap ψ *
+          ∑ χ ∈ E₂, planeMass X K i j k hik hjk n rho ψ χ z := by
+      ring
+    _ ≤ (∑ t : K, ‖rho (planePoint X K i j k hik hjk n
+          (t • unitVectorFirst X K n)) z - z‖ ^ 2) +
+        ∑ t : K, ‖rho (planePoint X K i j k hik hjk n
+          (t • unitVectorSecond X K n)) z - z‖ ^ 2 :=
+      add_le_add
+        (gap_mul_sum_planeMass_ne_zero_le X K i j k hik hjk n rho ψ
+          hψ z (unitVectorFirst X K n))
+        (gap_mul_sum_planeMass_ne_zero_le X K i j k hik hjk n rho ψ
+          hψ z (unitVectorSecond X K n))
+
+open Classical in
+/-- **Trivial-mass monotonicity** along the forward shear conjugation: the
+next-stage trivial mass of the conjugated vector never exceeds the current
+trivial mass. -/
+theorem planeMass_zero_conj_le (hψ : ψ ≠ 1) (x : X) (z : E) :
+    planeMass X K i j k hik hjk (n + 1) rho ψ 0
+        (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z) ≤
+      planeMass X K i j k hik hjk n rho ψ 0 z := by
+  rw [planeMass_eq_sum_fiber_forwardShear X K i j k hij hik hjk n rho ψ
+    hψ x z 0]
+  have hmem : (0 : Module.Dual K (PlaneVector X K (n + 1))) ∈
+      Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (forwardShear X K n x) = 0) :=
+    Finset.mem_filter.2 ⟨Finset.mem_univ _, by
+      refine LinearMap.ext fun v ↦ ?_
+      rfl⟩
+  exact Finset.single_le_sum
+    (fun χ' _ ↦ planeMass_nonneg X K i j k hik hjk (n + 1) rho ψ χ' _)
+    hmem
+
+open Classical in
+/-- **The boundary-layer drop identity**: the total mass of the nonzero
+fine characters killed by the forward dual shear is exactly the drop of the
+nested trivial mass. -/
+theorem sum_fiber_zero_ne_eq_drop (hψ : ψ ≠ 1) (x : X) (z : E) :
+    ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (forwardShear X K n x) = 0 ∧ χ' ≠ 0),
+      planeMass X K i j k hik hjk (n + 1) rho ψ χ'
+        (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z) =
+    planeMass X K i j k hik hjk n rho ψ 0 z -
+      planeMass X K i j k hik hjk (n + 1) rho ψ 0
+        (rho (elementaryRoot i j hij (FreeAlgebra.ι K x)) z) := by
+  rw [planeMass_eq_sum_fiber_forwardShear X K i j k hij hik hjk n rho ψ
+    hψ x z 0]
+  rw [show (Finset.univ.filter
+      (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+        χ'.comp (forwardShear X K n x) = 0)) =
+    insert (0 : Module.Dual K (PlaneVector X K (n + 1)))
+      (Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (forwardShear X K n x) = 0 ∧ χ' ≠ 0)) from by
+    ext χ'
+    simp only [Finset.mem_insert, Finset.mem_filter, Finset.mem_univ,
+      true_and]
+    constructor
+    · intro h
+      by_cases hzero : χ' = 0
+      · exact Or.inl hzero
+      · exact Or.inr ⟨h, hzero⟩
+    · rintro (rfl | ⟨h, -⟩)
+      · refine LinearMap.ext fun v ↦ ?_
+        rfl
+      · exact h]
+  rw [Finset.sum_insert (by
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    rintro ⟨-, h⟩
+    exact h rfl)]
+  ring
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist
