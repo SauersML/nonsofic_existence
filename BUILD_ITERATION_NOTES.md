@@ -1,0 +1,96 @@
+# Cluster build iteration — exact pending fixes (2026-08-05)
+
+State: MSI auth works (breaker off; pushes via one-off credential helper
+pinned to SauersML: `git -c credential.helper= -c credential.helper='!f() {
+echo "username=SauersML"; echo "password=$(gh auth token -u SauersML)"; }; f'
+push origin main`). Build loop: put changed files with `msi put f
+/projects/standard/hsiehph/sauer354/nonsofic_existence/f`, then `lake build`
+remotely. 3685/3689 targets green; four modules remain, errors fully
+diagnosed from full bodies (task byuok6c6f):
+
+## AlmostMinimalDisplacement
+- :32 `Finset.le_sup' _ hg` can't infer f (displacement is semireducible).
+  Fix: `by unfold displacement; exact Finset.le_sup' (fun g ↦ ‖ρ g ξ - ξ‖) hg`.
+- :74 pin's `add_le_add_right h a : a + b ≤ a + c` (left-add!). Replace with
+  `add_le_add (norm_le_displacement ρ Q hQ η hg) le_rfl`.
+
+## HilbertCircumcenter
+- :33 `hR ht : t ∈ closedBall x R` vs `dist x t ≤ R`: use
+  `Metric.mem_closedBall'.mp (hR ht)`.
+- :57 same add_le_add_left convention issue: use
+  `add_le_add le_rfl (dist_le_coveringRadius hbdd y hs)`.
+- :208 stuck `IsOrderedRing ?m` metavar near `div_le_one (by positivity)`
+  in hm2/hn2 region (~line 205-212): add type ascriptions to the casts
+  (read the lines first).
+- :321 hinv forward branch beta mismatch persists even with `by exact`:
+  replace with `refine ⟨g * h, ?_⟩; show φ (g * h) x₀ = φ g (φ h x₀);
+  exact (hmul g h x₀).symm`.
+
+## DiagonalClassGroup
+- :82/:86: fin_cases mangles Fin literals + decide-proofs (type-incorrect
+  under instances transparency). RESTRUCTURE diagUnit_conj_mem's `mem` case:
+  prove a single general lemma instead of two special ones:
+  `diagUnit_conj_elementaryUnit (u) (i j hij a) : diagUnit u *
+   elementaryUnit i j hij a * (diagUnit u)⁻¹ = elementaryUnit i j hij
+   (![(u:R),1] i * a * ![((u⁻¹:Rˣ):R),1] j)` proved at val level via
+  `!![(u:R),0;0,1] = Matrix.diagonal ![(u:R),1]` (ext, fin_cases, simp) and
+  `Matrix.diagonal_mul_single` / `Matrix.single_mul_diagonal`
+  (names to verify), D(1+S)D' = DD' + DSD' with DD' = 1.
+  Then mem-case: `obtain ⟨i,j,hij,a,rfl⟩ := hz; rw [diagUnit_conj_elementaryUnit];
+  exact elementaryUnit_mem _ _ _ _` — no fin_cases at all.
+- :121 `No goals`: in stableUnits_normal the `congr 1; exact map_inv ...`
+  inside the show-block over-splits. Replace whole rewrite with:
+  `have h := map_mul/map_mul/map_inv chain on diagUnitHom` then rw.
+- :171 diagPair_mul entries need `simp [Units.val_mul]` (goal
+  `↑u * ↑u' = ↑(diagPair (u*u') _) 0 0`).
+- Downstream :213/:228/:235/:244/:281/:283/:285 errors were cascades/stale;
+  re-check after above.
+
+## UltralimitGeometry
+- :422/:430 whnf timeout in bddAbove_orbit_seqNorm even at 1e6 heartbeats:
+  whnf unfolds stdPart's `OrderRingHom.comp Classical.ofNonempty` dite.
+  Fix: `attribute [irreducible] seqNorm seqNormSq` placed after
+  seqNormSq_parallelogram (before Center section), keeping earlier
+  unfold-based proofs working (they precede the attribute). If that breaks
+  earlier proofs' rw [seqNorm]-style steps, scope it: set it just before
+  the Center section. :434 kernel unknown-constant is cascade.
+
+## ShalomFinitePresentation / others
+- Not yet re-built after toGroup.of/lift_apply_of fixes; expect new errors
+  after deps compile. GaussianPositiveDefinite: header now
+  `open scoped Matrix InnerProductSpace Nat` (⟪⟫_ℝ is in InnerProductSpace
+  scope, NOT RealInnerProductSpace).
+
+## Rose-K₁ breakthrough (record!)
+Unstable descent is now elementary: diag(u,1…1) ∈ E_{2^m}(L) ⟹ via
+elementaryBlockGroup_map + prefix-code self-similarity, diag(κ_w(u),1) ∈
+E₂(L), and κ_w(u) ≡ u mod H (proved) ⟹ u ∈ H. So H = ker(Lˣ → K₁(L)) and
+ScalarReduction ⟸ STABLE K₁(L₂) = 0 (ABC09 at n=1 only). Candidate routes:
+BHS-style splitting for the corner-skew Laurent presentation; or graded
+triangulation induction on normal-form support through GE₂ over blocks.
+Draft the unstable-descent theorem next (all ingredients proved).
+
+## Teammate (tex-align-sweep)
+Line-by-line on UltralimitGeometry still queued. All static sweeps clean.
+
+## Rose-K₁ formalization roadmap (from ABC09 full text, user-supplied)
+NOT eliminated: the paper's mathematical content. Eliminated: the need for
+its full machinery (spectra, homotopy fibrations, Waldhausen NK-vanishing
+in all degrees). With the proved unstable descent (H = ker K₁), the target
+is STABLE K₁(L₂) = 0 over a field k, degree-1 only. Concrete plan mirroring
+ABC09 §4 specialized to the 2-rose (no sinks, no sources, e₀ = 1):
+1. L = L₀[t₊,t₋,φ] (corner-skew Laurent; their eq. (skewle), cites
+   [skew, Lemma 2.4]); t₊ = a chosen s-generator, φ(x) = t₊ x t₋.
+   L₀ = ⋃_n L_{0,n}, L_{0,n} = span{s_α t_β : |α|=|β|=n} ≅ M_{2^n}(k) —
+   ultramatricial; repo's leftCombCode/prefix machinery covers this.
+2. Twisted Bass–Heller–Swan at K₁ ONLY via Higman-style linearization for
+   corner-skew Laurent rings (concrete matrix moves; Yao's proof low-degree
+   part). Gives: units of L modulo E generated by units of L₀ modulo the
+   relation u ~ φ(u) (plus NK₁-terms).
+3. K₁ of ultramatricial-over-field: GL_N(M_{2^n}k) = GL_N·E with
+   determinant; K₁(L₀) = colim kˣ — elementary over a field.
+4. coker(1−φ) on kˣ = the proved c ≡ c² mechanism (n−1 = 1).
+5. NK₁-vanishing for the specific von Neumann regular L₀ (low-degree only —
+   NOT Waldhausen's general theorem). Research exact elementary proof.
+Their explicit Δ_n/Ω_n transition matrices (proof of thm:skewle) are the
+concrete forms to formalize for step 3-4.
