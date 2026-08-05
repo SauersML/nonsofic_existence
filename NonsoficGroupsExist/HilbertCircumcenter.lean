@@ -16,6 +16,8 @@ orbit fixes the circumcenter of that orbit.
 namespace NonsoficGroupsExist
 namespace Circumcenter
 
+set_option linter.unusedSectionVars false
+
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 /-- The covering radius of a set from a point. -/
@@ -163,7 +165,6 @@ theorem exists_coveringRadius_lt {S : Set E} [Nonempty E] {r : ℝ}
 
 /-- **Existence and uniqueness of the Chebyshev center** of a nonempty
 bounded set in a complete real inner product space. -/
-set_option linter.unusedSectionVars false in
 theorem existsUnique_center [CompleteSpace E] {S : Set E}
     (hne : S.Nonempty) (hbdd : Bornology.IsBounded S) :
     ∃! c : E, coveringRadius S c = chebyshevRadius S := by
