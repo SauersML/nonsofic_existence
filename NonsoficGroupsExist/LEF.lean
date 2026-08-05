@@ -118,6 +118,29 @@ theorem isLEF_iff_textbook (J : Type*) [Group J] :
         ext z
         simp [regular, Equiv.permCongr_apply, Equiv.Perm.mul_apply, hm]
 
+/-- **LEF passes to subgroups**: a group that embeds into an LEF group is
+LEF. -/
+theorem isLEF_of_injective {H G : Type*} [Group H] [Group G]
+    (φ : H →* G) (hφ : Function.Injective φ) (hG : IsLEF G) : IsLEF H := by
+  intro s
+  classical
+  obtain ⟨n, f, hinj, hmul⟩ := hG (s.image φ)
+  refine ⟨n, f ∘ φ, ?_, ?_⟩
+  · intro x hx y hy hxy
+    exact hφ (hinj (Finset.mem_coe.2 (Finset.mem_image_of_mem φ
+        (Finset.mem_coe.1 hx)))
+      (Finset.mem_coe.2 (Finset.mem_image_of_mem φ
+        (Finset.mem_coe.1 hy))) hxy)
+  · refine ⟨?_, ?_⟩
+    · show f (φ 1) = 1
+      rw [map_one]
+      exact hmul.map_one
+    · intro x hx y hy
+      show f (φ (x * y)) = f (φ x) * f (φ y)
+      rw [map_mul]
+      exact hmul.map_mul (φ x) (Finset.mem_image_of_mem φ hx)
+        (φ y) (Finset.mem_image_of_mem φ hy)
+
 /-- Every finite group is LEF, via its left regular action transported to a
 standard finite type. -/
 theorem isLEF_of_finite (G : Type) [Group G] [Finite G] : IsLEF G := by
