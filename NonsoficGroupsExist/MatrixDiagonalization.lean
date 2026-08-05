@@ -51,7 +51,7 @@ theorem elementaryUnit10_val (t : R) :
     simp [elementaryUnit, Matrix.single]
 
 /-- The auxiliary reduction, assuming the corner entry is nonzero. -/
-theorem exists_elementary_mul_diag_of_corner_ne_zero [Nontrivial R]
+theorem exists_elementary_mul_diag_of_corner_ne_zero
     (hdiv : ∀ x : R, x ≠ 0 → ∃ p q : R, p * x * q = 1)
     (A : (Matrix (Fin 2) (Fin 2) R)ˣ)
     (hA : (A : Matrix (Fin 2) (Fin 2) R) 0 0 ≠ 0) :

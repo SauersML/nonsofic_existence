@@ -54,7 +54,7 @@ theorem cylinder_eq_sum_extensions (w : List (Fin 2)) (r : ℕ) :
 open Classical in
 /-- **Covering codes are complete**: a prefix code covering the boundary
 has cylinder sum `1` in every ring carrying a binary Leavitt family. -/
-theorem isComplete_of_covers {ι : Type*} [Fintype ι] [DecidableEq ι]
+theorem isComplete_of_covers {ι : Type*} [Fintype ι]
     (E : BinaryPrefixCode ι) (hE : ThompsonV.Covers E) :
     L.IsComplete E := by
   unfold IsComplete

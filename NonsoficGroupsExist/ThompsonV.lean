@@ -60,6 +60,13 @@ words. -/
 def Covers {ι : Type*} (E : BinaryPrefixCode ι) : Prop :=
   ∀ x : Boundary, ∃ i, IsStreamPrefix (E.word i) x
 
+/-- Positive control: the root code, whose single word is empty, covers
+the boundary. -/
+theorem covers_rootCode :
+    Covers ⟨fun _ : Fin 1 ↦ [],
+      fun i j hij _ ↦ hij (Subsingleton.elim i j)⟩ :=
+  fun _ ↦ ⟨0, fun k h ↦ by simp at h⟩
+
 /-- Two comparable stream prefixes at the same point are prefix-comparable
 words. -/
 theorem prefix_or_prefix_of_isStreamPrefix {v w : List (Fin 2)}
