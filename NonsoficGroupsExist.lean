@@ -161,6 +161,7 @@ import NonsoficGroupsExist.UniversalRankFour
 import NonsoficGroupsExist.UniversalPropertyT
 import NonsoficGroupsExist.UniversalCompressionSetup
 import NonsoficGroupsExist.ThompsonV
+import NonsoficGroupsExist.ThompsonVEmbedding
 import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
