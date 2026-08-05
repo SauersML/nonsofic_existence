@@ -169,9 +169,9 @@ unchecked boxes are repository-level verification tasks.
 - [x] Instantiate the finite-table cover to obtain an unconditional finitely
   presented nonsofic group
 - [x] Add the two unconditional public headline declarations
-- [ ] Run the complete `lake build`
+- [x] Run the complete `lake build`
 - [x] Audit the closed headline signatures and run `#print axioms`
-- [ ] Search for and eliminate forbidden trust bypasses, stale
+- [x] Search for and eliminate forbidden trust bypasses, stale
   conditional wrappers, dead code, and misleading documentation
 
 The final two declarations have exactly these premise-free mathematical
@@ -186,6 +186,15 @@ theorem exists_finitelyPresented_nonsofic_group :
       Group.IsFinitelyPresented G ∧ ¬ IsSofic G := by
   ...
 ```
+
+The complete remote build reports `Build completed successfully (3246
+jobs).` The transitive axiom reports for both headline theorems are exactly
+`[propext, Classical.choice, Quot.sound]`; there is no project axiom or
+unproved placeholder in either proof term. The source audit finds no
+declaration of a custom axiom, no proof placeholder, and none of the former
+literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
+the module and namespace containing the compiled proof, not an assumed
+proposition interface.
 
 ## What is already formalized
 
