@@ -12,6 +12,7 @@ import NonsoficGroupsExist.FreeAlgebraDegree
 import NonsoficGroupsExist.FreeRootFiltration
 import NonsoficGroupsExist.FreeRootActions
 import NonsoficGroupsExist.FreeRootPlane
+import NonsoficGroupsExist.FreeRootPlaneMass
 import NonsoficGroupsExist.FreeRootPlaneFourier
 import NonsoficGroupsExist.FreeRootCharacterValuation
 import NonsoficGroupsExist.FreeElementaryPropertyT

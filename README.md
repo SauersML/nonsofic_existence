@@ -98,9 +98,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     under automorphisms of the acting vector space, the identification of
     the trivial-character mass with the squared norm of the orbit average,
     and the abstract moving-mass gap bound (`CharacterMass`)
-  - [ ] A3. Simultaneous masses for the two-root coefficient plane over
-    `ZMod p`, coordinate characters, and factorization of plane characters
-    through the two coefficient functionals
+  - [x] A3. Simultaneous masses for the two-root coefficient plane over
+    every finite coefficient field: the additive parametrization of the
+    plane, instantiated positivity/conservation/displacement/gap bounds for
+    every orthogonal representation of the elementary group, coordinate
+    characters, and nontriviality of a nonzero plane character on one of
+    the two coefficient functionals (`FreeRootPlaneMass`)
   - [ ] A4. Moving-mass control: generator and unit-root displacement
     bounds the mass of characters nontrivial on the plane, with the
     explicit `2 * (1 - cos (2π/p))` constant
@@ -435,7 +438,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3254
+The current complete MSI build reports `Build completed successfully (3255
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -443,7 +446,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The source audit covers all 162 project modules, and
+proposition interface. The source audit covers all 163 project modules, and
 the whole-namespace kernel audit traverses every project declaration and
 reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
