@@ -578,5 +578,27 @@ theorem refined_component_expands
       hUgood hneighborhoodCard hneighborhoodBlock hdisjoint γ hγ hq
       (hglobal y U hUP hUne hhalfP)
 
+/-- **Constant-perturbation probe for the bad-block branch.**  Replacing the
+advertised `γ / 4` by an arbitrary positive `c` still elaborates when `y` is a
+bad vertex, because refinement makes its block a singleton.  The statement is
+kept as a report-only semantic alarm: downstream arguments must use the
+separate negligibility theorem for these vertices, never interpret this branch
+as quantitative expansion. -/
+theorem refined_bad_component_expands_at_every_positive_constant
+    {G : Type} [Group G] (M : FiniteModel) (τ : G → Equiv.Perm M)
+    (S : Finset G) (P : BlockStructure M) (E : Finset M) (K : ℕ)
+    (marker : GoodCrossingStub (generatorGraph M S τ) P
+      (badVertices (generatorGraph M S τ) P E K) → M)
+    (marker_ne : ∀ s, marker s ≠ stubEndpoint (generatorGraph M S τ) P s.1)
+    (y : M) (hybad : y ∈ badVertices (generatorGraph M S τ) P E K)
+    (c : ℝ) (hc : 0 < c) :
+    FiniteMultiGraph.HasCheegerLowerBound
+      ((KunSelectiveRepairGraph.graph (generatorGraph M S τ) P
+        (badVertices (generatorGraph M S τ) P E K) marker marker_ne).induce
+        ((singletonizeBadBlocks (generatorGraph M S τ) P E K).block y)) c := by
+  rw [singletonizeBadBlocks_block_of_bad
+    (generatorGraph M S τ) P E K hybad]
+  exact FiniteMultiGraph.induce_singleton_hasCheegerLowerBound _ _ hc
+
 end KunSelectiveRepairExpansion
 end NonsoficGroupsExist
