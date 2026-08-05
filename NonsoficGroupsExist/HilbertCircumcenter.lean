@@ -73,16 +73,13 @@ theorem coveringRadius_midpoint_sq {S : Set E} (hne : S.Nonempty)
     have hmids : dist (midpoint ℝ x y) s =
         ‖(x - s) + (y - s)‖ / 2 := by
       rw [dist_eq_norm]
-      rw [show midpoint ℝ x y - s = ((x - s) + (y - s)) / (2 : ℝ) from by
-        rw [midpoint_eq_smul_add]
-        rw [smul_add]
-        rw [div_eq_inv_mul]
-        rw [show ((2 : ℝ))⁻¹ * (x - s + (y - s)) =
-          (2 : ℝ)⁻¹ • (x - s + (y - s)) from rfl]
-        rw [smul_add]
+      rw [show midpoint ℝ x y - s =
+          (2 : ℝ)⁻¹ • ((x - s) + (y - s)) from by
+        rw [midpoint_eq_smul_add, invOf_eq_inv]
         module]
-      rw [norm_div]
-      simp
+      rw [norm_smul, Real.norm_eq_abs,
+        abs_of_pos (by norm_num : (0 : ℝ) < (2 : ℝ)⁻¹)]
+      ring
     have hd : dist x y = ‖(x - s) - (y - s)‖ := by
       rw [dist_eq_norm]
       congr 1
@@ -95,10 +92,16 @@ theorem coveringRadius_midpoint_sq {S : Set E} (hne : S.Nonempty)
     have hysq : dist y s ^ 2 ≤ coveringRadius S y ^ 2 := by
       have h0 : (0 : ℝ) ≤ dist y s := dist_nonneg
       nlinarith
+    have hxn : ‖x - s‖ ^ 2 ≤ coveringRadius S x ^ 2 := by
+      rw [hx']
+      exact hxsq
+    have hyn : ‖y - s‖ ^ 2 ≤ coveringRadius S y ^ 2 := by
+      rw [hy']
+      exact hysq
     rw [hmids]
     rw [div_pow]
     rw [hd]
-    nlinarith [hpar, hxsq, hysq, hx'.symm ▸ hxsq, sq_nonneg (dist x y)]
+    nlinarith [hpar, hxn, hyn, sq_nonneg (dist x y)]
   have h2 : coveringRadius S (midpoint ℝ x y) ^ 2 ≤
       (coveringRadius S x ^ 2 + coveringRadius S y ^ 2) / 2 -
         dist x y ^ 2 / 4 := by
@@ -134,7 +137,6 @@ theorem coveringRadius_midpoint_sq {S : Set E} (hne : S.Nonempty)
           dist x y ^ 2 / 4 := Real.sq_sqrt hsqrtnn
   linarith
 
-
 /-- The Chebyshev radius of a set. -/
 noncomputable def chebyshevRadius (S : Set E) : ℝ :=
   ⨅ x : E, coveringRadius S x
@@ -151,8 +153,7 @@ theorem chebyshevRadius_le {S : Set E} (hne : S.Nonempty)
     chebyshevRadius S ≤ coveringRadius S x :=
   ciInf_le (coveringRadius_bddBelow S hne hbdd) x
 
-theorem exists_coveringRadius_lt {S : Set E} [Nonempty E]
-    (hne : S.Nonempty) (hbdd : Bornology.IsBounded S) {r : ℝ}
+theorem exists_coveringRadius_lt {S : Set E} [Nonempty E] {r : ℝ}
     (hr : chebyshevRadius S < r) :
     ∃ x : E, coveringRadius S x < r := by
   by_contra hall
@@ -174,7 +175,7 @@ theorem existsUnique_center [CompleteSpace E] {S : Set E}
   have hseq : ∀ n : ℕ, ∃ x : E,
       coveringRadius S x < ρ + 1 / (n + 1) := by
     intro n
-    apply exists_coveringRadius_lt hne hbdd
+    apply exists_coveringRadius_lt
     have hpos : (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
     linarith
   choose x hx using hseq

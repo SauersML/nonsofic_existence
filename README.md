@@ -233,7 +233,18 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   - [ ] C1. Property `(T)` descends along surjections in the repository's
     Kazhdan-pair form
   - [ ] C2. Shalom's theorem: every Kazhdan group is a quotient of a
-    finitely presented Kazhdan group
+    finitely presented Kazhdan group.  In progress: `HilbertCircumcenter`
+    (Chebyshev centers of bounded sets and fixed points of bounded
+    isometric actions) and `AlmostMinimalDisplacement` (the displacement
+    calculus over a finite generating set and the full halving recursion
+    of Bekka–de la Harpe–Valette Lemma 3.2.5, discrete case:
+    `exists_displacement_one_of_almost_invariant` produces a
+    displacement-one vector whose `M`-neighbourhood has displacement
+    above one half) are drafted and committed, pending cluster
+    verification (cluster access currently blocked on reauthentication).
+    Remaining: Gaussian-kernel positive-definiteness via the Schur
+    product theorem (`Matrix.PosSemidef.hadamard`), the Delorme
+    direction, and the Shalom assembly
   - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
     property-`(T)` refinement and quotient claims of Theorem C
   - [ ] C4. Audit
