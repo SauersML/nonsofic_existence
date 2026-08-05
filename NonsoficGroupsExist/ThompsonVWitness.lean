@@ -216,5 +216,222 @@ theorem cornerWitness_le_deltaPermUnits :
 
 end WitnessMembership
 
+
+section SwapTable
+
+open Classical
+
+/-- The index type of the swap table: the two swapped cylinders together
+with all depth-`N` words avoiding both. -/
+abbrev SwapIndex (a b : List (Fin 2)) : Type :=
+  Fin 2 ⊕ {g : Fin (max a.length b.length) → Fin 2 //
+    ¬ a <+: List.ofFn g ∧ ¬ b <+: List.ofFn g}
+
+open Classical in
+noncomputable instance (a b : List (Fin 2)) : Fintype (SwapIndex a b) := by
+  unfold SwapIndex
+  infer_instance
+
+variable (a b : List (Fin 2))
+
+private theorem ofFn_swapIndex_length
+    (g : {g : Fin (max a.length b.length) → Fin 2 //
+      ¬ a <+: List.ofFn g ∧ ¬ b <+: List.ofFn g}) :
+    (List.ofFn g.val).length = max a.length b.length := by
+  simp
+
+private theorem prefix_of_eq {u l : List (Fin 2)} (h : l = u) :
+    u <+: l := by
+  rw [h]
+
+/-- The leaf code of the swap table, with the two distinguished cylinders
+listed in the given order. -/
+noncomputable def swapCode (u v : List (Fin 2))
+    (huv : ¬ u <+: v) (hvu : ¬ v <+: u)
+    (hgu : ∀ g : {g : Fin (max a.length b.length) → Fin 2 //
+      ¬ a <+: List.ofFn g ∧ ¬ b <+: List.ofFn g},
+      ¬ u <+: List.ofFn g.val)
+    (hgv : ∀ g : {g : Fin (max a.length b.length) → Fin 2 //
+      ¬ a <+: List.ofFn g ∧ ¬ b <+: List.ofFn g},
+      ¬ v <+: List.ofFn g.val)
+    (hlu : u.length ≤ max a.length b.length)
+    (hlv : v.length ≤ max a.length b.length) :
+    BinaryPrefixCode (SwapIndex a b) where
+  word i := Sum.elim (fun t : Fin 2 ↦ if t = 0 then u else v)
+    (fun g ↦ List.ofFn g.val) i
+  prefix_free := by
+    rintro (t | g) (t' | g') hij h
+    · by_cases ht : t = 0
+      · by_cases ht' : t' = 0
+        · exact hij (by rw [ht, ht'])
+        · rw [Sum.elim_inl, Sum.elim_inl, if_pos ht, if_neg ht'] at h
+          exact huv h
+      · by_cases ht' : t' = 0
+        · rw [Sum.elim_inl, Sum.elim_inl, if_neg ht, if_pos ht'] at h
+          exact hvu h
+        · exact hij (by
+            rw [show t = 1 from by omega, show t' = 1 from by omega])
+    · rw [Sum.elim_inl, Sum.elim_inr] at h
+      by_cases ht : t = 0
+      · rw [if_pos ht] at h
+        exact hgu g' h
+      · rw [if_neg ht] at h
+        exact hgv g' h
+    · rw [Sum.elim_inr, Sum.elim_inl] at h
+      by_cases ht' : t' = 0
+      · rw [if_pos ht'] at h
+        have hle := h.length_le
+        rw [ofFn_swapIndex_length a b g] at hle
+        exact hgu g (prefix_of_eq (List.IsPrefix.eq_of_length h (by
+          rw [ofFn_swapIndex_length a b g]
+          omega)))
+      · rw [if_neg ht'] at h
+        have hle := h.length_le
+        rw [ofFn_swapIndex_length a b g] at hle
+        exact hgv g (prefix_of_eq (List.IsPrefix.eq_of_length h (by
+          rw [ofFn_swapIndex_length a b g]
+          omega)))
+    · rw [Sum.elim_inr, Sum.elim_inr] at h
+      have heq : List.ofFn g.val = List.ofFn g'.val :=
+        List.IsPrefix.eq_of_length h (by
+          rw [ofFn_swapIndex_length a b g, ofFn_swapIndex_length a b g'])
+      exact hij (by
+        rw [Sum.inr.injEq]
+        exact Subtype.ext (List.ofFn_injective heq))
+
+end SwapTable
+
+
+
+
+section SwapPermMem
+
+open Classical ThompsonV
+
+theorem isStreamPrefix_of_prefix_trunc {w : List (Fin 2)} {x : Boundary}
+    {N : ℕ} (h : w <+: List.ofFn (fun n : Fin N ↦ x n)) :
+    IsStreamPrefix w x := by
+  intro m hm
+  obtain ⟨hle, helem⟩ := List.prefix_iff_getElem.mp h
+  have hstep := helem m hm
+  simpa using hstep.symm
+
+theorem trunc_isStreamPrefix (x : Boundary) (N : ℕ) :
+    IsStreamPrefix (List.ofFn (fun n : Fin N ↦ x n)) x := by
+  intro m hm
+  simp only [List.length_ofFn] at hm
+  simp
+
+variable (a b : List (Fin 2)) (hab : ¬ a <+: b) (hba : ¬ b <+: a)
+
+theorem covers_swapCode (u v : List (Fin 2))
+    (huv : ¬ u <+: v) (hvu : ¬ v <+: u)
+    (hgu : ∀ g : {g : Fin (max a.length b.length) → Fin 2 //
+      ¬ a <+: List.ofFn g ∧ ¬ b <+: List.ofFn g},
+      ¬ u <+: List.ofFn g.val)
+    (hgv : ∀ g : {g : Fin (max a.length b.length) → Fin 2 //
+      ¬ a <+: List.ofFn g ∧ ¬ b <+: List.ofFn g},
+      ¬ v <+: List.ofFn g.val)
+    (hlu : u.length ≤ max a.length b.length)
+    (hlv : v.length ≤ max a.length b.length)
+    (hset : (u = a ∧ v = b) ∨ (u = b ∧ v = a)) :
+    ThompsonV.Covers (swapCode a b u v huv hvu hgu hgv hlu hlv) := by
+  intro x
+  by_cases hu : IsStreamPrefix u x
+  · refine ⟨Sum.inl 0, ?_⟩
+    have hw : (swapCode a b u v huv hvu hgu hgv hlu hlv).word
+        (Sum.inl 0) = u := rfl
+    rw [hw]
+    exact hu
+  by_cases hv : IsStreamPrefix v x
+  · refine ⟨Sum.inl 1, ?_⟩
+    have hw : (swapCode a b u v huv hvu hgu hgv hlu hlv).word
+        (Sum.inl 1) = v := rfl
+    rw [hw]
+    exact hv
+  · set g : Fin (max a.length b.length) → Fin 2 := fun n ↦ x n with hg
+    have hga : ¬ a <+: List.ofFn g := by
+      intro hpre
+      rcases hset with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+      · exact hu (isStreamPrefix_of_prefix_trunc hpre)
+      · exact hv (isStreamPrefix_of_prefix_trunc hpre)
+    have hgb : ¬ b <+: List.ofFn g := by
+      intro hpre
+      rcases hset with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+      · exact hv (isStreamPrefix_of_prefix_trunc hpre)
+      · exact hu (isStreamPrefix_of_prefix_trunc hpre)
+    refine ⟨Sum.inr ⟨g, hga, hgb⟩, ?_⟩
+    have hw : (swapCode a b u v huv hvu hgu hgv hlu hlv).word
+        (Sum.inr ⟨g, hga, hgb⟩) = List.ofFn g := rfl
+    rw [hw]
+    exact trunc_isStreamPrefix x _
+
+/-- The source leaves of the swap. -/
+noncomputable def swapE : BinaryPrefixCode (SwapIndex a b) :=
+  swapCode a b a b hab hba (fun g ↦ g.property.1)
+    (fun g ↦ g.property.2) (le_max_left _ _) (le_max_right _ _)
+
+/-- The target leaves of the swap. -/
+noncomputable def swapB : BinaryPrefixCode (SwapIndex a b) :=
+  swapCode a b b a hba hab (fun g ↦ g.property.2)
+    (fun g ↦ g.property.1) (le_max_right _ _) (le_max_left _ _)
+
+theorem covers_swapE : ThompsonV.Covers (swapE a b hab hba) :=
+  covers_swapCode a b a b _ _ _ _ _ _ (Or.inl ⟨rfl, rfl⟩)
+
+theorem covers_swapB : ThompsonV.Covers (swapB a b hab hba) :=
+  covers_swapCode a b b a _ _ _ _ _ _ (Or.inr ⟨rfl, rfl⟩)
+
+/-- **Cylinder transpositions are tree tables.** -/
+theorem swapPerm_mem_thompsonV :
+    swapPerm a b hab hba ∈ thompsonV := by
+  have hEB : tableEquiv (swapE a b hab hba) (swapB a b hab hba)
+      (covers_swapE a b hab hba) (covers_swapB a b hab hba) =
+      swapPerm a b hab hba := by
+    apply Equiv.ext
+    intro x
+    show tableMap (swapE a b hab hba) (swapB a b hab hba)
+      (covers_swapE a b hab hba) x = swapMap a b x
+    by_cases ha : IsStreamPrefix a x
+    · have hidx : coveringIndex (swapE a b hab hba)
+          (covers_swapE a b hab hba) x = Sum.inl 0 :=
+        coveringIndex_eq _ _ (by
+          have hw : (swapE a b hab hba).word (Sum.inl 0) = a := rfl
+          rw [hw]
+          exact ha)
+      rw [tableMap, hidx, swapMap, if_pos ha]
+      rfl
+    · by_cases hb : IsStreamPrefix b x
+      · have hidx : coveringIndex (swapE a b hab hba)
+            (covers_swapE a b hab hba) x = Sum.inl 1 :=
+          coveringIndex_eq _ _ (by
+            have hw : (swapE a b hab hba).word (Sum.inl 1) = b := rfl
+            rw [hw]
+            exact hb)
+        rw [tableMap, hidx, swapMap, if_neg ha, if_pos hb]
+        rfl
+      · set g : Fin (max a.length b.length) → Fin 2 := fun n ↦ x n
+          with hg
+        have hga : ¬ a <+: List.ofFn g := fun hpre ↦
+          ha (isStreamPrefix_of_prefix_trunc hpre)
+        have hgb : ¬ b <+: List.ofFn g := fun hpre ↦
+          hb (isStreamPrefix_of_prefix_trunc hpre)
+        have hidx : coveringIndex (swapE a b hab hba)
+            (covers_swapE a b hab hba) x = Sum.inr ⟨g, hga, hgb⟩ :=
+          coveringIndex_eq _ _ (by
+            have hw : (swapE a b hab hba).word
+                (Sum.inr ⟨g, hga, hgb⟩) = List.ofFn g := rfl
+            rw [hw]
+            exact trunc_isStreamPrefix x _)
+        rw [tableMap, hidx, swapMap, if_neg ha, if_neg hb]
+        show ThompsonV.prepend (List.ofFn g)
+          (ThompsonV.drop (List.ofFn g).length x) = x
+        exact prepend_drop_of_isStreamPrefix _ x
+          (trunc_isStreamPrefix x _)
+  rw [← hEB]
+  exact tableEquiv_mem_thompsonV' _ _ _ _
+
+end SwapPermMem
+
 end BinaryLeavitt
 end NonsoficGroupsExist

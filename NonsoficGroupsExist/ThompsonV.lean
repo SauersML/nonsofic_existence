@@ -165,5 +165,46 @@ theorem tableEquiv_mem_thompsonV {m : ℕ}
     tableEquiv E B hE hB ∈ thompsonV :=
   Subgroup.subset_closure ⟨m, E, B, hE, hB, rfl⟩
 
+
+/-- Reindexing a prefix code along an equivalence. -/
+def reindexCode {ι κ : Type*} (e : κ ≃ ι) (E : BinaryPrefixCode ι) :
+    BinaryPrefixCode κ where
+  word j := E.word (e j)
+  prefix_free _ _ hij h := E.prefix_free (fun hc ↦ hij (e.injective hc)) h
+
+theorem covers_reindexCode {ι κ : Type*} (e : κ ≃ ι)
+    {E : BinaryPrefixCode ι} (hE : Covers E) :
+    Covers (reindexCode e E) := by
+  intro x
+  obtain ⟨i, hi⟩ := hE x
+  exact ⟨e.symm i, by
+    show IsStreamPrefix (E.word (e (e.symm i))) x
+    rwa [e.apply_symm_apply]⟩
+
+theorem tableEquiv_reindex {ι κ : Type*} (e : κ ≃ ι)
+    (E B : BinaryPrefixCode ι) (hE : Covers E) (hB : Covers B) :
+    tableEquiv (reindexCode e E) (reindexCode e B)
+        (covers_reindexCode e hE) (covers_reindexCode e hB) =
+      tableEquiv E B hE hB := by
+  apply Equiv.ext
+  intro x
+  show tableMap (reindexCode e E) (reindexCode e B)
+      (covers_reindexCode e hE) x = tableMap E B hE x
+  set j := coveringIndex (reindexCode e E) (covers_reindexCode e hE) x
+    with hj
+  have hjx : IsStreamPrefix (E.word (e j)) x :=
+    coveringIndex_spec (reindexCode e E) (covers_reindexCode e hE) x
+  have hix : coveringIndex E hE x = e j := coveringIndex_eq E hE hjx
+  rw [tableMap, tableMap, ← hj, hix]
+  rfl
+
+/-- Every finitely indexed tree table lies in `V`. -/
+theorem tableEquiv_mem_thompsonV' {ι : Type*} [Fintype ι]
+    (E B : BinaryPrefixCode ι) (hE : Covers E) (hB : Covers B) :
+    tableEquiv E B hE hB ∈ thompsonV := by
+  classical
+  rw [← tableEquiv_reindex (Fintype.equivFin ι).symm E B hE hB]
+  exact tableEquiv_mem_thompsonV _ _ _ _
+
 end ThompsonV
 end NonsoficGroupsExist
