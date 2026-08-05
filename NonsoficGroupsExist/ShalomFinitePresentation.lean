@@ -61,17 +61,6 @@ theorem freeGroup_subsingleton_of_isEmpty {α : Type*} [IsEmpty α] :
       (fun a b ha hb ↦ by rw [ha, hb, one_mul])
   rw [hone x, hone y]
 
-/-- The generators of a free group generate it. -/
-theorem closure_range_of (α : Type*) :
-    Subgroup.closure (Set.range (FreeGroup.of : α → FreeGroup α)) =
-      ⊤ := by
-  rw [eq_top_iff]
-  intro z _
-  refine FreeGroup.induction_on z (one_mem _)
-    (fun i ↦ Subgroup.subset_closure ⟨i, rfl⟩)
-    (fun i hi ↦ inv_mem hi)
-    (fun a b ha hb ↦ mul_mem ha hb)
-
 /-- The finset of free generators. -/
 noncomputable def generatorSet (n : ℕ) : Finset (FreeGroup (Fin n)) := by
   classical
@@ -93,7 +82,7 @@ theorem closure_generatorSet (n : ℕ) :
     Subgroup.closure
       ((generatorSet n : Finset (FreeGroup (Fin n))) : Set (FreeGroup (Fin n))) = ⊤ := by
   rw [coe_generatorSet]
-  exact closure_range_of (Fin n)
+  exact FreeGroup.closure_range_of (Fin n)
 
 /-- **The ultralimit contradiction.**  A sequence of representations of
 the free group whose stage-`k` member kills every kernel element

@@ -277,7 +277,7 @@ theorem exists_displacement_one_of_witness [CompleteSpace E]
     (C := M * δ) (by norm_num) hdist hℓ
   have hb2 : dist ξ₀ ℓ ≤ M * δ / (1 - 1 / 2) := hbound
   rw [hℓ0, dist_zero_right, hξ₀norm,
-    show M * δ / (1 - 1 / 2 : ℝ) = 2 * (M * δ) from by ring] at hb2
+    show M * δ / (1 - 1 / 2 : ℝ) = 2 * (M * δ) from by norm_num] at hb2
   have h4 : M * δ < 1 / 4 := by
     have hlt : M * δ < M * (1 / (4 * M)) :=
       mul_lt_mul_of_pos_left hξ₀disp hM

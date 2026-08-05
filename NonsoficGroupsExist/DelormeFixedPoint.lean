@@ -120,7 +120,8 @@ theorem bounded_of_gaussian_isPositiveDefinite
   -- The Gaussian positive-definite function and its GNS data.
   set p : PositiveDefiniteFunction G :=
     ⟨fun g ↦ Real.exp (-t * ψ g), hpd t htpos⟩ with hp
-  have hpapply : ∀ g : G, p g = Real.exp (-t * ψ g) := fun g ↦ rfl
+  have hpapply : ∀ g : G, p g = Real.exp (-t * ψ g) := fun g ↦ by
+    rw [hp]
   set ρ := representation p with hρ
   set ξ := kernelVector p 1 with hξ
   have hξsq : inner ℝ ξ ξ = 1 := by
@@ -207,7 +208,7 @@ theorem bounded_of_gaussian_isPositiveDefinite
   -- The moving component is below one quarter in square.
   have h2tB : 2 * t * B = ε ^ 2 / 16 := by
     rw [ht]
-    field_simp
+    field_simp [hBpos.ne']
     ring
   have hm16 : ‖m‖ ^ 2 ≤ 1 / 16 := by
     rw [h2tB] at hmsq

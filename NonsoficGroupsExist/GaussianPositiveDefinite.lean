@@ -26,9 +26,9 @@ variable {ι : Type*} [Fintype ι]
 
 /-- The real quadratic form of a matrix, written as a double sum. -/
 private theorem star_dotProduct_eq (A : Matrix ι ι ℝ) (x : ι → ℝ) :
-    Matrix.dotProduct (star x) (A.mulVec x) =
+    dotProduct (star x) (A.mulVec x) =
       ∑ i, ∑ j, x i * x j * A i j := by
-  simp only [star_trivial, Matrix.dotProduct, Matrix.mulVec,
+  simp only [star_trivial, dotProduct, Matrix.mulVec,
     Finset.mul_sum]
   exact Finset.sum_congr rfl fun i _ ↦
     Finset.sum_congr rfl fun j _ ↦ by ring
