@@ -192,6 +192,50 @@ theorem sum_dual_apply_re (hψ : ψ ≠ 1) (a : V) :
   · simpa using h
   · simpa [ha] using h
 
+omit [DecidableEq V] in
+open Classical in
+/-- Group-side orthogonality: the character sum of a dual functional over
+the whole space detects the zero functional. -/
+theorem sum_group_apply (hψ : ψ ≠ 1) (θ : Module.Dual K V) :
+    ∑ v : V, ψ (θ v) =
+      if θ = 0 then (Fintype.card V : ℂ) else 0 := by
+  rcases eq_or_ne θ 0 with rfl | hθ
+  · simp
+  · rw [if_neg hθ]
+    obtain ⟨v₀, hv₀⟩ : ∃ v₀ : V, θ v₀ ≠ 0 := by
+      by_contra hall
+      push Not at hall
+      exact hθ (LinearMap.ext fun v ↦ by
+        rw [hall v, LinearMap.zero_apply])
+    obtain ⟨t, ht⟩ := exists_smul_ne_one ψ hψ hv₀
+    have hw₀ : ψ (θ (t • v₀)) ≠ 1 := by
+      rwa [map_smul, smul_eq_mul]
+    have hreindex : ∑ v : V, ψ (θ (v + t • v₀)) = ∑ v : V, ψ (θ v) :=
+      Fintype.sum_equiv (Equiv.addRight (t • v₀)) _ _ (fun v ↦ rfl)
+    have hshift : ∑ v : V, ψ (θ (v + t • v₀)) =
+        (∑ v : V, ψ (θ v)) * ψ (θ (t • v₀)) := by
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro v _
+      rw [map_add, AddChar.map_add_eq_mul]
+    have hzero : (∑ v : V, ψ (θ v)) * (1 - ψ (θ (t • v₀))) = 0 := by
+      rw [mul_sub, mul_one, ← hshift, hreindex, sub_self]
+    rcases mul_eq_zero.1 hzero with h | h
+    · exact h
+    · exact absurd (sub_eq_zero.1 h).symm hw₀
+
+omit [DecidableEq V] in
+open Classical in
+/-- Real-part form of the group-side orthogonality. -/
+theorem sum_group_apply_re (hψ : ψ ≠ 1) (θ : Module.Dual K V) :
+    ∑ v : V, (ψ (θ v)).re =
+      if θ = 0 then (Fintype.card V : ℝ) else 0 := by
+  have h := congrArg Complex.re (sum_group_apply ψ hψ θ)
+  rw [Complex.re_sum] at h
+  rcases eq_or_ne θ 0 with rfl | hθ
+  · simp
+  · simpa [hθ] using h
+
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable (ρ : V → (E ≃ₗᵢ[ℝ] E))
 
@@ -217,6 +261,17 @@ theorem mass_conj (g : E ≃ₗᵢ[ℝ] E) (χ : Module.Dual K V) (z : E) :
     rw [g.symm_apply_apply]
   rw [happly]
   exact g.inner_map_map z (ρ v z)
+
+omit [DecidableEq V] in
+/-- Negation symmetry of the masses: conjugate characters carry the same
+mass. -/
+theorem mass_neg (χ : Module.Dual K V) (z : E) :
+    mass ψ ρ (-χ) z = mass ψ ρ χ z := by
+  unfold mass
+  congr 1
+  refine Finset.sum_congr rfl fun v _ ↦ ?_
+  congr 1
+  rw [LinearMap.neg_apply, ← conj_apply, Complex.conj_re]
 
 omit [Fintype K] [DecidableEq V] in
 /-- **Equivariance under automorphisms**: precomposing the action with a
@@ -570,6 +625,156 @@ theorem gap_mul_sum_mass_ne_zero_le (hψ : ψ ≠ 1) (z : E) (w : V) :
         fun χ hχ ↦ gap_le ψ (Finset.mem_filter.1 hχ).2
 
 end Action
+
+omit [DecidableEq V] in
+open Classical in
+/-- **Fiber covariance**: the mass of a pulled-back action at a coarse
+character is the total mass over the dual-restriction fiber of that
+character.  This is the exact Fourier transport law: a coarse mass is the
+sum of precisely its fine extensions, with the conjugate fiber folded in by
+the negation symmetry of the masses. -/
+theorem sum_mass_fiber_comp
+    {W : Type*} [AddCommGroup W] [Module K W] [Fintype W]
+    (ρ : W → (E ≃ₗᵢ[ℝ] E)) (hρ : ∀ v w : W, ρ (v + w) = ρ v * ρ w)
+    (hψ : ψ ≠ 1) (s : V →ₗ[K] W) (z : E) (χ : Module.Dual K V) :
+    ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K W ↦ χ'.comp s = χ),
+      mass ψ ρ χ' z =
+    mass ψ (fun v ↦ ρ (s v)) χ z := by
+  have hcard : ((Fintype.card V : ℝ)) ≠ 0 := by
+    exact_mod_cast Fintype.card_ne_zero
+  have hinner : ∀ χ' : Module.Dual K W,
+      (Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+          (ψ (χ v)).re * (ψ ((χ'.comp s) v)).re =
+        ((if χ'.comp s = χ then (1 : ℝ) else 0) +
+          (if χ'.comp s = -χ then (1 : ℝ) else 0)) / 2 := by
+    intro χ'
+    rw [show (∑ v : V, (ψ (χ v)).re * (ψ ((χ'.comp s) v)).re) =
+        ∑ v : V, ((ψ ((χ - χ'.comp s) v)).re +
+          (ψ ((χ + χ'.comp s) v)).re) / 2 from
+      Finset.sum_congr rfl fun v _ ↦ by
+        rw [re_mul_re, ← LinearMap.sub_apply, ← LinearMap.add_apply]]
+    rw [← Finset.sum_div, Finset.sum_add_distrib,
+      sum_group_apply_re ψ hψ (χ - χ'.comp s),
+      sum_group_apply_re ψ hψ (χ + χ'.comp s)]
+    have e1 : (χ - χ'.comp s = 0) ↔ (χ'.comp s = χ) := by
+      rw [sub_eq_zero]
+      exact eq_comm
+    have e2 : (χ + χ'.comp s = 0) ↔ (χ'.comp s = -χ) := by
+      rw [add_comm]
+      exact add_eq_zero_iff_eq_neg
+    by_cases h1 : χ'.comp s = χ <;> by_cases h2 : χ'.comp s = -χ
+    · rw [if_pos (e1.mpr h1), if_pos (e2.mpr h2), if_pos h1, if_pos h2]
+      field_simp
+    · rw [if_pos (e1.mpr h1), if_neg (mt e2.mp h2), if_pos h1,
+        if_neg h2]
+      field_simp
+      ring
+    · rw [if_neg (mt e1.mp h1), if_pos (e2.mpr h2), if_neg h1,
+        if_pos h2]
+      field_simp
+      ring
+    · rw [if_neg (mt e1.mp h1), if_neg (mt e2.mp h2), if_neg h1,
+        if_neg h2]
+      field_simp
+      ring
+  have hnegsum : (∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K W ↦ χ'.comp s = -χ),
+      mass ψ ρ χ' z) =
+    ∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K W ↦ χ'.comp s = χ),
+      mass ψ ρ χ' z := by
+    refine Finset.sum_nbij' (i := fun χ' ↦ -χ') (j := fun χ' ↦ -χ')
+      ?_ ?_ ?_ ?_ ?_
+    · intro χ' hχ'
+      rw [Finset.mem_filter] at hχ' ⊢
+      refine ⟨Finset.mem_univ _, ?_⟩
+      rw [show (-χ').comp s = -(χ'.comp s) from rfl, hχ'.2, neg_neg]
+    · intro χ' hχ'
+      rw [Finset.mem_filter] at hχ' ⊢
+      refine ⟨Finset.mem_univ _, ?_⟩
+      rw [show (-χ').comp s = -(χ'.comp s) from rfl, hχ'.2]
+    · intro χ' _
+      simp
+    · intro χ' _
+      simp
+    · intro χ' _
+      exact (mass_neg ψ ρ χ' z).symm
+  calc
+    (∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K W ↦ χ'.comp s = χ),
+      mass ψ ρ χ' z) =
+        (∑ χ' ∈ Finset.univ.filter
+            (fun χ' : Module.Dual K W ↦ χ'.comp s = χ),
+          mass ψ ρ χ' z / 2) +
+        ∑ χ' ∈ Finset.univ.filter
+            (fun χ' : Module.Dual K W ↦ χ'.comp s = -χ),
+          mass ψ ρ χ' z / 2 := by
+      rw [← Finset.sum_div, ← Finset.sum_div, hnegsum]
+      ring
+    _ = ∑ χ' : Module.Dual K W,
+        ((if χ'.comp s = χ then mass ψ ρ χ' z / 2 else 0) +
+          (if χ'.comp s = -χ then mass ψ ρ χ' z / 2 else 0)) := by
+      rw [Finset.sum_add_distrib, Finset.sum_filter, Finset.sum_filter]
+    _ = ∑ χ' : Module.Dual K W,
+        ((Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+          (ψ (χ v)).re * (ψ ((χ'.comp s) v)).re) * mass ψ ρ χ' z := by
+      refine Finset.sum_congr rfl fun χ' _ ↦ ?_
+      rw [hinner χ']
+      by_cases h1 : χ'.comp s = χ <;> by_cases h2 : χ'.comp s = -χ
+      · rw [if_pos h1, if_pos h2, if_pos h1, if_pos h2]
+        ring
+      · rw [if_pos h1, if_neg h2, if_pos h1, if_neg h2]
+        ring
+      · rw [if_neg h1, if_pos h2, if_neg h1, if_pos h2]
+        ring
+      · rw [if_neg h1, if_neg h2, if_neg h1, if_neg h2]
+        ring
+    _ = (Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+        (ψ (χ v)).re * ∑ χ' : Module.Dual K W,
+          (ψ (χ' (s v))).re * mass ψ ρ χ' z := by
+      calc
+        (∑ χ' : Module.Dual K W,
+            ((Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+              (ψ (χ v)).re * (ψ ((χ'.comp s) v)).re) * mass ψ ρ χ' z) =
+            ∑ χ' : Module.Dual K W, ∑ v : V,
+              (Fintype.card V : ℝ)⁻¹ *
+                ((ψ (χ v)).re *
+                  ((ψ (χ' (s v))).re * mass ψ ρ χ' z)) := by
+          refine Finset.sum_congr rfl fun χ' _ ↦ ?_
+          calc
+            ((Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+                (ψ (χ v)).re * (ψ ((χ'.comp s) v)).re) *
+                mass ψ ρ χ' z =
+                (∑ v : V, (ψ (χ v)).re * (ψ ((χ'.comp s) v)).re) *
+                  ((Fintype.card V : ℝ)⁻¹ * mass ψ ρ χ' z) := by ring
+            _ = ∑ v : V, ((ψ (χ v)).re * (ψ ((χ'.comp s) v)).re) *
+                  ((Fintype.card V : ℝ)⁻¹ * mass ψ ρ χ' z) :=
+              Finset.sum_mul _ _ _
+            _ = ∑ v : V, (Fintype.card V : ℝ)⁻¹ *
+                  ((ψ (χ v)).re *
+                    ((ψ (χ' (s v))).re * mass ψ ρ χ' z)) := by
+              refine Finset.sum_congr rfl fun v _ ↦ ?_
+              rw [show (χ'.comp s) v = χ' (s v) from rfl]
+              ring
+        _ = ∑ v : V, ∑ χ' : Module.Dual K W,
+              (Fintype.card V : ℝ)⁻¹ *
+                ((ψ (χ v)).re *
+                  ((ψ (χ' (s v))).re * mass ψ ρ χ' z)) :=
+          Finset.sum_comm
+        _ = (Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+              (ψ (χ v)).re * ∑ χ' : Module.Dual K W,
+                (ψ (χ' (s v))).re * mass ψ ρ χ' z := by
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl fun v _ ↦ ?_
+          rw [Finset.mul_sum, Finset.mul_sum]
+    _ = mass ψ (fun v ↦ ρ (s v)) χ z := by
+      rw [show mass ψ (fun v ↦ ρ (s v)) χ z =
+          (Fintype.card V : ℝ)⁻¹ * ∑ v : V,
+            (ψ (χ v)).re * inner ℝ z (ρ (s v) z) from rfl]
+      congr 1
+      refine Finset.sum_congr rfl fun v _ ↦ ?_
+      rw [← sum_apply_re_mass ψ ρ hρ hψ z (s v)]
 
 end CharacterMass
 
