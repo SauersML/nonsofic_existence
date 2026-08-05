@@ -139,6 +139,7 @@ import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.LeavittNormalForm
 import NonsoficGroupsExist.DiagonalClassGroup
+import NonsoficGroupsExist.DiagonalDescent
 import NonsoficGroupsExist.GLIsElementary
 import NonsoficGroupsExist.LeavittDiagonalClass
 import NonsoficGroupsExist.BinaryLeavittDiagonal

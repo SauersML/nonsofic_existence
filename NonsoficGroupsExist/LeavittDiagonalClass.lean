@@ -23,6 +23,8 @@ open scoped commutatorElement
 namespace NonsoficGroupsExist
 namespace LeavittFamily
 
+set_option linter.unusedSimpArgs false
+
 open MatrixDiagonalization
 
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
@@ -114,31 +116,15 @@ def cornerIntertwiner : (Matrix (Fin 2) (Fin 2) A)ˣ where
   val_inv := by
     rw [Matrix.mul_fin_two]
     ext i j
-    fin_cases i <;> fin_cases j
-    · show L.wordS w * L.wordT w +
-        (1 - L.wordS w * L.wordT w) * (1 - L.wordS w * L.wordT w) = 1
-      rw [one_sub_range_idem]
-      abel
-    · show L.wordS w * 0 + (1 - L.wordS w * L.wordT w) * L.wordS w = 0
-      rw [mul_zero, zero_add, one_sub_range_mul_wordS]
-    · show 0 * L.wordT w + L.wordT w * (1 - L.wordS w * L.wordT w) = 0
-      rw [zero_mul, zero_add, wordT_mul_one_sub_range]
-    · show 0 * 0 + L.wordT w * L.wordS w = 1
-      rw [zero_mul, zero_add, wordT_mul_wordS_self]
+    fin_cases i <;> fin_cases j <;>
+      simp [one_sub_range_idem, one_sub_range_mul_wordS,
+        wordT_mul_one_sub_range, wordT_mul_wordS_self]
   inv_val := by
     rw [Matrix.mul_fin_two]
     ext i j
-    fin_cases i <;> fin_cases j
-    · show L.wordT w * L.wordS w + 0 * 0 = 1
-      rw [zero_mul, add_zero, wordT_mul_wordS_self]
-    · show L.wordT w * (1 - L.wordS w * L.wordT w) + 0 * L.wordT w = 0
-      rw [zero_mul, add_zero, wordT_mul_one_sub_range]
-    · show (1 - L.wordS w * L.wordT w) * L.wordS w + L.wordS w * 0 = 0
-      rw [mul_zero, add_zero, one_sub_range_mul_wordS]
-    · show (1 - L.wordS w * L.wordT w) *
-        (1 - L.wordS w * L.wordT w) + L.wordS w * L.wordT w = 1
-      rw [one_sub_range_idem]
-      abel
+    fin_cases i <;> fin_cases j <;>
+      simp [one_sub_range_idem, one_sub_range_mul_wordS,
+        wordT_mul_one_sub_range, wordT_mul_wordS_self]
 
 /-- The intertwining identity
 `X_w · diag(u, 1) · X_w⁻¹ = diag(κ_w(u), 1)`. -/
@@ -151,27 +137,10 @@ theorem cornerIntertwiner_conj_diagUnit (u : Aˣ) :
     !![L.wordT w, 0; 1 - L.wordS w * L.wordT w, L.wordS w] = _
   rw [Matrix.mul_fin_two, Matrix.mul_fin_two]
   ext i j
-  fin_cases i <;> fin_cases j
-  · show (L.wordS w * (u : A) + (1 - L.wordS w * L.wordT w) * 0) *
-        L.wordT w +
-      (L.wordS w * 0 + (1 - L.wordS w * L.wordT w) * 1) *
-        (1 - L.wordS w * L.wordT w) = (L.kappaUnit w u : A)
-    rw [kappaUnit_val]
-    rw [mul_zero, add_zero, mul_zero, zero_add, mul_one,
-      one_sub_range_idem]
-  · show (L.wordS w * (u : A) + (1 - L.wordS w * L.wordT w) * 0) * 0 +
-      (L.wordS w * 0 + (1 - L.wordS w * L.wordT w) * 1) *
-        L.wordS w = 0
-    rw [mul_zero, mul_zero, zero_add, mul_one, one_sub_range_mul_wordS,
-      add_zero]
-  · show (0 * (u : A) + L.wordT w * 0) * L.wordT w +
-      (0 * 0 + L.wordT w * 1) * (1 - L.wordS w * L.wordT w) = 0
-    rw [zero_mul, mul_zero, add_zero, zero_mul, zero_add, mul_one,
-      zero_mul, zero_add, wordT_mul_one_sub_range]
-  · show (0 * (u : A) + L.wordT w * 0) * 0 +
-      (0 * 0 + L.wordT w * 1) * L.wordS w = 1
-    rw [zero_mul, mul_zero, add_zero, zero_mul, mul_zero, zero_add,
-      mul_one, zero_add, wordT_mul_wordS_self]
+  fin_cases i <;> fin_cases j <;>
+    simp [diagUnit, kappaUnit_val, one_sub_range_idem,
+      one_sub_range_mul_wordS, wordT_mul_one_sub_range,
+      wordT_mul_wordS_self]
 
 /-- **The `κ_w`-coset identity**: under strong division the corner
 insertion does not move the diagonal class. -/
@@ -183,10 +152,10 @@ theorem kappaUnit_mul_inv_mem_stableUnits [Nontrivial A]
     (L.cornerIntertwiner w) (diagUnit u)
   have hval : ⁅L.cornerIntertwiner w, diagUnit u⁆ =
       diagUnit (L.kappaUnit w u * u⁻¹) := by
-    rw [commutatorElement_def, cornerIntertwiner_conj_diagUnit,
-      diagUnit_mul]
-    congr 1
-    exact (map_inv diagUnitHom u).symm
+    have hinv : (diagUnit u)⁻¹ = diagUnit u⁻¹ :=
+      (map_inv diagUnitHom u).symm
+    rw [commutatorElement_def, cornerIntertwiner_conj_diagUnit, hinv,
+      ← diagUnit_mul]
   rwa [hval] at hcomm
 
 end Word
@@ -287,11 +256,12 @@ theorem kappa_zero_mul_kappa_one (u : Aˣ) :
           rw [hsum]
           exact sub_self 1
   rw [add_mul, mul_add, mul_add, h00, h0p, hp1, hpp]
-  show L.s 0 * (u : A) * L.t 0 + 0 +
-    (L.s 1 * (u : A) * L.t 1 + 0) = _
-  rw [add_zero, add_zero]
-  rfl
+  show 0 + L.s 0 * (u : A) * L.t 0 +
+      (L.s 1 * (u : A) * L.t 1 + 0) =
+    L.s 0 * (u : A) * L.t 0 + L.s 1 * (u : A) * L.t 1
+  abel
 
+include L in
 /-- **Central units lie in the diagonal class group**: they are fixed by
 the corner sum, which is the product of the two corner insertions, each
 congruent to the unit itself. -/
@@ -329,11 +299,14 @@ theorem central_mem_stableUnits [Nontrivial A]
       _ = ((c : Aˣ ⧸ stableUnits A)) * ((c : Aˣ ⧸ stableUnits A)) := by
         rw [hmk _ h0, hmk _ h1]
   have hone : ((c : Aˣ ⧸ stableUnits A)) = 1 := by
-    have := mul_left_cancel (a := ((c : Aˣ ⧸ stableUnits A)))
-      (by rw [mul_one]; exact hq)
-    exact this.symm
+    have hcancel : ((c : Aˣ ⧸ stableUnits A)) * 1 =
+        ((c : Aˣ ⧸ stableUnits A)) * ((c : Aˣ ⧸ stableUnits A)) := by
+      rw [mul_one]
+      exact hq
+    exact (mul_left_cancel hcancel).symm
   exact (QuotientGroup.eq_one_iff _).mp hone
 
+include L in
 /-- **Checkpoint `B4`, reduced form**: if every unit is a central unit
 modulo the diagonal class — the rose-graph `K₁` computation — then the
 diagonal class group is everything. -/
