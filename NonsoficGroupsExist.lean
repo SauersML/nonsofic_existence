@@ -143,6 +143,7 @@ import NonsoficGroupsExist.DiagonalDescent
 import NonsoficGroupsExist.GLIsElementary
 import NonsoficGroupsExist.LeavittDiagonalClass
 import NonsoficGroupsExist.BinaryLeavittDiagonal
+import NonsoficGroupsExist.StableUnitsGenerators
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
