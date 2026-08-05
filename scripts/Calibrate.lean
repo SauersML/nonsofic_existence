@@ -73,6 +73,17 @@ run_cmd do
       failures := failures.push
         s!"clean declaration {decl} was reported under {(hits.map (·.tag)).toList}"
 
+  -- The axiom traversal must descend through proof terms.  Asserted separately
+  -- from the findings above: the AXIOM plant is itself an `axiom`, so it is
+  -- reported even when the descent through proofs is entirely broken -- which
+  -- is exactly the state this repository's scans were in on first contact with
+  -- the real toolchain.
+  let reach := Audit.axiomClosure env #[``AuditPlant.plantedReachesClassical]
+  unless reach.contains ``Classical.choice do
+    failures := failures.push
+      s!"axiom traversal does not descend through proof terms: closure of \
+plantedReachesClassical is {reach.toList}, missing Classical.choice"
+
   for f in findings do
     logInfo m!"[{f.tag}] {f.decl}: {f.detail}"
 

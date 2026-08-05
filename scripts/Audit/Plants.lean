@@ -64,6 +64,14 @@ structure PlantedCertificate where
   bound : Nat
   law : bound = bound + 1
 
+/-- The axiom traversal must descend through PROOF TERMS, not merely notice
+declarations that are themselves axioms.  This theorem's type mentions no
+axiom; only its proof reaches `Classical.choice`.  Asserted directly in
+`scripts/Calibrate.lean`, because the plain axiom plant above passes even when
+the descent is completely broken. -/
+theorem plantedReachesClassical (p : Prop) (h : ¬¬p) : p :=
+  Classical.byContradiction h
+
 /-! ## Clean declarations.  No scan may report any of these. -/
 
 /-- Not LAUNDERED_PROP: established below. -/

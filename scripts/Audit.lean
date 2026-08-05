@@ -39,12 +39,19 @@ example : ∃ (G : Type) (_ : Group G), Group.IsFinitelyPresented G ∧ ¬ IsSof
 example : ¬ IsSofic UniversalRankFour.Ambient :=
   universalLeavittEL4_not_isSofic
 
+example (m : ℕ) (hm : 3 ≤ m) :
+    Group.FG (UniversalLeavittEL m) ∧
+      Infinite (UniversalLeavittEL m) ∧
+      HasKazhdanPropertyT.{0, 0} (UniversalLeavittEL m) ∧
+      ¬ IsSofic (UniversalLeavittEL m) :=
+  universalLeavitt_theoremA m hm
+
 example :
     Group.FG UniversalRankFour.Ambient ∧
       Infinite UniversalRankFour.Ambient ∧
       HasKazhdanPropertyT.{0, 0} UniversalRankFour.Ambient ∧
       ¬ IsSofic UniversalRankFour.Ambient :=
-  universalLeavittEL4_properties
+  ambient_profile
 
 /-- The positive control, pinned here so that it cannot be deleted while the
 negative results remain.  Every other occurrence of `IsSofic` in the library is
@@ -54,6 +61,22 @@ definition being unsatisfiable, and a kernel-clean proof of it would be worth
 nothing.  See `NonsoficGroupsExist/SoficPositiveControl.lean`. -/
 example (G : Type) [Group G] [Fintype G] [DecidableEq G] : IsSofic G :=
   isSofic_of_fintype G
+
+example (G : Type) [Group G] [Finite G] : IsSofic G :=
+  isSofic_of_finite G
+
+example : IsSofic (Multiplicative ℤ) :=
+  isSofic_multiplicative_int
+
+example (G : Type) [Group G] :
+    IsSofic G ↔ IsSoficProductRestricted G :=
+  isSofic_iff_productRestricted G
+
+example (G : Type) [Group G] [Finite G] : IsLEF G :=
+  isLEF_of_finite G
+
+example : IsLEF (Multiplicative ℤ) :=
+  isLEF_multiplicative_int
 
 /-! ## 2. Transitive axiom closure -/
 
@@ -73,7 +96,8 @@ def headlineTheorems : List Name :=
   [``nonsofic_groups_exist,
    ``exists_finitelyPresented_nonsofic_group,
    ``universalLeavittEL4_not_isSofic,
-   ``universalLeavittEL4_properties]
+   ``universalLeavitt_theoremA,
+   ``ambient_profile]
 
 /-- Every declaration of this development, taken from the environment rather
 than from a hand-maintained list, so that a new module cannot escape the

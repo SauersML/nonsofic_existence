@@ -1,5 +1,4 @@
 import Lean
-import Lean.Util.CollectAxioms
 import Audit.DeclFilter
 
 /-!
@@ -89,13 +88,56 @@ partial def stripLams : Expr → Expr
   | .mdata _ b => stripLams b
   | e => e
 
+/-- The value of a declaration.
+
+NOT `ConstantInfo.value?`, which returns `none` for THEOREMS on this toolchain
+even though the proof term is present and reachable by matching `.thmInfo`
+directly.  Every scan that reads a proof term went silent when it trusted
+`value?` -- including the axiom traversal, which stopped descending through
+proofs entirely and would therefore have reported a clean closure for a corpus
+with a `sorry` in it.  `scripts/Calibrate.lean` is what caught this, and it now
+asserts the descent explicitly. -/
+def valueOf? : ConstantInfo → Option Expr
+  | .thmInfo v => some v.value
+  | .defnInfo v => some v.value
+  | .opaqueInfo v => some v.value
+  | _ => none
+
 /-! ## AXIOM -/
+
+/-- Axiom-closure traversal state. -/
+structure AxiomState where
+  visited : NameSet := {}
+  axioms : Array Name := #[]
+
+/-- Walk the transitive closure of `c` through the environment, accumulating
+axioms.
+
+Written out rather than calling `Lean.CollectAxioms.collect`, which this
+toolchain's module system does not export to downstream code -- the public
+`Lean.collectAxioms` wrapper is exported, but it allocates a fresh visited set
+per call, and the whole point here is to sweep thousands of roots against ONE
+shared set.  Per-root closures over a corpus this size are quadratic and do not
+finish. -/
+partial def collectFrom (env : Environment) (c : Name) : StateM AxiomState Unit := do
+  unless (← get).visited.contains c do
+    modify fun s => { s with visited := s.visited.insert c }
+    match env.find? c with
+    | some (.axiomInfo v) =>
+        modify fun s => { s with axioms := s.axioms.push c }
+        v.type.getUsedConstants.forM (collectFrom env)
+    | some ci =>
+        ci.type.getUsedConstants.forM (collectFrom env)
+        if let some val := valueOf? ci then
+          val.getUsedConstants.forM (collectFrom env)
+        if let .inductInfo v := ci then
+          v.ctors.forM (collectFrom env)
+    | none => pure ()
 
 /-- Axioms reachable from `roots`, sharing one visited set so the sweep over
 the whole corpus stays a single traversal. -/
 def axiomClosure (env : Environment) (roots : Array Name) : Array Name :=
-  let (_, s) := ((roots.forM CollectAxioms.collect).run env).run {}
-  s.axioms
+  (((roots.forM (collectFrom env)).run {}).2).axioms
 
 /-- Corpus declarations that reach `target`, capped: the point is to name a
 place to start reading, not to enumerate every debtor. -/
@@ -104,8 +146,7 @@ def debtorsOf (env : Environment) (names : Array Name) (target : Name)
   let mut out := #[]
   for n in names do
     if out.size ≥ cap then break
-    let (_, s) := ((CollectAxioms.collect n).run env).run {}
-    if s.axioms.contains target then out := out.push n
+    if (axiomClosure env #[n]).contains target then out := out.push n
   return out
 
 def axiomScan (env : Environment) (names : Array Name) (allowed : List Name) :
@@ -291,7 +332,7 @@ Prop premises" }
         { tag := "TRIVIAL", fatal := false, decl := n, detail := "concludes `True`" }
 
     -- UNUSED
-    let some val := ci.value? | continue
+    let some val := valueOf? ci | continue
     let deadType := typeUnused ci.type 0 #[]
     let (deadVal, lams) := valUnused val 0 #[]
     let dead := deadType.filter fun (i, nm) ↦
