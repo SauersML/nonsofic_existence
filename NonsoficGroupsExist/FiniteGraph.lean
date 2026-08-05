@@ -342,6 +342,22 @@ def HasCheegerLowerBound (X : FiniteMultiGraph) (h : ℝ) : Prop :=
     2 * U.card ≤ Fintype.card X.vertex →
       h * U.card ≤ X.boundaryCard U
 
+/-- A singleton graph satisfies the Cheeger cut condition for every positive
+constant because it has no nonempty subset of size at most half its vertices.
+This is intentionally explicit: callers may use singleton components only
+when the vertices they isolate are controlled separately. -/
+theorem induce_singleton_hasCheegerLowerBound (X : FiniteMultiGraph)
+    (y : X.vertex) {h : ℝ} (hh : 0 < h) :
+    (X.induce {y}).HasCheegerLowerBound h := by
+  refine ⟨hh, ?_⟩
+  intro U hUne hhalf
+  have hUpos : 0 < U.card := Finset.card_pos.mpr hUne
+  have hvertexCard : Fintype.card (X.induce {y}).vertex = 1 := by
+    simp only [induce, Fintype.card_coe]
+    exact Finset.card_singleton y
+  rw [hvertexCard] at hhalf
+  omega
+
 theorem transport_hasCheegerLowerBound (X : FiniteMultiGraph) (Z : FiniteModel)
     (e : X.vertex ≃ Z) {h : ℝ} (hX : X.HasCheegerLowerBound h) :
     (X.transport Z e).HasCheegerLowerBound h := by

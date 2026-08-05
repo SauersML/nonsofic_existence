@@ -546,20 +546,13 @@ theorem refined_component_expands
         ((singletonizeBadBlocks (generatorGraph M S τ) P E K).block y))
       (γ / 4) := by
   by_cases hybad : y ∈ badVertices (generatorGraph M S τ) P E K
-  · refine ⟨div_pos hγ (by norm_num), ?_⟩
-    intro U hUne hhalf
+  ·
     let Q := singletonizeBadBlocks (generatorGraph M S τ) P E K
     have hblock : Q.block y = {y} :=
       singletonizeBadBlocks_block_of_bad (generatorGraph M S τ) P E K hybad
-    have hUpos : 0 < U.card := Finset.card_pos.mpr hUne
-    have hvertexCard : Fintype.card
-        ((KunSelectiveRepairGraph.graph (generatorGraph M S τ) P
-          (badVertices (generatorGraph M S τ) P E K) marker marker_ne).induce
-          (Q.block y)).vertex = 1 := by
-      simp only [FiniteMultiGraph.induce, hblock, Fintype.card_coe]
-      exact Finset.card_singleton y
-    rw [hvertexCard] at hhalf
-    omega
+    rw [hblock]
+    exact FiniteMultiGraph.induce_singleton_hasCheegerLowerBound _ _
+      (div_pos hγ (by norm_num))
   · let Z := KunSelectiveRepairGraph.graph (generatorGraph M S τ) P
       (badVertices (generatorGraph M S τ) P E K) marker marker_ne
     let Q := singletonizeBadBlocks (generatorGraph M S τ) P E K
