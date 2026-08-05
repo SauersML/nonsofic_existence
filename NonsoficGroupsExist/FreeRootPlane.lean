@@ -302,7 +302,7 @@ theorem conjugate_secondCoordinate_generator
         (secondCoordinate X i j k hij hik hjk n b).1 *
         (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
       (generatorShearedSecondCoordinate X i j k hij hik hjk x n b).1 := by
-  exact FreeRootActions.conjugate_by_generator X i j k hij hjk hik x b.1
+  exact FreeRootActions.conjugate_by_generator X (ZMod 2) i j k hij hjk hik x b.1
 
 /-- The same adjacent shear fixes the first coordinate, viewed in the next
 degree stage. -/
@@ -338,7 +338,7 @@ theorem conjugate_firstCoordinate_opposite_generator
       (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
     elementaryRoot i k hik a.1 *
       elementaryRoot j k hjk (FreeAlgebra.ι (ZMod 2) x * a.1)
-  rw [FreeRootActions.conjugate_by_generator X j i k hij.symm hik hjk]
+  rw [FreeRootActions.conjugate_by_generator X (ZMod 2) j i k hij.symm hik hjk]
   exact (elementaryRoot_commute_of_ne j k i k hjk hik
     hik.symm hjk.symm _ _).eq
 

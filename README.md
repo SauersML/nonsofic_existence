@@ -69,6 +69,10 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   exhaustion) from `ZMod 2` to an arbitrary commutative coefficient
   semiring, with stage finiteness for every finite coefficient semiring;
   only the exact-support monomial expansion remains `ZMod 2`-specific
+- [x] Generalize the elementary root-subgroup degree stages and the
+  generator shear/commutator advancement identities to free algebras over
+  every commutative coefficient ring, with stage finiteness for finite
+  coefficients
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route
