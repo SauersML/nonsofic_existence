@@ -297,3 +297,35 @@ components y_d (graded_independence_all now green):
   the [0,0]-case is a balanced unit (done). Alternative if rank path
   stalls: multiply chain by t₁-extractions to convert into explicit
   matrix equations over k.
+
+## Residual endgame derivation, session 7 — MAJOR simplifications
+- The residual tail IS a corner isometry: β = s₁s₀t₀ = s₁·p₀ (since
+  s₀t₀ = p₀). So R-units are u = c + s₁p₀, c balanced.
+- FREE MOVE FAMILIES (all in H by mem_stableUnits_of_val_unipotent):
+  1 + s₁Xt₀ for ALL X (A := s₁X, B := t₀, BA = t₀s₁X = 0); dually
+  1 + s₀Xt₁ for all X. Useful products against u:
+  (1 + s₁Xt₀)·u = u + s₁·X·(t₀c)   [t₀β = 0]
+  u·(1 + s₁Yt₀) = u + (cs₁)·Y·t₀   [p₀s₁ = 0]
+  (1 + s₀Xt₁)·u = u + s₀X(t₁c) + s₀X·p₀  [t₁β = p₀]
+- KILL CRITERion: u + s₁X t₀c balanced ⟺ X·(t₀c) + s₀t₀ ∈ L₋₁;
+  u + cs₁Yt₀ balanced ⟺ (cs₁)·Y + s₁s₀ ∈ L₊₁.
+- UNIT RELATIONS (y := u⁻¹, y₀ its balanced component — canonical by
+  graded_independence_all): t₀·u = t₀c gives (t₀c)(ys₀) = 1, and the
+  degree-0 component gives (t₀c)·z = 1 with z = Zs₀ PURE degree +1,
+  hence (p₀c)(Zp₀) = p₀ with Zp₀ BALANCED.  Dually y·u = 1 right-mult
+  s₁ gives y(cs₁) = s₁, degree-split y₀(cs₁) = s₁, hence
+  p₁(y₀c)p₁ = p₁ with everything balanced.
+- So in M_{2^m}(k): (p₀c)·(Zp₀) = p₀ (p₀-corner of c right-invertible
+  in the corner) and (p₁y₀)·(cp₁) = p₁ (cp₁ full column rank).
+- REMAINING CHIRALITY GAP: the left-move needs X(t₀c) ≈ −s₀t₀ (a
+  LEFT-division by t₀c) but unit-ness gives its RIGHT inverse; the
+  right-move needs (cs₁)Y ≈ −s₁s₀ (RIGHT division) but we have the
+  LEFT inverse.  Next ideas: (i) use BOTH relations simultaneously —
+  p₀-corner right-invertible + p₁-column-full may force c's rank
+  structure to make one division solvable over M_{2^m}(k) via
+  rank(p₀c) = 2^{m−1} ⟹ rowspace(p₀c) is a complement question;
+  (ii) exploit that solvability is only needed MOD degree slack;
+  (iii) symmetrize with the mirror residual (t-side tail) using the
+  swap; (iv) failing exact kill, split c by vN-regular idempotents of
+  p₀c and reduce the failure rank inductively (rank strictly drops,
+  fixed level m, ≤ 2^m steps).
