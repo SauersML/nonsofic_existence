@@ -250,78 +250,29 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     Kazhdan-pair form (`HasKazhdanPropertyT.of_surjective` in
     `Kazhdan.lean`: push the Kazhdan set forward along the surjection,
     pull representations back)
-  - [ ] C2. Shalom's theorem: every Kazhdan group is a quotient of a
-    finitely presented Kazhdan group.  In progress: `HilbertCircumcenter`
-    (Chebyshev centers of bounded sets and fixed points of bounded
-    isometric actions) and `AlmostMinimalDisplacement` (the displacement
-    calculus over a finite generating set and the full halving recursion
-    of Bekka–de la Harpe–Valette Lemma 3.2.5, discrete case:
-    `exists_displacement_one_of_almost_invariant` produces a
-    displacement-one vector whose `M`-neighbourhood has displacement
-    above one half), `GaussianPositiveDefinite` (Gaussian kernels along
-    a cocycle are positive-definite, via the Schur product theorem
-    `Matrix.PosSemidef.hadamard` and the exponential series), and
-    `DelormeFixedPoint` (Delorme's theorem: under a Kazhdan pair every
-    isometric cocycle is bounded — the GNS cyclic vector of the small-`t`
-    Gaussian has small moving component, bounding the Gaussian below by
-    `1/2` uniformly — and the bounded orbit has a fixed circumcenter,
-    `exists_fixed_point_of_hasKazhdanPropertyT`) are drafted and
-    committed, pending cluster verification (cluster access currently
-    blocked on reauthentication).  Remaining: the Shalom assembly, with
-    this design (leaner than Bekka–de la Harpe–Valette 3.4.5): present
-    `G = F/N` with `F` free of finite rank, `N = ⋃ N_k` an exhaustion by
-    finitely normally generated subgroups; if every `F/N_k` failed
-    property `(T)`, the failing pair (generator images, `1/(4(k+1))`)
-    would give a witness representation `σ_k` of `F` with a unit vector
-    of displacement below `1/(4(k+1))` and no invariant vectors — no
-    ℓ²-direct sum is needed because `exists_displacement_one_of_witness`
-    consumes a single seed vector; Lemma 3.2.5 with `M = k+1` then
-    yields `ξ_k` of displacement one whose radius-`(k+1)` neighbourhood
-    has displacement above `1/2`.  Set `b_k(g) := σ_k(g)ξ_k − ξ_k` (an
-    `IsCocycle`) and `ψ̄(g) := ArchimedeanClass.stdPart` of the
-    hyperreal sequence `‖b_k(g)‖²` (bounded in `k` for fixed `g` by
-    `FreeGroup.induction_on` subadditivity, so no word-length metric is
-    needed).  The Gaussians `exp(−t·ψ̄)` are positive-definite as
-    hyperfilter limits of the positive-definite
-    `exp(−t·‖b_k(·)‖²)` (finite quadratic forms pass to `stdPart`
-    limits), and `ψ̄` descends to `G` since `σ_k` kills `N_k`
-    eventually, so `bounded_of_gaussian_isPositiveDefinite` bounds `ψ̄`
-    by some `R` on all of `F`.  Then run the approximate-circumcenter
-    argument directly on bounded sequences `v : ∀ k, H_k` with the
-    hyperreal seminorm `ν(v) := stdPart (ofSeq ‖v_k‖)` — no Banach
-    ultraproduct, no quotient, no completeness: the affine action
-    `β_s v := π_k(s)v_k + b_k(s)` permutes the ν-bounded orbit
-    `{(b_k(g))_k : g ∈ F}`, covering-radius `δ`-minimizers exist by
-    `csSup`/`inf` arithmetic, and the parallelogram law (pointwise, then
-    `stdPart`) shows any `δ`-minimizer `η` has
-    `ν(β_{a_i}η − η)² ≤ 4((r*+δ)² − r*²) < (1/3)²`.  Since
-    `ν(...) < 1/3` forces `‖σ_k(a_i)(ξ_k+η_k) − (ξ_k+η_k)‖ < 1/3` on a
-    hyperfilter set, and `‖η_k‖ ≤ C < k+1` cofinitely, some large `k`
-    exhibits a vector within `k+1` of `ξ_k` with displacement at most
-    `1/3 < 1/2`, contradicting the isolation.  Hence some `F/N_k` has
-    `(T)`; it is finitely presented and surjects onto `G`.  This design
-    is now fully drafted: `UltralimitGeometry` additionally carries
-    `stdPart_exp` (the exponential commutes with standard parts, by
-    ultrafilter-dichotomy transfer and a `1/(n+1)` squeeze — no
-    infinitesimal calculus needed), the orbit-radius/`centerRadius`
-    machinery with the approximate-circumcenter estimate
-    (`seqNormSq_sub_le_of_near_center`), and
-    `ShalomFinitePresentation` proves `core_contradiction` and the
-    headline `exists_finitelyPresented_kazhdan_cover` (trivial-group
-    branch included), all pending cluster verification
-  - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
-    property-`(T)` refinement and quotient claims of Theorem C.  In
-    progress: `KazhdanCover.lean` is drafted, pending cluster
-    verification — `familyPullbackModel` generalizes the table-model
-    pullback from presented groups to any group carrying a
-    multiplicative separated family over the forbidden table, and
-    `exists_kazhdan_finitelyPresented_nonsofic_cover` imposes the
-    table relators (lifted along a section of the composed surjection)
-    on the Shalom presentation, so the cover is finitely presented by
-    instance, Kazhdan as a quotient of the Shalom cover, and nonsofic
-    by the family pullback.  Remaining for C3: the final Theorem C
-    quotient claims, which await the B-block identification of
-    `L^×` (B4–B6)
+  - [x] C2. Shalom's theorem: every Kazhdan group is a quotient of a
+    finitely presented Kazhdan group.  Fully formalized and built:
+    `Shalom.exists_presented_kazhdan_cover` (presentation-exposed form)
+    and `exists_finitelyPresented_kazhdan_cover`, via
+    `exists_displacement_one_of_witness` (a single-witness
+    strengthening of Bekka–de la Harpe–Valette Lemma 3.2.5 that
+    eliminates the ℓ²-direct-sum step), Delorme's theorem
+    (`exists_fixed_point_of_hasKazhdanPropertyT`, through the abstract
+    Gaussian boundedness principle
+    `bounded_of_gaussian_isPositiveDefinite`), Gaussian
+    positive-definiteness by the Schur product theorem
+    (`GaussianPositiveDefinite`), Chebyshev circumcenters
+    (`HilbertCircumcenter`), and a scalar-hyperreal ultralimit
+    (`UltralimitGeometry`) replacing the Banach ultraproduct and the
+    reduced-cohomology step of the cited proof
+  - [x] C3. The Kazhdan finite-table cover (`thm:kcover`), formalized
+    and built (`exists_kazhdan_finitelyPresented_nonsofic_cover` in
+    `KazhdanCover`): the forbidden-table relators are imposed on the
+    Shalom presentation, the family pullback `familyPullbackModel`
+    transfers nonsoficity, and finite generation is derived from
+    property `(T)` internally rather than hypothesized.  The final
+    Theorem C quotient claims (surjections onto the Theorem B list)
+    await the `B4` scalar input
   - [ ] C4. Audit
 - [x] Define Thompson's group `V` and identify the manuscript's tree-table
   and corner copies with it (the existence proof currently uses a stronger
