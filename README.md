@@ -138,9 +138,14 @@ box is still a required dependency of the final theorem.
   disjoint below the top-degree boundary, charge each interior fiber only to
   its concrete image set, and prove arbitrary selected Fourier projections
   are contractive and have the required squared-mass continuity estimate
-- [ ] Remove spurious invalid-sign mass from the transported image sets,
-  control the top-degree boundary in the increasing-stage limit, and derive
-  Kassabov's final disjoint mass-sum inequalities
+- [x] Prove that every nonmultiplicative binary sign assignment has zero
+  Fourier component, remove those invalid assignments from both transported
+  image families, prove the valid images lie in the required target regions,
+  and derive the two disjoint below-boundary mass-sum inequalities with the
+  target mass counted once rather than once per free generator
+- [ ] Control the top-degree boundary in the increasing-stage limit and use
+  the compiled disjoint interior estimates to obtain Kassabov's uniform
+  relative-property-`(T)` inequality
 - [ ] Complete the uniform finite-stage relative-property-`(T)` mass estimate
   for the two-root subgroup
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group

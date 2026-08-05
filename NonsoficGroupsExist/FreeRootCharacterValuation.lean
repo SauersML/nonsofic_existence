@@ -1017,6 +1017,18 @@ noncomputable def planeRegionSignSet
   Finset.univ.filter fun sign ↦
     planeCharacterRegion X i j k hij hik hjk n sign = region
 
+/-- A binary assignment on an exhaustive finite plane is a genuine group
+character exactly when its assigned eigenvalues are multiplicative.  This is
+an algebraic validity condition, not a certificate containing any analytic or
+target-region conclusion. -/
+def IsPlaneCharacterSign
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) : Prop :=
+  ∀ g h : Plane X i j k hij hik hjk n,
+    planeEigenvalue X i j k hij hik hjk n sign (g * h) =
+      planeEigenvalue X i j k hij hik hjk n sign g *
+        planeEigenvalue X i j k hij hik hjk n sign h
+
 /-- The `q`-th least-leading-generator fiber of the next-stage `A ∪ B`
 characters, using the second coefficient character as in Kassabov's claim. -/
 noncomputable def planeABLeadingSignSet
@@ -1285,6 +1297,54 @@ universe u
 
 variable {E : Type u} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
+theorem isPlaneCharacterSign_of_component_ne_zero
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E) (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0) :
+    IsPlaneCharacterSign X i j k hij hik hjk n sign := by
+  intro g h
+  exact planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk n
+    rho sign z hv g h
+
+/-- Invalid binary assignments carry zero Fourier mass in every orthogonal
+representation and for every vector. -/
+theorem planeComponent_eq_zero_of_not_isPlaneCharacterSign
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (z : E) (hinvalid : ¬ IsPlaneCharacterSign X i j k hij hik hjk n sign) :
+    planeComponent X i j k hij hik hjk n rho sign z = 0 := by
+  by_contra hv
+  exact hinvalid (isPlaneCharacterSign_of_component_ne_zero
+    X i j k hij hik hjk n rho sign z hv)
+
+/-- The first-character opposite-shear formula needs only algebraic character
+validity. -/
+theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 1) fineSign)
+    (a : degreeLE X n) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) a =
+      oppositeShearedFirstCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        x a := by
+  rw [firstCoefficientEigenvalue,
+    planeEigenvalue_oppositeConjugatedRestriction]
+  have hconj : oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
+      (firstCoordinate X i j k hij hik hjk n a) =
+      generatorShearedFirstCoordinate X i j k hij hik hjk x n a := by
+    apply Subtype.ext
+    exact conjugate_firstCoordinate_opposite_generator
+      X i j k hij hik hjk x n a
+  rw [hconj, generatorShearedFirstCoordinate, hvalid]
+  rfl
+
 /-- On a nonzero fine Fourier component, restricting its sign assignment
 along the opposite conjugated-plane map produces exactly the algebraic dual
 shear of the first coefficient character. -/
@@ -1303,18 +1363,10 @@ theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction
         (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
         (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
         x a := by
-  rw [firstCoefficientEigenvalue,
-    planeEigenvalue_oppositeConjugatedRestriction]
-  have hconj : oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
-      (firstCoordinate X i j k hij hik hjk n a) =
-      generatorShearedFirstCoordinate X i j k hij hik hjk x n a := by
-    apply Subtype.ext
-    exact conjugate_firstCoordinate_opposite_generator
-      X i j k hij hik hjk x n a
-  rw [hconj, generatorShearedFirstCoordinate,
-    planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk (n + 1)
-      rho fineSign z hv]
-  rfl
+  exact firstCoefficientEigenvalue_oppositeConjugatedRestriction_of_valid
+    X i j k hij hik hjk x n fineSign
+      (isPlaneCharacterSign_of_component_ne_zero
+        X i j k hij hik hjk (n + 1) rho fineSign z hv) a
 
 /-- The second coefficient of the opposite-conjugated restriction is exactly
 the restricted fine second character. -/
@@ -1363,6 +1415,34 @@ theorem firstCoefficientEigenvalue_forwardConjugatedRestriction
   rw [hconj]
   rfl
 
+/-- The second-character forward-shear formula from algebraic character
+validity alone. -/
+theorem secondCoefficientEigenvalue_forwardConjugatedRestriction_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (x : X) (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 1) fineSign)
+    (b : degreeLE X n) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) b =
+      forwardShearedSecondCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        x b := by
+  rw [secondCoefficientEigenvalue,
+    planeEigenvalue_forwardConjugatedRestriction]
+  have hconj : forwardConjugatedPlaneSucc X i j k hij hik hjk x n
+      (secondCoordinate X i j k hij hik hjk n b) =
+      generatorShearedSecondCoordinate X i j k hij hik hjk x n b := by
+    apply Subtype.ext
+    exact conjugate_secondCoordinate_generator X i j k hij hik hjk x n b
+  rw [hconj, generatorShearedSecondCoordinate, hvalid]
+  simp only [forwardShearedSecondCharacter, oppositeShearedFirstCharacter,
+    characterProduct, restrictCharacterSucc, leftDerivedCharacter,
+    firstCoefficientEigenvalue, secondCoefficientEigenvalue]
+  rw [mul_comm]
+
 /-- On a nonzero fine component, the second coefficient of the
 forward-conjugated restriction is exactly the algebraic forward dual shear. -/
 theorem secondCoefficientEigenvalue_forwardConjugatedRestriction
@@ -1380,20 +1460,10 @@ theorem secondCoefficientEigenvalue_forwardConjugatedRestriction
         (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
         (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
         x b := by
-  rw [secondCoefficientEigenvalue,
-    planeEigenvalue_forwardConjugatedRestriction]
-  have hconj : forwardConjugatedPlaneSucc X i j k hij hik hjk x n
-      (secondCoordinate X i j k hij hik hjk n b) =
-      generatorShearedSecondCoordinate X i j k hij hik hjk x n b := by
-    apply Subtype.ext
-    exact conjugate_secondCoordinate_generator X i j k hij hik hjk x n b
-  rw [hconj, generatorShearedSecondCoordinate,
-    planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk (n + 1)
-      rho fineSign z hv]
-  simp only [forwardShearedSecondCharacter, oppositeShearedFirstCharacter,
-    characterProduct, restrictCharacterSucc, leftDerivedCharacter,
-    firstCoefficientEigenvalue, secondCoefficientEigenvalue]
-  rw [mul_comm]
+  exact secondCoefficientEigenvalue_forwardConjugatedRestriction_of_valid
+    X i j k hij hik hjk x n fineSign
+      (isPlaneCharacterSign_of_component_ne_zero
+        X i j k hij hik hjk (n + 1) rho fineSign z hv) b
 
 /-- Below the top-degree boundary, the second character of an opposite
 conjugated restriction retains the source character's canonical leading
@@ -1456,13 +1526,23 @@ noncomputable def planeABInteriorLeadingSignSet
     fun fineSign ↦
       secondCoefficientValuation X i j k hij hik hjk (n + 2) fineSign ≤ n + 1
 
+/-- The algebraically valid characters in one interior `A ∪ B` fiber. -/
+noncomputable def planeABValidInteriorLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (q : Fin (Fintype.card X)) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool) :=
+  by
+    classical
+    exact (planeABInteriorLeadingSignSet X i j k hij hik hjk n q).filter
+      (IsPlaneCharacterSign X i j k hij hik hjk (n + 2))
+
 /-- Coarse sign characters obtained by the concrete opposite shear from one
 interior leading fiber. -/
 noncomputable def planeABOppositeInteriorImageSignSet
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (q : Fin (Fintype.card X)) :
     Finset (Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) :=
-  (planeABInteriorLeadingSignSet X i j k hij hik hjk n q).image
+  (planeABValidInteriorLeadingSignSet X i j k hij hik hjk n q).image
     fun fineSign r ↦ fineSign (oppositeConjugatedPlaneSuccIndex
       X i j k hij hik hjk (generatorEnumeration X q) (n + 1) r)
 
@@ -1479,6 +1559,9 @@ theorem planeABOppositeInteriorImageSignSet_pairwise_disjoint
   intro coarseSign hq hr
   obtain ⟨fineQ, hfineQ, hcoarseQ⟩ := Finset.mem_image.mp hq
   obtain ⟨fineR, hfineR, hcoarseR⟩ := Finset.mem_image.mp hr
+  simp only [planeABValidInteriorLeadingSignSet, Finset.mem_filter] at hfineQ hfineR
+  obtain ⟨hfineQ, _⟩ := hfineQ
+  obtain ⟨hfineR, _⟩ := hfineR
   simp only [planeABInteriorLeadingSignSet, Finset.mem_filter] at hfineQ hfineR
   obtain ⟨hqFiber, hqLe⟩ := hfineQ
   obtain ⟨hrFiber, hrLe⟩ := hfineR
@@ -1513,13 +1596,23 @@ noncomputable def planeCBInteriorLeadingSignSet
     fun fineSign ↦
       firstCoefficientValuation X i j k hij hik hjk (n + 2) fineSign ≤ n + 1
 
+/-- The algebraically valid characters in one interior `C ∪ B` fiber. -/
+noncomputable def planeCBValidInteriorLeadingSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
+    (q : Fin (Fintype.card X)) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk (n + 2))) → Bool) :=
+  by
+    classical
+    exact (planeCBInteriorLeadingSignSet X i j k hij hik hjk n q).filter
+      (IsPlaneCharacterSign X i j k hij hik hjk (n + 2))
+
 /-- Coarse sign characters obtained by the concrete forward shear from one
 interior `C ∪ B` fiber. -/
 noncomputable def planeCBForwardInteriorImageSignSet
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (q : Fin (Fintype.card X)) :
     Finset (Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) :=
-  (planeCBInteriorLeadingSignSet X i j k hij hik hjk n q).image
+  (planeCBValidInteriorLeadingSignSet X i j k hij hik hjk n q).image
     fun fineSign r ↦ fineSign (forwardConjugatedPlaneSuccIndex
       X i j k hij hik hjk (generatorEnumeration X q) (n + 1) r)
 
@@ -1536,6 +1629,9 @@ theorem planeCBForwardInteriorImageSignSet_pairwise_disjoint
   intro coarseSign hq hr
   obtain ⟨fineQ, hfineQ, hcoarseQ⟩ := Finset.mem_image.mp hq
   obtain ⟨fineR, hfineR, hcoarseR⟩ := Finset.mem_image.mp hr
+  simp only [planeCBValidInteriorLeadingSignSet, Finset.mem_filter] at hfineQ hfineR
+  obtain ⟨hfineQ, _⟩ := hfineQ
+  obtain ⟨hfineR, _⟩ := hfineR
   simp only [planeCBInteriorLeadingSignSet, Finset.mem_filter] at hfineQ hfineR
   obtain ⟨hqFiber, hqLe⟩ := hfineQ
   obtain ⟨hrFiber, hrLe⟩ := hfineR
@@ -1578,7 +1674,27 @@ theorem sum_norm_planeABInteriorLeadingSignSet_sq_le_image
   let index := oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
     (generatorEnumeration X q) (n + 1)
   let image := planeABOppositeInteriorImageSignSet X i j k hij hik hjk n q
-  have hsubset : planeABInteriorLeadingSignSet X i j k hij hik hjk n q ⊆
+  have hmass :
+      (∑ fineSign ∈ planeABInteriorLeadingSignSet X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2) =
+        ∑ fineSign ∈ planeABValidInteriorLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 := by
+    classical
+    rw [planeABValidInteriorLeadingSignSet]
+    generalize planeABInteriorLeadingSignSet X i j k hij hik hjk n q = signs
+    induction signs using Finset.induction_on with
+    | empty => simp
+    | @insert fineSign signs hnot ih =>
+        by_cases hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 2) fineSign
+        · rw [Finset.filter_insert]
+          simp [hnot, hvalid, ih]
+        · have hzero := planeComponent_eq_zero_of_not_isPlaneCharacterSign
+            X i j k hij hik hjk (n + 2) rho fineSign z hvalid
+          rw [Finset.filter_insert]
+          simp [hnot, hvalid, hzero, ih]
+  have hsubset : planeABValidInteriorLeadingSignSet
+        X i j k hij hik hjk n q ⊆
       fineRestrictionSignSet
         (Nat.card (Plane X i j k hij hik hjk (n + 2)))
         (Nat.card (Plane X i j k hij hik hjk (n + 1))) index image := by
@@ -1588,7 +1704,12 @@ theorem sum_norm_planeABInteriorLeadingSignSet_sq_le_image
     exact Finset.mem_image.mpr ⟨fineSign, hmem, rfl⟩
   calc
     ∑ fineSign ∈ planeABInteriorLeadingSignSet X i j k hij hik hjk n q,
-        ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 ≤
+        ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 =
+        ∑ fineSign ∈ planeABValidInteriorLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 :=
+      hmass
+    _ ≤
         ∑ fineSign ∈ fineRestrictionSignSet
           (Nat.card (Plane X i j k hij hik hjk (n + 2)))
           (Nat.card (Plane X i j k hij hik hjk (n + 1))) index image,
@@ -1619,7 +1740,27 @@ theorem sum_norm_planeCBInteriorLeadingSignSet_sq_le_image
   let index := forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
     (generatorEnumeration X q) (n + 1)
   let image := planeCBForwardInteriorImageSignSet X i j k hij hik hjk n q
-  have hsubset : planeCBInteriorLeadingSignSet X i j k hij hik hjk n q ⊆
+  have hmass :
+      (∑ fineSign ∈ planeCBInteriorLeadingSignSet X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2) =
+        ∑ fineSign ∈ planeCBValidInteriorLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 := by
+    classical
+    rw [planeCBValidInteriorLeadingSignSet]
+    generalize planeCBInteriorLeadingSignSet X i j k hij hik hjk n q = signs
+    induction signs using Finset.induction_on with
+    | empty => simp
+    | @insert fineSign signs hnot ih =>
+        by_cases hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 2) fineSign
+        · rw [Finset.filter_insert]
+          simp [hnot, hvalid, ih]
+        · have hzero := planeComponent_eq_zero_of_not_isPlaneCharacterSign
+            X i j k hij hik hjk (n + 2) rho fineSign z hvalid
+          rw [Finset.filter_insert]
+          simp [hnot, hvalid, hzero, ih]
+  have hsubset : planeCBValidInteriorLeadingSignSet
+        X i j k hij hik hjk n q ⊆
       fineRestrictionSignSet
         (Nat.card (Plane X i j k hij hik hjk (n + 2)))
         (Nat.card (Plane X i j k hij hik hjk (n + 1))) index image := by
@@ -1629,7 +1770,12 @@ theorem sum_norm_planeCBInteriorLeadingSignSet_sq_le_image
     exact Finset.mem_image.mpr ⟨fineSign, hmem, rfl⟩
   calc
     ∑ fineSign ∈ planeCBInteriorLeadingSignSet X i j k hij hik hjk n q,
-        ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 ≤
+        ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 =
+        ∑ fineSign ∈ planeCBValidInteriorLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2 :=
+      hmass
+    _ ≤
         ∑ fineSign ∈ fineRestrictionSignSet
           (Nat.card (Plane X i j k hij hik hjk (n + 2)))
           (Nat.card (Plane X i j k hij hik hjk (n + 1))) index image,
@@ -1642,6 +1788,43 @@ theorem sum_norm_planeCBInteriorLeadingSignSet_sq_le_image
               (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z)‖ ^ 2 :=
       sum_norm_forwardConjugatedRestriction_sq X i j k hij hik hjk
         (generatorEnumeration X q) (n + 1) rho image z
+
+/-- Algebraic character validity is sufficient for the concrete opposite
+conjugation to carry an `A ∪ B` leading fiber into `C ∪ D`. -/
+theorem planeCharacterRegion_oppositeConjugatedRestriction_eq_C_or_D_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 1) fineSign)
+    (hsign : fineSign ∈ planeABLeadingSignSet X i j k hij hik hjk n q) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .C ∨
+      planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .D := by
+  have hfirst : firstCoefficientEigenvalue X i j k hij hik hjk n
+      (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+        (generatorEnumeration X q) n r)) =
+      oppositeShearedFirstCharacter X
+        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
+        (generatorEnumeration X q) := by
+    funext a
+    exact firstCoefficientEigenvalue_oppositeConjugatedRestriction_of_valid
+      X i j k hij hik hjk (generatorEnumeration X q) n fineSign hvalid a
+  have hsecond : secondCoefficientEigenvalue X i j k hij hik hjk n
+      (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
+        (generatorEnumeration X q) n r)) =
+      oppositeShearedSecondCharacter X
+        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) := by
+    funext b
+    exact secondCoefficientEigenvalue_oppositeConjugatedRestriction
+      X i j k hij hik hjk (generatorEnumeration X q) n fineSign b
+  unfold planeCharacterRegion
+  rw [hfirst, hsecond]
+  exact planeABLeadingSignSet_region_transport X i j k hij hik hjk n q
+    fineSign hsign
 
 /-- The exact concrete opposite conjugation carries every nonzero fine
 component in an `A ∪ B` leading fiber to a coarse character in `C ∪ D`.
@@ -1661,38 +1844,18 @@ theorem planeCharacterRegion_oppositeConjugatedRestriction_eq_C_or_D
       planeCharacterRegion X i j k hij hik hjk n
         (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
           (generatorEnumeration X q) n r)) = .D := by
-  have hfirst : firstCoefficientEigenvalue X i j k hij hik hjk n
-      (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
-        (generatorEnumeration X q) n r)) =
-      oppositeShearedFirstCharacter X
-        (firstCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
-        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
-        (generatorEnumeration X q) := by
-    funext a
-    exact firstCoefficientEigenvalue_oppositeConjugatedRestriction
-      X i j k hij hik hjk (generatorEnumeration X q) n rho fineSign z hv a
-  have hsecond : secondCoefficientEigenvalue X i j k hij hik hjk n
-      (fun r ↦ fineSign (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk
-        (generatorEnumeration X q) n r)) =
-      oppositeShearedSecondCharacter X
-        (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign) := by
-    funext b
-    exact secondCoefficientEigenvalue_oppositeConjugatedRestriction
-      X i j k hij hik hjk (generatorEnumeration X q) n fineSign b
-  unfold planeCharacterRegion
-  rw [hfirst, hsecond]
-  exact planeABLeadingSignSet_region_transport X i j k hij hik hjk n q
-    fineSign hsign
+  exact planeCharacterRegion_oppositeConjugatedRestriction_eq_C_or_D_of_valid
+    X i j k hij hik hjk n q fineSign
+      (isPlaneCharacterSign_of_component_ne_zero
+        X i j k hij hik hjk (n + 1) rho fineSign z hv) hsign
 
-/-- The symmetric concrete forward conjugation sends every nonzero fine
-component in a `C ∪ B` leading fiber to `A ∪ D` at the coarse stage. -/
-theorem planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D
+/-- Algebraic character validity is sufficient for the forward concrete
+conjugation to carry a `C ∪ B` leading fiber into `A ∪ D`. -/
+theorem planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D_of_valid
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
     (n : ℕ) (q : Fin (Fintype.card X))
-    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
-    (z : E)
-    (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 1) fineSign)
     (hsign : fineSign ∈ planeCBLeadingSignSet X i j k hij hik hjk n q) :
     planeCharacterRegion X i j k hij hik hjk n
         (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
@@ -1716,12 +1879,373 @@ theorem planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D
         (secondCoefficientEigenvalue X i j k hij hik hjk (n + 1) fineSign)
         (generatorEnumeration X q) := by
     funext b
-    exact secondCoefficientEigenvalue_forwardConjugatedRestriction
-      X i j k hij hik hjk (generatorEnumeration X q) n rho fineSign z hv b
+    exact secondCoefficientEigenvalue_forwardConjugatedRestriction_of_valid
+      X i j k hij hik hjk (generatorEnumeration X q) n fineSign hvalid b
   unfold planeCharacterRegion
   rw [hfirst, hsecond]
   exact planeCBLeadingSignSet_region_transport X i j k hij hik hjk n q
     fineSign hsign
+
+/-- The symmetric concrete forward conjugation sends every nonzero fine
+component in a `C ∪ B` leading fiber to `A ∪ D` at the coarse stage. -/
+theorem planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X))
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
+    (z : E)
+    (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
+    (hsign : fineSign ∈ planeCBLeadingSignSet X i j k hij hik hjk n q) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .A ∨
+      planeCharacterRegion X i j k hij hik hjk n
+        (fun r ↦ fineSign (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk
+          (generatorEnumeration X q) n r)) = .D := by
+  exact planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D_of_valid
+    X i j k hij hik hjk n q fineSign
+      (isPlaneCharacterSign_of_component_ne_zero
+        X i j k hij hik hjk (n + 1) rho fineSign z hv) hsign
+
+/-- Every valid opposite-shear image below the top-degree boundary lies in
+the coarse `C ∪ D` region. -/
+theorem planeABOppositeInteriorImageSignSet_subset_C_union_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    planeABOppositeInteriorImageSignSet X i j k hij hik hjk n q ⊆
+      planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+        planeRegionSignSet X i j k hij hik hjk (n + 1) .D := by
+  classical
+  intro coarseSign hcoarse
+  obtain ⟨fineSign, hfine, rfl⟩ := Finset.mem_image.mp hcoarse
+  obtain ⟨hinterior, hvalid⟩ := Finset.mem_filter.mp hfine
+  obtain ⟨hleading, _⟩ := Finset.mem_filter.mp hinterior
+  have hregion :=
+    planeCharacterRegion_oppositeConjugatedRestriction_eq_C_or_D_of_valid
+      X i j k hij hik hjk (n + 1) q fineSign hvalid hleading
+  simpa [planeRegionSignSet] using hregion
+
+/-- Every valid forward-shear image below the top-degree boundary lies in
+the coarse `A ∪ D` region. -/
+theorem planeCBForwardInteriorImageSignSet_subset_A_union_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Fintype.card X)) :
+    planeCBForwardInteriorImageSignSet X i j k hij hik hjk n q ⊆
+      planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+        planeRegionSignSet X i j k hij hik hjk (n + 1) .D := by
+  classical
+  intro coarseSign hcoarse
+  obtain ⟨fineSign, hfine, rfl⟩ := Finset.mem_image.mp hcoarse
+  obtain ⟨hinterior, hvalid⟩ := Finset.mem_filter.mp hfine
+  obtain ⟨hleading, _⟩ := Finset.mem_filter.mp hinterior
+  have hregion :=
+    planeCharacterRegion_forwardConjugatedRestriction_eq_A_or_D_of_valid
+      X i j k hij hik hjk (n + 1) q fineSign hvalid hleading
+  simpa [planeRegionSignSet] using hregion
+
+/-- Because the valid opposite-shear images are pairwise disjoint, their
+total nonnegative weight is bounded by the weight of the single `C ∪ D`
+target region. -/
+theorem sum_planeABOppositeInteriorImageSignSet_le_C_union_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (f : (Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) → ℝ)
+    (hf : ∀ sign, 0 ≤ f sign) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeABOppositeInteriorImageSignSet
+            X i j k hij hik hjk n q,
+          f sign) ≤
+      ∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+          planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+        f sign := by
+  classical
+  have hpair :
+      ((Finset.univ : Finset (Fin (Fintype.card X))) : Set _).PairwiseDisjoint
+        (planeABOppositeInteriorImageSignSet X i j k hij hik hjk n) := by
+    intro q _ r _ hqr
+    exact planeABOppositeInteriorImageSignSet_pairwise_disjoint
+      X i j k hij hik hjk n hqr
+  rw [← Finset.sum_biUnion hpair]
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro sign hsign
+    simp only [Finset.mem_biUnion, Finset.mem_univ, true_and] at hsign
+    obtain ⟨q, hq⟩ := hsign
+    exact planeABOppositeInteriorImageSignSet_subset_C_union_D
+      X i j k hij hik hjk n q hq
+  · intro sign _ _
+    exact hf sign
+
+/-- The symmetric disjoint-image estimate into the single `A ∪ D` target
+region. -/
+theorem sum_planeCBForwardInteriorImageSignSet_le_A_union_D
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (f : (Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool) → ℝ)
+    (hf : ∀ sign, 0 ≤ f sign) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ sign ∈ planeCBForwardInteriorImageSignSet
+            X i j k hij hik hjk n q,
+          f sign) ≤
+      ∑ sign ∈ (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+          planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+        f sign := by
+  classical
+  have hpair :
+      ((Finset.univ : Finset (Fin (Fintype.card X))) : Set _).PairwiseDisjoint
+        (planeCBForwardInteriorImageSignSet X i j k hij hik hjk n) := by
+    intro q _ r _ hqr
+    exact planeCBForwardInteriorImageSignSet_pairwise_disjoint
+      X i j k hij hik hjk n hqr
+  rw [← Finset.sum_biUnion hpair]
+  apply Finset.sum_le_sum_of_subset_of_nonneg
+  · intro sign hsign
+    simp only [Finset.mem_biUnion, Finset.mem_univ, true_and] at hsign
+    obtain ⟨q, hq⟩ := hsign
+    exact planeCBForwardInteriorImageSignSet_subset_A_union_D
+      X i j k hij hik hjk n q hq
+  · intro sign _ _
+    exact hf sign
+
+/-- The full below-boundary `A ∪ B` mass is charged injectively to one copy
+of the `C ∪ D` mass, up to the sum of the concrete adjacent-generator
+displacements.  In particular, the target mass has no generator-cardinality
+factor. -/
+theorem sum_norm_planeABInteriorLeadingSignSet_sq_le_target_add_error
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ fineSign ∈ planeABInteriorLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2) ≤
+      (∑ coarseSign ∈
+          (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X),
+          2 * ‖z‖ *
+            ‖rho (elementaryRoot j i hij.symm
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖ := by
+  classical
+  let moved : Fin (Fintype.card X) → E := fun q ↦
+    rho (elementaryRoot j i hij.symm
+      (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z
+  have hfiber :
+      (∑ q : Fin (Fintype.card X),
+          ∑ fineSign ∈ planeABInteriorLeadingSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2) ≤
+        ∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2 := by
+    apply Finset.sum_le_sum
+    intro q _
+    exact sum_norm_planeABInteriorLeadingSignSet_sq_le_image
+      X i j k hij hik hjk n q rho z
+  have hmoved :
+      (∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2) ≤
+        ∑ q : Fin (Fintype.card X),
+          ((∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+                X i j k hij hik hjk n q,
+              ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+            2 * ‖z‖ * ‖moved q - z‖) := by
+    apply Finset.sum_le_sum
+    intro q _
+    have hvariation := abs_sum_norm_planeComponent_sq_sub_le
+      X i j k hij hik hjk (n + 1) rho
+      (planeABOppositeInteriorImageSignSet X i j k hij hik hjk n q)
+      (moved q) z
+    have hdiff :
+        (∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2) -
+          (∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) ≤
+        (‖moved q‖ + ‖z‖) * ‖moved q - z‖ :=
+      (le_abs_self _).trans hvariation
+    rw [sub_le_iff_le_add] at hdiff
+    have hnorm : ‖moved q‖ = ‖z‖ := by
+      exact (rho (elementaryRoot j i hij.symm
+        (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q)))).norm_map z
+    calc
+      _ ≤ (‖moved q‖ + ‖z‖) * ‖moved q - z‖ +
+          ∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2 :=
+        hdiff
+      _ = (∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+          2 * ‖z‖ * ‖moved q - z‖ := by
+        rw [hnorm]
+        ring
+  have htarget :
+      (∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) ≤
+        ∑ coarseSign ∈
+            (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+              planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2 :=
+    sum_planeABOppositeInteriorImageSignSet_le_C_union_D
+      X i j k hij hik hjk n
+      (fun coarseSign ↦
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2)
+      (fun _ ↦ sq_nonneg _)
+  calc
+    _ ≤ ∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2 := hfiber
+    _ ≤ ∑ q : Fin (Fintype.card X),
+          ((∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+                X i j k hij hik hjk n q,
+              ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+            2 * ‖z‖ * ‖moved q - z‖) := hmoved
+    _ = (∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeABOppositeInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X), 2 * ‖z‖ * ‖moved q - z‖ := by
+      rw [Finset.sum_add_distrib]
+    _ ≤ (∑ coarseSign ∈
+          (planeRegionSignSet X i j k hij hik hjk (n + 1) .C ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X), 2 * ‖z‖ * ‖moved q - z‖ :=
+      add_le_add htarget (le_refl _)
+    _ = _ := by rfl
+
+/-- The symmetric full below-boundary `C ∪ B` estimate charges its mass
+injectively to one copy of `A ∪ D`, again with no cardinality factor on the
+target mass. -/
+theorem sum_norm_planeCBInteriorLeadingSignSet_sq_le_target_add_error
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ q : Fin (Fintype.card X),
+        ∑ fineSign ∈ planeCBInteriorLeadingSignSet
+            X i j k hij hik hjk n q,
+          ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2) ≤
+      (∑ coarseSign ∈
+          (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X),
+          2 * ‖z‖ *
+            ‖rho (elementaryRoot i j hij
+              (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖ := by
+  classical
+  let moved : Fin (Fintype.card X) → E := fun q ↦
+    rho (elementaryRoot i j hij
+      (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z
+  have hfiber :
+      (∑ q : Fin (Fintype.card X),
+          ∑ fineSign ∈ planeCBInteriorLeadingSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 2) rho fineSign z‖ ^ 2) ≤
+        ∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2 := by
+    apply Finset.sum_le_sum
+    intro q _
+    exact sum_norm_planeCBInteriorLeadingSignSet_sq_le_image
+      X i j k hij hik hjk n q rho z
+  have hmoved :
+      (∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2) ≤
+        ∑ q : Fin (Fintype.card X),
+          ((∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+                X i j k hij hik hjk n q,
+              ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+            2 * ‖z‖ * ‖moved q - z‖) := by
+    apply Finset.sum_le_sum
+    intro q _
+    have hvariation := abs_sum_norm_planeComponent_sq_sub_le
+      X i j k hij hik hjk (n + 1) rho
+      (planeCBForwardInteriorImageSignSet X i j k hij hik hjk n q)
+      (moved q) z
+    have hdiff :
+        (∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2) -
+          (∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) ≤
+        (‖moved q‖ + ‖z‖) * ‖moved q - z‖ :=
+      (le_abs_self _).trans hvariation
+    rw [sub_le_iff_le_add] at hdiff
+    have hnorm : ‖moved q‖ = ‖z‖ := by
+      exact (rho (elementaryRoot i j hij
+        (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q)))).norm_map z
+    calc
+      _ ≤ (‖moved q‖ + ‖z‖) * ‖moved q - z‖ +
+          ∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2 :=
+        hdiff
+      _ = (∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+          2 * ‖z‖ * ‖moved q - z‖ := by
+        rw [hnorm]
+        ring
+  have htarget :
+      (∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) ≤
+        ∑ coarseSign ∈
+            (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+              planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2 :=
+    sum_planeCBForwardInteriorImageSignSet_le_A_union_D
+      X i j k hij hik hjk n
+      (fun coarseSign ↦
+        ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2)
+      (fun _ ↦ sq_nonneg _)
+  calc
+    _ ≤ ∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign
+              (moved q)‖ ^ 2 := hfiber
+    _ ≤ ∑ q : Fin (Fintype.card X),
+          ((∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+                X i j k hij hik hjk n q,
+              ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+            2 * ‖z‖ * ‖moved q - z‖) := hmoved
+    _ = (∑ q : Fin (Fintype.card X),
+          ∑ coarseSign ∈ planeCBForwardInteriorImageSignSet
+              X i j k hij hik hjk n q,
+            ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X), 2 * ‖z‖ * ‖moved q - z‖ := by
+      rw [Finset.sum_add_distrib]
+    _ ≤ (∑ coarseSign ∈
+          (planeRegionSignSet X i j k hij hik hjk (n + 1) .A ∪
+            planeRegionSignSet X i j k hij hik hjk (n + 1) .D),
+          ‖planeComponent X i j k hij hik hjk (n + 1) rho coarseSign z‖ ^ 2) +
+        ∑ q : Fin (Fintype.card X), 2 * ‖z‖ * ‖moved q - z‖ :=
+      add_le_add htarget (le_refl _)
+    _ = _ := by rfl
 
 /-- The squared mass of one `A ∪ B` leading-generator fiber is bounded by
 the coarse `C ∪ D` mass after acting by its opposite adjacent generator.
