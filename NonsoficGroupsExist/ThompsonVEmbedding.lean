@@ -386,6 +386,214 @@ theorem finsuppStreamRep_wordT_single (a : List (Fin 2))
 
 end Actions
 
+
+section Embedding
+
+open ThompsonV
+
+variable (k : Type) [Field k]
+
+private theorem tableSum_mul {m : ℕ}
+    (B E D : BinaryPrefixCode (Fin m)) :
+    (∑ i, (family k).wordS (B.word i) * (family k).wordT (E.word i)) *
+      (∑ j, (family k).wordS (E.word j) * (family k).wordT (D.word j)) =
+    ∑ i, (family k).wordS (B.word i) * (family k).wordT (D.word i) := by
+  rw [Finset.sum_mul_sum]
+  calc
+    (∑ i, ∑ j,
+        ((family k).wordS (B.word i) * (family k).wordT (E.word i)) *
+          ((family k).wordS (E.word j) * (family k).wordT (D.word j))) =
+        ∑ i, ∑ j, if i = j then
+          (family k).wordS (B.word i) * (family k).wordT (D.word j)
+          else 0 := by
+      refine Finset.sum_congr rfl fun i _ ↦
+        Finset.sum_congr rfl fun j _ ↦ ?_
+      calc
+        ((family k).wordS (B.word i) * (family k).wordT (E.word i)) *
+            ((family k).wordS (E.word j) * (family k).wordT (D.word j)) =
+            (family k).wordS (B.word i) *
+              (((family k).wordT (E.word i) *
+                (family k).wordS (E.word j)) *
+                (family k).wordT (D.word j)) := by
+          simp only [mul_assoc]
+        _ = if i = j then
+            (family k).wordS (B.word i) * (family k).wordT (D.word j)
+            else 0 := by
+          rw [LeavittFamily.prefixCode_orthogonal]
+          by_cases h : i = j
+          · rw [if_pos h, if_pos h, one_mul]
+          · rw [if_neg h, if_neg h, zero_mul, mul_zero]
+    _ = ∑ i, (family k).wordS (B.word i) * (family k).wordT (D.word i) := by
+      refine Finset.sum_congr rfl fun i _ ↦ ?_
+      rw [Finset.sum_ite_eq]
+      rw [if_pos (Finset.mem_univ i)]
+
+private theorem tableSum_complete {m : ℕ}
+    (B : BinaryPrefixCode (Fin m)) (hB : Covers B) :
+    (∑ i, (family k).wordS (B.word i) * (family k).wordT (B.word i)) =
+      1 := by
+  have h := (family k).isComplete_of_covers B hB
+  unfold LeavittFamily.IsComplete at h
+  simpa [LeavittFamily.cylinder] using h
+
+/-- The Leavitt unit of a tree table. -/
+noncomputable def tableUnit {m : ℕ} (E B : BinaryPrefixCode (Fin m))
+    (hE : Covers E) (hB : Covers B) : (BinaryLeavittAlgebra k)ˣ where
+  val := ∑ i, (family k).wordS (B.word i) * (family k).wordT (E.word i)
+  inv := ∑ i, (family k).wordS (E.word i) * (family k).wordT (B.word i)
+  val_inv := by
+    rw [tableSum_mul k B E B]
+    exact tableSum_complete k B hB
+  inv_val := by
+    rw [tableSum_mul k E B E]
+    exact tableSum_complete k E hE
+
+open Classical in
+theorem finsuppStreamRep_tableUnit_single {m : ℕ}
+    (E B : BinaryPrefixCode (Fin m)) (hE : Covers E) (hB : Covers B)
+    (x : Boundary) (c : k) :
+    finsuppStreamRep k ((tableUnit k E B hE hB : (BinaryLeavittAlgebra k)ˣ) :
+        BinaryLeavittAlgebra k) (Finsupp.single x c) =
+      Finsupp.single (tableMap E B hE x) c := by
+  show finsuppStreamRep k
+    (∑ i, (family k).wordS (B.word i) * (family k).wordT (E.word i))
+    (Finsupp.single x c) = _
+  rw [map_sum, LinearMap.sum_apply]
+  rw [Finset.sum_eq_single_of_mem (coveringIndex E hE x)
+    (Finset.mem_univ _) (fun j _ hj ↦ by
+      rw [map_mul, Module.End.mul_apply, finsuppStreamRep_wordT_single,
+        if_neg (fun hcon ↦ hj
+          (covering_index_unique E hcon (coveringIndex_spec E hE x))),
+        map_zero])]
+  rw [map_mul, Module.End.mul_apply, finsuppStreamRep_wordT_single,
+    if_pos (coveringIndex_spec E hE x), finsuppStreamRep_wordS_single]
+  rfl
+
+open Classical in
+/-- The units acting on the basis vectors as a permutation of the
+boundary. -/
+noncomputable def deltaPermUnits : Subgroup (BinaryLeavittAlgebra k)ˣ where
+  carrier := {u | ∃ σ : Equiv.Perm Boundary, ∀ (x : Boundary) (c : k),
+    finsuppStreamRep k (u : BinaryLeavittAlgebra k)
+      (Finsupp.single x c) = Finsupp.single (σ x) c}
+  one_mem' := ⟨1, fun x c ↦ by simp⟩
+  mul_mem' := by
+    rintro u v ⟨σ, hσ⟩ ⟨τ, hτ⟩
+    refine ⟨σ * τ, fun x c ↦ ?_⟩
+    rw [Units.val_mul, map_mul, Module.End.mul_apply, hτ, hσ]
+    rfl
+  inv_mem' := by
+    rintro u ⟨σ, hσ⟩
+    refine ⟨σ⁻¹, fun x c ↦ ?_⟩
+    have h1 : finsuppStreamRep k (u : BinaryLeavittAlgebra k)
+        (Finsupp.single (σ⁻¹ x) c) = Finsupp.single x c := by
+      rw [hσ]
+      simp
+    calc
+      finsuppStreamRep k ((u⁻¹ : (BinaryLeavittAlgebra k)ˣ) :
+          BinaryLeavittAlgebra k) (Finsupp.single x c) =
+          finsuppStreamRep k ((u⁻¹ : (BinaryLeavittAlgebra k)ˣ) :
+            BinaryLeavittAlgebra k)
+            (finsuppStreamRep k (u : BinaryLeavittAlgebra k)
+              (Finsupp.single (σ⁻¹ x) c)) := by rw [h1]
+      _ = Finsupp.single (σ⁻¹ x) c := by
+        rw [← Module.End.mul_apply, ← map_mul, ← Units.val_mul,
+          inv_mul_cancel, Units.val_one, map_one, Module.End.one_apply]
+
+open Classical in
+theorem deltaPermUnits_sigma_unique {σ τ : Equiv.Perm Boundary}
+    (hσ : ∀ (x : Boundary) (c : k), Finsupp.single (σ x) c =
+      Finsupp.single (τ x) c) : σ = τ := by
+  apply Equiv.ext
+  intro x
+  exact Finsupp.single_left_injective one_ne_zero (hσ x 1)
+
+open Classical in
+/-- The permutation realized by a basis-permuting unit. -/
+noncomputable def toPerm : deltaPermUnits k →* Equiv.Perm Boundary where
+  toFun u := u.property.choose
+  map_one' := by
+    apply deltaPermUnits_sigma_unique k
+    intro x c
+    rw [← (1 : deltaPermUnits k).property.choose_spec x c]
+    simp
+  map_mul' := by
+    intro u v
+    apply deltaPermUnits_sigma_unique k
+    intro x c
+    rw [← (u * v).property.choose_spec x c]
+    rw [show ((u * v : deltaPermUnits k) : (BinaryLeavittAlgebra k)ˣ) =
+      (u : (BinaryLeavittAlgebra k)ˣ) * v from rfl]
+    rw [Units.val_mul, map_mul, Module.End.mul_apply,
+      v.property.choose_spec, u.property.choose_spec]
+    rfl
+
+theorem toPerm_spec (u : deltaPermUnits k) (x : Boundary) (c : k) :
+    finsuppStreamRep k ((u : (BinaryLeavittAlgebra k)ˣ) :
+        BinaryLeavittAlgebra k) (Finsupp.single x c) =
+      Finsupp.single (toPerm k u x) c :=
+  u.property.choose_spec x c
+
+theorem toPerm_injective : Function.Injective (toPerm k) := by
+  rw [injective_iff_map_eq_one]
+  intro u hu
+  have hval : ((u : (BinaryLeavittAlgebra k)ˣ) :
+      BinaryLeavittAlgebra k) = 1 := by
+    apply finsuppStreamRep_injective k
+    rw [map_one]
+    refine Finsupp.lhom_ext fun x c ↦ ?_
+    rw [toPerm_spec, hu]
+    simp
+  exact Subtype.ext (Units.ext hval)
+
+theorem tableUnit_mem_deltaPermUnits {m : ℕ}
+    (E B : BinaryPrefixCode (Fin m)) (hE : Covers E) (hB : Covers B) :
+    tableUnit k E B hE hB ∈ deltaPermUnits k :=
+  ⟨tableEquiv E B hE hB, fun x c ↦
+    finsuppStreamRep_tableUnit_single k E B hE hB x c⟩
+
+theorem toPerm_tableUnit {m : ℕ}
+    (E B : BinaryPrefixCode (Fin m)) (hE : Covers E) (hB : Covers B) :
+    toPerm k ⟨tableUnit k E B hE hB,
+      tableUnit_mem_deltaPermUnits k E B hE hB⟩ =
+      tableEquiv E B hE hB := by
+  apply deltaPermUnits_sigma_unique k
+  intro x c
+  rw [← toPerm_spec]
+  exact finsuppStreamRep_tableUnit_single k E B hE hB x c
+
+theorem thompsonV_le_toPerm_range :
+    thompsonV ≤ (toPerm k).range := by
+  rw [thompsonV]
+  rw [Subgroup.closure_le]
+  rintro f ⟨m, E, B, hE, hB, rfl⟩
+  exact ⟨⟨tableUnit k E B hE hB,
+    tableUnit_mem_deltaPermUnits k E B hE hB⟩,
+    toPerm_tableUnit k E B hE hB⟩
+
+/-- **Proposition `prop:vembed`, embedding half** (checkpoint `D2`):
+Thompson's group `V` embeds into the unit group of `L_k(1,2)`, with the
+tree tables acting on the basis of the faithful stream module exactly by
+their prefix substitutions. -/
+noncomputable def vEmbedding : thompsonV →* (BinaryLeavittAlgebra k)ˣ :=
+  (deltaPermUnits k).subtype.comp
+    ((MulEquiv.symm (MonoidHom.ofInjective
+      (toPerm_injective k))).toMonoidHom.comp
+      (Subgroup.inclusion (thompsonV_le_toPerm_range k)))
+
+theorem vEmbedding_injective : Function.Injective (vEmbedding k) := by
+  intro g h hgh
+  have h2 : (MulEquiv.symm (MonoidHom.ofInjective (toPerm_injective k)))
+      (Subgroup.inclusion (thompsonV_le_toPerm_range k) g) =
+    (MulEquiv.symm (MonoidHom.ofInjective (toPerm_injective k)))
+      (Subgroup.inclusion (thompsonV_le_toPerm_range k) h) :=
+    Subtype.val_injective hgh
+  have h3 := (MulEquiv.symm (MonoidHom.ofInjective
+    (toPerm_injective k))).injective h2
+  exact Subgroup.inclusion_injective _ h3
+
+end Embedding
+
 end BinaryLeavitt
 
 
