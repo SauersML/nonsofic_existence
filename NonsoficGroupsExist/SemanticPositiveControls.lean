@@ -1,8 +1,15 @@
 import Mathlib.Data.ZMod.Basic
+import NonsoficGroupsExist.A2MagicHilbert
 import NonsoficGroupsExist.AlmostAutomorphism
+import NonsoficGroupsExist.FiniteClassTwoOrthogonality
+import NonsoficGroupsExist.FreeRootCharacterValuation
+import NonsoficGroupsExist.HilbertEpsilonOrthogonality
 import NonsoficGroupsExist.KazhdanControl
+import NonsoficGroupsExist.KazhdanImprovement
+import NonsoficGroupsExist.MaximalCutRepair
 import NonsoficGroupsExist.SoficPositiveControl
 import NonsoficGroupsExist.TableCover
+import NonsoficGroupsExist.UniversalLeavitt
 
 /-!
 # Semantic positive controls
@@ -232,6 +239,132 @@ noncomputable def c2_expanderDecomposition :
     have ht' : t = c2Generator := by simpa using ht
     subst t
     simp [pairedApproximation, pairedBlocks, pairedMap]
+
+private abbrev boolModel : FiniteModel :=
+  { carrier := Bool
+    fintype := inferInstance
+    decidableEq := inferInstance }
+
+private noncomputable abbrev boolEmptyGraph : FiniteMultiGraph where
+  vertex := boolModel
+  edge :=
+    { carrier := Fin 0
+      fintype := inferInstance
+      decidableEq := inferInstance }
+  first := Fin.elim0
+  second := Fin.elim0
+  loopless := fun e ↦ Fin.elim0 e
+
+/-- Cauchy--Schwarz gives a nonzero, nonvacuous epsilon-orthogonality
+control on the full real line. -/
+theorem real_top_epsilonOrthogonal :
+    HilbertEpsilonOrthogonality.EpsilonOrthogonal
+      (⊤ : Submodule ℝ ℝ) ⊤ 1 := by
+  intro u _ v _
+  simpa only [one_mul] using abs_real_inner_le_norm u v
+
+/-- A singleton in a two-vertex edgeless graph is an actual sparse cut. -/
+theorem boolEmptyGraph_hasSparseCut :
+    MaximalCutRepair.IsSparseCut boolEmptyGraph 1
+      (Finset.singleton (show boolEmptyGraph.vertex from false)) := by
+  refine ⟨Finset.singleton_nonempty _, ?_, ?_⟩
+  · norm_num [boolEmptyGraph, boolModel, Fintype.card_bool]
+  · norm_num [boolEmptyGraph, boolModel, FiniteMultiGraph.boundaryCard,
+      FiniteMultiGraph.boundary]
+
+/-- The identity is a good almost automorphism at a positive defect scale. -/
+theorem bool_identity_isGood :
+    AlmostAutomorphism.IsGood boolModel ∅ 1 1 1 := by
+  norm_num [AlmostAutomorphism.IsGood, AlmostAutomorphism.badArcs]
+
+/-- The independent epsilon-good predicate also contains the identity. -/
+theorem bool_identity_isEpsilonGood :
+    KazhdanImprovement.IsEpsilonGood boolModel ∅ 1 1 := by
+  constructor <;> simp [AlmostAutomorphism.badArcs]
+
+/-- Detection at degree zero is realized by the empty word and the constant
+minus-one functional. -/
+theorem unit_hasDetectionAtDegreeZero :
+    FreeRootCharacterValuation.HasDetectionAtDegree Unit
+      (n := 0) (fun _ ↦ (-1 : ℝ)) 0 := by
+  refine ⟨1, ?_⟩
+  have hlen : FreeAlgebraDegree.freeWordLength Unit (1 : FreeMonoid Unit) = 0 :=
+    (FreeAlgebraDegree.freeWordLength_eq_zero_iff Unit 1).2 rfl
+  exact ⟨hlen, by omega, rfl⟩
+
+/-- The constant-positive sign assignment is the trivial character on a
+concrete plane. -/
+theorem unit_constantTrue_isPlaneCharacterSign :
+    FreeRootCharacterValuation.IsPlaneCharacterSign Unit
+      0 1 2 (by decide) (by decide) (by decide) 0 (fun _ ↦ true) := by
+  intro g h
+  simp [FreeRootPlaneFourier.planeEigenvalue]
+
+/-- The universal Leavitt relation family has a concrete member. -/
+theorem universalLeavitt_relation_isInhabited :
+    ∃ a b : UniversalLeavitt.Free, UniversalLeavitt.Relation a b := by
+  exact ⟨_, _, BinaryLeavitt.Relation.t0_s0⟩
+
+/-- The trivial orthogonal action on the real line is irreducible. -/
+theorem real_trivial_isOrthogonallyIrreducible :
+    FiniteClassTwoOrthogonality.IsOrthogonallyIrreducible
+      (1 : Unit →* (ℝ ≃ₗᵢ[ℝ] ℝ)) := by
+  refine ⟨inferInstance, ?_⟩
+  intro U _
+  by_cases hU : U = ⊥
+  · exact Or.inl hU
+  · right
+    rw [eq_top_iff]
+    intro x
+    obtain ⟨u, hu, hu0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hU
+    have hone : (1 : ℝ) ∈ U := by
+      have := U.smul_mem (u⁻¹) hu
+      simpa [hu0] using this
+    have := U.smul_mem x hone
+    simpa using this
+
+private abbrev concreteA2 := elementaryA2System (ZMod 2)
+
+private theorem concreteA2_exponentTwo :
+    ∀ (i j : Fin 3) (hij : i ≠ j),
+      ∀ g ∈ concreteA2.root i j hij, g ^ 2 = 1 := by
+  intro i j hij g hg
+  exact elementaryRootSubgroup_sq i j hij g hg
+
+private theorem concreteA2_existsConstantProjectionBound :
+    ∃ gamma : ℝ, 0 ≤ gamma ∧ gamma < 1 ∧
+      A2MagicHilbert.ConstantProjectionBound.{0, 0} concreteA2 gamma := by
+  exact A2MagicHilbert.exists_constantProjectionBound
+    concreteA2 concreteA2_exponentTwo
+
+private noncomputable def concreteA2ProjectionGamma : ℝ :=
+  Classical.choose concreteA2_existsConstantProjectionBound
+
+private theorem concreteA2ProjectionGamma_nonneg :
+    0 ≤ concreteA2ProjectionGamma :=
+  (Classical.choose_spec
+    concreteA2_existsConstantProjectionBound).1
+
+/-- The characteristic-two elementary A2 system satisfies the constant-family
+projection predicate for a closed, constructed constant. -/
+theorem concreteA2_constantProjectionBound :
+    A2MagicHilbert.ConstantProjectionBound.{0, 0}
+      concreteA2 concreteA2ProjectionGamma :=
+  (Classical.choose_spec concreteA2_existsConstantProjectionBound).2.2
+
+/-- The same concrete system satisfies the operator-facing projection bound. -/
+theorem concreteA2_vertexProjectionBound :
+    A2System.VertexProjectionBound.{0, 0}
+      concreteA2 concreteA2ProjectionGamma :=
+  A2MagicHilbert.vertexProjectionBound_of_constantProjectionBound
+    concreteA2 concreteA2_constantProjectionBound
+
+/-- The same concrete system satisfies the six-space codistance bound. -/
+theorem concreteA2_vertexCodistanceBound :
+    A2System.VertexCodistanceBound.{0, 0}
+      concreteA2 concreteA2ProjectionGamma :=
+  concreteA2.vertexCodistanceBound_of_projectionBound
+    concreteA2ProjectionGamma_nonneg concreteA2_vertexProjectionBound
 
 /-- The one-element group has the elementary Kazhdan pair `(∅, 1)`. -/
 theorem unit_isKazhdanPair :
