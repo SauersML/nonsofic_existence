@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.FiniteGroupAverage
 import Mathlib.GroupTheory.Index
+import Mathlib.Algebra.Ring.GeomSum
 
 /-!
 # The central-fixed part of the finite class-two angle estimate
@@ -29,13 +30,15 @@ def IsOrthogonallyIrreducible (rho : G →* (E ≃ₗᵢ[ℝ] E)) : Prop :=
     ∀ U : Submodule ℝ E,
       (∀ g : G, ∀ z ∈ U, rho g z ∈ U) → U = ⊥ ∨ U = ⊤
 
-/-- A central involution acts by `+1` or `-1` in an irreducible real
-orthogonal representation. -/
-theorem central_involution_scalar
+/-- In an irreducible orthogonal representation, a central element either
+acts trivially or has no fixed vectors.  This characteristic-free dichotomy
+is the starting point for the finite-order central-character argument. -/
+theorem central_eq_one_or_fixedSubmodule_bot
     (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (hirr : IsOrthogonallyIrreducible rho) {c : G}
-    (hc : c ∈ Subgroup.center G) (hcsq : c ^ 2 = 1) :
-    rho c = 1 ∨ ∀ z : E, rho c z = -z := by
+    (hc : c ∈ Subgroup.center G) :
+    rho c = 1 ∨
+      (rho c).toLinearEquiv.toLinearMap.fixedSubmodule = ⊥ := by
   let U : Submodule ℝ E :=
     (rho c).toLinearEquiv.toLinearMap.fixedSubmodule
   have hUinv : ∀ g : G, ∀ z ∈ U, rho g z ∈ U := by
@@ -53,7 +56,46 @@ theorem central_involution_scalar
         rw [map_mul]
       _ = rho g z := by rw [hz]
   rcases hirr.2 U hUinv with hbot | htop
+  · exact Or.inr hbot
+  · left
+    ext z
+    have hzU : z ∈ U := by rw [htop]; exact Submodule.mem_top
+    change rho c z = z at hzU
+    simpa using hzU
+
+/-- If a finite-order linear operator has no fixed vectors, its full cyclic
+orbit sum vanishes.  This replaces the sign-eigenvalue shortcut available only for
+central involutions. -/
+theorem geomSum_apply_eq_zero_of_fixedSubmodule_bot
+    (T : Module.End ℝ E) (n : ℕ) (hpow : T ^ n = 1)
+    (hbot : T.fixedSubmodule = ⊥) (z : E) :
+    (∑ i ∈ Finset.range n, T ^ i) z = 0 := by
+  let S : Module.End ℝ E := ∑ i ∈ Finset.range n, T ^ i
+  have hprod : (T - 1) * S = 0 := by
+    simpa [S, hpow] using mul_geom_sum T n
+  have hfixed : T (S z) = S z := by
+    have hz := LinearMap.congr_fun hprod z
+    change T (S z) - S z = 0 at hz
+    exact sub_eq_zero.mp hz
+  have hmem : S z ∈ T.fixedSubmodule := hfixed
+  rw [hbot] at hmem
+  have hz0 : S z = 0 := by simpa using hmem
+  change S z = 0
+  exact hz0
+
+/-- A central involution acts by `+1` or `-1` in an irreducible real
+orthogonal representation. -/
+theorem central_involution_scalar
+    (rho : G →* (E ≃ₗᵢ[ℝ] E))
+    (hirr : IsOrthogonallyIrreducible rho) {c : G}
+    (hc : c ∈ Subgroup.center G) (hcsq : c ^ 2 = 1) :
+    rho c = 1 ∨ ∀ z : E, rho c z = -z := by
+  let U : Submodule ℝ E :=
+    (rho c).toLinearEquiv.toLinearMap.fixedSubmodule
+  rcases central_eq_one_or_fixedSubmodule_bot rho hirr hc with htrivial | hbot
+  · exact Or.inl htrivial
   · right
+    change U = ⊥ at hbot
     intro z
     have hfixed : rho c (rho c z + z) = rho c z + z := by
       calc
@@ -68,11 +110,6 @@ theorem central_involution_scalar
     rw [hbot] at hmem
     have hz0 : rho c z + z = 0 := by simpa using hmem
     exact eq_neg_of_add_eq_zero_left hz0
-  · left
-    ext z
-    have hzU : z ∈ U := by rw [htop]; exact Submodule.mem_top
-    change rho c z = z at hzU
-    simpa using hzU
 
 /-- The subgroup of `X` whose represented operators commute with the
 represented image of `Y`.  On a scalar central-character summand this is
@@ -167,15 +204,120 @@ theorem inner_translate_eq_zero_of_not_mem_radical
   rw [hnegconj, inner_neg_left] at hconj
   linarith
 
-/-- On a nontrivial scalar commutator-character summand, averaging a
-`Y`-fixed vector over `X` decreases squared norm by at least a factor of
-two. -/
-theorem norm_orbitAverage_sq_le_half
-    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y : Subgroup G) [Finite X]
-    (hscalar : ∀ y ∈ Y, ∀ x ∈ X,
-      rho ⁅y, x⁆ = 1 ∨ ∀ z : E, rho ⁅y, x⁆ z = -z)
-    (hradical : representationRadical rho X Y ≠ ⊤)
-    {v : E} (hvY : v ∈ KazhdanFixedSpace.fixedSubspace rho Y) :
+/-- Characteristic-free version of the vanishing correlation argument on an
+irreducible summand.  Instead of requiring a central commutator to act by
+`-1`, average its whole finite cyclic orbit. -/
+theorem inner_translate_eq_zero_of_not_mem_radical_of_irreducible
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y C : Subgroup G)
+    (n : ℕ) (hn : 0 < n)
+    (hcomm : ⁅Y, X⁆ ≤ C) (hcentral : C ≤ Subgroup.center G)
+    (hexp : ∀ c ∈ C, c ^ n = 1)
+    (hirr : IsOrthogonallyIrreducible rho)
+    {v : E} (hvY : v ∈ KazhdanFixedSpace.fixedSubspace rho Y)
+    (x : X) (hx : x ∉ representationRadical rho X Y) :
+    inner ℝ (rho x.1 v) v = 0 := by
+  rw [mem_representationRadical_iff_commutator] at hx
+  push Not at hx
+  obtain ⟨y, hy, hnontrivial⟩ := hx
+  let c : G := ⁅y, x.1⁆
+  have hcC : c ∈ C :=
+    hcomm (Subgroup.commutator_mem_commutator hy x.2)
+  have hcCentral : c ∈ Subgroup.center G := hcentral hcC
+  have hcPow : c ^ n = 1 := hexp c hcC
+  have hbot : (rho c).toLinearEquiv.toLinearMap.fixedSubmodule = ⊥ :=
+    (central_eq_one_or_fixedSubmodule_bot rho hirr hcCentral).resolve_left
+      hnontrivial
+  let T : Module.End ℝ E := (rho c).toLinearEquiv.toLinearMap
+  have hTpow_apply (i : ℕ) (z : E) : (T ^ i) z = rho (c ^ i) z := by
+    induction i generalizing z with
+    | zero => simp
+    | succ i ih =>
+        rw [pow_succ, pow_succ]
+        change (T ^ i) (T z) = rho (c ^ i * c) z
+        rw [ih]
+        change rho (c ^ i) (rho c z) = rho (c ^ i * c) z
+        rw [map_mul]
+        rfl
+  have hTpow : T ^ n = 1 := by
+    ext z
+    rw [hTpow_apply, hcPow]
+    simp
+  have hcy : Commute c y :=
+    (Subgroup.mem_center_iff.mp hcCentral y).symm
+  have hconjPow (i : ℕ) :
+      y ^ i * x.1 * (y ^ i)⁻¹ = c ^ i * x.1 := by
+    induction i with
+    | zero => simp
+    | succ i ih =>
+        calc
+          y ^ (i + 1) * x.1 * (y ^ (i + 1))⁻¹ =
+              y * (y ^ i * x.1 * (y ^ i)⁻¹) * y⁻¹ := by group
+          _ = y * (c ^ i * x.1) * y⁻¹ := by rw [ih]
+          _ = c ^ i * (y * x.1 * y⁻¹) := by
+            calc
+              y * (c ^ i * x.1) * y⁻¹ = (y * c ^ i) * x.1 * y⁻¹ := by
+                simp only [mul_assoc]
+              _ = (c ^ i * y) * x.1 * y⁻¹ := by
+                rw [(hcy.symm.pow_right i).eq]
+              _ = c ^ i * (y * x.1 * y⁻¹) := by simp only [mul_assoc]
+          _ = c ^ i * (c * x.1) := by
+            rw [← conj_eq_commutatorElement_mul]
+            rfl
+          _ = c ^ (i + 1) * x.1 := by rw [pow_succ]; group
+  have hinner (i : ℕ) :
+      inner ℝ ((T ^ i) (rho x.1 v)) v = inner ℝ (rho x.1 v) v := by
+    have hyPow : y ^ i ∈ Y := Y.pow_mem hy i
+    have hyfix : rho (y ^ i) v = v :=
+      (KazhdanFixedSpace.mem_fixedSubspace_iff rho Y v).mp hvY _ hyPow
+    have hyinvfix : rho (y ^ i)⁻¹ v = v :=
+      (KazhdanFixedSpace.mem_fixedSubspace_iff rho Y v).mp hvY _
+        (Y.inv_mem hyPow)
+    have hconj :
+        inner ℝ (rho (y ^ i * x.1 * (y ^ i)⁻¹) v) v =
+          inner ℝ (rho x.1 v) v := by
+      calc
+        inner ℝ (rho (y ^ i * x.1 * (y ^ i)⁻¹) v) v =
+            inner ℝ (rho (y ^ i) (rho x.1 (rho (y ^ i)⁻¹ v))) v := by
+              simp only [map_mul]
+              rfl
+        _ = inner ℝ (rho (y ^ i) (rho x.1 v)) (rho (y ^ i) v) := by
+              rw [hyinvfix, hyfix]
+        _ = inner ℝ (rho x.1 v) v := (rho (y ^ i)).inner_map_map _ _
+    calc
+      inner ℝ ((T ^ i) (rho x.1 v)) v =
+          inner ℝ (rho (c ^ i * x.1) v) v := by
+            rw [hTpow_apply, map_mul]
+            rfl
+      _ = inner ℝ (rho (y ^ i * x.1 * (y ^ i)⁻¹) v) v := by
+            rw [hconjPow i]
+      _ = inner ℝ (rho x.1 v) v := hconj
+  have hsumZero :
+      ∑ i ∈ Finset.range n, inner ℝ ((T ^ i) (rho x.1 v)) v = 0 := by
+    have hzero := geomSum_apply_eq_zero_of_fixedSubmodule_bot
+      T n hTpow (by simpa [T] using hbot) (rho x.1 v)
+    have hinnerZero := congrArg (fun z : E ↦ inner ℝ z v) hzero
+    rw [← sum_inner]
+    simpa [map_sum] using hinnerZero
+  have hnInner : (n : ℝ) * inner ℝ (rho x.1 v) v = 0 := by
+    calc
+      (n : ℝ) * inner ℝ (rho x.1 v) v =
+          ∑ _i ∈ Finset.range n, inner ℝ (rho x.1 v) v := by simp
+      _ = ∑ i ∈ Finset.range n,
+          inner ℝ ((T ^ i) (rho x.1 v)) v := by
+            apply Finset.sum_congr rfl
+            intro i _
+            exact (hinner i).symm
+      _ = 0 := hsumZero
+  exact (mul_eq_zero.mp hnInner).resolve_left (by exact_mod_cast hn.ne')
+
+/-- Once correlations vanish outside the represented commutator radical,
+averaging a `Y`-fixed vector over `X` decreases squared norm by at least a
+factor of two. -/
+theorem norm_orbitAverage_sq_le_half_of_vanishing
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y : Subgroup G) [Finite X] {v : E}
+    (hvanish : ∀ x : X, x ∉ representationRadical rho X Y →
+      inner ℝ (rho x.1 v) v = 0)
+    (hradical : representationRadical rho X Y ≠ ⊤) :
     ‖FiniteGroupAverage.orbitAverage
         (KazhdanFixedSpace.restrictRepresentation rho X) v‖ ^ 2 ≤
       (1 / 2 : ℝ) * ‖v‖ ^ 2 := by
@@ -203,8 +345,7 @@ theorem norm_orbitAverage_sq_le_half
     apply Finset.sum_subset (Finset.filter_subset _ _)
     intro x _ hx
     simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx
-    exact inner_translate_eq_zero_of_not_mem_radical
-      rho X Y hscalar hvY x hx
+    exact hvanish x hx
   have hterm (x : X) : inner ℝ (rho x.1 v) v ≤ ‖v‖ ^ 2 := by
     calc
       inner ℝ (rho x.1 v) v ≤ |inner ℝ (rho x.1 v) v| := le_abs_self _
@@ -306,8 +447,34 @@ theorem norm_orbitAverage_sq_le_half_of_scalar
       rho X Y hgen hradical hno hvY]
     rw [norm_zero, zero_pow (by norm_num)]
     exact mul_nonneg (show (0 : ℝ) ≤ 1 / 2 by norm_num) (sq_nonneg ‖v‖)
-  · exact norm_orbitAverage_sq_le_half
-      rho X Y hscalar hradical hvY
+  · exact norm_orbitAverage_sq_le_half_of_vanishing
+      rho X Y (fun x hx ↦
+        inner_translate_eq_zero_of_not_mem_radical
+          rho X Y hscalar hvY x hx) hradical
+
+/-- The same half-norm estimate on an irreducible summand for central
+commutators of any one positive finite exponent. -/
+theorem norm_orbitAverage_sq_le_half_of_irreducible_finiteOrder
+    (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y C : Subgroup G) [Finite X]
+    (n : ℕ) (hn : 0 < n)
+    (hgen : X ⊔ Y = ⊤) (hcomm : ⁅Y, X⁆ ≤ C)
+    (hcentral : C ≤ Subgroup.center G) (hexp : ∀ c ∈ C, c ^ n = 1)
+    (hirr : IsOrthogonallyIrreducible rho)
+    (hno : IsKazhdanPair.HasNoInvariantVectors G rho)
+    {v : E} (hvY : v ∈ KazhdanFixedSpace.fixedSubspace rho Y) :
+    ‖FiniteGroupAverage.orbitAverage
+        (KazhdanFixedSpace.restrictRepresentation rho X) v‖ ^ 2 ≤
+      (1 / 2 : ℝ) * ‖v‖ ^ 2 := by
+  by_cases hradical : representationRadical rho X Y = ⊤
+  · rw [orbitAverage_eq_zero_of_radical_eq_top
+      rho X Y hgen hradical hno hvY]
+    rw [norm_zero, zero_pow (by norm_num)]
+    exact mul_nonneg (show (0 : ℝ) ≤ 1 / 2 by norm_num) (sq_nonneg ‖v‖)
+  · exact norm_orbitAverage_sq_le_half_of_vanishing
+      rho X Y (fun x hx ↦
+        inner_translate_eq_zero_of_not_mem_radical_of_irreducible
+          rho X Y C n hn hcomm hcentral hexp hirr hvY x hx)
+      hradical
 
 /-- Passing from the squared half estimate to the `1 / sqrt 2` norm
 estimate. -/
@@ -327,29 +494,25 @@ theorem le_inv_sqrt_two_mul_of_sq_le_half {a b : ℝ}
     rwa [hsquare]
   exact (sq_le_sq₀ ha (mul_nonneg hinv hb)).mp hsq
 
-/-- The `1 / sqrt 2` averaging estimate in an irreducible real summand of
-a finite class-two group. -/
+/-- The `1 / sqrt 2` averaging estimate in an irreducible real summand of a
+finite class-two group with central commutators of one positive bounded
+exponent. -/
 theorem norm_orbitAverage_le_inv_sqrt_two_of_irreducible
     (rho : G →* (E ≃ₗᵢ[ℝ] E)) (X Y C : Subgroup G) [Finite X]
+    (n : ℕ) (hn : 0 < n)
     (hgen : X ⊔ Y = ⊤)
     (hcomm : ⁅Y, X⁆ ≤ C)
     (hcentral : C ≤ Subgroup.center G)
-    (hexp : ∀ c ∈ C, c ^ 2 = 1)
+    (hexp : ∀ c ∈ C, c ^ n = 1)
     (hirr : IsOrthogonallyIrreducible rho)
     (hno : IsKazhdanPair.HasNoInvariantVectors G rho)
     {v : E} (hvY : v ∈ KazhdanFixedSpace.fixedSubspace rho Y) :
     ‖FiniteGroupAverage.orbitAverage
         (KazhdanFixedSpace.restrictRepresentation rho X) v‖ ≤
       (Real.sqrt 2)⁻¹ * ‖v‖ := by
-  have hscalar : ∀ y ∈ Y, ∀ x ∈ X,
-      rho ⁅y, x⁆ = 1 ∨ ∀ z : E, rho ⁅y, x⁆ z = -z := by
-    intro y hy x hx
-    have hc : ⁅y, x⁆ ∈ C :=
-      hcomm (Subgroup.commutator_mem_commutator hy hx)
-    exact central_involution_scalar rho hirr (hcentral hc) (hexp _ hc)
   apply le_inv_sqrt_two_mul_of_sq_le_half (norm_nonneg _) (norm_nonneg _)
-  exact norm_orbitAverage_sq_le_half_of_scalar
-    rho X Y hgen hno hscalar hvY
+  exact norm_orbitAverage_sq_le_half_of_irreducible_finiteOrder
+    rho X Y C n hn hgen hcomm hcentral hexp hirr hno hvY
 
 /-- On the part fixed by the commutator subgroup, the fixed spaces of the
 two generating subgroups are orthogonal.  The proof uses the literal finite

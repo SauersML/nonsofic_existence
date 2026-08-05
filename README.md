@@ -49,6 +49,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Generalize elementary-root exponent identities and the finite
   class-two stage reduction from exponent two to arbitrary positive bounded
   exponent
+- [x] Replace the irreducible class-two sign-character shortcut by a
+  characteristic-free cyclic-orbit argument for central commutators of any
+  positive bounded exponent
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route
