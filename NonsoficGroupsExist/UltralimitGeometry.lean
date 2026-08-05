@@ -403,6 +403,15 @@ theorem seqNormSq_smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
       (ofSeq_norm_sq_finite hv), stdPart_coe]
   rfl
 
+theorem seqNorm_def (v : ∀ k, H k) :
+    seqNorm v =
+      ArchimedeanClass.stdPart (Hyperreal.ofSeq fun k ↦ ‖v k‖) := rfl
+
+theorem seqNormSq_def (v : ∀ k, H k) :
+    seqNormSq v =
+      ArchimedeanClass.stdPart
+        (Hyperreal.ofSeq fun k ↦ ‖v k‖ ^ 2) := rfl
+
 attribute [irreducible] seqNorm seqNormSq
 
 section Center

@@ -65,14 +65,9 @@ theorem unitsMap_binaryMatrixRingEquiv_diagUnit (u : Aˣ) :
     rw [← h]
     abel
   rw [hsub]
-  show L.s0 * (u : A) * L.t0 + L.s0 * 0 * L.t1 +
-      (L.s1 * 0 * L.t0 + L.s1 * 1 * L.t1) = _
-  rw [mul_zero, zero_mul, mul_zero, zero_mul, zero_mul, mul_one]
-  show L.s0 * (u : A) * L.t0 + 0 + (0 + L.s1 * L.t1) =
-    L.s 0 * (u : A) * L.t 0 + L.s 1 * L.t 1
-  rw [add_zero, zero_add]
-  rfl
+  simp
 
+include L in
 /-- **Unstable descent, one step**: if `diag(u, 1)` lies in the
 diagonal class of the matrix ring, then `u` lies in the diagonal class
 of the base ring. -/

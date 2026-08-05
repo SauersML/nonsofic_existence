@@ -94,3 +94,19 @@ ABC09 §4 specialized to the 2-rose (no sinks, no sources, e₀ = 1):
    NOT Waldhausen's general theorem). Research exact elementary proof.
 Their explicit Δ_n/Ω_n transition matrices (proof of thm:skewle) are the
 concrete forms to formalize for step 3-4.
+
+## Iteration log (continued)
+- GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
+  AlmostMinimalDisplacement, UltralimitGeometry, HilbertCircumcenter,
+  GaussianPositiveDefinite.
+- Root causes found this round (reusable): pin swaps add_le_add_left/right
+  argument-side (use add_le_add h le_rfl / le_rfl h); Bracket instance for
+  group commutators is SCOPED (open scoped commutatorElement); open scoped
+  Nat imports the totient notation clobbering identifier phi; simp needs
+  structure-def names (diagUnit, diagPair) to unfold vals; rw with same-term
+  pattern consumes all occurrences (drop duplicates); section variables not
+  in the STATEMENT are invisible in proofs (include L in); include-in must
+  precede docstrings; single_apply_of_row_ne/col_ne have explicit index/value
+  args; attribute [irreducible] seqNorm seqNormSq fixed the whnf blowup.
+- Still to verify: DelormeFixedPoint, ShalomFinitePresentation, KazhdanCover,
+  GLIsElementary, BinaryLeavittDiagonal, DiagonalDescent (first builds).

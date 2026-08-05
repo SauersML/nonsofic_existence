@@ -75,6 +75,7 @@ end IsCocycle
 theorem isCocycle_orbit (π : G →* (E ≃ₗᵢ[ℝ] E)) (ξ : E) :
     IsCocycle π (fun g ↦ π g ξ - ξ) := by
   intro g h
+  show π (g * h) ξ - ξ = (π g ξ - ξ) + π g (π h ξ - ξ)
   rw [map_mul]
   have hcomp : (π g * π h) ξ = π g (π h ξ) := rfl
   rw [hcomp, map_sub]
@@ -328,6 +329,7 @@ theorem exists_fixed_point_of_isKazhdanPair [CompleteSpace E]
       (r := max 1 R)).subset
     rintro y ⟨g, rfl⟩
     rw [Metric.mem_closedBall, dist_zero_right]
+    show ‖φ g 0‖ ≤ max 1 R
     have hval : φ g 0 = b g := by
       simp only [hφ]
       rw [map_zero, zero_add]

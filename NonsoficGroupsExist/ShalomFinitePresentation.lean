@@ -2,6 +2,7 @@ import NonsoficGroupsExist.UltralimitGeometry
 import NonsoficGroupsExist.AlmostMinimalDisplacement
 import NonsoficGroupsExist.DelormeFixedPoint
 import Mathlib.GroupTheory.PresentedGroup
+import Mathlib.SetTheory.Cardinal.Free
 import Mathlib.GroupTheory.FinitelyPresentedGroup
 
 /-!
@@ -92,7 +93,8 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
     (β : FreeGroup (Fin n) →* G) (hβ : Function.Surjective β)
     {Q : Finset G} {ε' : ℝ} (hQ : IsKazhdanPair.{u, u} G Q ε')
     (E : ℕ → Type) (instN : ∀ k, NormedAddCommGroup (E k))
-    (instI : ∀ k, @InnerProductSpace ℝ (E k) _ (instN k))
+    (instI : ∀ k, @InnerProductSpace ℝ (E k) _
+      (instN k).toSeminormedAddCommGroup)
     (σ : ∀ k, FreeGroup (Fin n) →* (E k ≃ₗᵢ[ℝ] E k))
     (hkill : ∀ w ∈ β.ker, ∃ j : ℕ, ∀ k, j ≤ k → σ k w = 1)
     (ξ : ∀ k, E k)
@@ -150,9 +152,8 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
   set ψ : FreeGroup (Fin n) → ℝ := fun g ↦ seqNormSq (bseq g) with hψ
   have hψnn : ∀ g, 0 ≤ ψ g := by
     intro g
-    rw [hψ]
-    have := seqNormSq_eq_sq (hbound g)
-    rw [this]
+    show 0 ≤ seqNormSq (bseq g)
+    rw [seqNormSq_eq_sq (hbound g)]
     exact sq_nonneg _
   have hψone : ψ 1 = 0 := by
     have hzero : bseq (1 : FreeGroup (Fin n)) = fun k ↦ 0 := by
@@ -224,13 +225,17 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
         Hyperreal.ofSeq (fun _ : ℕ ↦ (-t : ℝ)) from rfl, ← ofSeq_mul]
     rw [hmul, ArchimedeanClass.stdPart_mul (hyperreal_coe_finite (-t))
       (ofSeq_norm_sq_finite (hbound g)), stdPart_coe]
-    rfl
+    have hq : ψ g = ArchimedeanClass.stdPart
+        (Hyperreal.ofSeq fun k ↦ ‖bseq g k‖ ^ 2) :=
+      seqNormSq_def (bseq g)
+    rw [hq]
   have hpdF : ∀ t : ℝ, 0 < t →
       IsPositiveDefinite (fun g : FreeGroup (Fin n) ↦
         Real.exp (-t * ψ g)) := by
     intro t ht
     constructor
     · intro g h
+      show Real.exp (-t * ψ (g⁻¹ * h)) = Real.exp (-t * ψ (h⁻¹ * g))
       rw [hψsymm g h]
     · intro F c
       have hentry : ∀ g : FreeGroup (Fin n),
@@ -303,59 +308,11 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
         rfl
       rw [hofseq]
       apply ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom
-      · exact ofSeq_finite_of_bounds
-          (a := -(∑ i ∈ F, ∑ j ∈ F, |c i * c j|))
-          (b := ∑ i ∈ F, ∑ j ∈ F, |c i * c j|)
-          (fun k ↦ by
-            have hbound1 : ∀ i ∈ F, ∀ j ∈ F,
-                |c i * c j * Real.exp
-                  (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2)| ≤ |c i * c j| := by
-              intro i _ j _
-              rw [abs_mul]
-              have hexp1 : Real.exp
-                  (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2) ≤ 1 := by
-                rw [show (1 : ℝ) = Real.exp 0 from
-                  (Real.exp_zero).symm]
-                apply Real.exp_le_exp.mpr
-                have := sq_nonneg ‖bseq (i⁻¹ * j) k‖
-                nlinarith
-              have hexp0 := (Real.exp_pos
-                (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2)).le
-              rw [abs_of_nonneg hexp0]
-              nlinarith [abs_nonneg (c i * c j)]
-            calc -(∑ i ∈ F, ∑ j ∈ F, |c i * c j|) ≤
-                -(∑ i ∈ F, ∑ j ∈ F, |c i * c j *
-                  Real.exp (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2)|) := by
-                  apply neg_le_neg
-                  refine Finset.sum_le_sum fun i hi ↦
-                    Finset.sum_le_sum fun j hj ↦ hbound1 i hi j hj
-              _ ≤ ∑ i ∈ F, ∑ j ∈ F, c i * c j *
-                  Real.exp (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2) := by
-                  rw [← Finset.sum_neg_distrib]
-                  refine Finset.sum_le_sum fun i _ ↦ ?_
-                  rw [← Finset.sum_neg_distrib]
-                  refine Finset.sum_le_sum fun j _ ↦ ?_
-                  exact neg_abs_le _)
-          (fun k ↦ by
-            refine (Finset.sum_le_sum fun i (_ : i ∈ F) ↦
-              Finset.sum_le_sum fun j (_ : j ∈ F) ↦ ?_).trans le_rfl
-            calc c i * c j * Real.exp
-                (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2) ≤
-                |c i * c j * Real.exp
-                  (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2)| := le_abs_self _
-              _ ≤ |c i * c j| := by
-                  rw [abs_mul]
-                  have hexp1 : Real.exp
-                      (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2) ≤ 1 := by
-                    rw [show (1 : ℝ) = Real.exp 0 from
-                      (Real.exp_zero).symm]
-                    apply Real.exp_le_exp.mpr
-                    have := sq_nonneg ‖bseq (i⁻¹ * j) k‖
-                    nlinarith
-                  have hexp0 := (Real.exp_pos
-                    (-t * ‖bseq (i⁻¹ * j) k‖ ^ 2)).le
-                  rw [abs_of_nonneg hexp0]
-                  nlinarith [abs_nonneg (c i * c j)])
+      · rw [← hofseq]
+        exact hyperreal_finset_sum_finite F _ (fun i _ ↦
+          hyperreal_finset_sum_finite F _ (fun j _ ↦
+            hyperreal_mul_finite (hyperreal_coe_finite _)
+              (hfinentry _)))
       · rw [map_zero]
         change Hyperreal.ofSeq (fun _ : ℕ ↦ (0 : ℝ)) ≤ _
         rw [Hyperreal.ofSeq_le_ofSeq]
@@ -382,7 +339,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
       IsPositiveDefinite (fun γ : G ↦ Real.exp (-t * ψG γ)) := by
     intro t ht
     apply GaussianKernel.isPositiveDefinite_of_comp_surjective β hβ
-      (φ := fun γ ↦ Real.exp (-t * ψG γ))
+      (χ := fun γ ↦ Real.exp (-t * ψG γ))
     have heq : (fun g : FreeGroup (Fin n) ↦
         Real.exp (-t * ψG (β g))) =
         fun g ↦ Real.exp (-t * ψ g) := by
@@ -391,8 +348,12 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
     rw [heq]
     exact hpdF t ht
   obtain ⟨R, hR⟩ := Delorme.bounded_of_gaussian_isPositiveDefinite hQ
-    ψG (by rw [show (1 : G) = β 1 from (map_one β).symm, hcomp 1]
-          exact hψone)
+    ψG (by
+      have h1 : ψG 1 = ψ 1 := by
+        rw [show (1 : G) = β 1 from (map_one β).symm]
+        exact hcomp 1
+      rw [h1]
+      exact hψone)
     (fun γ ↦ by rw [hψG]; exact hψnn (s γ)) hpdG
   have hψR : ∀ g : FreeGroup (Fin n), ψ g ≤ R := by
     intro g
@@ -445,7 +406,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
       fun k ↦ σ k (FreeGroup.of i) (v k) + bseq (FreeGroup.of i) k
       with hw
     have hwb : IsBoundedSeq w := by
-      obtain ⟨Cv, hCv⟩ := hvb
+      obtain ⟨Cv, hCv⟩ := id hvb
       refine ⟨Cv + 1, fun k ↦ ?_⟩
       calc ‖w k‖ ≤ ‖σ k (FreeGroup.of i) (v k)‖ +
           ‖bseq (FreeGroup.of i) k‖ := norm_add_le _ _
@@ -475,7 +436,9 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
               (bseq ((FreeGroup.of i)⁻¹ * g) k)) =
           σ k (FreeGroup.of i)
             (v k - bseq ((FreeGroup.of i)⁻¹ * g) k) from by
-          rw [map_sub]
+          have hms := map_sub (σ k (FreeGroup.of i)) (v k)
+            (bseq ((FreeGroup.of i)⁻¹ * g) k)
+          rw [hms]
           abel]
         exact (σ k _).norm_map _
       rw [hshift]
@@ -492,7 +455,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
       field_simp
     nlinarith [hc0, hD0, hδ0]
   -- Transfer to a single large stage and contradict the isolation.
-  obtain ⟨Cv, hCv⟩ := hvb
+  obtain ⟨Cv, hCv⟩ := id hvb
   have hevsmall : ∀ i : Fin n, ∀ᶠ k in ↑(Filter.hyperfilter ℕ),
       ‖σ k (FreeGroup.of i) (ξ k + v k) - (ξ k + v k)‖ < 1 / 3 := by
     intro i
@@ -536,7 +499,7 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
   have hevall : ∀ᶠ k in ↑(Filter.hyperfilter ℕ), ∀ i : Fin n,
       ‖σ k (FreeGroup.of i) (ξ k + v k) - (ξ k + v k)‖ < 1 / 3 :=
     Filter.eventually_all.mpr hevsmall
-  have hevnorm : ∀ᶠ k in ↑(Filter.hyperfilter ℕ),
+  have hevnorm : ∀ᶠ k : ℕ in ↑(Filter.hyperfilter ℕ),
       (Cv : ℝ) ≤ (k : ℝ) := by
     filter_upwards [eventually_le_id ⌈Cv⌉₊] with k hk
     calc Cv ≤ (⌈Cv⌉₊ : ℝ) := Nat.le_ceil Cv
@@ -622,10 +585,8 @@ theorem exists_presented_kazhdan_cover
         intro r hr
         simp only [hrels, Finset.coe_image, Set.mem_image,
           Finset.mem_coe, Finset.mem_range] at hr
-        obtain ⟨j, _, rfl⟩ := hr
-        have hker := (e j).2
-        rw [MonoidHom.mem_ker, hβdef] at hker
-        exact hker
+        obtain ⟨j, -, rfl⟩ := hr
+        exact (e j).2
       have hcompeq : ∀ w : FreeGroup (Fin n),
           PresentedGroup.toGroup hkillrel (PresentedGroup.mk _ w) =
             FreeGroup.lift gens w := by
@@ -658,10 +619,10 @@ theorem exists_presented_kazhdan_cover
       intro k hpair
       exact hnostage k ⟨_, _, hpair⟩
     have hwitness : ∀ k : ℕ, ∃ (E : Type)
-        (_ : NormedAddCommGroup E), ∃ (_ : InnerProductSpace ℝ E)
-        (_ : CompleteSpace E)
-        (ρ : PresentedGroup ((rels k : Finset (FreeGroup (Fin n))) :
-          Set (FreeGroup (Fin n))) →* (E ≃ₗᵢ[ℝ] E)) (x : E),
+        (_ : NormedAddCommGroup E) (_ : InnerProductSpace ℝ E),
+        CompleteSpace E ∧ ∃ (ρ : PresentedGroup
+          ((rels k : Finset (FreeGroup (Fin n))) :
+            Set (FreeGroup (Fin n))) →* (E ≃ₗᵢ[ℝ] E)) (x : E),
         ‖x‖ = 1 ∧
           (∀ q ∈ (Finset.univ : Finset (Fin n)).image fun i ↦
             PresentedGroup.of i,
