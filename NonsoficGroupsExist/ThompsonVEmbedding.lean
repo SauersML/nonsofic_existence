@@ -240,6 +240,154 @@ theorem finsuppStreamRep_injective :
   simp only [LinearMap.zero_apply, Module.End.one_apply] at h2
   exact Finsupp.single_ne_zero.mpr one_ne_zero h2.symm
 
+
+section Actions
+
+open ThompsonV
+
+variable (k : Type) [Field k]
+
+@[simp] theorem finsuppStreamRep_s0 :
+    finsuppStreamRep k (family k).s0 = finPrefixOp k 0 := by
+  show finsuppStreamRep k (generator k BinaryLeavitt.s0) = _
+  rw [finsuppStreamRep, lift_generator]
+  rfl
+
+@[simp] theorem finsuppStreamRep_s1 :
+    finsuppStreamRep k (family k).s1 = finPrefixOp k 1 := by
+  show finsuppStreamRep k (generator k BinaryLeavitt.s1) = _
+  rw [finsuppStreamRep, lift_generator]
+  rfl
+
+@[simp] theorem finsuppStreamRep_t0 :
+    finsuppStreamRep k (family k).t0 = finDeleteOp k 0 := by
+  show finsuppStreamRep k (generator k BinaryLeavitt.t0) = _
+  rw [finsuppStreamRep, lift_generator]
+  rfl
+
+@[simp] theorem finsuppStreamRep_t1 :
+    finsuppStreamRep k (family k).t1 = finDeleteOp k 1 := by
+  show finsuppStreamRep k (generator k BinaryLeavitt.t1) = _
+  rw [finsuppStreamRep, lift_generator]
+  rfl
+
+theorem finsuppStreamRep_s (i : Fin 2) :
+    finsuppStreamRep k ((family k).s i) = finPrefixOp k i := by
+  fin_cases i
+  · exact finsuppStreamRep_s0 k
+  · exact finsuppStreamRep_s1 k
+
+theorem finsuppStreamRep_t (i : Fin 2) :
+    finsuppStreamRep k ((family k).t i) = finDeleteOp k i := by
+  fin_cases i
+  · exact finsuppStreamRep_t0 k
+  · exact finsuppStreamRep_t1 k
+
+theorem tvPrepend_nil (x : Boundary) : ThompsonV.prepend [] x = x := by
+  funext n
+  simp [ThompsonV.prepend]
+
+theorem tvPrepend_cons (i : Fin 2) (a : List (Fin 2)) (x : Boundary) :
+    ThompsonV.prepend (i :: a) x =
+      BinaryLeavitt.prepend i (ThompsonV.prepend a x) := by
+  funext n
+  cases n with
+  | zero =>
+      simp [ThompsonV.prepend, BinaryLeavitt.prepend]
+  | succ m =>
+      show _ = ThompsonV.prepend a x m
+      rw [ThompsonV.prepend, ThompsonV.prepend]
+      by_cases hm : m < a.length
+      · rw [dif_pos (show m + 1 < (i :: a).length by
+          simp only [List.length_cons]
+          omega), dif_pos hm]
+        simp
+      · rw [dif_neg (show ¬ m + 1 < (i :: a).length by
+          simp only [List.length_cons]
+          omega), dif_neg hm]
+        congr 1
+        simp only [List.length_cons]
+        omega
+
+theorem isStreamPrefix_nil (x : Boundary) : IsStreamPrefix [] x := by
+  intro k h
+  simp at h
+
+theorem isStreamPrefix_cons_iff (i : Fin 2) (a : List (Fin 2))
+    (x : Boundary) :
+    IsStreamPrefix (i :: a) x ↔
+      x 0 = i ∧ IsStreamPrefix a (BinaryLeavitt.tail x) := by
+  constructor
+  · intro h
+    have h0 : x 0 = i := by
+      have := h 0 (by simp)
+      rwa [List.getElem_cons_zero] at this
+    refine ⟨h0, fun m hm ↦ ?_⟩
+    have hstep := h (m + 1) (by
+      simp only [List.length_cons]
+      omega)
+    rwa [List.getElem_cons_succ] at hstep
+  · rintro ⟨h0, h⟩
+    intro m hm
+    cases m with
+    | zero =>
+        rw [List.getElem_cons_zero]
+        exact h0
+    | succ n =>
+        have hn : n < a.length := by
+          simp only [List.length_cons] at hm
+          omega
+        rw [List.getElem_cons_succ]
+        exact h n hn
+
+theorem tvDrop_succ_length (a : List (Fin 2)) (x : Boundary) :
+    ThompsonV.drop (a.length + 1) x =
+      ThompsonV.drop a.length (BinaryLeavitt.tail x) := by
+  funext n
+  rfl
+
+open Classical in
+theorem finsuppStreamRep_wordS_single (a : List (Fin 2))
+    (x : Boundary) (c : k) :
+    finsuppStreamRep k ((family k).wordS a) (Finsupp.single x c) =
+      Finsupp.single (ThompsonV.prepend a x) c := by
+  induction a generalizing x with
+  | nil =>
+      rw [LeavittFamily.wordS_nil, map_one, tvPrepend_nil]
+      rfl
+  | cons i a ih =>
+      rw [LeavittFamily.wordS_cons, map_mul, Module.End.mul_apply,
+        ih, finsuppStreamRep_s, finPrefixOp_single, tvPrepend_cons]
+
+open Classical in
+theorem finsuppStreamRep_wordT_single (a : List (Fin 2))
+    (x : Boundary) (c : k) :
+    finsuppStreamRep k ((family k).wordT a) (Finsupp.single x c) =
+      if IsStreamPrefix a x then
+        Finsupp.single (ThompsonV.drop a.length x) c else 0 := by
+  induction a generalizing x with
+  | nil =>
+      rw [LeavittFamily.wordT_nil, map_one]
+      rw [if_pos (isStreamPrefix_nil x)]
+      rfl
+  | cons i a ih =>
+      rw [LeavittFamily.wordT_cons, map_mul, Module.End.mul_apply,
+        finsuppStreamRep_t, finDeleteOp_single]
+      by_cases h0 : x 0 = i
+      · rw [if_pos h0, ih]
+        by_cases hpre : IsStreamPrefix a (BinaryLeavitt.tail x)
+        · rw [if_pos hpre,
+            if_pos ((isStreamPrefix_cons_iff i a x).2 ⟨h0, hpre⟩)]
+          rw [List.length_cons, tvDrop_succ_length]
+        · rw [if_neg hpre, if_neg (fun hcon ↦
+            hpre ((isStreamPrefix_cons_iff i a x).1 hcon).2)]
+      · rw [if_neg h0, map_zero, if_neg (fun hcon ↦
+          h0 ((isStreamPrefix_cons_iff i a x).1 hcon).1)]
+
+end Actions
+
 end BinaryLeavitt
+
+
 
 end NonsoficGroupsExist
