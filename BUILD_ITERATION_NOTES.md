@@ -489,3 +489,30 @@ flip → the loop.
   solvability).  Alternatively strengthen the non-unit argument:
   characterize which (c, h) at the plateau admit units and show the
   kill is always solvable there.
+
+## Session 12: corner-support discovery (sharpest lead for the finish)
+Run one flip-round on the CANONICAL residual u = c + s₁p₀ with pivot
+û := c + s₁p₀t.  Then the new balanced part is c' = 1 − w·p₀ with
+w := tû⁻¹s₁p₀ (RIGHT-SUPPORTED: w = wp₀), and consequently:
+- p₀c' = p₀(1−w)p₀ is CORNER-SUPPORTED (p₀c'p₁ = 0 since wp₀p₁ = 0);
+- if the corner element p₀ − p₀wp₀ is invertible INSIDE the corner
+  p₀Mp₀, then rowsp(p₀c') = rowsp(p₀) — the FULL half-coordinate
+  row space;
+- the new tails h'ᵢ = tᵢ(û⁻¹s₁p₀) are right-supported on p₀, and
+  x = x·p₀ ⟹ rowsp(x) ⊆ rowsp(p₀).  KILL-CONDITION SATISFIED
+  rowsp(tail) ⊆ rowsp(p₀c') whenever the corner-invertibility holds!
+So the endgame reduces to TWO finite sub-steps at the plateau level:
+(a) handle the h₀'-component (either choose t with t₀û⁻¹s₁ = 0 to
+    make h₀' = 0, or solve the augmented system A·[p₀c' | s₀h₀'] =
+    [−h₁' | 0] — the junk-vanishing condition As₀h₀' = 0 is finitely
+    many balanced equations);
+(b) show t can be chosen with BOTH û invertible AND p₀ − p₀wp₀
+    corner-invertible (another sr1-flavored freedom argument: the
+    corner condition is again a unimodularity statement in the corner
+    algebra ≅ level-(m−1); candidate: derive corner-unimodularity of
+    p₀(1−w)p₀ from û-invertibility + the p₀-corner of û⁻¹-relations).
+If (a)+(b) close, the FULL CHAIN is: width-reduction (green) →
+funnel to canonical (green machinery) → one flip-round (flip green,
+element-pivot needs the block dictionary) → kill (green move
+families) → balanced → H (green).  ScalarReduction follows; B4, B5,
+B6 and Theorem C assemble; the manuscript is complete.
