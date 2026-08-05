@@ -1914,6 +1914,117 @@ theorem sum_planeMass_region_le_succ_add_boundaries (hψ : ψ ≠ 1) (z : E)
         firstBoundaryMass X K i j k hik hjk (n + 1) rho ψ z +
         secondBoundaryMass X K i j k hik hjk (n + 1) rho ψ z := rfl
 
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- **Coarse-image classification along the opposite shear**: a fine
+character in region `A` or `B`, whose second functional lies strictly
+below the top degree and descends by exactly one along `x`, has coarse
+opposite-shear image in region `C` — or `D` at the lowest level. -/
+theorem coarse_pairRegion_of_fine_AB_opposite (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1)))
+    (hAB : pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .A ∨
+      pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .B)
+    (hint : valuation X K (secondCoordinateChar X K (n + 1) χ') ≤ n)
+    (hlead : valuation X K
+        (leftDerived X K (secondCoordinateChar X K (n + 1) χ') x) + 1 =
+      valuation X K (secondCoordinateChar X K (n + 1) χ')) :
+    pairRegion X K
+        (firstCoordinateChar X K n (χ'.comp (oppositeShear X K n x)))
+        (secondCoordinateChar X K n
+          (χ'.comp (oppositeShear X K n x))) = .C ∨
+      pairRegion X K
+        (firstCoordinateChar X K n (χ'.comp (oppositeShear X K n x)))
+        (secondCoordinateChar X K n
+          (χ'.comp (oppositeShear X K n x))) = .D := by
+  set φ₁ := firstCoordinateChar X K (n + 1) χ' with hφ₁
+  set φ₂ := secondCoordinateChar X K (n + 1) χ' with hφ₂
+  have hdata : valuation X K φ₂ ≠ 0 ∧
+      valuation X K φ₂ ≤ valuation X K φ₁ := by
+    rcases hAB with hA | hB
+    · obtain ⟨-, -, h2ne, hlt⟩ := pairRegion_A_data X K _ _ hA
+      exact ⟨h2ne, hlt.le⟩
+    · obtain ⟨-, -, h2ne, heq⟩ := pairRegion_B_data X K _ _ hB
+      exact ⟨h2ne, heq.symm.le⟩
+  obtain ⟨h2ne, hle⟩ := hdata
+  rw [firstCoordinateChar_comp_oppositeShear X K n x χ',
+    secondCoordinateChar_comp_oppositeShear X K n x χ', ← hφ₁, ← hφ₂]
+  have hmin1 := valuation_restrictSucc_eq_min X K φ₁
+  have hmin2 := valuation_restrictSucc_eq_min X K φ₂
+  have hfirst : valuation X K
+      (restrictSucc X K φ₁ + leftDerived X K φ₂ x) =
+    valuation X K φ₂ - 1 := by
+    have hadd := valuation_add_of_lt X K (leftDerived X K φ₂ x)
+      (restrictSucc X K φ₁) (by omega)
+    rw [show leftDerived X K φ₂ x + restrictSucc X K φ₁ =
+      restrictSucc X K φ₁ + leftDerived X K φ₂ x by abel] at hadd
+    omega
+  have hsecond : valuation X K (restrictSucc X K φ₂) =
+      valuation X K φ₂ := by
+    omega
+  rcases Nat.eq_or_lt_of_le
+      (Nat.one_le_iff_ne_zero.2 h2ne) with h1 | h2
+  · right
+    exact pairRegion_eq_D_of_left_zero X K _ _ (by omega)
+  · left
+    exact pairRegion_eq_C_of_pos_of_lt X K _ _ (by omega) (by omega)
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- **Coarse-image classification along the forward shear**: a fine
+character in region `C` or `B`, whose first functional lies strictly
+below the top degree and descends by exactly one along `x`, has coarse
+forward-shear image in region `A` — or `D` at the lowest level. -/
+theorem coarse_pairRegion_of_fine_CB_forward (x : X)
+    (χ' : Module.Dual K (PlaneVector X K (n + 1)))
+    (hCB : pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .C ∨
+      pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ') = .B)
+    (hint : valuation X K (firstCoordinateChar X K (n + 1) χ') ≤ n)
+    (hlead : valuation X K
+        (leftDerived X K (firstCoordinateChar X K (n + 1) χ') x) + 1 =
+      valuation X K (firstCoordinateChar X K (n + 1) χ')) :
+    pairRegion X K
+        (firstCoordinateChar X K n (χ'.comp (forwardShear X K n x)))
+        (secondCoordinateChar X K n
+          (χ'.comp (forwardShear X K n x))) = .A ∨
+      pairRegion X K
+        (firstCoordinateChar X K n (χ'.comp (forwardShear X K n x)))
+        (secondCoordinateChar X K n
+          (χ'.comp (forwardShear X K n x))) = .D := by
+  set φ₁ := firstCoordinateChar X K (n + 1) χ' with hφ₁
+  set φ₂ := secondCoordinateChar X K (n + 1) χ' with hφ₂
+  have hdata : valuation X K φ₁ ≠ 0 ∧
+      valuation X K φ₁ ≤ valuation X K φ₂ := by
+    rcases hCB with hC | hB
+    · obtain ⟨-, h1ne, -, hlt⟩ := pairRegion_C_data X K _ _ hC
+      exact ⟨h1ne, hlt.le⟩
+    · obtain ⟨-, h1ne, -, heq⟩ := pairRegion_B_data X K _ _ hB
+      exact ⟨h1ne, heq.le⟩
+  obtain ⟨h1ne, hle⟩ := hdata
+  rw [firstCoordinateChar_comp_forwardShear X K n x χ',
+    secondCoordinateChar_comp_forwardShear X K n x χ', ← hφ₁, ← hφ₂]
+  have hmin1 := valuation_restrictSucc_eq_min X K φ₁
+  have hmin2 := valuation_restrictSucc_eq_min X K φ₂
+  have hsecond : valuation X K
+      (leftDerived X K φ₁ x + restrictSucc X K φ₂) =
+    valuation X K φ₁ - 1 := by
+    have hadd := valuation_add_of_lt X K (leftDerived X K φ₁ x)
+      (restrictSucc X K φ₂) (by omega)
+    omega
+  have hfirst : valuation X K (restrictSucc X K φ₁) =
+      valuation X K φ₁ := by
+    omega
+  rcases Nat.eq_or_lt_of_le
+      (Nat.one_le_iff_ne_zero.2 h1ne) with h1 | h2
+  · right
+    exact pairRegion_eq_D_of_right_zero X K _ _ (by omega)
+  · left
+    exact pairRegion_eq_A_of_pos_of_lt X K _ _ (by omega) (by omega)
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist
