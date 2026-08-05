@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -52,6 +51,23 @@ FORBIDDEN = [
 ]
 
 
+# Budgets, here rather than in a data file so raising one is a diff a reviewer
+# sees.  0 is a hard zero; None is report-only -- printed, counted, but not
+# fatal -- which is the honest state for a scan whose baseline on this corpus
+# has never been measured.  Replace a None with the measured count and the tag
+# becomes a ratchet that can only go down.
+BUDGETS: dict[str, int | None] = {
+    "orphan module": 0,
+    "sorry / sorryAx": 0,
+    "hand-declared axiom": 0,
+    "native_decide (trusts the compiler, not the kernel)": 0,
+    "unsafe / implemented_by / opaque escape hatch": 0,
+    "warningAsError disabled": 0,
+    "maxHeartbeats disabled": 0,
+    "stale conditionality disclaimer": None,
+}
+
+
 class Findings:
     def __init__(self) -> None:
         self.rows: list[tuple[str, str]] = []
@@ -60,9 +76,22 @@ class Findings:
         self.rows.append((tag, detail))
 
     def report(self, stream=sys.stdout) -> int:
+        status = 0
+        counts: dict[str, int] = {}
+        for tag, _ in self.rows:
+            counts[tag] = counts.get(tag, 0) + 1
         for tag, detail in self.rows:
-            print(f"::error::[{tag}] {detail}", file=stream)
-        return 1 if self.rows else 0
+            budget = BUDGETS.get(tag, 0)
+            level = "notice" if budget is None else "error"
+            print(f"::{level}::[{tag}] {detail}", file=stream)
+        for tag, count in sorted(counts.items()):
+            budget = BUDGETS.get(tag, 0)
+            if budget is None:
+                print(f"{tag}: {count} (report-only)", file=stream)
+            elif count > budget:
+                print(f"::error::{tag}: {count} findings, budget {budget}", file=stream)
+                status = 1
+        return status
 
 
 def module_files(root: Path) -> dict[str, Path]:
@@ -126,9 +155,49 @@ def check_forbidden(root: Path, f: Findings) -> None:
                 f.add(label, f"{rel}:{line}: {text.splitlines()[line - 1].strip()}")
 
 
+# Prose that describes the development as incomplete.  Tracked because the two
+# halves of this repository can disagree: `MainResults` proves an unconditional
+# existence theorem while individual module docstrings still describe their
+# contents as assumptions of conditional lemmas.  One of the two is stale, and
+# a reader who finds the disclaimer first reasonably concludes the headline
+# claim is overstated.
+#
+# Report-only by construction.  Which of the two is wrong is a question about
+# mathematics that no regex can answer; the scan's job is to keep the list
+# visible rather than to decide it.
+DISCLAIMER_RE = re.compile(
+    r"\b(conditional|conditionally|candidate|proposed|not proved|unproved|"
+    r"not yet proved|assumed rather than|remains an assumption)\b",
+    re.IGNORECASE,
+)
+
+DOC_LINE_RE = re.compile(r"^\s*(--|/-|-/|\*|/-!)|^\s*$")
+
+
+def check_stale_disclaimers(root: Path, f: Findings) -> None:
+    for name, path in sorted(module_files(root).items()):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        rel = path.relative_to(root)
+        in_block = False
+        for i, line in enumerate(text.splitlines(), start=1):
+            stripped = line.strip()
+            if stripped.startswith("/-"):
+                in_block = True
+            is_comment = in_block or stripped.startswith("--")
+            if stripped.endswith("-/"):
+                in_block = False
+            if not is_comment:
+                continue
+            m = DISCLAIMER_RE.search(line)
+            if m:
+                f.add("stale conditionality disclaimer",
+                      f"{rel}:{i}: {stripped[:110]}")
+
+
 CHECKS = [
     ("import closure", check_import_closure),
     ("forbidden constructs", check_forbidden),
+    ("stale conditionality disclaimers", check_stale_disclaimers),
 ]
 
 
@@ -147,7 +216,9 @@ def run(root: Path) -> Findings:
 CLEAN_TREE = {
     f"{LIB}.lean": f"import {LIB}.Alpha\nimport {LIB}.Beta\n",
     f"{LIB}/Alpha.lean": "theorem alpha : True := trivial\n",
-    f"{LIB}/Beta.lean": f"import {LIB}.Alpha\ntheorem beta : True := trivial\n",
+    f"{LIB}/Beta.lean":
+        f"import {LIB}.Alpha\n-- an ordinary comment that claims nothing\n"
+        "theorem beta : True := trivial\n",
 }
 
 PLANTS = {
@@ -162,6 +233,9 @@ PLANTS = {
         {f"{LIB}/Alpha.lean": "set_option warningAsError false\n"},
     "maxHeartbeats disabled":
         {f"{LIB}/Alpha.lean": "set_option maxHeartbeats 0 in\ntheorem a : True := trivial\n"},
+    "stale conditionality disclaimer":
+        {f"{LIB}/Alpha.lean":
+             "/-- This is a conditional result. -/\ntheorem alpha : True := trivial\n"},
 }
 
 
@@ -213,9 +287,9 @@ def main() -> int:
         return self_test()
     f = run(REPO)
     status = f.report()
-    if status == 0:
-        n = len(module_files(REPO))
-        print(f"source scan: {n} modules, all in the root import closure, no findings")
+    n = len(module_files(REPO))
+    verdict = "no findings over budget" if status == 0 else "OVER BUDGET"
+    print(f"source scan: {n} modules, {len(f.rows)} findings, {verdict}")
     return status
 
 
