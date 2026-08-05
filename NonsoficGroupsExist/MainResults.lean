@@ -53,6 +53,43 @@ theorem binaryLeavitt_finiteField_profile (k : Type) [Field k] [Finite k]
       ((isSofic_mulEquiv_iff e).mp hsofic)
   exact ⟨hfg, hinfinite, hT, hnsofic⟩
 
+
+/-- The full unit group of `L_k(1,2)` over any field. -/
+noncomputable abbrev BinaryLeavittUnits (k : Type) [Field k] :=
+  (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ
+
+/-- The general linear group of positive rank `m + 1` over `L_k(1,2)`. -/
+noncomputable abbrev BinaryLeavittGL (k : Type) [Field k] (m : ℕ) :=
+  (Matrix (Fin (m + 1)) (Fin (m + 1))
+    (BinaryLeavitt.BinaryLeavittAlgebra k))ˣ
+
+/-- The full unit group of `L_k(1,2)` is nonsofic for every finite field
+`k`: the complete four-leaf prefix code identifies it with `GL₄`, which
+contains the nonsofic elementary subgroup. -/
+theorem binaryLeavittUnits_not_isSofic (k : Type) [Field k] [Finite k] :
+    ¬ IsSofic (BinaryLeavittUnits k) := by
+  intro hUnits
+  let e : BinaryLeavittGL k 3 ≃* BinaryLeavittUnits k :=
+    (BinaryLeavitt.family k).prefixUnitsEquiv (leftCombCode 3)
+      ((BinaryLeavitt.family k).leftCombCode_complete 3)
+  have hGL : IsSofic (BinaryLeavittGL k 3) :=
+    (isSofic_mulEquiv_iff e).mpr hUnits
+  exact FiniteFieldLeavitt.ambient_not_isSofic k
+    (isSofic_of_injective
+      (elementaryGroup (Fin 4)
+        (BinaryLeavitt.BinaryLeavittAlgebra k)).subtype
+      Subtype.val_injective hGL)
+
+/-- Every positive-rank general linear group over `L_k(1,2)` is nonsofic
+for every finite field `k`. -/
+theorem binaryLeavittGL_not_isSofic (k : Type) [Field k] [Finite k]
+    (m : ℕ) : ¬ IsSofic (BinaryLeavittGL k m) := by
+  intro hGL
+  let e : BinaryLeavittGL k m ≃* BinaryLeavittUnits k :=
+    (BinaryLeavitt.family k).prefixUnitsEquiv (leftCombCode m)
+      ((BinaryLeavitt.family k).leftCombCode_complete m)
+  exact binaryLeavittUnits_not_isSofic k ((isSofic_mulEquiv_iff e).mp hGL)
+
 /-- The elementary rank-four group over the universal binary Leavitt algebra
 `L_{𝔽₂}(1,2)` is nonsofic. -/
 theorem universalLeavittEL4_not_isSofic :

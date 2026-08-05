@@ -295,7 +295,8 @@ so.
 | `thm:spine`, `thm:A` | `universalLeavitt_profile`, `universalLeavittEL4_not_isSofic`, `binaryLeavitt_finiteField_profile` | |
 | `thm:2x2` | `LeavittFamily.rankTwo_not_isSofic` (`RankTwoCompression`), with `eq:p0upper`/`eq:p0lower` as `rankTwoInvolution_conj_upperNil`/`rankTwoInvolution_conj_lowerNil` | finite generation of `Aˣ` derived via `KazhdanFiniteGeneration.exists_symmetric_generating_finset` |
 | `thm:agp`, `prop:glel` | — | manuscript-only (`K₁(L) = 0`, GE property of purely infinite simple rings) |
-| `thm:el2`, `thm:allranks`, `thm:B` | `universalLeavittUnits_not_isSofic`, `universalLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic`, `binaryLeavitt_finiteField_profile` | proved over every finite field via self-similarity, without `K₁`/GE: all elementary ranks `≥ 2`; the full unit group and all `GL_r` remain Lean-backed over `𝔽₂`, with other finite fields' unit groups pending the `B`-block |
+| `thm:allranks`, `thm:B` | `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic` | proved over every finite field via self-similarity, without `K₁`/GE: all elementary ranks `≥ 2`, the full unit group, and every positive-rank `GL_r` |
+| `thm:el2` (rank two, `thm:2x2` discharge) | `RankTwoCompression.rankTwo_not_isSofic` | criterion formalized; its GE and property-`(T)` hypotheses over `L_k(1,2)` are the `B`-block |
 | `def:model`, `lem:models` | `TableCover.TableModel`, `TableCover.tableModel_of_isSofic`, `TableCover.exists_table_obstruction` | |
 | `thm:table` | `TableCover.tableGroup_no_model`, `TableCover.exists_finitelyPresented_obstruction`, `exists_finitelyPresented_nonsofic_group` | |
 | `thm:kcover` | — | manuscript-only (Shalom's finitely presented Kazhdan covers) |

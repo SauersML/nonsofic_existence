@@ -48,6 +48,14 @@ example : ¬ IsSofic UniversalLeavittUnits :=
 example (m : ℕ) : ¬ IsSofic (UniversalLeavittGL m) :=
   universalLeavittGL_not_isSofic m
 
+example (k : Type) [Field k] [Finite k] :
+    ¬ IsSofic (BinaryLeavittUnits k) :=
+  binaryLeavittUnits_not_isSofic k
+
+example (k : Type) [Field k] [Finite k] (m : ℕ) :
+    ¬ IsSofic (BinaryLeavittGL k m) :=
+  binaryLeavittGL_not_isSofic k m
+
 example (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (UniversalLeavittEL m) ∧
       Infinite (UniversalLeavittEL m) ∧
@@ -148,6 +156,8 @@ def headlineTheorems : List Name :=
    ``universalLeavittEL3_not_isSofic,
    ``universalLeavittUnits_not_isSofic,
    ``universalLeavittGL_not_isSofic,
+   ``binaryLeavittUnits_not_isSofic,
+   ``binaryLeavittGL_not_isSofic,
    ``universalLeavitt_profile,
    ``binaryLeavitt_finiteField_profile,
    ``ambient_profile,
