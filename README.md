@@ -254,10 +254,19 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     prefix substitution, the basis-permuting units map to boundary
     permutations with trivial kernel, and `V` embeds in `L_k(1,2)^×`
     (`vEmbedding`, `vEmbedding_injective`)
-  - [ ] D3. Identify the corner witness subgroup with the corner copy of
-    the corresponding subgroup of `V`
-  - [ ] D4. Simplicity, finite presentation, and two-generation of `V`,
-    and the literal `prop:vnotlef` through `lem:fplef`
+  - [x] D3. The corner witness identified inside `V`
+    (`ThompsonVWitness`): every cylinder swap acts on the stream basis as
+    the boundary transposition (`finsuppStreamRep_cylinderSwap_single`),
+    corner insertion carries swaps to swaps of the inserted cylinders,
+    the two-generated witness subgroup lies in the basis-permuting units
+    (`cornerWitness_le_deltaPermUnits`), and every cylinder transposition
+    is a tree table (`swapPerm_mem_thompsonV`)
+  - [x] D4. **`prop:vnotlef`, unconditionally**: Thompson's group `V` is
+    not LEF (`thompsonV_not_isLEF`), audit-pinned.  The manuscript
+    derives this from the cited simplicity and finite presentability of
+    `V`; here it is kernel-checked with no cited inputs: LEF passes to
+    subgroups (`isLEF_of_injective`) and the finite-obstruction witness
+    embeds into `V` through the faithful stream action
   - [ ] D5. Audit
 - [x] State and prove the bounded-degree form of the expander decomposition:
   the edited multigraphs carry one explicit occurrence-counting degree bound

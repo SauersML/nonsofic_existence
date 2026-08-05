@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.ThompsonVEmbedding
 import NonsoficGroupsExist.ThompsonWitness
+import Mathlib.Algebra.Field.ZMod
 
 /-!
 # The corner witness inside the permutation units
@@ -432,6 +433,230 @@ theorem swapPerm_mem_thompsonV :
   exact tableEquiv_mem_thompsonV' _ _ _ _
 
 end SwapPermMem
+
+
+section VNotLEF
+
+open Classical ThompsonV
+
+variable (k : Type) [Field k]
+
+theorem toPerm_congr {u v : (BinaryLeavittAlgebra k)ˣ}
+    (h : u = v) (hu : u ∈ deltaPermUnits k) (hv : v ∈ deltaPermUnits k) :
+    toPerm k ⟨u, hu⟩ = toPerm k ⟨v, hv⟩ := by
+  congr 1
+  exact Subtype.ext h
+
+theorem toPerm_mk_mul (u v : (BinaryLeavittAlgebra k)ˣ)
+    (hu : u ∈ deltaPermUnits k) (hv : v ∈ deltaPermUnits k)
+    (huv : u * v ∈ deltaPermUnits k) :
+    toPerm k ⟨u * v, huv⟩ = toPerm k ⟨u, hu⟩ * toPerm k ⟨v, hv⟩ := by
+  rw [show (⟨u * v, huv⟩ : deltaPermUnits k) =
+    ⟨u, hu⟩ * ⟨v, hv⟩ from Subtype.ext rfl, map_mul]
+
+theorem toPerm_mk_inv (u : (BinaryLeavittAlgebra k)ˣ)
+    (hu : u ∈ deltaPermUnits k) (hui : u⁻¹ ∈ deltaPermUnits k) :
+    toPerm k ⟨u⁻¹, hui⟩ = (toPerm k ⟨u, hu⟩)⁻¹ := by
+  rw [show (⟨u⁻¹, hui⟩ : deltaPermUnits k) =
+    (⟨u, hu⟩ : deltaPermUnits k)⁻¹ from Subtype.ext rfl, map_inv]
+
+theorem toPerm_cylinderSwap (a b : List (Fin 2))
+    (hab : ¬ a <+: b) (hba : ¬ b <+: a) :
+    toPerm k ⟨(family k).cylinderSwap a b hab hba,
+      cylinderSwap_mem_deltaPermUnits k a b hab hba⟩ =
+    swapPerm a b hab hba := by
+  apply deltaPermUnits_sigma_unique k
+  intro x c
+  calc
+    Finsupp.single (toPerm k ⟨(family k).cylinderSwap a b hab hba,
+        cylinderSwap_mem_deltaPermUnits k a b hab hba⟩ x) c =
+        finsuppStreamRep k
+          (((family k).cylinderSwap a b hab hba :
+            (BinaryLeavittAlgebra k)ˣ) : BinaryLeavittAlgebra k)
+          (Finsupp.single x c) :=
+      (toPerm_spec k _ x c).symm
+    _ = Finsupp.single (swapMap a b x) c :=
+      finsuppStreamRep_cylinderSwap_single k a b hab hba x c
+    _ = Finsupp.single (swapPerm a b hab hba x) c := by
+      rw [swapPerm_apply]
+
+theorem toPerm_cylinderSwap_mem (a b : List (Fin 2))
+    (hab : ¬ a <+: b) (hba : ¬ b <+: a) :
+    toPerm k ⟨(family k).cylinderSwap a b hab hba,
+      cylinderSwap_mem_deltaPermUnits k a b hab hba⟩ ∈ thompsonV := by
+  rw [toPerm_cylinderSwap]
+  exact swapPerm_mem_thompsonV a b hab hba
+
+theorem toPerm_cornerHom_cylinderSwap_mem (a b : List (Fin 2))
+    (hab : ¬ a <+: b) (hba : ¬ b <+: a)
+    (hmem : (family k).cornerHom ((family k).cylinderSwap a b hab hba) ∈
+      deltaPermUnits k) :
+    toPerm k ⟨(family k).cornerHom ((family k).cylinderSwap a b hab hba),
+      hmem⟩ ∈ thompsonV := by
+  have hval : (family k).cornerHom ((family k).cylinderSwap a b hab hba) =
+      (family k).cylinderSwap ([1] ++ a) ([1] ++ b)
+        (fun h ↦ hab ((List.prefix_append_right_inj [1]).1 h))
+        (fun h ↦ hba ((List.prefix_append_right_inj [1]).1 h)) := by
+    rw [cornerHom_eq_prefixInsertionUnit,
+      prefixInsertionUnit_cylinderSwap]
+  rw [toPerm_congr k hval hmem
+    (cylinderSwap_mem_deltaPermUnits k _ _ _ _)]
+  exact toPerm_cylinderSwap_mem k _ _ _ _
+
+theorem toPerm_cornerHom_insertion_cylinderSwap_mem
+    (l a b : List (Fin 2)) (hab : ¬ a <+: b) (hba : ¬ b <+: a)
+    (hmem : (family k).cornerHom ((family k).prefixInsertionUnit l
+      ((family k).cylinderSwap a b hab hba)) ∈ deltaPermUnits k) :
+    toPerm k ⟨(family k).cornerHom ((family k).prefixInsertionUnit l
+      ((family k).cylinderSwap a b hab hba)), hmem⟩ ∈ thompsonV := by
+  have hval : (family k).prefixInsertionUnit l
+      ((family k).cylinderSwap a b hab hba) =
+      (family k).cylinderSwap (l ++ a) (l ++ b)
+        (fun h ↦ hab ((List.prefix_append_right_inj l).1 h))
+        (fun h ↦ hba ((List.prefix_append_right_inj l).1 h)) :=
+    prefixInsertionUnit_cylinderSwap _ l a b hab hba
+  rw [toPerm_congr k (congrArg (family k).cornerHom hval) hmem
+    (by
+      rw [← congrArg (family k).cornerHom hval]
+      exact hmem)]
+  exact toPerm_cornerHom_cylinderSwap_mem k _ _ _ _ _
+
+theorem toPerm_mem_thompsonV_of_mem_witness (x : (BinaryLeavittAlgebra k)ˣ)
+    (hx : x ∈ (family k).cornerWitnessSubgroup) :
+    toPerm k ⟨x, cornerWitness_le_deltaPermUnits k hx⟩ ∈ thompsonV := by
+  induction hx using Subgroup.closure_induction with
+  | mem y hy =>
+      rcases hy with rfl | rfl
+      · -- the cornered generator A
+        have hval : (family k).cornerHom (family k).generatorA =
+            ((family k).cornerHom ((family k).cylinderSwap [0] [1, 0]
+                (by decide) (by decide)) *
+              (family k).cornerHom ((family k).cylinderSwap [0] [1, 1]
+                (by decide) (by decide)) *
+              (family k).cornerHom ((family k).cylinderSwap [0] [1]
+                (by decide) (by decide)))⁻¹ := by
+          rw [LeavittFamily.generatorA, ← map_mul, ← map_mul, ← map_inv,
+            LeavittFamily.rootRotation]
+        rw [toPerm_congr k hval _ (by
+          rw [← hval]
+          exact cornerWitness_le_deltaPermUnits k
+            (Subgroup.subset_closure (Or.inl rfl)))]
+        rw [toPerm_mk_inv k _ (Subgroup.mul_mem _
+          (Subgroup.mul_mem _
+            (cornerHom_cylinderSwap_mem k [0] [1, 0] (by decide) (by decide))
+            (cornerHom_cylinderSwap_mem k [0] [1, 1] (by decide) (by decide)))
+          (cornerHom_cylinderSwap_mem k [0] [1] (by decide) (by decide))) _]
+        refine Subgroup.inv_mem _ ?_
+        rw [toPerm_mk_mul k _ _ (Subgroup.mul_mem _
+            (cornerHom_cylinderSwap_mem k [0] [1, 0] (by decide) (by decide))
+            (cornerHom_cylinderSwap_mem k [0] [1, 1] (by decide) (by decide)))
+          (cornerHom_cylinderSwap_mem k [0] [1] (by decide) (by decide)) _]
+        rw [toPerm_mk_mul k _ _
+          (cornerHom_cylinderSwap_mem k [0] [1, 0] (by decide) (by decide))
+          (cornerHom_cylinderSwap_mem k [0] [1, 1] (by decide) (by decide)) _]
+        exact Subgroup.mul_mem _
+          (Subgroup.mul_mem _
+            (toPerm_cornerHom_cylinderSwap_mem k [0] [1, 0]
+              (by decide) (by decide) _)
+            (toPerm_cornerHom_cylinderSwap_mem k [0] [1, 1]
+              (by decide) (by decide) _))
+          (toPerm_cornerHom_cylinderSwap_mem k [0] [1]
+            (by decide) (by decide) _)
+      · -- the cornered generator B
+        have hval : (family k).cornerHom (family k).generatorB =
+            ((family k).cornerHom ((family k).prefixInsertionUnit [1]
+                ((family k).cylinderSwap [0] [1, 0]
+                  (by decide) (by decide))) *
+              (family k).cornerHom ((family k).prefixInsertionUnit [1]
+                ((family k).cylinderSwap [0] [1, 1]
+                  (by decide) (by decide))) *
+              (family k).cornerHom ((family k).prefixInsertionUnit [1]
+                ((family k).cylinderSwap [0] [1]
+                  (by decide) (by decide))))⁻¹ := by
+          rw [LeavittFamily.generatorB, LeavittFamily.rightRotation,
+            map_inv, LeavittFamily.rootRotation, map_mul,
+            map_mul, map_mul, map_mul,
+            LeavittFamily.prefixInsertion_apply,
+            LeavittFamily.prefixInsertion_apply,
+            LeavittFamily.prefixInsertion_apply]
+        rw [toPerm_congr k hval _ (by
+          rw [← hval]
+          exact cornerWitness_le_deltaPermUnits k
+            (Subgroup.subset_closure (Or.inr rfl)))]
+        rw [toPerm_mk_inv k _ (Subgroup.mul_mem _
+          (Subgroup.mul_mem _
+            (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 0]
+              (by decide) (by decide))
+            (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 1]
+              (by decide) (by decide)))
+          (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1]
+            (by decide) (by decide))) _]
+        refine Subgroup.inv_mem _ ?_
+        rw [toPerm_mk_mul k _ _ (Subgroup.mul_mem _
+            (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 0]
+              (by decide) (by decide))
+            (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 1]
+              (by decide) (by decide)))
+          (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1]
+            (by decide) (by decide)) _]
+        rw [toPerm_mk_mul k _ _
+          (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 0]
+            (by decide) (by decide))
+          (cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 1]
+            (by decide) (by decide)) _]
+        exact Subgroup.mul_mem _
+          (Subgroup.mul_mem _
+            (toPerm_cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 0]
+              (by decide) (by decide) _)
+            (toPerm_cornerHom_insertion_cylinderSwap_mem k [1] [0] [1, 1]
+              (by decide) (by decide) _))
+          (toPerm_cornerHom_insertion_cylinderSwap_mem k [1] [0] [1]
+            (by decide) (by decide) _)
+  | one =>
+      rw [toPerm_congr k rfl _ (Subgroup.one_mem _),
+        show (⟨1, Subgroup.one_mem _⟩ : deltaPermUnits k) = 1 from
+          Subtype.ext rfl, map_one]
+      exact Subgroup.one_mem _
+  | mul y z hy hz ihy ihz =>
+      rw [toPerm_mk_mul k y z (cornerWitness_le_deltaPermUnits k hy)
+        (cornerWitness_le_deltaPermUnits k hz) _]
+      exact Subgroup.mul_mem _ ihy ihz
+  | inv y hy ihy =>
+      rw [toPerm_mk_inv k y (cornerWitness_le_deltaPermUnits k hy) _]
+      exact Subgroup.inv_mem _ ihy
+
+/-- **Proposition `prop:vnotlef`, unconditionally** (checkpoint `D4`):
+Thompson's group `V` is not LEF.  The manuscript derives this from the
+cited simplicity and finite presentability of `V`; here it follows
+kernel-checked from the finite-obstruction witness, which embeds into `V`
+through the faithful stream action, since LEF passes to subgroups. -/
+theorem thompsonV_not_isLEF : ¬ IsLEF ↥thompsonV := by
+  intro hLEF
+  refine (family (ZMod 2)).not_isLEF_cornerWitnessSubgroup ?_
+  refine isLEF_of_injective (G := ↥thompsonV) ?_ ?_ hLEF
+  · exact {
+      toFun := fun w ↦ ⟨toPerm (ZMod 2)
+          ⟨(w : (BinaryLeavittAlgebra (ZMod 2))ˣ),
+            cornerWitness_le_deltaPermUnits (ZMod 2) w.property⟩,
+        toPerm_mem_thompsonV_of_mem_witness (ZMod 2) w w.property⟩
+      map_one' := by
+        apply Subtype.ext
+        show toPerm (ZMod 2) ⟨1, _⟩ = 1
+        rw [show (⟨1, cornerWitness_le_deltaPermUnits (ZMod 2)
+            (Subgroup.one_mem _)⟩ : deltaPermUnits (ZMod 2)) = 1 from
+          Subtype.ext rfl, map_one]
+      map_mul' := fun w₁ w₂ ↦ by
+        apply Subtype.ext
+        exact toPerm_mk_mul (ZMod 2) _ _
+          (cornerWitness_le_deltaPermUnits (ZMod 2) w₁.property)
+          (cornerWitness_le_deltaPermUnits (ZMod 2) w₂.property) _ }
+  · intro w₁ w₂ h
+    have h1 := congrArg Subtype.val h
+    have h2 := toPerm_injective (ZMod 2) h1
+    have h3 := congrArg Subtype.val h2
+    exact Subtype.ext h3
+
+end VNotLEF
 
 end BinaryLeavitt
 end NonsoficGroupsExist
