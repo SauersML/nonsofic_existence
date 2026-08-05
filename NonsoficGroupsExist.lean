@@ -32,6 +32,7 @@ import NonsoficGroupsExist.RankTwoCompression
 import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.AlmostMinimalDisplacement
 import NonsoficGroupsExist.DelormeFixedPoint
+import NonsoficGroupsExist.UltralimitGeometry
 import NonsoficGroupsExist.GaussianPositiveDefinite
 import NonsoficGroupsExist.HilbertCircumcenter
 import NonsoficGroupsExist.KazhdanFixedSpace
