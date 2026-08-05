@@ -7,6 +7,10 @@ on:
     branches: [ "main" ]
     paths:
       - '**/*.lean'
+      # The source scan is a gate, so a change to it must re-run the gate.
+      # Without this, an edit to `check.py` alone -- including one that turns a
+      # detector off -- shipped without CI ever running.
+      - 'scripts/**'
       - 'lakefile.toml'
       - 'lean-toolchain'
       - 'lake-manifest.json'
@@ -15,6 +19,10 @@ on:
     branches: [ "main" ]
     paths:
       - '**/*.lean'
+      # The source scan is a gate, so a change to it must re-run the gate.
+      # Without this, an edit to `check.py` alone -- including one that turns a
+      # detector off -- shipped without CI ever running.
+      - 'scripts/**'
       - 'lakefile.toml'
       - 'lean-toolchain'
       - 'lake-manifest.json'
@@ -157,7 +165,17 @@ jobs:
       # check is the one finding a green build actively conceals: `lake build`
       # compiles the root's import closure, so a module nothing imports is
       # never compiled and never audited.
+      #
+      # `continue-on-error` is NOT tolerance -- the "Zero-tolerance verdict"
+      # step at the end of this job fails the run on this step's outcome, and
+      # deleting that step turns the gate off loudly rather than quietly.  It
+      # is here because the two scans see different things (source text vs.
+      # kernel environment) and a first failure that hides the second costs a
+      # multi-hour build to learn the other half.  One red run should name
+      # every finding in the repository, not the first one alphabetically.
       - name: Source scan
+        id: source-scan
+        continue-on-error: true
         run: python3 scripts/check.py
 
       # The build itself.  `lakefile.toml` sets `-DwarningAsError=true` for the
@@ -198,7 +216,12 @@ jobs:
       # whole namespace through the kernel environment, rejecting anything
       # outside `propext` / `Classical.choice` / `Quot.sound`.  Without it,
       # "0 sorries" is a grep result rather than a fact about the proof.
+      #
+      # `continue-on-error` for the same reason as the source scan, and with
+      # the same backstop: the verdict step below reads this outcome.
       - name: Kernel audit (statements, axiom closure, environment scans)
+        id: kernel-audit
+        continue-on-error: true
         run: lake env lean scripts/Audit.lean
 
       # The toolchain's built-in checker replays every olean through a fresh
@@ -207,3 +230,33 @@ jobs:
       # using the pinned toolchain also guarantees olean compatibility.
       - name: Fresh kernel re-check (leanchecker)
         run: lake env leanchecker --fresh NonsoficGroupsExist
+
+      # THE GATE.  The two scan steps above defer their verdict here so that one
+      # run names every finding; this step is what makes that deferral safe.
+      # There are no budgets in either scan and there is no threshold here: a
+      # single finding on either side is a red run.  If this step is ever
+      # removed, `continue-on-error` above silently becomes real tolerance --
+      # so it is the one step in this file that must not be deleted without
+      # deleting the `continue-on-error` lines with it.
+      - name: Zero-tolerance verdict
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          src='${{ steps.source-scan.outcome }}'
+          ker='${{ steps.kernel-audit.outcome }}'
+          # `skipped` counts as failure: it means an earlier step (the build)
+          # died, and an unrun scan is not a clean one.
+          if [ "$src" != "success" ]; then
+            echo "::error::source scan did not pass (outcome: ${src:-skipped}); see the 'Source scan' step"
+            failed=1
+          fi
+          if [ "$ker" != "success" ]; then
+            echo "::error::kernel audit did not pass (outcome: ${ker:-skipped}); see the 'Kernel audit' step"
+            failed=1
+          fi
+          if [ "$failed" -ne 0 ]; then
+            echo "zero tolerance: the repository is not clean."
+            exit 1
+          fi
+          echo "zero tolerance: source scan and kernel audit both clean."
