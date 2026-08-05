@@ -149,6 +149,7 @@ import NonsoficGroupsExist.FieldMatrixReduction
 import NonsoficGroupsExist.LeavittDegreeZero
 import NonsoficGroupsExist.FamilyDescent
 import NonsoficGroupsExist.LeavittGradingSpans
+import NonsoficGroupsExist.LeavittBalancedUnits
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
