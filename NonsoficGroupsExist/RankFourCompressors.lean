@@ -61,10 +61,10 @@ theorem transvection_sq [CharP A 2] (i j : Index) (hij : i ≠ j) (a : A) :
 
 /-- The four-transvection factor `Uᵢ` in the pair of coordinates `(i,last)`. -/
 def compressorPiece (L : LeavittFamily A) (i : Fin 3) : Ambient A :=
-  transvection lastIndex (coreIndex i) (last_ne_core i) (1 + L.t0) *
+  transvection lastIndex (coreIndex i) (last_ne_core i) (L.t0 - 1) *
     transvection (coreIndex i) lastIndex (core_ne_last i) 1 *
-      transvection lastIndex (coreIndex i) (last_ne_core i) (1 + L.s0) *
-        transvection (coreIndex i) lastIndex (core_ne_last i) L.t0
+      transvection lastIndex (coreIndex i) (last_ne_core i) (L.s0 - 1) *
+        transvection (coreIndex i) lastIndex (core_ne_last i) (-L.t0)
 
 /-- The sparse matrix represented by one compressor piece. -/
 def compressorPieceMatrix (L : LeavittFamily A) (i : Fin 3) :
@@ -75,33 +75,26 @@ def compressorPieceMatrix (L : LeavittFamily A) (i : Fin 3) :
     if c = lastIndex then L.t0 else 0
   else if r = c then 1 else 0
 
-@[simp] theorem compressorPiece_val [CharP A 2] (L : LeavittFamily A) (i : Fin 3) :
+@[simp] theorem compressorPiece_val (L : LeavittFamily A) (i : Fin 3) :
     (↑(↑(compressorPiece L i) : (Matrix Index Index A)ˣ) : Matrix Index Index A) =
       compressorPieceMatrix L i := by
-  have hone (a : A) : 1 + (1 + a) = a := CharTwo.add_cancel_left 1 a
-  have hupper (a : A) : a + (a + L.s0 * L.t0) + 1 = L.s1 * L.t1 := by
+  have hp1 : -L.p0 + 1 = L.p1 := by
+    rw [← L.p0_add_p1]
+    abel
+  have hupper : -L.t0 + (L.t0 - L.s0 * L.t0) + 1 = L.p1 := by
     calc
-      a + (a + L.s0 * L.t0) + 1 =
-          (a + a) + (L.s0 * L.t0 + 1) := by abel
-      _ = L.s1 * L.t1 := by
-        rw [CharTwo.add_self_eq_zero, zero_add, L.s0t0_add_one]
-  have hlower (a b : A) :
-      1 + a + (1 + b + (1 + a + (b + 1))) = 0 := by
-    calc
-      1 + a + (1 + b + (1 + a + (b + 1))) =
-          (1 + 1) + (1 + 1) + (a + a) + (b + b) := by abel
-      _ = 0 := by simp only [CharTwo.add_self_eq_zero]
-  have hdiag (a b : A) :
-      a + a * a + (a + b + (a + a * a + (b + a))) = 0 := by
-    calc
-      a + a * a + (a + b + (a + a * a + (b + a))) =
-          (a + a) + (a + a) + (a * a + a * a) + (b + b) := by abel
-      _ = 0 := by simp only [CharTwo.add_self_eq_zero]
+      -L.t0 + (L.t0 - L.s0 * L.t0) + 1 = -L.p0 + 1 := by
+        simp only [LeavittFamily.p0]
+        abel
+      _ = L.p1 := hp1
+  have hcancel :
+      L.t0 - 1 + (L.s0 - 1 + (1 - L.s0 - (L.t0 - 1))) = 0 := by
+    abel
   ext r c
   fin_cases i <;> fin_cases r <;> fin_cases c <;>
     simp [compressorPiece, compressorPieceMatrix, transvection, elementaryUnit,
       Matrix.mul_apply, Matrix.one_apply, Fin.sum_univ_succ, coreIndex, lastIndex,
-      LeavittFamily.p1, mul_add, add_mul, hone, hupper, hlower, hdiag]
+      hupper, hcancel, mul_add, add_mul, mul_sub, sub_mul]
 
 /-- The comb compressor `u = U₃ U₂ U₁`, as twelve explicit elementary
 transvections. -/
@@ -115,7 +108,7 @@ def compressorMatrix (L : LeavittFamily A) : Matrix Index Index A :=
      0, 0, L.s0, L.p1 * L.t0 * L.t0;
      0, 0, 0, L.t0 * L.t0 * L.t0]
 
-@[simp] theorem compressor_val [CharP A 2] (L : LeavittFamily A) :
+@[simp] theorem compressor_val (L : LeavittFamily A) :
     (↑(↑(compressor L) : (Matrix Index Index A)ˣ) : Matrix Index Index A) =
       compressorMatrix L := by
   change
