@@ -15,6 +15,7 @@ import NonsoficGroupsExist.FreeRootPlane
 import NonsoficGroupsExist.FreeRootPlaneFourier
 import NonsoficGroupsExist.FreeRootCharacterValuation
 import NonsoficGroupsExist.FreeElementaryPropertyT
+import NonsoficGroupsExist.FiniteTypeCharacteristicTwoPropertyT
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.ClassTwoApproximation
@@ -121,11 +122,13 @@ import NonsoficGroupsExist.SelectedGraphComparison
 import NonsoficGroupsExist.ConservativeMatching
 import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
-import NonsoficGroupsExist.ConcreteLeavitt
+import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.LeavittRankEquivalence
 import NonsoficGroupsExist.FiniteGraph
 import NonsoficGroupsExist.LeavittCorner
 import NonsoficGroupsExist.LeavittMatrixCompression
+import NonsoficGroupsExist.DiagonalCornerCompression
+import NonsoficGroupsExist.DiagonalElementary
 import NonsoficGroupsExist.LeavittSelfSimilarity
 import NonsoficGroupsExist.Localization
 import NonsoficGroupsExist.MatrixSelfSimilarity
@@ -149,6 +152,7 @@ import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
 import NonsoficGroupsExist.MainResults
+import NonsoficGroupsExist.Audit
 
 /-!
 # An unconditional construction of a finitely presented nonsofic group
@@ -160,10 +164,10 @@ nonsofic group exists.
 
 In particular, no declaration in this root module assumes a proposition named
 after Kun, Kun--Thom, or Ershov--Jaikin and then advertises the resulting
-conditional implication as an existence theorem.  The uninstantiated
+parameterized implication as an existence theorem.  The uninstantiated
 `ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData` are
 specifications for intermediate mathematics, not proofs merely by being
-inhabited in conditional lemmas.  The exact full-sequence Kun decomposition
+inhabited in interface lemmas.  The exact full-sequence Kun decomposition
 and Kun--Thom implication are now proved, as are property `(T)` for the
 universal-Leavitt rank-three core and rank-four ambient group. `MainResults` assembles
 them through the local criterion. Likewise,

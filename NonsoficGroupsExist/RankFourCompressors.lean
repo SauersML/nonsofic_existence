@@ -4,8 +4,8 @@ import NonsoficGroupsExist.LeavittMatrixCompression
 /-!
 # The explicit rank-four compressor words
 
-Two candidate matrices from the proposed characteristic-two construction are
-defined here as literal words in elementary transvections, so their membership
+Two compressor matrices for the characteristic-two construction are defined
+here as literal words in elementary transvections, so their membership
 in `EL₄` is proved.  We use `Fin 4`, with the first three coordinates forming
 the core; `ElementaryStabilization` followed by reindexing embeds that core.
 
@@ -13,7 +13,7 @@ The matrix calculations below prove that the involution squares to one and
 that conjugation by either compressor word implements `compressionEnd` on the
 embedded core.  They also prove that the two words together with the core
 generate the ambient elementary group.  The complementary non-LEF subgroup is
-specific to the stream-operator coefficient ring and is supplied in
+specialized to the universal binary Leavitt algebra and is supplied in
 `UniversalRankFour`; `UniversalCompressionSetup` combines both parts.
 -/
 
@@ -66,7 +66,7 @@ def compressorPiece (L : LeavittFamily A) (i : Fin 3) : Ambient A :=
       transvection lastIndex (coreIndex i) (last_ne_core i) (1 + L.s0) *
         transvection (coreIndex i) lastIndex (core_ne_last i) L.t0
 
-/-- The sparse matrix represented by one candidate compressor piece. -/
+/-- The sparse matrix represented by one compressor piece. -/
 def compressorPieceMatrix (L : LeavittFamily A) (i : Fin 3) :
     Matrix Index Index A := fun r c ↦
   if r = coreIndex i then
@@ -108,7 +108,7 @@ transvections. -/
 def compressor (L : LeavittFamily A) : Ambient A :=
   compressorPiece L 2 * compressorPiece L 1 * compressorPiece L 0
 
-/-- The sparse upper-triangular value of the complete candidate compressor. -/
+/-- The sparse upper-triangular value of the complete compressor. -/
 def compressorMatrix (L : LeavittFamily A) : Matrix Index Index A :=
   !![L.s0, 0, 0, L.p1;
      0, L.s0, 0, L.p1 * L.t0;
@@ -151,7 +151,7 @@ def involutionMatrix (L : LeavittFamily A) : Matrix Index Index A :=
       Matrix.mul_apply, Matrix.one_apply, Fin.sum_univ_succ, coreIndex, lastIndex,
       LeavittFamily.p0, mul_add, add_mul, mul_assoc, CharTwo.add_self_eq_zero]
 
-/-- The candidate involution really has order two in characteristic two. -/
+/-- The compressor involution has order two in characteristic two. -/
 theorem involution_sq [CharP A 2] (L : LeavittFamily A) :
     involution L * involution L = 1 := by
   let x : Ambient A :=
@@ -213,7 +213,7 @@ theorem compressionEnd_injective (L : LeavittFamily A) :
   apply Subtype.ext
   exact L.matrixCompression_elementaryUnit i j hij a
 
-/-- On every elementary core generator, multiplication past the candidate
+/-- On every elementary core generator, multiplication past the
 compressor implements coefficient compression. -/
 theorem compressor_mul_coreTransvection [CharP A 2] (L : LeavittFamily A)
     (i j : Fin 3) (hij : i ≠ j) (a : A) :
@@ -393,7 +393,7 @@ theorem involution_conjugates_lastColumn [CharP A 2] (L : LeavittFamily A)
         Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
         lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
 
-/-- The two-element set of candidate compressor words. -/
+/-- The two-element set of compressor words. -/
 noncomputable def compressorSet (L : LeavittFamily A) : Finset (Ambient A) :=
   by
     classical

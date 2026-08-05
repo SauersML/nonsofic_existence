@@ -4,9 +4,10 @@ import NonsoficGroupsExist.Criterion
 /-!
 # Exact local compression criterion
 
-This file states the data consumed by the conditional local matching argument.
-It also verifies that `A = S ∪ Q ∪ Q⁻¹` is symmetric and really generates `G`.
-No existence theorem for the two expander decompositions is asserted here.
+This file states the data consumed by the local matching argument.  It also
+verifies that `A = S ∪ Q ∪ Q⁻¹` is symmetric and really generates `G`.  The
+two expander decompositions are constructed later from property `(T)` by the
+closed criterion assembly.
 -/
 
 namespace NonsoficGroupsExist

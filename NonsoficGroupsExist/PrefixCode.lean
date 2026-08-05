@@ -119,4 +119,78 @@ def singletonPrefixCode (a : List (Fin 2)) : BinaryPrefixCode (Fin 1) where
   simp [prefixIdempotent, singletonPrefixCode]
 
 end LeavittFamily
+
+/-! ### Complete left-comb codes of every positive size -/
+
+/-- The `i`th leaf in the left-comb binary tree with `n + 1` leaves:
+`0, 10, 110, ..., 1ⁿ`. -/
+def leftCombWord (n : ℕ) (i : Fin (n + 1)) : List (Fin 2) :=
+  List.replicate i.val 1 ++ if i.val < n then [0] else []
+
+@[simp] theorem leftCombWord_zero (n : ℕ) :
+    leftCombWord (n + 1) 0 = [0] := by
+  simp [leftCombWord]
+
+@[simp] theorem leftCombWord_succ (n : ℕ) (i : Fin (n + 1)) :
+    leftCombWord (n + 1) i.succ = 1 :: leftCombWord n i := by
+  by_cases hi : i.val < n
+  · have hi' : i.val + 1 < n + 1 := by omega
+    simp [leftCombWord, hi, hi', List.replicate_succ]
+  · have hin : i.val = n := by omega
+    simp [leftCombWord, hin, List.replicate_succ]
+
+/-- The ordered complete left-comb code with `n + 1` leaves. -/
+def leftCombCode (n : ℕ) : BinaryPrefixCode (Fin (n + 1)) where
+  word := leftCombWord n
+  prefix_free := by
+    intro i j hij hp
+    have hijv : i.val ≠ j.val := by
+      intro h
+      exact hij (Fin.ext h)
+    rcases lt_or_gt_of_ne hijv with hlt | hgt
+    · have hin : i.val < n := by omega
+      have hiLen : i.val < (leftCombWord n i).length := by
+        simp [leftCombWord, hin]
+      have heq := hp.getElem hiLen
+      simp [leftCombWord, hin, hlt] at heq
+    · have hjn : j.val < n := by omega
+      have hjLen : j.val < (leftCombWord n i).length := by
+        simp [leftCombWord]
+        split_ifs <;> omega
+      have heq := hp.getElem hjLen
+      simp [leftCombWord, hjn, hgt] at heq
+
+namespace LeavittFamily
+
+variable {A : Type*} [Ring A] (L : LeavittFamily A)
+
+theorem cylinder_cons_one (w : List (Fin 2)) :
+    L.cylinder (1 :: w) = L.s1 * L.cylinder w * L.t1 := by
+  simp [cylinder, wordS, wordT, mul_assoc]
+
+/-- Every positive natural number occurs as the size of an explicit complete
+binary prefix code. -/
+theorem leftCombCode_complete (n : ℕ) :
+    L.IsComplete (leftCombCode n) := by
+  induction n with
+  | zero =>
+      simp [IsComplete, leftCombCode, leftCombWord, cylinder]
+  | succ n ih =>
+      have hsum : ∑ i : Fin (n + 1), L.cylinder (leftCombWord n i) = 1 := by
+        simpa [IsComplete, leftCombCode] using ih
+      unfold IsComplete
+      rw [Fin.sum_univ_succ]
+      simp only [leftCombCode, leftCombWord_zero, leftCombWord_succ]
+      calc
+        L.cylinder [0] + ∑ i : Fin (n + 1), L.cylinder (1 :: leftCombWord n i) =
+            L.cylinder [0] + L.s1 *
+              (∑ i : Fin (n + 1), L.cylinder (leftCombWord n i)) * L.t1 := by
+                simp_rw [L.cylinder_cons_one]
+                rw [Finset.mul_sum, Finset.sum_mul]
+        _ = L.cylinder [0] + L.s1 * 1 * L.t1 := by
+          rw [hsum]
+        _ = 1 := by
+          simpa [cylinder] using (L.cylinder_split []).symm
+
+end LeavittFamily
 end NonsoficGroupsExist

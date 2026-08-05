@@ -1,4 +1,5 @@
 
+# The validated PDF is intentionally versioned on main for direct access.
 name: Build and commit PDF
 
 on:
@@ -166,4 +167,3 @@ jobs:
             echo "The push failed even though main did not advance." >&2
             exit 1
           fi
-

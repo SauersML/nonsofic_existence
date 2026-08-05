@@ -10,7 +10,7 @@ import Mathlib.Algebra.CharP.Algebra
 This module specializes the proved rank-four matrix calculations to the
 universal binary Leavitt algebra over `ZMod 2`. It constructs the coefficient ring, `EL₃` core,
 `EL₄` ambient group, finite-generation instances, infinitude instances, the
-two concrete compressor elements, and proves that the core and compressors
+two explicit compressor elements, and proves that the core and compressors
 generate the ambient group.  It also embeds the explicit non-LEF cylinder
 witness into the core and proves the complementary-corner centralizer and
 trivial-intersection assertions.  Property `(T)` is not asserted here.
@@ -27,7 +27,7 @@ noncomputable abbrev Ambient := RankFour.Ambient CoefficientRing
 noncomputable def family : LeavittFamily CoefficientRing :=
   UniversalLeavitt.family
 
-/-- The concrete two-generated subgroup carrying the finite non-LEF
+/-- The explicit two-generated subgroup carrying the finite non-LEF
 obstruction. -/
 noncomputable abbrev Witness := family.cornerWitnessSubgroup
 
@@ -105,14 +105,14 @@ noncomputable instance : Infinite Core :=
 noncomputable instance : Infinite Ambient :=
   elementaryGroup_infinite (R := CoefficientRing) (0 : Fin 4) 1 (by decide)
 
-/-- The concrete embedded core. -/
+/-- The embedded rank-three core. -/
 noncomputable def coreEmbedding : Core →* Ambient :=
   RankFour.coreEmbedding
 
 theorem coreEmbedding_injective : Function.Injective coreEmbedding :=
   RankFour.coreEmbedding_injective
 
-/-- The concrete injective coefficient-compression endomorphism. -/
+/-- The injective coefficient-compression endomorphism. -/
 noncomputable def compressionEnd : Core →* Core :=
   RankFour.compressionEnd family
 
@@ -206,12 +206,12 @@ theorem compressionEnd_eq_witnessEmbedding_iff (g : Core) (j : Witness) :
 noncomputable def compressors : Finset Ambient :=
   RankFour.compressorSet family
 
-/-- Every concrete compressor implements `compressionEnd` by conjugation. -/
+/-- Every compressor implements `compressionEnd` by conjugation. -/
 theorem compressor_conjugation (q : Ambient) (hq : q ∈ compressors) (g : Core) :
     coreEmbedding (compressionEnd g) = q * coreEmbedding g * q⁻¹ := by
   exact RankFour.compressorSet_conjugation family q hq g
 
-/-- The concrete core and compressor set generate the ambient group. -/
+/-- The core and compressor set generate the ambient group. -/
 theorem core_compressors_generate :
     Subgroup.closure (Set.range coreEmbedding ∪ (compressors : Set Ambient)) = ⊤ := by
   exact RankFour.coreEmbedding_compressorSet_generate family

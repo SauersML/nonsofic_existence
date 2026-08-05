@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this formalization, please cite the repository and its archived release."
+title: "NonsoficGroupsExist"
+type: software
+authors:
+  - family-names: "Anonymous"
+version: 0.1.0
+date-released: 2026-08-05
+repository-code: "https://github.com/SauersML/nonsofic_existence"
+license: Apache-2.0

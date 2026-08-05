@@ -15,7 +15,7 @@ not inferred merely from localization.
 
 namespace NonsoficGroupsExist
 
-/-- Exact post-selection output of the conditional matching construction. -/
+/-- Exact post-selection output of the matching construction. -/
 structure SelectionOutput {G Γ J : Type} [Group G] [Group Γ] [Group J]
     (D : LocalCriterionData G Γ J) where
   localized : LocalizedApproximationData (Γ × J)

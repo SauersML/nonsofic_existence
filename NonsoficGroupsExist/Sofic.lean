@@ -1,6 +1,7 @@
 import Mathlib.Algebra.Group.Equiv.Defs
 import Mathlib.Data.Countable.Basic
 import Mathlib.Data.Fintype.Card
+import Mathlib.Algebra.Group.Pointwise.Finset.Basic
 import Mathlib.Data.Real.Basic
 import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Support
@@ -19,6 +20,8 @@ conversion for countable groups is proved in `TableCover`.
 
 namespace NonsoficGroupsExist
 
+open scoped Pointwise
+
 /-- A finite type bundled with exactly the instances needed by permutation
 models. -/
 structure FiniteModel where
@@ -26,9 +29,9 @@ structure FiniteModel where
   fintype : Fintype carrier
   decidableEq : DecidableEq carrier
 
-instance : CoeSort FiniteModel Type := ⟨FiniteModel.carrier⟩
-instance (Y : FiniteModel) : Fintype Y := Y.fintype
-instance (Y : FiniteModel) : DecidableEq Y := Y.decidableEq
+instance finiteModelCoeSort : CoeSort FiniteModel Type := ⟨FiniteModel.carrier⟩
+instance finiteModelFintype (Y : FiniteModel) : Fintype Y := Y.fintype
+instance finiteModelDecidableEq (Y : FiniteModel) : DecidableEq Y := Y.decidableEq
 
 /-- Normalized Hamming distance on permutations of a finite set.  On the empty
 set it is defined to be zero by real division; approximation cardinalities are
@@ -145,6 +148,53 @@ structure SoficModel (G : Type*) [Group G] (F : Finset G) (ε : ℝ) where
 /-- Standard local definition of a sofic group. -/
 def IsSofic (G : Type*) [Group G] : Prop :=
   ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (SoficModel G F ε)
+
+/-- Textbook local models in which multiplicativity is required only when the
+tested product remains in the finite test set. -/
+structure ProductRestrictedSoficModel (G : Type*) [Group G]
+    (F : Finset G) (ε : ℝ) where
+  carrier : FiniteModel
+  nonempty : 0 < Fintype.card carrier
+  map : G → Equiv.Perm carrier
+  multiplicative : ∀ g ∈ F, ∀ h ∈ F, g * h ∈ F →
+    hammingDistance carrier (map (g * h)) (map g * map h) ≤ ε
+  separated : ∀ g ∈ F, ∀ h ∈ F, g ≠ h →
+    1 - ε ≤ hammingDistance carrier (map g) (map h)
+
+/-- Soficity using the product-restricted textbook convention. -/
+def IsSoficProductRestricted (G : Type*) [Group G] : Prop :=
+  ∀ (F : Finset G) (ε : ℝ), 0 < ε →
+    Nonempty (ProductRestrictedSoficModel G F ε)
+
+/-- Requiring multiplicativity for all pairs in the test set is equivalent to
+requiring it only when their product remains in the set: enlarge `F` by
+`F * F` in the reverse direction. -/
+theorem isSofic_iff_productRestricted (G : Type*) [Group G] :
+    IsSofic G ↔ IsSoficProductRestricted G := by
+  classical
+  constructor
+  · intro h F ε hε
+    obtain ⟨M⟩ := h F ε hε
+    exact ⟨{
+      carrier := M.carrier
+      nonempty := M.nonempty
+      map := M.map
+      multiplicative := fun g hg h hh _ ↦ M.multiplicative g hg h hh
+      separated := M.separated }⟩
+  · intro h F ε hε
+    let T : Finset G := F ∪ F * F
+    obtain ⟨M⟩ := h T ε hε
+    refine ⟨{
+      carrier := M.carrier
+      nonempty := M.nonempty
+      map := M.map
+      multiplicative := ?_
+      separated := ?_ }⟩
+    · intro g hg h hh
+      exact M.multiplicative g (by simp [T, hg]) h (by simp [T, hh])
+        (Finset.mem_union_right F (Finset.mul_mem_mul hg hh))
+    · intro g hg h hh hgh
+      exact M.separated g (by simp [T, hg]) h (by simp [T, hh]) hgh
 
 /-- A sequence of finite permutation models satisfying Definition `def:sofic`
 in explicit epsilon--eventually form. -/

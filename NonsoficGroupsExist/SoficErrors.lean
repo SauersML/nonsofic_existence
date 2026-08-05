@@ -4,7 +4,7 @@ import NonsoficGroupsExist.Sofic
 /-!
 # Global error arrays of a sofic approximation
 
-The diagonal component selection counts all failures on each candidate block.
+The diagonal component selection counts all failures on each tested block.
 This file turns the two global failures supplied by the definition of a sofic
 approximation into the `Negligible` form used by `Selection`.
 -/

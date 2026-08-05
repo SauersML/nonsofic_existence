@@ -5,7 +5,7 @@ import NonsoficGroupsExist.UniversalRankFour
 # The universal Leavitt rank-four compression setup
 
 This module closes the algebraic specification consumed by the local matching
-argument.  Every field is instantiated by the concrete stream-operator
+argument.  Every field is instantiated by the universal binary Leavitt
 algebra, the explicit rank-four compressor words, and the cylinder witness.
 -/
 
@@ -47,7 +47,7 @@ private theorem coreGenerators_generate :
     Subgroup.closure (coreGenerators : Set Core) = ⊤ :=
   (Classical.choose_spec exists_core_generators).2.2
 
-/-- The complete concrete algebraic setup required by the compression
+/-- The complete universal-Leavitt algebraic setup required by the compression
 criterion.  In particular, neither an embedding nor a centralizer or
 intersection assertion is supplied by a caller. -/
 noncomputable def compressionSetup : CompressionSetup Ambient Core Witness := by

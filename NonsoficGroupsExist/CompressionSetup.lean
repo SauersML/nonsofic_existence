@@ -3,7 +3,7 @@ import NonsoficGroupsExist.SoficTransfer
 import Mathlib.Algebra.Group.End
 
 /-!
-# Algebraic specification for the conditional compression development
+# Algebraic compression interface
 
 This packages equations `eq:gen` and `eq:cent` without identifying an abstract
 subgroup with its ambient image.  The types `Γ` and `J` carry injective maps
@@ -12,14 +12,15 @@ into `G`; conjugation by every compressor is represented by an endomorphism of
 give an injective homomorphism `Γ × J → G`, the precise subgroup on which the
 localized sofic approximation is constructed in the manuscript.
 
-No declaration in this module constructs an inhabitant of this structure for
-the proposed elementary groups.  Its fields are assumptions of conditional
-intermediate lemmas, not proved properties of the candidate rank-four words.
+This module defines the reusable interface used by the compression argument.
+The universal binary-Leavitt construction supplies a closed inhabitant in
+`UniversalCompressionSetup`; the fields below are abstract only at this
+general interface boundary and leave no open premise in the headline theorem.
 -/
 
 namespace NonsoficGroupsExist
 
-/-- The algebraic hypotheses of the conditional local matching argument, with
+/-- The algebraic inputs of the local matching argument, with
 finite generation and infinitude explicit. -/
 structure CompressionSetup (G Γ J : Type*) [Group G] [Group Γ] [Group J] where
   embedΓ : Γ →* G

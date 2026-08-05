@@ -439,8 +439,8 @@ theorem hammingDistance_inv (a b : Equiv.Perm Y) :
 /-! ### Finite groups of almost-automorphism clusters -/
 
 /-- Abstract finite-stage data produced by the Kun--Thom improvement theorem.
-`candidate` is the finite set of sufficiently good almost automorphisms;
-`round` improves a product back into that set. -/
+One field contains the sufficiently good almost automorphisms; `round`
+improves a product back into that finite set. -/
 structure ClusterData where
   radius : ℝ
   radius_pos : 0 < radius
@@ -465,7 +465,7 @@ def IsGood (S : Finset (Equiv.Perm Y)) (h : ℝ) (m : ℕ)
     ((badArcs Y S c⁻¹).card : ℝ) < h * m / 2
 
 /-- A small normalized centralizer defect puts a permutation and its inverse
-in the symmetric candidate set at the one-fifth scale. -/
+in the symmetric good set at the one-fifth scale. -/
 theorem isGood_clusterScale_of_ratio_lt
     (S : Finset (Equiv.Perm Y)) {h : ℝ} (hh : 0 < h)
     (c : Equiv.Perm Y) (hcard : 10 ≤ Fintype.card Y)
@@ -1020,7 +1020,7 @@ theorem localEmbedding_of_cluster {J : Type*} [Group J]
 /-- The finite-stage criterion used in the Kun--Thom proof.  It asks only for
 good representatives of `1`, the tested elements, and their tested products;
 the map on every other group element is harmlessly sent to the identity
-candidate. -/
+representative. -/
 theorem localEmbedding_of_finite_stage {J : Type*} [Group J]
     (s : Finset J) (p : J → Equiv.Perm Y)
     (hmemOne : p 1 ∈ D.candidate)

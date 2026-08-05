@@ -7,8 +7,9 @@ rank-four elementary group over the actual universal binary Leavitt algebra
 proof then applies the finite-table cover theorem.
 
 The proof establishes the dependencies in their required mathematical
-generality. In particular, the Kun dependency is the one-way theorem for
-**every** infinite finitely generated property-`(T)` group, every finite
+generality needed by the endpoint. In particular, the Kun dependency is the
+one-way theorem for every universe-0 infinite finitely generated group with
+`HasKazhdanPropertyT.{0,0}`, every finite
 symmetric identity-containing generating set, and every sofic approximation.
 A theorem only for the concrete compression groups, an additional
 non-bipartiteness hypothesis, or a caller-supplied expander decomposition will
@@ -16,6 +17,12 @@ not count as completing that dependency.  Likewise, the final nonsoficity
 theorems must construct all property-`(T)`, compression, non-LEF, Kun, and
 Kun--Thom inputs internally; none may remain an explicit argument, implicit
 instance, bundled field, or `Nonempty` premise.
+
+`HasKazhdanPropertyT` is stated using real orthogonal representations.  This
+is the standard real form of property `(T)`, equivalent for discrete groups to
+the complex-unitary formulation by realification/complexification.  The
+current standalone theorem quantifies over universe-0 real Hilbert spaces; a
+countable-orbit universe-reduction lemma has not yet been formalized.
 
 The premise-free existence dependency chain is closed. Work is continuing on
 the stronger objective of formalizing every result in
@@ -28,10 +35,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Prove the universal quotient is nontrivial using its stream representation
 - [x] Instantiate the full compression construction directly over the universal quotient
 - [x] Prove `EL₄(L_{𝔽₂}(1,2))` is nonsofic and has property `(T)`
-- [ ] Generalize Theorem A to `EL_{m+1}(L_{𝔽₂}(1,2))` for every `m ≥ 3`
-- [ ] Define `L_k(1,2)` uniformly for every finite field `k`
-- [ ] Formalize the arbitrary finite-leaf self-similarity isomorphisms
-  `M_r(L_k(1,2)) ≃ L_k(1,2)` for every `r ≥ 1`
+- [x] Generalize Theorem A to `EL_{m+1}(L_{𝔽₂}(1,2))` for every `m ≥ 3`
+- [x] Define `L_k(1,2)` uniformly for every field `k`, prove its universal
+  property and nontrivial stream representation, and provide finite-type,
+  countability, infinitude, and canonical-family instances
+- [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
+  binary Leavitt family has explicit `M_r(R) ≃ R` for every `r ≥ 1`
 - [ ] Prove the rank-two compression theorem and nonsoficity of `EL₂`
 - [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required ranks
 - [ ] Deduce the unit-group and all-ranks panorama of Theorem B
@@ -48,11 +57,37 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [ ] Re-run the complete MSI build and final axiom/source audit after all
   manuscript-scope additions
 
+## Lean-backed claim map
+
+| Claim | Lean declaration | Status |
+| --- | --- | --- |
+| `EL₄(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittEL4_not_isSofic` | Formalized |
+| The explicit ambient group is finitely generated, infinite, Kazhdan, and nonsofic | `ambient_profile` | Formalized |
+| For every `m ≥ 3`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_theoremA` | Formalized |
+| A nonsofic group exists | `nonsofic_groups_exist` | Formalized |
+| A finitely presented nonsofic group exists | `exists_finitelyPresented_nonsofic_group` | Formalized |
+| The universal binary Leavitt algebra has the required family | `UniversalLeavitt.family` | Formalized |
+| The corner witness is non-LEF | `UniversalRankFour.witness_not_isLEF` | Formalized by a direct finite obstruction; not identified with `V` |
+| Unit group, every `GL_r`, every `EL_r` for `r ≥ 2`, other finite fields, and rank two | — | Manuscript-only |
+| A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
+
+## Module architecture
+
+| Layer | Principal modules | Role |
+| --- | --- | --- |
+| External definitions | `Sofic`, `LEF`, `Kazhdan`, `ElementaryGroup` | Hamming models, local embeddings, real-orthogonal property `(T)`, and `EL_n` |
+| Kun decomposition | `KunFiniteMarkov` through `KunDecomposition` and `KunFixedDecomposition` | Turns property `(T)` sofic models into negligible-edit uniform expander components |
+| Compression matching | `CompressionSetup`, `Criterion`, `MatchingPreparation`, `MatchingSelection`, `SelectionOutput` | Matches core and ambient components and localizes the product action |
+| Kun–Thom obstruction | `KunThomFiniteMarkov` through `KunThomTheorem` and `KunThomEssential` | Extracts LEF from exact-product expansion after repairing the relation to a permutation |
+| Property `(T)` | `FreeRoot*`, `A2*`, `Kazhdan*`, `FreeElementaryPropertyT` | Proves the free characteristic-two `EL₃` Kazhdan input |
+| Universal Leavitt witness | `UniversalLeavitt`, `LeavittRankEquivalence`, `UniversalRankFour`, `UniversalPropertyT`, `UniversalCompressionSetup` | Constructs the closed `EL₄(L_{𝔽₂}(1,2))` setup |
+| Endpoint and verification | `CriterionAssembly`, `TableCover`, `MainResults`, `Audit`; `scripts/Audit.lean` | Closes nonsoficity, builds the finitely presented cover, and audits statements and axioms |
+
 ## Proof status
 
 Checked boxes below mean that the corresponding code has a genuine Lean proof
-term and its module has compiled with warnings treated as errors. The remaining
-unchecked boxes are repository-level verification tasks.
+term and its module has compiled with warnings treated as errors. Manuscript
+claims not yet formalized are listed separately in “Full manuscript scope.”
 
 - [x] Standard finite Hamming approximation and soficity infrastructure
 - [x] LEF definitions and the finite non-LEF obstruction
@@ -228,6 +263,40 @@ proposition interface. The whole-namespace kernel audit traverses 5,246
 project declarations and reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
 each later manuscript-scope checkpoint.
+
+## How to verify
+
+The repository pins Lean `v4.32.2` and Mathlib commit
+`905b95818eb32af7874a58b427f50c1711a5e96c` in `lean-toolchain` and
+`lake-manifest.json`. Do not update the manifest during verification.
+
+```bash
+lake exe cache get
+python3 scripts/check.py --self-test
+python3 scripts/check.py
+lake build
+lake env lean scripts/Calibrate.lean
+lake env lean scripts/Audit.lean
+```
+
+The source scan must report every planted calibration defect, all project
+modules in the root import closure, and no real-source finding. The build must
+finish with zero warnings and errors. Each public and load-bearing declaration
+printed by `NonsoficGroupsExist.Audit` must report exactly `propext`,
+`Classical.choice`, and `Quot.sound`; `scripts/Audit.lean` additionally rejects
+any other axiom in the transitive closure of the entire namespace.
+
+CI also clones the `lean4checker` branch matching the pinned toolchain and
+replays `NonsoficGroupsExist.olean` independently. The exact command is in
+`.github/workflows/prover.yml`; success is exit status zero with every imported
+olean accepted. A cold dependency download requires several gigabytes, and a
+cold project build can take hours; subsequent cached builds are substantially
+faster.
+
+The `official/` directory contains OpenAI's proof documents. They are not
+imported by Lean and are distinct from the main
+`nonsofic_groups_exist.tex` manuscript. The validated built PDF is
+intentionally committed to `main` by the PDF workflow.
 
 ## What is already formalized
 

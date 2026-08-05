@@ -1,10 +1,15 @@
 import NonsoficGroupsExist.Sofic
+import Mathlib.Algebra.Group.TypeTags.Hom
+import Mathlib.Algebra.Group.TypeTags.Finite
+import Mathlib.Data.Finset.Lattice.Fold
+import Mathlib.Data.ZMod.Basic
 import Mathlib.GroupTheory.GroupAction.Basic
 
 /-!
 # Positive control: the soficity definition is satisfiable
 
-Every other use of `IsSofic` in this development is negative.  It appears as a
+Before this control module, every use of `IsSofic` in the development was
+negative.  It appears elsewhere as a
 hypothesis to be refuted (`not_isSofic_of_not_isLEF`), as a hypothesis to be
 transported (`SoficTransfer`), or as the conclusion of the two headline
 theorems under a `¬`.  Before this module, nothing anywhere in the library
@@ -20,15 +25,10 @@ shown to meet it.  Under an unsatisfiable definition every theorem in this
 repository would still be true, every proof would still be kernel-checked, the
 axiom audit would still be clean, and the result would be worth nothing.
 
-So: the left regular representation of a finite group is an exact permutation
-model, and finite groups are sofic.  `scripts/Audit.lean` pins this theorem
-alongside the headline results, so the control cannot be deleted while the
-negative results remain.
-
-This closes the vacuity question only for finite groups.  The natural next
-control is an infinite one -- `Multiplicative ℤ`, or residually finite implies
-sofic -- and until one exists, what is ruled out is a definition unsatisfiable
-outright, not a definition that is accidentally too strong on infinite groups.
+The left regular representation proves every finite group sofic.  Cyclic
+quotients give an exact local model of the infinite cyclic group
+`Multiplicative ℤ`.  `scripts/Audit.lean` pins both controls alongside the
+headline results, so neither can be deleted while the negative results remain.
 -/
 
 namespace NonsoficGroupsExist
@@ -91,5 +91,59 @@ theorem isSofic_of_fintype (G : Type) [Group G] [Fintype G] [DecidableEq G] :
   · intro g _ h _ hgh
     rw [hammingDistance_mulLeft G hgh]
     exact sub_le_self 1 hε.le
+
+/-- Every finite group is sofic without requiring callers to choose a
+`Fintype` enumeration or decidable equality. -/
+theorem isSofic_of_finite (G : Type) [Group G] [Finite G] : IsSofic G := by
+  classical
+  letI : Fintype G := Fintype.ofFinite G
+  exact isSofic_of_fintype G
+
+/-- The infinite cyclic group is sofic.  On a prescribed finite set, reduce
+integers modulo an odd modulus larger than twice every absolute value in the
+set, then use the exact left regular action of that cyclic quotient. -/
+theorem isSofic_multiplicative_int : IsSofic (Multiplicative ℤ) := by
+  classical
+  intro F ε hε
+  let M : ℕ := F.sup fun g ↦ g.toAdd.natAbs
+  let N : ℕ := 2 * M + 1
+  have hN : N ≠ 0 := by simp [N]
+  letI : NeZero N := ⟨hN⟩
+  let φ : Multiplicative ℤ →* Multiplicative (ZMod N) :=
+    AddMonoidHom.toMultiplicative (Int.castAddHom (ZMod N))
+  let H := Multiplicative (ZMod N)
+  letI : Fintype H := inferInstance
+  letI : DecidableEq H := inferInstance
+  refine ⟨{ carrier := regularModel H
+            nonempty := ?_
+            map := fun g ↦ Equiv.mulLeft (φ g)
+            multiplicative := ?_
+            separated := ?_ }⟩
+  · exact Fintype.card_pos_iff.mpr ⟨1⟩
+  · intro g _ h _
+    rw [map_mul, mulLeft_mul, hammingDistance_self]
+    exact hε.le
+  · intro g hg h hh hgh
+    rw [hammingDistance_mulLeft H]
+    · exact sub_le_self 1 hε.le
+    · intro hφ
+      have hcast : (g.toAdd : ZMod N) = (h.toAdd : ZMod N) := by
+        simpa [φ] using congrArg Multiplicative.toAdd hφ
+      have hdvd : (N : ℤ) ∣ h.toAdd - g.toAdd :=
+        (ZMod.intCast_eq_intCast_iff_dvd_sub g.toAdd h.toAdd N).mp hcast
+      have hdiff : h.toAdd - g.toAdd ≠ 0 := by
+        intro hz
+        apply hgh
+        have heq : h.toAdd = g.toAdd := sub_eq_zero.mp hz
+        exact congrArg Multiplicative.ofAdd heq.symm
+      have hlower : N ≤ (h.toAdd - g.toAdd).natAbs := by
+        simpa only [Int.natAbs_natCast] using
+          Int.natAbs_le_of_dvd_ne_zero hdvd hdiff
+      have hgM : g.toAdd.natAbs ≤ M := by
+        exact Finset.le_sup hg
+      have hhM : h.toAdd.natAbs ≤ M := by
+        exact Finset.le_sup hh
+      have hupper := Int.natAbs_sub_le h.toAdd g.toAdd
+      omega
 
 end NonsoficGroupsExist

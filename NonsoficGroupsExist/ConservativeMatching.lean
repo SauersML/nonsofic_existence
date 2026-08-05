@@ -29,7 +29,7 @@ noncomputable def selectionOutput : SelectionOutput D where
 
 end LocalCriterionData
 
-/-- Conditional statement of the kernel-checked finite matching argument. -/
+/-- Interface form of the kernel-checked finite matching argument. -/
 theorem conservativeMatchingTheorem :
     ∀ (G Γ J : Type) [Group G] [Group Γ] [Group J]
       [Countable Γ] [Countable J],

@@ -1,0 +1,31 @@
+import NonsoficGroupsExist.MainResults
+import NonsoficGroupsExist.SoficPositiveControl
+import NonsoficGroupsExist.KunDecomposition
+import NonsoficGroupsExist.KunThomTheorem
+import NonsoficGroupsExist.FreeElementaryPropertyT
+
+/-!
+# Human-readable axiom report
+
+This module pins the axiom reports for the public results and the three most
+load-bearing mathematical inputs.  It is imported by the library root, so a
+normal `lake build` prints these reports.  The stricter executable gate in
+`scripts/Audit.lean` independently traverses the transitive axiom closure of
+the entire project namespace and fails on anything beyond classical Lean.
+-/
+
+#print axioms NonsoficGroupsExist.nonsofic_groups_exist
+#print axioms NonsoficGroupsExist.universalLeavittEL4_not_isSofic
+#print axioms NonsoficGroupsExist.ambient_profile
+#print axioms NonsoficGroupsExist.universalLeavitt_theoremA
+#print axioms NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group
+#print axioms NonsoficGroupsExist.KunDecomposition.exists_expanderDecomposition
+#print axioms NonsoficGroupsExist.KunThomTheorem.isLEF_of_exactProductExpansion
+#print axioms NonsoficGroupsExist.FreeElementaryPropertyT.freeElementary_hasKazhdanPropertyT
+#print axioms NonsoficGroupsExist.UniversalRankFour.witness_not_isLEF
+#print axioms NonsoficGroupsExist.isSofic_of_finite
+#print axioms NonsoficGroupsExist.isSofic_multiplicative_int
+#print axioms NonsoficGroupsExist.isSofic_iff_productRestricted
+#print axioms NonsoficGroupsExist.isLEF_of_finite
+#print axioms NonsoficGroupsExist.isLEF_multiplicative_int
+#print axioms NonsoficGroupsExist.isLEF_iff_textbook

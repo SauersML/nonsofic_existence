@@ -51,7 +51,7 @@ theorem exists_maximalSeparated
   exact Finset.le_max' sizes U.card hUsize
 
 /-- Maximality makes the forbidden set together with the selected conflict
-neighborhoods cover the entire candidate block. -/
+neighborhoods cover the entire tested block. -/
 theorem subset_forbidden_union_biUnion_of_maximal
     {V : Type} [Fintype V] [DecidableEq V]
     (C F M : Finset V) (N : V → Finset V)

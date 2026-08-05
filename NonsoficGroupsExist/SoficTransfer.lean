@@ -64,6 +64,11 @@ theorem isSofic_of_injective (f : H →* G)
       exact M.separated (f g) (Finset.mem_image.mpr ⟨g, hg, rfl⟩)
         (f k) (Finset.mem_image.mpr ⟨k, hk, rfl⟩) (fun heq ↦ hne (hf heq)) }⟩
 
+/-- Soficity is invariant under group isomorphism. -/
+theorem isSofic_mulEquiv_iff (e : G ≃* H) : IsSofic G ↔ IsSofic H :=
+  ⟨fun hG ↦ isSofic_of_injective e.symm.toMonoidHom e.symm.injective hG,
+    fun hH ↦ isSofic_of_injective e.toMonoidHom e.injective hH⟩
+
 /-- The restriction of a sofic approximation of `G` to a subgroup. -/
 def SoficApproximation.restrict (S : SoficApproximation G) (K : Subgroup G) :
     SoficApproximation K :=

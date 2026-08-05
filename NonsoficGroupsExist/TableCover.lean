@@ -572,7 +572,7 @@ theorem exists_finitelyPresented_obstruction [Group.FG G]
   have hnsofic := tableGroup_not_isSofic F h₁ hε hbadF
   exact ⟨F, h₁, ε, hε, hbadGroup, hnsofic, hcover⟩
 
-/-- Honest conditional finite-presentation reduction in Mathlib's standard
+/-- Premise-explicit finite-presentation reduction in Mathlib's standard
 `Group.IsFinitelyPresented` predicate.  The sole substantive premise is the
 supplied finitely generated nonsofic group. -/
 theorem exists_finitelyPresented_nonsofic_cover

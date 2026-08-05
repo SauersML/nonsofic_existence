@@ -20,10 +20,11 @@ of Sections `subsec:onesided`--`subsec:matching` is proved here in full:
   `prop:match`(ii), the passage from pinning to almost-bijective matching;
 * `matching_injective` -- Proposition `prop:match`(iii).
 
-`ExpanderDecomposition` and `MatchingCertificate` are data structures used to
-state conditional intermediate results.  This module does not prove that such
-data exist and does not expose a theorem which treats their existence as an
-external input.
+`ExpanderDecomposition` and `MatchingCertificate` are reusable interfaces
+between stages of the proof.  Their inhabitants are constructed by the Kun
+decomposition and matching modules before the closed criterion is applied;
+this module does not treat their existence as an external premise of the
+headline theorem.
 -/
 
 namespace NonsoficGroupsExist
@@ -144,7 +145,7 @@ theorem matching_injective (U₁ U₂ D : Finset α) (hdisj : Disjoint U₁ U₂
   dominant_intersection_unique U₁ U₂ D hdisj
     (dominant_of_small_symmDiff U₁ D h₁) (dominant_of_small_symmDiff U₂ D h₂)
 
-/-! ### Data used by the conditional matching development -/
+/-! ### Data used by the matching development -/
 
 /-- The loopless generator multigraph of a finite permutation model.  Its edge
 type consists of generator/vertex arc occurrences, so parallel edges and labels
@@ -178,8 +179,8 @@ noncomputable def generatorGraphVertexEquiv {G : Type} [Group G]
   exact Equiv.refl Y
 
 /-- An expander decomposition in the precise form consumed by the subsequent
-finite matching argument.  Constructing this data from property `(T)` remains
-a separate obligation; this structure is not itself a proof of that theorem. -/
+finite matching argument.  `KunDecomposition` constructs this data from
+property `(T)`; this structure merely records the resulting interface. -/
 structure ExpanderDecomposition {G : Type} [Group G]
     (S : SoficApproximation G) (T : Finset G) where
   blocks : ∀ n, BlockStructure (S.model n)
