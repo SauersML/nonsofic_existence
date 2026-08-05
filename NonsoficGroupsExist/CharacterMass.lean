@@ -4,6 +4,9 @@ import Mathlib.Analysis.Complex.Basic
 import Mathlib.Algebra.Group.AddChar
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.FieldTheory.Finiteness
+import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
+import Mathlib.Algebra.CharP.Basic
+import Mathlib.Data.ZMod.Basic
 
 /-!
 # Character masses of finite-field orthogonal actions
@@ -981,6 +984,34 @@ theorem sum_mass_fiber_comp
       congr 1
       refine Finset.sum_congr rfl fun v _ ↦ ?_
       rw [← sum_apply_re_mass ψ ρ hρ hψ z (s v)]
+
+
+/-- **Positive control for the nontriviality hypotheses**: every finite
+field admits a nontrivial complex additive character, obtained by pushing
+a nonzero linear functional into the standard character of the prime
+field. -/
+theorem exists_addChar_ne_one (K : Type*) [Field K] [Fintype K] :
+    ∃ ψ : AddChar K ℂ, ψ ≠ 1 := by
+  classical
+  set p := ringChar K with hp
+  haveI hprime : Fact p.Prime := ⟨CharP.char_is_prime K p⟩
+  haveI : NeZero p := ⟨hprime.1.ne_zero⟩
+  letI : Algebra (ZMod p) K := ZMod.algebra K p
+  obtain ⟨φ, hφ⟩ : ∃ φ : Module.Dual (ZMod p) K, φ 1 ≠ 0 := by
+    by_contra hall
+    push Not at hall
+    exact one_ne_zero
+      ((Module.forall_dual_apply_eq_zero_iff (ZMod p) (1 : K)).1 hall)
+  refine ⟨(ZMod.stdAddChar (N := p)).compAddMonoidHom
+    φ.toAddMonoidHom, fun hcontra ↦ hφ ?_⟩
+  have happ : (ZMod.stdAddChar (N := p)).compAddMonoidHom
+      φ.toAddMonoidHom (1 : K) = 1 := by
+    rw [hcontra]
+    exact AddChar.one_apply _
+  rw [AddChar.compAddMonoidHom_apply] at happ
+  have h0 : ZMod.stdAddChar (N := p) (0 : ZMod p) = 1 :=
+    AddChar.map_zero_eq_one _
+  exact ZMod.injective_stdAddChar (happ.trans h0.symm)
 
 end CharacterMass
 
