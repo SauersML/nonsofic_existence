@@ -155,6 +155,7 @@ import NonsoficGroupsExist.BinaryLeavittWindow
 import NonsoficGroupsExist.ScaledStreamRepresentation
 import NonsoficGroupsExist.VandermondeExtraction
 import NonsoficGroupsExist.GradedIndependence
+import NonsoficGroupsExist.BaseChangeIndependence
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
