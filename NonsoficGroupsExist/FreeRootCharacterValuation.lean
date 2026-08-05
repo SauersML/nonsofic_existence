@@ -3017,6 +3017,493 @@ theorem sum_norm_planeCBRegion_sq_le_target_add_error_add_boundary
         (sum_norm_planeCBTopBoundaryLeadingSignSet_sq_le
           X i j k hij hik hjk n rho z)
 
+/-- The part of region `D` detected on the first unit coefficient. -/
+noncomputable def planeDFirstSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  (planeRegionSignSet X i j k hij hik hjk n .D).filter fun sign ↦
+    firstCoefficientValuation X i j k hij hik hjk n sign = 0
+
+/-- The remaining part of `D`; its second unit coefficient is necessarily
+detected. -/
+noncomputable def planeDSecondSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :=
+  (planeRegionSignSet X i j k hij hik hjk n .D).filter fun sign ↦
+    firstCoefficientValuation X i j k hij hik hjk n sign ≠ 0
+
+theorem planeRegionSignSet_D_eq_unit_split
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    planeRegionSignSet X i j k hij hik hjk n .D =
+      planeDFirstSignSet X i j k hij hik hjk n ∪
+        planeDSecondSignSet X i j k hij hik hjk n := by
+  classical
+  ext sign
+  simp only [planeDFirstSignSet, planeDSecondSignSet,
+    Finset.mem_filter, Finset.mem_union]
+  tauto
+
+theorem planeDFirstSignSet_disjoint_planeDSecondSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Disjoint (planeDFirstSignSet X i j k hij hik hjk n)
+      (planeDSecondSignSet X i j k hij hik hjk n) := by
+  classical
+  rw [Finset.disjoint_left]
+  intro sign hfirst hsecond
+  simp only [planeDFirstSignSet, planeDSecondSignSet,
+    Finset.mem_filter] at hfirst hsecond
+  exact hsecond.2 hfirst.2
+
+theorem planeDFirstSignSet_subset_negative_unit
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    planeDFirstSignSet X i j k hij hik hjk n ⊆
+      negativePlaneSignSet X i j k hij hik hjk n
+        (firstCoordinate X i j k hij hik hjk n
+          (wordMonomialInDegree X n 1)) := by
+  classical
+  intro sign hsign
+  simp only [planeDFirstSignSet, Finset.mem_filter] at hsign
+  have hdetect := (characterValuation_eq_zero_iff X
+    (firstCoefficientEigenvalue X i j k hij hik hjk n sign)).1 hsign.2
+  simpa [negativePlaneSignSet, firstCoefficientEigenvalue] using hdetect
+
+theorem planeDSecondSignSet_subset_negative_unit
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    planeDSecondSignSet X i j k hij hik hjk n ⊆
+      negativePlaneSignSet X i j k hij hik hjk n
+        (secondCoordinate X i j k hij hik hjk n
+          (wordMonomialInDegree X n 1)) := by
+  classical
+  intro sign hsign
+  simp only [planeDSecondSignSet, Finset.mem_filter] at hsign
+  have hregion : planeCharacterRegion X i j k hij hik hjk n sign = .D := by
+    simpa [planeRegionSignSet] using hsign.1
+  have hzero := characterPairRegion_D_data X n
+    (firstCoefficientEigenvalue X i j k hij hik hjk n sign)
+    (secondCoefficientEigenvalue X i j k hij hik hjk n sign) hregion
+  have hsecond : secondCoefficientValuation X i j k hij hik hjk n sign = 0 :=
+    hzero.resolve_left hsign.2
+  have hdetect := (characterValuation_eq_zero_iff X
+    (secondCoefficientEigenvalue X i j k hij hik hjk n sign)).1 hsecond
+  simpa [negativePlaneSignSet, secondCoefficientEigenvalue] using hdetect
+
+/-- Region `D` is controlled exactly by the two unit-coordinate
+displacements. -/
+theorem sum_norm_planeRegionSignSet_D_sq_le_unit_displacements
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .D,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      (4 : ℝ)⁻¹ *
+          ‖rho (firstCoordinate X i j k hij hik hjk n
+            (wordMonomialInDegree X n 1)).1 z - z‖ ^ 2 +
+        (4 : ℝ)⁻¹ *
+          ‖rho (secondCoordinate X i j k hij hik hjk n
+            (wordMonomialInDegree X n 1)).1 z - z‖ ^ 2 := by
+  classical
+  rw [planeRegionSignSet_D_eq_unit_split,
+    Finset.sum_union
+      (planeDFirstSignSet_disjoint_planeDSecondSignSet
+        X i j k hij hik hjk n)]
+  calc
+    _ ≤ (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
+            (firstCoordinate X i j k hij hik hjk n
+              (wordMonomialInDegree X n 1)),
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
+        ∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
+            (secondCoordinate X i j k hij hik hjk n
+              (wordMonomialInDegree X n 1)),
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 :=
+      add_le_add
+        (Finset.sum_le_sum_of_subset_of_nonneg
+          (planeDFirstSignSet_subset_negative_unit
+            X i j k hij hik hjk n) (fun _ _ _ ↦ sq_nonneg _))
+        (Finset.sum_le_sum_of_subset_of_nonneg
+          (planeDSecondSignSet_subset_negative_unit
+            X i j k hij hik hjk n) (fun _ _ _ ↦ sq_nonneg _))
+    _ = _ := by
+      rw [planeCharacterMass_eq_quarter_displacement,
+        planeCharacterMass_eq_quarter_displacement]
+
+/-- Under opposite unit conjugation, the first coefficient character becomes
+the product of the two original characters. -/
+theorem firstCoefficientEigenvalue_oppositeUnitConjugatedRestriction_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ sign
+          (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) =
+      characterProduct X
+        (firstCoefficientEigenvalue X i j k hij hik hjk n sign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk n sign) := by
+  funext a
+  rw [firstCoefficientEigenvalue,
+    planeEigenvalue_oppositeUnitConjugatedRestriction]
+  have hconj : oppositeUnitConjugatedPlane X i j k hij hik hjk n
+      (firstCoordinate X i j k hij hik hjk n a) =
+      firstCoordinate X i j k hij hik hjk n a *
+        secondCoordinate X i j k hij hik hjk n a := by
+    apply Subtype.ext
+    change elementaryRoot j i hij.symm 1 * elementaryRoot i k hik a.1 *
+        (elementaryRoot j i hij.symm 1)⁻¹ =
+      elementaryRoot i k hik a.1 * elementaryRoot j k hjk a.1
+    rw [elementaryRoot_conjugate, one_mul]
+    exact (elementaryRoot_commute_of_ne j k i k hjk hik
+      hik.symm hjk.symm _ _).eq
+  rw [hconj, hvalid]
+  rfl
+
+/-- Opposite unit conjugation fixes the second coefficient character. -/
+theorem secondCoefficientEigenvalue_oppositeUnitConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ sign
+          (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) =
+      secondCoefficientEigenvalue X i j k hij hik hjk n sign := by
+  funext b
+  rw [secondCoefficientEigenvalue,
+    planeEigenvalue_oppositeUnitConjugatedRestriction]
+  have hconj : oppositeUnitConjugatedPlane X i j k hij hik hjk n
+      (secondCoordinate X i j k hij hik hjk n b) =
+      secondCoordinate X i j k hij hik hjk n b := by
+    apply Subtype.ext
+    have hcomm := elementaryRoot_commute_of_ne j i j k hij.symm hjk
+      hij hjk.symm (1 : FreeRing X) b.1
+    change elementaryRoot j i hij.symm 1 * elementaryRoot j k hjk b.1 *
+        (elementaryRoot j i hij.symm 1)⁻¹ = elementaryRoot j k hjk b.1
+    rw [hcomm.eq]
+    simp
+  rw [hconj]
+  rfl
+
+/-- Forward unit conjugation fixes the first coefficient character. -/
+theorem firstCoefficientEigenvalue_forwardUnitConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) :
+    firstCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ sign
+          (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) =
+      firstCoefficientEigenvalue X i j k hij hik hjk n sign := by
+  funext a
+  rw [firstCoefficientEigenvalue,
+    planeEigenvalue_forwardUnitConjugatedRestriction]
+  have hconj : forwardUnitConjugatedPlane X i j k hij hik hjk n
+      (firstCoordinate X i j k hij hik hjk n a) =
+      firstCoordinate X i j k hij hik hjk n a := by
+    apply Subtype.ext
+    have hcomm := elementaryRoot_commute_of_ne i j i k hij hik
+      hij.symm hik.symm (1 : FreeRing X) a.1
+    change elementaryRoot i j hij 1 * elementaryRoot i k hik a.1 *
+        (elementaryRoot i j hij 1)⁻¹ = elementaryRoot i k hik a.1
+    rw [hcomm.eq]
+    simp
+  rw [hconj]
+  rfl
+
+/-- Under forward unit conjugation, the second coefficient character becomes
+the product of the two original characters. -/
+theorem secondCoefficientEigenvalue_forwardUnitConjugatedRestriction_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign) :
+    secondCoefficientEigenvalue X i j k hij hik hjk n
+        (fun q ↦ sign
+          (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) =
+      characterProduct X
+        (firstCoefficientEigenvalue X i j k hij hik hjk n sign)
+        (secondCoefficientEigenvalue X i j k hij hik hjk n sign) := by
+  funext b
+  rw [secondCoefficientEigenvalue,
+    planeEigenvalue_forwardUnitConjugatedRestriction]
+  have hconj : forwardUnitConjugatedPlane X i j k hij hik hjk n
+      (secondCoordinate X i j k hij hik hjk n b) =
+      firstCoordinate X i j k hij hik hjk n b *
+        secondCoordinate X i j k hij hik hjk n b := by
+    apply Subtype.ext
+    change elementaryRoot i j hij 1 * elementaryRoot j k hjk b.1 *
+        (elementaryRoot i j hij 1)⁻¹ =
+      elementaryRoot i k hik b.1 * elementaryRoot j k hjk b.1
+    rw [elementaryRoot_conjugate, one_mul]
+  rw [hconj, hvalid]
+  rfl
+
+/-- The opposite unit shear sends every valid region-`A` sign into `B`. -/
+theorem planeCharacterRegion_oppositeUnitConjugatedRestriction_eq_B_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign)
+    (hA : planeCharacterRegion X i j k hij hik hjk n sign = .A) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun q ↦ sign
+          (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) = .B := by
+  let chi := firstCoefficientEigenvalue X i j k hij hik hjk n sign
+  let psi := secondCoefficientEigenvalue X i j k hij hik hjk n sign
+  have hdata := characterPairRegion_A_data X n chi psi hA
+  have hPsiExists : ∃ d, HasDetectionAtDegree X psi d := by
+    by_contra hnone
+    have hsentinel := characterValuation_eq_succ_of_not_exists X psi hnone
+    have hchiBound := characterValuation_le_succ X chi
+    omega
+  have hproduct := characterValuation_characterProduct_eq_right_of_lt
+    X chi psi
+    (firstCoefficientEigenvalue_eq_one_or_neg_one X i j k hij hik hjk n sign)
+    (secondCoefficientEigenvalue_eq_one_or_neg_one X i j k hij hik hjk n sign)
+    hPsiExists hdata.2.2.2
+  have hfirst := firstCoefficientEigenvalue_oppositeUnitConjugatedRestriction_of_valid
+    X i j k hij hik hjk n sign hvalid
+  have hsecond := secondCoefficientEigenvalue_oppositeUnitConjugatedRestriction
+    X i j k hij hik hjk n sign
+  unfold planeCharacterRegion
+  rw [hfirst, hsecond]
+  apply characterPairRegion_eq_B_of_data X n
+  · intro hboth
+    change characterValuation X (characterProduct X chi psi) = n + 1 ∧
+      characterValuation X psi = n + 1 at hboth
+    have hchiBound := characterValuation_le_succ X chi
+    omega
+  · rw [hproduct]
+    exact hdata.2.2.1
+  · exact hdata.2.2.1
+  · exact hproduct
+
+/-- The forward unit shear sends every valid region-`C` sign into `B`. -/
+theorem planeCharacterRegion_forwardUnitConjugatedRestriction_eq_B_of_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign)
+    (hC : planeCharacterRegion X i j k hij hik hjk n sign = .C) :
+    planeCharacterRegion X i j k hij hik hjk n
+        (fun q ↦ sign
+          (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) = .B := by
+  let chi := firstCoefficientEigenvalue X i j k hij hik hjk n sign
+  let psi := secondCoefficientEigenvalue X i j k hij hik hjk n sign
+  have hdata := characterPairRegion_C_data X n chi psi hC
+  have hChiExists : ∃ d, HasDetectionAtDegree X chi d := by
+    by_contra hnone
+    have hsentinel := characterValuation_eq_succ_of_not_exists X chi hnone
+    have hpsiBound := characterValuation_le_succ X psi
+    omega
+  have hproduct := characterValuation_characterProduct_eq_left_of_lt
+    X chi psi
+    (firstCoefficientEigenvalue_eq_one_or_neg_one X i j k hij hik hjk n sign)
+    (secondCoefficientEigenvalue_eq_one_or_neg_one X i j k hij hik hjk n sign)
+    hChiExists hdata.2.2.2
+  have hfirst := firstCoefficientEigenvalue_forwardUnitConjugatedRestriction
+    X i j k hij hik hjk n sign
+  have hsecond := secondCoefficientEigenvalue_forwardUnitConjugatedRestriction_of_valid
+    X i j k hij hik hjk n sign hvalid
+  unfold planeCharacterRegion
+  rw [hfirst, hsecond]
+  apply characterPairRegion_eq_B_of_data X n
+  · intro hboth
+    change characterValuation X chi = n + 1 ∧
+      characterValuation X (characterProduct X chi psi) = n + 1 at hboth
+    have hpsiBound := characterValuation_le_succ X psi
+    omega
+  · exact hdata.2.1
+  · rw [hproduct]
+    exact hdata.2.1
+  · exact hproduct.symm
+
+/-- The genuine multiplicative signs inside one valuation region. -/
+noncomputable def planeValidRegionSignSet
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (region : ValuationRegion) :
+    Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool) := by
+  classical
+  exact (planeRegionSignSet X i j k hij hik hjk n region).filter
+    (IsPlaneCharacterSign X i j k hij hik hjk n)
+
+/-- Invalid binary assignments contribute zero, so every valuation region has
+exactly the same mass after filtering to genuine multiplicative signs. -/
+theorem sum_norm_planeRegionSignSet_eq_valid
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (region : ValuationRegion)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n region,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) =
+      ∑ sign ∈ planeValidRegionSignSet X i j k hij hik hjk n region,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := by
+  classical
+  rw [planeValidRegionSignSet]
+  generalize planeRegionSignSet X i j k hij hik hjk n region = signs
+  induction signs using Finset.induction_on with
+  | empty => simp
+  | @insert sign signs hnot ih =>
+      by_cases hvalid : IsPlaneCharacterSign X i j k hij hik hjk n sign
+      · rw [Finset.filter_insert]
+        simp [hnot, hvalid, ih]
+      · have hzero := planeComponent_eq_zero_of_not_isPlaneCharacterSign
+          X i j k hij hik hjk n rho sign z hvalid
+        rw [Finset.filter_insert]
+        simp [hnot, hvalid, hzero, ih]
+
+/-- Same-stage unit transport gives the quantitative `A → B` mass estimate
+from Kassabov's argument. -/
+theorem sum_norm_planeRegionSignSet_A_sq_le_B_add_unit_error
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .A,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .B,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
+      2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm 1) z - z‖ := by
+  classical
+  let source := planeRegionSignSet X i j k hij hik hjk n .A
+  let validSource := source.filter
+    (IsPlaneCharacterSign X i j k hij hik hjk n)
+  let target := planeRegionSignSet X i j k hij hik hjk n .B
+  let index := oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n
+  let moved := rho (elementaryRoot j i hij.symm 1) z
+  have hsubset : validSource ⊆ fineRestrictionSignSet
+      (Nat.card (Plane X i j k hij hik hjk n))
+      (Nat.card (Plane X i j k hij hik hjk n)) index target := by
+    intro sign hsign
+    obtain ⟨hsource, hvalid⟩ := Finset.mem_filter.mp hsign
+    have hA : planeCharacterRegion X i j k hij hik hjk n sign = .A := by
+      simpa [source, planeRegionSignSet] using hsource
+    have hB :=
+      planeCharacterRegion_oppositeUnitConjugatedRestriction_eq_B_of_valid
+        X i j k hij hik hjk n sign hvalid hA
+    simp only [fineRestrictionSignSet, Finset.mem_filter, Finset.mem_univ,
+      true_and]
+    simpa [index, target, planeRegionSignSet] using hB
+  have htransport :
+      (∑ sign ∈ source,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+        ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2 := by
+    calc
+      _ = ∑ sign ∈ validSource,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := by
+        exact sum_norm_planeRegionSignSet_eq_valid
+          X i j k hij hik hjk n .A rho z
+      _ ≤ ∑ sign ∈ fineRestrictionSignSet
+            (Nat.card (Plane X i j k hij hik hjk n))
+            (Nat.card (Plane X i j k hij hik hjk n)) index target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg hsubset
+          (fun _ _ _ ↦ sq_nonneg _)
+      _ = ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2 :=
+        sum_norm_oppositeUnitConjugatedRestriction_sq
+          X i j k hij hik hjk n rho target z
+  have hvariation := abs_sum_norm_planeComponent_sq_sub_le
+    X i j k hij hik hjk n rho target moved z
+  have hdiff :
+      (∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2) -
+        (∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      (‖moved‖ + ‖z‖) * ‖moved - z‖ :=
+    (le_abs_self _).trans hvariation
+  rw [sub_le_iff_le_add] at hdiff
+  have hnorm : ‖moved‖ = ‖z‖ :=
+    (rho (elementaryRoot j i hij.symm 1)).norm_map z
+  calc
+    _ ≤ ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2 := htransport
+    _ ≤ (‖moved‖ + ‖z‖) * ‖moved - z‖ +
+        ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := hdiff
+    _ = (∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
+        2 * ‖z‖ * ‖moved - z‖ := by rw [hnorm]; ring
+    _ = _ := by rfl
+
+/-- Symmetric quantitative `C → B` unit-shear estimate. -/
+theorem sum_norm_planeRegionSignSet_C_sq_le_B_add_unit_error
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .C,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .B,
+        ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
+      2 * ‖z‖ * ‖rho (elementaryRoot i j hij 1) z - z‖ := by
+  classical
+  let source := planeRegionSignSet X i j k hij hik hjk n .C
+  let validSource := source.filter
+    (IsPlaneCharacterSign X i j k hij hik hjk n)
+  let target := planeRegionSignSet X i j k hij hik hjk n .B
+  let index := forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n
+  let moved := rho (elementaryRoot i j hij 1) z
+  have hsubset : validSource ⊆ fineRestrictionSignSet
+      (Nat.card (Plane X i j k hij hik hjk n))
+      (Nat.card (Plane X i j k hij hik hjk n)) index target := by
+    intro sign hsign
+    obtain ⟨hsource, hvalid⟩ := Finset.mem_filter.mp hsign
+    have hC : planeCharacterRegion X i j k hij hik hjk n sign = .C := by
+      simpa [source, planeRegionSignSet] using hsource
+    have hB :=
+      planeCharacterRegion_forwardUnitConjugatedRestriction_eq_B_of_valid
+        X i j k hij hik hjk n sign hvalid hC
+    simp only [fineRestrictionSignSet, Finset.mem_filter, Finset.mem_univ,
+      true_and]
+    simpa [index, target, planeRegionSignSet] using hB
+  have htransport :
+      (∑ sign ∈ source,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+        ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2 := by
+    calc
+      _ = ∑ sign ∈ validSource,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := by
+        exact sum_norm_planeRegionSignSet_eq_valid
+          X i j k hij hik hjk n .C rho z
+      _ ≤ ∑ sign ∈ fineRestrictionSignSet
+            (Nat.card (Plane X i j k hij hik hjk n))
+            (Nat.card (Plane X i j k hij hik hjk n)) index target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg hsubset
+          (fun _ _ _ ↦ sq_nonneg _)
+      _ = ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2 :=
+        sum_norm_forwardUnitConjugatedRestriction_sq
+          X i j k hij hik hjk n rho target z
+  have hvariation := abs_sum_norm_planeComponent_sq_sub_le
+    X i j k hij hik hjk n rho target moved z
+  have hdiff :
+      (∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2) -
+        (∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
+      (‖moved‖ + ‖z‖) * ‖moved - z‖ :=
+    (le_abs_self _).trans hvariation
+  rw [sub_le_iff_le_add] at hdiff
+  have hnorm : ‖moved‖ = ‖z‖ :=
+    (rho (elementaryRoot i j hij 1)).norm_map z
+  calc
+    _ ≤ ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign moved‖ ^ 2 := htransport
+    _ ≤ (‖moved‖ + ‖z‖) * ‖moved - z‖ +
+        ∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 := hdiff
+    _ = (∑ sign ∈ target,
+          ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
+        2 * ‖z‖ * ‖moved - z‖ := by rw [hnorm]; ring
+    _ = _ := by rfl
+
 /-- The squared mass of one `A ∪ B` leading-generator fiber is bounded by
 the coarse `C ∪ D` mass after acting by its opposite adjacent generator.
 No component is counted through a merely algebraic character map: the proof

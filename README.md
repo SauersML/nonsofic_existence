@@ -147,6 +147,9 @@ box is still a required dependency of the final theorem.
   nonnegative trivial-character mass, prove both boundary masses tend to
   zero, and combine them with the disjoint interior estimates into the two
   full finite-stage Kassabov inequalities
+- [x] Construct the two same-stage unit-root conjugations, prove their exact
+  Fourier transport sends `A` and `C` into `B`, and bound region `D` by the
+  two unit-coordinate displacements
 - [ ] Pass the finite-stage inequalities to the limiting two-root moving
   mass and complete the uniform relative-property-`(T)` estimate
 - [ ] Prove property (T) for the concrete characteristic-two rank-three group

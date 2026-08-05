@@ -104,6 +104,70 @@ noncomputable def forwardConjugatedPlaneSuccIndex
     (forwardConjugatedPlaneSucc X i j k hij hik hjk x n
       (planeEnumeration X i j k hij hik hjk n q))
 
+/-- Conjugate a plane stage by the forward adjacent unit root without
+changing the degree stage. -/
+noncomputable def forwardUnitConjugatedPlane
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) : Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk n :=
+  fun g ↦ ⟨elementaryRoot i j hij 1 * g.1 * (elementaryRoot i j hij 1)⁻¹,
+    conjugate_unit_mem X i j k hij hik hjk n g.1 g.2⟩
+
+/-- The corresponding opposite adjacent unit conjugation. -/
+noncomputable def oppositeUnitConjugatedPlane
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) : Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk n :=
+  fun g ↦ ⟨elementaryRoot j i hij.symm 1 * g.1 *
+      (elementaryRoot j i hij.symm 1)⁻¹,
+    conjugate_opposite_unit_mem X i j k hij hik hjk n g.1 g.2⟩
+
+/-- Enumeration index of forward unit conjugation. -/
+noncomputable def forwardUnitConjugatedPlaneIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Fin (Nat.card (Plane X i j k hij hik hjk n)) →
+      Fin (Nat.card (Plane X i j k hij hik hjk n)) :=
+  fun q ↦ (planeEnumeration X i j k hij hik hjk n).symm
+    (forwardUnitConjugatedPlane X i j k hij hik hjk n
+      (planeEnumeration X i j k hij hik hjk n q))
+
+/-- Enumeration index of opposite unit conjugation. -/
+noncomputable def oppositeUnitConjugatedPlaneIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) :
+    Fin (Nat.card (Plane X i j k hij hik hjk n)) →
+      Fin (Nat.card (Plane X i j k hij hik hjk n)) :=
+  fun q ↦ (planeEnumeration X i j k hij hik hjk n).symm
+    (oppositeUnitConjugatedPlane X i j k hij hik hjk n
+      (planeEnumeration X i j k hij hik hjk n q))
+
+theorem planeFamily_forwardUnitConjugatedPlaneIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Nat.card (Plane X i j k hij hik hjk n))) :
+    elementaryRoot i j hij 1 * planeFamily X i j k hij hik hjk n q *
+        (elementaryRoot i j hij 1)⁻¹ =
+      planeFamily X i j k hij hik hjk n
+        (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n q) := by
+  change _ = ((planeEnumeration X i j k hij hik hjk n)
+    ((planeEnumeration X i j k hij hik hjk n).symm
+      (forwardUnitConjugatedPlane X i j k hij hik hjk n
+        (planeEnumeration X i j k hij hik hjk n q)))).1
+  rw [Equiv.apply_symm_apply]
+  rfl
+
+theorem planeFamily_oppositeUnitConjugatedPlaneIndex
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (q : Fin (Nat.card (Plane X i j k hij hik hjk n))) :
+    elementaryRoot j i hij.symm 1 * planeFamily X i j k hij hik hjk n q *
+        (elementaryRoot j i hij.symm 1)⁻¹ =
+      planeFamily X i j k hij hik hjk n
+        (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n q) := by
+  change _ = ((planeEnumeration X i j k hij hik hjk n)
+    ((planeEnumeration X i j k hij hik hjk n).symm
+      (oppositeUnitConjugatedPlane X i j k hij hik hjk n
+        (planeEnumeration X i j k hij hik hjk n q)))).1
+  rw [Equiv.apply_symm_apply]
+  rfl
+
 /-- The next-stage enumeration index of the opposite conjugate of a coarse
 plane element. -/
 noncomputable def oppositeConjugatedPlaneSuccIndex
@@ -410,6 +474,68 @@ theorem sum_norm_planeRestriction_sq
     (planeFamily_pairwise_commute X i j k hij hik hjk (n + 1))
     coarseSigns z
 
+/-- Exact same-stage squared-mass transport under the forward unit shear. -/
+theorem sum_norm_forwardUnitConjugatedRestriction_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (coarseSigns :
+      Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n) coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign
+          (rho (elementaryRoot i j hij 1) z)‖ ^ 2 := by
+  have hsq : elementaryRoot i j hij (1 : FreeRing X) ^ 2 = 1 := by
+    rw [pow_two, elementaryRoot_mul, FreeAlgebraDegree.add_self_eq_zero,
+      elementaryRoot_zero]
+  exact sum_norm_fineRestriction_conjugated_sq rho (elementaryRoot i j hij 1)
+    hsq
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk n)
+    (planeFamily X i j k hij hik hjk n)
+    (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n)
+    (planeFamily_forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n)
+    (planeFamily_sq X i j k hij hik hjk n)
+    (planeFamily_pairwise_commute X i j k hij hik hjk n)
+    coarseSigns z
+
+/-- Exact same-stage squared-mass transport under the opposite unit shear. -/
+theorem sum_norm_oppositeUnitConjugatedRestriction_sq
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (coarseSigns :
+      Finset (Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool))
+    (z : E) :
+    ∑ fineSign ∈ fineRestrictionSignSet
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (Nat.card (Plane X i j k hij hik hjk n))
+          (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n) coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho fineSign z‖ ^ 2 =
+      ∑ coarseSign ∈ coarseSigns,
+        ‖planeComponent X i j k hij hik hjk n rho coarseSign
+          (rho (elementaryRoot j i hij.symm 1) z)‖ ^ 2 := by
+  have hsq : elementaryRoot j i hij.symm (1 : FreeRing X) ^ 2 = 1 := by
+    rw [pow_two, elementaryRoot_mul, FreeAlgebraDegree.add_self_eq_zero,
+      elementaryRoot_zero]
+  exact sum_norm_fineRestriction_conjugated_sq rho (elementaryRoot j i hij.symm 1)
+    hsq
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (Nat.card (Plane X i j k hij hik hjk n))
+    (planeFamily X i j k hij hik hjk n)
+    (planeFamily X i j k hij hik hjk n)
+    (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n)
+    (planeFamily_oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n)
+    (planeFamily_sq X i j k hij hik hjk n)
+    (planeFamily_pairwise_commute X i j k hij hik hjk n)
+    coarseSigns z
+
 /-- Squared mass of any selected finite-plane sign set varies by at most the
 standard projection Lipschitz bound. -/
 theorem abs_sum_norm_planeComponent_sq_sub_le
@@ -458,6 +584,34 @@ theorem planeEigenvalue_succRestriction
       planeEigenvalue X i j k hij hik hjk (n + 1) fineSign
         (planeSucc X i j k hij hik hjk n g) := by
   unfold planeEigenvalue planeSuccIndex
+  simp only [Equiv.apply_symm_apply]
+
+/-- Exact eigenvalue restriction along forward unit conjugation. -/
+theorem planeEigenvalue_forwardUnitConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (g : Plane X i j k hij hik hjk n) :
+    planeEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (forwardUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) g =
+      planeEigenvalue X i j k hij hik hjk n fineSign
+        (forwardUnitConjugatedPlane X i j k hij hik hjk n g) := by
+  unfold planeEigenvalue forwardUnitConjugatedPlaneIndex
+  simp only [Equiv.apply_symm_apply]
+
+/-- Exact eigenvalue restriction along opposite unit conjugation. -/
+theorem planeEigenvalue_oppositeUnitConjugatedRestriction
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ)
+    (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
+    (g : Plane X i j k hij hik hjk n) :
+    planeEigenvalue X i j k hij hik hjk n
+        (fun q ↦ fineSign
+          (oppositeUnitConjugatedPlaneIndex X i j k hij hik hjk n q)) g =
+      planeEigenvalue X i j k hij hik hjk n fineSign
+        (oppositeUnitConjugatedPlane X i j k hij hik hjk n g) := by
+  unfold planeEigenvalue oppositeUnitConjugatedPlaneIndex
   simp only [Equiv.apply_symm_apply]
 
 /-- Restricting a fine sign assignment along the forward conjugated index map

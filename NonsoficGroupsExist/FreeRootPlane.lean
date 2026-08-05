@@ -444,6 +444,60 @@ theorem conjugate_opposite_generator_mem_succ
         elementaryRoot j k hjk (FreeAlgebra.ι (ZMod 2) x * a + b)
     rw [mul_assoc, ← elementaryRoot_mul]
 
+/-- Conjugation by the forward adjacent unit root preserves every plane
+degree stage. -/
+theorem conjugate_unit_mem
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (g : elementaryGroup (Fin 3) (FreeRing X))
+    (hg : g ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n) :
+    elementaryRoot i j hij 1 * g * (elementaryRoot i j hij 1)⁻¹ ∈
+      rootPlaneDegreeSubgroup X i j k hij hik hjk n := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := hg
+  let q := elementaryRoot i j hij (1 : FreeRing X)
+  have hqa : Commute q (elementaryRoot i k hik a) :=
+    elementaryRoot_commute_of_ne i j i k hij hik hij.symm hik.symm _ _
+  have hqaConj : q * elementaryRoot i k hik a * q⁻¹ =
+      elementaryRoot i k hik a := by
+    rw [hqa.eq]
+    simp
+  have hshift := elementaryRoot_conjugate i j k hij hjk hik
+    (1 : FreeRing X) b
+  refine ⟨a + b, (degreeLE X n).add_mem ha hb, b, hb, ?_⟩
+  rw [show q * (elementaryRoot i k hik a * elementaryRoot j k hjk b) * q⁻¹ =
+      (q * elementaryRoot i k hik a * q⁻¹) *
+        (q * elementaryRoot j k hjk b * q⁻¹) by group]
+  rw [hqaConj, hshift, one_mul]
+  rw [← elementaryRoot_mul i k hik a b, mul_assoc]
+
+/-- Conjugation by the opposite adjacent unit root also preserves every
+plane stage. -/
+theorem conjugate_opposite_unit_mem
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (n : ℕ) (g : elementaryGroup (Fin 3) (FreeRing X))
+    (hg : g ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n) :
+    elementaryRoot j i hij.symm 1 * g * (elementaryRoot j i hij.symm 1)⁻¹ ∈
+      rootPlaneDegreeSubgroup X i j k hij hik hjk n := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := hg
+  let q := elementaryRoot j i hij.symm (1 : FreeRing X)
+  have hfirst := elementaryRoot_conjugate j i k hij.symm hik hjk
+    (1 : FreeRing X) a
+  have hsecondComm := elementaryRoot_commute_of_ne j i j k hij.symm hjk
+    hij hjk.symm (1 : FreeRing X) b
+  have hsecond : q * elementaryRoot j k hjk b * q⁻¹ =
+      elementaryRoot j k hjk b := by
+    dsimp [q]
+    rw [hsecondComm.eq]
+    simp
+  have hcoordinates := elementaryRoot_commute_of_ne j k i k hjk hik
+    hik.symm hjk.symm a a
+  refine ⟨a, ha, a + b, (degreeLE X n).add_mem ha hb, ?_⟩
+  rw [show q * (elementaryRoot i k hik a * elementaryRoot j k hjk b) * q⁻¹ =
+      (q * elementaryRoot i k hik a * q⁻¹) *
+        (q * elementaryRoot j k hjk b * q⁻¹) by group]
+  dsimp [q]
+  rw [hfirst, one_mul, hsecond]
+  rw [hcoordinates.eq, mul_assoc, ← elementaryRoot_mul]
+
 end FreeRootPlane
 
 end NonsoficGroupsExist
