@@ -170,6 +170,31 @@ relocated the obligation into a premise. -/
 /-- Head constant of a type, if it has one. -/
 def headConst? (e : Expr) : Option Name := e.getAppFn.constName?
 
+/-- Prop-valued classes that are smuggled ASSUMPTIONS rather than ordinary
+mathematical structure.
+
+The distinction matters and getting it wrong cost this scan its first real
+verdict.  `Finite` is `class Finite (α : Sort*) : Prop`, so a positive control
+stated as `theorem isLEF_of_finite (G) [Group G] [Finite G] : IsLEF G` has a
+Prop argument in its telescope -- and a rule that says "any Prop argument means
+this is conditional" therefore reports `IsLEF` as never established, which is
+precisely backwards: that theorem is the thing that establishes it.  A theorem
+about a finite group is not assuming finite groups exist, it is naming the
+category it is stated in.
+
+A theorem carrying `[Fact (p < 1)]`, by contrast, IS assuming `p < 1`.  So an
+instance binder counts as an obligation only when its class is one of these.
+Written as unresolved name literals because this module must not import the
+corpus or Mathlib. -/
+def assumptionClasses : List Name := [`Fact, `Nonempty, `Inhabited]
+
+/-- Does this binder relocate a mathematical obligation onto the caller?
+
+Prop-valued, and NOT an instance binder of an ordinary structural class. -/
+def isObligation (t : Expr) (bi : BinderInfo) (isP : Bool) : Bool :=
+  isP && (bi != .instImplicit ||
+    (headConst? t |>.map assumptionClasses.contains |>.getD true))
+
 /-- Every head constant the corpus proves or constructs UNCONDITIONALLY, in one
 pass.
 
@@ -184,16 +209,30 @@ def establishedHeads (env : Environment) (names : Array Name) : MetaM NameSet :=
     unless (match ci with
             | .defnInfo _ | .ctorInfo _ | .thmInfo _ => true
             | _ => false) do continue
-    let h? ← forallTelescope ci.type fun args body ↦ do
+    let (h?, unconditional) ← forallTelescope ci.type fun args body ↦ do
       for a in args do
-        if ← isProp (← inferType a) then return none
+        let t ← inferType a
+        let bi := (← a.fvarId!.getDecl).binderInfo
+        if isObligation t bi (← isProp t) then return (none, false)
       -- Either a term of `H …`, or a proof of `Nonempty (H …)`: a theorem
       -- witnesses a Prop-valued head, a `Nonempty` proof a data one.
       let body := match body.getAppFn.constName? with
         | some ``Nonempty => (body.getAppArgs[0]?).getD body
         | _ => body
-      return headConst? body
+      return (headConst? body, true)
     if let some h := h? then out := out.insert h
+    -- A structure is also witnessed when its CONSTRUCTOR appears inside the
+    -- proof term of an unconditional declaration, even though the conclusion
+    -- is about something else.  `isSofic_of_fintype` builds a `SoficModel`
+    -- and concludes `IsSofic G`; reading conclusions alone reported
+    -- `SoficModel` as never constructed while the construction sat in the
+    -- proof.
+    if unconditional then
+      if let some val := valueOf? ci then
+        for c in val.getUsedConstants do
+          match c with
+          | .str parent "mk" => out := out.insert parent
+          | _ => pure ()
   return out
 
 /-- Corpus constants that are proposition-formers: `∀ …, Prop`. -/
@@ -248,9 +287,24 @@ corpus never exhibits a closed term of" }
 
 /-! ## Per-declaration shape scans -/
 
-/-- Names that promise a result standing on its own. -/
-def unconditionalWords : List String :=
-  ["exists", "unconditional", "_not_", "nonsofic"]
+/-- Words that promise the HEADLINE result, not merely an existence statement.
+
+`exists` and `_not_` were here and produced 1195 findings on a 5269-declaration
+corpus, which is not a gate, it is a mailing list.  Lean's naming convention is
+`exists_foo_of_bar` for conditional lemmas, so "exists" in a name carries no
+claim at all; `_not_` fares the same.  What the root docstring actually
+promises is that no CONDITIONAL result is advertised as THE existence theorem,
+so these are the words that only a headline claim would use. -/
+def claimWords : List String :=
+  ["unconditional", "nonsofic", "theorema", "theoremb"]
+
+/-- Declared directly in the corpus root namespace, i.e. `Corpus.foo` and not
+`Corpus.Sub.foo`.  Headline results live at the root; the deep namespaces are
+machinery, where a claim word is describing the subject matter rather than
+making a claim. -/
+def isHeadlineName : Name → Bool
+  | .str (.str .anonymous _) _ => true
+  | _ => false
 
 /-- Empty types: a premise of one makes the theorem vacuous. -/
 def emptyTypes : List Name := [``False, ``Empty, ``PEmpty]
@@ -301,9 +355,14 @@ def declScan (env : Environment) (names : Array Name) : MetaM (Array Finding) :=
         if t == body then taut := true
         if let some h := headConst? t then
           if emptyTypes.contains h then empty := empty.push h
+        -- Only instance-syntax ASSUMPTIONS.  Flagging every implicit Prop
+        -- binder reported 256 declarations, nearly all of them ordinary
+        -- side conditions written `{h : a ≠ b}` so they can be inferred from
+        -- later arguments -- normal Lean, not smuggled content.
         let fv := a.fvarId!
         let bi := (← fv.getDecl).binderInfo
-        if bi == .instImplicit || bi == .implicit || bi == .strictImplicit then
+        if bi == .instImplicit &&
+            (headConst? t |>.map assumptionClasses.contains |>.getD false) then
           hidden := hidden.push (← fv.getUserName)
       return (taut, propPremise, hidden, empty, body.isConstOf ``True)
     let (taut, propPremise, hidden, empty, trivialConcl) := shape
@@ -313,7 +372,7 @@ def declScan (env : Environment) (names : Array Name) : MetaM (Array Finding) :=
         { tag := "TAUTOLOGY", fatal := true, decl := n,
           detail := "the conclusion is syntactically one of the premises" }
     let promisesUnconditional :=
-      unconditionalWords.any fun w ↦ (nameStr.splitOn w).length > 1
+      isHeadlineName n && claimWords.any fun w ↦ (nameStr.splitOn w).length > 1
     if propPremise && promisesUnconditional then
       out := out.push
         { tag := "UNCONDITIONAL", fatal := true, decl := n,
@@ -321,8 +380,8 @@ def declScan (env : Environment) (names : Array Name) : MetaM (Array Finding) :=
 Prop premises" }
     unless hidden.isEmpty do
       out := out.push
-        { tag := "INSTANCE_PREMISE", fatal := false, decl := n,
-          detail := s!"Prop premises in implicit or instance syntax: {hidden.toList}" }
+        { tag := "ASSUMPTION_INSTANCE", fatal := false, decl := n,
+          detail := s!"assumptions in instance syntax: {hidden.toList}" }
     unless empty.isEmpty do
       out := out.push
         { tag := "EMPTY_PREMISE", fatal := true, decl := n,
@@ -359,8 +418,15 @@ proof term: {(dead.map Prod.snd).toList}" }
     -- `:= rfl`.
     let head := (stripLams val).getAppFn
     if head.isConstOf ``Eq.refl || head.isConstOf ``rfl then
-      out := out.push
-        { tag := "RFL", fatal := false, decl := n, detail := "proof term is `Eq.refl`" }
+      -- A `@[simp]` lemma proved by `rfl` is a deliberate API lemma -- it makes
+      -- a definitional fact available to `simp`, which is the whole reason to
+      -- state it.  96 of the corpus's hits were exactly that (`_apply`,
+      -- `_val`, `_coe`).  The interesting case is an ordinary theorem, stated
+      -- as though it had content, that holds by definition.
+      unless (← getSimpTheorems).isLemma (.decl n) do
+        out := out.push
+          { tag := "RFL", fatal := false, decl := n,
+            detail := "non-simp theorem whose proof term is `Eq.refl`" }
   return out
 
 /-! ## Driver -/

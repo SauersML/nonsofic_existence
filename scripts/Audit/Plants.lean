@@ -72,6 +72,57 @@ the descent is completely broken. -/
 theorem plantedReachesClassical (p : Prop) (h : ¬¬p) : p :=
   Classical.byContradiction h
 
+/-! ### False-positive guards for the establishment criterion
+
+Each of these is a defect the scans REPORTED on the real corpus and should
+not have.  They are plants in the opposite direction: the scan must stay
+silent about them. -/
+
+/-- Stands in for Mathlib's `Finite`, which is a Prop-valued class.  A theorem
+stated for such a class is naming the category it works in, not assuming its
+inhabitants into existence. -/
+class PlantedStructuralClass (α : Type) : Prop where
+  ok : True
+
+instance : PlantedStructuralClass Nat := ⟨trivial⟩
+
+def EstablishedUnderStructuralClass (α : Type) : Prop := α = α
+
+/-- Must NOT be LAUNDERED_PROP.  This is the shape of `isLEF_of_finite`, and
+the first version of the criterion reported the proposition it establishes as
+never established. -/
+theorem establishedUnderStructuralClass (α : Type) [PlantedStructuralClass α] :
+    EstablishedUnderStructuralClass α := rfl
+
+def OnlyEstablishedConditionally (α : Type) : Prop := α = α
+
+/-- Must STILL be LAUNDERED_PROP: an explicit Prop premise really does
+relocate the obligation, and widening the criterion must not lose that. -/
+theorem onlyEstablishedConditionally (α : Type) (h : α = α) :
+    OnlyEstablishedConditionally α := h
+
+/-- Must NOT be UNWITNESSED: constructed inside a proof term while the
+conclusion is about something else, which is exactly how `isSofic_of_fintype`
+constructs a `SoficModel`. -/
+structure PlantedInnerCertificate where
+  bound : Nat
+  law : bound = bound
+
+def plantedInnerCertificateUser : Nat :=
+  (⟨0, rfl⟩ : PlantedInnerCertificate).bound
+
+/-- Must be UNCONDITIONAL: a headline claim word, at the root of the corpus
+namespace, on a type that still takes a premise. -/
+theorem plantedNonsoficUnconditional (h : (0 : Nat) = 0) : ∃ n : Nat, n = 0 :=
+  ⟨0, h⟩
+
+/-- Must be ASSUMPTION_INSTANCE: an assumption written in instance syntax. -/
+theorem plantedNonemptyAssumption [Nonempty Nat] : True := trivial
+
+/-- Must NOT be RFL: a `@[simp]` lemma proved by `rfl` is a deliberate API
+lemma, which is what 96 of the corpus's 96 hits were. -/
+@[simp] theorem plantedSimpRfl : (2 : Nat) + 0 = 2 := rfl
+
 /-! ## Clean declarations.  No scan may report any of these. -/
 
 /-- Not LAUNDERED_PROP: established below. -/

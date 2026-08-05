@@ -78,6 +78,9 @@ example (G : Type) [Group G] [Finite G] : IsLEF G :=
 example : IsLEF (Multiplicative ℤ) :=
   isLEF_multiplicative_int
 
+example (G : Type) [Group G] : IsLEF G ↔ IsTextbookLEF G :=
+  isLEF_iff_textbook G
+
 /-! ## 2. Transitive axiom closure -/
 
 /-- The axioms of classical Lean, which Mathlib itself uses.  Nothing else is
@@ -163,7 +166,7 @@ def budgets : List (String × Option Nat) :=
   , ("UNCONDITIONAL", none)      -- conditional lemmas legitimately say "exists"
   , ("LAUNDERED_PROP", none)
   , ("UNWITNESSED", none)
-  , ("INSTANCE_PREMISE", none)
+  , ("ASSUMPTION_INSTANCE", none)
   , ("UNUSED", none)
   , ("TRIVIAL", none)
   , ("DUPLICATE", none)
@@ -195,9 +198,15 @@ run_cmd do
     | none =>
         logInfo m!"{tag}: {hits.size} (report-only) {examples}"
 
+  -- Once per tag, not once per finding: a renamed tag produced one line of
+  -- signal and 255 lines of repetition the first time this fired.
+  let mut orphanTags : Array String := #[]
   for f in findings do
-    unless covered.contains f.tag do
-      failures := failures.push s!"{f.tag}: produced findings but has no budget row"
+    unless covered.contains f.tag || orphanTags.contains f.tag do
+      orphanTags := orphanTags.push f.tag
+      failures := failures.push
+        s!"{f.tag}: produced findings but has no budget row (a scan cannot be \
+disabled by deleting its budget, and a renamed tag must be renamed here too)"
 
   unless failures.isEmpty do
     throwError "audit failed:{Format.line}{Format.joinSep failures.toList Format.line}"
