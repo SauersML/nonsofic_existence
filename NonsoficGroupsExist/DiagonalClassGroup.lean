@@ -154,5 +154,139 @@ theorem elementaryGroup_normal_of_division [Nontrivial R]
   intro E hE X
   exact conj_mem_elementaryGroup_of_division hdiv X hE
 
+/-- The two-slot diagonal unit `diag(u, v)`. -/
+def diagPair (u v : Rˣ) : (Matrix (Fin 2) (Fin 2) R)ˣ where
+  val := !![(u : R), 0; 0, (v : R)]
+  inv := !![((u⁻¹ : Rˣ) : R), 0; 0, ((v⁻¹ : Rˣ) : R)]
+  val_inv := by
+    rw [Matrix.mul_fin_two]
+    ext i j
+    fin_cases i <;> fin_cases j <;> simp
+  inv_val := by
+    rw [Matrix.mul_fin_two]
+    ext i j
+    fin_cases i <;> fin_cases j <;> simp
+
+theorem diagPair_mul (u v u' v' : Rˣ) :
+    diagPair u v * diagPair u' v' = diagPair (u * u') (v * v') := by
+  apply Units.ext
+  show !![(u : R), 0; 0, (v : R)] * !![(u' : R), 0; 0, (v' : R)] = _
+  rw [Matrix.mul_fin_two]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp
+
+theorem diagPair_inv (u v : Rˣ) :
+    (diagPair u v)⁻¹ = diagPair u⁻¹ v⁻¹ := by
+  apply Units.ext
+  rfl
+
+theorem diagUnit_eq_diagPair (u : Rˣ) : diagUnit u = diagPair u 1 := by
+  apply Units.ext
+  show !![(u : R), 0; 0, 1] = !![(u : R), 0; 0, ((1 : Rˣ) : R)]
+  rw [Units.val_one]
+
+/-- The Whitehead lemma, as a membership of the two-slot diagonal
+unit. -/
+theorem diagPair_inv_self_mem (u : Rˣ) :
+    diagPair u u⁻¹ ∈ elementaryGroup (Fin 2) R := by
+  obtain ⟨E, hE, hval⟩ := exists_elementary_whitehead u
+  have hEeq : E = diagPair u u⁻¹ := by
+    apply Units.ext
+    rw [hval]
+    rfl
+  rwa [hEeq] at hE
+
+/-- **`K₁`-abelianity at the diagonal**: exchanging the factors of a
+product of units moves the diagonal class by an elementary matrix, by
+three applications of the Whitehead lemma. -/
+theorem diagUnit_mul_swap_inv_mem (u v : Rˣ) :
+    diagUnit (u * v) * (diagUnit (v * u))⁻¹ ∈
+      elementaryGroup (Fin 2) R := by
+  have hkey : diagUnit (u * v) * (diagUnit (v * u))⁻¹ =
+      diagPair u u⁻¹ * diagPair v v⁻¹ *
+        (diagPair (v * u) (v * u)⁻¹)⁻¹ := by
+    rw [diagUnit_eq_diagPair (u * v), diagUnit_eq_diagPair (v * u),
+      diagPair_inv, diagPair_inv, diagPair_mul, diagPair_mul,
+      diagPair_mul]
+    congr 1
+    · group
+    · group
+  rw [hkey]
+  exact mul_mem (mul_mem (diagPair_inv_self_mem u)
+    (diagPair_inv_self_mem v)) (inv_mem (diagPair_inv_self_mem (v * u)))
+
+/-- Commutators of units have elementary diagonal stabilization. -/
+theorem diagUnit_commutator_mem (u v : Rˣ) :
+    diagUnit ⁅u, v⁆ ∈ elementaryGroup (Fin 2) R := by
+  have hcomm : ⁅u, v⁆ = (u * v) * (v * u)⁻¹ := by
+    rw [commutatorElement_def]
+    group
+  have hsplit : diagUnit ((u * v) * (v * u)⁻¹) =
+      diagUnit (u * v) * (diagUnit (v * u))⁻¹ := by
+    rw [diagUnit_mul]
+    congr 1
+    exact map_inv diagUnitHom (v * u)
+  rw [hcomm, hsplit]
+  exact diagUnit_mul_swap_inv_mem u v
+
+/-- The commutator subgroup of the units lies in the diagonal class
+group: the quotient by the diagonal class is abelian. -/
+theorem commutator_mem_stableUnits (u v : Rˣ) :
+    ⁅u, v⁆ ∈ stableUnits R :=
+  diagUnit_commutator_mem u v
+
+/-- **`GL₂ / EL₂` is abelian under strong division**: Gaussian
+elimination reduces every class to a diagonal one, and diagonal classes
+commute by `K₁`-abelianity. -/
+theorem commutator_mem_elementaryGroup_of_division [Nontrivial R]
+    (hdiv : ∀ x : R, x ≠ 0 → ∃ p q : R, p * x * q = 1)
+    (X Y : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+    ⁅X, Y⁆ ∈ elementaryGroup (Fin 2) R := by
+  letI hN : (elementaryGroup (Fin 2) R).Normal :=
+    elementaryGroup_normal_of_division hdiv
+  have hdiag : ∀ Z : (Matrix (Fin 2) (Fin 2) R)ˣ, ∃ d : Rˣ,
+      (Z : (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) =
+        ((diagUnit d : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+          (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) := by
+    intro Z
+    obtain ⟨E, F, d, hE, hF, hEZF⟩ := exists_elementary_mul_diag hdiv Z
+    refine ⟨d, ?_⟩
+    have hZ : Z = E⁻¹ * diagUnit d * F⁻¹ := by
+      rw [← hEZF]
+      group
+    rw [hZ]
+    rw [QuotientGroup.mk_mul, QuotientGroup.mk_mul,
+      (QuotientGroup.eq_one_iff _).mpr (inv_mem hE),
+      (QuotientGroup.eq_one_iff _).mpr (inv_mem hF), one_mul, mul_one]
+  have hcomm : ∀ a b : (Matrix (Fin 2) (Fin 2) R)ˣ ⧸
+      elementaryGroup (Fin 2) R, a * b = b * a := by
+    intro a b
+    obtain ⟨X', rfl⟩ := QuotientGroup.mk_surjective a
+    obtain ⟨Y', rfl⟩ := QuotientGroup.mk_surjective b
+    obtain ⟨x, hx⟩ := hdiag X'
+    obtain ⟨y, hy⟩ := hdiag Y'
+    rw [hx, hy, ← QuotientGroup.mk_mul, ← QuotientGroup.mk_mul]
+    apply QuotientGroup.eq.mpr
+    have hmem := diagUnit_mul_swap_inv_mem y x
+    have hconj := hN.conj_mem _ hmem (diagUnit (x * y))⁻¹
+    have hprod : (diagUnit x * diagUnit y)⁻¹ *
+        (diagUnit y * diagUnit x) =
+        (diagUnit (x * y))⁻¹ *
+          (diagUnit (y * x) * (diagUnit (x * y))⁻¹) *
+          ((diagUnit (x * y))⁻¹)⁻¹ := by
+      rw [← diagUnit_mul, ← diagUnit_mul]
+      group
+    rw [hprod]
+    exact hconj
+  have hone : ((⁅X, Y⁆ : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+      (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) = 1 := by
+    rw [show ((⁅X, Y⁆ : (Matrix (Fin 2) (Fin 2) R)ˣ) :
+        (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) =
+      ⁅((X : (Matrix (Fin 2) (Fin 2) R)ˣ) : _ ⧸ _),
+        ((Y : (Matrix (Fin 2) (Fin 2) R)ˣ) : _ ⧸ _)⁆ from
+      map_commutatorElement (QuotientGroup.mk' _) X Y]
+    exact commutatorElement_eq_one_iff_mul_comm.mpr (hcomm _ _)
+  exact (QuotientGroup.eq_one_iff _).mp hone
+
 end MatrixDiagonalization
 end NonsoficGroupsExist
