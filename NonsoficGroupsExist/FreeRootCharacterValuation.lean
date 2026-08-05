@@ -155,7 +155,7 @@ theorem characterValuation_eq_zero_iff
 coefficient space. -/
 def restrictCharacterSucc {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) :
     degreeLE X (ZMod 2) n → ℝ :=
-  fun a ↦ chi (coefficientSucc X a)
+  fun a ↦ chi (coefficientSucc X (ZMod 2) a)
 
 theorem hasDetectionAtDegree_of_restrictCharacterSucc
     {n d : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
@@ -164,7 +164,7 @@ theorem hasDetectionAtDegree_of_restrictCharacterSucc
   obtain ⟨w, hwd, hwn, hchi⟩ := h
   refine ⟨w, hwd, hwn.trans (Nat.le_succ n), ?_⟩
   unfold restrictCharacterSucc at hchi
-  rw [coefficientSucc_wordMonomialInDegree X n w hwn] at hchi
+  rw [coefficientSucc_wordMonomialInDegree X (ZMod 2) n w hwn] at hchi
   exact hchi
 
 theorem hasDetectionAtDegree_restrictCharacterSucc
@@ -176,7 +176,7 @@ theorem hasDetectionAtDegree_restrictCharacterSucc
   have hwn : freeWordLength X w ≤ n := hwd.trans_le hdn
   refine ⟨w, hwd, hwn, ?_⟩
   unfold restrictCharacterSucc
-  rw [coefficientSucc_wordMonomialInDegree X n w hwn]
+  rw [coefficientSucc_wordMonomialInDegree X (ZMod 2) n w hwn]
   exact hchi
 
 /-- Restriction preserves every valuation that is at most the restricted
@@ -335,7 +335,7 @@ theorem characterValuation_characterProduct_eq_right_of_lt
 free generator.  It lives one degree stage lower. -/
 def leftDerivedCharacter {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X) :
     degreeLE X (ZMod 2) n → ℝ :=
-  fun a ↦ chi (generatorMulCoefficientSucc X x a)
+  fun a ↦ chi (generatorMulCoefficientSucc X (ZMod 2) x a)
 
 /-- Taking a generator-derived character commutes exactly with restriction by
 one degree stage. -/
@@ -358,9 +358,9 @@ theorem leftDerivedCharacter_add
     (hadd : ∀ a b, chi (a + b) = chi a * chi b) (a b : degreeLE X (ZMod 2) n) :
     leftDerivedCharacter X chi x (a + b) =
       leftDerivedCharacter X chi x a * leftDerivedCharacter X chi x b := by
-  change chi (generatorMulCoefficientSucc X x (a + b)) =
-    chi (generatorMulCoefficientSucc X x a) *
-      chi (generatorMulCoefficientSucc X x b)
+  change chi (generatorMulCoefficientSucc X (ZMod 2) x (a + b)) =
+    chi (generatorMulCoefficientSucc X (ZMod 2) x a) *
+      chi (generatorMulCoefficientSucc X (ZMod 2) x b)
   rw [generatorMulCoefficientSucc_add, hadd]
 
 theorem leftDerivedCharacter_eq_one_or_neg_one
@@ -389,7 +389,7 @@ theorem exists_leftDerivedCharacter_valuation_succ
   have hvChi : leftDerivedCharacter X chi x
       (wordMonomialInDegree X (ZMod 2) n v) = -1 := by
     unfold leftDerivedCharacter
-    rw [generatorMulCoefficientSucc_wordMonomialInDegree X x n v hvStage]
+    rw [generatorMulCoefficientSucc_wordMonomialInDegree X (ZMod 2) x n v hvStage]
     rw [← hwFactor]
     exact hwChi
   have hvDetect : HasDetectionAtDegree X (leftDerivedCharacter X chi x)
@@ -410,9 +410,9 @@ theorem exists_leftDerivedCharacter_valuation_succ
     omega
   have huProductChi :
       chi (wordMonomialInDegree X (ZMod 2) (n + 1) (FreeMonoid.of x * u)) = -1 := by
-    change chi (generatorMulCoefficientSucc X x
+    change chi (generatorMulCoefficientSucc X (ZMod 2) x
       (wordMonomialInDegree X (ZMod 2) n u)) = -1 at huChi
-    rw [generatorMulCoefficientSucc_wordMonomialInDegree X x n u huStage]
+    rw [generatorMulCoefficientSucc_wordMonomialInDegree X (ZMod 2) x n u huStage]
       at huChi
     exact huChi
   have huProductDetect : HasDetectionAtDegree X chi (d + 1) := by
@@ -1415,8 +1415,8 @@ theorem firstCoefficientEigenvalue_succRestriction
   funext a
   rw [firstCoefficientEigenvalue, planeEigenvalue_succRestriction]
   have hsucc : planeSucc X i j k hij hik hjk n
-      (firstCoordinate X i j k hij hik hjk n a) =
-      firstCoordinate X i j k hij hik hjk (n + 1) (coefficientSucc X a) := by
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a) =
+      firstCoordinate X (ZMod 2) i j k hij hik hjk (n + 1) (coefficientSucc X (ZMod 2) a) := by
     apply Subtype.ext
     rfl
   rw [hsucc]
@@ -1435,8 +1435,8 @@ theorem secondCoefficientEigenvalue_succRestriction
   funext b
   rw [secondCoefficientEigenvalue, planeEigenvalue_succRestriction]
   have hsucc : planeSucc X i j k hij hik hjk n
-      (secondCoordinate X i j k hij hik hjk n b) =
-      secondCoordinate X i j k hij hik hjk (n + 1) (coefficientSucc X b) := by
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b) =
+      secondCoordinate X (ZMod 2) i j k hij hik hjk (n + 1) (coefficientSucc X (ZMod 2) b) := by
     apply Subtype.ext
     rfl
   rw [hsucc]
@@ -1965,11 +1965,11 @@ theorem sign_eq_const_true_of_component_ne_zero_of_region_zero
   let g : Plane X i j k hij hik hjk n :=
     planeEnumeration X i j k hij hik hjk n q
   obtain ⟨a, b, hab⟩ := exists_coordinate_factorization
-    X i j k hij hik hjk n g
+    X (ZMod 2) i j k hij hik hjk n g
   have hmul := planeEigenvalue_mul_of_component_ne_zero
     X i j k hij hik hjk n rho sign z hv
-      (firstCoordinate X i j k hij hik hjk n a)
-      (secondCoordinate X i j k hij hik hjk n b)
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a)
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b)
   have heig : planeEigenvalue X i j k hij hik hjk n sign g = 1 := by
     rw [← hab, hmul]
     change chi a * psi b = 1
@@ -1999,7 +1999,7 @@ theorem inner_planeComponent_eq_zero_of_fixed_of_mem_nonzero
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (hsign : sign ∈ planeNonzeroRegionSignSet X i j k hij hik hjk n)
     (hy : y ∈ KazhdanFixedSpace.fixedSubspace rho
-      (rootPlaneDegreeSubgroup X i j k hij hik hjk n)) :
+      (rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n)) :
     inner ℝ y (planeComponent X i j k hij hik hjk n rho sign z) = 0 := by
   have hne := sign_ne_const_true_of_mem_planeNonzeroRegionSignSet
     X i j k hij hik hjk n sign hsign
@@ -2013,7 +2013,7 @@ theorem inner_planeComponent_eq_zero_of_fixed_of_mem_nonzero
   obtain ⟨q, hq⟩ := hexists
   have hyact : rho (planeFamily X i j k hij hik hjk n q) y = y :=
     (KazhdanFixedSpace.mem_fixedSubspace_iff rho
-      (rootPlaneDegreeSubgroup X i j k hij hik hjk n) y).mp hy
+      (rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n) y).mp hy
       (planeFamily X i j k hij hik hjk n q)
       (planeEnumeration X i j k hij hik hjk n q).property
   have hvact := action_planeComponent X i j k hij hik hjk n rho sign z q
@@ -2032,7 +2032,7 @@ theorem planeMovingPart_mem_fixedSubspace_orthogonal
     (z : E) (n : ℕ) :
     planeMovingPart X i j k hij hik hjk rho z n ∈
       (KazhdanFixedSpace.fixedSubspace rho
-        (rootPlaneDegreeSubgroup X i j k hij hik hjk n))ᗮ := by
+        (rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n))ᗮ := by
   rw [Submodule.mem_orthogonal]
   intro y hy
   unfold planeMovingPart
@@ -2055,7 +2055,7 @@ theorem planeTrivialPart_mem_fixedSubspace
     (z : E) (n : ℕ) :
     planeTrivialPart X i j k hij hik hjk rho z n ∈
       KazhdanFixedSpace.fixedSubspace rho
-        (rootPlaneDegreeSubgroup X i j k hij hik hjk n) := by
+        (rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n) := by
   rw [KazhdanFixedSpace.mem_fixedSubspace_iff]
   intro g hg
   obtain ⟨q, hq⟩ := exists_planeFamily_eq X i j k hij hik hjk n ⟨g, hg⟩
@@ -2127,8 +2127,8 @@ theorem planeMovingPart_eq_subgroupMovingProjection [CompleteSpace E]
     (z : E) (n : ℕ) :
     planeMovingPart X i j k hij hik hjk rho z n =
       KazhdanFixedSpace.subgroupMovingProjection rho
-        (rootPlaneDegreeSubgroup X i j k hij hik hjk n) z := by
-  let H := rootPlaneDegreeSubgroup X i j k hij hik hjk n
+        (rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n) z := by
+  let H := rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n
   let U := KazhdanFixedSpace.fixedSubspace rho H
   let fixed := planeTrivialPart X i j k hij hik hjk rho z n
   let moving := planeMovingPart X i j k hij hik hjk rho z n
@@ -2168,10 +2168,10 @@ theorem tendsto_planeMovingPart [CompleteSpace E]
         (elementaryRootSubgroup i k hik ⊔
           elementaryRootSubgroup j k hjk) z)) := by
   have h := KazhdanFixedSpace.tendsto_subgroupMovingProjection_iSup rho
-    (rootPlaneDegreeSubgroup X i j k hij hik hjk)
+    (rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk)
     (elementaryRootSubgroup i k hik ⊔ elementaryRootSubgroup j k hjk)
-    (rootPlaneDegreeSubgroup_mono X i j k hij hik hjk)
-    (iSup_rootPlaneDegreeSubgroup X i j k hij hik hjk) z
+    (rootPlaneDegreeSubgroup_mono X (ZMod 2) i j k hij hik hjk)
+    (iSup_rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk) z
   simpa only [planeMovingPart_eq_subgroupMovingProjection
     X i j k hij hik hjk rho z] using h
 
@@ -2458,11 +2458,11 @@ theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction_of_valid
   rw [firstCoefficientEigenvalue,
     planeEigenvalue_oppositeConjugatedRestriction]
   have hconj : oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
-      (firstCoordinate X i j k hij hik hjk n a) =
-      generatorShearedFirstCoordinate X i j k hij hik hjk x n a := by
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a) =
+      generatorShearedFirstCoordinate X (ZMod 2) i j k hij hik hjk x n a := by
     apply Subtype.ext
     exact conjugate_firstCoordinate_opposite_generator
-      X i j k hij hik hjk x n a
+      X (ZMod 2) i j k hij hik hjk x n a
   rw [hconj, generatorShearedFirstCoordinate, hvalid]
   rfl
 
@@ -2504,12 +2504,12 @@ theorem secondCoefficientEigenvalue_oppositeConjugatedRestriction
   rw [secondCoefficientEigenvalue,
     planeEigenvalue_oppositeConjugatedRestriction]
   have hconj : oppositeConjugatedPlaneSucc X i j k hij hik hjk x n
-      (secondCoordinate X i j k hij hik hjk n b) =
-      secondCoordinate X i j k hij hik hjk (n + 1)
-        (coefficientSucc X b) := by
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b) =
+      secondCoordinate X (ZMod 2) i j k hij hik hjk (n + 1)
+        (coefficientSucc X (ZMod 2) b) := by
     apply Subtype.ext
     exact conjugate_secondCoordinate_opposite_generator
-      X i j k hij hik hjk x n b
+      X (ZMod 2) i j k hij hik hjk x n b
   rw [hconj]
   rfl
 
@@ -2528,11 +2528,11 @@ theorem firstCoefficientEigenvalue_forwardConjugatedRestriction
   rw [firstCoefficientEigenvalue,
     planeEigenvalue_forwardConjugatedRestriction]
   have hconj : forwardConjugatedPlaneSucc X i j k hij hik hjk x n
-      (firstCoordinate X i j k hij hik hjk n a) =
-      firstCoordinate X i j k hij hik hjk (n + 1)
-        (coefficientSucc X a) := by
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a) =
+      firstCoordinate X (ZMod 2) i j k hij hik hjk (n + 1)
+        (coefficientSucc X (ZMod 2) a) := by
     apply Subtype.ext
-    exact conjugate_firstCoordinate_generator X i j k hij hik hjk x n a
+    exact conjugate_firstCoordinate_generator X (ZMod 2) i j k hij hik hjk x n a
   rw [hconj]
   rfl
 
@@ -2554,10 +2554,10 @@ theorem secondCoefficientEigenvalue_forwardConjugatedRestriction_of_valid
   rw [secondCoefficientEigenvalue,
     planeEigenvalue_forwardConjugatedRestriction]
   have hconj : forwardConjugatedPlaneSucc X i j k hij hik hjk x n
-      (secondCoordinate X i j k hij hik hjk n b) =
-      generatorShearedSecondCoordinate X i j k hij hik hjk x n b := by
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b) =
+      generatorShearedSecondCoordinate X (ZMod 2) i j k hij hik hjk x n b := by
     apply Subtype.ext
-    exact conjugate_secondCoordinate_generator X i j k hij hik hjk x n b
+    exact conjugate_secondCoordinate_generator X (ZMod 2) i j k hij hik hjk x n b
   rw [hconj, generatorShearedSecondCoordinate, hvalid]
   simp only [forwardShearedSecondCharacter, oppositeShearedFirstCharacter,
     characterProduct, restrictCharacterSucc, leftDerivedCharacter,
@@ -3847,7 +3847,7 @@ theorem planeDFirstSignSet_subset_negative_unit
     (n : ℕ) :
     planeDFirstSignSet X i j k hij hik hjk n ⊆
       negativePlaneSignSet X i j k hij hik hjk n
-        (firstCoordinate X i j k hij hik hjk n
+        (firstCoordinate X (ZMod 2) i j k hij hik hjk n
           (wordMonomialInDegree X (ZMod 2) n 1)) := by
   classical
   intro sign hsign
@@ -3861,7 +3861,7 @@ theorem planeDSecondSignSet_subset_negative_unit
     (n : ℕ) :
     planeDSecondSignSet X i j k hij hik hjk n ⊆
       negativePlaneSignSet X i j k hij hik hjk n
-        (secondCoordinate X i j k hij hik hjk n
+        (secondCoordinate X (ZMod 2) i j k hij hik hjk n
           (wordMonomialInDegree X (ZMod 2) n 1)) := by
   classical
   intro sign hsign
@@ -3887,10 +3887,10 @@ theorem sum_norm_planeRegionSignSet_D_sq_le_unit_displacements
     (∑ sign ∈ planeRegionSignSet X i j k hij hik hjk n .D,
         ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
       (4 : ℝ)⁻¹ *
-          ‖rho (firstCoordinate X i j k hij hik hjk n
+          ‖rho (firstCoordinate X (ZMod 2) i j k hij hik hjk n
             (wordMonomialInDegree X (ZMod 2) n 1)).1 z - z‖ ^ 2 +
         (4 : ℝ)⁻¹ *
-          ‖rho (secondCoordinate X i j k hij hik hjk n
+          ‖rho (secondCoordinate X (ZMod 2) i j k hij hik hjk n
             (wordMonomialInDegree X (ZMod 2) n 1)).1 z - z‖ ^ 2 := by
   classical
   rw [planeRegionSignSet_D_eq_unit_split,
@@ -3899,11 +3899,11 @@ theorem sum_norm_planeRegionSignSet_D_sq_le_unit_displacements
         X i j k hij hik hjk n)]
   calc
     _ ≤ (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
-            (firstCoordinate X i j k hij hik hjk n
+            (firstCoordinate X (ZMod 2) i j k hij hik hjk n
               (wordMonomialInDegree X (ZMod 2) n 1)),
           ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
         ∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
-            (secondCoordinate X i j k hij hik hjk n
+            (secondCoordinate X (ZMod 2) i j k hij hik hjk n
               (wordMonomialInDegree X (ZMod 2) n 1)),
           ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 :=
       add_le_add
@@ -3934,9 +3934,9 @@ theorem firstCoefficientEigenvalue_oppositeUnitConjugatedRestriction_of_valid
   rw [firstCoefficientEigenvalue,
     planeEigenvalue_oppositeUnitConjugatedRestriction]
   have hconj : oppositeUnitConjugatedPlane X i j k hij hik hjk n
-      (firstCoordinate X i j k hij hik hjk n a) =
-      firstCoordinate X i j k hij hik hjk n a *
-        secondCoordinate X i j k hij hik hjk n a := by
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a) =
+      firstCoordinate X (ZMod 2) i j k hij hik hjk n a *
+        secondCoordinate X (ZMod 2) i j k hij hik hjk n a := by
     apply Subtype.ext
     change elementaryRoot j i hij.symm 1 * elementaryRoot i k hik a.1 *
         (elementaryRoot j i hij.symm 1)⁻¹ =
@@ -3960,8 +3960,8 @@ theorem secondCoefficientEigenvalue_oppositeUnitConjugatedRestriction
   rw [secondCoefficientEigenvalue,
     planeEigenvalue_oppositeUnitConjugatedRestriction]
   have hconj : oppositeUnitConjugatedPlane X i j k hij hik hjk n
-      (secondCoordinate X i j k hij hik hjk n b) =
-      secondCoordinate X i j k hij hik hjk n b := by
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b) =
+      secondCoordinate X (ZMod 2) i j k hij hik hjk n b := by
     apply Subtype.ext
     have hcomm := elementaryRoot_commute_of_ne j i j k hij.symm hjk
       hij hjk.symm (1 : FreeRing X) b.1
@@ -3985,8 +3985,8 @@ theorem firstCoefficientEigenvalue_forwardUnitConjugatedRestriction
   rw [firstCoefficientEigenvalue,
     planeEigenvalue_forwardUnitConjugatedRestriction]
   have hconj : forwardUnitConjugatedPlane X i j k hij hik hjk n
-      (firstCoordinate X i j k hij hik hjk n a) =
-      firstCoordinate X i j k hij hik hjk n a := by
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a) =
+      firstCoordinate X (ZMod 2) i j k hij hik hjk n a := by
     apply Subtype.ext
     have hcomm := elementaryRoot_commute_of_ne i j i k hij hik
       hij.symm hik.symm (1 : FreeRing X) a.1
@@ -4014,9 +4014,9 @@ theorem secondCoefficientEigenvalue_forwardUnitConjugatedRestriction_of_valid
   rw [secondCoefficientEigenvalue,
     planeEigenvalue_forwardUnitConjugatedRestriction]
   have hconj : forwardUnitConjugatedPlane X i j k hij hik hjk n
-      (secondCoordinate X i j k hij hik hjk n b) =
-      firstCoordinate X i j k hij hik hjk n b *
-        secondCoordinate X i j k hij hik hjk n b := by
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b) =
+      firstCoordinate X (ZMod 2) i j k hij hik hjk n b *
+        secondCoordinate X (ZMod 2) i j k hij hik hjk n b := by
     apply Subtype.ext
     change elementaryRoot i j hij 1 * elementaryRoot j k hjk b.1 *
         (elementaryRoot i j hij 1)⁻¹ =
@@ -4326,9 +4326,9 @@ theorem sum_planeRegionMass_nonzero_le_explicit_errors
         planeRegionMass X i j k hij hik hjk rho z (n + 2) .B +
         planeRegionMass X i j k hij hik hjk rho z (n + 2) .C +
         planeRegionMass X i j k hij hik hjk rho z (n + 2) .D ≤
-      ‖rho (firstCoordinate X i j k hij hik hjk (n + 2)
+      ‖rho (firstCoordinate X (ZMod 2) i j k hij hik hjk (n + 2)
           (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 +
-        ‖rho (secondCoordinate X i j k hij hik hjk (n + 2)
+        ‖rho (secondCoordinate X (ZMod 2) i j k hij hik hjk (n + 2)
           (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 +
         (3 : ℝ) / 2 *
           ((∑ q : Fin (Fintype.card X),
@@ -4360,10 +4360,10 @@ theorem sum_planeRegionMass_nonzero_le_explicit_errors
       2 * ‖z‖ * ‖rho (elementaryRoot i j hij 1) z - z‖ at hC
   change planeRegionMass X i j k hij hik hjk rho z (n + 2) .D ≤
     (4 : ℝ)⁻¹ *
-        ‖rho (firstCoordinate X i j k hij hik hjk (n + 2)
+        ‖rho (firstCoordinate X (ZMod 2) i j k hij hik hjk (n + 2)
           (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 +
       (4 : ℝ)⁻¹ *
-        ‖rho (secondCoordinate X i j k hij hik hjk (n + 2)
+        ‖rho (secondCoordinate X (ZMod 2) i j k hij hik hjk (n + 2)
           (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 at hD
   linarith
 

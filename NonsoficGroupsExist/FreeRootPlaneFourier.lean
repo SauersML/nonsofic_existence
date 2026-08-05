@@ -25,7 +25,7 @@ noncomputable section
 variable (X : Type*) [Fintype X]
 
 abbrev Plane (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (n : ℕ) := rootPlaneDegreeSubgroup X i j k hij hik hjk n
+    (n : ℕ) := rootPlaneDegreeSubgroup X (ZMod 2) i j k hij hik hjk n
 
 /-- An exhaustive enumeration of a finite plane stage. -/
 noncomputable def planeEnumeration
@@ -46,7 +46,7 @@ ambient elementary-group element. -/
 noncomputable def planeSucc
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
     Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk (n + 1) :=
-  fun g ↦ ⟨g.1, rootPlaneDegreeSubgroup_mono X i j k hij hik hjk
+  fun g ↦ ⟨g.1, rootPlaneDegreeSubgroup_mono X (ZMod 2) i j k hij hik hjk
     (Nat.le_succ n) g.2⟩
 
 /-- The index of an included stage-`n` plane element in the exhaustive
@@ -81,7 +81,7 @@ noncomputable def forwardConjugatedPlaneSucc
     Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk (n + 1) :=
   fun g ↦ ⟨elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) * g.1 *
       (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹,
-    conjugate_generator_mem_succ X i j k hij hik hjk x n g.1 g.2⟩
+    conjugate_generator_mem_succ X (ZMod 2) i j k hij hik hjk x n g.1 g.2⟩
 
 /-- Conjugate every stage-`n` plane element by an opposite adjacent root and
 regard the result as an element of the next plane stage. -/
@@ -91,7 +91,7 @@ noncomputable def oppositeConjugatedPlaneSucc
     Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk (n + 1) :=
   fun g ↦ ⟨elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) * g.1 *
       (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x))⁻¹,
-    conjugate_opposite_generator_mem_succ X i j k hij hik hjk x n g.1 g.2⟩
+    conjugate_opposite_generator_mem_succ X (ZMod 2) i j k hij hik hjk x n g.1 g.2⟩
 
 /-- The next-stage enumeration index of the forward conjugate of a coarse
 plane element. -/
@@ -110,7 +110,7 @@ noncomputable def forwardUnitConjugatedPlane
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
     (n : ℕ) : Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk n :=
   fun g ↦ ⟨elementaryRoot i j hij 1 * g.1 * (elementaryRoot i j hij 1)⁻¹,
-    conjugate_unit_mem X i j k hij hik hjk n g.1 g.2⟩
+    conjugate_unit_mem X (ZMod 2) i j k hij hik hjk n g.1 g.2⟩
 
 /-- The corresponding opposite adjacent unit conjugation. -/
 noncomputable def oppositeUnitConjugatedPlane
@@ -118,7 +118,7 @@ noncomputable def oppositeUnitConjugatedPlane
     (n : ℕ) : Plane X i j k hij hik hjk n → Plane X i j k hij hik hjk n :=
   fun g ↦ ⟨elementaryRoot j i hij.symm 1 * g.1 *
       (elementaryRoot j i hij.symm 1)⁻¹,
-    conjugate_opposite_unit_mem X i j k hij hik hjk n g.1 g.2⟩
+    conjugate_opposite_unit_mem X (ZMod 2) i j k hij hik hjk n g.1 g.2⟩
 
 /-- Enumeration index of forward unit conjugation. -/
 noncomputable def forwardUnitConjugatedPlaneIndex
@@ -215,7 +215,7 @@ theorem planeFamily_sq
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
     ∀ q, planeFamily X i j k hij hik hjk n q ^ 2 = 1 := by
   intro q
-  exact rootPlaneDegreeSubgroup_sq X i j k hij hik hjk n _
+  exact rootPlaneDegreeSubgroup_pow_char X (ZMod 2) 2 i j k hij hik hjk n _
     (planeEnumeration X i j k hij hik hjk n q).2
 
 theorem planeFamily_pairwise_commute
@@ -223,7 +223,7 @@ theorem planeFamily_pairwise_commute
     Pairwise (Function.onFun Commute
       (planeFamily X i j k hij hik hjk n)) := by
   intro q r _
-  exact rootPlaneDegreeSubgroup_commute X i j k hij hik hjk n _
+  exact rootPlaneDegreeSubgroup_commute X (ZMod 2) i j k hij hik hjk n _
     (planeEnumeration X i j k hij hik hjk n q).2 _
     (planeEnumeration X i j k hij hik hjk n r).2
 
@@ -727,25 +727,25 @@ theorem abs_generatorShearedSecondCharacterMass_sub_le
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
     (z : E) :
     |(∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk (n + 1)
-          (generatorShearedSecondCoordinate X i j k hij hik hjk x n b),
+          (generatorShearedSecondCoordinate X (ZMod 2) i j k hij hik hjk x n b),
         ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) -
       (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
-          (secondCoordinate X i j k hij hik hjk n b),
+          (secondCoordinate X (ZMod 2) i j k hij hik hjk n b),
         ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2)| ≤
       2 * ‖z‖ *
         ‖z - rho (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x)) z‖ := by
   rw [← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk
       (n + 1) rho z
-      (generatorShearedSecondCoordinate X i j k hij hik hjk x n b),
+      (generatorShearedSecondCoordinate X (ZMod 2) i j k hij hik hjk x n b),
     ← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk n rho z
-      (secondCoordinate X i j k hij hik hjk n b)]
-  have hc : (secondCoordinate X i j k hij hik hjk n b).1 ^ 2 = 1 :=
-    rootPlaneDegreeSubgroup_sq X i j k hij hik hjk n _
-      (secondCoordinate X i j k hij hik hjk n b).2
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b)]
+  have hc : (secondCoordinate X (ZMod 2) i j k hij hik hjk n b).1 ^ 2 = 1 :=
+    rootPlaneDegreeSubgroup_pow_char X (ZMod 2) 2 i j k hij hik hjk n _
+      (secondCoordinate X (ZMod 2) i j k hij hik hjk n b).2
   have htransport :=
     InvolutionSplitting.abs_norm_negativePart_conjugate_sq_sub_le rho
       (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x)) hc z
-  rw [conjugate_secondCoordinate_generator X i j k hij hik hjk x n b]
+  rw [conjugate_secondCoordinate_generator X (ZMod 2) i j k hij hik hjk x n b]
     at htransport
   exact htransport
 
@@ -758,27 +758,27 @@ theorem abs_generatorShearedFirstCharacterMass_sub_le
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
     (z : E) :
     |(∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk (n + 1)
-          (generatorShearedFirstCoordinate X i j k hij hik hjk x n a),
+          (generatorShearedFirstCoordinate X (ZMod 2) i j k hij hik hjk x n a),
         ‖planeComponent X i j k hij hik hjk (n + 1) rho sign z‖ ^ 2) -
       (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
-          (firstCoordinate X i j k hij hik hjk n a),
+          (firstCoordinate X (ZMod 2) i j k hij hik hjk n a),
         ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2)| ≤
       2 * ‖z‖ *
         ‖z - rho (elementaryRoot j i hij.symm
           (FreeAlgebra.ι (ZMod 2) x)) z‖ := by
   rw [← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk
       (n + 1) rho z
-      (generatorShearedFirstCoordinate X i j k hij hik hjk x n a),
+      (generatorShearedFirstCoordinate X (ZMod 2) i j k hij hik hjk x n a),
     ← norm_negativePart_sq_eq_planeCharacterMass X i j k hij hik hjk n rho z
-      (firstCoordinate X i j k hij hik hjk n a)]
-  have hc : (firstCoordinate X i j k hij hik hjk n a).1 ^ 2 = 1 :=
-    rootPlaneDegreeSubgroup_sq X i j k hij hik hjk n _
-      (firstCoordinate X i j k hij hik hjk n a).2
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a)]
+  have hc : (firstCoordinate X (ZMod 2) i j k hij hik hjk n a).1 ^ 2 = 1 :=
+    rootPlaneDegreeSubgroup_pow_char X (ZMod 2) 2 i j k hij hik hjk n _
+      (firstCoordinate X (ZMod 2) i j k hij hik hjk n a).2
   have htransport :=
     InvolutionSplitting.abs_norm_negativePart_conjugate_sq_sub_le rho
       (elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x)) hc z
   rw [conjugate_firstCoordinate_opposite_generator
-      X i j k hij hik hjk x n a] at htransport
+      X (ZMod 2) i j k hij hik hjk x n a] at htransport
   exact htransport
 
 /-- On every nonzero component, the assigned eigenvalue is multiplicative.
@@ -839,7 +839,7 @@ def firstCoefficientEigenvalue
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n) : ℝ :=
   planeEigenvalue X i j k hij hik hjk n sign
-    (firstCoordinate X i j k hij hik hjk n a)
+    (firstCoordinate X (ZMod 2) i j k hij hik hjk n a)
 
 /-- The character value on the second coefficient root. -/
 def secondCoefficientEigenvalue
@@ -847,7 +847,7 @@ def secondCoefficientEigenvalue
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (b : FreeAlgebraDegree.degreeLE X (ZMod 2) n) : ℝ :=
   planeEigenvalue X i j k hij hik hjk n sign
-    (secondCoordinate X i j k hij hik hjk n b)
+    (secondCoordinate X (ZMod 2) i j k hij hik hjk n b)
 
 /-- On a nonzero component, the first coefficient character converts
 addition into multiplication of signs. -/
@@ -890,7 +890,7 @@ theorem firstCoefficientEigenvalue_zero_of_component_ne_zero
     (z : E)
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0) :
     firstCoefficientEigenvalue X i j k hij hik hjk n sign 0 = 1 := by
-  have hcoord : firstCoordinate X i j k hij hik hjk n 0 = 1 := by
+  have hcoord : firstCoordinate X (ZMod 2) i j k hij hik hjk n 0 = 1 := by
     apply Subtype.ext
     simp
   rw [firstCoefficientEigenvalue, hcoord]
@@ -906,7 +906,7 @@ theorem secondCoefficientEigenvalue_zero_of_component_ne_zero
     (z : E)
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0) :
     secondCoefficientEigenvalue X i j k hij hik hjk n sign 0 = 1 := by
-  have hcoord : secondCoordinate X i j k hij hik hjk n 0 = 1 := by
+  have hcoord : secondCoordinate X (ZMod 2) i j k hij hik hjk n 0 = 1 := by
     apply Subtype.ext
     simp
   rw [secondCoefficientEigenvalue, hcoord]
@@ -1060,11 +1060,11 @@ theorem exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
       firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) ∨
     (∃ b : FreeAlgebraDegree.degreeLE X (ZMod 2) n,
       secondCoefficientEigenvalue X i j k hij hik hjk n sign b = -1) := by
-  obtain ⟨a, b, hab⟩ := exists_coordinate_factorization X i j k hij hik hjk n g
+  obtain ⟨a, b, hab⟩ := exists_coordinate_factorization X (ZMod 2) i j k hij hik hjk n g
   have hmul := planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk n
     rho sign z hv
-    (firstCoordinate X i j k hij hik hjk n a)
-    (secondCoordinate X i j k hij hik hjk n b)
+    (firstCoordinate X (ZMod 2) i j k hij hik hjk n a)
+    (secondCoordinate X (ZMod 2) i j k hij hik hjk n b)
   rw [hab, hg] at hmul
   change (-1 : ℝ) =
     firstCoefficientEigenvalue X i j k hij hik hjk n sign a *

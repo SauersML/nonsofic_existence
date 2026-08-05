@@ -73,6 +73,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   generator shear/commutator advancement identities to free algebras over
   every commutative coefficient ring, with stage finiteness for finite
   coefficients
+- [x] Generalize the two-root coefficient planes — subgroup structure,
+  finiteness, commutativity, coordinate factorization, exhaustion, and all
+  four generator/unit shear conjugation formulas — to every commutative
+  coefficient ring, replacing the plane involution law by exponent dividing
+  the characteristic; the `±1` Fourier analysis of the planes is now the
+  only remaining `ZMod 2`-specific layer
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route
