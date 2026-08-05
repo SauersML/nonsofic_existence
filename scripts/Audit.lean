@@ -38,6 +38,15 @@ example : ∃ (G : Type) (_ : Group G), Group.IsFinitelyPresented G ∧ ¬ IsSof
 example : ¬ IsSofic ConcreteRankFour.Ambient :=
   concreteAmbient_not_isSofic
 
+/-- The positive control, pinned here so that it cannot be deleted while the
+negative results remain.  Every other occurrence of `IsSofic` in the library is
+a hypothesis to refute or a conclusion under a `¬`; if no group is ever
+exhibited satisfying it, `¬ IsSofic G` is equally consistent with the
+definition being unsatisfiable, and a kernel-clean proof of it would be worth
+nothing.  See `NonsoficGroupsExist/SoficPositiveControl.lean`. -/
+example (G : Type) [Group G] [Fintype G] [DecidableEq G] : IsSofic G :=
+  isSofic_of_fintype G
+
 /-! ## 2. Transitive axiom closure -/
 
 /-- The axioms of classical Lean, which Mathlib itself uses.  Nothing else is
