@@ -17,7 +17,7 @@ entrywise exponential of a Gram matrix conjugated by a positive
 diagonal.
 -/
 
-open scoped RealInnerProductSpace
+open scoped Matrix InnerProductSpace Nat
 
 namespace NonsoficGroupsExist
 namespace GaussianKernel

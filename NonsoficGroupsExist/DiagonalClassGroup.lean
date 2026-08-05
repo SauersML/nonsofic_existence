@@ -242,7 +242,7 @@ theorem commutator_mem_elementaryGroup_of_division [Nontrivial R]
     (hdiv : ∀ x : R, x ≠ 0 → ∃ p q : R, p * x * q = 1)
     (X Y : (Matrix (Fin 2) (Fin 2) R)ˣ) :
     ⁅X, Y⁆ ∈ elementaryGroup (Fin 2) R := by
-  letI hN : (elementaryGroup (Fin 2) R).Normal :=
+  haveI hN : (elementaryGroup (Fin 2) R).Normal :=
     elementaryGroup_normal_of_division hdiv
   have hdiag : ∀ Z : (Matrix (Fin 2) (Fin 2) R)ˣ, ∃ d : Rˣ,
       (Z : (Matrix (Fin 2) (Fin 2) R)ˣ ⧸ elementaryGroup (Fin 2) R) =
