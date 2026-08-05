@@ -723,7 +723,7 @@ second-coordinate event only by the displacement of the vector under that
 single elementary generator. -/
 theorem abs_generatorShearedSecondCharacterMass_sub_le
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (b : FreeAlgebraDegree.degreeLE X n)
+    (x : X) (n : ℕ) (b : FreeAlgebraDegree.degreeLE X (ZMod 2) n)
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
     (z : E) :
     |(∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk (n + 1)
@@ -754,7 +754,7 @@ It compares the next-stage sheared first-coordinate event with the original
 pure first-coordinate event. -/
 theorem abs_generatorShearedFirstCharacterMass_sub_le
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (a : FreeAlgebraDegree.degreeLE X n)
+    (x : X) (n : ℕ) (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n)
     (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
     (z : E) :
     |(∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk (n + 1)
@@ -837,7 +837,7 @@ theorem planeEigenvalue_one_of_component_ne_zero
 def firstCoefficientEigenvalue
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
-    (a : FreeAlgebraDegree.degreeLE X n) : ℝ :=
+    (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n) : ℝ :=
   planeEigenvalue X i j k hij hik hjk n sign
     (firstCoordinate X i j k hij hik hjk n a)
 
@@ -845,7 +845,7 @@ def firstCoefficientEigenvalue
 def secondCoefficientEigenvalue
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
-    (b : FreeAlgebraDegree.degreeLE X n) : ℝ :=
+    (b : FreeAlgebraDegree.degreeLE X (ZMod 2) n) : ℝ :=
   planeEigenvalue X i j k hij hik hjk n sign
     (secondCoordinate X i j k hij hik hjk n b)
 
@@ -857,7 +857,7 @@ theorem firstCoefficientEigenvalue_add_of_component_ne_zero
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (z : E)
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
-    (a b : FreeAlgebraDegree.degreeLE X n) :
+    (a b : FreeAlgebraDegree.degreeLE X (ZMod 2) n) :
     firstCoefficientEigenvalue X i j k hij hik hjk n sign (a + b) =
       firstCoefficientEigenvalue X i j k hij hik hjk n sign a *
         firstCoefficientEigenvalue X i j k hij hik hjk n sign b := by
@@ -873,7 +873,7 @@ theorem secondCoefficientEigenvalue_add_of_component_ne_zero
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (z : E)
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
-    (a b : FreeAlgebraDegree.degreeLE X n) :
+    (a b : FreeAlgebraDegree.degreeLE X (ZMod 2) n) :
     secondCoefficientEigenvalue X i j k hij hik hjk n sign (a + b) =
       secondCoefficientEigenvalue X i j k hij hik hjk n sign a *
         secondCoefficientEigenvalue X i j k hij hik hjk n sign b := by
@@ -918,35 +918,35 @@ basis word in the support of any coefficient on which it is nontrivial.  This
 is the exact bridge from arbitrary free polynomials to the word-by-word shear
 argument. -/
 theorem exists_supported_word_of_additive_sign_character
-    {n : ℕ} (chi : FreeAlgebraDegree.degreeLE X n → ℝ)
+    {n : ℕ} (chi : FreeAlgebraDegree.degreeLE X (ZMod 2) n → ℝ)
     (hzero : chi 0 = 1)
     (hadd : ∀ a b, chi (a + b) = chi a * chi b)
     (hsign : ∀ a, chi a = 1 ∨ chi a = -1)
-    (p : FreeAlgebraDegree.degreeLE X n) (hp : chi p = -1) :
+    (p : FreeAlgebraDegree.degreeLE X (ZMod 2) n) (hp : chi p = -1) :
     ∃ (w : FreeMonoid X)
       (hw : w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
         (R := ZMod 2) (X := X) p.1).coeff.support),
-      chi ⟨FreeAlgebraDegree.wordMonomial X w,
-        FreeAlgebraDegree.wordMonomial_mem_degreeLE X
-          (((FreeAlgebraDegree.mem_degreeLE_iff X p.1 n).1 p.2) w hw)⟩ =
+      chi ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w,
+        FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2)
+          (((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) p.1 n).1 p.2) w hw)⟩ =
         -1 := by
   classical
   let q := (FreeAlgebra.equivMonoidAlgebraFreeMonoid
     (R := ZMod 2) (X := X) p.1).coeff
   let term : {w // w ∈ q.support} →
-      FreeAlgebraDegree.degreeLE X n := fun w ↦
-    ⟨FreeAlgebraDegree.wordMonomial X w.1,
-      FreeAlgebraDegree.wordMonomial_mem_degreeLE X
-        (((FreeAlgebraDegree.mem_degreeLE_iff X p.1 n).1 p.2) w.1 w.2)⟩
+      FreeAlgebraDegree.degreeLE X (ZMod 2) n := fun w ↦
+    ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w.1,
+      FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2)
+        (((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) p.1 n).1 p.2) w.1 w.2)⟩
   have hpsum : p = ∑ w, term w :=
     FreeAlgebraDegree.eq_sum_support_degreeWordMonomial X p
   by_contra hnone
   have hnone' : ∀ (w : FreeMonoid X)
       (hw : w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
         (R := ZMod 2) (X := X) p.1).coeff.support),
-      chi ⟨FreeAlgebraDegree.wordMonomial X w,
-        FreeAlgebraDegree.wordMonomial_mem_degreeLE X
-          (((FreeAlgebraDegree.mem_degreeLE_iff X p.1 n).1 p.2) w hw)⟩ ≠
+      chi ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w,
+        FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2)
+          (((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) p.1 n).1 p.2) w hw)⟩ ≠
         -1 := by
     intro w hw hneg
     exact hnone ⟨w, hw, hneg⟩
@@ -976,7 +976,7 @@ theorem exists_supported_word_of_additive_sign_character
 theorem firstCoefficientEigenvalue_eq_one_or_neg_one
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
-    (a : FreeAlgebraDegree.degreeLE X n) :
+    (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n) :
     firstCoefficientEigenvalue X i j k hij hik hjk n sign a = 1 ∨
       firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1 := by
   unfold firstCoefficientEigenvalue planeEigenvalue
@@ -986,7 +986,7 @@ theorem firstCoefficientEigenvalue_eq_one_or_neg_one
 theorem secondCoefficientEigenvalue_eq_one_or_neg_one
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
-    (a : FreeAlgebraDegree.degreeLE X n) :
+    (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n) :
     secondCoefficientEigenvalue X i j k hij hik hjk n sign a = 1 ∨
       secondCoefficientEigenvalue X i j k hij hik hjk n sign a = -1 := by
   unfold secondCoefficientEigenvalue planeEigenvalue
@@ -1000,15 +1000,15 @@ theorem exists_supported_word_of_firstCoefficientEigenvalue_eq_neg_one
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (z : E)
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
-    (a : FreeAlgebraDegree.degreeLE X n)
+    (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n)
     (ha : firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) :
     ∃ (w : FreeMonoid X)
       (hw : w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
         (R := ZMod 2) (X := X) a.1).coeff.support),
       firstCoefficientEigenvalue X i j k hij hik hjk n sign
-        ⟨FreeAlgebraDegree.wordMonomial X w,
-          FreeAlgebraDegree.wordMonomial_mem_degreeLE X
-            (((FreeAlgebraDegree.mem_degreeLE_iff X a.1 n).1 a.2) w hw)⟩ =
+        ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2)
+            (((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) a.1 n).1 a.2) w hw)⟩ =
         -1 := by
   exact exists_supported_word_of_additive_sign_character X
     (firstCoefficientEigenvalue X i j k hij hik hjk n sign)
@@ -1027,15 +1027,15 @@ theorem exists_supported_word_of_secondCoefficientEigenvalue_eq_neg_one
     (sign : Fin (Nat.card (Plane X i j k hij hik hjk n)) → Bool)
     (z : E)
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
-    (a : FreeAlgebraDegree.degreeLE X n)
+    (a : FreeAlgebraDegree.degreeLE X (ZMod 2) n)
     (ha : secondCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) :
     ∃ (w : FreeMonoid X)
       (hw : w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
         (R := ZMod 2) (X := X) a.1).coeff.support),
       secondCoefficientEigenvalue X i j k hij hik hjk n sign
-        ⟨FreeAlgebraDegree.wordMonomial X w,
-          FreeAlgebraDegree.wordMonomial_mem_degreeLE X
-            (((FreeAlgebraDegree.mem_degreeLE_iff X a.1 n).1 a.2) w hw)⟩ =
+        ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2)
+            (((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) a.1 n).1 a.2) w hw)⟩ =
         -1 := by
   exact exists_supported_word_of_additive_sign_character X
     (secondCoefficientEigenvalue X i j k hij hik hjk n sign)
@@ -1056,9 +1056,9 @@ theorem exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
     (hv : planeComponent X i j k hij hik hjk n rho sign z ≠ 0)
     (g : Plane X i j k hij hik hjk n)
     (hg : planeEigenvalue X i j k hij hik hjk n sign g = -1) :
-    (∃ a : FreeAlgebraDegree.degreeLE X n,
+    (∃ a : FreeAlgebraDegree.degreeLE X (ZMod 2) n,
       firstCoefficientEigenvalue X i j k hij hik hjk n sign a = -1) ∨
-    (∃ b : FreeAlgebraDegree.degreeLE X n,
+    (∃ b : FreeAlgebraDegree.degreeLE X (ZMod 2) n,
       secondCoefficientEigenvalue X i j k hij hik hjk n sign b = -1) := by
   obtain ⟨a, b, hab⟩ := exists_coordinate_factorization X i j k hij hik hjk n g
   have hmul := planeEigenvalue_mul_of_component_ne_zero X i j k hij hik hjk n
@@ -1100,14 +1100,14 @@ theorem exists_word_coordinate_of_planeEigenvalue_eq_neg_one
     (∃ (w : FreeMonoid X)
       (hw : FreeAlgebraDegree.freeWordLength X w ≤ n),
       firstCoefficientEigenvalue X i j k hij hik hjk n sign
-        ⟨FreeAlgebraDegree.wordMonomial X w,
-          FreeAlgebraDegree.wordMonomial_mem_degreeLE X hw⟩ =
+        ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2) hw⟩ =
         -1) ∨
     (∃ (w : FreeMonoid X)
       (hw : FreeAlgebraDegree.freeWordLength X w ≤ n),
       secondCoefficientEigenvalue X i j k hij hik hjk n sign
-        ⟨FreeAlgebraDegree.wordMonomial X w,
-          FreeAlgebraDegree.wordMonomial_mem_degreeLE X hw⟩ =
+        ⟨FreeAlgebraDegree.wordMonomial X (ZMod 2) w,
+          FreeAlgebraDegree.wordMonomial_mem_degreeLE X (ZMod 2) hw⟩ =
         -1) := by
   rcases exists_nontrivial_coefficient_of_planeEigenvalue_eq_neg_one
       X i j k hij hik hjk n rho sign z hv g hg with ⟨a, ha⟩ | ⟨b, hb⟩
@@ -1116,14 +1116,14 @@ theorem exists_word_coordinate_of_planeEigenvalue_eq_neg_one
       exists_supported_word_of_firstCoefficientEigenvalue_eq_neg_one
         X i j k hij hik hjk n rho sign z hv a ha
     have hdegree :=
-      ((FreeAlgebraDegree.mem_degreeLE_iff X a.1 n).1 a.2) w hw
+      ((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) a.1 n).1 a.2) w hw
     exact ⟨w, hdegree, hword⟩
   · right
     obtain ⟨w, hw, hword⟩ :=
       exists_supported_word_of_secondCoefficientEigenvalue_eq_neg_one
         X i j k hij hik hjk n rho sign z hv b hb
     have hdegree :=
-      ((FreeAlgebraDegree.mem_degreeLE_iff X b.1 n).1 b.2) w hw
+      ((FreeAlgebraDegree.mem_degreeLE_iff X (ZMod 2) b.1 n).1 b.2) w hw
     exact ⟨w, hdegree, hword⟩
 
 end

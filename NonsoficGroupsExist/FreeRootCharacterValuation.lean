@@ -28,21 +28,21 @@ variable (X : Type*) [Fintype X]
 /-- A sign character is first detected at the specified word degree.  The
 predicate itself does not assert minimality; minimality is imposed by
 `characterValuation`. -/
-def HasDetectionAtDegree {n : ℕ} (chi : degreeLE X n → ℝ) (d : ℕ) : Prop :=
+def HasDetectionAtDegree {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ) (d : ℕ) : Prop :=
   ∃ w : FreeMonoid X,
     freeWordLength X w = d ∧
     freeWordLength X w ≤ n ∧
-    chi (wordMonomialInDegree X n w) = -1
+    chi (wordMonomialInDegree X (ZMod 2) n w) = -1
 
 /-- The least detected word degree, or `n + 1` if the character is trivial on
 all word monomials in stage `n`. -/
-noncomputable def characterValuation {n : ℕ} (chi : degreeLE X n → ℝ) : ℕ := by
+noncomputable def characterValuation {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ) : ℕ := by
   classical
   exact if h : ∃ d, HasDetectionAtDegree X chi d then Nat.find h else n + 1
 
 /-- If a detection exists, the valuation degree itself is detected. -/
 theorem hasDetectionAtDegree_characterValuation
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (h : ∃ d, HasDetectionAtDegree X chi d) :
     HasDetectionAtDegree X chi (characterValuation X chi) := by
   classical
@@ -53,7 +53,7 @@ theorem hasDetectionAtDegree_characterValuation
 
 /-- The valuation is no larger than any detected degree. -/
 theorem characterValuation_le_of_hasDetection
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (h : ∃ d, HasDetectionAtDegree X chi d) {d : ℕ}
     (hd : HasDetectionAtDegree X chi d) :
     characterValuation X chi ≤ d := by
@@ -65,7 +65,7 @@ theorem characterValuation_le_of_hasDetection
 
 /-- With no detected word, the valuation is the distinguished value `n+1`. -/
 theorem characterValuation_eq_succ_of_not_exists
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (h : ¬ ∃ d, HasDetectionAtDegree X chi d) :
     characterValuation X chi = n + 1 := by
   classical
@@ -73,7 +73,7 @@ theorem characterValuation_eq_succ_of_not_exists
 
 /-- Every detected finite-stage character has valuation at most the stage. -/
 theorem characterValuation_le_stage_of_exists
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (h : ∃ d, HasDetectionAtDegree X chi d) :
     characterValuation X chi ≤ n := by
   obtain ⟨d, hd⟩ := h
@@ -85,7 +85,7 @@ theorem characterValuation_le_stage_of_exists
 
 /-- Every finite-stage valuation is bounded by the stage sentinel. -/
 theorem characterValuation_le_succ
-    {n : ℕ} (chi : degreeLE X n → ℝ) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ) :
     characterValuation X chi ≤ n + 1 := by
   by_cases h : ∃ d, HasDetectionAtDegree X chi d
   · exact (characterValuation_le_stage_of_exists X chi h).trans
@@ -95,28 +95,28 @@ theorem characterValuation_le_succ
 /-- Nontriviality on an arbitrary coefficient forces a word detection and
 hence a valuation within the finite stage. -/
 theorem characterValuation_le_stage_of_eq_neg_one
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (hzero : chi 0 = 1)
     (hadd : ∀ a b, chi (a + b) = chi a * chi b)
     (hsign : ∀ a, chi a = 1 ∨ chi a = -1)
-    (p : degreeLE X n) (hp : chi p = -1) :
+    (p : degreeLE X (ZMod 2) n) (hp : chi p = -1) :
     characterValuation X chi ≤ n := by
   obtain ⟨w, hw, hword⟩ :=
     exists_supported_word_of_additive_sign_character X chi hzero hadd hsign p hp
-  have hwDegree := ((mem_degreeLE_iff X p.1 n).1 p.2) w hw
+  have hwDegree := ((mem_degreeLE_iff X (ZMod 2) p.1 n).1 p.2) w hw
   have hdetect : HasDetectionAtDegree X chi (freeWordLength X w) := by
     refine ⟨w, rfl, hwDegree, ?_⟩
-    simpa [wordMonomialInDegree_of_le X w hwDegree] using hword
+    simpa [wordMonomialInDegree_of_le X (ZMod 2) w hwDegree] using hword
   exact characterValuation_le_stage_of_exists X chi ⟨_, hdetect⟩
 
 /-- For an additive sign character, the distinguished valuation `n+1` means
 the character is genuinely trivial on every coefficient in the stage. -/
 theorem eq_one_of_characterValuation_eq_succ
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (hzero : chi 0 = 1)
     (hadd : ∀ a b, chi (a + b) = chi a * chi b)
     (hsign : ∀ a, chi a = 1 ∨ chi a = -1)
-    (hval : characterValuation X chi = n + 1) (p : degreeLE X n) :
+    (hval : characterValuation X chi = n + 1) (p : degreeLE X (ZMod 2) n) :
     chi p = 1 := by
   rcases hsign p with hp | hp
   · exact hp
@@ -127,9 +127,9 @@ theorem eq_one_of_characterValuation_eq_succ
 /-- Valuation zero is exactly detection on the empty word (the unit
 coefficient). -/
 theorem characterValuation_eq_zero_iff
-    {n : ℕ} (chi : degreeLE X n → ℝ) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ) :
     characterValuation X chi = 0 ↔
-      chi (wordMonomialInDegree X n 1) = -1 := by
+      chi (wordMonomialInDegree X (ZMod 2) n 1) = -1 := by
   constructor
   · intro hval
     have hExists : ∃ d, HasDetectionAtDegree X chi d := by
@@ -153,12 +153,12 @@ theorem characterValuation_eq_zero_iff
 
 /-- Restrict a character from degree `n+1` to the included degree-`n`
 coefficient space. -/
-def restrictCharacterSucc {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) :
-    degreeLE X n → ℝ :=
+def restrictCharacterSucc {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) :
+    degreeLE X (ZMod 2) n → ℝ :=
   fun a ↦ chi (coefficientSucc X a)
 
 theorem hasDetectionAtDegree_of_restrictCharacterSucc
-    {n d : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n d : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (h : HasDetectionAtDegree X (restrictCharacterSucc X chi) d) :
     HasDetectionAtDegree X chi d := by
   obtain ⟨w, hwd, hwn, hchi⟩ := h
@@ -168,7 +168,7 @@ theorem hasDetectionAtDegree_of_restrictCharacterSucc
   exact hchi
 
 theorem hasDetectionAtDegree_restrictCharacterSucc
-    {n d : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n d : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (h : HasDetectionAtDegree X chi d)
     (hdn : d ≤ n) :
     HasDetectionAtDegree X (restrictCharacterSucc X chi) d := by
@@ -184,7 +184,7 @@ stage's sentinel `n+1`.  This includes a character first detected in degree
 `n+1`, whose restriction is trivial and therefore has exactly that sentinel
 value. -/
 theorem characterValuation_restrictCharacterSucc_eq
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (hle : characterValuation X chi ≤ n + 1) :
     characterValuation X (restrictCharacterSucc X chi) =
       characterValuation X chi := by
@@ -223,7 +223,7 @@ theorem characterValuation_restrictCharacterSucc_eq
 /-- In full generality, restriction truncates the one-extra-stage valuation
 at the lower stage's sentinel. -/
 theorem characterValuation_restrictCharacterSucc_eq_min
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) :
     characterValuation X (restrictCharacterSucc X chi) =
       min (characterValuation X chi) (n + 1) := by
   by_cases hle : characterValuation X chi ≤ n + 1
@@ -247,15 +247,15 @@ theorem characterValuation_restrictCharacterSucc_eq_min
 
 /-- Pointwise multiplication of two real sign characters.  For additive
 characters this is their group-law product in the dual coefficient group. -/
-def characterProduct {n : ℕ} (chi psi : degreeLE X n → ℝ) :
-    degreeLE X n → ℝ :=
+def characterProduct {n : ℕ} (chi psi : degreeLE X (ZMod 2) n → ℝ) :
+    degreeLE X (ZMod 2) n → ℝ :=
   fun a ↦ chi a * psi a
 
 theorem characterProduct_eq_one_or_neg_one
-    {n : ℕ} (chi psi : degreeLE X n → ℝ)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hchi : ∀ a, chi a = 1 ∨ chi a = -1)
     (hpsi : ∀ a, psi a = 1 ∨ psi a = -1)
-    (a : degreeLE X n) :
+    (a : degreeLE X (ZMod 2) n) :
     characterProduct X chi psi a = 1 ∨
       characterProduct X chi psi a = -1 := by
   rcases hchi a with ha | ha <;> rcases hpsi a with hb | hb <;>
@@ -264,12 +264,12 @@ theorem characterProduct_eq_one_or_neg_one
 /-- Below a character's least detected degree, every word monomial has value
 `1`. -/
 theorem eq_one_of_word_degree_lt_characterValuation
-    {n : ℕ} (chi : degreeLE X n → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) n → ℝ)
     (hsign : ∀ a, chi a = 1 ∨ chi a = -1)
     (w : FreeMonoid X) (hwn : freeWordLength X w ≤ n)
     (hlt : freeWordLength X w < characterValuation X chi) :
-    chi (wordMonomialInDegree X n w) = 1 := by
-  rcases hsign (wordMonomialInDegree X n w) with hone | hneg
+    chi (wordMonomialInDegree X (ZMod 2) n w) = 1 := by
+  rcases hsign (wordMonomialInDegree X (ZMod 2) n w) with hone | hneg
   · exact hone
   · have hdetect : HasDetectionAtDegree X chi (freeWordLength X w) :=
       ⟨w, rfl, hwn, hneg⟩
@@ -281,7 +281,7 @@ theorem eq_one_of_word_degree_lt_characterValuation
 character is genuinely detected, their product has exactly that lower
 valuation.  Cancellation cannot occur before the other character starts. -/
 theorem characterValuation_characterProduct_eq_left_of_lt
-    {n : ℕ} (chi psi : degreeLE X n → ℝ)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hchi : ∀ a, chi a = 1 ∨ chi a = -1)
     (hpsi : ∀ a, psi a = 1 ∨ psi a = -1)
     (hChiExists : ∃ d, HasDetectionAtDegree X chi d)
@@ -290,7 +290,7 @@ theorem characterValuation_characterProduct_eq_left_of_lt
       characterValuation X chi := by
   have hchiDetect := hasDetectionAtDegree_characterValuation X chi hChiExists
   obtain ⟨w, hwVal, hwn, hwChi⟩ := hchiDetect
-  have hwPsi : psi (wordMonomialInDegree X n w) = 1 :=
+  have hwPsi : psi (wordMonomialInDegree X (ZMod 2) n w) = 1 :=
     eq_one_of_word_degree_lt_characterValuation X psi hpsi w hwn (by omega)
   have hproductDetect : HasDetectionAtDegree X (characterProduct X chi psi)
       (characterValuation X chi) := by
@@ -307,16 +307,16 @@ theorem characterValuation_characterProduct_eq_left_of_lt
   have hlower : characterValuation X chi ≤
       characterValuation X (characterProduct X chi psi) := by
     by_contra hnot
-    have huChi : chi (wordMonomialInDegree X n u) = 1 :=
+    have huChi : chi (wordMonomialInDegree X (ZMod 2) n u) = 1 :=
       eq_one_of_word_degree_lt_characterValuation X chi hchi u hun (by omega)
-    have huPsi : psi (wordMonomialInDegree X n u) = 1 :=
+    have huPsi : psi (wordMonomialInDegree X (ZMod 2) n u) = 1 :=
       eq_one_of_word_degree_lt_characterValuation X psi hpsi u hun (by omega)
     simp [characterProduct, huChi, huPsi] at huProduct
     exact (by norm_num : (1 : ℝ) ≠ -1) huProduct
   exact le_antisymm hupper hlower
 
 theorem characterValuation_characterProduct_eq_right_of_lt
-    {n : ℕ} (chi psi : degreeLE X n → ℝ)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hchi : ∀ a, chi a = 1 ∨ chi a = -1)
     (hpsi : ∀ a, psi a = 1 ∨ psi a = -1)
     (hPsiExists : ∃ d, HasDetectionAtDegree X psi d)
@@ -333,14 +333,14 @@ theorem characterValuation_characterProduct_eq_right_of_lt
 
 /-- The character obtained by precomposing with left multiplication by one
 free generator.  It lives one degree stage lower. -/
-def leftDerivedCharacter {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X) :
-    degreeLE X n → ℝ :=
+def leftDerivedCharacter {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X) :
+    degreeLE X (ZMod 2) n → ℝ :=
   fun a ↦ chi (generatorMulCoefficientSucc X x a)
 
 /-- Taking a generator-derived character commutes exactly with restriction by
 one degree stage. -/
 theorem leftDerivedCharacter_restrictCharacterSucc
-    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ) (x : X) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 2) → ℝ) (x : X) :
     leftDerivedCharacter X (restrictCharacterSucc X chi) x =
       restrictCharacterSucc X (leftDerivedCharacter X chi x) := by
   funext a
@@ -348,14 +348,14 @@ theorem leftDerivedCharacter_restrictCharacterSucc
   congr 1
 
 theorem leftDerivedCharacter_zero
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X)
     (hzero : chi 0 = 1) :
     leftDerivedCharacter X chi x 0 = 1 := by
   simp [leftDerivedCharacter, hzero]
 
 theorem leftDerivedCharacter_add
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
-    (hadd : ∀ a b, chi (a + b) = chi a * chi b) (a b : degreeLE X n) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X)
+    (hadd : ∀ a b, chi (a + b) = chi a * chi b) (a b : degreeLE X (ZMod 2) n) :
     leftDerivedCharacter X chi x (a + b) =
       leftDerivedCharacter X chi x a * leftDerivedCharacter X chi x b := by
   change chi (generatorMulCoefficientSucc X x (a + b)) =
@@ -364,8 +364,8 @@ theorem leftDerivedCharacter_add
   rw [generatorMulCoefficientSucc_add, hadd]
 
 theorem leftDerivedCharacter_eq_one_or_neg_one
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) (x : X)
-    (hsign : ∀ a, chi a = 1 ∨ chi a = -1) (a : degreeLE X n) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X)
+    (hsign : ∀ a, chi a = 1 ∨ chi a = -1) (a : degreeLE X (ZMod 2) n) :
     leftDerivedCharacter X chi x a = 1 ∨
       leftDerivedCharacter X chi x a = -1 :=
   hsign _
@@ -374,7 +374,7 @@ theorem leftDerivedCharacter_eq_one_or_neg_one
 valuation admits a first generator whose derived character has valuation
 exactly one smaller. -/
 theorem exists_leftDerivedCharacter_valuation_succ
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (hExists : ∃ d, HasDetectionAtDegree X chi d)
     (hpos : 0 < characterValuation X chi) :
     ∃ x : X,
@@ -387,7 +387,7 @@ theorem exists_leftDerivedCharacter_valuation_succ
     exists_of_mul_of_freeWordLength_pos X w hwPos
   have hvStage : freeWordLength X v ≤ n := by omega
   have hvChi : leftDerivedCharacter X chi x
-      (wordMonomialInDegree X n v) = -1 := by
+      (wordMonomialInDegree X (ZMod 2) n v) = -1 := by
     unfold leftDerivedCharacter
     rw [generatorMulCoefficientSucc_wordMonomialInDegree X x n v hvStage]
     rw [← hwFactor]
@@ -409,9 +409,9 @@ theorem exists_leftDerivedCharacter_valuation_succ
     rw [freeWordLength_mul, freeWordLength_of]
     omega
   have huProductChi :
-      chi (wordMonomialInDegree X (n + 1) (FreeMonoid.of x * u)) = -1 := by
+      chi (wordMonomialInDegree X (ZMod 2) (n + 1) (FreeMonoid.of x * u)) = -1 := by
     change chi (generatorMulCoefficientSucc X x
-      (wordMonomialInDegree X n u)) = -1 at huChi
+      (wordMonomialInDegree X (ZMod 2) n u)) = -1 at huChi
     rw [generatorMulCoefficientSucc_wordMonomialInDegree X x n u huStage]
       at huChi
     exact huChi
@@ -432,7 +432,7 @@ noncomputable def generatorEnumeration :
 
 /-- All generator indices realizing the exact one-step valuation descent. -/
 noncomputable def leadingGeneratorIndexSet
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) :
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) :
     Finset (Fin (Fintype.card X)) :=
   Finset.univ.filter fun q ↦
     characterValuation X
@@ -440,7 +440,7 @@ noncomputable def leadingGeneratorIndexSet
       characterValuation X chi
 
 theorem mem_leadingGeneratorIndexSet_iff
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (q : Fin (Fintype.card X)) :
     q ∈ leadingGeneratorIndexSet X chi ↔
       characterValuation X
@@ -451,7 +451,7 @@ theorem mem_leadingGeneratorIndexSet_iff
 /-- Away from the top-degree boundary, restriction preserves exactly the set
 of generators realizing leading-term valuation descent. -/
 theorem mem_leadingGeneratorIndexSet_restrictCharacterSucc_iff
-    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 2) → ℝ)
     (hle : characterValuation X chi ≤ n + 1)
     (q : Fin (Fintype.card X)) :
     q ∈ leadingGeneratorIndexSet X (restrictCharacterSucc X chi) ↔
@@ -485,7 +485,7 @@ theorem mem_leadingGeneratorIndexSet_restrictCharacterSucc_iff
     exact h
 
 theorem leadingGeneratorIndexSet_restrictCharacterSucc
-    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 2) → ℝ)
     (hle : characterValuation X chi ≤ n + 1) :
     leadingGeneratorIndexSet X (restrictCharacterSucc X chi) =
       leadingGeneratorIndexSet X chi := by
@@ -495,7 +495,7 @@ theorem leadingGeneratorIndexSet_restrictCharacterSucc
 /-- Positive detected valuation makes the leading-generator index set
 nonempty. -/
 theorem leadingGeneratorIndexSet_nonempty
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (hExists : ∃ d, HasDetectionAtDegree X chi d)
     (hpos : 0 < characterValuation X chi) :
     (leadingGeneratorIndexSet X chi).Nonempty := by
@@ -509,14 +509,14 @@ theorem leadingGeneratorIndexSet_nonempty
 /-- The least enumerated leading generator, with `card X` as a total sentinel
 when no generator realizes valuation descent. -/
 noncomputable def leastLeadingGeneratorIndex
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) : ℕ :=
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) : ℕ :=
   if h : (leadingGeneratorIndexSet X chi).Nonempty then
     ((leadingGeneratorIndexSet X chi).min' h).val
   else
     Fintype.card X
 
 theorem leastLeadingGeneratorIndex_lt_card
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (h : (leadingGeneratorIndexSet X chi).Nonempty) :
     leastLeadingGeneratorIndex X chi < Fintype.card X := by
   rw [leastLeadingGeneratorIndex, dif_pos h]
@@ -525,7 +525,7 @@ theorem leastLeadingGeneratorIndex_lt_card
 /-- The total least-index selector genuinely realizes valuation descent
 whenever the leading-generator set is nonempty. -/
 theorem leastLeadingGeneratorIndex_spec
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (h : (leadingGeneratorIndexSet X chi).Nonempty) :
     characterValuation X
         (leftDerivedCharacter X chi
@@ -540,7 +540,7 @@ theorem leastLeadingGeneratorIndex_spec
 /-- Below the top-degree boundary, the canonical least leading generator is
 unchanged by restriction to the preceding stage. -/
 theorem leastLeadingGeneratorIndex_restrictCharacterSucc
-    {n : ℕ} (chi : degreeLE X (n + 2) → ℝ)
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 2) → ℝ)
     (hle : characterValuation X chi ≤ n + 1) :
     leastLeadingGeneratorIndex X (restrictCharacterSucc X chi) =
       leastLeadingGeneratorIndex X chi := by
@@ -573,7 +573,7 @@ inductive ValuationRegion
 
 /-- Classify an arbitrary pair of finite-stage characters. -/
 noncomputable def characterPairRegion
-    (n : ℕ) (chi psi : degreeLE X n → ℝ) :
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ) :
     ValuationRegion :=
   let a := characterValuation X chi
   let b := characterValuation X psi
@@ -584,7 +584,7 @@ noncomputable def characterPairRegion
   else .C
 
 theorem characterPairRegion_eq_zero_iff
-    (n : ℕ) (chi psi : degreeLE X n → ℝ) :
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ) :
     characterPairRegion X n chi psi = .zero ↔
       characterValuation X chi = n + 1 ∧
         characterValuation X psi = n + 1 := by
@@ -614,7 +614,7 @@ theorem characterPairRegion_eq_zero_iff
 
 /-- Exact numerical data carried by membership in region `A`. -/
 theorem characterPairRegion_A_data
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (h : characterPairRegion X n chi psi = .A) :
       ¬(characterValuation X chi = n + 1 ∧
         characterValuation X psi = n + 1) ∧
@@ -641,7 +641,7 @@ theorem characterPairRegion_A_data
 
 /-- Exact numerical data carried by membership in region `B`. -/
 theorem characterPairRegion_B_data
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (h : characterPairRegion X n chi psi = .B) :
       ¬(characterValuation X chi = n + 1 ∧
         characterValuation X psi = n + 1) ∧
@@ -667,7 +667,7 @@ theorem characterPairRegion_B_data
 
 /-- Exact numerical data carried by membership in region `C`. -/
 theorem characterPairRegion_C_data
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (h : characterPairRegion X n chi psi = .C) :
       ¬(characterValuation X chi = n + 1 ∧
         characterValuation X psi = n + 1) ∧
@@ -694,7 +694,7 @@ theorem characterPairRegion_C_data
 
 /-- Exact zero-coordinate alternative carried by membership in region `D`. -/
 theorem characterPairRegion_D_data
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (h : characterPairRegion X n chi psi = .D) :
     characterValuation X chi = 0 ∨ characterValuation X psi = 0 := by
   by_cases hz : characterValuation X chi = n + 1 ∧
@@ -716,7 +716,7 @@ theorem characterPairRegion_D_data
           cases h
 
 theorem characterPairRegion_eq_A_of_pos_of_lt
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hpsi : 0 < characterValuation X psi)
     (hlt : characterValuation X psi < characterValuation X chi) :
     characterPairRegion X n chi psi = .A := by
@@ -727,7 +727,7 @@ theorem characterPairRegion_eq_A_of_pos_of_lt
   rw [characterPairRegion, if_neg hz, if_neg hd, if_pos hlt]
 
 theorem characterPairRegion_eq_B_of_data
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hz : ¬(characterValuation X chi = n + 1 ∧
       characterValuation X psi = n + 1))
     (hchi : characterValuation X chi ≠ 0)
@@ -740,7 +740,7 @@ theorem characterPairRegion_eq_B_of_data
   rw [characterPairRegion, if_neg hz, if_neg hd, if_neg hba, if_pos heq]
 
 theorem characterPairRegion_eq_C_of_pos_of_lt
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hchi : 0 < characterValuation X chi)
     (hlt : characterValuation X chi < characterValuation X psi) :
     characterPairRegion X n chi psi = .C := by
@@ -753,13 +753,13 @@ theorem characterPairRegion_eq_C_of_pos_of_lt
   rw [characterPairRegion, if_neg hz, if_neg hd, if_neg hba, if_neg heq]
 
 theorem characterPairRegion_eq_D_of_left_zero
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hchi : characterValuation X chi = 0) :
     characterPairRegion X n chi psi = .D := by
   simp [characterPairRegion, hchi]
 
 theorem characterPairRegion_eq_D_of_right_zero
-    (n : ℕ) (chi psi : degreeLE X n → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) n → ℝ)
     (hpsi : characterValuation X psi = 0) :
     characterPairRegion X n chi psi = .D := by
   simp [characterPairRegion, hpsi]
@@ -768,23 +768,23 @@ theorem characterPairRegion_eq_D_of_right_zero
 restrict the original first character and multiply it by the generator-derived
 second character. -/
 def oppositeShearedFirstCharacter
-    {n : ℕ} (chi psi : degreeLE X (n + 1) → ℝ) (x : X) :
-    degreeLE X n → ℝ :=
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X) :
+    degreeLE X (ZMod 2) n → ℝ :=
   characterProduct X (restrictCharacterSucc X chi)
     (leftDerivedCharacter X psi x)
 
 /-- The opposite adjacent shear leaves the second character unchanged, apart
 from restriction to the lower degree stage. -/
 def oppositeShearedSecondCharacter
-    {n : ℕ} (psi : degreeLE X (n + 1) → ℝ) :
-    degreeLE X n → ℝ :=
+    {n : ℕ} (psi : degreeLE X (ZMod 2) (n + 1) → ℝ) :
+    degreeLE X (ZMod 2) n → ℝ :=
   restrictCharacterSucc X psi
 
 /-- Kassabov's first valuation-transport claim at finite degree: if a
 next-stage pair is in `A ∪ B` and `x` detects the leading part of the second
 character, the opposite shear restricts to a pair in `C ∪ D`. -/
 theorem oppositeShearedCharacterRegion_eq_C_or_D
-    {n : ℕ} (chi psi : degreeLE X (n + 1) → ℝ) (x : X)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X)
     (hchiSign : ∀ a, chi a = 1 ∨ chi a = -1)
     (hpsiSign : ∀ a, psi a = 1 ∨ psi a = -1)
     (hregion : characterPairRegion X (n + 1) chi psi = .A ∨
@@ -871,22 +871,22 @@ theorem oppositeShearedCharacterRegion_eq_C_or_D
 /-- The dual action of the `i,j` adjacent shear leaves the first character
 unchanged after restriction. -/
 def forwardShearedFirstCharacter
-    {n : ℕ} (chi : degreeLE X (n + 1) → ℝ) :
-    degreeLE X n → ℝ :=
+    {n : ℕ} (chi : degreeLE X (ZMod 2) (n + 1) → ℝ) :
+    degreeLE X (ZMod 2) n → ℝ :=
   restrictCharacterSucc X chi
 
 /-- The same shear multiplies the restricted second character by the
 generator-derived first character.  It is the coordinate swap of the
 opposite-shear formula above. -/
 def forwardShearedSecondCharacter
-    {n : ℕ} (chi psi : degreeLE X (n + 1) → ℝ) (x : X) :
-    degreeLE X n → ℝ :=
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X) :
+    degreeLE X (ZMod 2) n → ℝ :=
   oppositeShearedFirstCharacter X psi chi x
 
 /-- Kassabov's symmetric valuation-transport claim: a pair in `C ∪ B`,
 sheared using a leading generator of its first character, lands in `A ∪ D`. -/
 theorem forwardShearedCharacterRegion_eq_A_or_D
-    {n : ℕ} (chi psi : degreeLE X (n + 1) → ℝ) (x : X)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ) (x : X)
     (hchiSign : ∀ a, chi a = 1 ∨ chi a = -1)
     (hpsiSign : ∀ a, psi a = 1 ∨ psi a = -1)
     (hregion : characterPairRegion X (n + 1) chi psi = .C ∨
@@ -942,7 +942,7 @@ theorem forwardShearedCharacterRegion_eq_A_or_D
 character; the total sentinel branch of `leastLeadingGeneratorIndex` is
 therefore impossible on this region. -/
 theorem secondLeadingGeneratorIndexSet_nonempty_of_A_or_B
-    {n : ℕ} (chi psi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (hregion : characterPairRegion X (n + 1) chi psi = .A ∨
       characterPairRegion X (n + 1) chi psi = .B) :
     (leadingGeneratorIndexSet X psi).Nonempty := by
@@ -978,7 +978,7 @@ theorem secondLeadingGeneratorIndexSet_nonempty_of_A_or_B
 /-- Symmetrically, every pair in `C ∪ B` has a genuine leading generator for
 its first character. -/
 theorem firstLeadingGeneratorIndexSet_nonempty_of_C_or_B
-    {n : ℕ} (chi psi : degreeLE X (n + 1) → ℝ)
+    {n : ℕ} (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (hregion : characterPairRegion X (n + 1) chi psi = .C ∨
       characterPairRegion X (n + 1) chi psi = .B) :
     (leadingGeneratorIndexSet X chi).Nonempty := by
@@ -1474,7 +1474,7 @@ ordinary restriction preserves the valuation region exactly.  A still-trivial
 fine character (valuation `n+2`) remains the coarse sentinel (`n+1`), so it is
 correctly included in this stability statement. -/
 theorem characterPairRegion_restrictCharacterSucc_eq_of_ne_top
-    (n : ℕ) (chi psi : degreeLE X (n + 1) → ℝ)
+    (n : ℕ) (chi psi : degreeLE X (ZMod 2) (n + 1) → ℝ)
     (hchi : characterValuation X chi ≠ n + 1)
     (hpsi : characterValuation X psi ≠ n + 1) :
     characterPairRegion X n (restrictCharacterSucc X chi)
@@ -2447,7 +2447,7 @@ theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction_of_valid
     (x : X) (n : ℕ)
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
     (hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 1) fineSign)
-    (a : degreeLE X n) :
+    (a : degreeLE X (ZMod 2) n) :
     firstCoefficientEigenvalue X i j k hij hik hjk n
         (fun q ↦ fineSign
           (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) a =
@@ -2476,7 +2476,7 @@ theorem firstCoefficientEigenvalue_oppositeConjugatedRestriction
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
     (z : E)
     (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
-    (a : degreeLE X n) :
+    (a : degreeLE X (ZMod 2) n) :
     firstCoefficientEigenvalue X i j k hij hik hjk n
         (fun q ↦ fineSign
           (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) a =
@@ -2495,7 +2495,7 @@ theorem secondCoefficientEigenvalue_oppositeConjugatedRestriction
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
     (x : X) (n : ℕ)
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
-    (b : degreeLE X n) :
+    (b : degreeLE X (ZMod 2) n) :
     secondCoefficientEigenvalue X i j k hij hik hjk n
         (fun q ↦ fineSign
           (oppositeConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) b =
@@ -2519,7 +2519,7 @@ theorem firstCoefficientEigenvalue_forwardConjugatedRestriction
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
     (x : X) (n : ℕ)
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
-    (a : degreeLE X n) :
+    (a : degreeLE X (ZMod 2) n) :
     firstCoefficientEigenvalue X i j k hij hik hjk n
         (fun q ↦ fineSign
           (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) a =
@@ -2543,7 +2543,7 @@ theorem secondCoefficientEigenvalue_forwardConjugatedRestriction_of_valid
     (x : X) (n : ℕ)
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
     (hvalid : IsPlaneCharacterSign X i j k hij hik hjk (n + 1) fineSign)
-    (b : degreeLE X n) :
+    (b : degreeLE X (ZMod 2) n) :
     secondCoefficientEigenvalue X i j k hij hik hjk n
         (fun q ↦ fineSign
           (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) b =
@@ -2573,7 +2573,7 @@ theorem secondCoefficientEigenvalue_forwardConjugatedRestriction
     (fineSign : Fin (Nat.card (Plane X i j k hij hik hjk (n + 1))) → Bool)
     (z : E)
     (hv : planeComponent X i j k hij hik hjk (n + 1) rho fineSign z ≠ 0)
-    (b : degreeLE X n) :
+    (b : degreeLE X (ZMod 2) n) :
     secondCoefficientEigenvalue X i j k hij hik hjk n
         (fun q ↦ fineSign
           (forwardConjugatedPlaneSuccIndex X i j k hij hik hjk x n q)) b =
@@ -3848,7 +3848,7 @@ theorem planeDFirstSignSet_subset_negative_unit
     planeDFirstSignSet X i j k hij hik hjk n ⊆
       negativePlaneSignSet X i j k hij hik hjk n
         (firstCoordinate X i j k hij hik hjk n
-          (wordMonomialInDegree X n 1)) := by
+          (wordMonomialInDegree X (ZMod 2) n 1)) := by
   classical
   intro sign hsign
   simp only [planeDFirstSignSet, Finset.mem_filter] at hsign
@@ -3862,7 +3862,7 @@ theorem planeDSecondSignSet_subset_negative_unit
     planeDSecondSignSet X i j k hij hik hjk n ⊆
       negativePlaneSignSet X i j k hij hik hjk n
         (secondCoordinate X i j k hij hik hjk n
-          (wordMonomialInDegree X n 1)) := by
+          (wordMonomialInDegree X (ZMod 2) n 1)) := by
   classical
   intro sign hsign
   simp only [planeDSecondSignSet, Finset.mem_filter] at hsign
@@ -3888,10 +3888,10 @@ theorem sum_norm_planeRegionSignSet_D_sq_le_unit_displacements
         ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) ≤
       (4 : ℝ)⁻¹ *
           ‖rho (firstCoordinate X i j k hij hik hjk n
-            (wordMonomialInDegree X n 1)).1 z - z‖ ^ 2 +
+            (wordMonomialInDegree X (ZMod 2) n 1)).1 z - z‖ ^ 2 +
         (4 : ℝ)⁻¹ *
           ‖rho (secondCoordinate X i j k hij hik hjk n
-            (wordMonomialInDegree X n 1)).1 z - z‖ ^ 2 := by
+            (wordMonomialInDegree X (ZMod 2) n 1)).1 z - z‖ ^ 2 := by
   classical
   rw [planeRegionSignSet_D_eq_unit_split,
     Finset.sum_union
@@ -3900,11 +3900,11 @@ theorem sum_norm_planeRegionSignSet_D_sq_le_unit_displacements
   calc
     _ ≤ (∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
             (firstCoordinate X i j k hij hik hjk n
-              (wordMonomialInDegree X n 1)),
+              (wordMonomialInDegree X (ZMod 2) n 1)),
           ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2) +
         ∑ sign ∈ negativePlaneSignSet X i j k hij hik hjk n
             (secondCoordinate X i j k hij hik hjk n
-              (wordMonomialInDegree X n 1)),
+              (wordMonomialInDegree X (ZMod 2) n 1)),
           ‖planeComponent X i j k hij hik hjk n rho sign z‖ ^ 2 :=
       add_le_add
         (Finset.sum_le_sum_of_subset_of_nonneg
@@ -4327,9 +4327,9 @@ theorem sum_planeRegionMass_nonzero_le_explicit_errors
         planeRegionMass X i j k hij hik hjk rho z (n + 2) .C +
         planeRegionMass X i j k hij hik hjk rho z (n + 2) .D ≤
       ‖rho (firstCoordinate X i j k hij hik hjk (n + 2)
-          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 +
+          (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 +
         ‖rho (secondCoordinate X i j k hij hik hjk (n + 2)
-          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 +
+          (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 +
         (3 : ℝ) / 2 *
           ((∑ q : Fin (Fintype.card X),
               2 * ‖z‖ *
@@ -4361,10 +4361,10 @@ theorem sum_planeRegionMass_nonzero_le_explicit_errors
   change planeRegionMass X i j k hij hik hjk rho z (n + 2) .D ≤
     (4 : ℝ)⁻¹ *
         ‖rho (firstCoordinate X i j k hij hik hjk (n + 2)
-          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 +
+          (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 +
       (4 : ℝ)⁻¹ *
         ‖rho (secondCoordinate X i j k hij hik hjk (n + 2)
-          (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 at hD
+          (wordMonomialInDegree X (ZMod 2) (n + 2) 1)).1 z - z‖ ^ 2 at hD
   linarith
 
 /-- Limiting two-root relative Kazhdan estimate.  The finite Fourier boundary

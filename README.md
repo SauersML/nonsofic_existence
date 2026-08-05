@@ -64,6 +64,11 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
   rank-three Kazhdan-subset theorem now holds over every ring of positive
   characteristic, so the remaining characteristic-two dependence is confined
   to the free-root Fourier relative-property-`(T)` transport
+- [x] Generalize the free-algebra word-degree filtration (finite stages,
+  monotonicity, degree additivity, generator advancement, word monomials,
+  exhaustion) from `ZMod 2` to an arbitrary commutative coefficient
+  semiring, with stage finiteness for every finite coefficient semiring;
+  only the exact-support monomial expansion remains `ZMod 2`-specific
 - [ ] Generalize the kernel-checked property-`(T)` theorem from
   characteristic two to arbitrary finite coefficient fields; this is now the
   only characteristic restriction in the adjacent-rank nonsoficity route

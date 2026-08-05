@@ -22,14 +22,14 @@ variable (X : Type*) [Fintype X]
 noncomputable def rootPlaneDegreeSubgroup
     (i j k : Fin 3) (_hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
     Subgroup (elementaryGroup (Fin 3) (FreeRing X)) where
-  carrier := {g | ∃ a : FreeRing X, a ∈ degreeLE X n ∧
-    ∃ b : FreeRing X, b ∈ degreeLE X n ∧
+  carrier := {g | ∃ a : FreeRing X, a ∈ degreeLE X (ZMod 2) n ∧
+    ∃ b : FreeRing X, b ∈ degreeLE X (ZMod 2) n ∧
       elementaryRoot i k hik a * elementaryRoot j k hjk b = g}
-  one_mem' := ⟨0, (degreeLE X n).zero_mem, 0, (degreeLE X n).zero_mem, by simp⟩
+  one_mem' := ⟨0, (degreeLE X (ZMod 2) n).zero_mem, 0, (degreeLE X (ZMod 2) n).zero_mem, by simp⟩
   mul_mem' := by
     rintro _ _ ⟨a, ha, b, hb, rfl⟩ ⟨c, hc, d, hd, rfl⟩
-    refine ⟨a + c, (degreeLE X n).add_mem ha hc,
-      b + d, (degreeLE X n).add_mem hb hd, ?_⟩
+    refine ⟨a + c, (degreeLE X (ZMod 2) n).add_mem ha hc,
+      b + d, (degreeLE X (ZMod 2) n).add_mem hb hd, ?_⟩
     rw [← elementaryRoot_mul i k hik a c,
       ← elementaryRoot_mul j k hjk b d]
     have hcomm := elementaryRoot_commute_of_ne i k j k hik hjk
@@ -48,8 +48,8 @@ noncomputable def rootPlaneDegreeSubgroup
         simp only [mul_assoc]
   inv_mem' := by
     rintro _ ⟨a, ha, b, hb, rfl⟩
-    refine ⟨-a, (degreeLE X n).neg_mem ha,
-      -b, (degreeLE X n).neg_mem hb, ?_⟩
+    refine ⟨-a, (degreeLE X (ZMod 2) n).neg_mem ha,
+      -b, (degreeLE X (ZMod 2) n).neg_mem hb, ?_⟩
     rw [elementaryRoot_neg, elementaryRoot_neg, mul_inv_rev]
     exact (elementaryRoot_commute_of_ne i k j k hik hjk
       hjk.symm hik.symm a b).inv_left.inv_right.eq
@@ -58,8 +58,8 @@ theorem mem_rootPlaneDegreeSubgroup_iff
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (g : elementaryGroup (Fin 3) (FreeRing X)) :
     g ∈ rootPlaneDegreeSubgroup X i j k hij hik hjk n ↔
-      ∃ a : FreeRing X, a ∈ degreeLE X n ∧
-      ∃ b : FreeRing X, b ∈ degreeLE X n ∧
+      ∃ a : FreeRing X, a ∈ degreeLE X (ZMod 2) n ∧
+      ∃ b : FreeRing X, b ∈ degreeLE X (ZMod 2) n ∧
         elementaryRoot i k hik a * elementaryRoot j k hjk b = g :=
   Iff.rfl
 
@@ -67,7 +67,7 @@ theorem mem_rootPlaneDegreeSubgroup_iff
 noncomputable instance finite_rootPlaneDegreeSubgroup
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ) :
     Finite (rootPlaneDegreeSubgroup X i j k hij hik hjk n) := by
-  let f : degreeLE X n × degreeLE X n →
+  let f : degreeLE X (ZMod 2) n × degreeLE X (ZMod 2) n →
       rootPlaneDegreeSubgroup X i j k hij hik hjk n := fun p ↦
     ⟨elementaryRoot i k hik p.1.1 * elementaryRoot j k hjk p.2.1,
       ⟨p.1.1, p.1.2, p.2.1, p.2.2, rfl⟩⟩
@@ -83,7 +83,7 @@ theorem rootPlaneDegreeSubgroup_mono
     Monotone (rootPlaneDegreeSubgroup X i j k hij hik hjk) := by
   intro m n hmn g
   rintro ⟨a, ha, b, hb, habg⟩
-  exact ⟨a, degreeLE_mono X hmn ha, b, degreeLE_mono X hmn hb, habg⟩
+  exact ⟨a, degreeLE_mono X (ZMod 2) hmn ha, b, degreeLE_mono X (ZMod 2) hmn hb, habg⟩
 
 /-- Every finite coefficient plane is abelian. -/
 theorem rootPlaneDegreeSubgroup_commute
@@ -126,32 +126,32 @@ theorem rootPlaneDegreeSubgroup_sq
 /-- The first coefficient coordinate inside a finite plane stage. -/
 noncomputable def firstCoordinate
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
-    (a : degreeLE X n) : rootPlaneDegreeSubgroup X i j k hij hik hjk n :=
+    (a : degreeLE X (ZMod 2) n) : rootPlaneDegreeSubgroup X i j k hij hik hjk n :=
   ⟨elementaryRoot i k hik a.1,
-    ⟨a.1, a.2, 0, (degreeLE X n).zero_mem, by simp⟩⟩
+    ⟨a.1, a.2, 0, (degreeLE X (ZMod 2) n).zero_mem, by simp⟩⟩
 
 /-- The second coefficient coordinate inside a finite plane stage. -/
 noncomputable def secondCoordinate
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
-    (b : degreeLE X n) : rootPlaneDegreeSubgroup X i j k hij hik hjk n :=
+    (b : degreeLE X (ZMod 2) n) : rootPlaneDegreeSubgroup X i j k hij hik hjk n :=
   ⟨elementaryRoot j k hjk b.1,
-    ⟨0, (degreeLE X n).zero_mem, b.1, b.2, by simp⟩⟩
+    ⟨0, (degreeLE X (ZMod 2) n).zero_mem, b.1, b.2, by simp⟩⟩
 
 @[simp] theorem firstCoordinate_val
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
-    (a : degreeLE X n) :
+    (a : degreeLE X (ZMod 2) n) :
     (firstCoordinate X i j k hij hik hjk n a :
       elementaryGroup (Fin 3) (FreeRing X)) = elementaryRoot i k hik a.1 := rfl
 
 @[simp] theorem secondCoordinate_val
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
-    (b : degreeLE X n) :
+    (b : degreeLE X (ZMod 2) n) :
     (secondCoordinate X i j k hij hik hjk n b :
       elementaryGroup (Fin 3) (FreeRing X)) = elementaryRoot j k hjk b.1 := rfl
 
 theorem firstCoordinate_add
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
-    (a b : degreeLE X n) :
+    (a b : degreeLE X (ZMod 2) n) :
     firstCoordinate X i j k hij hik hjk n (a + b) =
       firstCoordinate X i j k hij hik hjk n a *
         firstCoordinate X i j k hij hik hjk n b := by
@@ -160,7 +160,7 @@ theorem firstCoordinate_add
 
 theorem secondCoordinate_add
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
-    (a b : degreeLE X n) :
+    (a b : degreeLE X (ZMod 2) n) :
     secondCoordinate X i j k hij hik hjk n (a + b) =
       secondCoordinate X i j k hij hik hjk n a *
         secondCoordinate X i j k hij hik hjk n b := by
@@ -171,7 +171,7 @@ theorem secondCoordinate_add
 theorem exists_coordinate_factorization
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k) (n : ℕ)
     (g : rootPlaneDegreeSubgroup X i j k hij hik hjk n) :
-    ∃ a b : degreeLE X n,
+    ∃ a b : degreeLE X (ZMod 2) n,
       firstCoordinate X i j k hij hik hjk n a *
         secondCoordinate X i j k hij hik hjk n b = g := by
   obtain ⟨a, ha, b, hb, habg⟩ := g.2
@@ -195,31 +195,31 @@ theorem iSup_rootPlaneDegreeSubgroup
             le_sup_right) ⟨b, rfl⟩)
   · apply sup_le
     · rintro g ⟨a, rfl⟩
-      obtain ⟨n, hn⟩ := exists_mem_degreeLE X a
+      obtain ⟨n, hn⟩ := exists_mem_degreeLE X (ZMod 2) a
       apply (le_iSup (rootPlaneDegreeSubgroup X i j k hij hik hjk) n)
-      exact ⟨a, hn, 0, (degreeLE X n).zero_mem, by simp⟩
+      exact ⟨a, hn, 0, (degreeLE X (ZMod 2) n).zero_mem, by simp⟩
     · rintro g ⟨b, rfl⟩
-      obtain ⟨n, hn⟩ := exists_mem_degreeLE X b
+      obtain ⟨n, hn⟩ := exists_mem_degreeLE X (ZMod 2) b
       apply (le_iSup (rootPlaneDegreeSubgroup X i j k hij hik hjk) n)
-      exact ⟨0, (degreeLE X n).zero_mem, b, hn, by simp⟩
+      exact ⟨0, (degreeLE X (ZMod 2) n).zero_mem, b, hn, by simp⟩
 
 /-- Regard a degree-`n` coefficient as a degree-`n+1` coefficient. -/
-noncomputable def coefficientSucc {n : ℕ} (a : degreeLE X n) :
-    degreeLE X (n + 1) :=
-  ⟨a.1, degreeLE_mono X (Nat.le_succ n) a.2⟩
+noncomputable def coefficientSucc {n : ℕ} (a : degreeLE X (ZMod 2) n) :
+    degreeLE X (ZMod 2) (n + 1) :=
+  ⟨a.1, degreeLE_mono X (ZMod 2) (Nat.le_succ n) a.2⟩
 
 /-- Left multiplication by a free generator, as a coefficient in the next
 degree stage. -/
 noncomputable def generatorMulCoefficientSucc {n : ℕ} (x : X)
-    (a : degreeLE X n) : degreeLE X (n + 1) :=
+    (a : degreeLE X (ZMod 2) n) : degreeLE X (ZMod 2) (n + 1) :=
   ⟨FreeAlgebra.ι (ZMod 2) x * a.1,
-    generator_mul_mem_degreeLE_succ X x a.2⟩
+    generator_mul_mem_degreeLE_succ X (ZMod 2) x a.2⟩
 
 /-- The next-stage plane element obtained by shearing a pure second
 coordinate by a free generator. -/
 noncomputable def generatorShearedSecondCoordinate
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (b : degreeLE X n) :
+    (x : X) (n : ℕ) (b : degreeLE X (ZMod 2) n) :
     rootPlaneDegreeSubgroup X i j k hij hik hjk (n + 1) :=
   firstCoordinate X i j k hij hik hjk (n + 1)
       (generatorMulCoefficientSucc X x b) *
@@ -231,32 +231,32 @@ the `j,i` generator fixes the first coefficient and adds its left-generator
 multiple to the second coefficient. -/
 noncomputable def generatorShearedFirstCoordinate
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (a : degreeLE X n) :
+    (x : X) (n : ℕ) (a : degreeLE X (ZMod 2) n) :
     rootPlaneDegreeSubgroup X i j k hij hik hjk (n + 1) :=
   firstCoordinate X i j k hij hik hjk (n + 1)
       (coefficientSucc X a) *
     secondCoordinate X i j k hij hik hjk (n + 1)
       (generatorMulCoefficientSucc X x a)
 
-@[simp] theorem coefficientSucc_val {n : ℕ} (a : degreeLE X n) :
+@[simp] theorem coefficientSucc_val {n : ℕ} (a : degreeLE X (ZMod 2) n) :
     (coefficientSucc X a).1 = a.1 := rfl
 
 @[simp] theorem coefficientSucc_zero {n : ℕ} :
-    coefficientSucc X (0 : degreeLE X n) = 0 := by
+    coefficientSucc X (0 : degreeLE X (ZMod 2) n) = 0 := by
   rfl
 
 @[simp] theorem generatorMulCoefficientSucc_val {n : ℕ} (x : X)
-    (a : degreeLE X n) :
+    (a : degreeLE X (ZMod 2) n) :
     (generatorMulCoefficientSucc X x a).1 =
       FreeAlgebra.ι (ZMod 2) x * a.1 := rfl
 
 @[simp] theorem generatorMulCoefficientSucc_zero {n : ℕ} (x : X) :
-    generatorMulCoefficientSucc X x (0 : degreeLE X n) = 0 := by
+    generatorMulCoefficientSucc X x (0 : degreeLE X (ZMod 2) n) = 0 := by
   apply Subtype.ext
   simp
 
 theorem generatorMulCoefficientSucc_add {n : ℕ} (x : X)
-    (a b : degreeLE X n) :
+    (a b : degreeLE X (ZMod 2) n) :
     generatorMulCoefficientSucc X x (a + b) =
       generatorMulCoefficientSucc X x a +
         generatorMulCoefficientSucc X x b := by
@@ -269,35 +269,35 @@ left. -/
 theorem generatorMulCoefficientSucc_wordMonomialInDegree
     (x : X) (n : ℕ) (w : FreeMonoid X)
     (hw : freeWordLength X w ≤ n) :
-    generatorMulCoefficientSucc X x (wordMonomialInDegree X n w) =
-      wordMonomialInDegree X (n + 1) (FreeMonoid.of x * w) := by
+    generatorMulCoefficientSucc X x (wordMonomialInDegree X (ZMod 2) n w) =
+      wordMonomialInDegree X (ZMod 2) (n + 1) (FreeMonoid.of x * w) := by
   have hprod : freeWordLength X (FreeMonoid.of x * w) ≤ n + 1 := by
     rw [freeWordLength_mul, freeWordLength_of]
     omega
   apply Subtype.ext
   rw [generatorMulCoefficientSucc_val,
-    wordMonomialInDegree_of_le X w hw,
-    wordMonomialInDegree_of_le X (FreeMonoid.of x * w) hprod]
-  change FreeAlgebra.ι (ZMod 2) x * wordMonomial X w =
-    wordMonomial X (FreeMonoid.of x * w)
-  rw [← wordMonomial_mul X (FreeMonoid.of x) w, wordMonomial_of]
+    wordMonomialInDegree_of_le X (ZMod 2) w hw,
+    wordMonomialInDegree_of_le X (ZMod 2) (FreeMonoid.of x * w) hprod]
+  change FreeAlgebra.ι (ZMod 2) x * wordMonomial X (ZMod 2) w =
+    wordMonomial X (ZMod 2) (FreeMonoid.of x * w)
+  rw [← wordMonomial_mul X (ZMod 2) (FreeMonoid.of x) w, wordMonomial_of]
 
 /-- The filtration inclusion preserves every bounded basis monomial exactly. -/
 theorem coefficientSucc_wordMonomialInDegree
     (n : ℕ) (w : FreeMonoid X) (hw : freeWordLength X w ≤ n) :
-    coefficientSucc X (wordMonomialInDegree X n w) =
-      wordMonomialInDegree X (n + 1) w := by
+    coefficientSucc X (wordMonomialInDegree X (ZMod 2) n w) =
+      wordMonomialInDegree X (ZMod 2) (n + 1) w := by
   have hsucc : freeWordLength X w ≤ n + 1 := hw.trans (Nat.le_succ n)
   apply Subtype.ext
-  rw [coefficientSucc_val, wordMonomialInDegree_of_le X w hw,
-    wordMonomialInDegree_of_le X w hsucc]
+  rw [coefficientSucc_val, wordMonomialInDegree_of_le X (ZMod 2) w hw,
+    wordMonomialInDegree_of_le X (ZMod 2) w hsucc]
 
 /-- The exact adjacent-stage shear on the second plane coordinate.  This is
 an equality of actual elementary matrices, not merely membership in the next
 stage. -/
 theorem conjugate_secondCoordinate_generator
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (b : degreeLE X n) :
+    (x : X) (n : ℕ) (b : degreeLE X (ZMod 2) n) :
     elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
         (secondCoordinate X i j k hij hik hjk n b).1 *
         (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
@@ -308,7 +308,7 @@ theorem conjugate_secondCoordinate_generator
 degree stage. -/
 theorem conjugate_firstCoordinate_generator
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (a : degreeLE X n) :
+    (x : X) (n : ℕ) (a : degreeLE X (ZMod 2) n) :
     elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x) *
         (firstCoordinate X i j k hij hik hjk n a).1 *
         (elementaryRoot i j hij (FreeAlgebra.ι (ZMod 2) x))⁻¹ =
@@ -327,7 +327,7 @@ theorem conjugate_firstCoordinate_generator
 on a pure first-coordinate element. -/
 theorem conjugate_firstCoordinate_opposite_generator
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (a : degreeLE X n) :
+    (x : X) (n : ℕ) (a : degreeLE X (ZMod 2) n) :
     elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
         (firstCoordinate X i j k hij hik hjk n a).1 *
         (elementaryRoot j i hij.symm
@@ -346,7 +346,7 @@ theorem conjugate_firstCoordinate_opposite_generator
 next degree stage. -/
 theorem conjugate_secondCoordinate_opposite_generator
     (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
-    (x : X) (n : ℕ) (b : degreeLE X n) :
+    (x : X) (n : ℕ) (b : degreeLE X (ZMod 2) n) :
     elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x) *
         (secondCoordinate X i j k hij hik hjk n b).1 *
         (elementaryRoot j i hij.symm
@@ -383,10 +383,10 @@ theorem conjugate_generator_mem_succ
   have hshift := elementaryRoot_conjugate i j k hij hjk hik
     (FreeAlgebra.ι (ZMod 2) x) b
   refine ⟨a + FreeAlgebra.ι (ZMod 2) x * b, ?_, b, ?_, ?_⟩
-  · exact (degreeLE X (n + 1)).add_mem
-      (degreeLE_mono X (Nat.le_succ n) ha)
-      (generator_mul_mem_degreeLE_succ X x hb)
-  · exact degreeLE_mono X (Nat.le_succ n) hb
+  · exact (degreeLE X (ZMod 2) (n + 1)).add_mem
+      (degreeLE_mono X (ZMod 2) (Nat.le_succ n) ha)
+      (generator_mul_mem_degreeLE_succ X (ZMod 2) x hb)
+  · exact degreeLE_mono X (ZMod 2) (Nat.le_succ n) hb
   · rw [show q * (elementaryRoot i k hik a * elementaryRoot j k hjk b) * q⁻¹ =
         (q * elementaryRoot i k hik a * q⁻¹) *
           (q * elementaryRoot j k hjk b * q⁻¹) by group]
@@ -409,11 +409,11 @@ theorem conjugate_opposite_generator_mem_succ
       rootPlaneDegreeSubgroup X i j k hij hik hjk (n + 1) := by
   obtain ⟨a, ha, b, hb, rfl⟩ := hg
   let q := elementaryRoot j i hij.symm (FreeAlgebra.ι (ZMod 2) x)
-  refine ⟨a, degreeLE_mono X (Nat.le_succ n) ha,
+  refine ⟨a, degreeLE_mono X (ZMod 2) (Nat.le_succ n) ha,
     FreeAlgebra.ι (ZMod 2) x * a + b, ?_, ?_⟩
-  · exact (degreeLE X (n + 1)).add_mem
-      (generator_mul_mem_degreeLE_succ X x ha)
-      (degreeLE_mono X (Nat.le_succ n) hb)
+  · exact (degreeLE X (ZMod 2) (n + 1)).add_mem
+      (generator_mul_mem_degreeLE_succ X (ZMod 2) x ha)
+      (degreeLE_mono X (ZMod 2) (Nat.le_succ n) hb)
   · symm
     have hfirst := conjugate_firstCoordinate_opposite_generator
       X i j k hij hik hjk x n ⟨a, ha⟩
@@ -458,7 +458,7 @@ theorem conjugate_unit_mem
     simp
   have hshift := elementaryRoot_conjugate i j k hij hjk hik
     (1 : FreeRing X) b
-  refine ⟨a + b, (degreeLE X n).add_mem ha hb, b, hb, ?_⟩
+  refine ⟨a + b, (degreeLE X (ZMod 2) n).add_mem ha hb, b, hb, ?_⟩
   rw [show q * (elementaryRoot i k hik a * elementaryRoot j k hjk b) * q⁻¹ =
       (q * elementaryRoot i k hik a * q⁻¹) *
         (q * elementaryRoot j k hjk b * q⁻¹) by group]
@@ -486,7 +486,7 @@ theorem conjugate_opposite_unit_mem
     simp
   have hcoordinates := elementaryRoot_commute_of_ne j k i k hjk hik
     hik.symm hjk.symm a a
-  refine ⟨a, ha, a + b, (degreeLE X n).add_mem ha hb, ?_⟩
+  refine ⟨a, ha, a + b, (degreeLE X (ZMod 2) n).add_mem ha hb, ?_⟩
   rw [show q * (elementaryRoot i k hik a * elementaryRoot j k hjk b) * q⁻¹ =
       (q * elementaryRoot i k hik a * q⁻¹) *
         (q * elementaryRoot j k hjk b * q⁻¹) by group]

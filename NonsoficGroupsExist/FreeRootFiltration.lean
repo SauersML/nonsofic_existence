@@ -25,28 +25,28 @@ abbrev FreeRing := FreeAlgebra (ZMod 2) X
 noncomputable def rootDegreeSubgroup (i j : Fin 3) (hij : i ≠ j) (n : ℕ) :
     Subgroup (elementaryGroup (Fin 3) (FreeRing X)) where
   carrier := {g | ∃ a : FreeRing X,
-    a ∈ degreeLE X n ∧ elementaryRoot i j hij a = g}
-  one_mem' := ⟨0, (degreeLE X n).zero_mem, elementaryRoot_zero i j hij⟩
+    a ∈ degreeLE X (ZMod 2) n ∧ elementaryRoot i j hij a = g}
+  one_mem' := ⟨0, (degreeLE X (ZMod 2) n).zero_mem, elementaryRoot_zero i j hij⟩
   mul_mem' := by
     rintro _ _ ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩
-    exact ⟨a + b, (degreeLE X n).add_mem ha hb,
+    exact ⟨a + b, (degreeLE X (ZMod 2) n).add_mem ha hb,
       (elementaryRoot_mul i j hij a b).symm⟩
   inv_mem' := by
     rintro _ ⟨a, ha, rfl⟩
-    exact ⟨-a, (degreeLE X n).neg_mem ha, elementaryRoot_neg i j hij a⟩
+    exact ⟨-a, (degreeLE X (ZMod 2) n).neg_mem ha, elementaryRoot_neg i j hij a⟩
 
 theorem mem_rootDegreeSubgroup_iff (i j : Fin 3) (hij : i ≠ j) (n : ℕ)
     (g : elementaryGroup (Fin 3) (FreeRing X)) :
     g ∈ rootDegreeSubgroup X i j hij n ↔
       ∃ a : FreeRing X,
-        a ∈ degreeLE X n ∧ elementaryRoot i j hij a = g :=
+        a ∈ degreeLE X (ZMod 2) n ∧ elementaryRoot i j hij a = g :=
   Iff.rfl
 
 /-- Every degree-bounded root subgroup is finite. -/
 noncomputable instance finite_rootDegreeSubgroup
     (i j : Fin 3) (hij : i ≠ j) (n : ℕ) :
     Finite (rootDegreeSubgroup X i j hij n) := by
-  let f : degreeLE X n → rootDegreeSubgroup X i j hij n := fun a ↦
+  let f : degreeLE X (ZMod 2) n → rootDegreeSubgroup X i j hij n := fun a ↦
     ⟨elementaryRoot i j hij a.1, ⟨a.1, a.2, rfl⟩⟩
   exact Finite.of_surjective f (by
     rintro ⟨g, a, ha, hag⟩
@@ -59,7 +59,7 @@ theorem rootDegreeSubgroup_mono (i j : Fin 3) (hij : i ≠ j) :
     Monotone (rootDegreeSubgroup X i j hij) := by
   intro m n hmn g
   rintro ⟨a, ha, hag⟩
-  exact ⟨a, degreeLE_mono X hmn ha, hag⟩
+  exact ⟨a, degreeLE_mono X (ZMod 2) hmn ha, hag⟩
 
 theorem rootDegreeSubgroup_le (i j : Fin 3) (hij : i ≠ j) (n : ℕ) :
     rootDegreeSubgroup X i j hij n ≤ elementaryRootSubgroup i j hij := by
@@ -73,7 +73,7 @@ theorem iSup_rootDegreeSubgroup (i j : Fin 3) (hij : i ≠ j) :
   · exact iSup_le (rootDegreeSubgroup_le X i j hij)
   · intro g hg
     obtain ⟨a, rfl⟩ := hg
-    obtain ⟨n, hn⟩ := exists_mem_degreeLE X a
+    obtain ⟨n, hn⟩ := exists_mem_degreeLE X (ZMod 2) a
     exact (le_iSup (rootDegreeSubgroup X i j hij) n) ⟨a, hn, rfl⟩
 
 end FreeRootFiltration

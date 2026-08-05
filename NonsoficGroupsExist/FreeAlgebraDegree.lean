@@ -5,13 +5,16 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.LinearAlgebra.Finsupp.Supported
 
 /-!
-# Finite degree stages of a free characteristic-two algebra
+# Finite degree stages of a free algebra over finite coefficients
 
 Kassabov's relative-property-`(T)` argument filters a free associative
 algebra by word degree.  This file constructs that filtration without any
 choice of a polynomial normal form: it uses the canonical equivalence with
-the monoid algebra of the free monoid.  For a finite alphabet, every stage is
-finite over `ZMod 2`, and the stages exhaust the whole free algebra.
+the monoid algebra of the free monoid.  For a finite alphabet the stages are
+defined over an arbitrary commutative coefficient semiring; each stage is
+finite whenever the coefficients are finite, and the stages exhaust the
+whole free algebra.  Only the exact-support expansion at the end of the file
+uses that every nonzero `ZMod 2` coefficient equals one.
 -/
 
 namespace NonsoficGroupsExist
@@ -19,6 +22,7 @@ namespace NonsoficGroupsExist
 namespace FreeAlgebraDegree
 
 variable (X : Type*) [Fintype X]
+variable (k : Type*) [CommSemiring k]
 
 /-- Add one letter to the front of a list, as an embedding. -/
 def consEmbedding (x : X) : List X ↪ List X where
@@ -94,37 +98,39 @@ omit [Fintype X] in
 
 /-- Polynomials supported on words of degree at most `n`. -/
 noncomputable def degreeLE (n : ℕ) :
-    Submodule (ZMod 2) (FreeAlgebra (ZMod 2) X) :=
-  (MonoidAlgebra.supported (ZMod 2) (ZMod 2)
+    Submodule k (FreeAlgebra k X) :=
+  (MonoidAlgebra.supported k k
       (freeWordsLE X n : Set (FreeMonoid X))).comap
     (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-      (R := ZMod 2) (X := X)).toLinearMap
+      (R := k) (X := X)).toLinearMap
 
-theorem mem_degreeLE_iff (p : FreeAlgebra (ZMod 2) X) (n : ℕ) :
-    p ∈ degreeLE X n ↔
+theorem mem_degreeLE_iff (p : FreeAlgebra k X) (n : ℕ) :
+    p ∈ degreeLE X k n ↔
       ∀ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-        (R := ZMod 2) (X := X) p).coeff.support,
+        (R := k) (X := X) p).coeff.support,
         freeWordLength X w ≤ n := by
   rw [degreeLE, Submodule.mem_comap, MonoidAlgebra.mem_supported]
   change
     (∀ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-      (R := ZMod 2) (X := X) p).coeff.support,
+      (R := k) (X := X) p).coeff.support,
       w ∈ freeWordsLE X n) ↔ _
   simp only [mem_freeWordsLE]
 
-/-- Every degree stage is a finite additive group. -/
-noncomputable instance finite_degreeLE (n : ℕ) : Finite (degreeLE X n) := by
+/-- Every degree stage over finite coefficients is a finite additive
+group. -/
+noncomputable instance finite_degreeLE [Finite k] (n : ℕ) :
+    Finite (degreeLE X k n) := by
   let S : Set (FreeMonoid X) := freeWordsLE X n
-  let V := MonoidAlgebra.supported (ZMod 2) (ZMod 2) S
-  let toV : degreeLE X n → V := fun p ↦
+  let V := MonoidAlgebra.supported k k S
+  let toV : degreeLE X k n → V := fun p ↦
     ⟨FreeAlgebra.equivMonoidAlgebraFreeMonoid
-      (R := ZMod 2) (X := X) p.1, p.2⟩
+      (R := k) (X := X) p.1, p.2⟩
   letI : Fintype S := Fintype.ofFinset (freeWordsLE X n) (by
     intro w
     rfl)
   let e := MonoidAlgebra.supportedEquivFinsupp
-    (R := ZMod 2) (S := ZMod 2) S
-  let coeffs : V → S → ZMod 2 := fun p w ↦ e p w
+    (R := k) (S := k) S
+  let coeffs : V → S → k := fun p w ↦ e p w
   letI : Finite V := Finite.of_injective coeffs fun p q h ↦ by
     apply e.injective
     ext w
@@ -132,29 +138,29 @@ noncomputable instance finite_degreeLE (n : ℕ) : Finite (degreeLE X n) := by
   exact Finite.of_injective toV fun a b h ↦ by
     apply Subtype.ext
     apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-      (R := ZMod 2) (X := X)).injective
+      (R := k) (X := X)).injective
     exact congrArg Subtype.val h
 
 /-- The degree stages are monotone. -/
-theorem degreeLE_mono : Monotone (degreeLE X) := by
+theorem degreeLE_mono : Monotone (degreeLE X k) := by
   intro m n hmn p hp
   rw [mem_degreeLE_iff] at hp ⊢
   intro w hw
   exact (hp w hw).trans hmn
 
 /-- Multiplication adds degree bounds. -/
-theorem mul_mem_degreeLE {p q : FreeAlgebra (ZMod 2) X} {m n : ℕ}
-    (hp : p ∈ degreeLE X m) (hq : q ∈ degreeLE X n) :
-    p * q ∈ degreeLE X (m + n) := by
+theorem mul_mem_degreeLE {p q : FreeAlgebra k X} {m n : ℕ}
+    (hp : p ∈ degreeLE X k m) (hq : q ∈ degreeLE X k n) :
+    p * q ∈ degreeLE X k (m + n) := by
   classical
   rw [mem_degreeLE_iff] at hp hq ⊢
   intro w hw
   rw [map_mul] at hw
   have hmul := MonoidAlgebra.support_coeff_mul_subset
     (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-      (R := ZMod 2) (X := X) p)
+      (R := k) (X := X) p)
     (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-      (R := ZMod 2) (X := X) q) hw
+      (R := k) (X := X) q) hw
   rw [Finset.mem_mul] at hmul
   obtain ⟨u, hu, v, hv, huv⟩ := hmul
   rw [← huv, freeWordLength_mul]
@@ -162,27 +168,28 @@ theorem mul_mem_degreeLE {p q : FreeAlgebra (ZMod 2) X} {m n : ℕ}
 
 /-- A canonical free generator has degree one. -/
 theorem generator_mem_degreeLE_one (x : X) :
-    FreeAlgebra.ι (ZMod 2) x ∈ degreeLE X 1 := by
+    FreeAlgebra.ι k x ∈ degreeLE X k 1 := by
   rw [mem_degreeLE_iff]
   intro w hw
   simp [FreeAlgebra.equivMonoidAlgebraFreeMonoid] at hw
-  subst w
+  rcases Finset.mem_singleton.mp
+    (Finsupp.support_single_subset (Finsupp.mem_support_iff.mpr hw)) with rfl
   simp [freeWordLength]
 
 /-- Left multiplication by a free generator advances the filtration by one
 stage. -/
 theorem generator_mul_mem_degreeLE_succ (x : X)
-    {p : FreeAlgebra (ZMod 2) X} {n : ℕ} (hp : p ∈ degreeLE X n) :
-    FreeAlgebra.ι (ZMod 2) x * p ∈ degreeLE X (n + 1) := by
+    {p : FreeAlgebra k X} {n : ℕ} (hp : p ∈ degreeLE X k n) :
+    FreeAlgebra.ι k x * p ∈ degreeLE X k (n + 1) := by
   simpa [Nat.add_comm] using
-    mul_mem_degreeLE X (generator_mem_degreeLE_one X x) hp
+    mul_mem_degreeLE X k (generator_mem_degreeLE_one X k x) hp
 
 /-- Right multiplication by a free generator advances the filtration by one
 stage. -/
 theorem mul_generator_mem_degreeLE_succ (x : X)
-    {p : FreeAlgebra (ZMod 2) X} {n : ℕ} (hp : p ∈ degreeLE X n) :
-    p * FreeAlgebra.ι (ZMod 2) x ∈ degreeLE X (n + 1) := by
-  exact mul_mem_degreeLE X hp (generator_mem_degreeLE_one X x)
+    {p : FreeAlgebra k X} {n : ℕ} (hp : p ∈ degreeLE X k n) :
+    p * FreeAlgebra.ι k x ∈ degreeLE X k (n + 1) := by
+  exact mul_mem_degreeLE X k hp (generator_mem_degreeLE_one X k x)
 
 omit [Fintype X] in
 /-- The additive group of the free `ZMod 2` algebra has exponent two. -/
@@ -195,78 +202,79 @@ theorem add_self_eq_zero (p : FreeAlgebra (ZMod 2) X) : p + p = 0 := by
 
 /-- The canonical basis monomial belonging to a free word. -/
 noncomputable def wordMonomial (w : FreeMonoid X) :
-    FreeAlgebra (ZMod 2) X :=
+    FreeAlgebra k X :=
   (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-    (R := ZMod 2) (X := X)).symm (MonoidAlgebra.single w 1)
+    (R := k) (X := X)).symm (MonoidAlgebra.single w 1)
 
 theorem wordMonomial_mem_degreeLE {w : FreeMonoid X} {n : ℕ}
-    (hw : freeWordLength X w ≤ n) : wordMonomial X w ∈ degreeLE X n := by
+    (hw : freeWordLength X w ≤ n) : wordMonomial X k w ∈ degreeLE X k n := by
   rw [mem_degreeLE_iff]
   intro v hv
   simp [wordMonomial] at hv
-  subst v
+  rcases Finset.mem_singleton.mp
+    (Finsupp.support_single_subset (Finsupp.mem_support_iff.mpr hv)) with rfl
   exact hw
 
 /-- A total degree-stage version of a word monomial. Words outside the stage
 are sent to zero; on words of length at most `n` this is the genuine basis
 monomial. -/
 noncomputable def wordMonomialInDegree (n : ℕ) (w : FreeMonoid X) :
-    degreeLE X n :=
+    degreeLE X k n :=
   if hw : freeWordLength X w ≤ n then
-    ⟨wordMonomial X w, wordMonomial_mem_degreeLE X hw⟩
+    ⟨wordMonomial X k w, wordMonomial_mem_degreeLE X k hw⟩
   else 0
 
 @[simp] theorem wordMonomialInDegree_of_le {n : ℕ} (w : FreeMonoid X)
     (hw : freeWordLength X w ≤ n) :
-    wordMonomialInDegree X n w =
-      ⟨wordMonomial X w, wordMonomial_mem_degreeLE X hw⟩ := by
+    wordMonomialInDegree X k n w =
+      ⟨wordMonomial X k w, wordMonomial_mem_degreeLE X k hw⟩ := by
   simp [wordMonomialInDegree, hw]
 
 @[simp] theorem wordMonomialInDegree_of_not_le {n : ℕ} (w : FreeMonoid X)
     (hw : ¬ freeWordLength X w ≤ n) :
-    wordMonomialInDegree X n w = 0 := by
+    wordMonomialInDegree X k n w = 0 := by
   simp [wordMonomialInDegree, hw]
 
 omit [Fintype X] in
 /-- Multiplication of basis monomials is free-word concatenation. -/
 theorem wordMonomial_mul (u v : FreeMonoid X) :
-    wordMonomial X u * wordMonomial X v = wordMonomial X (u * v) := by
+    wordMonomial X k u * wordMonomial X k v = wordMonomial X k (u * v) := by
   apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-    (R := ZMod 2) (X := X)).injective
+    (R := k) (X := X)).injective
   simp [wordMonomial]
 
 omit [Fintype X] in
-@[simp] theorem wordMonomial_one : wordMonomial X 1 = 1 := by
+@[simp] theorem wordMonomial_one : wordMonomial X k 1 = 1 := by
   unfold wordMonomial
   rw [← MonoidAlgebra.one_def]
   exact (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-    (R := ZMod 2) (X := X)).symm.map_one
+    (R := k) (X := X)).symm.map_one
 
 /-- The empty-word monomial has coefficient value one in every finite degree
 stage. -/
 @[simp] theorem wordMonomialInDegree_one_val (n : ℕ) :
-    (wordMonomialInDegree X n 1).1 = 1 := by
+    (wordMonomialInDegree X k n 1).1 = 1 := by
   have hlen : freeWordLength X (1 : FreeMonoid X) ≤ n := by
     rw [(freeWordLength_eq_zero_iff X 1).2 rfl]
     exact Nat.zero_le n
-  rw [wordMonomialInDegree_of_le X 1 hlen]
-  change wordMonomial X 1 = 1
-  exact wordMonomial_one X
+  rw [wordMonomialInDegree_of_le X k 1 hlen]
+  change wordMonomial X k 1 = 1
+  exact wordMonomial_one X k
 
 omit [Fintype X] in
 /-- A length-zero basis monomial is the unit coefficient. -/
 theorem wordMonomial_eq_one_of_freeWordLength_eq_zero
     (w : FreeMonoid X) (hw : freeWordLength X w = 0) :
-    wordMonomial X w = 1 := by
+    wordMonomial X k w = 1 := by
   rw [(freeWordLength_eq_zero_iff X w).1 hw, wordMonomial_one]
 
 omit [Fintype X] in
 /-- A one-letter basis monomial is the corresponding canonical free-algebra
 generator. -/
 theorem wordMonomial_of (x : X) :
-    wordMonomial X (FreeMonoid.of x) = FreeAlgebra.ι (ZMod 2) x := by
+    wordMonomial X k (FreeMonoid.of x) = FreeAlgebra.ι k x := by
   apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-    (R := ZMod 2) (X := X)).injective
+    (R := k) (X := X)).injective
   simp [wordMonomial, FreeAlgebra.equivMonoidAlgebraFreeMonoid]
 
 omit [Fintype X] in
@@ -293,26 +301,26 @@ theorem wordMonomial_eq_generator_mul_of_freeWordLength_pos
     (w : FreeMonoid X) (hw : 0 < freeWordLength X w) :
     ∃ x : X, ∃ v : FreeMonoid X,
       w = FreeMonoid.of x * v ∧
-      wordMonomial X w = FreeAlgebra.ι (ZMod 2) x * wordMonomial X v := by
+      wordMonomial X k w = FreeAlgebra.ι k x * wordMonomial X k v := by
   obtain ⟨x, v, hword, _⟩ := exists_of_mul_of_freeWordLength_pos X w hw
   refine ⟨x, v, hword, ?_⟩
-  rw [hword, ← wordMonomial_mul X (FreeMonoid.of x) v, wordMonomial_of]
+  rw [hword, ← wordMonomial_mul X k (FreeMonoid.of x) v, wordMonomial_of]
 
 omit [Fintype X] in
 /-- Every free polynomial is the finite sum of its supported word terms. -/
-theorem eq_sum_support_smul_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
+theorem eq_sum_support_smul_wordMonomial (p : FreeAlgebra k X) :
     p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-        (R := ZMod 2) (X := X) p).coeff.support,
+        (R := k) (X := X) p).coeff.support,
       ((FreeAlgebra.equivMonoidAlgebraFreeMonoid
-        (R := ZMod 2) (X := X) p).coeff w) • wordMonomial X w := by
+        (R := k) (X := X) p).coeff w) • wordMonomial X k w := by
   apply (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-    (R := ZMod 2) (X := X)).injective
+    (R := k) (X := X)).injective
   ext v
   simp [wordMonomial]
-  have h := congrArg (fun f : FreeMonoid X →₀ ZMod 2 ↦ f v)
+  have h := congrArg (fun f : FreeMonoid X →₀ k ↦ f v)
     (Finsupp.sum_single
       (FreeAlgebra.equivMonoidAlgebraFreeMonoid
-        (R := ZMod 2) (X := X) p).coeff)
+        (R := k) (X := X) p).coeff)
   simpa [Finsupp.sum] using h.symm
 
 omit [Fintype X] in
@@ -321,16 +329,17 @@ the sum of exactly the basis words in its support. -/
 theorem eq_sum_support_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
     p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
         (R := ZMod 2) (X := X) p).coeff.support,
-      wordMonomial X w := by
+      wordMonomial X (ZMod 2) w := by
   calc
     p = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
           (R := ZMod 2) (X := X) p).coeff.support,
         ((FreeAlgebra.equivMonoidAlgebraFreeMonoid
-          (R := ZMod 2) (X := X) p).coeff w) • wordMonomial X w :=
-      eq_sum_support_smul_wordMonomial X p
+          (R := ZMod 2) (X := X) p).coeff w) •
+            wordMonomial X (ZMod 2) w :=
+      eq_sum_support_smul_wordMonomial X (ZMod 2) p
     _ = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
           (R := ZMod 2) (X := X) p).coeff.support,
-        wordMonomial X w := by
+        wordMonomial X (ZMod 2) w := by
       apply Finset.sum_congr rfl
       intro w hw
       let c := (FreeAlgebra.equivMonoidAlgebraFreeMonoid
@@ -349,14 +358,15 @@ theorem eq_sum_support_wordMonomial (p : FreeAlgebra (ZMod 2) X) :
         omega
       simp [c, hcoeff]
 
-/-- A degree-bounded free polynomial is the sum, inside its degree submodule,
-of the basis words in its support. -/
-theorem eq_sum_support_degreeWordMonomial {n : ℕ} (p : degreeLE X n) :
+/-- A degree-bounded free `ZMod 2` polynomial is the sum, inside its degree
+submodule, of the basis words in its support. -/
+theorem eq_sum_support_degreeWordMonomial {n : ℕ}
+    (p : degreeLE X (ZMod 2) n) :
     let q := (FreeAlgebra.equivMonoidAlgebraFreeMonoid
       (R := ZMod 2) (X := X) p.1).coeff
-    let term : {w // w ∈ q.support} → degreeLE X n := fun w ↦
-      ⟨wordMonomial X w.1, wordMonomial_mem_degreeLE X
-        (((mem_degreeLE_iff X p.1 n).1 p.2) w.1 w.2)⟩
+    let term : {w // w ∈ q.support} → degreeLE X (ZMod 2) n := fun w ↦
+      ⟨wordMonomial X (ZMod 2) w.1, wordMonomial_mem_degreeLE X (ZMod 2)
+        (((mem_degreeLE_iff X (ZMod 2) p.1 n).1 p.2) w.1 w.2)⟩
     p = ∑ w, term w := by
   dsimp only
   apply Subtype.ext
@@ -364,33 +374,33 @@ theorem eq_sum_support_degreeWordMonomial {n : ℕ} (p : degreeLE X n) :
   change p.1 = ∑ w : {w // w ∈
       (FreeAlgebra.equivMonoidAlgebraFreeMonoid
         (R := ZMod 2) (X := X) p.1).coeff.support},
-    wordMonomial X w.1
+    wordMonomial X (ZMod 2) w.1
   calc
     p.1 = ∑ w ∈ (FreeAlgebra.equivMonoidAlgebraFreeMonoid
           (R := ZMod 2) (X := X) p.1).coeff.support,
-        wordMonomial X w := eq_sum_support_wordMonomial X p.1
+        wordMonomial X (ZMod 2) w := eq_sum_support_wordMonomial X p.1
     _ = ∑ w : {w // w ∈
         (FreeAlgebra.equivMonoidAlgebraFreeMonoid
           (R := ZMod 2) (X := X) p.1).coeff.support},
-      wordMonomial X w.1 := (Finset.sum_attach _ _).symm
+      wordMonomial X (ZMod 2) w.1 := (Finset.sum_attach _ _).symm
 
 /-- Every free polynomial lies in some finite degree stage. -/
-theorem exists_mem_degreeLE (p : FreeAlgebra (ZMod 2) X) :
-    ∃ n, p ∈ degreeLE X n := by
+theorem exists_mem_degreeLE (p : FreeAlgebra k X) :
+    ∃ n, p ∈ degreeLE X k n := by
   let q := FreeAlgebra.equivMonoidAlgebraFreeMonoid
-    (R := ZMod 2) (X := X) p
+    (R := k) (X := X) p
   let n := ∑ w ∈ q.coeff.support, freeWordLength X w
-  refine ⟨n, (mem_degreeLE_iff X p n).2 ?_⟩
+  refine ⟨n, (mem_degreeLE_iff X k p n).2 ?_⟩
   intro w hw
   dsimp [n]
   exact Finset.single_le_sum
     (fun z hz ↦ Nat.zero_le (freeWordLength X z)) hw
 
 /-- The finite degree stages exhaust the free algebra. -/
-theorem iSup_degreeLE : ⨆ n, degreeLE X n = ⊤ := by
+theorem iSup_degreeLE : ⨆ n, degreeLE X k n = ⊤ := by
   apply top_unique
   intro p hp
-  obtain ⟨n, hn⟩ := exists_mem_degreeLE X p
+  obtain ⟨n, hn⟩ := exists_mem_degreeLE X k p
   exact Submodule.mem_iSup_of_mem n hn
 
 end FreeAlgebraDegree
