@@ -399,3 +399,22 @@ For u = c + s₁p₀ (c balanced), U := toMatrix(u) at depth 1 is
   invertible), try the dual pair with z chosen from ê⁻¹-data to
   cancel the reinjected tail.  Watch: κ₀ deepens tails (s₀s₁p₀t₀);
   apply the z-pairs BEFORE funneling, at the [−1,1] stage.
+
+## Session 10: the obstruction is level-invariant — pivot must close it
+For general residual u' = c' + s₁g (tail s₁g, g balanced): the kill
+succeeds iff rowsp_m(g) ⊆ R := rowsp_m(p₀c') (kill-move changes g by
+A·(p₀c'), arbitrary A).  The relation (p₀c')(Z'p₀) = p₀ holds for ALL
+residual representatives (t₀ kills any s₁-tail), so rank(p₀c') is
+always full (2^{m−1}).  KEY NEGATIVE FINDING: every level-m move is
+δ-invariant, where δ := dim((rowsp g + R)/R):
+- left family (1+s₁Xt₀): g += A(p₀c') — adds R-rows, δ fixed;
+- right family (1+s₁Yt₀): (c', g) ↦ (c'(1+V), g(1+V)) simultaneous
+  right-mult by unipotent V = p₁Vp₀-corner — δ fixed;
+- block-diagonal balanced units: rowsp-preserving on both — δ fixed.
+Hence the closing argument MUST use the depth-changing moves (the
+toMatrix 2×2 sr1-pivot), which relate level-m data to level-(m+1)
+data.  Plan: track (g, p₀c') through one full pivot+funnel cycle and
+exhibit the self-similar rank relation that forces δ = 0 after
+enough iterations (the ker(1−φ₀) = 0 mechanism: φ halves ranks, so
+an invariant obstruction of positive rank contradicts stability).
+z-κ families (session 9) may implement the tracking cleanly.

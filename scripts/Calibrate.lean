@@ -14,7 +14,9 @@ alarm but cannot localize.
 
 Direction 2: every clean declaration is reported by nothing.  Without this half
 a scan that had degenerated into reporting everything would pass direction 1
-perfectly, and a budget-zero gate quietly rewards exactly that degeneration.
+perfectly, and a zero-tolerance gate quietly rewards exactly that
+degeneration -- the cheapest way to make a scan stop failing is to make it stop
+distinguishing.
 
 This file needs no Mathlib and no corpus, so the calibration still runs when
 the library does not build -- which is when a broken detector is most likely to

@@ -51,21 +51,23 @@ FORBIDDEN = [
 ]
 
 
-# Budgets, here rather than in a data file so raising one is a diff a reviewer
-# sees.  0 is a hard zero; None is report-only -- printed, counted, but not
-# fatal -- which is the honest state for a scan whose baseline on this corpus
-# has never been measured.  Replace a None with the measured count and the tag
-# becomes a ratchet that can only go down.
-BUDGETS: dict[str, int | None] = {
-    "orphan module": 0,
-    "sorry / sorryAx": 0,
-    "hand-declared axiom": 0,
-    "native_decide (trusts the compiler, not the kernel)": 0,
-    "unsafe / implemented_by / opaque escape hatch": 0,
-    "warningAsError disabled": 0,
-    "maxHeartbeats disabled": 0,
-    "stale conditionality disclaimer": None,
-}
+# There are no budgets: any finding, under any tag, fails the run.  Nothing is
+# report-only and nothing is a ratchet, so there is no number a reviewer can
+# raise instead of fixing the source, and a scan cannot be quietened by editing
+# this file.  The roster below is for reporting only -- a passing run prints a
+# count for every detector, since a scan that has silently stopped firing is
+# otherwise indistinguishable from a clean tree -- and a finding under a tag
+# missing from it fails just the same.
+SCAN_TAGS: tuple[str, ...] = (
+    "orphan module",
+    "sorry / sorryAx",
+    "hand-declared axiom",
+    "native_decide (trusts the compiler, not the kernel)",
+    "unsafe / implemented_by / opaque escape hatch",
+    "warningAsError disabled",
+    "maxHeartbeats disabled",
+    "stale conditionality disclaimer",
+)
 
 
 class Findings:
@@ -76,22 +78,17 @@ class Findings:
         self.rows.append((tag, detail))
 
     def report(self, stream=sys.stdout) -> int:
-        status = 0
         counts: dict[str, int] = {}
         for tag, _ in self.rows:
             counts[tag] = counts.get(tag, 0) + 1
         for tag, detail in self.rows:
-            budget = BUDGETS.get(tag, 0)
-            level = "notice" if budget is None else "error"
-            print(f"::{level}::[{tag}] {detail}", file=stream)
+            print(f"::error::[{tag}] {detail}", file=stream)
+        for tag in SCAN_TAGS:
+            print(f"{tag}: {counts.get(tag, 0)}", file=stream)
         for tag, count in sorted(counts.items()):
-            budget = BUDGETS.get(tag, 0)
-            if budget is None:
-                print(f"{tag}: {count} (report-only)", file=stream)
-            elif count > budget:
-                print(f"::error::{tag}: {count} findings, budget {budget}", file=stream)
-                status = 1
-        return status
+            if tag not in SCAN_TAGS:
+                print(f"{tag}: {count} (tag not on the roster)", file=stream)
+        return 1 if self.rows else 0
 
 
 def module_files(root: Path) -> dict[str, Path]:
@@ -162,9 +159,11 @@ def check_forbidden(root: Path, f: Findings) -> None:
 # a reader who finds the disclaimer first reasonably concludes the headline
 # claim is overstated.
 #
-# Report-only by construction.  Which of the two is wrong is a question about
-# mathematics that no regex can answer; the scan's job is to keep the list
-# visible rather than to decide it.
+# Fatal like every other tag.  Which of the two is wrong is a question about
+# mathematics that no regex can answer, so the resolution is a person's: either
+# the disclaimer is stale and goes, or the headline is overstated and the
+# disclaimer is right.  What a red gate must NOT buy is the third option --
+# deleting an accurate disclaimer to silence the scan.
 DISCLAIMER_RE = re.compile(
     r"\b(conditional|conditionally|candidate|proposed|not proved|unproved|"
     r"not yet proved|assumed rather than|remains an assumption)\b",
@@ -288,7 +287,7 @@ def main() -> int:
     f = run(REPO)
     status = f.report()
     n = len(module_files(REPO))
-    verdict = "no findings over budget" if status == 0 else "OVER BUDGET"
+    verdict = "clean" if status == 0 else "FINDINGS"
     print(f"source scan: {n} modules, {len(f.rows)} findings, {verdict}")
     return status
 

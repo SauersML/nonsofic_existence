@@ -344,7 +344,7 @@ partial def valUnused : Expr → Nat → Array Nat → (Array Nat × Nat)
 
 /-- Deliberate, by Lean's own convention for an intentionally unused binder --
 the leading underscore its `unusedVariables` linter respects.  That keeps the
-scan at budget zero with no allow-list, and makes the underscore an admission a
+scan silent with no allow-list, and makes the underscore an admission a
 reader can grep for rather than a way around the check. -/
 def deliberate (n : Name) : Bool := n.toString.startsWith "_"
 

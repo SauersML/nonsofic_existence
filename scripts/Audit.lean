@@ -215,31 +215,32 @@ axioms: {bad.toList}"
 `Audit.Scan` carries the detectors and `scripts/Calibrate.lean` proves they can
 fire; this section runs them on the real corpus and decides the exit code.
 
-**The budget is the gate, and it lives here rather than in a JSON file** so
-that raising one is a diff a reviewer sees.  `some 0` is a hard zero.  `none`
-is report-only: the count is printed but does not fail the run, which is the
-honest state for a scan whose baseline on this corpus has never been measured.
-Replace a `none` with the measured count once CI has printed it and the tag
-becomes a ratchet that can only go down.  A tag that produces findings but has
-no row here is an error rather than a silent drop, so a scan cannot be disabled
-by deleting its budget. -/
+**There are no budgets: any finding, under any tag, fails the run.**  Nothing
+here is report-only and nothing is a ratchet, so there is no number a reviewer
+can raise instead of fixing the corpus, and a scan cannot be quietened by
+editing this file.  The list below is a reporting roster, not a gate: it exists
+so that a passing log records a count for every detector, since a scan that has
+silently stopped firing is otherwise indistinguishable from a clean corpus.  A
+finding under a tag missing from the roster still fails, and is still named. -/
 
-def budgets : List (String × Option Nat) :=
-  [ ("AXIOM", some 0)            -- anything here is a trust bypass
-  , ("TAUTOLOGY", some 0)        -- a proof that is its own premise is never intended
-  , ("EMPTY_PREMISE", some 0)    -- a vacuously true theorem is never intended
-  , ("UNCONDITIONAL", some 0)
-  , ("LAUNDERED_PROP", some 0)
-  , ("UNWITNESSED", some 0)
-  -- Audited structural `[Nonempty ...]` inputs used to obtain positive finite
-  -- cardinalities or select an index.  This is a ratchet, not report-only.
-  , ("ASSUMPTION_INSTANCE", some 26)
-  , ("UNUSED", some 0)
-  , ("TRIVIAL", some 0)
-  , ("DUPLICATE", some 0)
-  , ("RFL", some 0) ]
+def scanTags : List String :=
+  [ "AXIOM"                 -- anything here is a trust bypass
+  , "TAUTOLOGY"             -- a proof that is its own premise is never intended
+  , "EMPTY_PREMISE"         -- a vacuously true theorem is never intended
+  , "UNCONDITIONAL"
+  , "LAUNDERED_PROP"
+  , "UNWITNESSED"
+  -- Structural `[Nonempty ...]` inputs used to obtain positive finite
+  -- cardinalities or select an index.  Fixed at the declaration, not tolerated
+  -- by a count here.
+  , "ASSUMPTION_INSTANCE"
+  , "UNUSED"
+  , "TRIVIAL"
+  , "DUPLICATE"
+  , "RFL" ]
 
-/-- Keep this above every ratcheted budget so a failing log names all hits. -/
+/-- Keep this high enough that a failing log names every hit rather than a
+sample of them. -/
 def examplesPerTag : Nat := 64
 
 run_cmd do
@@ -247,32 +248,21 @@ run_cmd do
   let findings ← liftTermElabM <|
     Audit.allScans env `NonsoficGroupsExist allowedAxioms
 
-  let mut failures : Array String := #[]
-  let mut covered : Array String := #[]
-
-  for (tag, budget) in budgets do
-    covered := covered.push tag
-    let hits := findings.filter (fun f => f.tag == tag)
-    let examples := (hits.map (·.decl)).toList.take examplesPerTag
-    match budget with
-    | some b =>
-        if hits.size > b then
-          failures := failures.push
-            s!"{tag}: {hits.size} findings, budget {b}; e.g. {examples}"
-        else
-          logInfo m!"{tag}: {hits.size} (budget {b})"
-    | none =>
-        logInfo m!"{tag}: {hits.size} (report-only) {examples}"
+  for tag in scanTags do
+    logInfo m!"{tag}: {(findings.filter (fun f => f.tag == tag)).size}"
 
   -- Once per tag, not once per finding: a renamed tag produced one line of
   -- signal and 255 lines of repetition the first time this fired.
-  let mut orphanTags : Array String := #[]
+  let mut failures : Array String := #[]
+  let mut reported : Array String := #[]
   for f in findings do
-    unless covered.contains f.tag || orphanTags.contains f.tag do
-      orphanTags := orphanTags.push f.tag
+    unless reported.contains f.tag do
+      reported := reported.push f.tag
+      let hits := findings.filter (fun g => g.tag == f.tag)
+      let examples := (hits.map (·.decl)).toList.take examplesPerTag
+      let roster := if scanTags.contains f.tag then "" else " (tag not on the roster)"
       failures := failures.push
-        s!"{f.tag}: produced findings but has no budget row (a scan cannot be \
-disabled by deleting its budget, and a renamed tag must be renamed here too)"
+        s!"{f.tag}: {hits.size} findings{roster}; e.g. {examples}"
 
   unless failures.isEmpty do
     throwError "audit failed:{Format.line}{Format.joinSep failures.toList Format.line}"

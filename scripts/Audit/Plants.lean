@@ -13,7 +13,7 @@ This is that corpus for `Audit.Scan`.  Every declaration below is either a
 defect that a named scan must report, or a clean declaration that no scan may
 report -- and the second half is not decoration.  It is what fails when a scan
 stops distinguishing and starts alarming at everything, which is the failure
-mode a budget-zero gate quietly rewards.
+mode a zero-tolerance gate quietly rewards.
 
 `scripts/Calibrate.lean` asserts both directions, and CI runs it BEFORE the
 real audit.  This module is deliberately Mathlib-free, so the calibration
@@ -139,7 +139,7 @@ def cleanCertificate : CleanCertificate := ⟨0, rfl⟩
 
 /-- Not UNUSED: Lean's own convention for a deliberately unused binder is the
 leading underscore, which its `unusedVariables` linter respects.  Honouring it
-keeps the scan at budget zero without an allow-list, and makes the underscore
+keeps the scan silent without an allow-list, and makes the underscore
 an admission a reader can grep for rather than a way around the check. -/
 theorem cleanDeliberateUnused (_h : (0 : Nat) = 0) : (1 : Nat) ≤ 1 :=
   Nat.le_refl 1
