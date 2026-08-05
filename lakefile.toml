@@ -10,3 +10,15 @@ rev = "v4.32.2"
 [[lean_lib]]
 name = "NonsoficGroupsExist"
 moreLeanArgs = ["-DwarningAsError=true"]
+
+# The audit's own library: detector logic only, no side effects, so it can be
+# built and calibrated independently of the corpus it audits.  The drivers
+# (scripts/Audit.lean, scripts/Calibrate.lean) are deliberately NOT roots here
+# -- they run under `lake env lean` and their whole purpose is to fail.
+#
+# No `warningAsError`: this library is instrumentation, and a deprecation
+# warning in a detector must not be able to take the corpus build down with it.
+[[lean_lib]]
+name = "Audit"
+srcDir = "scripts"
+roots = ["Audit.DeclFilter", "Audit.Scan", "Audit.Plants"]

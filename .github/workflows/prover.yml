@@ -165,6 +165,22 @@ jobs:
       - name: Build project
         run: lake build
 
+      # The detector library, built separately so a deprecation warning in the
+      # instrumentation can never take the corpus build down with it.
+      - name: Build the audit library
+        run: lake build Audit
+
+      # CALIBRATION BEFORE VERDICT, the third time in this file.  The scans in
+      # Audit.Scan report nothing on a clean corpus, and a scan that reports
+      # nothing because it is broken looks exactly the same.  Audit.Plants
+      # carries eleven planted defects that must each be reported under their
+      # own tag, and four clean declarations that must be reported by nothing.
+      # Needs no Mathlib and no corpus, so it still runs when the library does
+      # not build -- which is when a broken detector is most likely to be
+      # blamed on the corpus.
+      - name: Calibrate the environment scans
+        run: lake env lean scripts/Calibrate.lean
+
       # Saved with `always()` so a run that dies partway through still banks the
       # modules it did compile.  This is the mechanism that lets a build too
       # long for one job converge over consecutive runs instead of restarting
@@ -178,9 +194,32 @@ jobs:
 
       # A successful `lake build` says every module elaborates.  It says nothing
       # about what the proof terms rest on.  This step pins the statements of
-      # the three public theorems and walks the transitive axiom closure of the
+      # the four public theorems and walks the transitive axiom closure of the
       # whole namespace through the kernel environment, rejecting anything
       # outside `propext` / `Classical.choice` / `Quot.sound`.  Without it,
       # "0 sorries" is a grep result rather than a fact about the proof.
-      - name: Kernel audit (statements and transitive axiom closure)
+      - name: Kernel audit (statements, axiom closure, environment scans)
         run: lake env lean scripts/Audit.lean
+
+      # lean4checker replays every olean through the kernel from scratch, so a
+      # result that survives it does not rest on the ELABORATOR being correct
+      # -- only on the kernel.  For a claim this size that is the difference
+      # between "Lean accepted it" and "Lean's trusted core accepted it", and
+      # it is the standard bar for formalizations of open problems.
+      #
+      # Pinned to the project's own toolchain: a checker built against a
+      # different Lean cannot read these oleans, and if the tag is missing this
+      # step FAILS rather than skipping.  A gate that skips itself is not a
+      # weaker gate, it is no gate wearing the failure mode of infrastructure
+      # noise.
+      - name: Independent kernel re-check (lean4checker)
+        run: |
+          set -euo pipefail
+          version="$(cut -d: -f2 lean-toolchain)"
+          git clone --depth 1 --branch "toolchain/${version}" \
+            https://github.com/leanprover/lean4checker.git ../lean4checker
+          cd ../lean4checker
+          lake build
+          cd "$GITHUB_WORKSPACE"
+          LEAN_PATH="$(lake env printenv LEAN_PATH)" \
+            ../lean4checker/.lake/build/bin/lean4checker NonsoficGroupsExist
