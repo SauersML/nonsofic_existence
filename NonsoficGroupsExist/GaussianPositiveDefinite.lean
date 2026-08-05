@@ -226,6 +226,37 @@ theorem isPositiveDefinite_exp_neg_norm_sq (b : G → H)
     rw [heq]
     exact h0
 
+/-- Positive-definiteness descends along surjective homomorphisms: the
+finite quadratic forms of the quotient function are among those of the
+pullback, via any set-theoretic section. -/
+theorem isPositiveDefinite_of_comp_surjective {G' : Type*} [Group G']
+    (f : G →* G') (hf : Function.Surjective f) {φ : G' → ℝ}
+    (h : KazhdanFiniteModel.IsPositiveDefinite (fun g ↦ φ (f g))) :
+    KazhdanFiniteModel.IsPositiveDefinite φ := by
+  classical
+  constructor
+  · intro a b
+    obtain ⟨x, rfl⟩ := hf a
+    obtain ⟨y, rfl⟩ := hf b
+    have hsymm := h.1 x y
+    simpa [map_mul, map_inv] using hsymm
+  · intro F c
+    set s : G' → G := Function.surjInv hf with hs
+    have hsinj : Function.Injective s := Function.injective_surjInv hf
+    have hform := h.2 (F.image s) (c ∘ f)
+    simp only [Function.comp_apply] at hform
+    have key : ∑ a ∈ F, ∑ b ∈ F, c a * c b * φ (a⁻¹ * b) =
+        ∑ i ∈ F.image s, ∑ j ∈ F.image s,
+          c (f i) * c (f j) * φ (f (i⁻¹ * j)) := by
+      rw [Finset.sum_image (fun x _ y _ hxy ↦ hsinj hxy)]
+      refine Finset.sum_congr rfl fun a _ ↦ ?_
+      rw [Finset.sum_image (fun x _ y _ hxy ↦ hsinj hxy)]
+      refine Finset.sum_congr rfl fun b _ ↦ ?_
+      rw [map_mul, map_inv, Function.surjInv_eq hf a,
+        Function.surjInv_eq hf b]
+    rw [key]
+    exact hform
+
 end Group
 
 end GaussianKernel

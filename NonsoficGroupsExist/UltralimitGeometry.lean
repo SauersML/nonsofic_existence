@@ -247,5 +247,177 @@ theorem eventually_le_id (C : ℕ) :
     simpa [Set.mem_Iio, not_le] using hk
   exact (Set.finite_Iio C).subset hsub
 
+theorem seqNorm_neg (v : ∀ k, H k) :
+    seqNorm (fun k ↦ -v k) = seqNorm v := by
+  unfold seqNorm
+  congr 1
+  apply congrArg Hyperreal.ofSeq
+  funext k
+  rw [norm_neg]
+
+/-- Scaling of the squared seminorm. -/
+theorem seqNormSq_smul {v : ∀ k, H k} (hv : IsBoundedSeq v) (c : ℝ) :
+    seqNormSq (fun k ↦ c • v k) = c ^ 2 * seqNormSq v := by
+  have hconst : ((c ^ 2 : ℝ) : Hyperreal) =
+      Hyperreal.ofSeq (fun _ : ℕ ↦ (c ^ 2 : ℝ)) := rfl
+  have hpoint : (Hyperreal.ofSeq fun k ↦ ‖c • v k‖ ^ 2) =
+      ((c ^ 2 : ℝ) : Hyperreal) *
+        (Hyperreal.ofSeq fun k ↦ ‖v k‖ ^ 2) := by
+    rw [hconst, ← ofSeq_mul]
+    apply congrArg Hyperreal.ofSeq
+    funext k
+    rw [norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
+  rw [seqNormSq, hpoint,
+    ArchimedeanClass.stdPart_mul (hyperreal_coe_finite (c ^ 2))
+      (ofSeq_norm_sq_finite hv), stdPart_coe]
+  rfl
+
+section Center
+
+variable {ι : Type*} [Nonempty ι]
+
+/-- The covering radius of a sequence over an indexed orbit, in the
+hyperreal seminorm. -/
+noncomputable def orbitRadius (O : ι → ∀ k, H k) (v : ∀ k, H k) : ℝ :=
+  sSup (Set.range fun i ↦ seqNorm (fun k ↦ v k - O i k))
+
+/-- The optimal covering radius over all bounded sequences. -/
+noncomputable def centerRadius (O : ι → ∀ k, H k) : ℝ :=
+  sInf (orbitRadius O '' {v | IsBoundedSeq v})
+
+variable {O : ι → ∀ k, H k} {D : ℝ}
+
+theorem bddAbove_orbit_seqNorm (hOb : ∀ i, IsBoundedSeq (O i))
+    (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
+    (hv : IsBoundedSeq v) :
+    BddAbove (Set.range fun i ↦ seqNorm (fun k ↦ v k - O i k)) := by
+  refine ⟨seqNorm v + D, ?_⟩
+  rintro r ⟨i, rfl⟩
+  have htri : seqNorm (fun k ↦ v k - O i k) ≤
+      seqNorm v + seqNorm (fun k ↦ -O i k) := by
+    exact seqNorm_add_le hv (hOb i).neg
+  rw [seqNorm_neg] at htri
+  exact htri.trans (add_le_add_left (hOD i) _)
+
+theorem le_orbitRadius (hOb : ∀ i, IsBoundedSeq (O i))
+    (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
+    (hv : IsBoundedSeq v) (i : ι) :
+    seqNorm (fun k ↦ v k - O i k) ≤ orbitRadius O v :=
+  le_csSup (bddAbove_orbit_seqNorm hOb hOD hv) (Set.mem_range_self i)
+
+theorem orbitRadius_le {v : ∀ k, H k} {r : ℝ}
+    (h : ∀ i, seqNorm (fun k ↦ v k - O i k) ≤ r) :
+    orbitRadius O v ≤ r :=
+  csSup_le (Set.range_nonempty _) (by rintro s ⟨i, rfl⟩; exact h i)
+
+theorem orbitRadius_nonneg (hOb : ∀ i, IsBoundedSeq (O i))
+    (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
+    (hv : IsBoundedSeq v) :
+    0 ≤ orbitRadius O v := by
+  obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+  exact (seqNorm_nonneg (hv.sub (hOb i))).trans
+    (le_orbitRadius hOb hOD hv i)
+
+theorem bddBelow_radius_image (hOb : ∀ i, IsBoundedSeq (O i))
+    (hOD : ∀ i, seqNorm (O i) ≤ D) :
+    BddBelow (orbitRadius O '' {v | IsBoundedSeq v}) := by
+  refine ⟨0, ?_⟩
+  rintro r ⟨v, hv, rfl⟩
+  exact orbitRadius_nonneg hOb hOD hv
+
+theorem centerRadius_le (hOb : ∀ i, IsBoundedSeq (O i))
+    (hOD : ∀ i, seqNorm (O i) ≤ D) {v : ∀ k, H k}
+    (hv : IsBoundedSeq v) :
+    centerRadius O ≤ orbitRadius O v :=
+  csInf_le (bddBelow_radius_image hOb hOD) ⟨v, hv, rfl⟩
+
+/-- Near-optimal centers exist. -/
+theorem exists_near_center (hOb : ∀ i, IsBoundedSeq (O i))
+    (hOD : ∀ i, seqNorm (O i) ≤ D) {δ : ℝ} (hδ : 0 < δ) :
+    ∃ v : ∀ k, H k, IsBoundedSeq v ∧
+      orbitRadius O v < centerRadius O + δ := by
+  obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+  have hne : (orbitRadius O '' {v | IsBoundedSeq v}).Nonempty :=
+    ⟨orbitRadius O (O i), O i, hOb i, rfl⟩
+  have hlt : centerRadius O < centerRadius O + δ := by linarith
+  obtain ⟨r, ⟨v, hv, rfl⟩, hrlt⟩ :=
+    (csInf_lt_iff (bddBelow_radius_image hOb hOD) hne).mp hlt
+  exact ⟨v, hv, hrlt⟩
+
+/-- **The approximate-circumcenter estimate**: any two near-optimal
+centers are close, quantitatively, by the parallelogram law applied
+against every orbit point. -/
+theorem seqNormSq_sub_le_of_near_center
+    (hOb : ∀ i, IsBoundedSeq (O i)) (hOD : ∀ i, seqNorm (O i) ≤ D)
+    {v w : ∀ k, H k} (hv : IsBoundedSeq v) (hw : IsBoundedSeq w)
+    {ρ : ℝ} (hrv : orbitRadius O v ≤ ρ) (hrw : orbitRadius O w ≤ ρ) :
+    seqNormSq (fun k ↦ v k - w k) ≤
+      4 * (ρ ^ 2 - centerRadius O ^ 2) := by
+  classical
+  set mid : ∀ k, H k := fun k ↦ (2⁻¹ : ℝ) • (v k + w k) with hmid
+  have hmidb : IsBoundedSeq mid := (hv.add hw).smul 2⁻¹
+  set q : ℝ := seqNormSq (fun k ↦ v k - w k) with hq
+  -- Parallelogram against each orbit point.
+  have hkey : ∀ i : ι, 4 * seqNormSq (fun k ↦ mid k - O i k) + q ≤
+      4 * ρ ^ 2 := by
+    intro i
+    have hpar := seqNormSq_parallelogram (v := fun k ↦ v k - O i k)
+      (w := fun k ↦ w k - O i k) (hv.sub (hOb i)) (hw.sub (hOb i))
+    have hsub : (fun k ↦ (v k - O i k) - (w k - O i k)) =
+        fun k ↦ v k - w k := by
+      funext k
+      abel
+    have hsum : (fun k ↦ (v k - O i k) + (w k - O i k)) =
+        fun k ↦ (2 : ℝ) • (mid k - O i k) := by
+      funext k
+      show (v k - O i k) + (w k - O i k) =
+        (2 : ℝ) • ((2⁻¹ : ℝ) • (v k + w k) - O i k)
+      rw [smul_sub, smul_smul, show (2 : ℝ) * 2⁻¹ = 1 by norm_num,
+        one_smul, two_smul]
+      abel
+    rw [hsub, hsum, seqNormSq_smul (hmidb.sub (hOb i)) 2, ← hq] at hpar
+    have hva : seqNormSq (fun k ↦ v k - O i k) ≤ ρ ^ 2 := by
+      rw [seqNormSq_eq_sq (hv.sub (hOb i))]
+      have h1 := (le_orbitRadius hOb hOD hv i).trans hrv
+      have h0 := seqNorm_nonneg (hv.sub (hOb i))
+      nlinarith
+    have hwa : seqNormSq (fun k ↦ w k - O i k) ≤ ρ ^ 2 := by
+      rw [seqNormSq_eq_sq (hw.sub (hOb i))]
+      have h1 := (le_orbitRadius hOb hOD hw i).trans hrw
+      have h0 := seqNorm_nonneg (hw.sub (hOb i))
+      nlinarith
+    nlinarith [hpar, hva, hwa]
+  -- The midpoint radius squeezes the optimal radius.
+  have hB0 : 0 ≤ ρ ^ 2 - q / 4 := by
+    obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+    have := hkey i
+    have h0 : 0 ≤ seqNormSq (fun k ↦ mid k - O i k) := by
+      rw [seqNormSq_eq_sq (hmidb.sub (hOb i))]
+      exact sq_nonneg _
+    nlinarith
+  have hmidr : orbitRadius O mid ≤ Real.sqrt (ρ ^ 2 - q / 4) := by
+    apply orbitRadius_le
+    intro i
+    have h1 := hkey i
+    have h2 : seqNormSq (fun k ↦ mid k - O i k) ≤ ρ ^ 2 - q / 4 := by
+      nlinarith
+    rw [seqNormSq_eq_sq (hmidb.sub (hOb i))] at h2
+    have h3 : Real.sqrt (seqNorm (fun k ↦ mid k - O i k) ^ 2) ≤
+        Real.sqrt (ρ ^ 2 - q / 4) := Real.sqrt_le_sqrt h2
+    rwa [Real.sqrt_sq (seqNorm_nonneg (hmidb.sub (hOb i)))] at h3
+  have hcle : centerRadius O ≤ Real.sqrt (ρ ^ 2 - q / 4) :=
+    (centerRadius_le hOb hOD hmidb).trans hmidr
+  have hsq : centerRadius O ^ 2 ≤ ρ ^ 2 - q / 4 := by
+    have h0 : 0 ≤ centerRadius O := by
+      obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+      exact le_trans (orbitRadius_nonneg hOb hOD (hOb i))
+        (centerRadius_le hOb hOD (hOb i))
+    have hs := Real.sq_sqrt hB0
+    nlinarith [mul_self_le_mul_self h0 hcle,
+      Real.sqrt_nonneg (ρ ^ 2 - q / 4)]
+  linarith
+
+end Center
+
 end Ultralimit
 end NonsoficGroupsExist
