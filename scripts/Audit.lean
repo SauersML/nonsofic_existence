@@ -59,7 +59,8 @@ example (k : Type) [Field k] [Finite k] [CharP k 2]
     (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (BinaryLeavittEL k m) ∧
       Infinite (BinaryLeavittEL k m) ∧
-      HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) :=
+      HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) ∧
+      ¬ IsSofic (BinaryLeavittEL k m) :=
   binaryLeavitt_charTwo_profile k m hm
 
 example :
@@ -118,6 +119,13 @@ example : IsTextbookLEF (Multiplicative ℤ) :=
 example (G : Type) [Group G] : IsLEF G ↔ IsTextbookLEF G :=
   isLEF_iff_textbook G
 
+example {H : Type} [Group H] [Finite H]
+    (f : FreeGroup (Fin 2) →* H)
+    (h₁ : f ThompsonFObstruction.relator₁ = 1)
+    (h₂ : f ThompsonFObstruction.relator₂ = 1) :
+    f ThompsonFObstruction.generatorCommutator = 1 :=
+  ThompsonFObstruction.finite_image_generatorCommutator_eq_one f h₁ h₂
+
 /-! ## 2. Transitive axiom closure -/
 
 /-- The axioms of classical Lean, which Mathlib itself uses.  Nothing else is
@@ -141,6 +149,7 @@ def headlineTheorems : List Name :=
    ``universalLeavittUnits_not_isSofic,
    ``universalLeavittGL_not_isSofic,
    ``universalLeavitt_theoremA,
+   ``binaryLeavitt_charTwo_profile,
    ``ambient_profile,
    ``ambient_full_profile]
 

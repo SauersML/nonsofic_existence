@@ -196,7 +196,7 @@ element. -/
 theorem all_almost_invariant (D : ExpanderDecomposition S T)
     (hsymm : ∀ g ∈ T, g⁻¹ ∈ T)
     (hgen : Subgroup.closure (T : Set G) = ⊤) (g : G) :
-    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    S.cardScale.Negligible
       fun n ↦ ((wordCrossing (D.blocks n) (S.map n g)).card : ℝ) := by
   apply S.all_wordCrossing_negligible D.blocks T hsymm hgen
   intro t ht

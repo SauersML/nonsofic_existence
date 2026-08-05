@@ -1,18 +1,19 @@
 import NonsoficGroupsExist.LEF
 import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.GroupTheory.Commutator.Basic
+import Mathlib.GroupTheory.PresentedGroup
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Tactic.Group
 
 /-!
-# A two-relator obstruction to LEF
+# The Thompson-`F` two-relator obstruction to LEF
 
-The manuscript rules out LEF for the commuting corner copy of Thompson's group
-by citing that it is infinite, simple and finitely presented.  This file proves
-a stronger and completely elementary substitute, which removes the dependence
-on Higman's simplicity theorem and on Lemma `lem:fplef`:
+The two relations in this file are the standard two-generator relators for
+Thompson's group `F`.  This file uses only the relators themselves; it does not
+identify any concrete group with `F`, and it does not use an injectivity claim
+for a map out of the presented group.
 
-if two elements `a, b` of a group satisfy the two Thompson relations
+If two elements `a, b` of a group satisfy the two Thompson-`F` relations
 
   `[a b⁻¹, a⁻¹ b a] = 1`,  `[a b⁻¹, a⁻² b a²] = 1`
 
@@ -24,7 +25,7 @@ setting `cₙ = a⁻ⁿ b aⁿ`, the relations propagate to `b⁻¹ cₙ b = c�
 -/
 
 namespace NonsoficGroupsExist
-namespace ThompsonObstruction
+namespace ThompsonFObstruction
 
 open scoped commutatorElement
 
@@ -100,7 +101,8 @@ theorem conjugacy_relation_all (a b : G)
       simpa [Nat.add_assoc] using
         conjugacy_relation_step a b (n + 1) hfirst hprevious hcurrent
 
-/-- In a finite group the two Thompson relations force commutation. -/
+/-- In a finite group the two standard Thompson-`F` relations force
+commutation. -/
 theorem finite_commute_of_two_relations {G : Type*} [Group G] [Finite G] (a b : G)
     (hfirst : Commute (a * b⁻¹) (a⁻¹ * b * a))
     (hsecond : Commute (a * b⁻¹) ((a ^ 2)⁻¹ * b * a ^ 2)) :
@@ -126,25 +128,57 @@ theorem finite_commute_of_two_relations {G : Type*} [Group G] [Finite G] (a b : 
     a * b = a * (a⁻¹ * b * a) := congrArg (fun z : G ↦ a * z) heq
     _ = b * a := by group
 
-/-- The first Thompson relator, as an element of the free group on two
+/-- The first standard Thompson-`F` relator, as an element of the free group on two
 generators. -/
 def relator₁ : FreeGroup (Fin 2) :=
   ⁅FreeGroup.of (0 : Fin 2) * (FreeGroup.of (1 : Fin 2))⁻¹,
     (FreeGroup.of (0 : Fin 2))⁻¹ * FreeGroup.of (1 : Fin 2) *
       FreeGroup.of (0 : Fin 2)⁆
 
-/-- The second Thompson relator. -/
+/-- The second standard Thompson-`F` relator. -/
 def relator₂ : FreeGroup (Fin 2) :=
   ⁅FreeGroup.of (0 : Fin 2) * (FreeGroup.of (1 : Fin 2))⁻¹,
     ((FreeGroup.of (0 : Fin 2)) ^ 2)⁻¹ * FreeGroup.of (1 : Fin 2) *
       (FreeGroup.of (0 : Fin 2)) ^ 2⁆
 
+/-- The two-relator group underlying the obstruction. These are the standard
+two-generator relators for Thompson's group `F`; no identification theorem is
+needed by the non-LEF argument. -/
+noncomputable abbrev Presented :=
+  PresentedGroup ({relator₁, relator₂} : Set (FreeGroup (Fin 2)))
+
+/-- The first distinguished generator of the two-relator presented group. -/
+noncomputable def presentedA : Presented :=
+  PresentedGroup.of (0 : Fin 2)
+
+/-- The second distinguished generator of the two-relator presented group. -/
+noncomputable def presentedB : Presented :=
+  PresentedGroup.of (1 : Fin 2)
+
 /-- The commutator of the two generators. -/
 def generatorCommutator : FreeGroup (Fin 2) :=
   ⁅FreeGroup.of (0 : Fin 2), FreeGroup.of (1 : Fin 2)⁆
 
+/-- Every finite image satisfying the two standard Thompson-`F` relators kills
+the generator commutator. This is the finite-residual statement used by the
+LEF obstruction, separated from the local-embedding bookkeeping. -/
+theorem finite_image_generatorCommutator_eq_one
+    {H : Type*} [Group H] [Finite H] (f : FreeGroup (Fin 2) →* H)
+    (h₁ : f relator₁ = 1) (h₂ : f relator₂ = 1) :
+    f generatorCommutator = 1 := by
+  let a := f (FreeGroup.of (0 : Fin 2))
+  let b := f (FreeGroup.of (1 : Fin 2))
+  have hr₁ : Commute (a * b⁻¹) (a⁻¹ * b * a) := by
+    apply commutatorElement_eq_one_iff_commute.mp
+    simpa [a, b, relator₁] using h₁
+  have hr₂ : Commute (a * b⁻¹) ((a ^ 2)⁻¹ * b * a ^ 2) := by
+    apply commutatorElement_eq_one_iff_commute.mp
+    simpa [a, b, relator₂] using h₂
+  simpa [a, b, generatorCommutator] using
+    (finite_commute_of_two_relations a b hr₁ hr₂).commutator_eq
+
 /-- **Higman-free non-LEF criterion.**  A group containing two noncommuting
-elements satisfying the two Thompson relations is not LEF. -/
+elements satisfying the two standard Thompson-`F` relations is not LEF. -/
 theorem not_isLEF_of_two_relations {G : Type*} [Group G] (a b : G)
     (h₁ : Commute (a * b⁻¹) (a⁻¹ * b * a))
     (h₂ : Commute (a * b⁻¹) ((a ^ 2)⁻¹ * b * a ^ 2))
@@ -203,5 +237,5 @@ theorem not_isLEF_of_two_relations {G : Type*} [Group G] (a b : G)
     _ = 1 := hψw
     _ = f 1 := hlocal.map_one.symm
 
-end ThompsonObstruction
+end ThompsonFObstruction
 end NonsoficGroupsExist

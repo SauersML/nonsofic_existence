@@ -37,7 +37,7 @@ with `n = m + 2`, carrying one degree-preserving two-edge switch.
   adding a non-bipartiteness hypothesis to Theorem 3: the graphs are genuinely
   non-bipartite and the least eigenvalue still runs to `-1`.
 
-## What is NOT proved here, and why the argument is therefore incomplete
+## Formalization boundary
 
 **The uniform Cheeger lower bound for the family is not formalized.**  It is
 the load-bearing half: without it the family says nothing, because ANY

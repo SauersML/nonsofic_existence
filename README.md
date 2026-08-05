@@ -39,7 +39,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Define `L_k(1,2)` uniformly for every field `k`, prove its universal
   property and nontrivial stream representation, and provide finite-type,
   countability, infinitude, and canonical-family instances
-- [x] Prove finite generation, infinitude, and property `(T)` for
+- [x] Prove finite generation, infinitude, property `(T)`, and nonsoficity for
   `EL_{m+1}(L_k(1,2))` over every finite characteristic-two field and every
   `m ≥ 1`
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
@@ -72,7 +72,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | For every `m ≥ 1`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_theoremA` | Formalized |
 | The full unit group `L_{𝔽₂}(1,2)ˣ` is nonsofic | `universalLeavittUnits_not_isSofic` | Formalized |
 | Every positive-rank `GL_r(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittGL_not_isSofic` | Formalized |
-| Over every finite characteristic-two field, `EL_{m+1}(L_k(1,2))` is finitely generated, infinite, and Kazhdan for `m ≥ 1` | `binaryLeavitt_charTwo_profile` | Formalized; generic nonsoficity remains open in Lean |
+| Over every finite characteristic-two field, `EL_{m+1}(L_k(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic for `m ≥ 1` | `binaryLeavitt_charTwo_profile` | Formalized |
 | A nonsofic group exists | `nonsofic_groups_exist` | Formalized |
 | A finitely presented nonsofic group exists | `exists_finitelyPresented_nonsofic_group` | Formalized |
 | An infinite finitely presented nonsofic group surjects onto the explicit ambient group | `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | Formalized |

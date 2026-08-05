@@ -559,7 +559,7 @@ theorem vertexProjectionBound_of_constantProjectionBound
   nlinarith [hb]
 
 /-- A constant vertex-fixed family would be a globally invariant vector. -/
-theorem constant_inf_vertexFixed_eq_bot [CompleteSpace E]
+theorem constant_inf_vertexFixed_eq_bot
     (A : A2System G) (rho : G →* (E ≃ₗᵢ[ℝ] E))
     (hno : IsKazhdanPair.HasNoInvariantVectors G rho) :
     constantSubspace (E := E) ⊓ vertexFixedSubspace A rho = ⊥ := by

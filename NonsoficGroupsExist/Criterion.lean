@@ -189,7 +189,7 @@ structure ExpanderDecomposition {G : Type} [Group G]
   graph : ℕ → FiniteMultiGraph
   vertexEquiv : ∀ n, (graph n).vertex ≃ S.model n
   /-- The edited graph is occurrence-close to the actual generator graph. -/
-  edit_negligible : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+  edit_negligible : S.cardScale.Negligible
     fun n ↦ ((generatorGraph (S.model n) T (S.map n)).editDistance
       ((graph n).transport (S.model n) (vertexEquiv n)) (Equiv.refl _) : ℕ)
   /-- Occurrence-level realization of the edge edits, preserving every kept
@@ -197,7 +197,7 @@ structure ExpanderDecomposition {G : Type} [Group G]
   editWitness : ∀ n, EdgeEditWitness
     (generatorGraph (S.model n) T (S.map n))
       ((graph n).transport (S.model n) (vertexEquiv n)) (Equiv.refl _)
-  unmatched_negligible : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+  unmatched_negligible : S.cardScale.Negligible
     fun n ↦ ((editWitness n).unmatchedCount : ℝ)
   /-- Every edited edge stays inside one block. -/
   edge_inside : ∀ n (e : ((graph n).transport (S.model n) (vertexEquiv n)).edge),
@@ -208,7 +208,7 @@ structure ExpanderDecomposition {G : Type} [Group G]
     (((graph n).transport (S.model n) (vertexEquiv n)).induce
       ((blocks n).block y)).HasCheegerLowerBound cheeger
   /-- Almost invariance, equation `eq:gamma-inv`. -/
-  almost_invariant : ∀ t ∈ T, Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+  almost_invariant : ∀ t ∈ T, S.cardScale.Negligible
     fun n ↦ ((Finset.univ.filter fun y : S.model n ↦
       (blocks n).block (S.map n t y) ≠ (blocks n).block y).card : ℝ)
 
@@ -227,7 +227,7 @@ structure MatchingCertificate (K J : Type) [Group K] [Group J] where
   cheeger : ℝ
   cheeger_pos : 0 < cheeger
   expands : ∀ n, (graphs n).HasCheegerLowerBound cheeger
-  edit_negligible : Negligible (fun n ↦ (Fintype.card (approx.model n) : ℝ))
+  edit_negligible : approx.cardScale.Negligible
     fun n ↦ ((generatorGraph (approx.model n) generatorsK
       (fun k ↦ approx.map n (k, 1))).editDistance (graphs n)
         ((generatorGraphVertexEquiv (approx.model n) generatorsK

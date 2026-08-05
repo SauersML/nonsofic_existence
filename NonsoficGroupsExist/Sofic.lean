@@ -1,3 +1,4 @@
+import NonsoficGroupsExist.Asymptotics
 import Mathlib.Algebra.Group.Equiv.Defs
 import Mathlib.Data.Countable.Basic
 import Mathlib.Data.Fintype.Card
@@ -7,6 +8,7 @@ import Mathlib.GroupTheory.Perm.Basic
 import Mathlib.GroupTheory.Perm.Support
 import Mathlib.Tactic.Group
 import Mathlib.Tactic.Ring
+import Mathlib.Algebra.Order.Archimedean.Real.Basic
 
 /-!
 # Sofic groups and sequential approximations
@@ -237,6 +239,21 @@ structure SoficApproximation (G : Type*) [Group G] where
 namespace SoficApproximation
 
 variable {G : Type*} [Group G]
+
+/-- Model cardinality as a certified diverging asymptotic scale. -/
+def cardScale (S : SoficApproximation G) : AsymptoticScale where
+  value := fun n ↦ (Fintype.card (S.model n) : ℝ)
+  diverges := by
+    intro M
+    obtain ⟨K : ℕ, hK : M ≤ K⟩ := exists_nat_ge M
+    obtain ⟨N, hN⟩ := S.card_tendsToInfinity K
+    refine ⟨N, fun n hn ↦ hK.trans ?_⟩
+    have hKN : (K : ℝ) ≤ Fintype.card (S.model n) := by
+      exact_mod_cast hN n hn
+    exact hKN
+
+@[simp] theorem cardScale_value (S : SoficApproximation G) (n : ℕ) :
+    S.cardScale.value n = Fintype.card (S.model n) := rfl
 
 /-- Evaluate a fixed group word using the permutation assigned to each
 letter, without assuming that the assignment is a homomorphism. -/

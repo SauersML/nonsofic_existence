@@ -32,7 +32,7 @@ noncomputable def lowCutSubsets (X : FiniteMultiGraph) (R : Finset X.vertex)
 /-- Every nonempty finite family of finite sets has a member of minimum
 cardinality.  We minimize the finite image in `ℕ`, avoiding any arbitrary
 ordering of the vertex type. -/
-theorem exists_min_card_member {α : Type*} [DecidableEq α]
+theorem exists_min_card_member {α : Type*}
     (C : Finset (Finset α)) (hC : C.Nonempty) :
     ∃ T ∈ C, ∀ U ∈ C, T.card ≤ U.card := by
   classical

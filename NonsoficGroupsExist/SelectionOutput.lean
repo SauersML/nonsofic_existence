@@ -57,7 +57,9 @@ noncomputable def toMatchingCertificate (O : SelectionOutput D) :
   cheeger_pos := O.cheeger_pos
   expands := O.expands
   edit_negligible := by
-    simpa [LocalizedApproximationData.toSoficApproximation] using O.edit_negligible
+    simpa [AsymptoticScale.Negligible, SoficApproximation.cardScale,
+      Negligible, LocalizedApproximationData.toSoficApproximation] using
+      O.edit_negligible
 
 /-- The selected component forces `J` to be LEF whenever the first factor has
 property `(T)`.  The Kun--Thom argument and essential-to-exact repair are

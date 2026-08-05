@@ -26,7 +26,7 @@ theorem isSeparated_empty {V : Type} [DecidableEq V]
 
 /-- A maximum-cardinality separated subset of `C \ F` exists. -/
 theorem exists_maximalSeparated
-    {V : Type} [Fintype V] [DecidableEq V]
+    {V : Type} [DecidableEq V]
     (C F : Finset V) (N : V → Finset V) :
     ∃ M : Finset V,
       M ⊆ C \ F ∧ IsSeparated N M ∧
@@ -53,7 +53,7 @@ theorem exists_maximalSeparated
 /-- Maximality makes the forbidden set together with the selected conflict
 neighborhoods cover the entire tested block. -/
 theorem subset_forbidden_union_biUnion_of_maximal
-    {V : Type} [Fintype V] [DecidableEq V]
+    {V : Type} [DecidableEq V]
     (C F M : Finset V) (N : V → Finset V)
     (hself : ∀ x, x ∈ N x)
     (hsymm : ∀ x y, y ∈ N x ↔ x ∈ N y)
@@ -843,7 +843,7 @@ theorem exists_good_marker_assignment
 /-- Pairwise-disjoint marker neighborhoods have total intersection mass at
 most the size of the tested set. -/
 theorem sum_card_forwardNeighborhood_inter_le
-    {G I : Type} [Fintype I] [DecidableEq I]
+    {G I : Type}
     (M : FiniteModel) (τ : G → Equiv.Perm M)
     (S : Finset G) (r : ℕ) (marker : I → M)
     (hdisjoint : ∀ i j, i ≠ j →

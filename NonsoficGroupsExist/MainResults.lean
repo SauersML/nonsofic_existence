@@ -4,6 +4,7 @@ import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.SoficTransfer
 import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.FiniteTypeCharacteristicTwoPropertyT
+import NonsoficGroupsExist.FiniteCharacteristicTwoLeavitt
 
 /-!
 # Unconditional existence theorems
@@ -21,26 +22,20 @@ algebra over `k`. -/
 noncomputable abbrev BinaryLeavittEL (k : Type) [Field k] (m : ℕ) :=
   elementaryGroup (Fin (m + 1)) (BinaryLeavitt.BinaryLeavittAlgebra k)
 
-/-- The finite-generation, infinitude, and property-`(T)` portion of the
-manuscript panorama over every finite characteristic-two field.  Nonsoficity
-for this general coefficient field is deliberately not included until the
-generic compression setup is instantiated below this layer. -/
+/-- Over every finite characteristic-two field, every elementary rank at
+least two is finitely generated, infinite, Kazhdan, and nonsofic. -/
 theorem binaryLeavitt_charTwo_profile (k : Type) [Field k] [Finite k]
     [CharP k 2] (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (BinaryLeavittEL k m) ∧
       Infinite (BinaryLeavittEL k m) ∧
-      HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) := by
+      HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) ∧
+      ¬ IsSofic (BinaryLeavittEL k m) := by
   let L := BinaryLeavitt.family k
   let e : BinaryLeavittEL k m ≃*
-      elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k) :=
-    L.rankSuccEquiv m 2 (by omega) (by omega)
-  have hfg3 : Group.FG
-      (elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k)) :=
-    finiteCharacteristicTwoElementary_finitelyGenerated
-      (k := k) (A := BinaryLeavitt.BinaryLeavittAlgebra k) 3 (by omega)
+      FiniteCharacteristicTwoLeavitt.Ambient k :=
+    L.rankSuccEquiv m 3 (by omega) (by omega)
   have hfg : Group.FG (BinaryLeavittEL k m) := by
-    letI : Group.FG
-        (elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k)) := hfg3
+    letI : Group.FG (FiniteCharacteristicTwoLeavitt.Ambient k) := inferInstance
     exact Group.fg_of_surjective (f := e.symm.toMonoidHom) e.symm.surjective
   have hinfinite : Infinite (BinaryLeavittEL k m) :=
     elementaryGroup_infinite
@@ -49,13 +44,14 @@ theorem binaryLeavitt_charTwo_profile (k : Type) [Field k] [Finite k]
         intro h
         have hval := congrArg Fin.val h
         norm_num at hval)
-  have hT3 : HasKazhdanPropertyT.{0, 0}
-      (elementaryGroup (Fin 3) (BinaryLeavitt.BinaryLeavittAlgebra k)) :=
-    finiteCharacteristicTwoElementaryThree_hasKazhdanPropertyT
-      (k := k) (A := BinaryLeavitt.BinaryLeavittAlgebra k)
   have hT : HasKazhdanPropertyT.{0, 0} (BinaryLeavittEL k m) :=
-    L.rankSucc_propertyT_of_rankSucc m 2 (by omega) (by omega) hT3
-  exact ⟨hfg, hinfinite, hT⟩
+    L.rankSucc_propertyT_of_rankSucc m 3 (by omega) (by omega)
+      (FiniteCharacteristicTwoLeavitt.ambient_hasKazhdanPropertyT k)
+  have hnsofic : ¬ IsSofic (BinaryLeavittEL k m) := by
+    intro hsofic
+    exact FiniteCharacteristicTwoLeavitt.ambient_not_isSofic k
+      ((isSofic_mulEquiv_iff e).mp hsofic)
+  exact ⟨hfg, hinfinite, hT, hnsofic⟩
 
 /-- The elementary rank-four group over the universal binary Leavitt algebra
 `L_{𝔽₂}(1,2)` is nonsofic. -/

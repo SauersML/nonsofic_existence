@@ -16,6 +16,7 @@ import NonsoficGroupsExist.FreeRootPlaneFourier
 import NonsoficGroupsExist.FreeRootCharacterValuation
 import NonsoficGroupsExist.FreeElementaryPropertyT
 import NonsoficGroupsExist.FiniteTypeCharacteristicTwoPropertyT
+import NonsoficGroupsExist.FiniteCharacteristicTwoLeavitt
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.ClassTwoApproximation
@@ -90,7 +91,7 @@ import NonsoficGroupsExist.Refinement
 import NonsoficGroupsExist.Selection
 import NonsoficGroupsExist.MedianNormalization
 import NonsoficGroupsExist.LEF
-import NonsoficGroupsExist.ThompsonObstruction
+import NonsoficGroupsExist.ThompsonFObstruction
 import NonsoficGroupsExist.Scheme
 import NonsoficGroupsExist.Criterion
 import NonsoficGroupsExist.BlockEnumeration

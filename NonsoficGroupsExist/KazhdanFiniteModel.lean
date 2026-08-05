@@ -25,6 +25,18 @@ universe u v
 variable {G : Type u} [Group G]
 variable {Y : Type v} [Fintype Y]
 
+omit [Group G] in
+/-- Squared norm of a sum, in the form used to transfer displacement bounds
+between nearby finite-model trajectories. -/
+theorem norm_add_sq_le_two
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+    (x y : E) : ‖x + y‖ ^ 2 ≤ 2 * ‖x‖ ^ 2 + 2 * ‖y‖ ^ 2 := by
+  have hnorm := norm_add_le x y
+  have hright : 0 ≤ ‖x‖ + ‖y‖ :=
+    add_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hsq := (sq_le_sq₀ (norm_nonneg _) hright).2 hnorm
+  nlinarith [sq_nonneg (‖x‖ - ‖y‖)]
+
 /-- The orthogonal operator on `ℓ²(Y)` induced by a permutation of `Y`. -/
 noncomputable def permutationOperator (p : Equiv.Perm Y) :
     EuclideanSpace ℝ Y ≃ₗᵢ[ℝ] EuclideanSpace ℝ Y :=

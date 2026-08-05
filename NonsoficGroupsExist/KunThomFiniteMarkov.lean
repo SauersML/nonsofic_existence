@@ -78,17 +78,6 @@ theorem norm_average_sq_div_scale_le {I E : Type*}
       gcongr
     _ = δ := by field_simp
 
-/-- Squared norm of a sum, used to transfer displacement bounds between
-nearby trajectories. -/
-theorem norm_add_sq_le_two {E : Type*}
-    [SeminormedAddCommGroup E] [NormedSpace ℝ E]
-    (x y : E) : ‖x + y‖ ^ 2 ≤ 2 * ‖x‖ ^ 2 + 2 * ‖y‖ ^ 2 := by
-  have hnorm := norm_add_le x y
-  have hright : 0 ≤ ‖x‖ + ‖y‖ :=
-    add_nonneg (norm_nonneg _) (norm_nonneg _)
-  have hsq := (sq_le_sq₀ (norm_nonneg _) hright).2 hnorm
-  nlinarith [sq_nonneg (‖x‖ - ‖y‖)]
-
 /-- A fixed finite exact translation and its composed finite-model
 translation differ by `o(|Y_n|)`, uniformly over every permutation graph. -/
 theorem finiteTranslation_hilbert_error_eventually

@@ -15,9 +15,10 @@ Every asymptotic statement in the manuscript has the shape `= o(|Y_n|)`.  This
 file provides the single bookkeeping API used for all of them, in the explicit
 epsilon--eventually form used throughout this development (no filters).
 
-`Vanishing a` is `a n → 0`; `Negligible N e` is `e n = o(N n)`, i.e. the
-normalized quantity `e n / N n` vanishes.  Together with `Diverges` these three
-predicates carry every `o(N_n)` estimate of Sections 3--4 of the manuscript.
+`Vanishing a` is `a n → 0`; `Negligible N e` records that the normalized
+quantity `e n / N n` vanishes. `AsymptoticScale` bundles the divergence needed
+to interpret that quotient as a density and is used at the main certificate
+boundaries.
 -/
 
 namespace NonsoficGroupsExist
@@ -31,6 +32,26 @@ def Vanishing (a : ℕ → ℝ) : Prop :=
 /-- A real sequence tending to `+∞`, in explicit form. -/
 def Diverges (a : ℕ → ℝ) : Prop :=
   ∀ M : ℝ, ∃ N : ℕ, ∀ n, N ≤ n → M ≤ a n
+
+/-- A normalizing sequence known to diverge. Bundling this hypothesis prevents
+major certificate APIs from treating a zero scale as a meaningful density. -/
+structure AsymptoticScale where
+  value : ℕ → ℝ
+  diverges : Diverges value
+
+namespace AsymptoticScale
+
+/-- Negligibility relative to a certified diverging scale. -/
+def Negligible (N : AsymptoticScale) (e : ℕ → ℝ) : Prop :=
+  Vanishing fun n ↦ e n / N.value n
+
+/-- A diverging scale is eventually strictly positive. -/
+theorem eventually_pos (N : AsymptoticScale) :
+    ∃ k : ℕ, ∀ n ≥ k, 0 < N.value n := by
+  obtain ⟨k, hk⟩ := N.diverges 1
+  exact ⟨k, fun n hn ↦ lt_of_lt_of_le zero_lt_one (hk n hn)⟩
+
+end AsymptoticScale
 
 namespace Vanishing
 

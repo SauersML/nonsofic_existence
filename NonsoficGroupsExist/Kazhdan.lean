@@ -26,8 +26,10 @@ def IsKazhdanPair (G : Type u) [Group G] (Q : Finset G) (ε : ℝ) : Prop :=
         (∀ q ∈ Q, ‖ρ q x - x‖ < ε) →
           ∃ y : E, y ≠ 0 ∧ ∀ g : G, ρ g y = y
 
-/-- Kazhdan's property `(T)` for a discrete group, in its standard
-Kazhdan-pair formulation. -/
+/-- Kazhdan's property `(T)` for a discrete group, in Kazhdan-pair form at
+representation-space universe `v`. A declaration of
+`HasKazhdanPropertyT.{u, v} G` quantifies over complete real Hilbert spaces in
+`Type v`; no universe-independence theorem is implicit in this name. -/
 def HasKazhdanPropertyT (G : Type u) [Group G] : Prop :=
   ∃ Q : Finset G, ∃ ε : ℝ, IsKazhdanPair.{u, v} G Q ε
 

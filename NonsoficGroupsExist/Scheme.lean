@@ -1,5 +1,5 @@
 import NonsoficGroupsExist.LeavittCorner
-import NonsoficGroupsExist.ThompsonObstruction
+import NonsoficGroupsExist.ThompsonFObstruction
 
 /-!
 # The compression scheme: the two corners
@@ -14,10 +14,10 @@ unit groups.  Over any ring carrying a binary Leavitt family:
 * `compressed_inf_corner` is `K ∩ J = 1` (Proposition `prop:KJ`).
 
 Finally `not_isLEF_cornerSubgroup` supplies the manuscript's non-LEF input in
-Higman-free form: a noncommuting pair of units satisfying the two Thompson
-relations transports through the corner embedding, so the corner copy is not
-LEF.  This replaces the appeal to simplicity and finite presentation of
-Thompson's group `V` by the elementary argument of `ThompsonObstruction`.
+Higman-free form: a noncommuting pair of units satisfying the two standard
+Thompson-`F` relations transports through the corner embedding, so the corner
+copy is not LEF. This avoids any identification with a named Thompson group;
+the proof uses the elementary argument of `ThompsonFObstruction`.
 -/
 
 namespace NonsoficGroupsExist
@@ -65,7 +65,7 @@ theorem cornerHomRange_injective : Function.Injective L.cornerHomRange := by
   exact congrArg Subtype.val huv
 
 /-- **Higman-free replacement for Proposition `prop:vnotlef`.**  If the ambient
-unit group contains two noncommuting units satisfying the two Thompson
+unit group contains two noncommuting units satisfying the two standard Thompson-`F`
 relations, then the commuting corner copy is not LEF. -/
 theorem not_isLEF_cornerSubgroup (a b : Aˣ)
     (h₁ : Commute (a * b⁻¹) (a⁻¹ * b * a))
@@ -83,7 +83,7 @@ theorem not_isLEF_cornerSubgroup (a b : Aˣ)
     apply (commute_iff_eq a b).2
     apply hinj
     simpa using hcom.eq
-  exact ThompsonObstruction.not_isLEF_of_two_relations (f a) (f b) hf₁ hf₂ hfne
+  exact ThompsonFObstruction.not_isLEF_of_two_relations (f a) (f b) hf₁ hf₂ hfne
 
 /-- The compressed copy is likewise not LEF when the ambient unit group carries
 the witness; this is the statement used when the roles of the two corners are
@@ -109,7 +109,7 @@ theorem not_isLEF_compressedSubgroup (a b : Aˣ)
     apply (commute_iff_eq a b).2
     apply hinj
     simpa using hcom.eq
-  exact ThompsonObstruction.not_isLEF_of_two_relations (f a) (f b) hf₁ hf₂ hfne
+  exact ThompsonFObstruction.not_isLEF_of_two_relations (f a) (f b) hf₁ hf₂ hfne
 
 end LeavittFamily
 end NonsoficGroupsExist

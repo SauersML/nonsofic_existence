@@ -5,7 +5,7 @@ import Mathlib.GroupTheory.Commutator.Basic
 /-!
 # An explicit two-relator non-LEF witness
 
-The non-LEF criterion of `ThompsonObstruction` needs two concrete noncommuting
+The non-LEF criterion of `ThompsonFObstruction` needs two concrete noncommuting
 units satisfying two finite relations.  This file constructs them inside
 the unit group of any ring carrying a binary Leavitt family, using only prefix
 transpositions of cylinders:
@@ -15,8 +15,8 @@ transpositions of cylinders:
   group into the corner at the cylinder `l`;
 * `generatorA`, `generatorB` -- the two units of the witness, with
   `generatorB = prefixInsertion [1] generatorA`;
-* `relator_one`, `relator_two`, `generators_not_commute` -- the two Thompson
-  relations and the failure of commutation.
+* `relator_one`, `relator_two`, `generators_not_commute` -- the two standard
+  Thompson-`F` relations and the failure of commutation.
 
 The mechanism is the one used in the manuscript: the two relations hold because
 the difference `a b⁻¹` acts as the identity on the cylinder supporting the
@@ -798,7 +798,7 @@ theorem not_isLEF_cornerWitnessSubgroup [Nontrivial A] :
     change L.cornerHom L.generatorA * L.cornerHom L.generatorB =
       L.cornerHom L.generatorB * L.cornerHom L.generatorA at h
     simpa only [map_mul] using h
-  exact ThompsonObstruction.not_isLEF_of_two_relations a b h₁ h₂ hne
+  exact ThompsonFObstruction.not_isLEF_of_two_relations a b h₁ h₂ hne
 
 end LeavittFamily
 end NonsoficGroupsExist

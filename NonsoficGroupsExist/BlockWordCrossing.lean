@@ -71,14 +71,18 @@ noncomputable def wordDisagreement (w : List G) (n : ℕ) : Finset (S.model n) :
     S.map n w.prod x ≠ SoficApproximation.evaluateWord (S.map n) w x
 
 theorem wordDisagreement_negligible (w : List G) :
-    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    S.cardScale.Negligible
       fun n ↦ ((S.wordDisagreement w n).card : ℝ) := by
+  change Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    (fun n ↦ ((S.wordDisagreement w n).card : ℝ))
   intro ε hε
   obtain ⟨N, hN⟩ := S.word_close w ε hε
   refine ⟨N, fun n hn ↦ ?_⟩
   change |((S.wordDisagreement w n).card : ℝ) / Fintype.card (S.model n)| < ε
   rw [abs_of_nonneg (div_nonneg (by positivity) (by positivity))]
-  simpa only [hammingDistance, hammingDisagreement, wordDisagreement] using hN n hn
+  change hammingDistance (S.model n) (S.map n w.prod)
+    (SoficApproximation.evaluateWord (S.map n) w) < ε
+  exact hN n hn
 
 private theorem evaluateWord_crossing_card_le (w : List G) (n : ℕ) :
     (wordCrossing (P n) (SoficApproximation.evaluateWord (S.map n) w)).card ≤
@@ -92,22 +96,22 @@ private theorem evaluateWord_crossing_card_le (w : List G) (n : ℕ) :
       omega
 
 private theorem evaluateWord_crossing_negligible (w : List G)
-    (hletter : ∀ g ∈ w, Negligible
-      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    (hletter : ∀ g ∈ w, S.cardScale.Negligible
       fun n ↦ ((wordCrossing (P n) (S.map n g)).card : ℝ)) :
-    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ)) fun n ↦
+    S.cardScale.Negligible fun n ↦
       ((wordCrossing (P n)
         (SoficApproximation.evaluateWord (S.map n) w)).card : ℝ) := by
+  unfold AsymptoticScale.Negligible at hletter ⊢
   induction w with
   | nil =>
       simpa [SoficApproximation.evaluateWord, wordCrossing] using
-        (Negligible.zero : Negligible
-          (fun n ↦ (Fintype.card (S.model n) : ℝ)) (fun _ ↦ 0))
+        (Vanishing.zero : Vanishing (fun _ ↦ (0 : ℝ)))
   | cons g w ih =>
       have hg := hletter g (by simp)
       have hw := ih fun x hx ↦ hletter x (by simp [hx])
-      have hsum := Negligible.add hw hg
-      refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+      have hsum := Vanishing.add hw hg
+      refine Vanishing.squeeze
+        (fun n ↦ div_nonneg (by positivity) (by simp [SoficApproximation.cardScale]))
         (fun n ↦ ?_) hsum
       have hcard := wordCrossing_mul_card_le (P n) (S.map n g)
         (SoficApproximation.evaluateWord (S.map n) w)
@@ -118,8 +122,20 @@ private theorem evaluateWord_crossing_negligible (w : List G)
             (SoficApproximation.evaluateWord (S.map n) w)).card : ℝ) +
           (wordCrossing (P n) (S.map n g)).card := by
         exact_mod_cast hcard
-      apply div_le_div_of_nonneg_right hcast
-      positivity
+      calc
+        ((wordCrossing (P n)
+            (SoficApproximation.evaluateWord (S.map n) (g :: w))).card : ℝ) /
+              S.cardScale.value n ≤
+            (((wordCrossing (P n)
+                (SoficApproximation.evaluateWord (S.map n) w)).card : ℝ) +
+              (wordCrossing (P n) (S.map n g)).card) / S.cardScale.value n :=
+          div_le_div_of_nonneg_right hcast (by
+            simp [SoficApproximation.cardScale])
+        _ = ((wordCrossing (P n)
+                (SoficApproximation.evaluateWord (S.map n) w)).card : ℝ) /
+              S.cardScale.value n +
+            ((wordCrossing (P n) (S.map n g)).card : ℝ) /
+              S.cardScale.value n := by ring
 
 private theorem assigned_crossing_subset (w : List G) (n : ℕ) :
     wordCrossing (P n) (S.map n w.prod) ⊆
@@ -137,14 +153,15 @@ private theorem assigned_crossing_subset (w : List G) (n : ℕ) :
     exact hx
 
 theorem wordCrossing_negligible_of_letters (w : List G)
-    (hletter : ∀ g ∈ w, Negligible
-      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    (hletter : ∀ g ∈ w, S.cardScale.Negligible
       fun n ↦ ((wordCrossing (P n) (S.map n g)).card : ℝ)) :
-    Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    S.cardScale.Negligible
       fun n ↦ ((wordCrossing (P n) (S.map n w.prod)).card : ℝ) := by
-  have hsum := Negligible.add (S.wordDisagreement_negligible w)
+  unfold AsymptoticScale.Negligible at hletter ⊢
+  have hsum := Vanishing.add (S.wordDisagreement_negligible w)
     (S.evaluateWord_crossing_negligible P w hletter)
-  refine Vanishing.squeeze (fun n ↦ div_nonneg (by positivity) (by positivity))
+  refine Vanishing.squeeze
+    (fun n ↦ div_nonneg (by positivity) (by simp [SoficApproximation.cardScale]))
     (fun n ↦ ?_) hsum
   have hs := Finset.card_le_card (S.assigned_crossing_subset P w n)
   have hu := Finset.card_union_le (S.wordDisagreement w n)
@@ -154,17 +171,25 @@ theorem wordCrossing_negligible_of_letters (w : List G)
         (wordCrossing (P n)
           (SoficApproximation.evaluateWord (S.map n) w)).card := by
     exact_mod_cast hs.trans hu
-  apply div_le_div_of_nonneg_right hcast
-  positivity
+  calc
+    ((wordCrossing (P n) (S.map n w.prod)).card : ℝ) / S.cardScale.value n ≤
+        (((S.wordDisagreement w n).card : ℝ) +
+          (wordCrossing (P n)
+            (SoficApproximation.evaluateWord (S.map n) w)).card) /
+            S.cardScale.value n :=
+      div_le_div_of_nonneg_right hcast (by simp [SoficApproximation.cardScale])
+    _ = ((S.wordDisagreement w n).card : ℝ) / S.cardScale.value n +
+        ((wordCrossing (P n)
+          (SoficApproximation.evaluateWord (S.map n) w)).card : ℝ) /
+            S.cardScale.value n := by ring
 
 /-- Generator almost-invariance propagates to every fixed group element. -/
 theorem all_wordCrossing_negligible (T : Finset G)
     (hsymm : ∀ g ∈ T, g⁻¹ ∈ T)
     (hgen : Subgroup.closure (T : Set G) = ⊤)
-    (hgenerator : ∀ g ∈ T, Negligible
-      (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    (hgenerator : ∀ g ∈ T, S.cardScale.Negligible
       fun n ↦ ((wordCrossing (P n) (S.map n g)).card : ℝ))
-    (g : G) : Negligible (fun n ↦ (Fintype.card (S.model n) : ℝ))
+    (g : G) : S.cardScale.Negligible
       fun n ↦ ((wordCrossing (P n) (S.map n g)).card : ℝ) := by
   obtain ⟨w, hw, hprod⟩ := exists_generator_word T hsymm hgen g
   rw [← hprod]
