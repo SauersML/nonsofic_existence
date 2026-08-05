@@ -141,6 +141,7 @@ import NonsoficGroupsExist.LeavittNormalForm
 import NonsoficGroupsExist.DiagonalClassGroup
 import NonsoficGroupsExist.GLIsElementary
 import NonsoficGroupsExist.LeavittDiagonalClass
+import NonsoficGroupsExist.BinaryLeavittDiagonal
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
