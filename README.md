@@ -217,7 +217,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     input, and also the load-bearing input of the cited `[KhanhThanh26]`
     generation theorem
   - [ ] B5. `L^×` perfect and `GL_r(L) = EL_r(L)` for every `r ≥ 2`
-    (`prop:glel`)
+    (`prop:glel`).  Route fixed: `GL₄(L) = GL₂(M₂(L))` and `M₂(L) ≅ L`
+    inherits the strong division property through the self-similarity
+    isomorphism, so the proved rank-two GE theorem applies over `M₂(L)`;
+    block transvections and block diagonals decompose into ordinary
+    `E₄`-elements, giving `GE_r` for `r ∈ {2, 4}` without a general-rank
+    induction; perfection of `L^×` awaits the `B4` input
   - [ ] B6. Discharge the rank-two theorem's GE and property-`(T)`
     hypotheses over every finite field; audit
 - [x] Prove the full unit group and every positive-rank `GL_r` nonsofic
