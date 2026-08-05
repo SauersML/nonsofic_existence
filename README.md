@@ -251,7 +251,39 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     `1/2` uniformly — and the bounded orbit has a fixed circumcenter,
     `exists_fixed_point_of_hasKazhdanPropertyT`) are drafted and
     committed, pending cluster verification (cluster access currently
-    blocked on reauthentication).  Remaining: the Shalom assembly
+    blocked on reauthentication).  Remaining: the Shalom assembly, with
+    this design (leaner than Bekka–de la Harpe–Valette 3.4.5): present
+    `G = F/N` with `F` free of finite rank, `N = ⋃ N_k` an exhaustion by
+    finitely normally generated subgroups; if every `F/N_k` failed
+    property `(T)`, the failing pair (generator images, `1/(4(k+1))`)
+    would give a witness representation `σ_k` of `F` with a unit vector
+    of displacement below `1/(4(k+1))` and no invariant vectors — no
+    ℓ²-direct sum is needed because `exists_displacement_one_of_witness`
+    consumes a single seed vector; Lemma 3.2.5 with `M = k+1` then
+    yields `ξ_k` of displacement one whose radius-`(k+1)` neighbourhood
+    has displacement above `1/2`.  Set `b_k(g) := σ_k(g)ξ_k − ξ_k` (an
+    `IsCocycle`) and `ψ̄(g) := ArchimedeanClass.stdPart` of the
+    hyperreal sequence `‖b_k(g)‖²` (bounded in `k` for fixed `g` by
+    `FreeGroup.induction_on` subadditivity, so no word-length metric is
+    needed).  The Gaussians `exp(−t·ψ̄)` are positive-definite as
+    hyperfilter limits of the positive-definite
+    `exp(−t·‖b_k(·)‖²)` (finite quadratic forms pass to `stdPart`
+    limits), and `ψ̄` descends to `G` since `σ_k` kills `N_k`
+    eventually, so `bounded_of_gaussian_isPositiveDefinite` bounds `ψ̄`
+    by some `R` on all of `F`.  Then run the approximate-circumcenter
+    argument directly on bounded sequences `v : ∀ k, H_k` with the
+    hyperreal seminorm `ν(v) := stdPart (ofSeq ‖v_k‖)` — no Banach
+    ultraproduct, no quotient, no completeness: the affine action
+    `β_s v := π_k(s)v_k + b_k(s)` permutes the ν-bounded orbit
+    `{(b_k(g))_k : g ∈ F}`, covering-radius `δ`-minimizers exist by
+    `csSup`/`inf` arithmetic, and the parallelogram law (pointwise, then
+    `stdPart`) shows any `δ`-minimizer `η` has
+    `ν(β_{a_i}η − η)² ≤ 4((r*+δ)² − r*²) < (1/3)²`.  Since
+    `ν(...) < 1/3` forces `‖σ_k(a_i)(ξ_k+η_k) − (ξ_k+η_k)‖ < 1/3` on a
+    hyperfilter set, and `‖η_k‖ ≤ C < k+1` cofinitely, some large `k`
+    exhibits a vector within `k+1` of `ξ_k` with displacement at most
+    `1/3 < 1/2`, contradicting the isolation.  Hence some `F/N_k` has
+    `(T)`; it is finitely presented and surjects onto `G`
   - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
     property-`(T)` refinement and quotient claims of Theorem C
   - [ ] C4. Audit
