@@ -5,6 +5,7 @@ import NonsoficGroupsExist.FiniteClassTwoOrthogonality
 import NonsoficGroupsExist.FreeRootCharacterValuation
 import NonsoficGroupsExist.HilbertEpsilonOrthogonality
 import NonsoficGroupsExist.KazhdanControl
+import NonsoficGroupsExist.KazhdanFiniteModel
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.MaximalCutRepair
 import NonsoficGroupsExist.SoficPositiveControl
@@ -261,8 +262,7 @@ private def twoPointSwap : Equiv.Perm twoPointModel :=
   pairedMap 0 c2Generator
 
 private theorem twoPointModel_card : Fintype.card twoPointModel = 2 := by
-  simp [twoPointModel, pairedModel, pairedCarrier, regularModel,
-    Fintype.card_multiplicative, ZMod.card]
+  simp [pairedCarrier, Fintype.card_multiplicative, ZMod.card]
 
 private theorem twoPointSwap_ne (y : twoPointModel) : twoPointSwap y ≠ y :=
   pairedMap_generator_ne 0 y
@@ -290,13 +290,10 @@ theorem twoPointSwap_hasDirectedCheegerLowerBound :
     left
     constructor
     · exact hu
-    · simp [hUeq, p, twoPointSwap_ne]
-  have hboundary : 1 ≤
-      (AlmostAutomorphism.directedBoundary
-        twoPointModel {twoPointSwap} U).card :=
-    Finset.one_le_card.mpr ⟨p, hp⟩
+    · rw [hUeq]
+      simpa [p] using twoPointSwap_ne u
   norm_num [hUcard]
-  exact_mod_cast hboundary
+  exact ⟨p, hp⟩
 
 /-- The same real crossing supplies expansion at the cluster scale `m = 1`. -/
 theorem twoPointSwap_hasDirectedExpansionAtScale :
@@ -305,7 +302,7 @@ theorem twoPointSwap_hasDirectedExpansionAtScale :
   refine ⟨by norm_num, ?_⟩
   intro U hm hhalf
   apply twoPointSwap_hasDirectedCheegerLowerBound.2 U
-  · exact Finset.card_pos.mpr (by omega)
+  · exact Finset.card_pos.mp (by omega)
   · exact hhalf
 
 /-- Directed Cheeger expansion gives a closed `ℓ¹` Poincare control. -/
@@ -339,10 +336,10 @@ theorem twoPointAction_hasActionExpansion :
     obtain ⟨w, hw⟩ := Finset.card_eq_one.mp hUcard
     have huw : u = w := by simpa [hw] using hu
     simpa [huw] using hw
-  have hne : twoPointAction c2Generator u ≠ u := twoPointSwap_ne u
+  have hne : pairedMap 0 c2Generator u ≠ u :=
+    pairedMap_generator_ne 0 u
   rw [hUeq]
-  simp [KazhdanFiniteModel.actionBoundarySize, twoPointAction,
-    twoPointSwap, hne]
+  simp [KazhdanFiniteModel.actionBoundarySize, twoPointAction, hne]
 
 /-- Cauchy--Schwarz gives a nonzero, nonvacuous epsilon-orthogonality
 control on the full real line. -/
