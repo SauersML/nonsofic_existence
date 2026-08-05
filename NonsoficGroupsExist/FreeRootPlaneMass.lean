@@ -1445,33 +1445,6 @@ noncomputable def planeStageInclusion :
     ((stageInclusion X K n).comp (LinearMap.fst K _ _))
     ((stageInclusion X K n).comp (LinearMap.snd K _ _))
 
-omit [Fintype K] in
-/-- Plane points are unchanged by the stage inclusion. -/
-theorem planePoint_planeStageInclusion (v : PlaneVector X K n) :
-    planePoint X K i j k hik hjk (n + 1)
-        (planeStageInclusion X K n v) =
-      planePoint X K i j k hik hjk n v := rfl
-
-omit [Fintype K] in
-/-- The first coordinate of a stage-included character is the restriction
-of its first coordinate. -/
-theorem firstCoordinateChar_comp_planeStageInclusion
-    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
-    firstCoordinateChar X K n
-        (χ'.comp (planeStageInclusion X K n)) =
-      FreeRootFunctionalValuation.restrictSucc X K
-        (firstCoordinateChar X K (n + 1) χ') := rfl
-
-omit [Fintype K] in
-/-- The second coordinate of a stage-included character is the restriction
-of its second coordinate. -/
-theorem secondCoordinateChar_comp_planeStageInclusion
-    (χ' : Module.Dual K (PlaneVector X K (n + 1))) :
-    secondCoordinateChar X K n
-        (χ'.comp (planeStageInclusion X K n)) =
-      FreeRootFunctionalValuation.restrictSucc X K
-        (secondCoordinateChar X K (n + 1) χ') := rfl
-
 open Classical in
 /-- **Nested mass transport**: the stage-`n` plane mass of `z` at a coarse
 character is the total stage-`n+1` plane mass of the same vector over the
@@ -1596,9 +1569,7 @@ theorem firstTrivialMass_eq_add_boundary (hψ : ψ ≠ 1) (z : E) :
     constructor
     · rintro ⟨χ, hχ, rfl⟩
       have hres : restrictSucc X K
-          (firstCoordinateChar X K (n + 1) χ') = 0 := by
-        rw [← firstCoordinateChar_comp_planeStageInclusion]
-        exact hχ
+          (firstCoordinateChar X K (n + 1) χ') = 0 := hχ
       have hval : valuation X K (restrictSucc X K
           (firstCoordinateChar X K (n + 1) χ')) = n + 1 :=
         (valuation_eq_succ_iff X K _).2 hres
@@ -1613,7 +1584,7 @@ theorem firstTrivialMass_eq_add_boundary (hψ : ψ ≠ 1) (z : E) :
         omega
     · intro h
       refine ⟨χ'.comp (planeStageInclusion X K n), ?_, rfl⟩
-      rw [firstCoordinateChar_comp_planeStageInclusion]
+      show restrictSucc X K (firstCoordinateChar X K (n + 1) χ') = 0
       rcases h with hz | hval
       · rw [hz]
         rfl
@@ -1692,9 +1663,7 @@ theorem secondTrivialMass_eq_add_boundary (hψ : ψ ≠ 1) (z : E) :
     constructor
     · rintro ⟨χ, hχ, rfl⟩
       have hres : restrictSucc X K
-          (secondCoordinateChar X K (n + 1) χ') = 0 := by
-        rw [← secondCoordinateChar_comp_planeStageInclusion]
-        exact hχ
+          (secondCoordinateChar X K (n + 1) χ') = 0 := hχ
       have hval : valuation X K (restrictSucc X K
           (secondCoordinateChar X K (n + 1) χ')) = n + 1 :=
         (valuation_eq_succ_iff X K _).2 hres
@@ -1709,7 +1678,7 @@ theorem secondTrivialMass_eq_add_boundary (hψ : ψ ≠ 1) (z : E) :
         omega
     · intro h
       refine ⟨χ'.comp (planeStageInclusion X K n), ?_, rfl⟩
-      rw [secondCoordinateChar_comp_planeStageInclusion]
+      show restrictSucc X K (secondCoordinateChar X K (n + 1) χ') = 0
       rcases h with hz | hval
       · rw [hz]
         rfl
