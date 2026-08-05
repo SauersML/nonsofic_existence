@@ -133,6 +133,37 @@ L₂ ≡ degree-zero unit modulo E-moves. Sharpened plan:
   terms. λ(u) = Σ s_b u t_b ≡ u² mod H for EVERY unit (fromMatrix of
   diag(u,u) = κ₀(u)κ₁(u)) — the c ↦ c² mechanism at unit level.
 
+## Laurent endgame analysis (2026-08-05, second session)
+Groundwork now green (FamilyDescent, LeavittGradingSpans):
+- mem_stableUnits_of_cornerDiag_mem: descent at EVERY matrix size (the
+  2^m generalization item is DONE — elementary group pulls back to H
+  through any family; single-slot diagonal pulls back to pairKappa).
+- levelMonomials_eq (length form), span_levelMonomials_mono (padding),
+  monomial_factor_s0/t0 (positive monomial = balanced′·s₀; negative =
+  t₀·balanced′), exists_corner_move (the Φ-move: for all v w,
+  ∃ unit ≡ u mod H with value s₀(u+vw)t₀ + s₀vt₁ + s₁wt₀ + s₁t₁).
+THE WALL, precisely: Φ-move with vw := −(positive part) kills positive
+degrees of u but reinjects ONE positive-degree entry (v or w carries
+it). This is the K₀-patching obstruction of classical BHS. Two
+candidate elementary resolutions, in preference order:
+1. Bass XII §7 semisimple-style ending using von Neumann REGULARITY of
+   the balanced subalgebra: pseudo-inverses exist concretely — for
+   balanced x at depth n, x = Θ(scalar matrix C) and C⁺ from Mathlib
+   Pivot decomposition C = E₁DE₂, C⁺ := E₂⁻¹D⁺E₁⁻¹ (D diagonal, D⁺
+   entrywise). Use idempotent pivots eB = top coefficient support to
+   split the linear matrix and cancel the reinjected entry against the
+   t-side. Needs on-paper derivation of the exact induction BEFORE
+   coding; do width-1 case by hand first: u = t₀p + a + bs₀ unit.
+2. If (1) stalls: no-pure-degree-unit rank argument is formalizable
+   NOW: map balanced elements to scalar matrices (entry extraction),
+   use Mathlib Matrix.rank + rank_mul_le; p₀^{(d)} has scalar matrix =
+   0/1 diagonal of rank 2^{m−d} < 2^m = rank 1. Gives ker-part; the
+   coker-part needs the coordinate-free lattice argument (heavier).
+Audit note: ASSUMPTION_INSTANCE ratchet is 26; new [Nontrivial A]
+binders may move the count — retighten when the audit is next run
+(scan not yet re-run after the six new modules; run scripts/check.py
+with cluster /usr/bin/python3.12 next round).
+
 ## Iteration log (continued)
 - GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
   AlmostMinimalDisplacement, UltralimitGeometry, HilbertCircumcenter,
