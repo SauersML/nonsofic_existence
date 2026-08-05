@@ -31,6 +31,7 @@ import NonsoficGroupsExist.CharacterMass
 import NonsoficGroupsExist.RankTwoCompression
 import NonsoficGroupsExist.KazhdanControl
 import NonsoficGroupsExist.AlmostMinimalDisplacement
+import NonsoficGroupsExist.GaussianPositiveDefinite
 import NonsoficGroupsExist.HilbertCircumcenter
 import NonsoficGroupsExist.KazhdanFixedSpace
 import NonsoficGroupsExist.HilbertConvexFixedPoint
