@@ -507,6 +507,325 @@ theorem secondCoordinateChar_comp_oppositeShear (x : X)
     (0, stageInclusion X K n b)
   rw [map_zero, map_zero, zero_add]
 
+
+/-! ### Same-stage unit shears and the region transport into `B` -/
+
+/-- The forward same-stage unit shear `(a, b) ↦ (a + b, b)`. -/
+noncomputable def unitShearForward :
+    PlaneVector X K n ≃ₗ[K] PlaneVector X K n :=
+  LinearEquiv.ofLinear
+    (LinearMap.prod (LinearMap.fst K _ _ + LinearMap.snd K _ _)
+      (LinearMap.snd K _ _))
+    (LinearMap.prod (LinearMap.fst K _ _ - LinearMap.snd K _ _)
+      (LinearMap.snd K _ _))
+    (by
+      refine LinearMap.ext fun v ↦ ?_
+      apply Prod.ext
+      · show v.1 - v.2 + v.2 = v.1
+        abel
+      · rfl)
+    (by
+      refine LinearMap.ext fun v ↦ ?_
+      apply Prod.ext
+      · show v.1 + v.2 - v.2 = v.1
+        abel
+      · rfl)
+
+/-- The opposite same-stage unit shear `(a, b) ↦ (a, a + b)`. -/
+noncomputable def unitShearOpposite :
+    PlaneVector X K n ≃ₗ[K] PlaneVector X K n :=
+  LinearEquiv.ofLinear
+    (LinearMap.prod (LinearMap.fst K _ _)
+      (LinearMap.fst K _ _ + LinearMap.snd K _ _))
+    (LinearMap.prod (LinearMap.fst K _ _)
+      (LinearMap.snd K _ _ - LinearMap.fst K _ _))
+    (by
+      refine LinearMap.ext fun v ↦ ?_
+      apply Prod.ext
+      · rfl
+      · show v.1 + (v.2 - v.1) = v.2
+        abel)
+    (by
+      refine LinearMap.ext fun v ↦ ?_
+      apply Prod.ext
+      · rfl
+      · show v.1 + v.2 - v.1 = v.2
+        abel)
+
+omit [Fintype K] in
+/-- Conjugation by the forward unit root realizes the forward unit shear on
+plane points. -/
+theorem planePoint_unitShearForward (v : PlaneVector X K n) :
+    elementaryRoot i j hij (1 : FreeAlgebra K X) *
+        planePoint X K i j k hik hjk n v *
+        (elementaryRoot i j hij (1 : FreeAlgebra K X))⁻¹ =
+      planePoint X K i j k hik hjk n (unitShearForward X K n v) := by
+  set g := elementaryRoot i j hij (1 : FreeAlgebra K X) with hg
+  have hsplit : g * planePoint X K i j k hik hjk n v * g⁻¹ =
+      (g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹) *
+        (g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹) := by
+    unfold planePoint
+    group
+  have hfirst : g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot i k hik (v.1 : FreeAlgebra K X) := by
+    have hcomm := elementaryRoot_commute_of_ne i j i k hij hik
+      hij.symm hik.symm (1 : FreeAlgebra K X) (v.1 : FreeAlgebra K X)
+    rw [hg, hcomm.eq]
+    group
+  have hsecond : g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot i k hik (v.2 : FreeAlgebra K X) *
+        elementaryRoot j k hjk (v.2 : FreeAlgebra K X) := by
+    rw [hg, elementaryRoot_conjugate i j k hij hjk hik
+      (1 : FreeAlgebra K X) (v.2 : FreeAlgebra K X), one_mul]
+  rw [hsplit, hfirst, hsecond]
+  unfold planePoint
+  rw [show ((unitShearForward X K n v).1 : FreeAlgebra K X) =
+    (v.1 : FreeAlgebra K X) + (v.2 : FreeAlgebra K X) from rfl]
+  rw [show ((unitShearForward X K n v).2 : FreeAlgebra K X) =
+    (v.2 : FreeAlgebra K X) from rfl]
+  rw [← elementaryRoot_mul i k hik, mul_assoc]
+
+omit [Fintype K] in
+/-- Conjugation by the opposite unit root realizes the opposite unit shear
+on plane points. -/
+theorem planePoint_unitShearOpposite (v : PlaneVector X K n) :
+    elementaryRoot j i hij.symm (1 : FreeAlgebra K X) *
+        planePoint X K i j k hik hjk n v *
+        (elementaryRoot j i hij.symm (1 : FreeAlgebra K X))⁻¹ =
+      planePoint X K i j k hik hjk n (unitShearOpposite X K n v) := by
+  set g := elementaryRoot j i hij.symm (1 : FreeAlgebra K X) with hg
+  have hsplit : g * planePoint X K i j k hik hjk n v * g⁻¹ =
+      (g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹) *
+        (g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹) := by
+    unfold planePoint
+    group
+  have hfirst : g * elementaryRoot i k hik (v.1 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot i k hik (v.1 : FreeAlgebra K X) *
+        elementaryRoot j k hjk (v.1 : FreeAlgebra K X) := by
+    rw [hg, elementaryRoot_conjugate j i k hij.symm hik hjk
+      (1 : FreeAlgebra K X) (v.1 : FreeAlgebra K X), one_mul]
+    exact (elementaryRoot_commute_of_ne j k i k hjk hik
+      hik.symm hjk.symm _ _).eq
+  have hsecond : g * elementaryRoot j k hjk (v.2 : FreeAlgebra K X) * g⁻¹ =
+      elementaryRoot j k hjk (v.2 : FreeAlgebra K X) := by
+    have hcomm := elementaryRoot_commute_of_ne j i j k hij.symm hjk
+      hij hjk.symm (1 : FreeAlgebra K X) (v.2 : FreeAlgebra K X)
+    rw [hg, hcomm.eq]
+    group
+  rw [hsplit, hfirst, hsecond]
+  unfold planePoint
+  rw [show ((unitShearOpposite X K n v).1 : FreeAlgebra K X) =
+    (v.1 : FreeAlgebra K X) from rfl]
+  rw [show ((unitShearOpposite X K n v).2 : FreeAlgebra K X) =
+    (v.1 : FreeAlgebra K X) + (v.2 : FreeAlgebra K X) from rfl]
+  rw [← elementaryRoot_mul j k hjk, mul_assoc]
+
+/-- **Same-stage mass transport** along the forward unit shear. -/
+theorem planeMass_unitShearForward
+    (χ : Module.Dual K (PlaneVector X K n)) (z : E) :
+    planeMass X K i j k hik hjk n rho ψ χ z =
+      planeMass X K i j k hik hjk n rho ψ
+        (χ.comp ((unitShearForward X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n))
+        (rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) z) := by
+  set U := rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) with hU
+  have hconj : ∀ v : PlaneVector X K n,
+      U * planeAction X K i j k hik hjk n rho v * U⁻¹ =
+        planeAction X K i j k hik hjk n rho
+          (unitShearForward X K n v) := by
+    intro v
+    unfold planeAction
+    rw [hU, ← map_inv, ← map_mul, ← map_mul,
+      planePoint_unitShearForward X K i j k hij hik hjk n v]
+  calc
+    planeMass X K i j k hik hjk n rho ψ χ z =
+        CharacterMass.mass ψ
+          (fun v ↦ U * planeAction X K i j k hik hjk n rho v * U⁻¹)
+          χ (U z) := by
+      rw [planeMass]
+      exact (CharacterMass.mass_conj ψ _ U χ z).symm
+    _ = CharacterMass.mass ψ
+        (fun v ↦ planeAction X K i j k hik hjk n rho
+          (unitShearForward X K n v)) χ (U z) := by
+      congr 1
+      funext v
+      exact hconj v
+    _ = planeMass X K i j k hik hjk n rho ψ
+        (χ.comp ((unitShearForward X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n)) (U z) :=
+      CharacterMass.mass_precomp ψ _ (unitShearForward X K n) χ (U z)
+
+/-- **Same-stage mass transport** along the opposite unit shear. -/
+theorem planeMass_unitShearOpposite
+    (χ : Module.Dual K (PlaneVector X K n)) (z : E) :
+    planeMass X K i j k hik hjk n rho ψ χ z =
+      planeMass X K i j k hik hjk n rho ψ
+        (χ.comp ((unitShearOpposite X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n))
+        (rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) z) := by
+  set U := rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) with hU
+  have hconj : ∀ v : PlaneVector X K n,
+      U * planeAction X K i j k hik hjk n rho v * U⁻¹ =
+        planeAction X K i j k hik hjk n rho
+          (unitShearOpposite X K n v) := by
+    intro v
+    unfold planeAction
+    rw [hU, ← map_inv, ← map_mul, ← map_mul,
+      planePoint_unitShearOpposite X K i j k hij hik hjk n v]
+  calc
+    planeMass X K i j k hik hjk n rho ψ χ z =
+        CharacterMass.mass ψ
+          (fun v ↦ U * planeAction X K i j k hik hjk n rho v * U⁻¹)
+          χ (U z) := by
+      rw [planeMass]
+      exact (CharacterMass.mass_conj ψ _ U χ z).symm
+    _ = CharacterMass.mass ψ
+        (fun v ↦ planeAction X K i j k hik hjk n rho
+          (unitShearOpposite X K n v)) χ (U z) := by
+      congr 1
+      funext v
+      exact hconj v
+    _ = planeMass X K i j k hik hjk n rho ψ
+        (χ.comp ((unitShearOpposite X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n)) (U z) :=
+      CharacterMass.mass_precomp ψ _ (unitShearOpposite X K n) χ (U z)
+
+omit [Fintype K] in
+/-- Coordinate functionals of the forward unit-shear transport. -/
+theorem coordinateChar_comp_unitShearForward_symm
+    (χ : Module.Dual K (PlaneVector X K n)) :
+    firstCoordinateChar X K n (χ.comp
+        ((unitShearForward X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n)) =
+      firstCoordinateChar X K n χ ∧
+    secondCoordinateChar X K n (χ.comp
+        ((unitShearForward X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n)) =
+      -firstCoordinateChar X K n χ + secondCoordinateChar X K n χ := by
+  constructor
+  · refine LinearMap.ext fun a ↦ ?_
+    show χ ((unitShearForward X K n).symm (a, 0)) = χ (a, 0)
+    rw [show (unitShearForward X K n).symm (a, 0) = (a, 0) by
+      rw [unitShearForward, LinearEquiv.ofLinear_symm_apply]
+      apply Prod.ext
+      · show a - 0 = a
+        rw [sub_zero]
+      · rfl]
+  · refine LinearMap.ext fun b ↦ ?_
+    show χ ((unitShearForward X K n).symm (0, b)) =
+      -χ (b, 0) + χ (0, b)
+    rw [← map_neg, ← map_add,
+      show (unitShearForward X K n).symm (0, b) = (-b + 0, 0 + b) by
+        rw [unitShearForward, LinearEquiv.ofLinear_symm_apply]
+        apply Prod.ext
+        · show (0 : degreeLE X K n) - b = -b + 0
+          rw [zero_sub, add_zero]
+        · show b = 0 + b
+          rw [zero_add]]
+    congr 1
+    apply Prod.ext <;> simp
+
+omit [Fintype K] in
+/-- Coordinate functionals of the opposite unit-shear transport. -/
+theorem coordinateChar_comp_unitShearOpposite_symm
+    (χ : Module.Dual K (PlaneVector X K n)) :
+    firstCoordinateChar X K n (χ.comp
+        ((unitShearOpposite X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n)) =
+      firstCoordinateChar X K n χ - secondCoordinateChar X K n χ ∧
+    secondCoordinateChar X K n (χ.comp
+        ((unitShearOpposite X K n).symm :
+          PlaneVector X K n →ₗ[K] PlaneVector X K n)) =
+      secondCoordinateChar X K n χ := by
+  constructor
+  · refine LinearMap.ext fun a ↦ ?_
+    show χ ((unitShearOpposite X K n).symm (a, 0)) =
+      χ (a, 0) - χ (0, a)
+    rw [← map_sub,
+      show (unitShearOpposite X K n).symm (a, 0) = (a - 0, 0 - a) by
+        rw [unitShearOpposite, LinearEquiv.ofLinear_symm_apply]
+        apply Prod.ext
+        · show a = a - 0
+          rw [sub_zero]
+        · rfl]
+    congr 1
+  · refine LinearMap.ext fun b ↦ ?_
+    show χ ((unitShearOpposite X K n).symm (0, b)) = χ (0, b)
+    rw [show (unitShearOpposite X K n).symm (0, b) = (0, b) by
+      rw [unitShearOpposite, LinearEquiv.ofLinear_symm_apply]
+      apply Prod.ext
+      · rfl
+      · show b - 0 = b
+        rw [sub_zero]]
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- **Region `C` is sent into region `B`** by the forward unit-shear
+transport. -/
+theorem pairRegion_comp_unitShearForward_symm_of_C
+    (χ : Module.Dual K (PlaneVector X K n))
+    (h : pairRegion X K (firstCoordinateChar X K n χ)
+      (secondCoordinateChar X K n χ) = .C) :
+    pairRegion X K
+        (firstCoordinateChar X K n (χ.comp
+          ((unitShearForward X K n).symm :
+            PlaneVector X K n →ₗ[K] PlaneVector X K n)))
+        (secondCoordinateChar X K n (χ.comp
+          ((unitShearForward X K n).symm :
+            PlaneVector X K n →ₗ[K] PlaneVector X K n))) = .B := by
+  obtain ⟨hz, hφ, hχ2, hlt⟩ := pairRegion_C_data X K _ _ h
+  obtain ⟨hfirst, hsecond⟩ :=
+    coordinateChar_comp_unitShearForward_symm X K n χ
+  rw [hfirst, hsecond]
+  have hnegval : valuation X K (-firstCoordinateChar X K n χ) =
+      valuation X K (firstCoordinateChar X K n χ) :=
+    valuation_neg X K _
+  have hval : valuation X K
+      (-firstCoordinateChar X K n χ + secondCoordinateChar X K n χ) =
+      valuation X K (firstCoordinateChar X K n χ) := by
+    rw [valuation_add_of_lt X K _ _ (by omega), hnegval]
+  apply pairRegion_eq_B_of_data
+  · intro hcontra
+    have hb := valuation_le_succ X K (secondCoordinateChar X K n χ)
+    omega
+  · exact hφ
+  · omega
+  · omega
+
+open FreeRootFunctionalValuation in
+omit [Fintype K] in
+/-- **Region `A` is sent into region `B`** by the opposite unit-shear
+transport. -/
+theorem pairRegion_comp_unitShearOpposite_symm_of_A
+    (χ : Module.Dual K (PlaneVector X K n))
+    (h : pairRegion X K (firstCoordinateChar X K n χ)
+      (secondCoordinateChar X K n χ) = .A) :
+    pairRegion X K
+        (firstCoordinateChar X K n (χ.comp
+          ((unitShearOpposite X K n).symm :
+            PlaneVector X K n →ₗ[K] PlaneVector X K n)))
+        (secondCoordinateChar X K n (χ.comp
+          ((unitShearOpposite X K n).symm :
+            PlaneVector X K n →ₗ[K] PlaneVector X K n))) = .B := by
+  obtain ⟨hz, hχ1, hχ2, hlt⟩ := pairRegion_A_data X K _ _ h
+  obtain ⟨hfirst, hsecond⟩ :=
+    coordinateChar_comp_unitShearOpposite_symm X K n χ
+  rw [hfirst, hsecond]
+  have hval : valuation X K
+      (firstCoordinateChar X K n χ - secondCoordinateChar X K n χ) =
+      valuation X K (secondCoordinateChar X K n χ) := by
+    rw [show firstCoordinateChar X K n χ - secondCoordinateChar X K n χ =
+      -secondCoordinateChar X K n χ + firstCoordinateChar X K n χ by abel]
+    rw [valuation_add_of_lt X K _ _
+      (by rw [valuation_neg X K _]; omega), valuation_neg X K _]
+  apply pairRegion_eq_B_of_data
+  · intro hcontra
+    have hb := valuation_le_succ X K (firstCoordinateChar X K n χ)
+    omega
+  · omega
+  · exact hχ2
+  · omega
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist

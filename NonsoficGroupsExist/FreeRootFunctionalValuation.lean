@@ -164,6 +164,69 @@ theorem valuation_eq_zero_iff {n : ℕ}
     have := valuation_le_of_hasDetection X K φ hdet
     omega
 
+/-- Below its valuation, a functional vanishes on every stage basis
+monomial. -/
+theorem apply_wordMonomialInDegree_eq_zero_of_lt {n : ℕ}
+    (φ : Module.Dual K (degreeLE X K n)) {w : FreeMonoid X}
+    (hw : freeWordLength X w ≤ n)
+    (hlt : freeWordLength X w < valuation X K φ) :
+    φ (wordMonomialInDegree X K n w) = 0 := by
+  by_contra hne
+  exact not_hasDetection_of_lt_valuation X K φ hlt ⟨w, rfl, hw, hne⟩
+
+/-- Negation preserves the valuation. -/
+theorem valuation_neg {n : ℕ} (φ : Module.Dual K (degreeLE X K n)) :
+    valuation X K (-φ) = valuation X K φ := by
+  have h : ∀ ξ : Module.Dual K (degreeLE X K n), ∀ d : ℕ,
+      HasDetectionAtDegree X K ξ d → HasDetectionAtDegree X K (-ξ) d := by
+    rintro ξ d ⟨w, hwd, hwn, hξ⟩
+    refine ⟨w, hwd, hwn, ?_⟩
+    rw [LinearMap.neg_apply]
+    exact neg_ne_zero.2 hξ
+  have hle : ∀ ξ : Module.Dual K (degreeLE X K n),
+      valuation X K (-ξ) ≤ valuation X K ξ := by
+    intro ξ
+    by_cases hξ : ∃ d, HasDetectionAtDegree X K ξ d
+    · exact valuation_le_of_hasDetection X K (-ξ)
+        (h ξ _ (hasDetectionAtDegree_valuation X K ξ hξ))
+    · rw [valuation_eq_succ_of_not_exists X K ξ hξ]
+      exact valuation_le_succ X K (-ξ)
+  have h1 := hle φ
+  have h2 := hle (-φ)
+  rw [neg_neg] at h2
+  omega
+
+/-- **The min rule**: adding a functional of strictly larger valuation does
+not change the valuation. -/
+theorem valuation_add_of_lt {n : ℕ}
+    (φ ξ : Module.Dual K (degreeLE X K n))
+    (h : valuation X K φ < valuation X K ξ) :
+    valuation X K (φ + ξ) = valuation X K φ := by
+  have hφdet : ∃ d, HasDetectionAtDegree X K φ d := by
+    by_contra hnone
+    have h1 := valuation_eq_succ_of_not_exists X K φ hnone
+    have h2 := valuation_le_succ X K ξ
+    omega
+  obtain ⟨w, hwd, hwn, hφw⟩ := hasDetectionAtDegree_valuation X K φ hφdet
+  have hξw : ξ (wordMonomialInDegree X K n w) = 0 :=
+    apply_wordMonomialInDegree_eq_zero_of_lt X K ξ hwn (by omega)
+  have hdet : HasDetectionAtDegree X K (φ + ξ) (valuation X K φ) := by
+    refine ⟨w, hwd, hwn, ?_⟩
+    rw [LinearMap.add_apply, hξw, add_zero]
+    exact hφw
+  apply le_antisymm
+  · exact valuation_le_of_hasDetection X K (φ + ξ) hdet
+  · by_contra hlt
+    push Not at hlt
+    obtain ⟨u, hud, hun, hsum⟩ :=
+      hasDetectionAtDegree_valuation X K (φ + ξ) ⟨_, hdet⟩
+    have hφu : φ (wordMonomialInDegree X K n u) = 0 :=
+      apply_wordMonomialInDegree_eq_zero_of_lt X K φ hun (by omega)
+    have hξu : ξ (wordMonomialInDegree X K n u) = 0 :=
+      apply_wordMonomialInDegree_eq_zero_of_lt X K ξ hun (by omega)
+    rw [LinearMap.add_apply, hφu, hξu, add_zero] at hsum
+    exact hsum rfl
+
 /-! ### Positive control -/
 
 /-- The unit-coefficient functional: the coefficient of the empty word. -/

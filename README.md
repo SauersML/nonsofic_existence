@@ -131,7 +131,15 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     identification of both dual shears on coordinate functionals with the
     valuation module's restriction and generator-derived functionals
   - [ ] A7. Boundary-layer vanishing and the two full finite-stage
-    Kassabov inequalities over `ZMod p`
+    Kassabov inequalities over every finite coefficient field; done so far:
+    the vanishing-below-valuation law, valuation of negation, the min rule
+    `valuation (φ + ξ) = valuation φ` for strictly larger `valuation ξ`
+    (`FreeRootFunctionalValuation`), the two same-stage unit shears with
+    their plane-point conjugation identities and mass transport
+    (`planeMass_unitShearForward`/`_Opposite`), their dual coordinate
+    formulas, and the exact region movements `C → B` and `A → B`
+    (`pairRegion_comp_unitShear*`); the boundary layers and the assembled
+    inequalities are pending
   - [ ] A8. The limiting two-root moving-mass bound and the uniform
     relative-property-`(T)` estimate over `ZMod p`
   - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
