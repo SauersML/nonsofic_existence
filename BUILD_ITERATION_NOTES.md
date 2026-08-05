@@ -372,3 +372,30 @@ For u = c + s₁p₀ (c balanced), U := toMatrix(u) at depth 1 is
   sr1 choices), the Whitehead-style factorization of U may land in
   E₂(balanced)·diag(balanced-unit, unit-with-tail-in-p₀-corner) where
   the tail sits INSIDE a corner killed by rank descent at fixed level.
+
+## Session 9: sr1 GREEN + new kappa move families
+- StableRankOne.lean GREEN: exists_isUnit_add_comp_of_sup_range
+  (End version; injectivity via projections only — no quotients) and
+  exists_isUnit_add_mul_of_unimodular (Matrix version via
+  Matrix.toLinAlgEquiv'; note: module ToLin, NOT ToLinAlgEquiv, at
+  this pin; Submodule.projectionOnto takes p q EXPLICIT before h,
+  apply-lemmas take them implicit).
+- NEXT BRICK (mechanical, fully specified): transport sr1 to the
+  balanced span: Θ := (family).prefixRingEquiv-fromMatrix ∘
+  (algebraMap k A).mapMatrix : Matrix ι ι k →+* A is INJECTIVE
+  (algebraMap injective entrywise + fromMatrix iso) with range =
+  balanced span at depth n (monomials = images of single matrices;
+  Θ C ∈ span since scalar•monomial ∈ span).  Transport unimodular
+  rows a·z₀ + b·z₁ = 1 to matrices, apply sr1, pull back T and the
+  INVERSE (same level ⟹ balanced): yields â := a + b·t balanced
+  invertible WITH balanced inverse.
+- NEW MOVE FAMILIES (session-9 discovery): for ANY z ∈ L,
+  (s₀ + s₁z, t₀) is an isometry pair (t₀s₁ = 0!), giving
+  [w] = [κ₀(w) + s₁·z·(w−1)·t₀] for every unit w and every z.
+  Dually (s₀, t₀ + z·t₁) gives [w] = [κ₀(w) + s₀·(w−1)·z·t₁].
+  These generalize pairKappaUnit beyond word pairs and give
+  z-parameterized freedom to reshape residual tails — combine with
+  the sr1 pivot loop: after pivot [u] = [ẽ − s₀g] (t₁ẽ right-
+  invertible), try the dual pair with z chosen from ê⁻¹-data to
+  cancel the reinjected tail.  Watch: κ₀ deepens tails (s₀s₁p₀t₀);
+  apply the z-pairs BEFORE funneling, at the [−1,1] stage.
