@@ -163,10 +163,11 @@ theorem exists_coveringRadius_lt {S : Set E} [Nonempty E] {r : ℝ}
 
 /-- **Existence and uniqueness of the Chebyshev center** of a nonempty
 bounded set in a complete real inner product space. -/
+set_option linter.unusedSectionVars false in
 theorem existsUnique_center [CompleteSpace E] {S : Set E}
     (hne : S.Nonempty) (hbdd : Bornology.IsBounded S) :
     ∃! c : E, coveringRadius S c = chebyshevRadius S := by
-  obtain ⟨s₀, hs₀⟩ := hne
+  obtain ⟨s₀, hs₀⟩ := id hne
   haveI : Nonempty E := ⟨s₀⟩
   set ρ := chebyshevRadius S with hρ
   have hρ0 : 0 ≤ ρ := by
@@ -297,7 +298,7 @@ theorem coveringRadius_image {f : E → E} (hf : Isometry f)
   ext r
   constructor
   · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩
-    exact ⟨s, hs, (hf.dist_eq x s).symm ▸ rfl⟩
+    exact ⟨s, hs, (hf.dist_eq x s).symm⟩
   · rintro ⟨s, hs, rfl⟩
     exact ⟨f s, ⟨s, hs, rfl⟩, hf.dist_eq x s⟩
 
@@ -316,7 +317,7 @@ theorem exists_fixed_of_bounded_orbit [CompleteSpace E] {G : Type*}
     ext y
     constructor
     · rintro ⟨_, ⟨h, rfl⟩, rfl⟩
-      exact ⟨g * h, (hmul g h x₀).symm⟩
+      exact ⟨g * h, by exact (hmul g h x₀).symm⟩
     · rintro ⟨h, rfl⟩
       exact ⟨φ (g⁻¹ * h) x₀, ⟨g⁻¹ * h, rfl⟩, by
         rw [← hmul, mul_inv_cancel_left]⟩

@@ -17,6 +17,8 @@ by the sofic correlation limits.
 namespace NonsoficGroupsExist
 namespace Ultralimit
 
+set_option linter.unusedSectionVars false
+
 open KazhdanFiniteModel
 
 /-- Germ addition on hyperreal sequences. -/
@@ -91,7 +93,11 @@ theorem stdPart_mono {x y : Hyperreal}
   have hsub := ArchimedeanClass.stdPart_sub hy hx
   have hnn : (0 : ℝ) ≤ ArchimedeanClass.stdPart (y - x) := by
     apply ArchimedeanClass.le_stdPart_of_le Hyperreal.coeRingHom
-      (hyperreal_sub_finite hy hx)
+      (by
+        rw [sub_eq_add_neg]
+        refine hyperreal_add_finite hy ?_
+        rw [ArchimedeanClass.mk_neg]
+        exact hx)
     rw [map_zero]
     exact sub_nonneg.mpr hxy
   rw [hsub] at hnn
@@ -223,7 +229,7 @@ theorem eventually_norm_lt_of_seqNorm_lt {v : ∀ k, H k}
   by_contra hcon
   have hnot : {k : ℕ | ‖v k‖ < r} ∉ Filter.hyperfilter ℕ := hcon
   have hmem : {k : ℕ | ‖v k‖ < r}ᶜ ∈ Filter.hyperfilter ℕ :=
-    Ultrafilter.compl_mem_iff_not_mem.mpr hnot
+    Ultrafilter.compl_mem_iff_notMem.mpr hnot
   have hmem' : {k : ℕ | r ≤ ‖v k‖} ∈ Filter.hyperfilter ℕ := by
     have hset : {k : ℕ | ‖v k‖ < r}ᶜ = {k : ℕ | r ≤ ‖v k‖} := by
       ext k
@@ -256,7 +262,7 @@ theorem eventually_lt_of_stdPart_lt {s : ℕ → ℝ}
   by_contra hcon
   have hnot : {k : ℕ | s k < r} ∉ Filter.hyperfilter ℕ := hcon
   have hmem : {k : ℕ | s k < r}ᶜ ∈ Filter.hyperfilter ℕ :=
-    Ultrafilter.compl_mem_iff_not_mem.mpr hnot
+    Ultrafilter.compl_mem_iff_notMem.mpr hnot
   have hmem' : {k : ℕ | r ≤ s k} ∈ Filter.hyperfilter ℕ := by
     have hset : {k : ℕ | s k < r}ᶜ = {k : ℕ | r ≤ s k} := by
       ext k
@@ -279,7 +285,7 @@ theorem eventually_lt_stdPart_of_lt {s : ℕ → ℝ}
   by_contra hcon
   have hnot : {k : ℕ | r < s k} ∉ Filter.hyperfilter ℕ := hcon
   have hmem : {k : ℕ | r < s k}ᶜ ∈ Filter.hyperfilter ℕ :=
-    Ultrafilter.compl_mem_iff_not_mem.mpr hnot
+    Ultrafilter.compl_mem_iff_notMem.mpr hnot
   have hmem' : {k : ℕ | s k ≤ r} ∈ Filter.hyperfilter ℕ := by
     have hset : {k : ℕ | r < s k}ᶜ = {k : ℕ | s k ≤ r} := by
       ext k
@@ -535,8 +541,9 @@ theorem seqNormSq_sub_le_of_near_center
   have hsq : centerRadius O ^ 2 ≤ ρ ^ 2 - q / 4 := by
     have h0 : 0 ≤ centerRadius O := by
       obtain ⟨i⟩ := (inferInstance : Nonempty ι)
-      exact le_trans (orbitRadius_nonneg hOb hOD (hOb i))
-        (centerRadius_le hOb hOD (hOb i))
+      refine le_csInf ⟨orbitRadius O (O i), O i, hOb i, rfl⟩ ?_
+      rintro r ⟨v, hv, rfl⟩
+      exact orbitRadius_nonneg hOb hOD hv
     have hs := Real.sq_sqrt hB0
     nlinarith [mul_self_le_mul_self h0 hcle,
       Real.sqrt_nonneg (ρ ^ 2 - q / 4)]

@@ -410,8 +410,9 @@ theorem core_contradiction {G : Type u} [Group G] {n : ℕ} (hn : n ≠ 0)
       Real.sqrt_le_sqrt h1
     rwa [Real.sqrt_sq (seqNorm_nonneg (hbound g))] at h2
   have hc0 : 0 ≤ centerRadius bseq := by
-    exact le_trans (orbitRadius_nonneg hbound hOD (hbound 1))
-      (centerRadius_le hbound hOD (hbound 1))
+    refine le_csInf ⟨orbitRadius bseq (bseq 1), bseq 1, hbound 1, rfl⟩ ?_
+    rintro r ⟨v, hv, rfl⟩
+    exact orbitRadius_nonneg hbound hOD hv
   have hcD : centerRadius bseq ≤ D := by
     refine le_trans (centerRadius_le hbound hOD (hbound 1)) ?_
     apply orbitRadius_le
@@ -647,7 +648,7 @@ theorem exists_presented_kazhdan_cover
       refine ⟨PresentedGroup.mk _ w, ?_⟩
       rw [hcompeq w, ← hβdef, hw]
     by_contra hnostage
-    push_neg at hnostage
+    push Not at hnostage
     have hfailpair : ∀ k : ℕ, ¬ IsKazhdanPair.{0, 0}
         (PresentedGroup ((rels k : Finset (FreeGroup (Fin n))) :
           Set (FreeGroup (Fin n))))
@@ -669,7 +670,7 @@ theorem exists_presented_kazhdan_cover
       intro k
       have h := hfailpair k
       rw [IsKazhdanPair] at h
-      push_neg at h
+      push Not at h
       exact h (by positivity)
     choose Ek instNk instIk instCk ρ x hxnorm hxnear hxmoved
       using hwitness

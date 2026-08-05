@@ -39,7 +39,7 @@ theorem displacement_le (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
 
 theorem displacement_nonneg (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
     (hQ : Q.Nonempty) (ξ : E) : 0 ≤ displacement ρ Q hQ ξ := by
-  obtain ⟨g, hg⟩ := hQ
+  obtain ⟨g, hg⟩ := id hQ
   exact le_trans (norm_nonneg _) (norm_le_displacement ρ Q hQ ξ hg)
 
 theorem displacement_smul (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (Q : Finset G)
@@ -161,7 +161,7 @@ theorem exists_displacement_one_of_witness [CompleteSpace E]
     ∃ ξ : E, displacement ρ Q hQ ξ = 1 ∧
       ∀ η : E, ‖η - ξ‖ ≤ M → 1 / 2 < displacement ρ Q hQ η := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   -- The scale-invariant halving step: any vector of positive displacement
   -- admits a vector at controlled distance with exactly half its
   -- displacement, by normalizing, applying the counterexample, and
@@ -277,7 +277,10 @@ theorem exists_displacement_one_of_witness [CompleteSpace E]
     (C := M * δ) (by norm_num) hdist hℓ
   have hb2 : dist ξ₀ ℓ ≤ M * δ / (1 - 1 / 2) := hbound
   rw [hℓ0, dist_zero_right, hξ₀norm,
-    show M * δ / (1 - 1 / 2 : ℝ) = 2 * (M * δ) from by norm_num] at hb2
+    show M * δ / (1 - 1 / 2 : ℝ) = 2 * (M * δ) from by
+      rw [show (1 - 1 / 2 : ℝ) = 1 / 2 from by norm_num,
+        div_eq_iff (by norm_num : (1 / 2 : ℝ) ≠ 0)]
+      ring] at hb2
   have h4 : M * δ < 1 / 4 := by
     have hlt : M * δ < M * (1 / (4 * M)) :=
       mul_lt_mul_of_pos_left hξ₀disp hM
