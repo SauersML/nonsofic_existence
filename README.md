@@ -283,7 +283,16 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     hyperfilter set, and `‖η_k‖ ≤ C < k+1` cofinitely, some large `k`
     exhibits a vector within `k+1` of `ξ_k` with displacement at most
     `1/3 < 1/2`, contradicting the isolation.  Hence some `F/N_k` has
-    `(T)`; it is finitely presented and surjects onto `G`
+    `(T)`; it is finitely presented and surjects onto `G`.  This design
+    is now fully drafted: `UltralimitGeometry` additionally carries
+    `stdPart_exp` (the exponential commutes with standard parts, by
+    ultrafilter-dichotomy transfer and a `1/(n+1)` squeeze — no
+    infinitesimal calculus needed), the orbit-radius/`centerRadius`
+    machinery with the approximate-circumcenter estimate
+    (`seqNormSq_sub_le_of_near_center`), and
+    `ShalomFinitePresentation` proves `core_contradiction` and the
+    headline `exists_finitelyPresented_kazhdan_cover` (trivial-group
+    branch included), all pending cluster verification
   - [ ] C3. The Kazhdan finite-table cover (`thm:kcover`) and the
     property-`(T)` refinement and quotient claims of Theorem C
   - [ ] C4. Audit
