@@ -53,12 +53,6 @@ def coreTransvection (i j : Fin 3) (hij : i ≠ j) (a : A) : Core A :=
 def transvection (i j : Index) (hij : i ≠ j) (a : A) : Ambient A :=
   ⟨elementaryUnit i j hij a, elementaryUnit_mem i j hij a⟩
 
-theorem transvection_sq [CharP A 2] (i j : Index) (hij : i ≠ j) (a : A) :
-    transvection i j hij a * transvection i j hij a = 1 := by
-  apply Subtype.ext
-  change elementaryUnit i j hij a * elementaryUnit i j hij a = 1
-  rw [elementaryUnit_mul, CharTwo.add_self_eq_zero, elementaryUnit_zero]
-
 /-- The four-transvection factor `Uᵢ` in the pair of coordinates `(i,last)`. -/
 def compressorPiece (L : LeavittFamily A) (i : Fin 3) : Ambient A :=
   transvection lastIndex (coreIndex i) (last_ne_core i) (L.t0 - 1) *
@@ -122,11 +116,91 @@ def compressorMatrix (L : LeavittFamily A) : Matrix Index Index A :=
     simp [compressorPieceMatrix, compressorMatrix, Matrix.mul_apply,
       Fin.sum_univ_succ, coreIndex, lastIndex, mul_assoc]
 
-/-- The involution word `z = x₁ₙ(s₁) xₙ₁(t₁) x₁ₙ(s₁)`. -/
-def involution (L : LeavittFamily A) : Ambient A :=
+/-- The Whitehead word in the coordinate pair `(last, 0)`. -/
+def lastWhiteheadWord (u : Aˣ) : Ambient A :=
+  transvection lastIndex (coreIndex 0) (last_ne_core 0) (↑u : A) *
+    transvection (coreIndex 0) lastIndex (core_ne_last 0) (-(↑u⁻¹ : A)) *
+      transvection lastIndex (coreIndex 0) (last_ne_core 0) (↑u : A)
+
+@[simp] theorem lastWhiteheadWord_val (u : Aˣ) :
+    (↑(↑(lastWhiteheadWord u) : (Matrix Index Index A)ˣ) : Matrix Index Index A) =
+      !![0, 0, 0, -(↑u⁻¹ : A);
+         0, 1, 0, 0;
+         0, 0, 1, 0;
+         (↑u : A), 0, 0, 0] := by
+  ext r c
+  fin_cases r <;> fin_cases c <;>
+    simp [lastWhiteheadWord, transvection, elementaryUnit,
+      Matrix.mul_apply, Matrix.one_apply, Fin.sum_univ_succ, coreIndex,
+      lastIndex]
+
+/-- The balanced Whitehead diagonal, with `u` in the last coordinate and
+`u⁻¹` in coordinate zero. -/
+def lastBalanced (u : Aˣ) : Ambient A :=
+  lastWhiteheadWord u * lastWhiteheadWord (-1 : Aˣ)
+
+@[simp] theorem lastBalanced_val (u : Aˣ) :
+    (↑(↑(lastBalanced u) : (Matrix Index Index A)ˣ) : Matrix Index Index A) =
+      !![(↑u⁻¹ : A), 0, 0, 0;
+         0, 1, 0, 0;
+         0, 0, 1, 0;
+         0, 0, 0, (↑u : A)] := by
+  change (↑(↑(lastWhiteheadWord u) : (Matrix Index Index A)ˣ) :
+      Matrix Index Index A) *
+      (↑(↑(lastWhiteheadWord (-1 : Aˣ)) : (Matrix Index Index A)ˣ) :
+        Matrix Index Index A) = _
+  rw [lastWhiteheadWord_val, lastWhiteheadWord_val]
+  ext r c
+  fin_cases r <;> fin_cases c <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_succ]
+
+/-- Whitehead's commutator diagonal in the last coordinate. -/
+def lastDiagonalCommutator (a b : Aˣ) : Ambient A :=
+  lastBalanced a * lastBalanced b * lastBalanced ((b * a)⁻¹)
+
+@[simp] theorem lastDiagonalCommutator_val (a b : Aˣ) :
+    (↑(↑(lastDiagonalCommutator a b) : (Matrix Index Index A)ˣ) :
+      Matrix Index Index A) =
+      !![1, 0, 0, 0;
+         0, 1, 0, 0;
+         0, 0, 1, 0;
+         0, 0, 0, (↑⁅a, b⁆ : A)] := by
+  change (↑(↑(lastBalanced a) : (Matrix Index Index A)ˣ) :
+      Matrix Index Index A) *
+      (↑(↑(lastBalanced b) : (Matrix Index Index A)ˣ) :
+        Matrix Index Index A) *
+        (↑(↑(lastBalanced ((b * a)⁻¹)) : (Matrix Index Index A)ˣ) :
+          Matrix Index Index A) = _
+  rw [lastBalanced_val, lastBalanced_val, lastBalanced_val]
+  ext r c
+  fin_cases r <;> fin_cases c <;>
+    simp [Matrix.mul_apply, Fin.sum_univ_succ, commutatorElement_def, mul_assoc]
+
+/-- The elementary diagonal sign correction.  The Leavitt relations prove
+that its last entry is `-1`; no `K₁` input is involved. -/
+def signCorrection (L : LeavittFamily A) : Ambient A :=
+  lastDiagonalCommutator L.cornerSign L.cornerSwap
+
+@[simp] theorem signCorrection_val (L : LeavittFamily A) :
+    (↑(↑(signCorrection L) : (Matrix Index Index A)ˣ) : Matrix Index Index A) =
+      !![1, 0, 0, 0;
+         0, 1, 0, 0;
+         0, 0, 1, 0;
+         0, 0, 0, -1] := by
+  rw [signCorrection, lastDiagonalCommutator_val,
+    L.cornerSign_commutator_cornerSwap]
+  rfl
+
+/-- The three-transvection word has the desired involution block except for
+the last-row sign. -/
+def rawInvolutionWord (L : LeavittFamily A) : Ambient A :=
   transvection (coreIndex 0) lastIndex (core_ne_last 0) L.s1 *
-    transvection lastIndex (coreIndex 0) (last_ne_core 0) L.t1 *
+    transvection lastIndex (coreIndex 0) (last_ne_core 0) (-L.t1) *
       transvection (coreIndex 0) lastIndex (core_ne_last 0) L.s1
+
+/-- The characteristic-free elementary involution word. -/
+def involution (L : LeavittFamily A) : Ambient A :=
+  signCorrection L * rawInvolutionWord L
 
 /-- The sparse matrix value of the involution word. -/
 def involutionMatrix (L : LeavittFamily A) : Matrix Index Index A :=
@@ -135,29 +209,31 @@ def involutionMatrix (L : LeavittFamily A) : Matrix Index Index A :=
      0, 0, 1, 0;
      L.t1, 0, 0, 0]
 
-@[simp] theorem involution_val [CharP A 2] (L : LeavittFamily A) :
+@[simp] theorem involution_val (L : LeavittFamily A) :
     (↑(↑(involution L) : (Matrix Index Index A)ˣ) : Matrix Index Index A) =
       involutionMatrix L := by
+  have hcorner : 1 + -(L.s1 * L.t1) = L.s0 * L.t0 := by
+    rw [← L.p0_add_s1t1]
+    abel
   ext r c
   fin_cases r <;> fin_cases c <;>
-    simp [involution, involutionMatrix, transvection, elementaryUnit,
+    simp [involution, rawInvolutionWord, involutionMatrix, transvection, elementaryUnit,
       Matrix.mul_apply, Matrix.one_apply, Fin.sum_univ_succ, coreIndex, lastIndex,
-      LeavittFamily.p0, mul_add, add_mul, mul_assoc, CharTwo.add_self_eq_zero]
+      hcorner, LeavittFamily.p0, mul_add, add_mul, mul_assoc]
 
-/-- The compressor involution has order two in characteristic two. -/
-theorem involution_sq [CharP A 2] (L : LeavittFamily A) :
+/-- The compressor involution has order two in every characteristic. -/
+theorem involution_sq (L : LeavittFamily A) :
     involution L * involution L = 1 := by
-  let x : Ambient A :=
-    transvection (coreIndex 0) lastIndex (core_ne_last 0) L.s1
-  let y : Ambient A :=
-    transvection lastIndex (coreIndex 0) (last_ne_core 0) L.t1
-  have hx : x * x = 1 := transvection_sq _ _ _ _
-  have hy : y * y = 1 := transvection_sq _ _ _ _
-  change (x * y * x) * (x * y * x) = 1
-  calc
-    (x * y * x) * (x * y * x) = x * y * (x * x) * y * x := by group
-    _ = x * (y * y) * x := by rw [hx]; simp only [mul_one]; group
-    _ = 1 := by rw [hy]; simpa using hx
+  apply Subtype.ext
+  apply Units.ext
+  change
+    (↑(↑(involution L) : (Matrix Index Index A)ˣ) : Matrix Index Index A) *
+      (↑(↑(involution L) : (Matrix Index Index A)ˣ) : Matrix Index Index A) = 1
+  rw [involution_val]
+  ext r c
+  fin_cases r <;> fin_cases c <;>
+    simp [involutionMatrix, Matrix.mul_apply, Fin.sum_univ_succ,
+      LeavittFamily.p0, L.sum_range, mul_assoc]
 
 /-- The second compressor `v = z u`. -/
 def secondCompressor (L : LeavittFamily A) : Ambient A :=
@@ -208,7 +284,7 @@ theorem compressionEnd_injective (L : LeavittFamily A) :
 
 /-- On every elementary core generator, multiplication past the
 compressor implements coefficient compression. -/
-theorem compressor_mul_coreTransvection [CharP A 2] (L : LeavittFamily A)
+theorem compressor_mul_coreTransvection (L : LeavittFamily A)
     (i j : Fin 3) (hij : i ≠ j) (a : A) :
     compressor L * coreEmbedding (coreTransvection i j hij a) =
       coreEmbedding (compressionEnd L (coreTransvection i j hij a)) * compressor L := by
@@ -225,7 +301,7 @@ theorem compressor_mul_coreTransvection [CharP A 2] (L : LeavittFamily A)
       Matrix.one_apply, Fin.sum_univ_succ, coreIndex, LeavittFamily.p1, mul_assoc]
 
 /-- The generator calculation extends to every element of `EL₃(A)`. -/
-theorem compressor_mul_coreEmbedding [CharP A 2] (L : LeavittFamily A)
+theorem compressor_mul_coreEmbedding (L : LeavittFamily A)
     (g : Core A) :
     compressor L * coreEmbedding g = coreEmbedding (compressionEnd L g) * compressor L := by
   rcases g with ⟨g, hg⟩
@@ -274,14 +350,14 @@ theorem compressor_mul_coreEmbedding [CharP A 2] (L : LeavittFamily A)
 
 /-- Conjugation by the first explicit compressor is exactly the concrete
 coefficient-compression endomorphism on the embedded core. -/
-theorem compressor_conjugation [CharP A 2] (L : LeavittFamily A) (g : Core A) :
+theorem compressor_conjugation (L : LeavittFamily A) (g : Core A) :
     compressor L * coreEmbedding g * (compressor L)⁻¹ =
       coreEmbedding (compressionEnd L g) := by
   rw [compressor_mul_coreEmbedding]
   group
 
 /-- The involution commutes with every compressed elementary core generator. -/
-theorem involution_commutes_compressed_coreTransvection [CharP A 2]
+theorem involution_commutes_compressed_coreTransvection
     (L : LeavittFamily A) (i j : Fin 3) (hij : i ≠ j) (a : A) :
     Commute (involution L)
       (coreEmbedding (compressionEnd L (coreTransvection i j hij a))) := by
@@ -298,7 +374,7 @@ theorem involution_commutes_compressed_coreTransvection [CharP A 2]
       mul_add, add_mul, mul_assoc]
 
 /-- The generator calculation extends to the complete compressed core. -/
-theorem involution_commutes_compressed_core [CharP A 2]
+theorem involution_commutes_compressed_core
     (L : LeavittFamily A) (g : Core A) :
     Commute (involution L) (coreEmbedding (compressionEnd L g)) := by
   rcases g with ⟨g, hg⟩
@@ -319,7 +395,7 @@ theorem involution_commutes_compressed_core [CharP A 2]
       exact hx.inv_right
 
 /-- The second explicit word implements the same compression endomorphism. -/
-theorem secondCompressor_mul_coreEmbedding [CharP A 2]
+theorem secondCompressor_mul_coreEmbedding
     (L : LeavittFamily A) (g : Core A) :
     secondCompressor L * coreEmbedding g =
       coreEmbedding (compressionEnd L g) * secondCompressor L := by
@@ -335,7 +411,7 @@ theorem secondCompressor_mul_coreEmbedding [CharP A 2]
     _ = coreEmbedding (compressionEnd L g) * secondCompressor L := by
       simp only [secondCompressor, mul_assoc]
 
-theorem secondCompressor_conjugation [CharP A 2]
+theorem secondCompressor_conjugation
     (L : LeavittFamily A) (g : Core A) :
     secondCompressor L * coreEmbedding g * (secondCompressor L)⁻¹ =
       coreEmbedding (compressionEnd L g) := by
@@ -344,7 +420,7 @@ theorem secondCompressor_conjugation [CharP A 2]
 
 /-- Conjugation by the involution turns a core root out of coordinate zero
 into a last-row root. -/
-theorem involution_conjugates_lastRow [CharP A 2] (L : LeavittFamily A)
+theorem involution_conjugates_lastRow (L : LeavittFamily A)
     (j : Fin 3) (hj : j ≠ 0) (a : A) :
     involution L *
         coreEmbedding (coreTransvection 0 j hj.symm (L.s1 * a)) * involution L =
@@ -358,15 +434,15 @@ theorem involution_conjugates_lastRow [CharP A 2] (L : LeavittFamily A)
   · fin_cases r <;> fin_cases c <;>
       simp [transvection, elementaryUnit, involutionMatrix,
         Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
-        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+        lastIndex, mul_add, mul_assoc]
   · fin_cases r <;> fin_cases c <;>
       simp [transvection, elementaryUnit, involutionMatrix,
         Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
-        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+        lastIndex, mul_add, mul_assoc]
 
 /-- Conjugation by the involution turns a core root into coordinate zero into
 a last-column root. -/
-theorem involution_conjugates_lastColumn [CharP A 2] (L : LeavittFamily A)
+theorem involution_conjugates_lastColumn (L : LeavittFamily A)
     (i : Fin 3) (hi : i ≠ 0) (a : A) :
     involution L *
         coreEmbedding (coreTransvection i 0 hi (a * L.t1)) * involution L =
@@ -380,11 +456,11 @@ theorem involution_conjugates_lastColumn [CharP A 2] (L : LeavittFamily A)
   · fin_cases r <;> fin_cases c <;>
       simp [transvection, elementaryUnit, involutionMatrix,
         Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
-        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+        lastIndex, mul_add, mul_assoc]
   · fin_cases r <;> fin_cases c <;>
       simp [transvection, elementaryUnit, involutionMatrix,
         Matrix.mul_apply, Fin.sum_univ_succ, coreIndex,
-        lastIndex, mul_add, mul_assoc, CharTwo.add_self_eq_zero]
+        lastIndex, mul_add, mul_assoc]
 
 /-- The two-element set of compressor words. -/
 noncomputable def compressorSet (L : LeavittFamily A) : Finset (Ambient A) :=
@@ -403,7 +479,7 @@ theorem secondCompressor_mem (L : LeavittFamily A) :
 
 /-- Every member of the explicit two-word set implements the concrete
 compression endomorphism. -/
-theorem compressorSet_conjugation [CharP A 2] (L : LeavittFamily A)
+theorem compressorSet_conjugation (L : LeavittFamily A)
     (q : Ambient A) (hq : q ∈ compressorSet L) (g : Core A) :
     coreEmbedding (compressionEnd L g) = q * coreEmbedding g * q⁻¹ := by
   classical
@@ -414,7 +490,7 @@ theorem compressorSet_conjugation [CharP A 2] (L : LeavittFamily A)
 
 /-- The embedded core together with the two explicit compressor words generates
 the complete rank-four elementary group. -/
-theorem coreEmbedding_compressorSet_generate [CharP A 2] (L : LeavittFamily A) :
+theorem coreEmbedding_compressorSet_generate (L : LeavittFamily A) :
     Subgroup.closure
       (Set.range (coreEmbedding (A := A)) ∪ (compressorSet L : Set (Ambient A))) = ⊤ := by
   let H : Subgroup (Ambient A) := Subgroup.closure

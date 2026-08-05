@@ -182,14 +182,14 @@ theorem compressionEnd_eq_witnessEmbedding_iff (g : Core k) (j : Witness k) :
 
 def compressors : Finset (Ambient k) := RankFour.compressorSet (family k)
 
-omit [Finite k] in
+omit [Finite k] [CharP k 2] in
 theorem compressor_conjugation (q : Ambient k) (hq : q ∈ compressors k)
     (g : Core k) :
     coreEmbedding k (compressionEnd k g) =
       q * coreEmbedding k g * q⁻¹ :=
   RankFour.compressorSet_conjugation (family k) q hq g
 
-omit [Finite k] in
+omit [Finite k] [CharP k 2] in
 theorem core_compressors_generate :
     Subgroup.closure
       (Set.range (coreEmbedding k) ∪ (compressors k : Set (Ambient k))) = ⊤ :=
