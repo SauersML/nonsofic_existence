@@ -627,6 +627,73 @@ theorem gap_mul_sum_mass_ne_zero_le (hψ : ψ ≠ 1) (z : E) (w : V) :
 end Action
 
 omit [DecidableEq V] in
+/-- **Mass continuity**: the mass at any character is quadratically
+continuous in the vector.  This is the quantitative transport estimate: a
+sheared event and the original event differ by at most the displacement
+times the sum of the norms. -/
+theorem abs_mass_sub_mass_le (χ : Module.Dual K V) (z z' : E) :
+    |mass ψ ρ χ z - mass ψ ρ χ z'| ≤ (‖z‖ + ‖z'‖) * ‖z - z'‖ := by
+  have hcardpos : (0 : ℝ) < (Fintype.card V : ℝ) := by
+    exact_mod_cast Fintype.card_pos
+  have hterm : ∀ v : V,
+      |(ψ (χ v)).re * inner ℝ z (ρ v z) -
+        (ψ (χ v)).re * inner ℝ z' (ρ v z')| ≤
+      (‖z‖ + ‖z'‖) * ‖z - z'‖ := by
+    intro v
+    have hre : |(ψ (χ v)).re| ≤ 1 := by
+      calc
+        |(ψ (χ v)).re| ≤ ‖ψ (χ v)‖ := Complex.abs_re_le_norm _
+        _ = 1 := norm_apply ψ _
+    have hsplit : inner ℝ z (ρ v z) - inner ℝ z' (ρ v z') =
+        inner ℝ (z - z') (ρ v z) + inner ℝ z' (ρ v (z - z')) := by
+      rw [inner_sub_left, map_sub, inner_sub_right]
+      ring
+    have hbound : |inner ℝ z (ρ v z) - inner ℝ z' (ρ v z')| ≤
+        (‖z‖ + ‖z'‖) * ‖z - z'‖ := by
+      rw [hsplit]
+      calc
+        |inner ℝ (z - z') (ρ v z) + inner ℝ z' (ρ v (z - z'))| ≤
+            |inner ℝ (z - z') (ρ v z)| +
+              |inner ℝ z' (ρ v (z - z'))| := abs_add_le _ _
+        _ ≤ ‖z - z'‖ * ‖ρ v z‖ + ‖z'‖ * ‖ρ v (z - z')‖ :=
+          add_le_add (abs_real_inner_le_norm _ _)
+            (abs_real_inner_le_norm _ _)
+        _ = (‖z‖ + ‖z'‖) * ‖z - z'‖ := by
+          rw [(ρ v).norm_map, (ρ v).norm_map]
+          ring
+    calc
+      |(ψ (χ v)).re * inner ℝ z (ρ v z) -
+          (ψ (χ v)).re * inner ℝ z' (ρ v z')| =
+          |(ψ (χ v)).re| *
+            |inner ℝ z (ρ v z) - inner ℝ z' (ρ v z')| := by
+        rw [← abs_mul]
+        congr 1
+        ring
+      _ ≤ 1 * ((‖z‖ + ‖z'‖) * ‖z - z'‖) := by
+        apply mul_le_mul hre hbound (abs_nonneg _)
+        norm_num
+      _ = (‖z‖ + ‖z'‖) * ‖z - z'‖ := one_mul _
+  calc
+    |mass ψ ρ χ z - mass ψ ρ χ z'| =
+        (Fintype.card V : ℝ)⁻¹ *
+          |∑ v : V, ((ψ (χ v)).re * inner ℝ z (ρ v z) -
+            (ψ (χ v)).re * inner ℝ z' (ρ v z'))| := by
+      rw [mass, mass, ← mul_sub, ← Finset.sum_sub_distrib, abs_mul,
+        abs_of_pos (by positivity : (0 : ℝ) < (Fintype.card V : ℝ)⁻¹)]
+    _ ≤ (Fintype.card V : ℝ)⁻¹ *
+        ∑ v : V, |(ψ (χ v)).re * inner ℝ z (ρ v z) -
+          (ψ (χ v)).re * inner ℝ z' (ρ v z')| :=
+      mul_le_mul_of_nonneg_left
+        (Finset.abs_sum_le_sum_abs _ _) (by positivity)
+    _ ≤ (Fintype.card V : ℝ)⁻¹ *
+        ∑ _v : V, (‖z‖ + ‖z'‖) * ‖z - z'‖ :=
+      mul_le_mul_of_nonneg_left
+        (Finset.sum_le_sum fun v _ ↦ hterm v) (by positivity)
+    _ = (‖z‖ + ‖z'‖) * ‖z - z'‖ := by
+      rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+      field_simp
+
+omit [DecidableEq V] in
 open Classical in
 /-- **Fiber covariance**: the mass of a pulled-back action at a coarse
 character is the total mass over the dual-restriction fiber of that

@@ -989,6 +989,119 @@ theorem sum_fiber_zero_ne_eq_drop (hψ : ψ ≠ 1) (x : X) (z : E) :
     exact h rfl)]
   ring
 
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **Region `A` sum bound**: the total region-`A` mass of `z` is at most
+the total region-`B` mass of the opposite-unit-conjugated vector. -/
+theorem sum_planeMass_A_le_sum_B (z : E) :
+    ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .A),
+      planeMass X K i j k hik hjk n rho ψ χ z ≤
+    ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .B),
+      planeMass X K i j k hik hjk n rho ψ χ
+        (rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) z) := by
+  set τ : Module.Dual K (PlaneVector X K n) →
+      Module.Dual K (PlaneVector X K n) := fun χ ↦
+    χ.comp ((unitShearOpposite X K n).symm :
+      PlaneVector X K n →ₗ[K] PlaneVector X K n) with hτ
+  set A := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ) = .A) with hA
+  set B := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ) = .B) with hB
+  set z' := rho (elementaryRoot j i hij.symm (1 : FreeAlgebra K X)) z
+    with hz'
+  have hstep : (∑ χ ∈ A, planeMass X K i j k hik hjk n rho ψ χ z) =
+      ∑ χ ∈ A, planeMass X K i j k hik hjk n rho ψ (τ χ) z' := by
+    refine Finset.sum_congr rfl fun χ _ ↦ ?_
+    exact planeMass_unitShearOpposite X K i j k hij hik hjk n rho ψ χ z
+  rw [hstep]
+  have hinj : Set.InjOn τ A := by
+    intro χ _ χ' _ h
+    refine LinearMap.ext fun v ↦ ?_
+    have := congrArg
+      (fun φ : Module.Dual K (PlaneVector X K n) ↦
+        φ (unitShearOpposite X K n v)) h
+    simpa [hτ, LinearEquiv.symm_apply_apply] using this
+  rw [show (∑ χ ∈ A, planeMass X K i j k hik hjk n rho ψ (τ χ) z') =
+      ∑ η ∈ A.image τ, planeMass X K i j k hik hjk n rho ψ η z' from
+    (Finset.sum_image
+      (f := fun η ↦ planeMass X K i j k hik hjk n rho ψ η z')
+      (fun χ hχ χ' hχ' h ↦ hinj hχ hχ' h)).symm]
+  refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+    fun η _ _ ↦ planeMass_nonneg X K i j k hik hjk n rho ψ η z'
+  intro η hη
+  obtain ⟨χ, hχ, rfl⟩ := Finset.mem_image.1 hη
+  rw [hB, Finset.mem_filter]
+  rw [hA, Finset.mem_filter] at hχ
+  exact ⟨Finset.mem_univ _,
+    pairRegion_comp_unitShearOpposite_symm_of_A X K n χ hχ.2⟩
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **Region `C` sum bound**: the total region-`C` mass of `z` is at most
+the total region-`B` mass of the forward-unit-conjugated vector. -/
+theorem sum_planeMass_C_le_sum_B (z : E) :
+    ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .C),
+      planeMass X K i j k hik hjk n rho ψ χ z ≤
+    ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ) = .B),
+      planeMass X K i j k hik hjk n rho ψ χ
+        (rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) z) := by
+  set τ : Module.Dual K (PlaneVector X K n) →
+      Module.Dual K (PlaneVector X K n) := fun χ ↦
+    χ.comp ((unitShearForward X K n).symm :
+      PlaneVector X K n →ₗ[K] PlaneVector X K n) with hτ
+  set C := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ) = .C) with hC
+  set B := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ) = .B) with hB
+  set z' := rho (elementaryRoot i j hij (1 : FreeAlgebra K X)) z
+    with hz'
+  have hstep : (∑ χ ∈ C, planeMass X K i j k hik hjk n rho ψ χ z) =
+      ∑ χ ∈ C, planeMass X K i j k hik hjk n rho ψ (τ χ) z' := by
+    refine Finset.sum_congr rfl fun χ _ ↦ ?_
+    exact planeMass_unitShearForward X K i j k hij hik hjk n rho ψ χ z
+  rw [hstep]
+  have hinj : Set.InjOn τ C := by
+    intro χ _ χ' _ h
+    refine LinearMap.ext fun v ↦ ?_
+    have := congrArg
+      (fun φ : Module.Dual K (PlaneVector X K n) ↦
+        φ (unitShearForward X K n v)) h
+    simpa [hτ, LinearEquiv.symm_apply_apply] using this
+  rw [show (∑ χ ∈ C, planeMass X K i j k hik hjk n rho ψ (τ χ) z') =
+      ∑ η ∈ C.image τ, planeMass X K i j k hik hjk n rho ψ η z' from
+    (Finset.sum_image
+      (f := fun η ↦ planeMass X K i j k hik hjk n rho ψ η z')
+      (fun χ hχ χ' hχ' h ↦ hinj hχ hχ' h)).symm]
+  refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+    fun η _ _ ↦ planeMass_nonneg X K i j k hik hjk n rho ψ η z'
+  intro η hη
+  obtain ⟨χ, hχ, rfl⟩ := Finset.mem_image.1 hη
+  rw [hB, Finset.mem_filter]
+  rw [hC, Finset.mem_filter] at hχ
+  exact ⟨Finset.mem_univ _,
+    pairRegion_comp_unitShearForward_symm_of_C X K n χ hχ.2⟩
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist

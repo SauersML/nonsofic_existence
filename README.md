@@ -141,9 +141,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`pairRegion_comp_unitShear*`), the region-`D` mass control by the
     scalar unit-vector displacements (`gap_mul_sum_planeMass_D_le`), the
     nested trivial-mass monotonicity along the forward shear conjugation
-    (`planeMass_zero_conj_le`), and the exact boundary-layer drop identity
-    (`sum_fiber_zero_ne_eq_drop`); the assembled finite-stage inequalities
-    are pending
+    (`planeMass_zero_conj_le`), the exact boundary-layer drop identity
+    (`sum_fiber_zero_ne_eq_drop`), the quantitative mass-continuity bound
+    (`CharacterMass.abs_mass_sub_mass_le`), and the summed region bounds
+    `A ≤ B` and `C ≤ B` under the two unit conjugations
+    (`sum_planeMass_A_le_sum_B`/`_C_le_sum_B`); the assembled finite-stage
+    inequalities are pending
   - [ ] A8. The limiting two-root moving-mass bound and the uniform
     relative-property-`(T)` estimate over `ZMod p`
   - [ ] A9. Property `(T)` for `EL₃` of the free `ZMod p` algebra with an
