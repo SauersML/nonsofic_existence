@@ -52,13 +52,13 @@ def IsLEF (J : Type*) [Group J] : Prop :=
 
 /-- A finite group packaged as a target for textbook LEF models. -/
 structure FiniteGroupModel where
-  carrier : Type
-  group : Group carrier
-  fintype : Fintype carrier
-  decidableEq : DecidableEq carrier
+  groupCarrier : Type
+  group : Group groupCarrier
+  fintype : Fintype groupCarrier
+  decidableEq : DecidableEq groupCarrier
 
 instance finiteGroupModelCoeSort : CoeSort FiniteGroupModel Type :=
-  ⟨FiniteGroupModel.carrier⟩
+  ⟨FiniteGroupModel.groupCarrier⟩
 instance finiteGroupModelGroup (H : FiniteGroupModel) : Group H := H.group
 instance finiteGroupModelFintype (H : FiniteGroupModel) : Fintype H := H.fintype
 instance finiteGroupModelDecidableEq (H : FiniteGroupModel) : DecidableEq H :=
@@ -81,7 +81,7 @@ theorem isLEF_iff_textbook (J : Type*) [Group J] :
   · intro h s
     obtain ⟨n, f, hf, hmul⟩ := h s
     let H : FiniteGroupModel :=
-      { carrier := Equiv.Perm (Fin n)
+      { groupCarrier := Equiv.Perm (Fin n)
         group := inferInstance
         fintype := inferInstance
         decidableEq := inferInstance }
@@ -188,6 +188,17 @@ theorem isLEF_multiplicative_int : IsLEF (Multiplicative ℤ) := by
     · intro g _ h _
       ext z
       simp [f, Equiv.permCongr_apply, Equiv.Perm.mul_apply]
+
+/-- Every finite group also satisfies the textbook partial-product
+formulation of LEF. -/
+theorem isTextbookLEF_of_finite (G : Type) [Group G] [Finite G] :
+    IsTextbookLEF G :=
+  (isLEF_iff_textbook G).mp (isLEF_of_finite G)
+
+/-- The infinite cyclic group satisfies the textbook LEF formulation. -/
+theorem isTextbookLEF_multiplicative_int :
+    IsTextbookLEF (Multiplicative ℤ) :=
+  (isLEF_iff_textbook (Multiplicative ℤ)).mp isLEF_multiplicative_int
 
 /-- Every fixed element of a free group has a finite control set outside of
 which local multiplicativity already forces the value of the corresponding

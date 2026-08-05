@@ -78,6 +78,12 @@ example (G : Type) [Group G] [Finite G] : IsLEF G :=
 example : IsLEF (Multiplicative ℤ) :=
   isLEF_multiplicative_int
 
+example (G : Type) [Group G] [Finite G] : IsTextbookLEF G :=
+  isTextbookLEF_of_finite G
+
+example : IsTextbookLEF (Multiplicative ℤ) :=
+  isTextbookLEF_multiplicative_int
+
 example (G : Type) [Group G] : IsLEF G ↔ IsTextbookLEF G :=
   isLEF_iff_textbook G
 
