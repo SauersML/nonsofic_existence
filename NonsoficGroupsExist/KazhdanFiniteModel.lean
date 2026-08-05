@@ -655,24 +655,6 @@ theorem sofic_inv_mul_close_eventually (A : SoficApproximation G)
     ((A.map n g)⁻¹ * A.map n h)
   linarith
 
-/-- Uniformize an eventually statement over a fixed finite index set. -/
-theorem eventually_all_finset {ι : Type*} (s : Finset ι)
-    (P : ι → ℕ → Prop)
-    (hP : ∀ i ∈ s, ∃ N : ℕ, ∀ n ≥ N, P i n) :
-    ∃ N : ℕ, ∀ n ≥ N, ∀ i ∈ s, P i n := by
-  classical
-  induction s using Finset.induction_on with
-  | empty =>
-      exact ⟨0, by simp⟩
-  | @insert a s ha ih =>
-      obtain ⟨Na, hNa⟩ := hP a (by simp)
-      obtain ⟨Ns, hNs⟩ := ih fun i hi ↦ hP i (by simp [hi])
-      refine ⟨max Na Ns, fun n hn i hi ↦ ?_⟩
-      rw [Finset.mem_insert] at hi
-      rcases hi with rfl | hi
-      · exact hNa n ((le_max_left _ _).trans hn)
-      · exact hNs n ((le_max_right _ _).trans hn) i hi
-
 /-- The normalized Hilbert multiplicativity error is eventually uniform on
 every prescribed finite multiplication table. -/
 theorem sofic_multiplication_hilbert_error_on_finset_eventually
@@ -683,7 +665,7 @@ theorem sofic_multiplication_hilbert_error_on_finset_eventually
             permutationOperator (A.map n g * A.map n h)
               (centeredIndicator U)‖ ^ 2 /
             Fintype.card (A.model n) < δ := by
-  obtain ⟨N, hN⟩ := eventually_all_finset (F.product F)
+  obtain ⟨N, hN⟩ := eventually_finset (F.product F)
     (fun p n ↦ ∀ U : Finset (A.model n),
       ‖permutationOperator (A.map n (p.1 * p.2)) (centeredIndicator U) -
           permutationOperator (A.map n p.1 * A.map n p.2)

@@ -23,22 +23,6 @@ namespace AlmostAutomorphism
 
 variable (Y : FiniteModel)
 
-/-- Finitely many eventual assertions have one common threshold. -/
-theorem eventually_finset {ι : Type*} (s : Finset ι) (P : ι → ℕ → Prop)
-    (h : ∀ i ∈ s, ∃ N, ∀ n ≥ N, P i n) :
-    ∃ N, ∀ n ≥ N, ∀ i ∈ s, P i n := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => exact ⟨0, by simp⟩
-  | @insert i s hi ih =>
-      obtain ⟨Ni, hNi⟩ := h i (Finset.mem_insert_self i s)
-      obtain ⟨Ns, hNs⟩ := ih fun j hj ↦ h j (Finset.mem_insert_of_mem hj)
-      refine ⟨max Ni Ns, fun n hn j hj ↦ ?_⟩
-      rw [Finset.mem_insert] at hj
-      rcases hj with rfl | hj
-      · exact hNi n ((le_max_left _ _).trans hn)
-      · exact hNs n ((le_max_right _ _).trans hn) j hj
-
 /-- Label occurrences on a finite permutation graph. -/
 abbrev Arc := Equiv.Perm Y × Y
 
