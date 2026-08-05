@@ -166,8 +166,11 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     (`FiniteFieldLeavitt.ambient_not_isSofic`), and every elementary rank
     `≥ 2` over `L_k(1,2)` is finitely generated, infinite, Kazhdan, and
     nonsofic (`binaryLeavitt_finiteField_profile`)
-  - [ ] A10. Full build and audit re-run; claim map updated so Theorem B
-    is Lean-backed for all finite fields
+  - [x] A10. Full build and audit re-run (3672 jobs, 165 modules, kernel
+    closure `[propext, Classical.choice, Quot.sound]`); claim map updated:
+    Theorem B's elementary-rank claims are Lean-backed for all finite
+    fields, and its unit-group/`GL_r` claims over fields other than `𝔽₂`
+    are tracked by the `B`-block checkpoints below
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
   binary Leavitt family has explicit `M_r(R) ≃ R` for every `r ≥ 1`
 - [x] Prove nonsoficity of `EL₂` by the all-positive-ranks Leavitt equivalence
