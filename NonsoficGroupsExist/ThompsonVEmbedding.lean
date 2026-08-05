@@ -150,4 +150,96 @@ theorem isComplete_of_covers {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 end LeavittFamily
 
+
+namespace BinaryLeavitt
+
+open LeavittFamily
+
+variable (k : Type) [Field k]
+
+/-- The finitely supported stream module. -/
+abbrev StreamModule := BinaryStream →₀ k
+
+/-- Prefixing a bit, on finitely supported functions. -/
+noncomputable def finPrefixOp (i : Fin 2) :
+    Module.End k (StreamModule k) :=
+  Finsupp.lsum k (fun x ↦ Finsupp.lsingle (prepend i x))
+
+open Classical in
+/-- Deleting a matching leading bit, on finitely supported functions. -/
+noncomputable def finDeleteOp (i : Fin 2) :
+    Module.End k (StreamModule k) :=
+  Finsupp.lsum k
+    (fun x ↦ if x 0 = i then Finsupp.lsingle (tail x) else 0)
+
+@[simp] theorem finPrefixOp_single (i : Fin 2) (x : BinaryStream)
+    (c : k) :
+    finPrefixOp k i (Finsupp.single x c) =
+      Finsupp.single (prepend i x) c := by
+  simp [finPrefixOp]
+
+open Classical in
+theorem finDeleteOp_single (i : Fin 2) (x : BinaryStream) (c : k) :
+    finDeleteOp k i (Finsupp.single x c) =
+      if x 0 = i then Finsupp.single (tail x) c else 0 := by
+  by_cases h : x 0 = i <;> simp [finDeleteOp, h]
+
+/-- The binary Leavitt family on the finitely supported stream module. -/
+noncomputable def finsuppStreamFamily :
+    LeavittFamily (Module.End k (StreamModule k)) where
+  s0 := finPrefixOp k 0
+  s1 := finPrefixOp k 1
+  t0 := finDeleteOp k 0
+  t1 := finDeleteOp k 1
+  t0_s0 := by
+    refine Finsupp.lhom_ext fun x c ↦ ?_
+    simp [Module.End.mul_apply, finDeleteOp_single]
+  t0_s1 := by
+    refine Finsupp.lhom_ext fun x c ↦ ?_
+    simp [Module.End.mul_apply, finDeleteOp_single]
+  t1_s0 := by
+    refine Finsupp.lhom_ext fun x c ↦ ?_
+    simp [Module.End.mul_apply, finDeleteOp_single]
+  t1_s1 := by
+    refine Finsupp.lhom_ext fun x c ↦ ?_
+    simp [Module.End.mul_apply, finDeleteOp_single]
+  sum_range := by
+    refine Finsupp.lhom_ext fun x c ↦ ?_
+    have hx : x 0 = 0 ∨ x 0 = 1 := by omega
+    rcases hx with hx | hx
+    · have hxx : prepend 0 (tail x) = x := by
+        rw [← hx]
+        exact prepend_head_tail x
+      simp [Module.End.mul_apply, finDeleteOp_single, hx,
+        LinearMap.add_apply, hxx]
+    · have hxx : prepend 1 (tail x) = x := by
+        rw [← hx]
+        exact prepend_head_tail x
+      simp [Module.End.mul_apply, finDeleteOp_single, hx,
+        LinearMap.add_apply, hxx]
+
+/-- The finitely supported stream representation. -/
+noncomputable def finsuppStreamRep :
+    BinaryLeavittAlgebra k →ₐ[k] Module.End k (StreamModule k) :=
+  lift (finsuppStreamFamily k)
+
+/-- **Faithfulness from simplicity**: any representation of the purely
+infinite simple algebra `L_k(1,2)` with `1 ≠ 0` is injective. -/
+theorem finsuppStreamRep_injective :
+    Function.Injective (finsuppStreamRep k) := by
+  intro x y hxy
+  by_contra hne
+  obtain ⟨a, b, hab⟩ :=
+    exists_mul_mul_eq_one k (sub_ne_zero.mpr hne)
+  have hz : finsuppStreamRep k (x - y) = 0 := by
+    rw [map_sub, hxy, sub_self]
+  have h1 := congrArg (finsuppStreamRep k) hab
+  rw [map_one, map_mul, map_mul, hz, mul_zero, zero_mul] at h1
+  have h2 := congrArg (fun T : Module.End k (StreamModule k) ↦
+    T (Finsupp.single (fun _ ↦ 0) (1 : k))) h1
+  simp only [LinearMap.zero_apply, Module.End.one_apply] at h2
+  exact Finsupp.single_ne_zero.mpr one_ne_zero h2.symm
+
+end BinaryLeavitt
+
 end NonsoficGroupsExist
