@@ -763,6 +763,33 @@ theorem pairRegion_eq_D_of_right_zero {n : ℕ}
     omega
   rw [pairRegion, if_neg hz, if_pos (Or.inr hχ)]
 
+
+/-- **Region invariance under restriction away from the boundary**: when
+neither valuation sits exactly at the top degree of the finer stage, the
+pair region is unchanged by restriction to the preceding stage. -/
+theorem pairRegion_restrictSucc_of_ne_top {n : ℕ}
+    (φ χ : Module.Dual K (degreeLE X K (n + 1)))
+    (h1 : valuation X K φ ≠ n + 1) (h2 : valuation X K χ ≠ n + 1) :
+    pairRegion X K (restrictSucc X K φ) (restrictSucc X K χ) =
+      pairRegion X K φ χ := by
+  have hm1 := valuation_restrictSucc_eq_min X K φ
+  have hm2 := valuation_restrictSucc_eq_min X K χ
+  have hb1 := valuation_le_succ X K φ
+  have hb2 := valuation_le_succ X K χ
+  rcases hR : pairRegion X K φ χ with - | - | - | - | -
+  · obtain ⟨hv1, hv2⟩ := (pairRegion_eq_zero_iff X K φ χ).1 hR
+    exact (pairRegion_eq_zero_iff X K _ _).2 ⟨by omega, by omega⟩
+  · obtain ⟨hz, hv1, hv2, hlt⟩ := pairRegion_A_data X K φ χ hR
+    exact pairRegion_eq_A_of_pos_of_lt X K _ _ (by omega) (by omega)
+  · obtain ⟨hz, hv1, hv2, heq⟩ := pairRegion_B_data X K φ χ hR
+    exact pairRegion_eq_B_of_data X K _ _ (by omega) (by omega)
+      (by omega) (by omega)
+  · obtain ⟨hz, hv1, hv2, hlt⟩ := pairRegion_C_data X K φ χ hR
+    exact pairRegion_eq_C_of_pos_of_lt X K _ _ (by omega) (by omega)
+  · rcases pairRegion_D_data X K φ χ hR with hv | hv
+    · exact pairRegion_eq_D_of_left_zero X K _ _ (by omega)
+    · exact pairRegion_eq_D_of_right_zero X K _ _ (by omega)
+
 end FreeRootFunctionalValuation
 
 end NonsoficGroupsExist

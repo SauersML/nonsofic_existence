@@ -1788,6 +1788,132 @@ theorem tendsto_secondBoundaryMass_zero (hψ : ψ ≠ 1) (z : E) :
   rw [heq]
   simpa using hconv.sub hsucc
 
+
+open FreeRootFunctionalValuation in
+open Classical in
+/-- **Cross-stage region monotonicity**: for any region predicate, the
+selected mass at one stage is bounded by the selected mass at the next
+stage plus both boundary layers. -/
+theorem sum_planeMass_region_le_succ_add_boundaries (hψ : ψ ≠ 1) (z : E)
+    (P : ValuationRegion → Prop) [DecidablePred P] :
+    ∑ χ ∈ Finset.univ.filter
+        (fun χ : Module.Dual K (PlaneVector X K n) ↦
+          P (pairRegion X K (firstCoordinateChar X K n χ)
+            (secondCoordinateChar X K n χ))),
+      planeMass X K i j k hik hjk n rho ψ χ z ≤
+    (∑ χ' ∈ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          P (pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+            (secondCoordinateChar X K (n + 1) χ'))),
+      planeMass X K i j k hik hjk (n + 1) rho ψ χ' z) +
+      firstBoundaryMass X K i j k hik hjk (n + 1) rho ψ z +
+      secondBoundaryMass X K i j k hik hjk (n + 1) rho ψ z := by
+  set S := Finset.univ.filter
+    (fun χ : Module.Dual K (PlaneVector X K n) ↦
+      P (pairRegion X K (firstCoordinateChar X K n χ)
+        (secondCoordinateChar X K n χ))) with hS
+  set F := Finset.univ.filter
+    (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+      P (pairRegion X K (firstCoordinateChar X K (n + 1) χ')
+        (secondCoordinateChar X K (n + 1) χ'))) with hF
+  set B₁ := Finset.univ.filter
+    (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+      valuation X K (firstCoordinateChar X K (n + 1) χ') = n + 1)
+    with hB₁
+  set B₂ := Finset.univ.filter
+    (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+      valuation X K (secondCoordinateChar X K (n + 1) χ') = n + 1)
+    with hB₂
+  have h1 : (∑ χ ∈ S, planeMass X K i j k hik hjk n rho ψ χ z) =
+      ∑ χ ∈ S, ∑ χ' ∈ Finset.univ.filter
+          (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+            χ'.comp (planeStageInclusion X K n) = χ),
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+    Finset.sum_congr rfl fun χ _ ↦
+      planeMass_eq_sum_fiber_stageInclusion X K i j k hik hjk n rho ψ
+        hψ z χ
+  have hdisj : (S : Set (Module.Dual K
+      (PlaneVector X K n))).PairwiseDisjoint
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ)) := by
+    intro χ₁ _ χ₂ _ hne
+    refine Finset.disjoint_left.2 fun χ' hm1 hm2 ↦ ?_
+    rw [Finset.mem_filter] at hm1 hm2
+    exact hne (hm1.2 ▸ hm2.2)
+  have hsubset : S.biUnion
+      (fun χ ↦ Finset.univ.filter
+        (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+          χ'.comp (planeStageInclusion X K n) = χ)) ⊆
+      (F ∪ B₁) ∪ B₂ := by
+    intro χ' hχ'
+    obtain ⟨χ, hχS, hfib⟩ := Finset.mem_biUnion.1 hχ'
+    rw [Finset.mem_filter] at hfib
+    rw [hS, Finset.mem_filter] at hχS
+    have hcoarse : P (pairRegion X K
+        (restrictSucc X K (firstCoordinateChar X K (n + 1) χ'))
+        (restrictSucc X K (secondCoordinateChar X K (n + 1) χ'))) := by
+      have hchi : firstCoordinateChar X K n
+            (χ'.comp (planeStageInclusion X K n)) =
+          restrictSucc X K (firstCoordinateChar X K (n + 1) χ') := rfl
+      have hchi2 : secondCoordinateChar X K n
+            (χ'.comp (planeStageInclusion X K n)) =
+          restrictSucc X K (secondCoordinateChar X K (n + 1) χ') := rfl
+      rw [← hchi, ← hchi2, hfib.2]
+      exact hχS.2
+    by_cases hv1 : valuation X K
+        (firstCoordinateChar X K (n + 1) χ') = n + 1
+    · exact Finset.mem_union_left _ (Finset.mem_union_right _
+        (Finset.mem_filter.2 ⟨Finset.mem_univ _, hv1⟩))
+    by_cases hv2 : valuation X K
+        (secondCoordinateChar X K (n + 1) χ') = n + 1
+    · exact Finset.mem_union_right _
+        (Finset.mem_filter.2 ⟨Finset.mem_univ _, hv2⟩)
+    refine Finset.mem_union_left _ (Finset.mem_union_left _
+      (Finset.mem_filter.2 ⟨Finset.mem_univ _, ?_⟩))
+    rwa [← pairRegion_restrictSucc_of_ne_top X K _ _ hv1 hv2]
+  calc
+    (∑ χ ∈ S, planeMass X K i j k hik hjk n rho ψ χ z) =
+        ∑ χ' ∈ S.biUnion
+          (fun χ ↦ Finset.univ.filter
+            (fun χ' : Module.Dual K (PlaneVector X K (n + 1)) ↦
+              χ'.comp (planeStageInclusion X K n) = χ)),
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z := by
+      rw [h1, Finset.sum_biUnion hdisj]
+    _ ≤ ∑ χ' ∈ (F ∪ B₁) ∪ B₂,
+        planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+      Finset.sum_le_sum_of_subset_of_nonneg hsubset
+        fun χ' _ _ ↦ planeMass_nonneg X K i j k hik hjk (n + 1) rho ψ χ' z
+    _ ≤ (∑ χ' ∈ F ∪ B₁,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z) +
+        ∑ χ' ∈ B₂,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z := by
+      have hui := Finset.sum_union_inter
+        (s₁ := F ∪ B₁) (s₂ := B₂)
+        (f := fun χ' ↦ planeMass X K i j k hik hjk (n + 1) rho ψ χ' z)
+      have hpos : 0 ≤ ∑ χ' ∈ (F ∪ B₁) ∩ B₂,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+        Finset.sum_nonneg fun χ' _ ↦
+          planeMass_nonneg X K i j k hik hjk (n + 1) rho ψ χ' z
+      linarith
+    _ ≤ ((∑ χ' ∈ F,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z) +
+        ∑ χ' ∈ B₁,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z) +
+        ∑ χ' ∈ B₂,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z := by
+      have hui := Finset.sum_union_inter (s₁ := F) (s₂ := B₁)
+        (f := fun χ' ↦ planeMass X K i j k hik hjk (n + 1) rho ψ χ' z)
+      have hpos : 0 ≤ ∑ χ' ∈ F ∩ B₁,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z :=
+        Finset.sum_nonneg fun χ' _ ↦
+          planeMass_nonneg X K i j k hik hjk (n + 1) rho ψ χ' z
+      linarith
+    _ = (∑ χ' ∈ F,
+          planeMass X K i j k hik hjk (n + 1) rho ψ χ' z) +
+        firstBoundaryMass X K i j k hik hjk (n + 1) rho ψ z +
+        secondBoundaryMass X K i j k hik hjk (n + 1) rho ψ z := rfl
+
 end FreeRootPlaneMass
 
 end NonsoficGroupsExist
