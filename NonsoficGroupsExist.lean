@@ -140,6 +140,7 @@ import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.LeavittNormalForm
 import NonsoficGroupsExist.DiagonalClassGroup
 import NonsoficGroupsExist.GLIsElementary
+import NonsoficGroupsExist.LeavittDiagonalClass
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
