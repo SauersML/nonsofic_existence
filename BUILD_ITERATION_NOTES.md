@@ -159,10 +159,38 @@ candidate elementary resolutions, in preference order:
    use Mathlib Matrix.rank + rank_mul_le; p₀^{(d)} has scalar matrix =
    0/1 diagonal of rank 2^{m−d} < 2^m = rank 1. Gives ker-part; the
    coker-part needs the coordinate-free lattice argument (heavier).
-Audit note: ASSUMPTION_INSTANCE ratchet is 26; new [Nontrivial A]
-binders may move the count — retighten when the audit is next run
-(scan not yet re-run after the six new modules; run scripts/check.py
-with cluster /usr/bin/python3.12 next round).
+Audit note: audit re-run after the six new modules — GREEN, 6680
+declarations, closure exactly [propext, Classical.choice, Quot.sound],
+ASSUMPTION_INSTANCE still exactly 26.
+
+## Laurent endgame ARCHITECTURE (width-1 hand-derivation, do in order)
+Step A (Bass/vN-regular reduction — the remaining hard induction):
+  every unit ≡ mod H to (balanced unit)·(code-permutation unit).
+  Mechanism found: in the 2×2 picture [[a, −b],[σ, 1]] (reached by the
+  proved Φ-composite from u = a + bσ), pivot on the invertible corner
+  b̃ : fL₀ ≅ eL₀ of b (e := bb⁺, f := b⁺b, pseudo-inverse b⁺ from the
+  Pivot decomposition at the FIXED matrix level M_{2^n}(k) of the
+  original representation — all operations stay at level n, and
+  rank(f) ≥ 1 strictly decreases per round, so ≤ 2^n pivots terminate.
+  The exact op-sequence still needs a symbol-level paper derivation
+  (watch: clearing ops reinject σ·(...)·b̃⁻¹ terms — verify the final
+  matrix is triangular with UNIT diagonal before coding).
+Step B (done): balanced units ∈ H (degree-zero theorem + central
+  collapse).
+Step C (new discovery — code-permutation units ∈ H, elementary):
+  - Equal-length leaf transpositions T(w,w') = s_w t_{w'} + s_{w'} t_w
+    + (1 − p_w − p_{w'}) are BALANCED → ∈ H by Step B directly.
+  - Unequal-length transpositions: conjugate by a code-unit g with
+    |g·w| = |g·w'| (prefix-replacement makes lengths equal); the
+    conjugation identity g·T(w,w')·g⁻¹ = T(gw, gw') is a word
+    computation; then T(w,w') ∈ H by NORMALITY of stableUnits — no
+    abelianness needed.
+  - General code-permutation unit = product of transpositions: Higman
+    generation for Thompson's V — finite tree combinatorics; OR avoid
+    it by making Step A's endpoint transposition-factored directly.
+Alternative fallback for C if V-generation is painful: every
+code-permutation unit U = U_{C'→leftComb} · U_{leftComb→C}⁻¹; reduce to
+V_C := Σ s_{c_i} t_{ℓ_i} vs leftComb by induction on leaf-splitting.
 
 ## Iteration log (continued)
 - GREEN as of this round: DiagonalClassGroup, LeavittDiagonalClass,
