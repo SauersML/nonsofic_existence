@@ -35,15 +35,19 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 - [x] Prove the universal quotient is nontrivial using its stream representation
 - [x] Instantiate the full compression construction directly over the universal quotient
 - [x] Prove `EL₄(L_{𝔽₂}(1,2))` is nonsofic and has property `(T)`
-- [x] Generalize Theorem A to `EL_{m+1}(L_{𝔽₂}(1,2))` for every `m ≥ 3`
+- [x] Generalize Theorem A to `EL_{m+1}(L_{𝔽₂}(1,2))` for every `m ≥ 1`
 - [x] Define `L_k(1,2)` uniformly for every field `k`, prove its universal
   property and nontrivial stream representation, and provide finite-type,
   countability, infinitude, and canonical-family instances
+- [x] Prove finite generation, infinitude, and property `(T)` for
+  `EL_{m+1}(L_k(1,2))` over every finite characteristic-two field and every
+  `m ≥ 2`
 - [x] Formalize arbitrary finite-leaf self-similarity: every ring carrying a
   binary Leavitt family has explicit `M_r(R) ≃ R` for every `r ≥ 1`
-- [ ] Prove the rank-two compression theorem and nonsoficity of `EL₂`
+- [x] Prove nonsoficity of `EL₂` by the all-positive-ranks Leavitt equivalence
+- [ ] Prove a separate rank-two compression theorem
 - [ ] Prove the GE/`K₁` inputs and `GL_r(L) = EL_r(L)` for all required ranks
-- [ ] Deduce the unit-group and all-ranks panorama of Theorem B
+- [x] Prove the full unit group and every positive-rank `GL_r` nonsofic
 - [x] Prove every finitely generated nonsofic group has a finitely presented
   nonsofic cover
 - [ ] Formalize Shalom's property-`(T)` finitely presented cover theorem
@@ -62,13 +66,19 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | Claim | Lean declaration | Status |
 | --- | --- | --- |
 | `EL₄(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittEL4_not_isSofic` | Formalized |
+| `EL₃(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittEL3_not_isSofic` | Formalized |
 | The explicit ambient group is finitely generated, infinite, Kazhdan, and nonsofic | `ambient_profile` | Formalized |
-| For every `m ≥ 3`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_theoremA` | Formalized |
+| The explicit ambient group is countable, finitely generated, infinite, Kazhdan, and nonsofic | `ambient_full_profile` | Formalized |
+| For every `m ≥ 1`, `EL_{m+1}(L_{𝔽₂}(1,2))` is finitely generated, infinite, Kazhdan, and nonsofic | `universalLeavitt_theoremA` | Formalized |
+| The full unit group `L_{𝔽₂}(1,2)ˣ` is nonsofic | `universalLeavittUnits_not_isSofic` | Formalized |
+| Every positive-rank `GL_r(L_{𝔽₂}(1,2))` is nonsofic | `universalLeavittGL_not_isSofic` | Formalized |
+| Over every finite characteristic-two field, `EL_{m+1}(L_k(1,2))` is finitely generated, infinite, and Kazhdan for `m ≥ 2` | `binaryLeavitt_charTwo_profile` | Formalized; generic nonsoficity remains open in Lean |
 | A nonsofic group exists | `nonsofic_groups_exist` | Formalized |
 | A finitely presented nonsofic group exists | `exists_finitelyPresented_nonsofic_group` | Formalized |
+| An infinite finitely presented nonsofic group surjects onto the explicit ambient group | `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | Formalized |
 | The universal binary Leavitt algebra has the required family | `UniversalLeavitt.family` | Formalized |
 | The corner witness is non-LEF | `UniversalRankFour.witness_not_isLEF` | Formalized by a direct finite obstruction; not identified with `V` |
-| Unit group, every `GL_r`, every `EL_r` for `r ≥ 2`, other finite fields, and rank two | — | Manuscript-only |
+| `GL_r = EL_r`, generic nonsoficity over other finite fields, and the rank-two compression construction | — | Manuscript-only |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
 
 ## Module architecture
@@ -251,7 +261,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3252
+The current complete MSI build reports `Build completed successfully (3254
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -259,7 +269,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The whole-namespace kernel audit traverses 5,293
+proposition interface. The whole-namespace kernel audit traverses 5,322
 project declarations and reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
 each later manuscript-scope checkpoint.

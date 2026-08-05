@@ -16,9 +16,15 @@ the entire project namespace and fails on anything beyond classical Lean.
 
 #print axioms NonsoficGroupsExist.nonsofic_groups_exist
 #print axioms NonsoficGroupsExist.universalLeavittEL4_not_isSofic
+#print axioms NonsoficGroupsExist.universalLeavittEL3_not_isSofic
+#print axioms NonsoficGroupsExist.universalLeavittUnits_not_isSofic
+#print axioms NonsoficGroupsExist.universalLeavittGL_not_isSofic
 #print axioms NonsoficGroupsExist.ambient_profile
+#print axioms NonsoficGroupsExist.ambient_full_profile
 #print axioms NonsoficGroupsExist.universalLeavitt_theoremA
+#print axioms NonsoficGroupsExist.binaryLeavitt_charTwo_profile
 #print axioms NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group
+#print axioms NonsoficGroupsExist.exists_infinite_finitelyPresented_nonsofic_ambient_cover
 #print axioms NonsoficGroupsExist.KunDecomposition.exists_expanderDecomposition
 #print axioms NonsoficGroupsExist.KunThomTheorem.isLEF_of_exactProductExpansion
 #print axioms NonsoficGroupsExist.FreeElementaryPropertyT.freeElementary_hasKazhdanPropertyT

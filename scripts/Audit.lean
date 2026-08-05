@@ -39,7 +39,16 @@ example : ∃ (G : Type) (_ : Group G), Group.IsFinitelyPresented G ∧ ¬ IsSof
 example : ¬ IsSofic UniversalRankFour.Ambient :=
   universalLeavittEL4_not_isSofic
 
-example (m : ℕ) (hm : 3 ≤ m) :
+example : ¬ IsSofic UniversalRankFour.Core :=
+  universalLeavittEL3_not_isSofic
+
+example : ¬ IsSofic UniversalLeavittUnits :=
+  universalLeavittUnits_not_isSofic
+
+example (m : ℕ) : ¬ IsSofic (UniversalLeavittGL m) :=
+  universalLeavittGL_not_isSofic m
+
+example (m : ℕ) (hm : 1 ≤ m) :
     Group.FG (UniversalLeavittEL m) ∧
       Infinite (UniversalLeavittEL m) ∧
       HasKazhdanPropertyT.{0, 0} (UniversalLeavittEL m) ∧
@@ -52,6 +61,21 @@ example :
       HasKazhdanPropertyT.{0, 0} UniversalRankFour.Ambient ∧
       ¬ IsSofic UniversalRankFour.Ambient :=
   ambient_profile
+
+example :
+    Countable UniversalRankFour.Ambient ∧
+      Group.FG UniversalRankFour.Ambient ∧
+      Infinite UniversalRankFour.Ambient ∧
+      HasKazhdanPropertyT.{0, 0} UniversalRankFour.Ambient ∧
+      ¬ IsSofic UniversalRankFour.Ambient :=
+  ambient_full_profile
+
+example :
+    ∃ (H : Type) (_ : Group H),
+      Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬ IsSofic H ∧
+        ∃ π : H →* UniversalRankFour.Ambient,
+          Function.Surjective π :=
+  exists_infinite_finitelyPresented_nonsofic_ambient_cover
 
 /-- The positive control, pinned here so that it cannot be deleted while the
 negative results remain.  Every other occurrence of `IsSofic` in the library is
@@ -104,9 +128,14 @@ that a CI log records exactly what each headline theorem rests on. -/
 def headlineTheorems : List Name :=
   [``nonsofic_groups_exist,
    ``exists_finitelyPresented_nonsofic_group,
+   ``exists_infinite_finitelyPresented_nonsofic_ambient_cover,
    ``universalLeavittEL4_not_isSofic,
+   ``universalLeavittEL3_not_isSofic,
+   ``universalLeavittUnits_not_isSofic,
+   ``universalLeavittGL_not_isSofic,
    ``universalLeavitt_theoremA,
-   ``ambient_profile]
+   ``ambient_profile,
+   ``ambient_full_profile]
 
 /-- Every declaration of this development, taken from the environment rather
 than from a hand-maintained list, so that a new module cannot escape the

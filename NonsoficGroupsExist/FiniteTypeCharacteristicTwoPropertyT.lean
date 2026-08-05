@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.FreeElementaryPropertyT
 import NonsoficGroupsExist.ElementaryGroup
+import Mathlib.Algebra.Algebra.ZMod
 import Mathlib.RingTheory.FiniteType
 
 /-!
@@ -31,6 +32,55 @@ theorem finiteTypeElementaryThree_hasKazhdanPropertyT :
     (elementaryGroupMap (ι := Fin 3) f.toRingHom)
     (elementaryGroupMap_surjective_of_surjective f.toRingHom hf)
     (FreeElementaryPropertyT.freeElementary_hasKazhdanPropertyT X)
+
+/-- Over a finite field of characteristic two, every finite-type algebra has
+Kazhdan elementary group in rank three.  This is the finite-field form needed
+for the manuscript's characteristic-two panorama. -/
+theorem finiteCharacteristicTwoElementaryThree_hasKazhdanPropertyT
+    {k A : Type} [Field k] [Finite k] [CharP k 2]
+    [Ring A] [Algebra k A] [Nontrivial A] [Algebra.FiniteType k A] :
+    HasKazhdanPropertyT.{0, 0} (elementaryGroup (Fin 3) A) := by
+  letI : Fintype k := Fintype.ofFinite k
+  letI : Algebra (ZMod 2) k := ZMod.algebra k 2
+  letI : CharP A 2 :=
+    charP_of_injective_algebraMap (R := k)
+      (RingHom.injective (algebraMap k A)) 2
+  letI : Algebra (ZMod 2) A := ZMod.algebra A 2
+  letI : IsScalarTower (ZMod 2) k A :=
+    ZMod.instIsScalarTower 2 k A
+  letI : Algebra.FiniteType (ZMod 2) k := by
+    refine ⟨Finset.univ, ?_⟩
+    simp
+  have ht : IsScalarTower (ZMod 2) k A := inferInstance
+  letI : Algebra.FiniteType (ZMod 2) A :=
+    @Algebra.FiniteType.trans (ZMod 2) k A
+      inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance ht inferInstance inferInstance
+  exact finiteTypeElementaryThree_hasKazhdanPropertyT
+
+/-- Elementary groups of rank at least three over finite-type algebras over a
+finite characteristic-two field are finitely generated. -/
+theorem finiteCharacteristicTwoElementary_finitelyGenerated
+    {k A : Type} [Field k] [Finite k] [CharP k 2]
+    [Ring A] [Algebra k A] [Nontrivial A] [Algebra.FiniteType k A]
+    (n : ℕ) (hn : 2 < n) : Group.FG (elementaryGroup (Fin n) A) := by
+  letI : Fintype k := Fintype.ofFinite k
+  letI : Algebra (ZMod 2) k := ZMod.algebra k 2
+  letI : CharP A 2 :=
+    charP_of_injective_algebraMap (R := k)
+      (RingHom.injective (algebraMap k A)) 2
+  letI : Algebra (ZMod 2) A := ZMod.algebra A 2
+  letI : IsScalarTower (ZMod 2) k A :=
+    ZMod.instIsScalarTower 2 k A
+  letI : Algebra.FiniteType (ZMod 2) k := by
+    refine ⟨Finset.univ, ?_⟩
+    simp
+  have ht : IsScalarTower (ZMod 2) k A := inferInstance
+  letI : Algebra.FiniteType (ZMod 2) A :=
+    @Algebra.FiniteType.trans (ZMod 2) k A
+      inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance ht inferInstance inferInstance
+  exact elementaryGroup_finitelyGenerated n hn
 
 end
 end NonsoficGroupsExist

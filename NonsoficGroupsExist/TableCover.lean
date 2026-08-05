@@ -583,4 +583,20 @@ theorem exists_finitelyPresented_nonsofic_cover
   letI : Group.IsFinitelyPresented (tableGroup F h₁) := inferInstance
   exact ⟨tableGroup F h₁, inferInstance, inferInstance, hnsofic⟩
 
+/-- The finite-table construction retains its quotient map.  When the
+original finitely generated nonsofic group is infinite, the presented cover is
+therefore infinite as well. -/
+theorem exists_infinite_finitelyPresented_nonsofic_cover
+    [Group.FG G] [Infinite G] (h : ¬ IsSofic G) :
+    ∃ (H : Type u) (_ : Group H),
+      Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬ IsSofic H ∧
+        ∃ π : H →* G, Function.Surjective π := by
+  obtain ⟨F, h₁, _, _, _, hnsofic, hsurj⟩ :=
+    exists_finitelyPresented_obstruction h
+  letI : Group.IsFinitelyPresented (tableGroup F h₁) := inferInstance
+  letI : Infinite (tableGroup F h₁) :=
+    Infinite.of_surjective (tableEvaluation F h₁) hsurj
+  exact ⟨tableGroup F h₁, inferInstance, inferInstance, inferInstance,
+    hnsofic, tableEvaluation F h₁, hsurj⟩
+
 end NonsoficGroupsExist
