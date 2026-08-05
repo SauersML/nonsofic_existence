@@ -137,7 +137,7 @@ theorem exists_isUnit_add_mul_of_unimodular {k : Type*} [Field k]
 finite-dimensional source. -/
 theorem exists_bijective_add_comp_of_sup_range' {k V W : Type*}
     [Field k] [AddCommGroup V] [Module k V] [FiniteDimensional k V]
-    [AddCommGroup W] [Module k W] [FiniteDimensional k W]
+    [AddCommGroup W] [Module k W]
     (f : V →ₗ[k] V) (g : W →ₗ[k] V)
     (hsup : LinearMap.range f ⊔ LinearMap.range g = ⊤) :
     ∃ t : V →ₗ[k] W, Function.Bijective (f + g ∘ₗ t) := by
