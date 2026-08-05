@@ -251,7 +251,7 @@ theorem exists_finitelyPresented_nonsofic_group :
   ...
 ```
 
-The current complete MSI build reports `Build completed successfully (3249
+The current complete MSI build reports `Build completed successfully (3252
 jobs).` The transitive axiom reports for both headline theorems and for
 `universalLeavittEL4_not_isSofic` are exactly
 `[propext, Classical.choice, Quot.sound]`; there is no project axiom or
@@ -259,7 +259,7 @@ unproved placeholder in either proof term. The source audit finds no
 declaration of a custom axiom, no proof placeholder, and none of the former
 literature-hypothesis parameters. The remaining `KunThomTheorem` matches are
 the module and namespace containing the compiled proof, not an assumed
-proposition interface. The whole-namespace kernel audit traverses 5,246
+proposition interface. The whole-namespace kernel audit traverses 5,293
 project declarations and reports no disallowed axiom. This build and audit are
 the current universal-quotient integration checkpoint; both will be rerun after
 each later manuscript-scope checkpoint.
@@ -275,6 +275,7 @@ lake exe cache get
 python3 scripts/check.py --self-test
 python3 scripts/check.py
 lake build
+lake build Audit
 lake env lean scripts/Calibrate.lean
 lake env lean scripts/Audit.lean
 ```
