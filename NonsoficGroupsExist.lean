@@ -138,6 +138,7 @@ import NonsoficGroupsExist.CriterionAssembly
 import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.LeavittNormalForm
+import NonsoficGroupsExist.DiagonalClassGroup
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
