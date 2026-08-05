@@ -4367,6 +4367,98 @@ theorem sum_planeRegionMass_nonzero_le_explicit_errors
           (wordMonomialInDegree X (n + 2) 1)).1 z - z‖ ^ 2 at hD
   linarith
 
+/-- Limiting two-root relative Kazhdan estimate.  The finite Fourier boundary
+terms disappear along the exhaustive free-word filtration, leaving only the
+displacements of the explicit adjacent-root generators and the two unit
+elements in the moving plane. -/
+theorem norm_joinRootMovingProjection_sq_le_explicit_errors [CompleteSpace E]
+    (i j k : Fin 3) (hij : i ≠ j) (hik : i ≠ k) (hjk : j ≠ k)
+    (rho : elementaryGroup (Fin 3) (FreeRing X) →* (E ≃ₗᵢ[ℝ] E))
+    (z : E) :
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z‖ ^ 2 ≤
+      ‖rho (elementaryRoot i k hik 1) z - z‖ ^ 2 +
+        ‖rho (elementaryRoot j k hjk 1) z - z‖ ^ 2 +
+        (3 : ℝ) / 2 *
+          ((∑ q : Fin (Fintype.card X),
+              2 * ‖z‖ *
+                ‖rho (elementaryRoot j i hij.symm
+                  (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+            ∑ q : Fin (Fintype.card X),
+              2 * ‖z‖ *
+                ‖rho (elementaryRoot i j hij
+                  (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+          2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm 1) z - z‖ +
+          2 * ‖z‖ * ‖rho (elementaryRoot i j hij 1) z - z‖ := by
+  let C : ℝ :=
+    ‖rho (elementaryRoot i k hik 1) z - z‖ ^ 2 +
+      ‖rho (elementaryRoot j k hjk 1) z - z‖ ^ 2 +
+      (3 : ℝ) / 2 *
+        ((∑ q : Fin (Fintype.card X),
+            2 * ‖z‖ *
+              ‖rho (elementaryRoot j i hij.symm
+                (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+          ∑ q : Fin (Fintype.card X),
+            2 * ‖z‖ *
+              ‖rho (elementaryRoot i j hij
+                (FreeAlgebra.ι (ZMod 2) (generatorEnumeration X q))) z - z‖) +
+        2 * ‖z‖ * ‖rho (elementaryRoot j i hij.symm 1) z - z‖ +
+        2 * ‖z‖ * ‖rho (elementaryRoot i j hij 1) z - z‖
+  change
+    ‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z‖ ^ 2 ≤ C
+  have hfinite (n : ℕ) :
+      ‖planeMovingPart X i j k hij hik hjk rho z (n + 2)‖ ^ 2 ≤
+        C + (9 : ℝ) / 2 *
+          (planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+            planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2)) := by
+    rw [norm_planeMovingPart_sq_eq_sum_regionMass
+      X i j k hij hik hjk rho z (n + 2)]
+    have h := sum_planeRegionMass_nonzero_le_explicit_errors
+      X i j k hij hik hjk n rho z
+    simp only [firstCoordinate_val, secondCoordinate_val,
+      wordMonomialInDegree_one_val] at h
+    dsimp only [C]
+    linarith
+  have hleft : Filter.Tendsto
+      (fun n ↦ ‖planeMovingPart X i j k hij hik hjk rho z (n + 2)‖ ^ 2)
+      Filter.atTop
+      (nhds (‖KazhdanFixedSpace.subgroupMovingProjection rho
+        (elementaryRootSubgroup i k hik ⊔
+          elementaryRootSubgroup j k hjk) z‖ ^ 2)) := by
+    exact (Filter.tendsto_add_atTop_iff_nat 2).2
+      (tendsto_norm_planeMovingPart_sq X i j k hij hik hjk rho z)
+  have hfirst : Filter.Tendsto
+      (fun n ↦ planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2))
+      Filter.atTop (nhds 0) := by
+    have h := (Filter.tendsto_add_atTop_iff_nat 1).2
+      (tendsto_planeFirstTopBoundaryMass_succ_zero
+        X i j k hij hik hjk rho z)
+    simpa [Nat.add_assoc] using h
+  have hsecond : Filter.Tendsto
+      (fun n ↦ planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2))
+      Filter.atTop (nhds 0) := by
+    have h := (Filter.tendsto_add_atTop_iff_nat 1).2
+      (tendsto_planeSecondTopBoundaryMass_succ_zero
+        X i j k hij hik hjk rho z)
+    simpa [Nat.add_assoc] using h
+  have hscaled : Filter.Tendsto
+      (fun n ↦ (9 : ℝ) / 2 *
+        (planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+          planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2)))
+      Filter.atTop (nhds 0) := by
+    simpa using (tendsto_const_nhds.mul (hfirst.add hsecond))
+  have hright : Filter.Tendsto
+      (fun n ↦ C + (9 : ℝ) / 2 *
+        (planeFirstTopBoundaryMass X i j k hij hik hjk rho z (n + 2) +
+          planeSecondTopBoundaryMass X i j k hij hik hjk rho z (n + 2)))
+      Filter.atTop (nhds C) := by
+    simpa using tendsto_const_nhds.add hscaled
+  exact le_of_tendsto_of_tendsto hleft hright
+    (Filter.Eventually.of_forall hfinite)
+
 /-- The squared mass of one `A ∪ B` leading-generator fiber is bounded by
 the coarse `C ∪ D` mass after acting by its opposite adjacent generator.
 No component is counted through a merely algebraic character map: the proof

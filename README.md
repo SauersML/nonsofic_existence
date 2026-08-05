@@ -155,9 +155,10 @@ box is still a required dependency of the final theorem.
   same-stage target plus those already-vanishing layers, and combine both
   generator shears with the unit shears into a single explicit finite-stage
   bound for all four nonzero valuation regions
-- [ ] Pass the finite-stage inequalities to the limiting two-root moving
+- [x] Pass the finite-stage inequalities to the limiting two-root moving
   mass and complete the uniform relative-property-`(T)` estimate
-- [ ] Prove property (T) for the concrete characteristic-two rank-three group
+- [x] Prove property `(T)` for elementary rank three over every finite-rank
+  free characteristic-two algebra, using an explicit finite Kazhdan set
 - [ ] Transfer/instantiate property (T) for every concrete group used by the
   compression argument
 - [x] Close the exact full-sequence Kun expander-decomposition theorem used at the final
@@ -225,9 +226,13 @@ not discard to a cofinal subsequence.
 
 The decisive remaining mathematics is not hidden behind theorem-shaped
 parameters. The exact Kun expander decomposition and Kun--Thom implication are
-now proved and compiled; the repository still lacks the relevant concrete
-property `(T)` results and therefore cannot yet instantiate those general
-theorems at the unconditional headline boundary.  The represented
+now proved and compiled. The finite-stage Fourier argument has also been
+passed to the exhaustive free-root plane and yields an explicit finite
+Kazhdan pair for elementary rank three over every finite-rank free
+characteristic-two algebra. The repository must still transfer this theorem
+through the concrete coefficient-ring quotients used by the compression
+groups before it can instantiate the general criterion at the unconditional
+headline boundary. The represented
 stream-operator algebra is not
 identified with the universal Leavitt algebra, and the non-LEF witness is not
 identified with Thompson's group `V`; neither identification is used by the

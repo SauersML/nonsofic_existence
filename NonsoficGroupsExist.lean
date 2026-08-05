@@ -14,6 +14,7 @@ import NonsoficGroupsExist.FreeRootActions
 import NonsoficGroupsExist.FreeRootPlane
 import NonsoficGroupsExist.FreeRootPlaneFourier
 import NonsoficGroupsExist.FreeRootCharacterValuation
+import NonsoficGroupsExist.FreeElementaryPropertyT
 import NonsoficGroupsExist.A2Kazhdan
 import NonsoficGroupsExist.ClassTwoNormalForm
 import NonsoficGroupsExist.ClassTwoApproximation

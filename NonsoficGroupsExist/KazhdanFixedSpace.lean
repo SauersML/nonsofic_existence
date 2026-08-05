@@ -497,6 +497,59 @@ theorem fixedProjection_equivariant_of_mem_normalizer [CompleteSpace E]
       ρ H hg hxorth
     simpa [map_sub] using hmap
 
+/-- The moving projection commutes with every element that normalizes the
+subgroup. -/
+theorem subgroupMovingProjection_equivariant_of_mem_normalizer [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G}
+    (hg : g ∈ Subgroup.normalizer (H : Set G)) (x : E) :
+    subgroupMovingProjection ρ H (ρ g x) =
+      ρ g (subgroupMovingProjection ρ H x) := by
+  rw [subgroupMovingProjection_eq_sub_fixedProjection,
+    fixedProjection_equivariant_of_mem_normalizer ρ H hg,
+    subgroupMovingProjection_eq_sub_fixedProjection, map_sub]
+
+/-- Orthogonal projection onto the moving subspace is contractive. -/
+theorem norm_subgroupMovingProjection_le [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) (x : E) :
+    ‖subgroupMovingProjection ρ H x‖ ≤ ‖x‖ := by
+  have hpyth := norm_sq_fixedProjection_add_movingProjection ρ H x
+  have hsq : ‖subgroupMovingProjection ρ H x‖ ^ 2 ≤ ‖x‖ ^ 2 := by
+    rw [hpyth]
+    exact le_add_of_nonneg_left (sq_nonneg _)
+  nlinarith [norm_nonneg (subgroupMovingProjection ρ H x), norm_nonneg x]
+
+/-- Under a normalizing element, displacement of the moving projection is no
+larger than displacement of the original vector. -/
+theorem norm_subgroupMovingProjection_displacement_le_of_mem_normalizer
+    [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G}
+    (hg : g ∈ Subgroup.normalizer (H : Set G)) (x : E) :
+    ‖ρ g (subgroupMovingProjection ρ H x) -
+        subgroupMovingProjection ρ H x‖ ≤ ‖ρ g x - x‖ := by
+  rw [← subgroupMovingProjection_equivariant_of_mem_normalizer ρ H hg]
+  rw [← map_sub]
+  exact norm_subgroupMovingProjection_le ρ H (ρ g x - x)
+
+/-- Displacement by a subgroup element is carried entirely by the moving
+component, and is at most twice its norm. -/
+theorem norm_displacement_le_two_mul_norm_subgroupMovingProjection_of_mem
+    [CompleteSpace E]
+    (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (H : Subgroup G) {g : G} (hg : g ∈ H)
+    (x : E) :
+    ‖ρ g x - x‖ ≤ 2 * ‖subgroupMovingProjection ρ H x‖ := by
+  let p : E := fixedProjection ρ H x
+  let w : E := subgroupMovingProjection ρ H x
+  have hx : x = p + w := by
+    dsimp only [p, w]
+    rw [subgroupMovingProjection_eq_sub_fixedProjection]
+    abel
+  have hgp : ρ g p = p := by
+    exact fixedProjection_mem ρ H x ⟨g, hg⟩
+  calc
+    ‖ρ g x - x‖ = ‖ρ g w - w‖ := by rw [hx, map_add, hgp]; abel_nf
+    _ ≤ ‖ρ g w‖ + ‖w‖ := norm_sub_le _ _
+    _ = 2 * ‖w‖ := by rw [(ρ g).norm_map]; ring
+
 /-- If `K` normalizes `H` and `x` is `K`-fixed, projecting `x` onto the
 `H`-fixed space already lands in the fixed space of `H ⊔ K`. -/
 theorem fixedProjection_eq_sup_of_fixed_of_normalizes [CompleteSpace E]
