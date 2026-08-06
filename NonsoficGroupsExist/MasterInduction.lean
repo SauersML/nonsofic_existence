@@ -75,11 +75,10 @@ theorem pencil_unit_mem [Nontrivial (BinaryLeavittAlgebra k)]
       have hι : Fintype.card ι = 0 := by omega
       have hu0 : (u : BinaryLeavittAlgebra k) = 0 := by
         rw [hu]
-        rw [Finset.sum_eq_zero]
-        intro i _
-        exact absurd (Finset.mem_univ i)
-          (by rw [← Finset.card_eq_zero.mp (by simpa using hι)]
-              exact fun h ↦ h)
+        refine Finset.sum_eq_zero fun i _ ↦ ?_
+        -- card zero says `ι` is empty, so the bound `i` is already absurd;
+        -- rewriting `univ` to `∅` never applies to `i ∉ univ`.
+        exact (Fintype.card_eq_zero_iff.mp hι).elim i
       have h1 : (1 : BinaryLeavittAlgebra k) = 0 := by
         rw [← u.mul_inv, hu0, zero_mul]
       exact one_ne_zero h1
@@ -92,9 +91,7 @@ theorem pencil_unit_mem [Nontrivial (BinaryLeavittAlgebra k)]
         have hu0 : (u : BinaryLeavittAlgebra k) = 0 := by
           rw [hu]
           refine Finset.sum_eq_zero fun i _ ↦ ?_
-          exact absurd (Finset.mem_univ i)
-            (by rw [Finset.card_eq_zero.mp (by simpa using hι0)]
-                exact fun h ↦ h)
+          exact (Fintype.card_eq_zero_iff.mp hι0).elim i
         exact one_ne_zero (by rw [← u.mul_inv, hu0, zero_mul])
       -- branch 1: column extraction
       by_cases hextT : ∃ v₀ : κ → k, v₀ ≠ 0 ∧
@@ -142,13 +139,10 @@ theorem pencil_unit_mem [Nontrivial (BinaryLeavittAlgebra k)]
         · -- both stacks full: the terminal
           obtain ⟨N, hNpos⟩ := entry_window_nonpos_of_B_full k R C hC
             A₀ A₁ Cm B₀ B₁ u hu G₀ G₁ hG
+          -- `stack_left_inverse_or_kernel` on the transposed stack already
+          -- produces `∑ j, (H₀ i j * A₀ i' j + …)`, the shape wanted here.
           obtain ⟨N', hNneg⟩ := entry_window_nonneg_of_A_full k R hR C
-            A₀ A₁ Cm B₀ B₁ u hu H₀ H₁ (by
-              intro i i'
-              have h := hH i i'
-              rw [Finset.sum_congr rfl (fun j _ ↦ by
-                rw [mul_comm (H₀ i j), mul_comm (H₁ i j)])] at h
-              exact h)
+            A₀ A₁ Cm B₀ B₁ u hu H₀ H₁ hH
           exact balanced_entries_mem_stableUnits k hdiv R hR C hC u
             (fun j i ↦ mem_balanced_of_nonpos_nonneg k
               (hNpos j i) (hNneg j i))
