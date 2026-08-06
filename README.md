@@ -262,10 +262,71 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     `NarrowReduction` (units with value in the `[-1,1]` window lie in
     the central class group), from which `ScalarReduction`, B4, and
     `GL₂/GL₄ = EL₂/EL₄` all follow by formalized theorems.  The
-    remaining mathematics for `NarrowReduction` is reduced to two
-    lemmas — (G) invertibility of the γ-invariant for units, and (i)
-    nilpotent tails of general index — with the index-2 case proved
-    and the attack recorded in `BUILD_ITERATION_NOTES.md`
+    `NarrowReduction` program (attack log in
+    `BUILD_ITERATION_NOTES.md`; the most recent modules are written
+    and registered, pending the next green build):
+    - [x] Theorem (P), the keystone (`ZeroKOne`
+      `balanced_component_isUnit`): balanced parts of `[0,1]`-window
+      units are invertible — the elementary replacement for the cited
+      `[AraBrustengaCortinas09]` input, via the rank normal form,
+      graded inverse components, downward elimination to a corner
+      identity, and a geometric shape-matrix rank contradiction
+    - [x] pure-tail nilpotency (`PureTailNilpotency`), the κ-corner
+      transports, the nilpotent-tail kill (`NilpotentTailKill`), and
+      the width-two window kill (`WidthTwoReduction`)
+    - [x] `GammaDischarge`: units `1 + s₁(z₋ + z₀)` lie in the class
+      group, discharging the earlier γ-reduction hypotheses
+    - [x] the generalized block-move kill (`BlockMoveTailKill`,
+      `WindowNonnegReduction`): every `[0, N]`-window unit lies in
+      `H`, for every `N` and arbitrary balanced part
+    - [x] the θ anti-automorphism with elementary-group stability and
+      the mirrored `[-N, 0]`-window kill (`OppositeTranspose`,
+      `ThetaStable`, `WindowNonposReduction`)
+    - [x] code-change units and the Higman–Thompson generation
+      theorem (`CodeChangeInfrastructure`, `CodeChangeSwap`,
+      `CodeChangeUnits.codeChange_mem_stableUnits`): the value of any
+      complete-code pair list is a unit of the diagonal class group
+    - [x] the rank-one normal form (`RankOneNormalForm`): every
+      narrow unit is equivalent mod `H` to one of value `w + s₁t₀₀`
+      with `w` in the `[0,1]` window, by the stable block move with
+      `P` the whole degree `-1` part and `Q = 1` through the
+      mixed-depth code `{00, 01, 1}` — no invertibility hypotheses
+    - [x] the structure theorem for nonnegative narrow units
+      (`NonnegUnitStructure`): every `[0,1]`-window unit factors as
+      (invertible balanced)·(unipotent with nilpotent pure tail);
+      inverses of such units have nonnegative windows
+    - [x] the pencil move generators (`PencilCore`): scalar-matrix
+      embeddings and disjoint-support block unipotents transport
+      into `H` through the depth-`n` matrix picture
+    - [x] the scalar-pencil form (`PencilForm`): at a deep corner
+      level every narrow element is a word-indexed matrix with
+      entries `A₀ᵢⱼ•t₀ + A₁ᵢⱼ•t₁ + Cᵢⱼ•1 + B₀ᵢⱼ•s₀ + B₁ᵢⱼ•s₁` for
+      five scalar matrices
+    - [x] the window dichotomy (`WindowDichotomy`): if the degree
+      `+1` part is left-full (`g₀(t₀b) + g₁(t₁b) = 1`) then the
+      inverse has a nonpositive window and the unit lies in `H`;
+      mirror when the degree `-1` part is right-full — the two
+      terminal branches of the elimination
+    - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
+      `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
+      rows split off invertible `τ/ς` shift blocks by an exact
+      block-unipotent elimination (`τ·τ' = I` on both sides), the
+      extracted middle block being the original sub-block verbatim
+    - [ ] the refinement move and the round recursion: `s`-free
+      pencil columns split into their two children (the Wiener–Hopf
+      index shift — a pure re-indexing, no multiplication), and the
+      extracted middle re-transports along mixed-size complete codes
+      to an honest narrow unit of strictly smaller pencil size;
+      machine-tested (120/120 random narrow units reach extraction
+      within ≤ 2 refinements) — the termination proof and the
+      code-relative statements remain to be written
+    - [ ] `NarrowDischarge`: assemble the trichotomy (window-kill /
+      extract / refine-and-recurse) into `NarrowReduction k`, closing
+      the chain `NarrowReduction → ScalarReduction → B4 → GL = EL`
+    - [ ] cleanup: retire or derive the `TriangularFactorization`
+      scaffolding from the completed pipeline, refresh the stale
+      docstrings on the three main theorems, clear the audit flags,
+      and re-run the full build
   - [ ] B5. `L^×` perfect and `GL_r(L) = EL_r(L)` for every `r ≥ 2`
     (`prop:glel`).  Route fixed: `GL₄(L) = GL₂(M₂(L))` and `M₂(L) ≅ L`
     inherits the strong division property through the self-similarity
