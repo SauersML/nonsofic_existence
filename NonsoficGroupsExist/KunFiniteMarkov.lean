@@ -34,9 +34,10 @@ theorem sofic_one_hilbert_error_eventually
   have hcard : 0 < Fintype.card (A.model n) := by
     have := hNcard n hncard
     omega
-  letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  have hmodel : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  letI := hmodel
   have hbound :=
-    normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
+    normalized_norm_permutationOperators_centeredIndicator_sub_sq_le hmodel
       (A.map n 1) 1 U
   rw [permutationOperator_one] at hbound
   exact hbound.trans_lt (by linarith [hNerr n hnerr])

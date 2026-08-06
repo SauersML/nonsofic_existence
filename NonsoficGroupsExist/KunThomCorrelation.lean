@@ -30,9 +30,13 @@ theorem norm_graphVector_sq_le (c : Equiv.Perm Y) :
   · haveI : IsEmpty Y := Fintype.card_eq_zero_iff.mp hcardZero
     have hzero : graphVector c = 0 := Subsingleton.elim _ _
     simp [hzero]
-  letI : Nonempty Y :=
+  have hne : Nonempty Y :=
     Fintype.card_pos_iff.mp (Nat.pos_of_ne_zero hcardZero)
-  rw [graphVector, norm_centeredIndicator_sq, card_permutationGraph]
+  letI := hne
+  -- `graphVector` lives over `Y × Y`, so that is the model whose nonemptiness
+  -- the variance formula now asks for by name.
+  have hprod : Nonempty (Y × Y) := inferInstance
+  rw [graphVector, norm_centeredIndicator_sq hprod, card_permutationGraph]
   have hcard : (0 : ℝ) < Fintype.card Y := by
     exact_mod_cast Nat.pos_of_ne_zero hcardZero
   have hdensity : (0 : ℝ) ≤
