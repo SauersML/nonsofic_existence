@@ -1047,3 +1047,59 @@ WRITTEN: GammaReduction.lean (complete, hypotheses explicit).
   pure-singular case 1 + s₁z₋ + [tail coupling only to the regular
   part] should force the M=1 system into the instance-1 pattern
   where positive-side equations kill y₀'s p₀-part).
+
+## Session 24: MAJOR — (G) reduced to one finite-dim case; three new theorems
+REFORMULATION (P): u = 1+s₁z flips to v = γ + z₀s₁ ∈ window [0,1]
+with BALANCED PART γ.  So (G) ⟺ (P): every [0,1]-window unit
+w = c + ζ (c balanced, ζ ∈ L₁) has c invertible.  If (P): w = c(1+c⁻¹ζ),
+pure positive tail, nilpotent automatically (below), done — NO
+dynamics needed, GammaReduction's hypotheses all discharge.
+
+NEW THEOREM 1 (no homogeneous units): L(1,2) has no units of pure
+degree d ≠ 0.  Proof: pad w to level matrices: W is 2^p×2^q with
+p−q = d ≠ 0; WX = I_{2^p}, XW = I_{2^q} impossible by rank.  Also the
+ONE-SIDED version for d ≥ 1: a degree-(+1) element with a RIGHT
+inverse of degree −1 is impossible (tall matrix ΞΡ = I_{2D}, rank ≤ D).
+
+NEW THEOREM 2 (automatic nilpotency): unit 1 + ζ, ζ pure positive
+degree ⟹ ζ nilpotent.  Proof: inverse x = Σx_d; degree recursion
+x_d = δ_{d0} − ζx_{d−1} from the bottom: negative components vanish
+(x_m = 0 for m < 0 directly!), x_0 = 1, x_d = (−ζ)^d, finite support
+⟹ ζ^{M+1} = 0.  [Formalize via graded decomposition extraction.]
+
+NEW THEOREM 3 (γ upgrade): 1+ẑ (ẑ balanced level q) invertible in L
+⟺ invertible in B_q ≅ M_{2^q}(k) (singular matrix ⟹ zero divisor);
+inverse automatically balanced.  So GammaReduction's hginv is free.
+
+CORNER NORMAL FORM: mod H (balanced pivot units), any [0,1]-unit
+becomes w = e + ζ, e = diagonal cylinder idempotent, f := 1−e.
+FULL cross-corner unipotent toolkit: 1 + eηf, 1 + fηe ∈ H for ANY η
+(a := eη, b := f, ba = 0 — mem_stableUnits_of_val_unipotent!).
+
+CASE ANALYSIS on x := w⁻¹'s lowest degree m (c singular ⟺ m < 0):
+- degree-0 f-compressions (hold for ALL m): (fx₋₁)(ζf) = f and
+  (fζ)(x₋₁f) = f.  So ζf INJECTIVE (left-invertible), fζ surjective.
+- m = −1: x₋₁ = fx₋₁f (from ex_m = 0 = x_me) ⟹ ξ := fζf is
+  INVERTIBLE in corner fLf ≅ (amplified) L, homogeneous degree 1
+  ⟹ contradiction by Theorem 1.  **m = −1 IMPOSSIBLE.**
+- rank bound (all m): ζ_{fe}(ex₋₁f) + ξ(fx₋₁f) = f = I_{2D} at level:
+  rank ≤ E + D ⟹ **E ≥ D: singular balanced part has rank ≥ 1/2.**
+- equality E = D: forces Ξ full column rank (injective); but for
+  m ≤ −2: x_m = fx_mf ≠ 0 with ξx_m = 0 ⟹ x_m = 0 contra.
+  **E = D IMPOSSIBLE for m ≤ −2.**
+- REMAINING: m ≤ −2, E > D strictly.  Chain equations: fζx_d = 0 and
+  x_dζf = 0 for m ≤ d ≤ −2; im(ζf) ⊆ ker X_d; x_d = β_dx₀ − β_{d+1}x₋₁
+  (β_d := x_de) for d ≤ −2, β_m·(from x_me = 0)... plus twisted trace.
+
+MODULAR TRACE: normalized trace τ on L₀ (level-invariant); for
+y ∈ L_d, z ∈ L_{−d}: 2^d·τ(yz) = τ(zy) (rectangular trace identity).
+Gives τ(ex₀e) = 1 (all char, incl. char 2 — state multiplied form).
+No positivity over 𝔽₂ (the MAIN case is 𝔽₂!) so trace alone can't
+finish; it's one more constraint on the remaining case.
+
+NEXT: (a) attack m ≤ −2, E > D by the β-recursion + padding rigidity
+(the M=1 hand-case died by ⊗I₂-parallelism — generalize); AND
+(b) actively search for a counterexample unit (rank e = 3·2^{q}/4,
+m = −2 ansatz).  Even if (P) fails, mod-H moves + corner toolkit give
+the fallback.  Meanwhile: Theorems 1–3 + corner form are formalizable
+NOW and are needed regardless.
