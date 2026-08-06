@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.MainResults
+import NonsoficGroupsExist.UnitsGLProfile
 import NonsoficGroupsExist.SoficPositiveControl
 import NonsoficGroupsExist.KunDecomposition
 import NonsoficGroupsExist.KunThomTheorem
@@ -57,3 +58,9 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.BinaryLeavitt.glTwo_eq_elementary_holds
 #print axioms NonsoficGroupsExist.BinaryLeavitt.glFour_eq_elementary_holds
 #print axioms NonsoficGroupsExist.BinaryLeavitt.K1_trivial
+
+-- The unit-group and general-linear profiles (Theorem B(i) closed): finite
+-- generation, infinitude, property (T), and nonsoficity of `L_k(1,2)ˣ` and
+-- of every positive-rank `GL_r` over every finite field.
+#print axioms NonsoficGroupsExist.binaryLeavittUnits_profile
+#print axioms NonsoficGroupsExist.binaryLeavittGL_profile
