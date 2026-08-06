@@ -700,3 +700,32 @@ z₋s₁ balanced: use IT as data — u = 1 + s₁z: FLIP: [1+s₁z] =
 form IS 1 + z₋s₁: run sr1 on the OTHER side/dual pivot, or note
 (1+zs₁)-unit with balanced-part-singular still fine — kill z₀s₁-part
 against it...  CONTINUE HERE NEXT MATH TURN.
+
+## Session 15c: the γ-invariant — NarrowReduction reduces to TWO lemmas
+Define γ(1 + s₁z) := 1 + z₋s₁ (balanced).  Facts derived:
+- γ is MULTIPLICATIVE on [−1,0]-form products:
+  γ((1+s₁a)(1+s₁b)) = γ(a-form)·γ(b-form)  [only (−1,−1) hits deg −1].
+- γ is INVARIANT under both free families (t₀s₁ = 0 protects it) and
+  transforms by left-mult under the loop (c₂' = û⁻¹(1 + z₋s₁)) and by
+  conjugation under block-diagonal moves — its (non)invertibility is
+  an invariant of all known moves.
+- If γ invertible: flip + absorb: [1+s₁z] = [1+zs₁] = [γ]·[1+γ⁻¹z₀s₁]
+  = [1 + s₁γ⁻¹-moved z₀-pure form] ⟹ z₋ = 0 case ⟹ tail NILPOTENT
+  (classification) ⟹ kill by (i).
+NARROWREDUCTION ⟸ (G) + (i):
+(G): u = 1 + s₁z unit ⟹ γ = 1 + z₋s₁ invertible in the balanced
+  algebra.  [Test-verified on κ₁-images (⟺ unit-condition), free
+  movers (γ = 1), products (multiplicativity).  Attack: the
+  (XX_d)-system (1+s₁z₋)y_d = [d=0] − s₁z₀y_{d−1} plus py_d-facts
+  downward induction; or stream-representation invertibility
+  restricted to a γ-detecting subspace.]
+(i): 1 + s₁z₀ with (s₁z₀)^D = 0 ⟹ ∈ H.  Index 2 PROVED
+  (square_zero_tail_mem_stableUnits, written).  General D: filtration
+  splitting compatible with ψ(e) = t₁es₁, or dyadic induction via
+  [1+n]² = [1+n²]-char-2-plus-odd-part, or flag idempotents from
+  vN-regularity of the P_k := (z₀s₁)^k z₀ kernel chain.
+Also: entry into 1+s₁z-form from the [−1,1]-window: [window-unit] =
+[c + s₁w-funnel-output] — then LEFT-round (sr1-pivot) gives the
+1 + s₁z-form; both formalizable with existing machinery (sr1 needs
+the element-level block dictionary — the remaining nontrivial
+formalization plumbing).
