@@ -213,6 +213,7 @@ import NonsoficGroupsExist.EntrywiseKill
 import NonsoficGroupsExist.StackDichotomy
 import NonsoficGroupsExist.RefinedCodes
 import NonsoficGroupsExist.BalancedCodePencil
+import NonsoficGroupsExist.EntrywiseKillMirror
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

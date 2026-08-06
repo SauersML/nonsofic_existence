@@ -222,14 +222,11 @@ theorem balanced_entries_mem_stableUnits
         -- the summand is `if q = q'` with `q'` bound, which is the unprimed
         -- lemma; `sum_ite_eq'` matches `if q' = q`.
         rw [Finset.sum_ite_eq Finset.univ q, if_pos (Finset.mem_univ q)]
-        rw [Algebra.smul_def, map_mul]
-        rw [show L.wordS (CM.word p) *
-            algebraMap k (BinaryLeavittAlgebra k) (W' p q) *
-            (algebraMap k (BinaryLeavittAlgebra k) (v₀ q)) =
-          L.wordS (CM.word p) *
-            (algebraMap k (BinaryLeavittAlgebra k) (W' p q) *
-              algebraMap k (BinaryLeavittAlgebra k) (v₀ q)) from by
-            noncomm_ring, ← map_mul]
+        -- `Algebra.smul_def` on its own lands `algebraMap (v₀ q)` on the
+        -- *left* of `wordS`, which no reassociation can undo.  Push the
+        -- scalar through the product first, then expand it.
+        rw [← mul_smul_comm, Algebra.smul_def, ← map_mul,
+          mul_comm (v₀ q)]
       rw [Finset.sum_congr rfl fun q _ ↦ hcol q, ← Finset.mul_sum,
         ← map_sum, hv p, map_zero, mul_zero]
     have hx₀0 : x₀ = 0 := by
@@ -312,13 +309,16 @@ theorem balanced_entries_mem_stableUnits
       simpa [Matrix.mulVecLin_apply, Matrix.mulVec, dotProduct]
         using h
     have hf2 : Function.Injective
-        (Matrix.mulVecLin (Matrix.of W')ᵀ) := by
+        -- `ᵀ` is scoped notation in `Matrix`, which this file does not open.
+        (Matrix.mulVecLin (Matrix.of W').transpose) := by
       rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
       intro v hv
       refine hinj' v fun q ↦ ?_
       have h := congrFun hv q
-      simpa [Matrix.mulVecLin_apply, Matrix.mulVec, dotProduct,
-        Matrix.transpose_apply, mul_comm] using h
+      -- `mulVec_transpose` fires before `mulVec` can unfold, so `h` arrives as
+      -- a `vecMul`; that head has to be in the simp set too.
+      simpa [Matrix.mulVecLin_apply, Matrix.mulVec, Matrix.vecMul,
+        dotProduct, Matrix.transpose_apply, mul_comm] using h
     have h1 := LinearMap.finrank_le_finrank_of_injective hf1
     have h2 := LinearMap.finrank_le_finrank_of_injective hf2
     rw [Module.finrank_pi, Module.finrank_pi] at h1
@@ -349,7 +349,8 @@ theorem balanced_entries_mem_stableUnits
     rw [hω, L.codePairUnit_val]
     exact L.codeDelta_collapse (fun p ↦ RM.word (e p)) CM.word
   have hωmem : ω ∈ stableUnits (BinaryLeavittAlgebra k) :=
-    L.codeBijection_mem_stableUnits hdiv (fun p ↦ RM.word (e p))
+    -- the base field is implicit and no other argument pins it down
+    L.codeBijection_mem_stableUnits (k := k) hdiv (fun p ↦ RM.word (e p))
       CM.word
       (fun p q hpq h ↦ RM.prefix_free
         (fun hh ↦ hpq (e.injective hh)) h)
@@ -419,10 +420,6 @@ theorem balanced_entries_mem_stableUnits
   have hfinal : u⁻¹ = ω⁻¹ * (ω * u⁻¹) := by group
   rw [hfinal]
   exact mul_mem (inv_mem hωmem) hu₂mem
-
-end BinaryLeavitt
-end NonsoficGroupsExist
-
 
 end BinaryLeavitt
 end NonsoficGroupsExist
