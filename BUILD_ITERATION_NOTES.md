@@ -1687,3 +1687,38 @@ mathematics settled in sessions 24–25:
   into itself to express P_{-1} = 0 as (grouped polynomial in A, B
   acting on seeds) — the resulting identity at the bottom is the
   nilpotency statement.  FINISH NEXT TURN.
+
+## Session 32: THE COMPILE SWEEP IS DONE — full tree GREEN (3723 jobs)
+All ~20 previously-unverified modules now compile with
+-DwarningAsError=true, INCLUDING:
+- NilpotentTailKill (lemma i′), GammaReduction, TailSupportReduction,
+  ResidualMoves, ResidualReduction, WindowProductClosure,
+  BalancedRegularity, IncomparableUnipotents,
+- ShapeCalculus, GradedComponents, DegreeShapeBridge,
+  CylinderCornerRank (both rank certificates),
+- PureTailNilpotency (Theorem 2), RankNormalForm (Theorem 3),
+- **ZeroKOne (THEOREM (P)) — the manuscript's [ABC09] K₁-input
+  replacement is now MACHINE-VERIFIED**,
+- WidthTwoReduction (window_zero_one_mem_stableUnits) — the complete
+  width-2 chain, first-try green.
+Fix-log highlights (for future reference): z₋-subscript-minus is not
+a valid Lean ident; beta-redexes block rw after refine-with-lambda
+(beta_reduce); noncomm_ring CANNOT float -1• out of mid-product
+factors — isolate negation in pure-rewrite pow-identities
+(hpow0-pattern) and distribute subs with mul_sub/sub_mul + congr
+before noncomm_ring; Even.neg_pow needs explicit base arg;
+prefixCode_orthogonal needs an ofFn-typed have-binding;
+obtain-destructuring clears the source hypothesis;
+Matrix rank_add_le doesn't exist at pin (proved matrix_rank_add_le
+via finrank_sup_add_finrank_inf_eq + finrank_mono);
+exists_mulVec_eq_zero_iff lives in ToLinearEquiv;
+isUnit_of_mul_eq_one absent — det-route via
+left_ne_zero_of_mul_eq_one; Units.coe_map_inv not map_inv;
+Int intervals: Mathlib.Data.Int.Interval.
+AUDIT: full build green; audit flags = exactly the width-3 frontier:
+LAUNDERED_PROP [NarrowReduction def], UNUSED [rank-normal-form &
+pseudo-inverse chains awaiting the final wiring], STALE_DISCLAIMER
+[3 main-theorem docstrings to update at assembly time].
+REMAINING: width-3 math (A-nilpotency finish + swap-cascade supply),
+its formalization, NarrowReduction proof + assembly, docstring
+updates, final audit.
