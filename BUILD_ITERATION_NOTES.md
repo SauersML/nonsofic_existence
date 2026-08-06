@@ -1997,3 +1997,21 @@ B4/docstrings.  NO other mathematics remains.
   mirror-window-nonneg ⟹ [−N, 0]-window units die.  Then the final
   mixing question is sharply: value = c + A + B with A ≠ 0 ≠ B, and
   the two one-sided theorems + abelian Units/H available.
+
+## Session 37c: the endgame statement — Bruhat/LPU over the tree
+With both one-sided theorems (nonneg compiled-track + mirror chain to
+write) and V-elements ∈ H (swaps + 3-cycles; Higman–Thompson
+generation), the remaining gap is exactly:
+**(LPU) every narrow unit factors mod H as
+  (nonneg-window unit)·(V-element)·(nonpos-window unit)** —
+the Leavitt/tree analog of banded-operator triangular factorization
+(the V-pivot absorbs the band's index, cf. the conservation law).
+Attack: strip the bottom degree: rank-normalize A_{−M} to a canonical
+partial isometry τ_r (compiled machinery), multiply by the matching
+rebalancer ω_r ∈ H; bookkeeping of what re-enters the bottom is the
+termination question — weighted-depth measure candidate.
+This is classical-shaped (Birkhoff via Gauss with pivots).  Next
+session: (1) write the mirror chain (mechanical, ~4 modules:
+mirror-(P) via xw-side, mirror-PureTail, mirror-κ-transport pieces,
+mirror-WidthTwo/window-nonpos); (2) prove LPU by bottom-stripping
+with the weighted measure; (3) V-generation lemma; (4) assembly.
