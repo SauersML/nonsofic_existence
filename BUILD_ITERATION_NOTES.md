@@ -1383,3 +1383,41 @@ mathematics settled in sessions 24–25:
   RingHom.mapMatrix_apply, Matrix.diagonal_map hypothesis.
 - Registered in aggregator.  NEXT: ZeroKOne.lean (the (P) keystone —
   see 25d roadmap step 4), then WidthTwoReduction, then width-3 math.
+
+## Session 27: THE KEYSTONE IS WRITTEN — ZeroKOne.lean and supports
+- DegreeShapeBridge.lean: exists_ofFn_eq, monomial_mem_shapeSpan
+  (r-induction over trailing pads), exists_shapeSpan_of_degreeSpan
+  (uniform interface thresholds via span_induction + max),
+  shapeRep_add, shapeRep_finsetSum, rank_finsetSum_le
+  (RISKS: Matrix.rank_add_le, Matrix.rank_zero, Finset.induction_on
+  case-binder names).
+- CylinderCornerRank.lean: appendFun + ofFn_appendFun
+  (List.ext_getElem / getElem_ofFn / getElem_append — API RISK),
+  appendFun_injective, wordT_cylSum_wordS (full delta computation),
+  cylSum_mem_shapeSpan, card_le_rank_of_shapeRep_cylSum (U·M·V = 1
+  certificate over {γ // γ ∈ T} × (Fin (ℓ−n) → Fin 2); rank_one,
+  rank_mul_le_left/right, Fintype.card_fun), and
+  rank_le_card_of_shapeRep_cylSum (per-cylinder s_γ·t_γ isometry
+  factorization; rank_le_card_width RISK).
+- ZeroKOne.lean: balanced_component_isUnit — the FULL (P) proof:
+  by_contra; rank normal form ⟹ e, f = Σ_T cylinders, T ≠ ∅;
+  hcyl/hfe/hff orthogonality; w := g·u·h with value e + ζ';
+  graded components of w⁻¹ + componentwise equations (same
+  sum-splitting pattern as PureTailNilpotency); hsubst
+  (y d = f·y d − ζ'·y (d−1) for d ≤ −1, both in-window and
+  out-of-support cases); the remainder induction hclaim
+  (GG j := f·ζ'·(−ζ')^j, YY j := f·(y(−1−j)·f) — NOTE: GG has NO
+  trailing f so the induction is pure noncomm_ring + pow_succ; hff
+  needed only in the base case); termination at M := (−lo).toNat;
+  interface ℓ := n + M + 1 + B (B := sup of shape thresholds);
+  dependent choose over range M with attach-sums (Finset.sum_attach);
+  lower bound via card_le_rank_of_shapeRep_cylSum, upper via
+  factor-through-Mf; geometric-sum contradiction (sum_range_reflect,
+  sum_two_pow, mul_lt_mul_of_pos_left, pow_pos).
+  RISKS: Finset.sum_ite_eq' arg-order, Finset.sum_mul_sum shape,
+  add_eq_zero_iff_eq_neg, attach/sum_attach forms, set-vs-rw
+  interactions, `simp only [] at` beta-reduction usages.
+- All registered in aggregator.  REMAINING: WidthTwoReduction.lean
+  (assembly: (P) + Theorem 3 + κ₁-transport + NilpotentTailKill ⟹
+  every [0,1]-window unit ∈ H); the width-3 → width-2 mathematics;
+  then NarrowReduction assembly and the compile-and-fix sweep.

@@ -172,6 +172,9 @@ import NonsoficGroupsExist.ShapeCalculus
 import NonsoficGroupsExist.GradedComponents
 import NonsoficGroupsExist.PureTailNilpotency
 import NonsoficGroupsExist.RankNormalForm
+import NonsoficGroupsExist.DegreeShapeBridge
+import NonsoficGroupsExist.CylinderCornerRank
+import NonsoficGroupsExist.ZeroKOne
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
