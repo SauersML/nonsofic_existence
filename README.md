@@ -246,11 +246,26 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
     span `span{s_α t_β : |α|=|β|=n}` have scalar matrix entries and
     hence lie in `centralClassGroup`).  Combined with the central
     collapse `c̄ = c̄²` this puts every degree-zero unit in `H`.
-    Remaining: the Laurent width-reduction (arbitrary unit ≡
-    degree-zero unit modulo elementary moves, by Higman-style
-    linearization with `s₀`/`t₀`-entry transvections — plan and the
-    graded normal form recorded in `BUILD_ITERATION_NOTES.md`), and
-    the `2^m`-generalization of the one-step unstable descent
+    The Laurent width-reduction is now FORMALIZED
+    (`LeavittWindowReduction`, `BinaryLeavittWindow`: every unit
+    narrows to degrees `[-1,1]` mod the diagonal class), as are
+    graded independence over every field (`ScaledStreamRepresentation`,
+    `VandermondeExtraction`, `GradedIndependence`,
+    `BaseChangeIndependence`), stable rank one with its balanced
+    transport (`StableRankOne`, `BalancedStableRank`), the Whitehead
+    flip `[1+xy] = [1+yx]` (`WhiteheadFlip`), the residual normal-form
+    transports (`ResidualNormalForm`, `ResidualMoves`), balanced von
+    Neumann regularity with the square-zero-tail kill
+    (`BalancedRegularity`), and the descent at every matrix size
+    (`FamilyDescent`).  The whole chain is wired in
+    `ResidualReduction`: the single remaining input is
+    `NarrowReduction` (units with value in the `[-1,1]` window lie in
+    the central class group), from which `ScalarReduction`, B4, and
+    `GL₂/GL₄ = EL₂/EL₄` all follow by formalized theorems.  The
+    remaining mathematics for `NarrowReduction` is reduced to two
+    lemmas — (G) invertibility of the γ-invariant for units, and (i)
+    nilpotent tails of general index — with the index-2 case proved
+    and the attack recorded in `BUILD_ITERATION_NOTES.md`
   - [ ] B5. `L^×` perfect and `GL_r(L) = EL_r(L)` for every `r ≥ 2`
     (`prop:glel`).  Route fixed: `GL₄(L) = GL₂(M₂(L))` and `M₂(L) ≅ L`
     inherits the strong division property through the self-similarity
