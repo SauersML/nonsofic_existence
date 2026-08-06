@@ -286,16 +286,11 @@ instance : Inner ℝ (ULift.{w} F) := ⟨fun a b ↦ inner ℝ a.down b.down⟩
 @[simp] theorem inner_ulift (a b : ULift.{w} F) :
     inner ℝ a b = inner ℝ a.down b.down := rfl
 
-instance : InnerProductSpace ℝ (ULift.{w} F) where
-  norm_sq_eq_re_inner a := by
-    simpa [ULift.norm_def] using
-      norm_sq_eq_re_inner (𝕜 := ℝ) (E := F) a.down
-  conj_inner_symm a b := by
-    simpa using real_inner_comm b.down a.down
-  add_left a b c := by
-    simpa using inner_add_left (𝕜 := ℝ) a.down b.down c.down
-  smul_left a b r := by
-    simpa using real_inner_smul_left a.down b.down r
+noncomputable instance : InnerProductSpace ℝ (ULift.{w} F) where
+  norm_sq_eq_re_inner a := norm_sq_eq_re_inner (𝕜 := ℝ) a.down
+  conj_inner_symm a b := inner_conj_symm (𝕜 := ℝ) a.down b.down
+  add_left a b c := inner_add_left (𝕜 := ℝ) a.down b.down c.down
+  smul_left a b r := inner_smul_left (𝕜 := ℝ) a.down b.down r
 
 /-- The universe lift of a real inner product space is isometric to it. -/
 def uliftIsometry : ULift.{w} F ≃ₗᵢ[ℝ] F where
@@ -304,6 +299,9 @@ def uliftIsometry : ULift.{w} F ≃ₗᵢ[ℝ] F where
 
 @[simp] theorem uliftIsometry_apply (a : ULift.{w} F) :
     uliftIsometry a = a.down := rfl
+
+@[simp] theorem uliftIsometry_symm_apply (a : F) :
+    (uliftIsometry.symm a : ULift.{w} F) = ULift.up a := rfl
 
 /-- A linear isometry equivalence lifted to a higher universe. -/
 def uliftEquiv (f : F ≃ₗᵢ[ℝ] F) : ULift.{w} F ≃ₗᵢ[ℝ] ULift.{w} F :=
