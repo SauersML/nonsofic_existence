@@ -101,7 +101,6 @@ open LeavittFamily
 
 variable (k : Type) [Field k]
 
-set_option maxHeartbeats 1000000 in
 /-- **`GL_n = EL_n` at every rank `n ≥ 2`**, as a subgroup equality,
 over every field.  Even ranks are reached from rank two by coefficient
 transport and block flattening; every rank is then reached back down
