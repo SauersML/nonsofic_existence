@@ -2481,3 +2481,37 @@ NEXT (M3–M6): Smith-on-C elimination; C=0 branch dichotomy (parity,
 rank arguments on 𝔅/Ā via graded equations of the inverse matrix);
 the τ/ς extraction recursion; NarrowDischarge.  See session 43 notes
 for the complete paper proof.
+
+## Session 43c: CORRECTION to the elimination — Step 0 (Smith-on-C +
+## pivot clearing) as stated is WRONG; corrected recursion derived
+BUG: after Smith on C the pivot entries are 1 + (odd content), not
+clean scalars; Gaussian clearing multiplies odd·odd and creates
+degree-±2 debris, leaving the pencil class.  Block-UDL needs the
+pivot block invertible — not available.  So DROP Step 0.
+FIX: run the τ/ς-extraction on FULL pencils (C included):
+- Pure-t columns exist ⟺ ker [B₀; B₁; C] ≠ 0 (the C-row joins the
+  stack); pure-s rows ⟺ coker (A₀ | A₁ | C) ≠ 0.
+- The extraction + exact elimination (τ_bτ_b' = I_{2b}, ς_a†ς_a =
+  I_{2a}) go through verbatim; crucially the correction terms kill
+  entire row/column blocks EXACTLY, so the middle block M̃ is the
+  ORIGINAL sub-block verbatim — still a (full) pencil.  One-sided
+  extraction (only τ or only ς available) also recurses fine.
+- Branches: (a) both stacks deficient → extract both, recurse;
+  (b)/(c) one deficient → extract one, recurse; sizes strictly drop.
+- (d) BOTH stacks full column/row rank: THE REMAINING OPEN CASE
+  (parity closed it when C = 0; with C present the top-equation
+  chain is B∘x_T = 0; C x_T + B∘x_{T-1} = 0; … — a Wiener–Hopf
+  filtration argument is needed).  Examples in (d): V = 1;
+  V = 1 + nilpotent-odd-triangular (units ✓).  CONJECTURE (d):
+  forces C invertible, and then C⁻¹V = 1 + W with W odd and the
+  even-odd decoupling ((1+W) unit ⟺ (1−W²) unit with even inverse)
+  or a direct filtration closes it.  NOT YET PROVED.
+- Rectangular pure-inverse branches from the C = 0 analysis
+  (V = ς·G, V = G·τ) reappear inside (b)/(c) terminals — re-derive
+  with C when writing.
+STATUS: M1 (PencilCore) + M2 (PencilForm) written and registered.
+M3 next = pencilVal transport lemmas (scalar-GL congruence action on
+the five matrices; single incomparable-unipotent col/row ops at the
+value level) — independent of the branch analysis, safe to build.
+M4 = the dichotomy + extraction; its (d)-case needs the filtration
+derivation FIRST (paper math next session).

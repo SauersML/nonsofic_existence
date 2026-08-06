@@ -1,6 +1,8 @@
 import NonsoficGroupsExist.GradedComponents
 import NonsoficGroupsExist.BalancedStableRank
 import NonsoficGroupsExist.LeavittWindowReduction
+-- `window_mul_mem_span` lives here
+import NonsoficGroupsExist.WindowProductClosure
 
 /-!
 # The scalar-pencil form of narrow elements
@@ -42,7 +44,9 @@ theorem wordT_balancedEmbed_wordS (m : ℕ)
       = (L.prefixMatrixFamily (fullBinaryCode m)
           (L.fullBinaryCode_complete m)).matrixRingEquiv.symm
           (L.balancedEmbed (k := k) m C) i j := rfl
-    _ = algebraMap k A (C i j) := by rw [h]
+    -- `mapMatrix` is definitionally `Matrix.map`, so the residual entry
+    -- equation is `rfl` -- just not at `rw`'s trailing transparency.
+    _ = algebraMap k A (C i j) := by rw [h]; rfl
 
 /-- Split a scalar multiple of a `t`-generator over the two slots. -/
 theorem smul_t_expand (z : Fin 2) (α : k) :
@@ -73,12 +77,12 @@ theorem pencil_entry_A {m : ℕ}
         L.wordT (List.ofFn fun r ↦ i r.castSucc) := by
     rw [show List.ofFn i =
       (List.ofFn fun r ↦ i r.castSucc) ++ [i (Fin.last m)] from
-        (List.ofFn_succ' i).trans (List.concat_eq_append _ _),
+        (List.ofFn_succ' i).trans List.concat_eq_append,
       wordT_append]
     simp
   have hSj : L.wordS (List.ofFn j) =
       L.s (j 0) * L.wordS (List.ofFn fun r ↦ j r.succ) := by
-    rw [List.ofFn_succ j, wordS_cons]
+    rw [List.ofFn_succ, wordS_cons]
   have hterm : ∀ z : Fin 2,
       L.wordT (List.ofFn i) * (L.balancedEmbed (k := k) m
           (if z = 0 then Α₀ else Α₁) * L.t z) *
@@ -143,13 +147,13 @@ theorem pencil_entry_B {m : ℕ}
         L.s (j (Fin.last m)) := by
   have hTi : L.wordT (List.ofFn i) =
       L.wordT (List.ofFn fun r ↦ i r.succ) * L.t (i 0) := by
-    rw [List.ofFn_succ i, wordT_cons]
+    rw [List.ofFn_succ, wordT_cons]
   have hSj : L.wordS (List.ofFn j) =
       L.wordS (List.ofFn fun r ↦ j r.castSucc) *
         L.s (j (Fin.last m)) := by
     rw [show List.ofFn j =
       (List.ofFn fun r ↦ j r.castSucc) ++ [j (Fin.last m)] from
-        (List.ofFn_succ' j).trans (List.concat_eq_append _ _),
+        (List.ofFn_succ' j).trans List.concat_eq_append,
       wordS_append]
     simp
   have hterm : ∀ z : Fin 2,
@@ -309,11 +313,17 @@ theorem exists_pencil_form (v : BinaryLeavittAlgebra k)
           L.wordS (List.ofFn i) *
             (L.wordT (List.ofFn i) * v * L.wordS (List.ofFn j)) *
             L.wordT (List.ofFn j) := by
+          -- `mul_sum` fires on the outer product first, so the simp leaves
+          -- `∑ j, ∑ i, …` -- the opposite nesting to the stated goal.  Swap
+          -- the order back before matching the binders, otherwise the two
+          -- `sum_congr`s bind crosswise and demand `C j * v * C i = C i * v * C j`.
           simp only [Finset.sum_mul, Finset.mul_sum]
+          rw [Finset.sum_comm]
           refine Finset.sum_congr rfl fun i _ ↦
             Finset.sum_congr rfl fun j _ ↦ ?_
-          simp only [cylinder]
-          noncomm_ring
+          -- pure re-association of the same five factors; `noncomm_ring`
+          -- bottoms out in `abel_nf`, which has nothing additive to do
+          simp only [cylinder, mul_assoc]
   rw [hpart]
   refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ ?_
   congr 1
