@@ -25,6 +25,7 @@ variable {A : Type*} [Ring A] (L : LeavittFamily A)
 variable {k : Type*} [Field k] [Algebra k A]
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
+omit [Fintype ι] in
 /-- **Block-unipotent moves along any prefix code are in `H`.** -/
 theorem code_unipotent_mem (Ccode : BinaryPrefixCode ι)
     {S T : Finset ι} (hST : Disjoint S T)

@@ -2719,3 +2719,32 @@ BlockMoveTailKill); (ii) the ς-mirror of the peel (or θ-transport);
 (iii) M5 master induction; (iv) the stuck-branch progress theorem
 (one batch refine ⟹ extraction/dichotomy — see session 45b notes for
 the coker-A structural fact); (v) M6 NarrowDischarge; cleanup.
+
+## Session 46b: peel-normalization support modules
+- MixedCodeMoves.lean: code_unipotent_mem (block unipotents with
+  disjoint supports along ANY prefix code ∈ H — generalizes
+  PencilCore from uniform depth); t_combo_not_left_invertible
+  (x·(λ₀•t₀ + λ₁•t₁) ≠ 1 via s_z-right-strips forcing s₁ ∈ k·s₀,
+  killed by t·s-corners) — this forces the linear independence of
+  the shift-column pair from unit-column left-invertibility.
+- GLPairNormalization.lean: exists_isUnit_matrix_mulVec_pair —
+  independent pair ↦ (Pi.single i₁ 1, Pi.single i₂ 1) by an
+  invertible matrix: Basis.extend + two-swap index bijection +
+  Basis.equiv + toMatrix'/toLin' transport.  Mathlib-API-heavy
+  (name risks: to_subtype_range, extend_apply_self,
+  fintypeBasisIndex, finrank_pi, basisFun_apply, toLin'_toMatrix').
+NEXT (the extraction-normalization assembly, then M5):
+ exnorm: from a unit-pencil (R,C,E) with kernel data
+ (v₀ scalar, B_z·v₀ = 0, Cm·v₀ = 0, v₀ ≠ 0):
+ (1) right-GL by any G with G⁻¹-hmm column-mix so col j₀ carries
+     E·v₀ (pure-t); value-transform via codePair_mul with
+     codeScalar-data; membership via codeScalar_unit_mem;
+ (2) independence of the resulting (A₀-col, A₁-col) from
+     t_combo_not_left_invertible + the left-invertibility witness
+     T(Cⱼ₀)·u⁻¹ of the column u·S(Cⱼ₀);
+ (3) left-GL from exists_isUnit_matrix_mulVec_pair putting the
+     column into atom shape;
+ (4) right block-unipotent (code_unipotent_mem, support
+     {j₀}×(κ\{j₀})) clearing rows i₁ i₂ exactly (t₀s₀ = 1-cross);
+ (5) atom_peel.  All five composed give: extraction-eligible unit ⟹
+     ∃ smaller-code-pair pencil unit, H-membership equivalent.
