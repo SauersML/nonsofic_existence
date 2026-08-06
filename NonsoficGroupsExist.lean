@@ -144,6 +144,17 @@ import NonsoficGroupsExist.Criterion.CriterionAssembly
 import NonsoficGroupsExist.Leavitt.Leavitt
 import NonsoficGroupsExist.Leavitt.AryCorner
 import NonsoficGroupsExist.Leavitt.FamilyRankFour
+import NonsoficGroupsExist.Leavitt.RawSwapCompressors
+import NonsoficGroupsExist.Leavitt.LeavittOverCommRing
+import NonsoficGroupsExist.Leavitt.IntegralConditional
+import NonsoficGroupsExist.Leavitt.ElementaryPerfect
+import NonsoficGroupsExist.Leavitt.AryProfile
+import NonsoficGroupsExist.Leavitt.SelfSimilarityAlgebra
+import NonsoficGroupsExist.Leavitt.PlaneEmbedding
+import NonsoficGroupsExist.Leavitt.GeneralRankWords
+import NonsoficGroupsExist.Leavitt.GeneralScheme
+import NonsoficGroupsExist.Leavitt.GeneralCornerTheorem
+import NonsoficGroupsExist.Sofic.LEFSofic
 import NonsoficGroupsExist.Leavitt.AryLeavitt
 import NonsoficGroupsExist.Leavitt.AryCornerMatrix
 import NonsoficGroupsExist.Leavitt.AryEndpoints
@@ -233,6 +244,7 @@ import NonsoficGroupsExist.Sofic.Sofic
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls
 import NonsoficGroupsExist.Sofic.SoficErrors
+import NonsoficGroupsExist.Sofic.Normalization
 import NonsoficGroupsExist.Leavitt.Whitehead
 import NonsoficGroupsExist.Covers.KazhdanCover
 import NonsoficGroupsExist.Covers.TableCover
@@ -248,6 +260,7 @@ import NonsoficGroupsExist.Leavitt.UniversalPropertyT
 import NonsoficGroupsExist.Leavitt.UniversalCompressionSetup
 import NonsoficGroupsExist.Leavitt.ThompsonV
 import NonsoficGroupsExist.Leavitt.ThompsonVEmbedding
+import NonsoficGroupsExist.Leavitt.FamilyVEmbedding
 import NonsoficGroupsExist.Leavitt.ThompsonVWitness
 import NonsoficGroupsExist.Leavitt.ThompsonWitness
 import NonsoficGroupsExist.Matching.MatchedComponents

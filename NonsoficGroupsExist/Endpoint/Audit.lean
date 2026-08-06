@@ -11,6 +11,16 @@ import NonsoficGroupsExist.Kazhdan.KazhdanUniverse
 import NonsoficGroupsExist.KOne.RefineLoopDischarge
 import NonsoficGroupsExist.Kazhdan.ShalomFinitePresentation
 import NonsoficGroupsExist.Covers.KazhdanCover
+import NonsoficGroupsExist.Leavitt.FamilyRankFour
+import NonsoficGroupsExist.Leavitt.IntegralConditional
+import NonsoficGroupsExist.Leavitt.RawSwapCompressors
+import NonsoficGroupsExist.Leavitt.SelfSimilarityAlgebra
+import NonsoficGroupsExist.Leavitt.PlaneEmbedding
+import NonsoficGroupsExist.Leavitt.GeneralRankWords
+import NonsoficGroupsExist.Leavitt.GeneralScheme
+import NonsoficGroupsExist.Leavitt.GeneralCornerTheorem
+import NonsoficGroupsExist.Sofic.Normalization
+import NonsoficGroupsExist.Leavitt.FamilyVEmbedding
 
 /-!
 # Human-readable axiom report
@@ -91,3 +101,27 @@ the entire project namespace and fails on anything beyond classical Lean.
 
 -- `lem:fplef`, closed: finitely presented LEF groups are residually finite.
 #print axioms NonsoficGroupsExist.finitelyPresented_isLEF_residuallyFinite
+
+-- `cor:fgring` at the generality the corollary is stated in: any nontrivial
+-- countable finite-type algebra over a finite field carrying a binary Leavitt
+-- family.  The manuscript's margin note names these, so an ordinary build
+-- reports their axioms rather than leaving them to the whole-namespace scan.
+#print axioms NonsoficGroupsExist.FamilyRankFour.ambient_not_isSofic
+#print axioms NonsoficGroupsExist.FamilyRankFour.elementary_not_isSofic
+#print axioms NonsoficGroupsExist.FamilyRankFour.units_not_isSofic
+#print axioms NonsoficGroupsExist.FamilyRankFour.gl_not_isSofic
+
+-- `thm:corner` at every adjacent pair `(m, m + 1)` with `m ≥ 2`, at the
+-- printed hypotheses, and its characteristic-two discharge of the
+-- membership hypothesis (ii).
+#print axioms NonsoficGroupsExist.GeneralCornerTheorem.corner_not_isSofic
+#print axioms NonsoficGroupsExist.GeneralCornerTheorem.corner_not_isSofic_of_charTwo
+
+-- `lem:normalization`: the inverse-compatible normalization of a sofic
+-- approximation is constructed, not just estimated.
+#print axioms NonsoficGroupsExist.SoficApproximation.exists_normalization
+
+-- `prop:vembed`: Thompson's `V` embeds into the unit group of any
+-- nontrivial ring carrying a binary Leavitt family, with `eq:Ug` on tables.
+#print axioms NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily_injective
+#print axioms NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily_tableEquiv

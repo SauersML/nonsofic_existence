@@ -302,4 +302,38 @@ structure MatchingCertificate (K J : Type) [Group K] [Group J] where
         ((generatorGraphVertexEquiv (approx.model n) generatorsK
           (fun k ↦ approx.map n (k, 1))).trans (vertexEquiv n).symm) : ℕ)
 
+/-- **Definition `def:essential`.**  A sequence of graphs is an *essential
+expander sequence* along a diverging vertex scale when it is edit-equivalent
+to an expander sequence: graphs identified vertex by vertex with it, carrying
+one uniform positive Cheeger bound, at negligible edit distance.
+
+Two points where this is the printed definition read literally rather than a
+translation of it.  The vertex sets are identified by an explicit equivalence
+instead of being equal on the nose, which is how every graph in this library
+carries its vertex set; and the divergence `|V(Xₙ)| → ∞` of the printed
+definition is carried by the `AsymptoticScale` against which the edit count is
+negligible, rather than restated.  No degree bound is imposed: the sequences
+this is applied to are `T`-generator graphs, whose degree is at most `2|T|`
+by `generatorGraph_hasDegreeBound`, so a bound here would be a hypothesis
+that is always available and never used. -/
+def IsEssentialExpanderSequence (scale : AsymptoticScale)
+    (X : ℕ → FiniteMultiGraph) : Prop :=
+  ∃ (Y : ℕ → FiniteMultiGraph) (e : ∀ n, (X n).vertex ≃ (Y n).vertex) (h : ℝ),
+    0 < h ∧ (∀ n, (Y n).HasCheegerLowerBound h) ∧
+      scale.Negligible fun n ↦ ((X n).editDistance (Y n) (e n) : ℕ)
+
+/-- The `K`-generator graphs of a matching certificate are an essential
+expander sequence.  This is what the certificate's expansion and edit fields
+say, and it is why `MatchingCertificate` is the formal content of
+Definition `def:essential`: the fields are the existential witnesses. -/
+theorem MatchingCertificate.isEssentialExpanderSequence {K J : Type} [Group K]
+    [Group J] (C : MatchingCertificate K J) :
+    IsEssentialExpanderSequence C.approx.cardScale
+      (fun n ↦ generatorGraph (C.approx.model n) C.generatorsK
+        (fun k ↦ C.approx.map n (k, 1))) :=
+  ⟨C.graphs,
+    fun n ↦ (generatorGraphVertexEquiv (C.approx.model n) C.generatorsK
+      (fun k ↦ C.approx.map n (k, 1))).trans (C.vertexEquiv n).symm,
+    C.cheeger, C.cheeger_pos, C.expands, C.edit_negligible⟩
+
 end NonsoficGroupsExist

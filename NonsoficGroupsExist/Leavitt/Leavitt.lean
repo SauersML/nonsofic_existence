@@ -291,6 +291,11 @@ theorem infinite (L : LeavittFamily A) [Nontrivial A] : Infinite A := by
   rw [← L.sum_range]
   exact CharTwo.add_cancel_left (L.s0 * L.t0) (L.s1 * L.t1)
 
+@[simp] theorem one_add_s0t0 [CharP A 2] :
+    (1 : A) + L.s0 * L.t0 = L.s1 * L.t1 := by
+  rw [← L.sum_range, add_comm (L.s0 * L.t0) (L.s1 * L.t1)]
+  exact CharTwo.add_cancel_right (L.s1 * L.t1) (L.s0 * L.t0)
+
 /-- The elementary upper transvection used in Lemma `lem:chartwo`. -/
 def x12 (a : A) : Matrix (Fin 2) (Fin 2) A := !![1, a; 0, 1]
 

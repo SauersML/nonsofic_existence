@@ -141,7 +141,9 @@ theorem witness_not_isLEF [Nontrivial A] : ¬ IsLEF L.cornerWitnessSubgroup :=
 
 /-! ### Symmetric finite generating sets -/
 
-private theorem exists_symmetric_generators (G : Type*) [Group G]
+/-- Every finitely generated group has a finite symmetric generating set
+containing the identity; shared by the compression setups built downstream. -/
+theorem exists_symmetric_generators (G : Type*) [Group G]
     [Group.FG G] :
     ∃ S : Finset G,
       1 ∈ S ∧ (∀ g ∈ S, g⁻¹ ∈ S) ∧ Subgroup.closure (S : Set G) = ⊤ := by

@@ -98,7 +98,7 @@ end LeavittFamily
 
 /-! ### Injectivity of elementary maps along injective coefficient maps -/
 
-private theorem elementaryGroupMap_injective {R S : Type*} [Ring R] [Ring S]
+theorem elementaryGroupMap_injective {R S : Type*} [Ring R] [Ring S]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (f : R →+* S)
     (hf : Function.Injective f) :
     Function.Injective (elementaryGroupMap (ι := ι) f) := by
