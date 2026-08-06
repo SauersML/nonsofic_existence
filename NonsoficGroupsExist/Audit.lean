@@ -43,3 +43,6 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.hasKazhdanPropertyT_iff_complex
 #print axioms NonsoficGroupsExist.IsKazhdanPair.liftUniverse
 #print axioms NonsoficGroupsExist.HasKazhdanPropertyT.liftUniverse
+#print axioms NonsoficGroupsExist.IsKazhdanPair.lowerUniverse
+#print axioms NonsoficGroupsExist.hasKazhdanPropertyT_universe_iff
+#print axioms NonsoficGroupsExist.hasKazhdanPropertyT_iff_textbook

@@ -18,11 +18,26 @@ theorems must construct all property-`(T)`, compression, non-LEF, Kun, and
 Kun--Thom inputs internally; none may remain an explicit argument, implicit
 instance, bundled field, or `Nonempty` premise.
 
-`HasKazhdanPropertyT` is stated using real orthogonal representations.  This
-is the standard real form of property `(T)`, equivalent for discrete groups to
-the complex-unitary formulation by realification/complexification.  The
-current standalone theorem quantifies over universe-0 real Hilbert spaces; a
-countable-orbit universe-reduction lemma has not yet been formalized.
+`HasKazhdanPropertyT` is stated using real orthogonal representations on
+Hilbert spaces in the universe of the group.  Both restrictions are now
+theorems rather than caveats, so the formalized property is the textbook one:
+
+- `isKazhdanPair_iff_complex` (`KazhdanComplex.lean`): the real orthogonal and
+  the complex-unitary forms of a Kazhdan pair are equivalent, with the *same*
+  control set and the *same* tolerance.  Realification needs no construction;
+  complexification uses the `L²` complexification `E ⊕ iE` built in
+  `HilbertComplexification.lean`.
+- `IsKazhdanPair.liftUniverse` (`KazhdanUniverse.lean`): a Kazhdan pair for
+  representations on Hilbert spaces in the universe of the group is a Kazhdan
+  pair for representations on Hilbert spaces of *every* universe.  This is the
+  countable-orbit reduction: the diagonal matrix coefficient of an almost
+  invariant vector is positive definite, and its GNS space -- built from the
+  group alone -- embeds isometrically and equivariantly into the given
+  representation, carrying the cyclic vector to the almost invariant vector.
+  `IsKazhdanPair.lowerUniverse` is the converse, by `ULift`.
+- `hasKazhdanPropertyT_iff_textbook`: combining the two,
+  `HasKazhdanPropertyT.{u,u} G` is equivalent to the complex-unitary property
+  `(T)` quantified over Hilbert spaces of every universe.
 
 The premise-free existence dependency chain is closed. Work is continuing on
 the stronger objective of formalizing every result in
