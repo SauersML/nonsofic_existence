@@ -2748,3 +2748,38 @@ NEXT (the extraction-normalization assembly, then M5):
      {j₀}×(κ\{j₀})) clearing rows i₁ i₂ exactly (t₀s₀ = 1-cross);
  (5) atom_peel.  All five composed give: extraction-eligible unit ⟹
      ∃ smaller-code-pair pencil unit, H-membership equivalent.
+
+## Session 46c: PencilEntryArith landed
+pencilEntry (a₀•t₀ + a₁•t₁ + c•1 + (b₀•s₀ + b₁•s₁)) — matches
+exists_pencil_form's parenthesization exactly (definitional bridge);
+smul_mul_algebraMap / algebraMap_mul_smul; pencilEntry_mul/
+mul_pencilEntry (coefficientwise scalar action); sum_pencilEntry;
+pencilVal_mul_codeScalar and codeScalar_mul_pencilVal: right/left
+transported-GL moves act as right/left matrix multiplication on the
+five coefficient matrices (via codePair_mul + beta_reduce pattern).
+ASSEMBLY MAP for exnorm (next session, all ingredients now exist):
+ given kernel vector v₀ of [B₀;B₁;Cm]:
+ (1) G_right := any invertible G with G·e_{j₀}-column = v₀
+     (single-vector case of GLPairNormalization — need the 1-vector
+     variant: v₀ ≠ 0 extends to a basis; SIMPLER: take the pair
+     (v₀, any-independent-partner) or prove exists_isUnit_matrix_
+     mulVec_single analogously; or transpose-trick);
+     u' := u · codeScalarUnit(C, G_rightᵀ-hmm orientation: want
+     new-col-j₀ = Σₗ E l·v₀ l: pencilVal_mul_codeScalar gives
+     coefficients Σₗ A₀ i l G l j: col j₀: Σₗ A₀ᵢₗG_{l j₀}: need
+     G-COLUMN-j₀ = v₀: same single-vector normalization, inverted;
+ (2) new col j₀: B/C-coefficients vanish (kernel!), A-pair columns
+     (a := A₀G-col, b := A₁G-col); independence: else t_combo_not_
+     left_invertible contradicts left-invertibility of
+     u'·S(C.word j₀) (witness T(C.word j₀)·u'⁻¹);
+ (3) left move by exists_isUnit_matrix_mulVec_pair-G';
+     codeScalar_mul_pencilVal;
+ (4) clear rows i₁,i₂ outside j₀: right multiplier
+     1 − Σ_{j≠j₀} S(C j₀)·x_j·T(C j), x_j := s₀·pE(i₁-row) +
+     s₁·pE(i₂-row); membership code_unipotent_mem
+     ({j₀}×(κ\{j₀})-support); value via codePair_mul with
+     (δ + N)-data; entry-identities t₀s₀ = 1 kills exactly;
+ (5) atom_peel.  Note: also need the 1-vector GL-normalization
+     lemma (exists G invertible with G.mulVec e_{j₀} = v₀ — i.e.
+     v₀ as a COLUMN of an invertible matrix; equivalently extend
+     {v₀} to a basis — write exists_isUnit_matrix_col_eq next).
