@@ -2819,3 +2819,25 @@ REMAINING for goal (1): (a) FullExtraction.lean — compose:
  (d) M6 NarrowDischarge (exists_pencil_form bridge; top-level codes
  are fullBinaryCode; conclude NarrowReduction k).
  (e) cleanup + full build.
+
+## Session 48: FullExtraction WRITTEN — the size-reduction engine
+FullExtraction.full_extraction: from a kernel vector v₀ of
+[B₀;B₁;Cm] (columnwise scalar equations), produces i₂, a complete
+code D on {i ≠ i₂}, residual five-matrix data over (D, C), and u₂
+with u ∈ H ↔ u₂ ∈ H.  Composition: exists_isUnit_matrix_col →
+pencilVal_mul_codeScalar → (independence: LinearIndependent.pair_iff
+by_contra, both dependence cases reduced to t_combo_not_left_
+invertible against the witness (T(C j₀)·u1⁻¹)·(u1·S(C j₀)) = 1;
+t = 0 case gives a = 0 directly, t ≠ 0 gives b = (−t⁻¹s)•a) →
+fintype_card_le_finrank + finrank_pi + exists_pair_of_one_lt_card →
+exists_isUnit_matrix_mulVec_pair → codeScalar_mul_pencilVal →
+row_clear → atom_peel, with the residual-data bridge (per-(p,j)
+split_ifs; pivot row becomes the Cm'-scalar 1 at (⟨i₁'⟩, j₀)).
+H-chain: four-step iff-calc through uG, uG', row-clear m, u₁-peel.
+REMAINING (goal 1): (a) ς-mirror of full_extraction; (b) the
+rank-fullness → scalar one-sided inverse lemma (feeds
+CodeRelativeFullness witnesses from stack-rank facts; via
+LinearMap.exists_leftInverse-machinery); (c) M5 master induction
+(measure card ι + card κ; branches recorded) + the stuck-branch
+progress theorem (the only open math; 583/583 machine-verified);
+(d) M6 NarrowDischarge; (e) cleanup + build; then goals 2–3.

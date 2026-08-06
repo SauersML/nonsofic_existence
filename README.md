@@ -361,11 +361,16 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       erases the atom rows everywhere else — collision lemmas,
       `t_z`-collapses, and the full value computation splitting both
       double sums at the distinguished rows
-    - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
-      `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
-      rows split off invertible `τ/ς` shift blocks by an exact
-      block-unipotent elimination (`τ·τ' = I` on both sides), the
-      extracted middle block being the original sub-block verbatim
+    - [x] the extraction step (`FullExtraction.full_extraction`): a
+      kernel vector of the scalar stack `[B₀;B₁;C]` yields a pencil
+      unit over one fewer row with equivalent class-group
+      membership — right scalar move, independence of the `t`-pair
+      forced by column left-invertibility against the shift
+      rigidity, left scalar move onto standard atoms, the
+      row-clearing block unipotent, and the atom peel, composed
+    - [ ] the ς-mirror of the extraction (pure-`s` rows / kernel of
+      the row stack `(A₀|A₁|C)`), by the symmetric argument or
+      θ-transport
     - [ ] the refinement move and the round recursion: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the
