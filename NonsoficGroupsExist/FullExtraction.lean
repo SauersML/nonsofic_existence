@@ -188,7 +188,10 @@ theorem full_extraction [Nontrivial A]
   have hcard : 1 < Fintype.card ι := by
     have h1 := hab.fintype_card_le_finrank
     rw [Module.finrank_pi] at h1
-    simpa using h1
+    -- `1 < n` and `2 ≤ n` agree definitionally but `simpa`'s closing match
+    -- is syntactic, so name the simplified form and finish arithmetically.
+    have h2 : 2 ≤ Fintype.card ι := by simpa using h1
+    omega
   obtain ⟨i₁', i₂', hne'⟩ := Fintype.exists_pair_of_one_lt_card hcard
   -- STEP 3: left scalar move putting the pair onto standard atoms
   obtain ⟨G', hG'u, hG'a, hG'b⟩ :=
@@ -264,10 +267,10 @@ theorem full_extraction [Nontrivial A]
     (fun i j ↦ ∑ l, G' i l * ∑ l', Cm l l' * G l' j)
     (fun i j ↦ ∑ l, G' i l * ∑ l', B₀ l l' * G l' j)
     (fun i j ↦ ∑ l, G' i l * ∑ l', B₁ l l' * G l' j)
-    u2 (by beta_reduce; exact hu2) i₁' i₂' hne' j₀
-    (by beta_reduce; exact hc2A₀) (by beta_reduce; exact hc2A₁)
-    (by beta_reduce; exact hc2C) (by beta_reduce; exact hc2B₀)
-    (by beta_reduce; exact hc2B₁)
+    u2 (by exact hu2) i₁' i₂' hne' j₀
+    (by exact hc2A₀) (by exact hc2A₁)
+    (by exact hc2C) (by exact hc2B₀)
+    (by exact hc2B₁)
   -- STEP 5: peel the atom
   haveI : Nonempty {i : ι // i ≠ i₂'} := ⟨⟨i₁', hne'⟩⟩
   obtain ⟨D, hDfree, hDsum⟩ :=
@@ -321,7 +324,7 @@ theorem full_extraction [Nontrivial A]
     rw [if_pos hcond, if_pos hcond, if_pos hcond, if_pos hcond,
       if_pos hcond]
     exact hpE0'
-  obtain ⟨u₄, hu₄val, hiff₄⟩ := L.atom_peel hdiv R hR C Ecl u3
+  obtain ⟨u₄, hu₄val, hiff₄⟩ := L.atom_peel (k := k) hdiv R hR C Ecl u3
     (by rw [hu3, hEcl]) i₁' i₂' hne' j₀ hE1 hE2 hE4 hE5 D hDfree
     hDsum
   -- the residual value as pencil data
@@ -359,8 +362,6 @@ theorem full_extraction [Nontrivial A]
         simp
     · rw [if_neg hp, if_neg hp, if_neg hp, if_neg hp, if_neg hp,
         if_neg hp, hEcl]
-      beta_reduce
-      rfl
   · calc u ∈ stableUnits A
         ↔ u1 ∈ stableUnits A := by
           constructor

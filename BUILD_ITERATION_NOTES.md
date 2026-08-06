@@ -2841,3 +2841,58 @@ LinearMap.exists_leftInverse-machinery); (c) M5 master induction
 (measure card ι + card κ; branches recorded) + the stuck-branch
 progress theorem (the only open math; 583/583 machine-verified);
 (d) M6 NarrowDischarge; (e) cleanup + build; then goals 2–3.
+
+## Session 49: MirrorExtraction landed + M5 architectural finding
+- MirrorExtraction.lean WRITTEN: thetaHat_pencilEntry (θ̂ swaps t/s
+  coefficient slots), thetaHat_pencilVal (θ̂ transposes code
+  pencils), mirror_extraction: row-stack kernel vector ⟹ pencil
+  unit over one fewer COLUMN, by full_extraction on the transposed
+  side + thetaUnit_mem_stableUnits_iff transport.  Short (θ-route),
+  no re-mirroring of the six modules.
+- M5 FINDING (important): WindowDichotomy is a TOP-LEVEL argument —
+  it needs the pencil parts to be pure-degree components, i.e.
+  UNIFORM-depth codes.  Inner recursion nodes have mixed-depth codes
+  (the peel's intermediate D), where deg(S(Rᵢ)t_zT(Cⱼ)) =
+  |Rᵢ|−|Cⱼ|−1 varies.  So the inner T1/T2-full branches need a
+  DIFFERENT terminal.  DERIVED (mostly): the ENTRYWISE-GRADED KILL:
+  strip the unit equations to Σⱼ xᵢⱼ·y_{ji'} = δᵢᵢ' with
+  y_{ji} := T(Cⱼ)u⁻¹S(Rᵢ); at the top entry-degree D of Y the
+  s-part gives Σⱼ B_wᵢⱼ·y^{(D)}_{ji'} = 0 (t_w-strips; SCALAR
+  combinations of the entry components!), so a full B-stack kills
+  all positive entry components: Y-entries nonpositive.  MIRROR
+  (A-stack full): entries nonnegative.  REMAINING QUESTION: the
+  terminal conclusion from "u⁻¹ has nonpos-degree pencil entries"
+  at mixed codes.  Candidate resolutions, ranked:
+  (1) BOTH-FULL SANDWICH: if the node has BOTH stacks full (can the
+      branching arrange this?), entries are balanced ⟹ u⁻¹ is a
+      balanced-entry code-pair matrix ⟹ u⁻¹ = (code change)·
+      (balanced unit)-decomposable ⟹ H by compiled machinery.
+      Check: is inner-T1-full ∧ T2-deficient reachable? If the
+      branch order tests extraction FIRST (both kernels empty in the
+      T-branches), T1-full ∧ ker[B;C] = 0 ∧ coker[A;C] = 0 forces…
+      analyze: T1-full ⟹ kerB = 0 ⟹ ker[B;C] = 0 ✓ consistent;
+      coker[A;C] = 0 does NOT give A-stack-full.  So one-sided-full
+      is reachable.  BUT: with Y-nonpos from T1, RERUN the kill on
+      the OTHER equation side (u⁻¹u = 1, strips by T(Cⱼ)·…·S(Cⱼ')):
+      gives the A-stack-of-u¹-hmm — the second kill needs the
+      A-stack of u to be full, not given.  Partial.
+  (2) UNIFORMIZING CONJUGATION: code-change ω's re-index (C,R) to
+      uniform codes; blocked by the size-vs-depth constraint
+      (Σⱼ2^{dⱼ} = 2^P forces varying dⱼ, which re-mixes degrees).
+      Might be fixable by conjugating with ω on ONE side only and
+      re-running the dichotomy at the new mixed shape.
+  (3) Restate the master induction so inner nodes carry uniform
+      codes: replace the peel's D by "refine everything to uniform
+      after each peel" — needs re-narrowing (compiled window
+      reduction) but breaks the size measure; would need a new
+      measure (e.g. number of atoms extracted is NOT monotone…).
+  (4) Prove the nonpos-entry terminal directly: u⁻¹-value lies in
+      span{S(Cⱼ)·x·T(Rᵢ) : x nonpos}; seek a compiled-adjacent kill
+      for this "code-window" class (θ of a code-nonneg class; the
+      BlockMoveTailKill induction might generalize code-relatively —
+      its moves are already code-flavored!).  Perhaps simplest:
+      mimic WindowNonnegReduction's induction with the uniform
+      level-1 code replaced by C-children; its engine
+      (block move + κ-transport + orthogonality) is code-agnostic.
+  NEXT SESSION: settle the inner terminal (try (4) seriously first —
+  reread WindowNonnegReduction's proof shape; then (1)); then M5.

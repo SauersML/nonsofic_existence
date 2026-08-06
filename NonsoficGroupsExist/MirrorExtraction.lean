@@ -24,8 +24,11 @@ theorem thetaHat_pencilEntry (a₀ a₁ c b₀ b₁ : k) :
     thetaHat k ((family k).pencilEntry (k := k) a₀ a₁ c b₀ b₁) =
       (family k).pencilEntry (k := k) b₀ b₁ c a₀ a₁ := by
   unfold LeavittFamily.pencilEntry
-  rw [thetaHat_add, thetaHat_add, thetaHat_add, thetaHat_smul,
+  -- `pencilEntry` is a four-fold sum, so four `thetaHat_add`s are needed
+  -- before the five `thetaHat_smul`s have anything to match.
+  rw [thetaHat_add, thetaHat_add, thetaHat_add, thetaHat_add,
     thetaHat_smul, thetaHat_smul, thetaHat_smul, thetaHat_smul,
+    thetaHat_smul,
     thetaHat_t, thetaHat_t, thetaHat_one, thetaHat_s, thetaHat_s]
   abel
 
@@ -51,7 +54,7 @@ theorem thetaHat_pencilVal {ι κ : Type*} [Fintype ι] [Fintype κ]
       refine Finset.sum_congr rfl fun j _ ↦ ?_
       rw [thetaHat_mul, thetaHat_mul, thetaHat_wordT,
         thetaHat_wordS, thetaHat_pencilEntry, ← mul_assoc]]
-  exact Finset.sum_comm _ _ _
+  exact Finset.sum_comm
 
 /-- **The mirrored extraction step**: a kernel vector of the row
 stack yields a pencil unit over one fewer column. -/
@@ -98,9 +101,9 @@ theorem mirror_extraction [Nontrivial (BinaryLeavittAlgebra k)]
     (family k).full_extraction hdiv C hC R hR
       (fun j i ↦ B₀ i j) (fun j i ↦ B₁ i j) (fun j i ↦ Cm i j)
       (fun j i ↦ A₀ i j) (fun j i ↦ A₁ i j)
-      (thetaUnit k u) (by beta_reduce; exact hθ) u₀ hu₀
-      (by beta_reduce; exact hkA₀) (by beta_reduce; exact hkA₁)
-      (by beta_reduce; exact hkC)
+      (thetaUnit k u) (by exact hθ) u₀ hu₀
+      (by exact hkA₀) (by exact hkA₁)
+      (by exact hkC)
   -- transport back
   set Dcode : BinaryPrefixCode {j : κ // j ≠ j₂} := ⟨D, hDfree⟩
     with hDcode
