@@ -2078,3 +2078,32 @@ REMAINING LEAN (fully specified, no open math):
   (c) V-generation (induction on codes);
   (d) NarrowReduction assembly → ScalarReduction (wiring compiled)
       → B4 → Theorem C; docstrings; audit.
+
+## Session 38c: V-GENERATION PROOF (the last open item, now closed)
+**Lemma.** For complete prefix codes {cᵢ}, {dᵢ} of equal size, the
+code-change unit Ω = Σᵢ S(dᵢ)T(cᵢ) lies in H.
+PROOF (induction on code size, all steps formalization-friendly):
+1. RE-REPRESENT: pad each pair equally (S(d)T(c) = Σ_γ S(dγ)T(cγ))
+   so the SOURCE code is the full depth-D code (element unchanged!).
+2. SIBLING-PAIR EXISTENCE: any complete prefix code of size ≥ 2
+   contains a sibling pair at maximal depth (the sibling of a
+   maximal-depth element must itself be in the code: an ancestor
+   would violate prefix-freeness).  Classical, 10-line proof.
+3. ALIGN: right-multiply by a permutation of the (full) source code
+   and left-multiply by a permutation of the target code — both are
+   products of transpositions of same-code elements, which are
+   pairwise incomparable, so each σ ∈ H (COMPILED) — to place a
+   target sibling pair over a source sibling pair.
+4. MERGE: S(ev0)T(w0) + S(ev1)T(w1) = S(ev)T(w) (the completeness
+   relation).  Both codes shrink by one; induct.  Size 1: Ω = 1.
+Composition law Ω_{e,d}·Ω_{d,c} = Ω_{e,c} available throughout.
+**NO OPEN MATHEMATICS REMAINS.**  Full endgame stack:
+  narrow (compiled width-reduction)
+  → A-rank-normalization (rectangular pivot lemma, to write)
+  → Ω-intertwiner with {0,+1} degree profile & fresh completions
+    (session 38b; to write)
+  → u·Ω⁻¹: negative part = r fresh fully-supplied monomials
+    → KillMoves (COMPILED) → nonneg window → dies (COMPILED)
+  → [u] = [Ω], Ω ∈ H (this lemma; to write)
+  → NarrowReduction → ScalarReduction (COMPILED wiring) → B4
+  → Theorem C unconditional; docstrings; audit.

@@ -59,7 +59,9 @@ theorem thetaMat_one :
     (BinaryLeavittAlgebra k)) j i) = _
   by_cases h : i = j
   · subst h
-    rw [Matrix.one_apply_eq, Matrix.one_apply_eq]
+    -- One rewrite suffices: both sides are the same instance `1 i i`, and
+    -- `rw` replaces every occurrence of it at once.
+    rw [Matrix.one_apply_eq]
     exact thetaHat_one k
   · rw [Matrix.one_apply_ne (Ne.symm h), Matrix.one_apply_ne h]
     exact thetaHat_zero k
@@ -77,8 +79,12 @@ theorem thetaMat_single (i j : Fin 2) (a : BinaryLeavittAlgebra k) :
       Matrix.single j i (thetaHat k a) := by
   ext i' j'
   show thetaHat k (Matrix.single i j a j' i') = _
-  by_cases h1 : j = j'
-  · by_cases h2 : i = i'
+  -- `thetaMat` reads `M` at the *transposed* index, so both sides are
+  -- nonzero exactly when `i = j'` and `j = i'`.  Splitting on the
+  -- untransposed pairing `j = j'`/`i = i'` makes the `j ≠ j'` branch false
+  -- (take `i = 0, j = 1, j' = 0, i' = 1`), which is why `tauto` stalled.
+  by_cases h1 : i = j'
+  · by_cases h2 : j = i'
     · subst h1; subst h2
       rw [Matrix.single_apply_same, Matrix.single_apply_same]
     · rw [Matrix.single_apply_of_ne _ _ _ _ _ (by tauto),
@@ -160,11 +166,11 @@ theorem thetaMatUnit_diagUnit (u : (BinaryLeavittAlgebra k)ˣ) :
   · show thetaHat k (u : BinaryLeavittAlgebra k) = _
     rfl
   · show thetaHat k (0 : BinaryLeavittAlgebra k) = _
-    simpa using thetaHat_zero k
+    exact thetaHat_zero k
   · show thetaHat k (0 : BinaryLeavittAlgebra k) = _
-    simpa using thetaHat_zero k
+    exact thetaHat_zero k
   · show thetaHat k (1 : BinaryLeavittAlgebra k) = _
-    simpa using thetaHat_one k
+    exact thetaHat_one k
 
 /-- **`θ̂` preserves the diagonal class group.** -/
 theorem thetaUnit_mem_stableUnits {u : (BinaryLeavittAlgebra k)ˣ}
