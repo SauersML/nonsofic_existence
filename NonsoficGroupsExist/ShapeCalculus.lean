@@ -61,12 +61,12 @@ theorem exists_shapeRep {p q : ℕ} {x : A}
       rw [Finset.sum_eq_single f, Finset.sum_eq_single g]
       · simp [Matrix.single]
       · intro b _ hb
-        simp [Matrix.single_apply, Ne.symm hb]
+        simp [Ne.symm hb]
       · intro hg
         exact absurd (Finset.mem_univ g) hg
       · intro b _ hb
         refine Finset.sum_eq_zero fun δ _ ↦ ?_
-        simp [Matrix.single_apply, Ne.symm hb]
+        simp [Ne.symm hb]
       · intro hf
         exact absurd (Finset.mem_univ f) hf
   | zero => exact ⟨0, by simp [ShapeRep]⟩
@@ -88,7 +88,7 @@ theorem exists_shapeRep {p q : ℕ} {x : A}
       refine Finset.sum_congr rfl fun γ _ ↦ ?_
       rw [Finset.smul_sum]
       refine Finset.sum_congr rfl fun δ _ ↦ ?_
-      rw [Matrix.smul_apply, smul_smul, smul_assoc]
+      rw [Matrix.smul_apply, smul_smul, smul_eq_mul]
 
 /-- Entry extraction: compressing a represented element between
 equal-length words recovers the matrix entry. -/
@@ -210,7 +210,7 @@ theorem shapeRep_mul {p q r : ℕ}
         rw [Finset.sum_eq_single δ]
         · rw [horthQ δ δ, if_pos rfl, mul_one]
         · intro δ' _ hδ'
-          rw [horthQ δ δ', if_neg hδ']
+          rw [horthQ δ δ', if_neg (Ne.symm hδ')]
           rw [show L.wordS (List.ofFn γ) * (0 : A) *
             L.wordT (List.ofFn ε) = 0 from by noncomm_ring, smul_zero]
         · intro hδ
@@ -248,10 +248,12 @@ theorem span_shapeMonomials_le_succ (p q : ℕ) :
   rw [hsplit]
   refine Submodule.sum_mem _ fun i _ ↦ Submodule.subset_span ?_
   refine ⟨Fin.snoc f i, Fin.snoc g i, ?_⟩
-  rw [show List.ofFn (Fin.snoc f i) = List.ofFn f ++ [i] from by
-      simp [List.ofFn_succ', Fin.snoc, List.concat_eq_append],
-    show List.ofFn (Fin.snoc g i) = List.ofFn g ++ [i] from by
-      simp [List.ofFn_succ', Fin.snoc, List.concat_eq_append]]
+  have hsnoc : ∀ (m : ℕ) (h : Fin m → Fin 2),
+      List.ofFn (Fin.snoc h i) = List.ofFn h ++ [i] := by
+    intro m h
+    rw [List.ofFn_succ']
+    simp [Fin.snoc_castSucc, Fin.snoc_last, List.concat_eq_append]
+  rw [hsnoc p f, hsnoc q g]
 
 end Padding
 

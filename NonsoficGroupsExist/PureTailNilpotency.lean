@@ -66,8 +66,8 @@ theorem pure_tail_nilpotent {η : BinaryLeavittAlgebra k}
       ((u⁻¹ : (BinaryLeavittAlgebra k)ˣ) : BinaryLeavittAlgebra k) := by
     have hmap : D = Finset.map (addRightEmbedding (1 : ℤ))
         (Finset.Icc (lo - 1) hi) := by
-      rw [Finset.map_add_right_Icc]
-      congr 1 <;> omega
+      rw [Finset.map_add_right_Icc,
+        show lo - 1 + 1 = lo from by ring]
     rw [hmap, Finset.sum_map]
     have hstep : ∀ d ∈ Finset.Icc (lo - 1) hi,
         y (addRightEmbedding (1 : ℤ) d - 1) = y d := by
@@ -133,7 +133,7 @@ theorem pure_tail_nilpotent {η : BinaryLeavittAlgebra k}
         exact h
   have hneg : ∀ d : ℤ, d < 0 → y d = 0 := by
     intro d hd
-    rcases lt_or_le d lo with h | h
+    by_cases h : d < lo
     · exact hysupp d (Or.inl h)
     · exact hnegstep (d - lo).toNat d (by omega) hd
   -- the zero component is `1`
@@ -159,7 +159,8 @@ theorem pure_tail_nilpotent {η : BinaryLeavittAlgebra k}
           ih (by omega)] at h
         have hval : y ((m : ℤ) + 1) = -(η * (-η) ^ m) :=
           add_eq_zero_iff_eq_neg.mp h
-        rw [hcast, hval, pow_succ', neg_mul_eq_neg_mul]
+        rw [hcast, hval, pow_succ']
+        exact (neg_mul η ((-η) ^ m)).symm
   -- the top equation kills the geometric sequence
   have hhiD : (hi + 1) ∈ D := Finset.mem_Icc.mpr ⟨by omega, by omega⟩
   have htop := heq (hi + 1) hhiD
@@ -172,10 +173,10 @@ theorem pure_tail_nilpotent {η : BinaryLeavittAlgebra k}
   -- extract nilpotency of `η` itself
   refine ⟨hi.toNat + 1, ?_⟩
   rcases Nat.even_or_odd hi.toNat with he | ho
-  · rw [he.neg_pow] at htop
+  · rw [Even.neg_pow he η] at htop
     rw [pow_succ']
     exact htop
-  · rw [ho.neg_pow, mul_neg, neg_eq_zero] at htop
+  · rw [Odd.neg_pow ho η, mul_neg, neg_eq_zero] at htop
     rw [pow_succ']
     exact htop
 

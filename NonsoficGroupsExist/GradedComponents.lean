@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.BinaryLeavittWindow
 import NonsoficGroupsExist.BaseChangeIndependence
+import Mathlib.Data.Int.Interval
 
 /-!
 # Graded components of binary Leavitt elements
@@ -30,18 +31,20 @@ theorem exists_components {lo hi : ℤ} {x : BinaryLeavittAlgebra k}
   induction hx using Submodule.span_induction with
   | mem x hxmem =>
       obtain ⟨a, b, hl, hh, rfl⟩ := hxmem
-      set d₀ : ℤ := (a.length : ℤ) - b.length with hd₀
-      refine ⟨fun d ↦ if d = d₀ then
+      refine ⟨fun d ↦ if d = (a.length : ℤ) - b.length then
         (family k).wordS a * (family k).wordT b else 0, ?_, ?_, ?_⟩
       · intro d
-        by_cases hd : d = d₀
+        beta_reduce
+        by_cases hd : d = (a.length : ℤ) - b.length
         · rw [if_pos hd]
           exact Submodule.subset_span ⟨a, b, by omega, by omega, rfl⟩
         · rw [if_neg hd]
           exact Submodule.zero_mem _
       · intro d hd
-        rw [if_neg (by omega)]
-      · exact ((Finset.sum_eq_single d₀ (fun d _ hd ↦ if_neg hd)
+        beta_reduce
+        rw [if_neg (show ¬d = (a.length : ℤ) - b.length from by omega)]
+      · refine ((Finset.sum_eq_single ((a.length : ℤ) - b.length)
+          (fun d _ hd ↦ if_neg hd)
           (fun hd₀ ↦ absurd (Finset.mem_Icc.mpr ⟨hl, hh⟩)
             hd₀)).trans (if_pos rfl)).symm
   | zero =>

@@ -118,8 +118,7 @@ theorem nilpotent_tail_mem_stableUnits [Nontrivial A] (D : ℕ) :
       have hewin : e ∈ Submodule.span k (L.degreeMonomials 0 0) := by
         have h1 := L.window_mul_mem_span hτwin hΞwin
         have h2 := L.window_mul_mem_span h1 hrwin
-        refine L.span_degreeMonomials_mono ?_ ?_ h2 <;> push_cast <;>
-          omega
+        refine L.span_degreeMonomials_mono ?_ ?_ h2 <;> omega
       -- key annihilations
       have hrn : r * nn = 0 := by
         rw [hr, mul_assoc, ← pow_succ, hnil, mul_zero]

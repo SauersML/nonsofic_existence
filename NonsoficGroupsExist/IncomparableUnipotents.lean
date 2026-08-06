@@ -127,7 +127,7 @@ theorem signedSwap_val {a b : List (Fin 2)} (hab : ¬a <+: b)
       = 1 + X + X - Y + X * X - X * Y - Y * X - X * Y * X := by
         noncomm_ring
     _ = 1 + X + X - Y + 0 - L.cylinder a - L.cylinder b - X := by
-        rw [hXX, hXY, hYX, hXYX]
+        rw [hXYX, hXX, hXY, hYX]
     _ = 1 - L.cylinder a - L.cylinder b + X - Y := by noncomm_ring
 
 end LeavittFamily

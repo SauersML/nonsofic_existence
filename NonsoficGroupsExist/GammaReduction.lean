@@ -5,8 +5,8 @@ import NonsoficGroupsExist.LeavittBalancedUnits
 /-!
 # The γ-elimination chain
 
-Given a normal-form unit `1 + s₁(z₋ + z₀)` whose γ-invariant
-`1 + z₋s₁` is invertible with balanced inverse, two Whitehead flips
+Given a normal-form unit `1 + s₁(zneg + z₀)` whose γ-invariant
+`1 + znegs₁` is invertible with balanced inverse, two Whitehead flips
 and one balanced factorization reduce the class to a pure tail
 `1 + s₁(g⁻¹z₀)`; if that tail is nilpotent the nilpotent-tail kill
 finishes.  The two side conditions — γ-invertibility (lemma (G)) and
@@ -26,21 +26,21 @@ variable {k : Type*} [Field k] [Algebra k A]
 invertible with balanced inverse, and the resulting pure tail is
 nilpotent, the unit lies in the diagonal class group. -/
 theorem gamma_reduction [Nontrivial A]
-    (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1) {z₋ z₀ : A}
-    (hzm : z₋ ∈ Submodule.span k (L.degreeMonomials (-1) (-1)))
+    (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1) {zneg z₀ : A}
+    (hzm : zneg ∈ Submodule.span k (L.degreeMonomials (-1) (-1)))
     (hz₀ : z₀ ∈ Submodule.span k (L.degreeMonomials 0 0))
-    (g : Aˣ) (hgv : (g : A) = 1 + z₋ * L.s 1)
+    (g : Aˣ) (hgv : (g : A) = 1 + zneg * L.s 1)
     (hginv : ((g⁻¹ : Aˣ) : A) ∈
       Submodule.span k (L.degreeMonomials 0 0))
     (D : ℕ)
     (hnil : (L.s 1 * (((g⁻¹ : Aˣ) : A) * z₀)) ^ D = 0)
-    (u : Aˣ) (hu : (u : A) = 1 + L.s 1 * (z₋ + z₀)) :
+    (u : Aˣ) (hu : (u : A) = 1 + L.s 1 * (zneg + z₀)) :
     u ∈ stableUnits A := by
-  -- flip 1: [u] = [1 + (z₋ + z₀)s₁]
-  set v : Aˣ := flipUnit (L.s 1) (z₋ + z₀) u hu with hv
+  -- flip 1: [u] = [1 + (zneg + z₀)s₁]
+  set v : Aˣ := flipUnit (L.s 1) (zneg + z₀) u hu with hv
   have hflip1 : u * v⁻¹ ∈ stableUnits A :=
-    mul_flipUnit_inv_mem_stableUnits (L.s 1) (z₋ + z₀) u hu
-  have hvval : (v : A) = 1 + z₋ * L.s 1 + z₀ * L.s 1 := by
+    mul_flipUnit_inv_mem_stableUnits (L.s 1) (zneg + z₀) u hu
+  have hvval : (v : A) = 1 + zneg * L.s 1 + z₀ * L.s 1 := by
     rw [hv, flipUnit_val]
     noncomm_ring
   -- factor out γ = g: w := g⁻¹·v has value 1 + (g⁻¹z₀)·s₁
@@ -49,14 +49,13 @@ theorem gamma_reduction [Nontrivial A]
   have hwval : (w : A) = 1 + Y * L.s 1 := by
     show ((g⁻¹ : Aˣ) : A) * (v : A) = _
     rw [hvval]
-    have h1 : ((g⁻¹ : Aˣ) : A) * (1 + z₋ * L.s 1) = 1 := by
+    have h1 : ((g⁻¹ : Aˣ) : A) * (1 + zneg * L.s 1) = 1 := by
       rw [← hgv, Units.inv_mul]
-    calc ((g⁻¹ : Aˣ) : A) * (1 + z₋ * L.s 1 + z₀ * L.s 1)
-        = ((g⁻¹ : Aˣ) : A) * (1 + z₋ * L.s 1) +
+    calc ((g⁻¹ : Aˣ) : A) * (1 + zneg * L.s 1 + z₀ * L.s 1)
+        = ((g⁻¹ : Aˣ) : A) * (1 + zneg * L.s 1) +
           ((g⁻¹ : Aˣ) : A) * z₀ * L.s 1 := by noncomm_ring
       _ = 1 + Y * L.s 1 := by
           rw [h1, hY]
-          noncomm_ring
   -- g is a balanced-valued unit, hence in the diagonal class group
   have hgmem : g ∈ stableUnits A := by
     have hval : (g : A) ∈
