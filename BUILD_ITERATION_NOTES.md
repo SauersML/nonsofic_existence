@@ -1549,3 +1549,59 @@ mathematics settled in sessions 24–25:
 - Meta-status: remaining math = (a) free-cylinder supply for the
   swap cascade (rank-inequality flavored, session 24's E ≥ D bound
   is the template) + (B2, N = 2).  Both concrete, both bounded.
+
+## Session 30: the stable block-move calculus for width-3
+- KEY IDENTITY (elementary, two E-ops, all sizes): for ANY unit u and
+  any row P, column Q: [diag(u, I)] = [[[u − PQ, −P],[Q, I]]] mod E.
+  (M₀ = diag(u,I); right-mult E₂₁(Q): [[u,0],[Q,I]]; left-mult
+  E₁₂(−P): [[u−PQ, −P],[Q, I]].)
+- Applied with the RIGHT-split of the negative part w₋ = Σ(w₋sᵢ)tᵢ
+  (P := (w₋s₀, w₋s₁) balanced row, Q := (t₀; t₁)):
+  M₁ := [[w − w₋, −C₀, −C₁],[t₀, 1, 0],[t₁, 0, 1]] — the negative
+  content of the class becomes EXACTLY the canonical column (t₀; t₁).
+- MIXED-DEPTH TRANSPORT: through prefixMatrixFamily with a complete
+  code of lengths (ℓ₁, ℓ₂, ℓ₂), entry (i,j) picks up degree ℓᵢ − ℓⱼ.
+  CONSERVATION OBSTRUCTION: any split w₋ = PQ has deg P + deg Q = −1,
+  and transport shifts P, Q degrees oppositely — P and Q can never
+  both land in [0,1] in ONE move.  With Q-fix (ℓ₂ = ℓ₁ + 1) the
+  C-entries land at degree −1; with P-fix the t's stay at −1.
+- Col-op kills of the t-column against the I-block exactly undo
+  move 1 (trivial circle); row-op kills need inverting non-units;
+  support-shrinking subtraction (row₂ −= (t₀s₁)row₃) does not
+  terminate.  Iterating the block-move relocates the t-column
+  forever (Sisyphus) — monotone depth assignments contradict.
+- CONVERGENCE: everything reduces to ONE normalization: make the
+  C-row vanish against the code — i.e. pre-kill w₋'s column content
+  outside a controlled cylinder set, using (i) rank-normalization
+  w₀ → e, (ii) mixed unipotents u(1+ν) shifting w₋ by e·ν (e-row
+  content controllable), (iii) the free-cylinder supply question =
+  session-24's E ≥ D rank bound.  If w₋ can be arranged with
+  C₁ = 0 (single-branch: w₋ = C₀t₀, i.e. w₋p₁ = 0), then code
+  (ℓ, ℓ+1, ℓ) — u-block ℓ, t₀-block ℓ+1, spare ℓ — puts M₁ entries:
+  X: [0,1] ✓, −C₀ at (1,2): ℓ−(ℓ+1) = −1 ✗ ... still blocked; but
+  C₀ = w₋s₀ and single-branch w₋ = C₀t₀ allows instead P := (w₋),
+  Q := (t₀) 1×1-split: M₁ = [[w − w₋, −w₋],[t₀, 1]]: (1,2)-entry
+  w₋ degree −1 at code (ℓ, ℓ+1): −1 + ℓ − (ℓ+1)?? no: (1,2): ℓ₁−ℓ₂ +
+  (−1) = −2 ✗; code (ℓ+1, ℓ): (1,2): +1−1 = 0 ✓✓ (2,1): ℓ−(ℓ+1)−1 =
+  −2 ✗.  STILL conserved.  → The block-move ALONE cannot do it; must
+  be combined with genuine content-kills (swap cascade / e-row
+  unipotents).  NEXT: formalize-friendly plan: (1) rank-normalize
+  w₀ → e; (2) use e-row unipotents + swaps to force w₋ = e·w₋ and
+  w₋-columns inside Sᶜ-free-cylinders (supply from |Sᶜ|-count vs
+  rank w₋ ≤ ... session-24 E ≥ D!); (3) THEN the swap cascade
+  (session 29) balances w₋ term by term without new negatives
+  (constraints a·p_w = 0, e·p_w = 0 satisfiable by construction);
+  (4) land in [0,2]; (5) (P)-N=2 + B2-N=2.  And B2-N=2 itself:
+  revisit via the SAME block-move: 1 + η₁ + η₂: P := (s₀,s₁)·η-split
+  top-down: [diag] ~ [[1+η₁, −P'],[Q', I]] with P' ∈ L₁-entries,
+  Q' = (t·η₂) ∈ L₁-entries: ALL ENTRIES [0,1]-window ALREADY —
+  deg P' + deg Q' = +2 splits as 1+1 ✓✓ NO obstruction for the
+  POSITIVE side!!  **B2-N=2 SOLVED**: η₂ = Σᵢ sᵢ(tᵢη₂), P := (s₀,s₁)
+  (deg 1), Q := (t₀η₂; t₁η₂) (deg 1): M₁ = [[1+η₁, −s₀, −s₁],
+  [t₀η₂, 1, 0],[t₁η₂, 0, 1]]: window [0,1] entrywise; transport via
+  EQUAL-depth code (any 4-code, pad to M₄ with 2-deep words): entries
+  keep [0,1]; matrixRingEquiv → [0,1]-window unit of L →
+  WidthTwoReduction → ∈ H; descent: mem_stableUnits_of_cornerDiag /
+  glFour-machinery relates [diag(v, I₃)] to [v].  Same for all N by
+  induction (top-split drops window by one each time).
+  **THE (B2) GAP IS CLOSED.**
