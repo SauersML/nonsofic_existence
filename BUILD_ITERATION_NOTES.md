@@ -859,3 +859,27 @@ LEAN PLAN (module NilpotentTailKill.lean):
   binomial expansion needed!  Then k := D−2 gives r(1−e) = 0.
 REMAINING for NarrowReduction: only the z₋-elimination/(G) — with
 (i') done, NarrowReduction ⟸ (G) alone.
+
+## Session 19: (G) dichotomy + worked instance; Fitting framework
+- DICHOTOMY (proved): for u = 1 + s₁z, γ' := 1 + s₁z₋ (BALANCED —
+  note s₁z₋ is degree 0!): γ' invertible ⟺ u⁻¹ has no negative
+  graded components.  (⟸: bottom equation (1+s₁z₋)y_{−M} = 0 with
+  y_{−M} = Σ C_w t_w, t_w-independence gives balanced kernel
+  elements; ⟹: same equation kills y_{−M}.)  Note γ' vs γ = 1+z₋s₁:
+  flip-equivalent invertibility.
+- WORKED INSTANCE of (G): z₋ := −t₁ (γ' = p₀, maximally singular):
+  u = p₀ + s₁z₀ is NEVER a unit: uy = 1 forces s₁z₀y = p₁ hence
+  z₀y = t₁ hence y = z₀⁻¹t₁ (z₀ must be balanced-invertible), and the
+  p₀-component equation forces p₀z₀⁻¹t₁ = p₀ — degree −1 = degree 0,
+  contradiction by graded independence.
+- GENERAL (G) FRAMEWORK: Fitting decomposition of the BALANCED
+  element γ' at its level: π' := projector onto the generalized
+  kernel (γ'π' =: N nilpotent, commutes with π'; γ'(1−π') corner-
+  invertible).  The π'-corner unit equation reads (N + M)y = π' with
+  M := π's₁z₀ pure degree +1; graded components give
+  N·y_d + M·y_{d−1} = [d=0]π'; applying N^{K−1} isolates
+  N^{K−1}My₋₁ = N^{K−1} ≠ 0, and coefficient extraction (x = Σ(xs_j)t_j
+  valid for ALL x) turns this into balanced equations.  The worked
+  instance is the K = 1 case where the (1−π')-side forces the graded
+  contradiction.  CONJECTURED PROOF SHAPE: induction on K, pushing
+  the contradiction of the K = 1 case through the nilpotent cascade.
