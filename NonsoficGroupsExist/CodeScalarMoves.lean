@@ -72,7 +72,9 @@ theorem codeScalar_mul (D : BinaryPrefixCode ι) (G G' : Matrix ι ι k) :
 
 /-- Transvections transport to incomparable unipotents. -/
 theorem codeScalar_transvection (D : BinaryPrefixCode ι)
-    (hD : L.IsComplete D) {i j : ι} (hij : i ≠ j) (c : k) :
+    -- `i ≠ j` is part of what makes this a transvection, but the transport
+    -- identity below never needs it; `_`-prefix marks it deliberately unused.
+    (hD : L.IsComplete D) {i j : ι} (_hij : i ≠ j) (c : k) :
     L.codeScalar (k := k) D (Matrix.transvection i j c) =
       1 + L.wordS (D.word i) * algebraMap k A c *
         L.wordT (D.word j) := by
@@ -97,6 +99,13 @@ theorem codeScalar_transvection (D : BinaryPrefixCode ι)
       _ = ∑ j', (if j = j' then
             L.wordS (D.word i) * algebraMap k A c *
               L.wordT (D.word j') else 0) := by
+          -- The `i = i'` test sits inside the `∑ j'`, so the outer sum never
+          -- matches `sum_ite_eq`; and the right-hand side matches it at
+          -- shallower depth, so a bare rewrite lands there.  Put the `i'`
+          -- sum innermost, then descend under the `j'` binder so the only
+          -- remaining sum is the one we mean.
+          rw [Finset.sum_comm]
+          refine Finset.sum_congr rfl fun j' _ ↦ ?_
           rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ i)]
       _ = L.wordS (D.word i) * algebraMap k A c *
             L.wordT (D.word j) := by
@@ -148,16 +157,22 @@ theorem codeScalar_diagonal_unit_mem [Nontrivial A]
     have h3 : κu i = (κu i * (cunit i)⁻¹) * cunit i := by group
     rw [h3]
     exact mul_mem h1 h2
-  -- the product identity over any finset
-  have hprod : ∀ s : Finset ι, ((∏ i ∈ s, κu i : Aˣ) : A) =
+  -- The product identity over any finset.  `∏` is unavailable here: `Aˣ` is
+  -- not a `CommMonoid`, so `Finset.prod` is not even well defined.  Carry the
+  -- witness *and* its membership through the induction instead -- the
+  -- induction already fixes an order, so no commutation proof is needed.
+  have hprod : ∀ s : Finset ι, ∃ v : Aˣ, ((v : Aˣ) : A) =
       (∑ i ∈ s, L.wordS (D.word i) * algebraMap k A (d i) *
         L.wordT (D.word i)) +
-      (1 - ∑ i ∈ s, L.wordS (D.word i) * L.wordT (D.word i)) := by
+      (1 - ∑ i ∈ s, L.wordS (D.word i) * L.wordT (D.word i)) ∧
+      v ∈ stableUnits A := by
     intro s
     induction s using Finset.cons_induction with
-    | empty => simp
+    | empty => exact ⟨1, by simp, one_mem _⟩
     | cons a s ha ih =>
-        rw [Finset.prod_cons, Units.val_mul, ih, hκval a,
+        obtain ⟨v, hv, hvmem⟩ := ih
+        refine ⟨κu a * v, ?_, mul_mem (hκmem a) hvmem⟩
+        rw [Units.val_mul, hv, hκval a,
           Finset.sum_cons, Finset.sum_cons]
         have horthTS : ∀ i ∈ s, L.wordT (D.word a) *
             L.wordS (D.word i) = 0 := by
@@ -220,8 +235,9 @@ theorem codeScalar_diagonal_unit_mem [Nontrivial A]
               rw [hx1, hx2, hx3, hx4]
               noncomm_ring
   -- assemble at the full index set
-  have hval : ((∏ i, κu i : Aˣ) : A) = (u : A) := by
-    rw [hprod Finset.univ, hu]
+  obtain ⟨v, hv, hvmem⟩ := hprod Finset.univ
+  have hval : ((v : Aˣ) : A) = (u : A) := by
+    rw [hv, hu]
     have hcyl : ∑ i, L.wordS (D.word i) * L.wordT (D.word i) = 1 := hD
     rw [hcyl, sub_self, add_zero]
     unfold codeScalar
@@ -237,9 +253,9 @@ theorem codeScalar_diagonal_unit_mem [Nontrivial A]
       _ = L.wordS (D.word i) * algebraMap k A (d i) *
             L.wordT (D.word i) := by
           rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ i)]
-  have huprod : u = ∏ i, κu i := Units.ext hval.symm
+  have huprod : u = v := Units.ext hval.symm
   rw [huprod]
-  exact prod_mem fun i _ ↦ hκmem i
+  exact hvmem
 
 /-- Transvection-list transports are units of the class group. -/
 theorem codeScalar_transvecList_unit_mem

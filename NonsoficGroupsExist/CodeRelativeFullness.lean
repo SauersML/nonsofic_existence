@@ -40,10 +40,11 @@ theorem t_combo_mul_s_combo (α₀ α₁ β₀ β₁ : k) :
   have h10 : L.t 1 * L.s 0 = 0 := by
     rw [t_mul_s, if_neg (by decide)]
   have h11 : L.t 1 * L.s 1 = 1 := by rw [t_mul_s, if_pos rfl]
-  rw [add_mul, mul_add, mul_add,
-    L.smul_mul_smul' α₀ β₀, L.smul_mul_smul' α₀ β₁,
-    L.smul_mul_smul' α₁ β₀, L.smul_mul_smul' α₁ β₁,
-    h00, h01, h10, h11, smul_zero, smul_zero, add_zero, zero_add,
+  -- `smul_mul_smul'` is not a `LeavittFamily` method (nor a Mathlib name);
+  -- the fact `(a • b) * (c • d) = (a * c) • (b * d)` is `smul_mul_smul_comm`.
+  rw [add_mul, mul_add, mul_add]
+  simp only [smul_mul_smul_comm]
+  rw [h00, h01, h10, h11, smul_zero, smul_zero, add_zero, zero_add,
     add_smul]
 
 /-- **Left-fullness witness**: a scalar left inverse of the stack

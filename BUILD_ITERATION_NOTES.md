@@ -2660,3 +2660,31 @@ induction (on |ι| + |κ|) assembling: dichotomy-with-witnesses /
 peel / refine; M6 NarrowDischarge.  Within-round termination proof
 still needed (probe says ≤ 2 refinements; candidate: A-stack rank
 drops or extraction fires).
+
+## Session 45b: glue + termination evidence strengthened
+- CodeChangeGlue.lean: isCompleteCode_of_family (Fintype → list
+  interface), codeBijection_mem_stableUnits (Σᵢ s_{τᵢ}t_{σᵢ} ∈ H via
+  the compiled generation theorem), cylinder_split,
+  incomparable_append_single, split_family_free/sum (one-word split
+  of a complete family, indexed Fin 2 ⊕ {i ≠ j₀}).  These are the
+  u₁-ingredients of the atom peel.
+- Probe extended (400 random narrow units): every case terminates;
+  refinement needed in 183 cases, ALWAYS exactly one refinement, and
+  afterwards the s-side extraction fires.  A-stack rank at the refine
+  moment is often 0, so the naive rank measure is NOT the mechanism.
+- Worked by hand the minimal stuck example (2×2):
+  v = s₀t₀² + s₁t₀ + s₁s₀t₁, pencil [[t₀,0],[1,s₀]], unit with
+  explicit inverse [[s₀,p₁],[−1,t₀]].  One col-refinement produces
+  [[1,0,0],[s₀,s₁,s₀]] over {00,01,1}; row 2 becomes pure-s (u₀ = e₂
+  annihilates the A′-stack AND the children's C-content, since
+  children's C-cols are the old A-cols); one scalar col-op + one
+  exact t-multiplier row-op reach ς ⊕ (−1).  KEY PARTIAL FACT toward
+  termination: after refining ALL B-free kernel columns, any
+  u₀ ∈ coker(A-stack) automatically annihilates the children's
+  C-content (children C-cols = old A-cols); the only obstruction to
+  the s-extraction firing is u₀·(C-content of the surviving columns).
+  CONJECTURE (matches all 583 machine cases): iterating the batch
+  refine forces this obstruction to die — candidate second-tier
+  measure: dim(coker A-stack ∩ (surviving-C-cols)^⊥) strictly grows.
+- User expanded the goal: after formalization completes → fully
+  update nonsofic_groups_exist.tex → pursue new results beyond it.

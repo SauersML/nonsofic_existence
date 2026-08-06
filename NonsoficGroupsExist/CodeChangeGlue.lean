@@ -122,11 +122,11 @@ theorem split_family_free (τ : ι → List (Fin 2))
     exact hz this
   · -- child versus another word
     have hinc := L.incomparable_append_single
-      (hfree (Ne.symm i₂.2)) (hfree i₂.2) z₁
+      (hfree i₂.2) (hfree (Ne.symm i₂.2)) z₁
     exact hinc.2 h
   · -- another word versus child
     have hinc := L.incomparable_append_single
-      (hfree (Ne.symm i₁.2)) (hfree i₁.2) z₂
+      (hfree i₁.2) (hfree (Ne.symm i₁.2)) z₂
     exact hinc.1 h
   · -- two other words
     have hne' : i₁.1 ≠ i₂.1 := fun hh ↦
