@@ -1866,3 +1866,38 @@ LEAN PLAN (final modules):
 - Then: docstring updates (STALE_DISCLAIMER×3), audit re-run
   (LAUNDERED_PROP/UNUSED clear once wired), README.
 NOTE: user is now handling all compilation — I write, they build.
+
+## Session 35b: honest junk audit — swap raising-part creates degree-2
+- CORRECTION to session 35: the swap σ_{x,β} (left) has raising part
+  −S(β)T(x), and S(β)T(x)·R hits R's x-comparable S-roots → degree-2
+  junk.  Right-swaps have the mirror problem (y vs R's T-sides).
+  The machine witnesses succeeded because junk cancelled per-instance
+  or was re-killed by later moves — the clean "junk-free swap" needs
+  a hypothesis we cannot always discharge.
+- REVISED (final) PLAN:
+  1. B2-all-N in Lean (units 1 + τ, τ ∈ span[1,N], are in H) via the
+     session-30/33 block-move route — ALL ingredients compiled
+     (transvection pullback, matrixRingEquiv/equal-depth transport,
+     cornerDiag descent, WidthTwoReduction endpoint).  This absorbs
+     ALL upward junk permanently.
+  2. KillMoves.lean: unipotent_kill_step WRITTEN (exact value
+     formula, supply hypotheses, class-iff — no sorry); swap lemma
+     restated with honest junk formula (positive junk unconstrained,
+     negative-side exactness): A_new = a' + S(x)T(β), positive part
+     arbitrary-but-window-bounded.
+  3. Induction on the COUNT of negative monomials with the 2-move
+     macro (swap-convert then unipotent-kill nets −1 per round;
+     positive window grows but B2 doesn't care).
+  4. narrow → [0,≤N]-window → c-invertible ((P) generalized: hmm —
+     (P)-Lean is N = 1 only!  For the assembly, after killing ALL
+     negatives we land in [0,N]: split u = c(1+τ) needs (P)-N.
+     EITHER extend ZeroKOne to general N (grouped-coefficient
+     remainder vector — session-29 math) OR note c = 1-preserving:
+     the kill moves shift c only by junk... simplest: B2 handles
+     1 + τ directly; for general c + τ: rank-normalize c and rerun —
+     NO: cleanest is (P)-N.  Add ZeroKOneN to the plan (the Lean
+     induction upgrades hclaim to a remainder VECTOR indexed by the
+     N shifts; rank argument unchanged).
+  Order of writing: B2 (BlockMoveTailKill.lean), ZeroKOneN,
+  KillMovesSwap, NegativePartInduction, NarrowReductionProof,
+  assembly + docstrings.
