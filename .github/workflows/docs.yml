@@ -1,0 +1,62 @@
+# API documentation.  Deliberately NOT part of the proof gate: this workflow
+# never blocks a merge, and `doc-gen4` breaking must not be able to make the
+# repository look unproved.  The gates are `prover.yml` and
+# `independent-kernel.yml`.
+name: API documentation
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.lean'
+      - 'docbuild/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build and publish doc-gen4 output
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz \
+            | tar xz
+          ./elan-init -y --default-toolchain "$(cat lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch the Mathlib build cache
+        run: lake exe cache get || true
+
+      - name: Build the documentation
+        working-directory: docbuild
+        run: |
+          lake update -R
+          lake build NonsoficGroupsExist:docs
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docbuild/.lake/build/doc
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,19 @@
+# Documentation build, deliberately a separate package.
+#
+# `doc-gen4` pulls its own dependency set and pins its own toolchain
+# expectations.  Requiring it from the root `lakefile.toml` would put all of
+# that in the manifest of the library whose green build is the artifact, for
+# the sake of a side product.  Keeping it here means a doc-gen4 breakage can
+# never take the proof build down with it.
+name = "docbuild"
+version = "0.1.0"
+defaultTargets = ["NonsoficGroupsExist:docs"]
+
+[[require]]
+name = "NonsoficGroupsExist"
+path = ".."
+
+[[require]]
+name = "doc-gen4"
+git = "https://github.com/leanprover/doc-gen4"
+rev = "v4.32.2"
