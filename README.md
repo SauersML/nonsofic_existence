@@ -395,6 +395,11 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       branches recurse, both-stacks-full reaches the terminal, and
       the single refinement configuration is isolated as the named
       hypothesis `StuckReduction`
+    - [x] the master-induction discharge (`NarrowDischarge`):
+      `NarrowReduction k` now follows from the single named
+      statement `StuckReduction k` — the ENTIRE `K₁`-vanishing chain
+      (`NarrowReduction → ScalarReduction → B4 → GL = EL`) rests on
+      one remaining Prop
     - [ ] the refinement move and the round recursion: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the
