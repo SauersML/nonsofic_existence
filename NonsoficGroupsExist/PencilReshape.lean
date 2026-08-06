@@ -16,11 +16,17 @@ codes, this realizes the session-54 exits.
 namespace NonsoficGroupsExist
 namespace LeavittFamily
 
+-- `stableUnits` lives in `MatrixDiagonalization`
+open MatrixDiagonalization
+
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
 variable {k : Type} [Field k] [Algebra k A]
 variable {ι κ : Type*} [Fintype ι] [DecidableEq ι]
 variable [Fintype κ] [DecidableEq κ]
 
+-- the statement never mentions `k`, but `codeBijection_mem_stableUnits`
+-- in the proof needs it, so it has to be force-included
+include k in
 /-- **Reshaping**: two pencil units with the same entry matrix over
 different complete code pairs (same index types) are equivalent in the
 diagonal class group. -/
@@ -132,6 +138,7 @@ theorem reshaped_pencil_mem_iff [Nontrivial A]
     rw [hueq]
     exact mul_mem (mul_mem (inv_mem hω₁mem) h) (inv_mem hω₂mem)
 
+omit [DecidableEq ι] [DecidableEq κ] in
 /-- **The value window of a pencil over depth-controlled codes**:
 entry windows shift by row depth minus column depth. -/
 theorem pencilVal_window_mem {a b lo hi : ℤ}
