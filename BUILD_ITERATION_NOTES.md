@@ -976,3 +976,37 @@ WRITTEN: GammaReduction.lean (complete, hypotheses explicit).
   ⟹ q' = q'p₁ + q'p₀ = q' — TAUTOLOGY AGAIN (p₀+p₁ = 1).  ALL linear
   pairings are consistent; the contradiction MUST be nonlinear
   (rank/dimension count) or use the mirror system (yu = 1) jointly.
+
+## Session 22: (G) rank-count exhausted consistent; γ' IS MOVABLE
+- M = 1 nonlinear relations derived: pairing the two inverse systems
+  gives y_{−M}·s₁z₀·y_{d−1} = [d=0]·y_{−M}; for M = 1 this yields
+  BALANCED idempotents P := s₁z₀y₋₁ (= p₁P, rank δ) and
+  E := C₁z₀ with C₁z₀C_j = C_j, colsp(C₁) = ker γ' exactly,
+  rank(C₁) = δ = corank(γ'), 1 − P ∈ γ'·Mat with colsp(1−P) =
+  colsp(γ') exactly.  EVERY rank/subspace constraint checks out
+  consistently, including the level-(m+1) scaling (rank P = 2δ_m from
+  both computations).  The abstract matrix model of the system admits
+  no contradiction — the instances' contradictions used the LEVEL
+  EMBEDDING structure (s₁Xt_j corner copies), not the level-m algebra.
+- VERDICT: (G) via rank counting at a fixed level is DEAD; (G) itself
+  is possibly false as stated, and definitely not needed:
+- KEY DISCOVERY: the p-split mover 1 − s₁(z·p₀) is in H for ARBITRARY
+  z ∈ window[−1,0] (mem_stableUnits_of_val_unipotent with
+  a := −s₁zs₀, b := t₀, ba = 0 — NO balancedness needed).  Hence
+  [1 + s₁z] = [1 + s₁(z·p₁)] for mixed z, and more generally for all
+  0-rooted cylinder projections V = p_{0w'} (t_{0w'}s₁ = 0):
+  [1 + s₁z] = [1 + s₁·z(1 − p_{0w'})].  These moves CHANGE
+  z₋ ↦ z₋·p₁ etc. — γ' is NOT invariant under them (session 15c's
+  invariance was only for the other families).
+- NEW ROUTE to NarrowReduction WITHOUT (G): use the mixed p-splits +
+  corner transports + flips to normalize z₋'s column support, aiming
+  to make 1 + s₁z₋ invertible (or z₋ = 0) reachable.  Note
+  z ↦ zp₁ = zs₁t₁ then corner transport 1 + s₁(zs₁)t₁ = κ₁(1 + zs₁)
+  gives [1+s₁z] = [1 + zs₁] for MIXED z — the flip — and zs₁ has
+  components (zs₁)₋ = z₋s₁... iterate: the composite z ↦ t₁-shifted
+  data: TRACK what happens to the negative part under
+  z ↦ (the normal form of 1 + zs₁): worth computing whether the
+  γ'-obstruction provably shrinks (column-depth of z₋'s 1-rooted
+  content) per cycle.  ALSO available now: mixed-z tail support
+  reduction means the ENTIRE session-13 loop machinery applies to
+  mixed z with more freedom than previously exploited.
