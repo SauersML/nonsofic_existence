@@ -38,7 +38,8 @@ def mustReport : List (String × Name) :=
    ("TRIVIAL", ``AuditPlant.plantedUnusedHypothesis),
    ("UNUSED", ``AuditPlant.plantedUnusedHypothesis),
    ("LAUNDERED_PROP", ``AuditPlant.PlantedLaunderedProp),
-   ("UNWITNESSED", ``AuditPlant.PlantedCertificate)]
+   ("UNWITNESSED", ``AuditPlant.PlantedCertificate),
+   ("STALE_DISCLAIMER", ``AuditPlant.plantedStaleDisclaimer)]
 
 /-- Defects where either member of a pair may carry the finding, since which
 one is reported depends on the order the environment is walked in. -/
@@ -61,7 +62,9 @@ def mustNotReportUnder : List (String × Name) :=
    -- an ordinary implicit side condition is not an assumption in disguise
    ("ASSUMPTION_INSTANCE", ``AuditPlant.plantedHiddenPremise),
    -- a `@[simp]` lemma proved by `rfl` is a deliberate API lemma
-   ("RFL", ``AuditPlant.plantedSimpRfl)]
+   ("RFL", ``AuditPlant.plantedSimpRfl),
+   -- prose calling a result conditional, on a type that names the condition
+   ("STALE_DISCLAIMER", ``AuditPlant.cleanConditionalOnItsPremise)]
 
 /-- Declarations no scan may report. -/
 def mustNotReport : List Name :=

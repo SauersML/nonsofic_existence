@@ -191,9 +191,9 @@ jobs:
       # CALIBRATION BEFORE VERDICT, the third time in this file.  The scans in
       # Audit.Scan report nothing on a clean corpus, and a scan that reports
       # nothing because it is broken looks exactly the same.  Audit.Plants
-      # carries twelve planted defects that must each be reported under their
-      # own tag, five shapes that must NOT be reported under a named tag (one
-      # row per false positive the first real run emitted), and four clean
+      # carries thirteen planted defects that must each be reported under their
+      # own tag, six shapes that must NOT be reported under a named tag (one
+      # row per false positive a real run emitted), and four clean
       # declarations that must be reported by nothing.
       # Needs no Mathlib and no corpus, so it still runs when the library does
       # not build -- which is when a broken detector is most likely to be

@@ -81,7 +81,6 @@ theorem of_norm_starProjection_le {U V : Submodule ℝ E} {epsilon : ℝ}
     [U.HasOrthogonalProjection]
     (h : ∀ v ∈ V, ‖U.starProjection v‖ ≤ epsilon * ‖v‖) :
     EpsilonOrthogonal U V epsilon := by
-  haveI := hι
   intro u hu v hv
   have hinner : inner ℝ u v = inner ℝ u (U.starProjection v) := by
     calc
@@ -121,6 +120,7 @@ theorem of_monotone_starProjection
       |inner ℝ ((W i).starProjection u) ((W i).starProjection v)| ≤
         epsilon * ‖(W i).starProjection u‖ * ‖(W i).starProjection v‖) :
     EpsilonOrthogonal U V epsilon := by
+  haveI := hι
   intro u hu v hv
   have huT : Filter.Tendsto (fun i ↦ (W i).starProjection u) Filter.atTop (𝓝 u) :=
     Submodule.starProjection_tendsto_self W hW u hdense

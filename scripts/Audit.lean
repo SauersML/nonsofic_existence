@@ -237,7 +237,11 @@ def scanTags : List String :=
   , "UNUSED"
   , "TRIVIAL"
   , "DUPLICATE"
-  , "RFL" ]
+  , "RFL"
+  -- Prose calling a result conditional on a statement with no Prop premise.
+  -- Lives here rather than in `check.py` because only the environment can see
+  -- both the docstring and the type; see `Scan.disclaimerPhrases`.
+  , "STALE_DISCLAIMER" ]
 
 /-- Keep this high enough that a failing log names every hit rather than a
 sample of them. -/

@@ -58,6 +58,10 @@ widening this `set_option` past the one declaration silently decalibrates the
 UNUSED scan. -/
 theorem plantedUnusedHypothesis (h : (0 : Nat) = 0) : True := trivial
 
+/-- STALE_DISCLAIMER: a conditional result, or so this sentence claims --
+the statement below has no premise to be conditional on. -/
+theorem plantedStaleDisclaimer : ∃ n : Nat, n = 1 := ⟨1, rfl⟩
+
 /-- DUPLICATE + RFL. -/
 theorem plantedDuplicateA : (1 : Nat) + 1 = 2 := rfl
 
@@ -156,5 +160,13 @@ theorem cleanDeliberateUnused (_h : (0 : Nat) = 0) : (1 : Nat) ≤ 1 :=
 it. -/
 theorem cleanUsesPremise (h : (0 : Nat) = 0) : (0 : Nat) = 0 ∧ (1 : Nat) = 1 :=
   ⟨h, rfl⟩
+
+/-- Not STALE_DISCLAIMER: this result really is conditional, and the premise it
+is conditional on is right there in the type.  This is the shape the source-text
+version of the scan could not distinguish, and the reason it moved into the
+environment -- four sentences of this shape in the real corpus were its only
+findings, every one of them true. -/
+theorem cleanConditionalOnItsPremise (h : (0 : Nat) = 0) : ∃ n : Nat, n = 0 :=
+  ⟨0, h⟩
 
 end AuditPlant

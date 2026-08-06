@@ -331,7 +331,7 @@ theorem centeredIndicator_mem_orthogonal (hY : Nonempty Y)
   rw [Submodule.mem_orthogonal]
   intro x hx
   haveI := hY
-  obtain ⟨y₀⟩ := hY
+  obtain ⟨y₀⟩ := id hY
   have hxinv : ∀ g : G, permutationRepresentation σ g x = x :=
     (mem_invariantSubmodule (permutationRepresentation σ) x).1 hx
   have hxconstant : ∀ y z : Y, x y = x z :=
@@ -547,7 +547,7 @@ theorem orbitAction_hasExpansion
   let x' : orbitFinset σ x :=
     ⟨x, (mem_orbitFinset σ x x).2 ⟨1, by simp⟩⟩
   letI : Nonempty (orbitFinset σ x) := ⟨x'⟩
-  exact hasActionExpansion_of_kazhdanPair hQ (orbitAction σ x)
+  exact hasActionExpansion_of_kazhdanPair ⟨x'⟩ hQ (orbitAction σ x)
     (orbitAction_transitive σ x)
 
 end
@@ -605,9 +605,10 @@ theorem sofic_multiplication_hilbert_error_eventually
   have hcard : 0 < Fintype.card (A.model n) := by
     have := hNcard n hncard
     omega
-  letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  have hmodel : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  letI := hmodel
   have hbound :=
-    normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
+    normalized_norm_permutationOperators_centeredIndicator_sub_sq_le hmodel
       (A.map n (g * h)) (A.map n g * A.map n h) U
   have herr := hNerr n hnerr
   exact hbound.trans_lt (by linarith)
@@ -863,9 +864,10 @@ theorem sofic_relative_correlation_approaches_gram_eventually
   have hcard : 0 < Fintype.card (A.model n) := by
     have := hNcard n hncard
     omega
-  letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  have hmodel : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcard
+  letI := hmodel
   have hclose := hNclose n hnclose
-  have hsquare := abs_normalizedPermutationCorrelation_sub_sq_le
+  have hsquare := abs_normalizedPermutationCorrelation_sub_sq_le hmodel
     (U n) (A.map n (g⁻¹ * h)) ((A.map n g)⁻¹ * A.map n h)
   have hsquare' :
       |normalizedCorrelation (A.model n) (A.map n) (U n) (g⁻¹ * h) -
@@ -892,12 +894,13 @@ theorem abs_normalizedPermutationCorrelation_le_one (M : FiniteModel)
   · haveI : IsEmpty M := Fintype.card_eq_zero_iff.mp hcard
     simp [normalizedPermutationCorrelation]
   · have hcardNat : 0 < Fintype.card M := Nat.pos_of_ne_zero hcard
-    letI : Nonempty M := Fintype.card_pos_iff.mp hcardNat
+    have hmodel : Nonempty M := Fintype.card_pos_iff.mp hcardNat
+    letI := hmodel
     have hcardReal : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
     have hinner := abs_real_inner_le_norm (centeredIndicator U)
       (permutationOperator p (centeredIndicator U))
     rw [(permutationOperator p).norm_map] at hinner
-    have hnorm := norm_centeredIndicator_sq_div_card_le_one U
+    have hnorm := norm_centeredIndicator_sq_div_card_le_one hmodel U
     rw [normalizedPermutationCorrelation, abs_div, abs_of_pos hcardReal]
     calc
       |inner ℝ (centeredIndicator U)

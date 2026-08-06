@@ -183,7 +183,7 @@ theorem existsUnique_center [CompleteSpace E] {S : Set E}
   have hseq : ∀ n : ℕ, ∃ x : E,
       coveringRadius S x < ρ + 1 / (n + 1) := by
     intro n
-    apply exists_coveringRadius_lt
+    apply exists_coveringRadius_lt ⟨s₀⟩
     have hpos : (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
     linarith
   choose x hx using hseq

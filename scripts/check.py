@@ -66,7 +66,6 @@ SCAN_TAGS: tuple[str, ...] = (
     "unsafe / implemented_by / opaque escape hatch",
     "warningAsError disabled",
     "maxHeartbeats disabled",
-    "stale conditionality disclaimer",
 )
 
 
@@ -152,51 +151,22 @@ def check_forbidden(root: Path, f: Findings) -> None:
                 f.add(label, f"{rel}:{line}: {text.splitlines()[line - 1].strip()}")
 
 
-# Prose that describes the development as incomplete.  Tracked because the two
-# halves of this repository can disagree: `MainResults` proves an unconditional
-# existence theorem while individual module docstrings still describe their
-# contents as assumptions of conditional lemmas.  One of the two is stale, and
-# a reader who finds the disclaimer first reasonably concludes the headline
-# claim is overstated.
+# The "stale conditionality disclaimer" scan used to live here.  It moved to
+# `Audit.Scan` as STALE_DISCLAIMER, because the question it asks is not
+# answerable in the source text: a docstring saying "conditional on the
+# rose-graph `K1` input" is CORRECT when the theorem takes that input as a
+# hypothesis, and this file cannot see the hypothesis.  Its only findings on
+# this corpus were four such sentences, every one of them true, so its only
+# green state was one where accurate documentation had been deleted.
 #
-# Fatal like every other tag.  Which of the two is wrong is a question about
-# mathematics that no regex can answer, so the resolution is a person's: either
-# the disclaimer is stale and goes, or the headline is overstated and the
-# disclaimer is right.  What a red gate must NOT buy is the third option --
-# deleting an accurate disclaimer to silence the scan.
-DISCLAIMER_RE = re.compile(
-    r"\b(conditional|conditionally|candidate|proposed|not proved|unproved|"
-    r"not yet proved|assumed rather than|remains an assumption)\b",
-    re.IGNORECASE,
-)
-
-DOC_LINE_RE = re.compile(r"^\s*(--|/-|-/|\*|/-!)|^\s*$")
-
-
-def check_stale_disclaimers(root: Path, f: Findings) -> None:
-    for name, path in sorted(module_files(root).items()):
-        text = path.read_text(encoding="utf-8", errors="replace")
-        rel = path.relative_to(root)
-        in_block = False
-        for i, line in enumerate(text.splitlines(), start=1):
-            stripped = line.strip()
-            if stripped.startswith("/-"):
-                in_block = True
-            is_comment = in_block or stripped.startswith("--")
-            if stripped.endswith("-/"):
-                in_block = False
-            if not is_comment:
-                continue
-            m = DISCLAIMER_RE.search(line)
-            if m:
-                f.add("stale conditionality disclaimer",
-                      f"{rel}:{i}: {stripped[:110]}")
-
+# The environment sees the docstring AND the type, so the scan is decidable
+# there and sharper: conditionality prose on a statement with no Prop premise.
+# What no longer gets checked anywhere: module docstrings (`/-! ... -/`), which
+# belong to no declaration.  One of the original four was exactly that.
 
 CHECKS = [
     ("import closure", check_import_closure),
     ("forbidden constructs", check_forbidden),
-    ("stale conditionality disclaimers", check_stale_disclaimers),
 ]
 
 
@@ -232,9 +202,6 @@ PLANTS = {
         {f"{LIB}/Alpha.lean": "set_option warningAsError false\n"},
     "maxHeartbeats disabled":
         {f"{LIB}/Alpha.lean": "set_option maxHeartbeats 0 in\ntheorem a : True := trivial\n"},
-    "stale conditionality disclaimer":
-        {f"{LIB}/Alpha.lean":
-             "/-- This is a conditional result. -/\ntheorem alpha : True := trivial\n"},
 }
 
 

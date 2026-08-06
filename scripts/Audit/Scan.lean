@@ -49,6 +49,10 @@ environment is the only authority.
                    kernel accepted proves the binder is deletable.
   DUPLICATE        one proposition proved twice under two names.
   RFL              the proof term is literally `Eq.refl`.
+  STALE_DISCLAIMER a docstring describing the result as conditional, on a
+                   statement that carries no Prop premise to be conditional
+                   ON.  See `mentionsConditionality` for why this scan is
+                   here and not in `check.py`.
 -/
 
 open Lean Meta Elab Command
@@ -187,6 +191,37 @@ instance binder counts as an obligation only when its class is one of these.
 Written as unresolved name literals because this module must not import the
 corpus or Mathlib. -/
 def assumptionClasses : List Name := [`Fact, `Nonempty, `Inhabited]
+
+/-- Prose describing a result as not yet established.
+
+WHY THIS SCAN MOVED OUT OF `check.py`.  The source-text version asked only
+whether a comment contains one of these words, and on this corpus that is a
+question with four answers and no way to grade them: `glTwo_eq_elementary`
+says "conditional on the rose-graph `K₁` input" and takes
+`(hscalar : ScalarReduction _)` as a hypothesis, so the prose is exactly
+right.  A text scan cannot see that hypothesis, so its only green state was
+one where a true sentence had been deleted -- a gate that pays for silence
+with documentation is worse than no gate.
+
+The environment can see both halves, so the question becomes decidable and
+sharper than the original: prose claiming conditionality on a statement with
+NO Prop premise to be conditional on.  That is the disclaimer that is
+genuinely stale, and it is the one worth failing a run over.
+
+COVERAGE DROPPED IN THE MOVE, stated rather than left to be discovered:
+module docstrings (`/-! ... -/`) belong to no declaration and are invisible
+here, and so is prose on a `def`.  `BinaryLeavittDiagonal.lean`'s module
+docstring was one of the four original hits, and is no longer checked by
+anything. -/
+def disclaimerPhrases : List String :=
+  ["conditional", "candidate", "proposed", "not proved", "unproved",
+   "not yet proved", "assumed rather than", "remains an assumption"]
+
+/-- Case-insensitive substring test against `disclaimerPhrases`.  `splitOn`
+rather than a regex because Lean has no regex and this needs none. -/
+def mentionsConditionality (s : String) : Bool :=
+  let lower := s.toLower
+  disclaimerPhrases.any fun p => (lower.splitOn p).length > 1
 
 /-- Does this binder relocate a mathematical obligation onto the caller?
 
@@ -401,6 +436,17 @@ Prop premises" }
     if trivialConcl then
       out := out.push
         { tag := "TRIVIAL", fatal := false, decl := n, detail := "concludes `True`" }
+
+    -- STALE_DISCLAIMER.  `propPremise` is the whole test: a docstring may call
+    -- a result conditional exactly when the type says what it is conditional
+    -- on.  Without that guard this is the text scan again, and it fires on
+    -- four accurate sentences.
+    if let some doc ← findDocString? env n then
+      if mentionsConditionality doc && !propPremise then
+        out := out.push
+          { tag := "STALE_DISCLAIMER", fatal := true, decl := n,
+            detail := "the docstring describes the result as conditional or \
+unproved; the statement carries no Prop premise to be conditional on" }
 
     -- UNUSED
     let some val := valueOf? ci | continue

@@ -585,3 +585,83 @@ Then: ScalarReduction (BinaryLeavittAlgebra k) unconditional →
 upgrade BinaryLeavittDiagonal (drop hscalar) → B4/B5/B6 → final
 manuscript assembly.  BATCH-WRITE ALL OF THIS NEXT (user directive:
 write fully, then debug).
+
+## Session 15 (continuous run): corrected moves + the DEEP kill module
+- CORRECTION: right-mult by 1 + s₀Yt₁ acts as (c,w) ↦ (c(1+V), w(1+V))
+  — session-14's kill-sequence step 3 was invalid.  Move algebra:
+  (ch, wh) / (gc, g₁w) / (c, w + A·p₀c).  ResidualMoves.lean WRITTEN
+  (blockDiagUnit, blockDiagUnit_mul_residual, kill_move_residual,
+  kill_mover_mem) — not yet compiled (continuous-run mode).
+- z₋ = 0 CLASSIFICATION: 1 + s₁z₀ (z₀ balanced) is a unit ⟺ s₁z₀ is
+  nilpotent (geometric series is forced finite; negative components
+  of the inverse vanish by downward recursion).
+- COUNTEREXAMPLE to depth-1 kill-sufficiency: u = 1 + s₁s₀₀t₁₁ is a
+  unit ((s₁s₀₀t₁₁)² = 0 via t₁₁s₁ = t₁, t₁s₀ = 0) with z₀ = s₀₀t₁₁,
+  z₀p₁ = z₀ ≠ 0.  It IS trivially in H (unipotent a := s₁s₀₀,
+  b := t₁₁, ba = 0).  Hence δ := rank(z₀p₁) is NOT class-invariant:
+  the moves enumerated so far miss the DEEP families.
+- THE DEEP KILL MODULE: movers 1 + s_{1α'}·X·t_{0β''} (incomparable,
+  |α'| = |β''| for balance) change the tail by s_{α'}·A·(t_{0β''}c)
+  with NO junk (t_{0β''}s₁ = 0).  K_c := span of all such changes ⊇
+  old kill-ideal (α' = β'' = ∅ gives A·p₀c).  For c = 1 the module
+  contains all s_{α'}At_{β''}-balanced elements — kills the
+  counterexample (X := 1, α' = 00, β'' = 11).  CONJECTURE (final
+  form): u = c + s₁w unit ⟹ w ∈ K_c.  Deep-matrix heuristic:
+  K_c-membership ⟺ rowsp_deep(w) ⊆ rowsp of the deep matrices of
+  t₀c; (t₀c)(ys₀) = 1 gives t₀c full row rank at EVERY depth.
+  Remaining: prove the conjecture (candidates: induction on depth of
+  w's representation using the full-row-rank at matching depth;
+  or the z₋ = 0-classification generalized: reduce to nilpotent case
+  by the loop, then nilpotent tails are killable via their explicit
+  finite inverse).  NOTE the nilpotent-route: if z₋ = 0 then
+  u = 1 + s₁z₀ with s₁z₀ nilpotent — u·(1 − s₁z₀ + (s₁z₀)² − …) = 1
+  — and each partial product mover 1 + (finite sum) may itself be an
+  H-member via iterated unipotent/flip decompositions of nilpotents:
+  CHECK: is every unit of the form 1 + n (n nilpotent, n ∈ s₁·L₀!)
+  in H?  1 + n with n^D = 0: 1 + n = Π-telescoping?  For n = s₁z₀:
+  [1 + s₁z₀] = flip = [1 + z₀s₁] with (z₀s₁) nilpotent balanced-shifted
+  … z₀s₁ pure degree +1 nilpotent ⟹ 1 + z₀s₁: window [0,1] with
+  NILPOTENT tail: try induction on nilpotency degree D via the flip:
+  each flip conjugates/shortens?  (s₁z₀)² = 0-case: 1 + s₁z₀ IS
+  unipotent-lemma-able?? a := s₁z₀, b := 1: ba ≠ 0.  a := s₁, b := z₀:
+  ba = z₀s₁ ≠ 0 but NILPOTENT — generalize mem_stableUnits_of_val_
+  unipotent from ba = 0 to ba NILPOTENT: diag(1+ab, 1) vs 1+ba:
+  Whitehead flip gives [1+ab] = [1+ba]; induct on nilpotency index:
+  [1 + ba] with (ba)^{D−1}... (ab)^k-relations: THE FLIP REDUCES
+  NILPOTENCY INDEX?? (1+ab)(1+ba): if (ab)² = 0 then 1+ab = unit and
+  [1+ab] = [1+ba] with (ba)³ = b(ab)²a·… = 0-index-shifts by one!
+  (ba)^{k+1} = b(ab)^k a: (ab)^D = 0 ⟹ (ba)^{D+1} = 0 — WRONG
+  DIRECTION (index grows).  Decompose instead: 1 + n, n^D = 0:
+  n = n', use 1 + n = (1 + n·e₁)(1 + n·e₂)···-idempotent-splittings?
+  OVER A FIELD: nilpotent balanced-level N: 1 + N = product of
+  ELEMENTARY transvections in M_{2^m}(k)!!  — 1 + N is UNIPOTENT
+  matrix ⟹ ∈ E_{2^m}(k) ⟹ its image is in H by the
+  field-matrix-reduction (unitsEquiv_field_matrix... centralClass)!!
+  But s₁z₀ is NOT balanced (degree 1) ✗.  HOWEVER: 1 + s₁z₀ with
+  (s₁z₀)^D = 0: pure-degree-1 nilpotent: at depth-D-matrix picture
+  toMatrix_D(1 + s₁z₀) = I + (strictly-lower-triangular-by-degree
+  block structure)?? — degree-+1 elements SHIFT the grading-blocks:
+  the depth-j matrix of a degree-1 element has a SHIFT-structure ⟹
+  1 + (degree-1-nilpotent) is I + (block-shift-nilpotent-matrix) ⟹
+  UNIPOTENT MATRIX over the deep level ⟹ product of elementary
+  transvections OVER THE BALANCED-DEEP-RING (not field — entries are
+  L-elements... at depth D the entries of s₁z₀'s matrix: t_γ(s₁z₀)s_δ
+  — NOT scalar).  Hmm.  Simplest honest: prove
+  mem_stableUnits_of_val_unipotent' for n with n² = 0 directly:
+  1 + n, n² = 0: diag(1+n, 1): [[1,n],[0,1]]·[[1,0],[?,1]]-…:
+  1 + n = (1+n)·1: E₂-identity: [[1+n, 0],[0, (1+n)⁻¹-wait use
+  diagPair_inv_self + flip with x := n, y := 1?? flip x=n,y=1:
+  [1+n·1] = [1+1·n] trivial.  x := 1+?, …  DIRECT: n² = 0:
+  1 + n unit with inverse 1 − n: is diag(1+n,1) ∈ E₂?
+  [[1,n],[0,1]]·[[1,0],[-n?,1]]… compute [[1,n],[0,1]][[1,0],[y,1]]
+  = [[1+ny, n],[y,1]]: want [[1+n,0],[0,1]]: ny = n: y := 1?? then
+  [[1+n, n],[1, 1]]-no.  Known fact: 1+n (n²=0) IS a product of two
+  of OUR unipotents?  n = n·1: n² = 0 ⟹ 1+n = (1 + a b) with
+  a := n, b := 1 − n/2?? char-2-issues.  In fact for n² = 0:
+  1 + n = (1 + n)·— just use the FLIP-form: n = s₁z₀ = a·b with
+  a := s₁, b := z₀: [1 + s₁z₀] = [1 + z₀s₁] (flip ✓ green!) and
+  z₀s₁: DEGREE +1 with (z₀s₁)² = z₀(s₁z₀)s₁: (s₁z₀)² = 0 ⟹
+  (z₀s₁)³ = z₀(s₁z₀)²s₁ = 0: index ≤ 3… circles.  NEXT SESSION:
+  settle "1 + nilpotent-in-tail ∈ H" cleanly, then reduce general
+  residuals to the nilpotent case via the z₋-elimination (the
+  y-negative-component recursion suggests: LOOP kills z₋?).
