@@ -31,9 +31,10 @@ theorem exists_isUnit_matrix_mulVec_pair {k : Type*} [Field k]
       simp [h]
     exact (by decide : (0 : Fin 2) ≠ 1) (hab.injective h01)
   -- extend the pair to a basis
-  have hrange : LinearIndependent k
-      (Subtype.val : Set.range ![a, b] → (ι → k)) :=
-    hab.to_subtype_range
+  -- `LinearIndependent.to_subtype_range` is now `linearIndepOn_id`, phrased
+  -- as `LinearIndepOn k id (Set.range ![a, b])`.
+  have hrange : LinearIndepOn k id (Set.range ![a, b]) :=
+    hab.linearIndepOn_id
   set B : Basis (hrange.extend (Set.subset_univ _)) k (ι → k) :=
     Basis.extend hrange with hB
   have haS : a ∈ hrange.extend (Set.subset_univ _) :=
@@ -62,7 +63,8 @@ theorem exists_isUnit_matrix_mulVec_pair {k : Type*} [Field k]
     rw [he₂]
     have h1 : e₁ pb ≠ i₁ := by
       rw [← he₁a]
-      exact fun h ↦ hpab (e₁.injective h.symm).symm
+      -- `e₁.injective h.symm : pa = pb` already; the extra `.symm` flipped it
+      exact fun h ↦ hpab (e₁.injective h.symm)
     simp only [Equiv.trans_apply, he₁a]
     exact Equiv.swap_apply_of_ne_of_ne (Ne.symm h1) hne
   -- the change-of-basis equivalence

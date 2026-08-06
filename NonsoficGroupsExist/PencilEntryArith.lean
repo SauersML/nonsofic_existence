@@ -41,11 +41,11 @@ theorem pencilEntry_mul_algebraMap (a₀ a₁ c b₀ b₁ μ : k) :
         (b₁ * μ) := by
   unfold pencilEntry
   rw [add_mul, add_mul, add_mul, add_mul,
-    L.smul_mul_algebraMap a₀ (L.t 0) μ,
-    L.smul_mul_algebraMap a₁ (L.t 1) μ,
-    L.smul_mul_algebraMap c 1 μ,
-    L.smul_mul_algebraMap b₀ (L.s 0) μ,
-    L.smul_mul_algebraMap b₁ (L.s 1) μ]
+    smul_mul_algebraMap a₀ (L.t 0) μ,
+    smul_mul_algebraMap a₁ (L.t 1) μ,
+    smul_mul_algebraMap c 1 μ,
+    smul_mul_algebraMap b₀ (L.s 0) μ,
+    smul_mul_algebraMap b₁ (L.s 1) μ]
 
 /-- Left multiplication by a scalar acts on the coefficients. -/
 theorem algebraMap_mul_pencilEntry (μ a₀ a₁ c b₀ b₁ : k) :
@@ -54,11 +54,11 @@ theorem algebraMap_mul_pencilEntry (μ a₀ a₁ c b₀ b₁ : k) :
         (μ * b₁) := by
   unfold pencilEntry
   rw [mul_add, mul_add, mul_add, mul_add,
-    L.algebraMap_mul_smul μ a₀ (L.t 0),
-    L.algebraMap_mul_smul μ a₁ (L.t 1),
-    L.algebraMap_mul_smul μ c 1,
-    L.algebraMap_mul_smul μ b₀ (L.s 0),
-    L.algebraMap_mul_smul μ b₁ (L.s 1)]
+    algebraMap_mul_smul μ a₀ (L.t 0),
+    algebraMap_mul_smul μ a₁ (L.t 1),
+    algebraMap_mul_smul μ c 1,
+    algebraMap_mul_smul μ b₀ (L.s 0),
+    algebraMap_mul_smul μ b₁ (L.s 1)]
 
 /-- Sums of pencil entries collect coefficientwise. -/
 theorem sum_pencilEntry {γ : Type*} (s : Finset γ)
@@ -73,6 +73,7 @@ theorem sum_pencilEntry {γ : Type*} (s : Finset γ)
     ← Finset.sum_smul, ← Finset.sum_smul, ← Finset.sum_smul,
     ← Finset.sum_smul, ← Finset.sum_smul]
 
+omit [DecidableEq ι] in
 /-- **Right scalar move**: multiplying a code pencil by a transported
 scalar matrix multiplies the five coefficient matrices on the
 right. -/
@@ -109,6 +110,7 @@ theorem pencilVal_mul_codeScalar
           L.pencilEntry_mul_algebraMap _ _ _ _ _ _
     _ = _ := L.sum_pencilEntry Finset.univ _ _ _ _ _
 
+omit [DecidableEq κ] in
 /-- **Left scalar move**: multiplying on the left multiplies the five
 coefficient matrices on the left. -/
 theorem codeScalar_mul_pencilVal

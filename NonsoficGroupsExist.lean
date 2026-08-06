@@ -203,6 +203,8 @@ import NonsoficGroupsExist.AtomPeel
 import NonsoficGroupsExist.MixedCodeMoves
 import NonsoficGroupsExist.GLPairNormalization
 import NonsoficGroupsExist.PencilEntryArith
+import NonsoficGroupsExist.CompleteCodeSupply
+import NonsoficGroupsExist.GLVectorNormalization
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
