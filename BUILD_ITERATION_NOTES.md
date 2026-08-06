@@ -816,3 +816,46 @@ form v = γ + z₀s₁, x := v⁻¹):
   exhausts and c becomes unipotent-plus-identity ⟹ invertible).
 NEXT: nail the corner-depth termination for (G); then (i') general
 index remains (p₁-supported reduction now WRITTEN).
+
+## Session 18: LEMMA (i') PROVED — nilpotent tails die, all indices
+THEOREM: z balanced, n := s₁z, n^D = 0 ⟹ 1 + s₁z ∈ H.
+PROOF (induction on D; base D ≤ 2 = square_zero_tail_mem_stableUnits,
+written):
+Let D ≥ 3, r := (zs₁)^{D−2}z (pure degree D−2; nonzero else lower
+index).  Facts: r·s₁·z = (zs₁)^{D−1}z = 0 (from n^D = 0 by
+s₁-cancellation).
+1. PSEUDO-INVERSE OF PURE-DEGREE ELEMENTS: r = R·σ_d with d := D−2,
+   σ_d := wordS(0^d), R := r·τ_d balanced, R = R·p_{0^d}
+   automatically.  Take Ξ balanced with RΞR = R (balanced regularity,
+   written) and η := τ_d·Ξ.  Then rηr = R(σ_dτ_d)ΞRσ_d = RΞRσ_d = r.
+2. e := η·r = τ_d(ΞR)σ_d: idempotent (e² = η(rηr) = ηr), BALANCED
+   (τ_d·(balanced)·σ_d sandwich — needs the span-closure lemma
+   t-word·span·s-word ⊆ span, same pattern as mul_p0_mem_span), and
+   r·e = r.
+3. KEY VANISHING: z·e·s₁·z = zη(r·s₁·z) = 0.
+4. THE MOVE: mover m := 1 − s₁(ze): (s₁ze)² = s₁·(zes₁z)·e = 0,
+   ze balanced ⟹ m ∈ H by square_zero_tail_mem_stableUnits.
+   Product: m·(1 + s₁z) = 1 + s₁(z − ze − zes₁z) = 1 + s₁·z(1−e).
+5. INDEX DROP: z' := z(1−e): expand (z's₁)^{D−2}z' over choices
+   {zs₁, −zes₁} and final {z, −ze}: any term with e in a NON-final
+   position contains zes₁·z = 0; the two survivors are
+   (zs₁)^{D−2}z = r and −(zs₁)^{D−2}ze = −re = −r: they CANCEL.
+   Hence (z's₁)^{D−2}z' = 0: index of s₁z' ≤ D−1.  Induction. ∎
+LEAN PLAN (module NilpotentTailKill.lean):
+- span-closure: mul by t-words on left / s-words on right of the
+  balanced span (τ_d X σ_d sandwich) — generalize mul_p0_mem_span to
+  arbitrary single letters, then induct over words;
+- pure-degree right-mult: r·τ_d ∈ balanced span for r in
+  window[d,d]-span (same machinery);
+- the theorem by strong induction on D with the five steps above;
+  the expansion step 5 needs a finite product-expansion lemma — do it
+  by direct induction on D−2 with the two-term recursion
+  (z's₁)^k z' = (zs₁)^k z(1−e) for all k ≤ D−2, proved by:
+  (z's₁)((zs₁)^k z(1−e)) = (zs₁)^{k+1}z(1−e) − zes₁(zs₁)^k z(1−e);
+  and zes₁(zs₁)^k z = zes₁z(...) = 0 for k ≥ 0 — WAIT check:
+  zes₁·(zs₁)^k·z: starts zes₁z when k = 0 ✓ = 0; for k ≥ 1:
+  zes₁·zs₁(...) = (zes₁z)s₁(...) = 0 ✓ ALWAYS.  So the recursion is
+  CLEAN: (z's₁)^k z' = (zs₁)^k z (1−e) by induction on k — no
+  binomial expansion needed!  Then k := D−2 gives r(1−e) = 0.
+REMAINING for NarrowReduction: only the z₋-elimination/(G) — with
+(i') done, NarrowReduction ⟸ (G) alone.
