@@ -61,7 +61,6 @@ STATUS = {"verified": "formalized", "partial": "formalized in part",
 # is a deliberate edit here rather than a silent change of meaning.
 CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "KunSpectralCounterexample",
-    "RankTwoCompression",
     "ThompsonV",
     "ThompsonVEmbedding",
     "ThompsonVWitness",
@@ -138,8 +137,9 @@ def audit_report_closure(repo: Path | None = None) -> set[str]:
     if not d.is_dir():
         return set()
     imports = {
-        p.stem: set(re.findall(rf"^import {LIB}\.(\w+)", p.read_text(encoding="utf-8"), re.M))
-        for p in d.glob("*.lean")
+        p.stem: set(re.findall(rf"^import {LIB}\.([\w.]+)",
+                               p.read_text(encoding="utf-8"), re.M))
+        for p in d.rglob("*.lean")
     }
     seen: set[str] = set()
     stack = ["Audit"]
@@ -148,7 +148,9 @@ def audit_report_closure(repo: Path | None = None) -> set[str]:
         if m in seen or m not in imports:
             continue
         seen.add(m)
-        stack.extend(imports[m])
+        # Imports name modules by dotted path; the index is keyed by basename,
+        # which is what the manuscript's notes and this closure both use.
+        stack.extend(i.rsplit(".", 1)[-1] for i in imports[m])
     return seen
 
 
@@ -199,7 +201,7 @@ def to_markdown(claims: list[Claim], repo: Path | None = None) -> str:
             continue
         cells = []
         for module, decls in c.blocks:
-            mark = "" if module in closure else " \u2020"
+            mark = "" if module.rsplit("/", 1)[-1] in closure else " \u2020"
             cells.append(f"`{module}`{mark}: " + ", ".join(f"`{d}`" for d in decls))
         out.append(
             f"| `{c.label}` | {STATUS[c.status]} | {'; '.join(cells) or '—'} | {c.note or ''} |"

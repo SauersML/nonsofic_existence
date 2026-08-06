@@ -16,10 +16,16 @@ alike, and only the manuscript says which section it belongs to.  The script
 refuses to run with any module unassigned — a leftover `Misc/` is not a home
 chosen on purpose.
 
-## Why it has not been run
+## Status: done
 
-**The manuscript points into the flat directory, and cannot be edited from
-here.**  Two things break the moment a module moves:
+The move has been made and the manuscript follows it.  What is written below
+is the record of what the blocker was and how it was removed, kept because the
+same shape recurs whenever the two artefacts move relative to each other.
+
+## What the blocker was
+
+**The manuscript pointed into the flat directory.**  Two things broke the
+moment a module moved:
 
 1. **Every margin-note hyperlink 404s.**  `\leanfileurl` in the preamble is
 
@@ -37,20 +43,25 @@ here.**  Two things break the moment a module moves:
    `\leanmod{Whitehead}{...}` no longer names a module.  That gate also runs
    in the PDF build, so the manuscript stops building.
 
-Both are the checks working: this is exactly the drift they exist to catch.
-But neither can be repaired from the Lean side.
+Both were the checks working: exactly the drift they exist to catch.
 
-## What the manuscript needs
+## How it was removed
 
-The smallest change is to let a margin note carry a path.  `\leanmod`'s first
-argument becomes `Leavitt/Whitehead` instead of `Whitehead`, `\leanfileurl`
-keeps working unchanged, and the note displays the last component so the
-margin still reads as a module name.  `claim_map.py` then resolves the path
-directly and `check.py` follows without modification.
+Half of it did not need the manuscript at all.  `claim_map.module_path`
+resolves a note's module by path *or* by bare name, searching the tree, so
+moving a module is no longer a dangling reference on its own — the checks
+follow it wherever it goes.  That is the half worth keeping: it means a future
+move costs nothing here.
 
-Sequencing matters: **regenerate the margin notes and the manuscript in the
-same commit as the move**, or CI is red in between.  `docs/CLAIM_MAP.md` is
-generated, so it follows automatically.
+The hyperlink genuinely needed the `.tex`.  `\leanfileurl` appends `.lean` to
+whatever a note names, so a note naming `Whitehead` links to the old flat
+path.  Notes now name `Leavitt/Whitehead`, which `\leanfileurl` handles
+unchanged — 117 mechanical string edits, no macro change, no mathematics
+touched.  The margin displays the path, which reads no worse than the bare
+name and says more.
+
+Sequencing: the move and the note rewrite belong in **one commit**, or CI is
+red in between.  `docs/CLAIM_MAP.md` is generated, so it follows on its own.
 
 ## The eleven directories
 

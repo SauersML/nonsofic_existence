@@ -136,12 +136,24 @@ def plan() -> tuple[dict[str, str], list[str]]:
     return moves, unassigned
 
 
+def _tracked(rel: str) -> bool:
+    return subprocess.run(["git", "ls-files", "--error-unmatch", rel],
+                          cwd=REPO, capture_output=True).returncode == 0
+
+
 def apply(moves: dict[str, str]) -> None:
     for module, target in moves.items():
         dest = REPO / LIB / f"{target}.lean"
         dest.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["git", "mv", f"{LIB}/{module}.lean", f"{LIB}/{target}.lean"],
-                       cwd=REPO, check=True)
+        src = f"{LIB}/{module}.lean"
+        # Another session may have a module in flight and untracked; `git mv`
+        # refuses those, and leaving them behind would strand them at a path
+        # nothing imports any more.
+        if _tracked(src):
+            subprocess.run(["git", "mv", src, f"{LIB}/{target}.lean"],
+                           cwd=REPO, check=True)
+        else:
+            (REPO / src).rename(dest)
 
     rename = {m: t.replace("/", ".") for m, t in moves.items()}
     pattern = re.compile(rf"^import {LIB}\.(\w+)$", re.M)

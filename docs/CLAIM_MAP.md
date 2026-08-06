@@ -12,86 +12,87 @@ this table is that assertion, collected and resolved.
 
 | TeX label | Status | Lean modules and declarations | Note |
 | --- | --- | --- | --- |
-| `thm:A` | formalized | `MainResults`: `universalLeavittEL4_not_isSofic`, `universalLeavitt_profile`, `ambient_profile` |  |
-| `thm:B` | formalized | `MainResults`: `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`; `UnitsGLProfile`: `binaryLeavittUnits_profile`, `binaryLeavittGL_profile` |  |
-| `thm:C` | formalized | `MainResults`: `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover`; `KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` |  |
-| `thm:D` | formalized | `CriterionAssembly`: `isLEF_of_isSofic`, `not_isSofic_of_not_isLEF` |  |
-| `def:sofic` | formalized | `Sofic`: `SoficApproximation`, `IsSofic` |  |
-| `lem:normalization` | formalized | `Sofic`: `map_one_close`; `InverseNormalization`: `inverseError_negligible` |  |
-| `lem:word` | formalized | `Sofic`: `word_close`; `BlockWordCrossing`: `wordDisagreement_negligible`, `all_wordCrossing_negligible` |  |
-| `def:expdecomp` | formalized | `Criterion`: `ExpanderDecomposition` |  |
-| `def:essential` | formalized in part | `Criterion`: `MatchingCertificate`; `EssentialExpanderRepair`: `induced_expands_eventually`, `repairedActualGraph_expands_eventually` | Realized as the matching-certificate expansion data and its repair, not as a separate definition. |
-| `lem:coarea` | formalized | `FiniteGraph`: `coarea`, `coarea_mul`; `DirectedCoarea`: `nonnegative_coarea` |  |
+| `thm:A` | formalized | `Endpoint/MainResults`: `universalLeavittEL4_not_isSofic`, `universalLeavitt_profile`, `ambient_profile` |  |
+| `thm:B` | formalized | `Endpoint/MainResults`: `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`; `Leavitt/UnitsGLProfile`: `binaryLeavittUnits_profile`, `binaryLeavittGL_profile`; `KOne/AllRanksElementary`: `glAll_eq_elementary` |  |
+| `thm:C` | formalized | `Endpoint/MainResults`: `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover`; `Covers/KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` |  |
+| `thm:D` | formalized | `Criterion/CriterionAssembly`: `isLEF_of_isSofic`, `not_isSofic_of_not_isLEF` |  |
+| `def:sofic` | formalized | `Sofic/Sofic`: `SoficApproximation`, `IsSofic` |  |
+| `lem:normalization` | formalized | `Sofic/Sofic`: `map_one_close`; `Matching/InverseNormalization`: `inverseError_negligible` |  |
+| `lem:word` | formalized | `Sofic/Sofic`: `word_close`; `Matching/BlockWordCrossing`: `wordDisagreement_negligible`, `all_wordCrossing_negligible` |  |
+| `def:expdecomp` | formalized | `Criterion/Criterion`: `ExpanderDecomposition` |  |
+| `def:essential` | formalized in part | `Criterion/Criterion`: `MatchingCertificate`; `Matching/EssentialExpanderRepair`: `induced_expands_eventually`, `repairedActualGraph_expands_eventually` | Realized as the matching-certificate expansion data and its repair, not as a separate definition. |
+| `lem:coarea` | formalized | `Matching/FiniteGraph`: `coarea`, `coarea_mul`; `Matching/DirectedCoarea`: `nonnegative_coarea` |  |
 | `lem:fplef` | not formalized | — | Not needed: the non-LEF witness is a direct finite obstruction, not a residual-finiteness argument. |
-| `thm:kun` | formalized | `KunDecomposition`: `exists_expanderDecomposition`; `KunFixedDecomposition`: `expanderDecomposition` | Proved internally, in the full-sequence one-way form used here; not assumed. |
-| `thm:kunthom` | formalized | `KunThomTheorem`: `isLEF_of_exactProductExpansion`; `KunThomEssential`: `isLEF_of_matchingCertificate` | Proved internally, with the matching-core repair; not assumed. |
-| `rem:kunaudit` | formalized | `KunSpectralCounterexample` †: `switched`, `rayleigh_testVector`, `not_isBipartite` | The near-bipartite counterexample to the spectral implication, formalized. |
-| `lem:refine` | formalized | `Refinement`: `exists_dominant_cell`, `le_crossing_of_cell`; `ComponentRefinement`: `refineComponent` |  |
-| `lem:conserve` | formalized | `PermutationConservation`: `permutation_conservation_full` |  |
-| `lem:pin` | formalized | `Pinning`: `median_pinning`; `ComponentPinning`: `normalized_pinning_global` |  |
-| `lem:select` | formalized | `Selection`: `exists_selection`, `diagonalLevel_error` |  |
-| `lem:complete` | formalized | `Localization`: `exists_completion`, `involutiveCompletion`; `LocalizedApproximation`: `toSoficApproximation` |  |
-| `thm:local` | formalized | `LocalCriterion`: `LocalCriterionData`; `CriterionAssembly`: `isLEF_of_soficApproximation` |  |
-| `cor:kazhdan` | formalized | `CriterionAssembly`: `isLEF_of_isSofic`, `not_isSofic_of_not_isLEF` |  |
-| `prop:match` | formalized | `MedianNormalization`: `medianNormalize`; `MatchingPreparation`: `acceptable_symmDiff_le`; `Criterion`: `symmDiff_le_of_pinned`, `matching_injective` |  |
-| `lem:diverge` | formalized | `ComponentDivergence`: `smallBlockVertices_negligible` |  |
-| `def:family` | formalized | `Leavitt`: `LeavittFamily` |  |
-| `lem:family-infinite` | formalized | `Leavitt`: `infinite`, `s0_pow_injective` |  |
-| `lem:leaf` | formalized | `LeavittWords`: `wordT_mul_wordS_self`, `wordT_mul_wordS_of_incomparable`, `cylinder_split` |  |
-| `prop:selfsim` | formalized | `MatrixSelfSimilarity`: `ringEquivMatrix`; `LeavittSelfSimilarity`: `binaryMatrixRingEquiv` | Every positive rank, with an explicit inverse. |
-| `lem:whitehead` | formalized | `Whitehead` †: `whitehead_commutator`, `whitehead_diagonal`; `MatrixDiagonalization`: `exists_elementary_whitehead` |  |
-| `lem:elfg` | formalized | `ElementaryGroup`: `elementaryGroup_finitelyGenerated` |  |
-| `thm:ejz` | formalized in part | `FreeElementaryPropertyT`: `controlSet_isKazhdanPair`; `FiniteFieldElementaryPropertyT`: `finiteFieldElementaryThree_hasKazhdanPropertyT` | Proved internally at rank three for finite-type algebras over every finite field, with an explicit Kazhdan pair; the arbitrary finitely generated ring statement is manuscript-only. |
-| `prop:rankequiv` | formalized | `LeavittRankEquivalence`: `rankSuccEquiv`, `rankSuccToProduct`, `rankSucc_propertyT_of_rankSucc` |  |
-| `lem:chartwo` | formalized | `Leavitt`: `characteristicTwo_involution`, `characteristicTwo_compressor`, `compressor_factorization` | The factorization is proved in every characteristic. |
-| `prop:vembed` | formalized | `ThompsonVEmbedding` †: `vEmbedding`, `vEmbedding_injective`, `isComplete_of_covers`; `ThompsonV` †: `tableEquiv` |  |
-| `lem:corner` | formalized | `LeavittCorner`: `cornerHom`, `cornerHom_s0`, `t0_cornerHom`, `t1_cornerHom_s1` |  |
-| `prop:vnotlef` | formalized | `ThompsonVWitness` †: `thompsonV_not_isLEF`; `ThompsonWitness`: `not_isLEF_cornerWitnessSubgroup`; `Scheme`: `not_isLEF_cornerSubgroup` | Strengthened: proved for $V$ itself, with no Higman presentation input. |
-| `rem:witnessroute` | formalized | `ThompsonFObstruction`: `not_isLEF_of_two_relations`, `finite_commute_of_two_relations`; `ThompsonWitness`: `cornerWitnessSubgroup`, `not_isLEF_cornerWitnessSubgroup`; `ThompsonVWitness` †: `thompsonV_not_isLEF` |  |
-| `lem:uinv` | formalized | `LeavittMatrixCompression`: `matrixCompressionHom` |  |
-| `prop:compress` | formalized | `RankFourCompressors`: `compressor_conjugation`, `compressionEnd_injective` |  |
-| `lem:zinv` | formalized | `Leavitt`: `z_sq`; `RankFourCompressors`: `involution_sq`; `DiagonalCornerCompression`: `matrixCompression_commutes_firstDiagonalCorner` |  |
-| `prop:gen` | formalized | `RankFourCompressors`: `coreEmbedding_compressorSet_generate` |  |
-| `prop:JinGamma` | formalized | `UniversalRankFour`: `witnessEmbedding`; `DiagonalElementary`: `firstDiagonalUnit_mem_of_mem_commutator` |  |
-| `prop:KJ` | formalized | `Scheme`: `commute_compressed_corner`, `compressed_inf_corner` |  |
-| `thm:corner` | formalized | `CompressionSetup`: `CompressionSetup`; `UniversalCompressionSetup`: `compressionSetup` |  |
-| `cor:fgring` | formalized | `CriterionAssembly`: `not_isSofic_of_not_isLEF` |  |
-| `prop:ufact` | formalized | `RankFourCompressors`: `compressor`, `compressorMatrix`, `compressorPiece` | Explicit elementary words, in every characteristic. |
-| `lem:zfact` | formalized | `RankFourCompressors`: `involution`, `involutionMatrix`, `involution_sq` | Explicit elementary words, in every characteristic. |
-| `thm:spine` | formalized | `MainResults`: `universalLeavittEL4_not_isSofic`, `universalLeavitt_profile` |  |
-| `thm:2x2` | formalized | `RankTwoCompression` †: `rankTwo_not_isSofic`, `rankTwoInvolution_conj_upperNil`, `rankTwoInvolution_conj_lowerNil` |  |
-| `thm:agp` | formalized in part | `MatrixDiagonalization`: `exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag`; `LeavittSimplicity`: `exists_mul_mul_eq_one` | The rank-two GE form is Lean-backed; part (b) remains a cited input. |
-| `prop:glel` | formalized in part | `RefineLoopDischarge`: `glTwo_eq_elementary_holds`, `glFour_eq_elementary_holds`, `stableUnits_eq_top_holds` | $K_1(L)=0$ in Whitehead form is unconditional; the $\GL=\EL$ collapse is formalized at ranks two and four. |
-| `rem:elementaryK1` | formalized | `RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds` |  |
-| `rem:effectiveWH` | formalized in part | `RefineLoopDischarge`: `narrowReduction_holds` | The elimination behind it is formalized; the complexity bounds are manuscript-only. |
-| `thm:el2` | formalized | `RankTwoCompression` †: `rankTwo_not_isSofic` |  |
-| `thm:allranks` | formalized | `MainResults`: `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic` | Proved over every finite field via self-similarity, without $K_1$ or GE. |
-| `def:model` | formalized | `TableCover`: `TableModel` |  |
-| `lem:models` | formalized | `TableCover`: `tableModel_of_isSofic`, `exists_table_obstruction` |  |
-| `thm:table` | formalized | `TableCover`: `tableGroup_no_model`, `exists_finitelyPresented_obstruction` |  |
-| `thm:kcover` | formalized | `ShalomFinitePresentation`: `exists_presented_kazhdan_cover`, `exists_finitelyPresented_kazhdan_cover`; `KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Shalom's theorem is proved internally, not cited. |
-| `def:H` | formalized | `DiagonalClassGroup`: `stableUnits`, `ScalarReduction` |  |
-| `thm:K1app` | formalized | `RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds`, `stableUnits_eq_top_holds` |  |
-| `lem:division` | formalized | `LeavittSimplicity`: `exists_mul_mul_eq_one` |  |
-| `lem:GEapp` | formalized in part | `MatrixDiagonalization`: `exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag` | Rank two is formalized; the higher-rank induction is manuscript-only. |
-| `lem:Hnormal` | formalized | `DiagonalClassGroup`: `conj_mem_elementaryGroup_of_division`, `stableUnits_normal` |  |
-| `lem:unipapp` | formalized | `StableUnitsGenerators`: `mem_stableUnits_of_val_unipotent`; `IncomparableUnipotents`: `incomparableUnit_mem` |  |
-| `lem:flipapp` | formalized | `WhiteheadFlip`: `flipUnit`, `diagPair_flipUnit_inv_mem`, `mul_flipUnit_inv_mem_stableUnits` |  |
-| `lem:kappaapp` | formalized | `LeavittDiagonalClass`: `kappaUnit_mul_inv_mem_stableUnits`, `central_mem_stableUnits`, `stableUnits_eq_top` |  |
-| `lem:codescalarapp` | formalized | `CodeScalarMoves`: `codeScalar_unit_mem` |  |
-| `lem:codechangeapp` | formalized | `CodeChangeUnits`: `codeChange_mem_stableUnits`; `CodeChangeGlue`: `codeBijection_mem_stableUnits` |  |
-| `cor:reshapeapp` | formalized | `PencilReshape`: `reshaped_pencil_mem_iff`, `exists_reshaped_pencil`, `pencilVal_window_mem` |  |
-| `lem:widthapp` | formalized | `LeavittWindowReduction`: `exists_window_reduction`; `LeavittGradingSpans`: `exists_corner_move`; `BinaryLeavittWindow`: `exists_narrow_representative` |  |
-| `lem:thetaapp` | formalized | `ThetaStable`: `thetaMatUnit_mem_elementaryGroup`, `thetaMatUnit_diagUnit` |  |
-| `lem:nilpapp` | formalized | `PureTailNilpotency`: `pure_tail_nilpotent` |  |
-| `lem:niltailapp` | formalized | `NilpotentTailKill`: `nilpotent_tail_mem_stableUnits`; `RankNormalForm`: `exists_rank_normal_form` |  |
-| `lem:keystoneapp` | formalized | `ZeroKOne`: `balanced_component_isUnit` |  |
-| `prop:windowsdieapp` | formalized | `WindowNonnegReduction`: `window_nonneg_mem_stableUnits`; `WindowNonposReduction`: `window_nonpos_mem_stableUnits`; `WidthTwoReduction`: `window_zero_one_mem_stableUnits` |  |
-| `lem:pencilapp` | formalized | `PencilForm`: `exists_pencil_form`; `RefineLoopDischarge`: `pencilEntry_mem_window`, `codePair_expansion` |  |
-| `lem:strictnegapp` | formalized | `StrictNegativePencil`: `entry_window_negative_of_B_full` |  |
-| `lem:refinestepapp` | formalized | `RefineStep`: `refine_column`, `pencilEntry_mul_s`; `GLVectorNormalization`: `exists_isUnit_matrix_col` |  |
-| `lem:kraftapp` | formalized | `CodeShapeSupply`: `exists_shallow_code`, `exists_deep_code` |  |
-| `thm:loopapp` | formalized | `RefineLoopDischarge`: `pencil_free_exit`, `pencil_full_exit`, `pencil_unit_mem_pow` |  |
-| `cor:K1consequences` | formalized | `RefineLoopDischarge`: `glTwo_eq_elementary_holds`, `glFour_eq_elementary_holds` |  |
+| `thm:kun` | formalized | `Kun/KunDecomposition`: `exists_expanderDecomposition`; `Kun/KunFixedDecomposition`: `expanderDecomposition` | Proved internally, in the full-sequence one-way form used here; not assumed. |
+| `thm:kunthom` | formalized | `KunThom/KunThomTheorem`: `isLEF_of_exactProductExpansion`; `KunThom/KunThomEssential`: `isLEF_of_matchingCertificate` | Proved internally, with the matching-core repair; not assumed. |
+| `rem:kunaudit` | formalized | `Kun/KunSpectralCounterexample` †: `switched`, `rayleigh_testVector`, `not_isBipartite` | The near-bipartite counterexample to the spectral implication, formalized. |
+| `lem:refine` | formalized | `Matching/Refinement`: `exists_dominant_cell`, `le_crossing_of_cell`; `Matching/ComponentRefinement`: `refineComponent` |  |
+| `lem:conserve` | formalized | `Matching/PermutationConservation`: `permutation_conservation_full` |  |
+| `lem:pin` | formalized | `Matching/Pinning`: `median_pinning`; `Matching/ComponentPinning`: `normalized_pinning_global` |  |
+| `lem:select` | formalized | `Matching/Selection`: `exists_selection`, `diagonalLevel_error` |  |
+| `lem:complete` | formalized | `Matching/Localization`: `exists_completion`, `involutiveCompletion`; `Criterion/LocalizedApproximation`: `toSoficApproximation` |  |
+| `thm:local` | formalized | `Criterion/LocalCriterion`: `LocalCriterionData`; `Criterion/CriterionAssembly`: `isLEF_of_soficApproximation` |  |
+| `cor:kazhdan` | formalized | `Criterion/CriterionAssembly`: `isLEF_of_isSofic`, `not_isSofic_of_not_isLEF` |  |
+| `prop:match` | formalized | `Matching/MedianNormalization`: `medianNormalize`; `Matching/MatchingPreparation`: `acceptable_symmDiff_le`; `Criterion/Criterion`: `symmDiff_le_of_pinned`, `matching_injective` |  |
+| `lem:diverge` | formalized | `Matching/ComponentDivergence`: `smallBlockVertices_negligible` |  |
+| `def:family` | formalized | `Leavitt/Leavitt`: `LeavittFamily` |  |
+| `lem:family-infinite` | formalized | `Leavitt/Leavitt`: `infinite`, `s0_pow_injective` |  |
+| `lem:leaf` | formalized | `Leavitt/LeavittWords`: `wordT_mul_wordS_self`, `wordT_mul_wordS_of_incomparable`, `cylinder_split` |  |
+| `prop:selfsim` | formalized | `Leavitt/MatrixSelfSimilarity`: `ringEquivMatrix`; `Leavitt/LeavittSelfSimilarity`: `binaryMatrixRingEquiv` | Every positive rank, with an explicit inverse. |
+| `lem:whitehead` | formalized | `Leavitt/Whitehead` †: `whitehead_commutator`, `whitehead_diagonal`; `Leavitt/MatrixDiagonalization`: `exists_elementary_whitehead` |  |
+| `lem:elfg` | formalized | `Leavitt/ElementaryGroup`: `elementaryGroup_finitelyGenerated` |  |
+| `thm:ejz` | formalized | `PropertyT/FreeElementaryPropertyT`: `controlSet_isKazhdanPair`; `PropertyT/FiniteFieldElementaryPropertyT`: `finiteFieldElementaryThree_hasKazhdanPropertyT` | Proved internally, with an explicit Kazhdan pair. |
+| `prop:rankequiv` | formalized | `Leavitt/LeavittRankEquivalence`: `rankSuccEquiv`, `rankSuccToProduct`, `rankSucc_propertyT_of_rankSucc` |  |
+| `lem:chartwo` | formalized | `Leavitt/Leavitt`: `characteristicTwo_involution`, `characteristicTwo_compressor`, `compressor_factorization` | The factorization is proved in every characteristic. |
+| `prop:vembed` | formalized | `Leavitt/ThompsonVEmbedding` †: `vEmbedding`, `vEmbedding_injective`, `isComplete_of_covers`; `Leavitt/ThompsonV` †: `tableEquiv` |  |
+| `lem:corner` | formalized | `Leavitt/LeavittCorner`: `cornerHom`, `cornerHom_s0`, `t0_cornerHom`, `t1_cornerHom_s1` |  |
+| `lem:tworelator` | formalized | `Sofic/ThompsonFObstruction`: `not_isLEF_of_two_relations`, `finite_commute_of_two_relations`, `conjugacy_relation_all` |  |
+| `prop:vnotlef` | formalized | `Leavitt/ThompsonVWitness` †: `thompsonV_not_isLEF`; `Leavitt/ThompsonWitness`: `not_isLEF_cornerWitnessSubgroup`; `Criterion/Scheme`: `not_isLEF_cornerSubgroup` | Proved for $V$ itself, with no simplicity or presentation input. |
+| `lem:uinv` | formalized | `Leavitt/LeavittMatrixCompression`: `matrixCompressionHom` |  |
+| `prop:compress` | formalized | `Leavitt/RankFourCompressors`: `compressor_conjugation`, `compressionEnd_injective` |  |
+| `lem:zinv` | formalized | `Leavitt/Leavitt`: `z_sq`; `Leavitt/RankFourCompressors`: `involution_sq`; `Leavitt/DiagonalCornerCompression`: `matrixCompression_commutes_firstDiagonalCorner` |  |
+| `prop:gen` | formalized | `Leavitt/RankFourCompressors`: `coreEmbedding_compressorSet_generate` |  |
+| `lem:swapcomm` | formalized | `Leavitt/ThompsonWitness`: `cylinderSwap_is_commutator`, `cylinderSwap_mem_commutator` |  |
+| `lem:pairelem` | formalized | `Leavitt/ThompsonWitness`: `rootRotation`, `cornerWitnessSubgroup`, `cornerWitnessSubgroup_le_commutator` |  |
+| `prop:JinGamma` | formalized | `Leavitt/UniversalRankFour`: `witnessEmbedding`, `witnessEmbedding_injective`; `Leavitt/DiagonalElementary`: `firstDiagonalUnit_mem_of_mem_commutator`; `Leavitt/ThompsonWitness`: `not_isLEF_cornerWitnessSubgroup` |  |
+| `prop:KJ` | formalized | `Criterion/Scheme`: `commute_compressed_corner`, `compressed_inf_corner` |  |
+| `thm:corner` | formalized | `Criterion/CompressionSetup`: `CompressionSetup`; `Leavitt/UniversalCompressionSetup`: `compressionSetup` |  |
+| `cor:fgring` | formalized | `Criterion/CriterionAssembly`: `not_isSofic_of_not_isLEF` |  |
+| `prop:ufact` | formalized | `Leavitt/RankFourCompressors`: `compressor`, `compressorMatrix`, `compressorPiece` | Explicit elementary words, in every characteristic. |
+| `lem:zfact` | formalized | `Leavitt/RankFourCompressors`: `involution`, `involutionMatrix`, `involution_sq` | Explicit elementary words, in every characteristic. |
+| `thm:spine` | formalized | `Endpoint/MainResults`: `universalLeavittEL4_not_isSofic`, `universalLeavitt_profile` |  |
+| `thm:2x2` | formalized | `Leavitt/RankTwoCompression`: `rankTwo_not_isSofic`, `rankTwoInvolution_conj_upperNil`, `rankTwoInvolution_conj_lowerNil` |  |
+| `prop:glel` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `stableUnits_eq_top_holds`; `KOne/AllRanksElementary`: `elementaryGroup_eq_top`, `glAll_eq_elementary`, `binaryLeavittUnits_perfect` |  |
+| `rem:elementaryK1` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds` |  |
+| `rem:effectiveWH` | formalized in part | `KOne/RefineLoopDischarge`: `narrowReduction_holds` | The elimination behind it is formalized; the complexity bounds are manuscript-only. |
+| `thm:el2` | formalized | `Leavitt/RankTwoCompression`: `rankTwo_not_isSofic` |  |
+| `thm:allranks` | formalized | `Endpoint/MainResults`: `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic` | Proved over every finite field via self-similarity, without $K_1$ or GE. |
+| `def:model` | formalized | `Covers/TableCover`: `TableModel` |  |
+| `lem:models` | formalized | `Covers/TableCover`: `tableModel_of_isSofic`, `exists_table_obstruction` |  |
+| `thm:table` | formalized | `Covers/TableCover`: `tableGroup_no_model`, `exists_finitelyPresented_obstruction` |  |
+| `thm:kcover` | formalized | `Kazhdan/ShalomFinitePresentation`: `exists_presented_kazhdan_cover`, `exists_finitelyPresented_kazhdan_cover`; `Covers/KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Shalom's theorem is proved internally, not cited. |
+| `def:H` | formalized | `Leavitt/DiagonalClassGroup`: `stableUnits`, `ScalarReduction` |  |
+| `thm:K1app` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds`, `stableUnits_eq_top_holds` |  |
+| `lem:division` | formalized | `Leavitt/LeavittSimplicity`: `exists_mul_mul_eq_one` |  |
+| `lem:GEapp` | formalized in part | `Leavitt/MatrixDiagonalization`: `exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag` | Rank two is formalized; the higher-rank induction is manuscript-only. |
+| `lem:Hnormal` | formalized | `Leavitt/DiagonalClassGroup`: `conj_mem_elementaryGroup_of_division`, `stableUnits_normal` |  |
+| `lem:unipapp` | formalized | `KOne/StableUnitsGenerators`: `mem_stableUnits_of_val_unipotent`; `KOne/IncomparableUnipotents`: `incomparableUnit_mem` |  |
+| `lem:flipapp` | formalized | `Leavitt/WhiteheadFlip`: `flipUnit`, `diagPair_flipUnit_inv_mem`, `mul_flipUnit_inv_mem_stableUnits` |  |
+| `lem:kappaapp` | formalized | `Leavitt/LeavittDiagonalClass`: `kappaUnit_mul_inv_mem_stableUnits`, `central_mem_stableUnits`, `stableUnits_eq_top` |  |
+| `lem:codescalarapp` | formalized | `KOne/CodeScalarMoves`: `codeScalar_unit_mem` |  |
+| `lem:codechangeapp` | formalized | `KOne/CodeChangeUnits`: `codeChange_mem_stableUnits`; `KOne/CodeChangeGlue`: `codeBijection_mem_stableUnits` |  |
+| `cor:reshapeapp` | formalized | `KOne/PencilReshape`: `reshaped_pencil_mem_iff`, `exists_reshaped_pencil`, `pencilVal_window_mem` |  |
+| `lem:widthapp` | formalized | `Leavitt/LeavittWindowReduction`: `exists_window_reduction`; `Leavitt/LeavittGradingSpans`: `exists_corner_move`; `Leavitt/BinaryLeavittWindow`: `exists_narrow_representative` |  |
+| `lem:thetaapp` | formalized | `KOne/ThetaStable`: `thetaMatUnit_mem_elementaryGroup`, `thetaMatUnit_diagUnit` |  |
+| `lem:nilpapp` | formalized | `KOne/PureTailNilpotency`: `pure_tail_nilpotent` |  |
+| `lem:niltailapp` | formalized | `KOne/NilpotentTailKill`: `nilpotent_tail_mem_stableUnits`; `Leavitt/RankNormalForm`: `exists_rank_normal_form` |  |
+| `lem:keystoneapp` | formalized | `KOne/ZeroKOne`: `balanced_component_isUnit` |  |
+| `prop:windowsdieapp` | formalized | `KOne/WindowNonnegReduction`: `window_nonneg_mem_stableUnits`; `KOne/WindowNonposReduction`: `window_nonpos_mem_stableUnits`; `KOne/WidthTwoReduction`: `window_zero_one_mem_stableUnits` |  |
+| `lem:pencilapp` | formalized | `KOne/PencilForm`: `exists_pencil_form`; `KOne/RefineLoopDischarge`: `pencilEntry_mem_window`, `codePair_expansion` |  |
+| `lem:strictnegapp` | formalized | `KOne/StrictNegativePencil`: `entry_window_negative_of_B_full` |  |
+| `lem:refinestepapp` | formalized | `KOne/RefineStep`: `refine_column`, `pencilEntry_mul_s`; `KOne/GLVectorNormalization`: `exists_isUnit_matrix_col` |  |
+| `lem:kraftapp` | formalized | `KOne/CodeShapeSupply`: `exists_shallow_code`, `exists_deep_code` |  |
+| `thm:loopapp` | formalized | `KOne/RefineLoopDischarge`: `pencil_free_exit`, `pencil_full_exit`, `pencil_unit_mem_pow` |  |
+| `cor:K1consequences` | formalized | `KOne/RefineLoopDischarge`: `glTwo_eq_elementary_holds`, `glFour_eq_elementary_holds` |  |
 
 † Proved, and covered by the whole-namespace scan in `scripts/Audit.lean`, but outside the import closure of `NonsoficGroupsExist/Audit.lean`, whose `#print axioms` reports run on an ordinary build.

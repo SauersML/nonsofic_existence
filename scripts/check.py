@@ -238,7 +238,9 @@ def check_claim_map(root: Path, f: Findings) -> None:
     expected = (claim_map.CITED_OUTSIDE_AXIOM_REPORT
                 if root == REPO else frozenset())
     closure = claim_map.audit_report_closure(root)
-    cited = {m for c in claims for m, _ in c.blocks}
+    # Notes may name a module by path; the closure is keyed by basename, which
+    # is what identifies a module regardless of which directory it sits in.
+    cited = {m.rsplit("/", 1)[-1] for c in claims for m, _ in c.blocks}
     actual = frozenset(m for m in cited if m not in closure)
     for module in sorted(actual - expected):
         f.add("axiom-report pinning",
