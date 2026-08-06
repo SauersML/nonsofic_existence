@@ -8,17 +8,16 @@ import NonsoficGroupsExist.WindowNonnegReduction
 The two terminal branches of the pencil elimination.  Let `v` be a
 narrow unit with value `a + c + b` (degrees `-1, 0, 1`).
 
-* If the degree `+1` part is **left full** — some combination
-  `g₀·(t₀b) + g₁·(t₁b) = 1` — then every positive-degree component of
-  `v⁻¹` dies from the top of the graded equations, so `v⁻¹` is a
-  nonpositive-window unit and `v ∈ H`.
-* Mirror: if the degree `-1` part is **right full** —
-  `(a·s₀)·h₀ + (a·s₁)·h₁ = 1` — then `v⁻¹` is a nonnegative-window
-  unit and `v ∈ H`.
+* If the degree `+1` part is **left invertible** — `w·b = 1` for some
+  `w` — then every positive-degree component of `v⁻¹` dies from the
+  top of the graded equations, so `v⁻¹` is a nonpositive-window unit
+  and `v ∈ H`.
+* Mirror: if the degree `-1` part is **right invertible** —
+  `a·w = 1` — then `v⁻¹` is a nonnegative-window unit and `v ∈ H`.
 
-In pencil terms the hypotheses say the scalar stack `[B₀; B₁]` has
-full column rank, resp. `(A₀ | A₁)` has full row rank; the fullness
-witnesses are the transported scalar one-sided inverses.
+In pencil terms the hypotheses hold whenever a code-relative scalar
+stack `[B₀; B₁]` has full column rank, resp. `(A₀ | A₁)` full row
+rank: the witness is the transported scalar one-sided inverse.
 -/
 
 namespace NonsoficGroupsExist
@@ -36,8 +35,7 @@ theorem mem_stableUnits_of_deg_one_left_full
     (hc : c ∈ Submodule.span k ((family k).degreeMonomials 0 0))
     (hb : b ∈ Submodule.span k ((family k).degreeMonomials 1 1))
     (hv : (v : BinaryLeavittAlgebra k) = a + c + b)
-    (g₀ g₁ : BinaryLeavittAlgebra k)
-    (hg : g₀ * ((family k).t 0 * b) + g₁ * ((family k).t 1 * b) = 1) :
+    (w : BinaryLeavittAlgebra k) (hw : w * b = 1) :
     v ∈ stableUnits (BinaryLeavittAlgebra k) := by
   classical
   set x : BinaryLeavittAlgebra k :=
@@ -141,13 +139,9 @@ theorem mem_stableUnits_of_deg_one_left_full
             show d + 1 + 1 = d + 2 from by ring,
             show d + 1 + (-1) = d from by ring,
             hd2', hd1', mul_zero, mul_zero, zero_add, zero_add] at heq
-          calc y d = (g₀ * ((family k).t 0 * b) +
-                g₁ * ((family k).t 1 * b)) * y d := by
-                rw [hg, one_mul]
-            _ = g₀ * ((family k).t 0 * (b * y d)) +
-                g₁ * ((family k).t 1 * (b * y d)) := by noncomm_ring
-            _ = 0 := by rw [heq, mul_zero, mul_zero, mul_zero, mul_zero,
-                add_zero]
+          calc y d = w * b * y d := by rw [hw, one_mul]
+            _ = w * (b * y d) := by rw [mul_assoc]
+            _ = 0 := by rw [heq, mul_zero]
   -- the inverse has a nonpositive window
   have hxneg : x ∈ Submodule.span k
       ((family k).degreeMonomials lo 0) := by
@@ -178,8 +172,7 @@ theorem mem_stableUnits_of_deg_neg_one_right_full
     (hc : c ∈ Submodule.span k ((family k).degreeMonomials 0 0))
     (hb : b ∈ Submodule.span k ((family k).degreeMonomials 1 1))
     (hv : (v : BinaryLeavittAlgebra k) = a + c + b)
-    (h₀ h₁ : BinaryLeavittAlgebra k)
-    (hh : a * (family k).s 0 * h₀ + a * (family k).s 1 * h₁ = 1) :
+    (w : BinaryLeavittAlgebra k) (hw : a * w = 1) :
     v ∈ stableUnits (BinaryLeavittAlgebra k) := by
   classical
   set x : BinaryLeavittAlgebra k :=
@@ -283,11 +276,9 @@ theorem mem_stableUnits_of_deg_neg_one_right_full
             show d - 1 + 1 = d from by ring,
             show d - 1 + (-1) = d - 2 from by ring,
             hd1', hd2', zero_mul, zero_mul, add_zero, add_zero] at heq
-          calc y d = y d * (a * (family k).s 0 * h₀ +
-                a * (family k).s 1 * h₁) := by rw [hh, mul_one]
-            _ = (y d * a) * ((family k).s 0 * h₀) +
-                (y d * a) * ((family k).s 1 * h₁) := by noncomm_ring
-            _ = 0 := by rw [heq, zero_mul, zero_mul, add_zero]
+          calc y d = y d * (a * w) := by rw [hw, mul_one]
+            _ = y d * a * w := by rw [← mul_assoc]
+            _ = 0 := by rw [heq, zero_mul]
   -- the inverse has a nonnegative window
   have hxpos : x ∈ Submodule.span k
       ((family k).degreeMonomials 0 hi) := by

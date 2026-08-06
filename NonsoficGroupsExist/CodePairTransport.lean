@@ -60,7 +60,16 @@ theorem codePair_mul [DecidableEq κ] (C : BinaryPrefixCode κ)
       = ∑ i, ∑ j, ∑ j', ∑ l,
           L.wordS (R i) * E i j * L.wordT (C.word j) *
             (L.wordS (C.word j') * F j' l * L.wordT (W l)) := by
-        simp only [Finset.sum_mul, Finset.mul_sum]
+        -- Distribute one binder at a time.  `simp only [Finset.sum_mul,
+        -- Finset.mul_sum]` reassociates to `∑ j', ∑ l, ∑ i, ∑ j, …` -- the
+        -- outer and inner pairs swapped relative to the stated order.
+        rw [Finset.sum_mul]
+        refine Finset.sum_congr rfl fun i _ ↦ ?_
+        rw [Finset.sum_mul]
+        refine Finset.sum_congr rfl fun j _ ↦ ?_
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun j' _ ↦ ?_
+        rw [Finset.mul_sum]
     _ = ∑ i, ∑ j, ∑ j', ∑ l,
           (if j = j' then
             L.wordS (R i) * (E i j * F j' l) * L.wordT (W l) else 0) :=

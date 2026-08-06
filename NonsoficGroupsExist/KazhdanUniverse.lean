@@ -48,7 +48,7 @@ theorem inner_orbit (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (a b : G) :
 
 @[simp] theorem coeff_one (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
     coeff ρ x 1 = ‖x‖ ^ 2 := by
-  simp [coeff, real_inner_self_eq_norm_sq]
+  simp [coeff]
 
 /-- Matrix coefficients of orthogonal representations are positive
 definite. -/
@@ -147,6 +147,8 @@ theorem continuous_cyclicMap (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
     Continuous (cyclicMap ρ x) :=
   UniformSpace.Completion.continuous_extension
 
+omit [CompleteSpace E] in
+omit [CompleteSpace E] in
 @[simp] theorem cyclicMap_coe (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
     (ff : PreHilbertSpace (gnsFunction ρ x)) :
     cyclicMap ρ x (UniformSpace.Completion.coe' ff) = preCyclic ρ x ff :=
@@ -162,10 +164,56 @@ theorem norm_cyclicMap (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
   | ih ff =>
       rw [cyclicMap_coe, UniformSpace.Completion.norm_coe, norm_preCyclic]
 
-/-- The embedding sends the cyclic vector to `x`. -/
+theorem cyclicMap_add (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
+    (z w : HilbertSpace (gnsFunction ρ x)) :
+    cyclicMap ρ x (z + w) = cyclicMap ρ x z + cyclicMap ρ x w := by
+  induction z, w using UniformSpace.Completion.induction_on₂ with
+  | hp =>
+      refine isClosed_eq ?_ ?_
+      · exact (continuous_cyclicMap ρ x).comp continuous_add
+      · exact ((continuous_cyclicMap ρ x).comp continuous_fst).add
+          ((continuous_cyclicMap ρ x).comp continuous_snd)
+  | ih ff gg =>
+      rw [← UniformSpace.Completion.coe_add, cyclicMap_coe, cyclicMap_coe,
+        cyclicMap_coe, map_add]
+
+theorem cyclicMap_smul (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (r : ℝ)
+    (z : HilbertSpace (gnsFunction ρ x)) :
+    cyclicMap ρ x (r • z) = r • cyclicMap ρ x z := by
+  induction z using UniformSpace.Completion.induction_on with
+  | hp =>
+      refine isClosed_eq ?_ ?_
+      · exact (continuous_cyclicMap ρ x).comp (continuous_const_smul r)
+      · exact (continuous_const_smul r).comp (continuous_cyclicMap ρ x)
+  | ih ff =>
+      rw [← UniformSpace.Completion.coe_smul, cyclicMap_coe, cyclicMap_coe,
+        map_smul]
+
+/-- The embedding of the GNS space of `coeff ρ x` into `E`, bundled as a
+linear isometry. -/
+noncomputable def cyclicIsometry (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
+    HilbertSpace (gnsFunction ρ x) →ₗᵢ[ℝ] E where
+  toFun := cyclicMap ρ x
+  map_add' := cyclicMap_add ρ x
+  map_smul' := cyclicMap_smul ρ x
+  norm_map' := norm_cyclicMap ρ x
+
+@[simp] theorem cyclicIsometry_apply (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
+    (z : HilbertSpace (gnsFunction ρ x)) :
+    cyclicIsometry ρ x z = cyclicMap ρ x z := rfl
+
+theorem cyclicMap_sub (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
+    (z w : HilbertSpace (gnsFunction ρ x)) :
+    cyclicMap ρ x (z - w) = cyclicMap ρ x z - cyclicMap ρ x w :=
+  (cyclicIsometry ρ x).map_sub z w
+
+/-- The embedding sends the cyclic vector to the orbit of `x`. -/
 @[simp] theorem cyclicMap_kernelVector (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
     (g : G) : cyclicMap ρ x (kernelVector (gnsFunction ρ x) g) = ρ g x := by
-  rw [kernelVector, cyclicMap_coe, preCyclic_single]
+  change cyclicMap ρ x (UniformSpace.Completion.coe'
+    (Finsupp.single (g, (1 : ℝ)) 1 :
+      PreHilbertSpace (gnsFunction ρ x))) = ρ g x
+  rw [cyclicMap_coe, preCyclic_single]
   simp
 
 /-- The embedding intertwines the GNS representation with `ρ`. -/
@@ -180,7 +228,9 @@ theorem cyclicMap_representation (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (s :
           (representation (gnsFunction ρ x) s).continuous
       · exact (ρ s).continuous.comp (continuous_cyclicMap ρ x)
   | ih ff =>
-      rw [translationOperator_coe, cyclicMap_coe, cyclicMap_coe]
+      have hrep : representation (gnsFunction ρ x) s =
+          translationOperator (gnsFunction ρ x) s := rfl
+      rw [hrep, translationOperator_coe, cyclicMap_coe, cyclicMap_coe]
       induction ff using Finsupp.induction with
       | zero => simp
       | single_add i c f _ _ ih =>
@@ -227,12 +277,8 @@ theorem IsKazhdanPair.liftUniverse {G : Type u} [Group G] {Q : Finset G}
   have hδnear : ∀ q ∈ Q,
       ‖representation p q δ - δ‖ < ε := by
     intro q hq
-    have := norm_cyclicMap ρ x (representation p q δ - δ)
-    rw [← this]
-    have hsub : cyclicMap ρ x (representation p q δ - δ) = ρ q x - x := by
-      rw [hδ, hδ, kernelVector, ← map_sub]
-      sorry
-    rw [hsub]
+    rw [← norm_cyclicMap ρ x (representation p q δ - δ), cyclicMap_sub,
+      cyclicMap_representation, hδx]
     exact hnear q hq
   obtain ⟨y, hy0, hy⟩ := h.2 (HilbertSpace p) (representation p) δ hδnorm hδnear
   refine ⟨cyclicMap ρ x y, cyclicMap_ne_zero ρ x hy0, fun g ↦ ?_⟩
