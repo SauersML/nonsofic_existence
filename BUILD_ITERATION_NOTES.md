@@ -1479,3 +1479,49 @@ mathematics settled in sessions 24–25:
   3. Remember: [−1,0]-window units ∈ H by the MIRROR of the width-2
      chain (s↔t antiautomorphism — formalizable as the op-algebra
      family or by rerunning the argument on xw = 1 side).
+
+## Session 29: EXPLICIT H-witness for the rebalancer; (P) generalizes to [0,N]
+- COMPUTED BY HAND (exact monomial calculus, verified stepwise):
+  ρ = S(0)T(00) + S(11)T(01) + S(10)T(1) (the basic tree rebalancer),
+  σ₁ := swap(01, 1) (incomparable ✓ ∈ H), σ₂ := swap(00, 1)
+  (incomparable ✓ ∈ H):
+    ρ·σ₁ = S(0)T(00) + S(11)T(1) + S(10)T(01)
+    ρ·σ₁·σ₂ = S(0)T(1) + S(10)T(01) + S(11)T(00)  — ALL BALANCED!
+  Hence ρ = (balanced unit)·σ₂·σ₁ ∈ H.  **Explicit witness found.**
+- THE SWAP-MOVE CALCULUS (general step): right-mult by σ_{β,w}
+  (|w| = |β|−1, w incomparable to β): kills a's β-column
+  (S(α)T(β) ↦ S(α)T(w), balanced), constraints: a·p_w = 0 (else
+  deg −2 junk) and c·p_w = 0 (else NEW deg −1 junk c·S(w)T(β));
+  b's β-column up-shifts to degree +2 — so the cascade lands in
+  window [0,2], NOT [0,1].
+- **(P) GENERALIZES TO [0,N] WINDOWS** (derivation done): for
+  w = e + ζ₁ + … + ζ_N, the downward elimination with GROUPED
+  coefficients gives f = Σ_{c≤−1} H_c·(f x_c f), H_c ∈ f·L_{−c}·f a
+  SINGLE element per degree (sum over composition paths — grouping
+  is essential: raw term-counting gives Fibonacci growth and fails);
+  the rank argument is unchanged: Σ_c D·2^c < D.  COROLLARIES:
+  (i) no units with all-positive windows (e = 0 case);
+  (ii) [0,N]-unit ⟹ balanced part invertible.
+  Lean note: ZeroKOne's induction needs upgrading from single
+  remainder to remainder-per-depth (vector/strong induction) for
+  general N — or a separate ZeroKOneN module; N = 2 would suffice.
+- REMAINING GAPS in the width-3 plan: (a) free-cylinder supply for
+  the swap cascade: need w with a·p_w = 0 AND c·p_w = 0 — after
+  rank-normalizing c → e, free-for-c columns are Sᶜ but a's columns
+  may cover them; need a pre-move to shrink/align a's column support
+  (candidates: prefix kills a ↦ a·(1−p), balanced right-units,
+  a's OWN rank normal form τ_r with column family orthogonalized —
+  note a·h-normalization changes column support freely!
+  a-CANONICAL: a = τ_r = Σ S(α_i)T(β_i): columns = the β-family,
+  SMALL (r of them) — then need e's support to avoid β's: e·p_{β_i}
+  = 0 ⟺ β_i ∈ Sᶜ-cylinders... adjust by swapping WITHIN balanced
+  (permutation units) to relocate Sᶜ onto the β-family?? — the
+  β-family sits at depth m+1, S at depth n: refine and match counts:
+  |Sᶜ|·2^{m+1−n} ≥ r needed — rank inequality!  This smells like
+  exactly the E ≥ D bound from session 24.  DERIVE next session.);
+  (b) tail-kill for [0,2]: 1 + η₁ + η₂ ∈ H (κ-transport gives
+  z := (η₁+η₂)t₁ ∈ [0,1] NOT balanced — NilpotentTailKill needs an
+  upgrade to mixed nonneg tails, or a two-step split).
+- The endgame is now a bounded list of concrete lemmas.  NO open
+  conceptual mysteries remain — all remaining items have identified
+  attack routes.
