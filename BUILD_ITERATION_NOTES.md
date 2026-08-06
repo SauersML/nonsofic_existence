@@ -2631,3 +2631,32 @@ extraction lemma; M4c refinement legality lemma (pure bookkeeping:
 E(i,j0) = E(i,j)·s₀ identities); M5 the round recursion (strong
 induction on |R|+|C|); M6 NarrowDischarge → NarrowReduction k; then
 cleanup + full build.
+
+## Session 45: M4 support modules landed
+- CodePairTransport (user-polished): codePair_mul (middle-code
+  collapse; outer word maps arbitrary), codePair_mul_eq_one,
+  codePairUnit (rectangular two-sided inverses transport to units
+  along code pairs of DIFFERENT sizes).
+- WindowDichotomy REFACTORED to single-witness hypotheses
+  (w·b = 1 / a·w = 1) — strictly stronger interface, simpler kills.
+- CodeScalarMoves: codeScalar (scalar-matrix transport along ANY
+  complete code), one/mul lemmas, transvections ↦ incomparable
+  unipotents, diagonal(d) with d ≠ 0 ↦ product of pairKappaUnit
+  insertions of central scalars (Finset product identity with
+  orthogonality cross-kills), codeScalar_unit_mem: EVERY invertible
+  scalar matrix transports into H along every complete code, via
+  Matrix.Pivot transvection decomposition.
+- CodeRelativeFullness: smul_mul_smul', t_combo_mul_s_combo
+  ((Σα_z•t_z)(Σβ_w•s_w) = (Σα_zβ_z)•1), stack_left/right_inverse_
+  transport: scalar stack one-sided inverses give the WindowDichotomy
+  witnesses w over ANY code pair.  KEY DESIGN WIN: the witness w is
+  written directly in pencil-entry form (t-combos between C-words and
+  R-words), so codePair_mul does the whole collapse — no appended
+  words, no incomparability side lemmas.
+REMAINING: M4b atom-peel factorization (single pure-t column ⟹
+v = (moves)·u₁·u₂ with u₁ a code-change and u₂ a strictly smaller
+code-pair pencil unit); M4c refinement identities; M5 master
+induction (on |ι| + |κ|) assembling: dichotomy-with-witnesses /
+peel / refine; M6 NarrowDischarge.  Within-round termination proof
+still needed (probe says ≤ 2 refinements; candidate: A-stack rank
+drops or extraction fires).

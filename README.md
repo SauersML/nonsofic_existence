@@ -318,6 +318,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       transvections become incomparable unipotents, diagonals become
       products of κ-corner insertions of central scalars, assembled
       through Mathlib's transvection decomposition
+    - [x] code-relative fullness witnesses (`CodeRelativeFullness`):
+      scalar one-sided inverses of the stacks `[B₀;B₁]` / `(A₀|A₁)`
+      transport to one-sided inverses of the degree `±1` pencil parts
+      through `codePair_mul` and the corner pairing
+      `(t-combo)·(s-combo) = scalar` — feeding the window dichotomy
+      at every refinement stage
     - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
       `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
       rows split off invertible `τ/ς` shift blocks by an exact

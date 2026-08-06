@@ -3,6 +3,8 @@ import NonsoficGroupsExist.StableUnitsGenerators
 import NonsoficGroupsExist.LeavittDiagonalClass
 import NonsoficGroupsExist.IncomparableUnipotents
 import Mathlib.LinearAlgebra.Matrix.Transvection
+-- `Matrix.isUnit_iff_isUnit_det` lives here (cf. RankNormalForm.lean)
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 /-!
 # Scalar matrix moves along an arbitrary complete prefix code
@@ -76,18 +78,18 @@ theorem codeScalar_transvection (D : BinaryPrefixCode ι)
         L.wordT (D.word j) := by
   classical
   have hbasis : L.codeScalar (k := k) D
-      (Matrix.stdBasisMatrix i j c) =
+      (Matrix.single i j c) =
       L.wordS (D.word i) * algebraMap k A c * L.wordT (D.word j) := by
     unfold codeScalar
     calc ∑ i', ∑ j', L.wordS (D.word i') *
-          algebraMap k A (Matrix.stdBasisMatrix i j c i' j') *
+          algebraMap k A (Matrix.single i j c i' j') *
           L.wordT (D.word j')
         = ∑ i', ∑ j', (if i = i' then (if j = j' then
             L.wordS (D.word i') * algebraMap k A c *
               L.wordT (D.word j') else 0) else 0) := by
           refine Finset.sum_congr rfl fun i' _ ↦
             Finset.sum_congr rfl fun j' _ ↦ ?_
-          rw [show Matrix.stdBasisMatrix i j c i' j' =
+          rw [show Matrix.single i j c i' j' =
               (if i = i' ∧ j = j' then c else 0) from rfl, ite_and,
             apply_ite (algebraMap k A), apply_ite (algebraMap k A),
             map_zero]
@@ -100,9 +102,9 @@ theorem codeScalar_transvection (D : BinaryPrefixCode ι)
             L.wordT (D.word j) := by
           rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ j)]
   have hadd : L.codeScalar (k := k) D
-      (1 + Matrix.stdBasisMatrix i j c) =
+      (1 + Matrix.single i j c) =
       L.codeScalar (k := k) D 1 +
-        L.codeScalar (k := k) D (Matrix.stdBasisMatrix i j c) := by
+        L.codeScalar (k := k) D (Matrix.single i j c) := by
     unfold codeScalar
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun i' _ ↦ ?_
@@ -111,7 +113,7 @@ theorem codeScalar_transvection (D : BinaryPrefixCode ι)
     rw [Matrix.add_apply, map_add]
     noncomm_ring
   rw [show Matrix.transvection i j c =
-      1 + Matrix.stdBasisMatrix i j c from rfl, hadd, hbasis,
+      1 + Matrix.single i j c from rfl, hadd, hbasis,
     L.codeScalar_one D hD]
 
 /-- The unit of `A` transporting a scalar diagonal matrix with
@@ -175,46 +177,46 @@ theorem codeScalar_diagonal_unit_mem [Nontrivial A]
         set Sa := L.wordS (D.word a) with hSa
         set Ta := L.wordT (D.word a) with hTa
         set da := algebraMap k A (d a) with hda
-        set Σd := ∑ i ∈ s, L.wordS (D.word i) * algebraMap k A (d i) *
-          L.wordT (D.word i) with hΣd
-        set Σp := ∑ i ∈ s, L.wordS (D.word i) * L.wordT (D.word i)
-          with hΣp
-        have hx1 : (Sa * da * Ta) * Σd = 0 := by
-          rw [hΣd, Finset.mul_sum]
+        set Sd := ∑ i ∈ s, L.wordS (D.word i) * algebraMap k A (d i) *
+          L.wordT (D.word i) with hSd
+        set Sp := ∑ i ∈ s, L.wordS (D.word i) * L.wordT (D.word i)
+          with hSp
+        have hx1 : (Sa * da * Ta) * Sd = 0 := by
+          rw [hSd, Finset.mul_sum]
           refine Finset.sum_eq_zero fun i hi ↦ ?_
           rw [show Sa * da * Ta * (L.wordS (D.word i) *
               algebraMap k A (d i) * L.wordT (D.word i)) =
             Sa * da * (Ta * L.wordS (D.word i)) *
               (algebraMap k A (d i) * L.wordT (D.word i)) from
               by noncomm_ring, horthTS i hi, mul_zero, zero_mul]
-        have hx2 : (Sa * da * Ta) * Σp = 0 := by
-          rw [hΣp, Finset.mul_sum]
+        have hx2 : (Sa * da * Ta) * Sp = 0 := by
+          rw [hSp, Finset.mul_sum]
           refine Finset.sum_eq_zero fun i hi ↦ ?_
           rw [show Sa * da * Ta * (L.wordS (D.word i) *
               L.wordT (D.word i)) =
             Sa * da * (Ta * L.wordS (D.word i)) * L.wordT (D.word i)
               from by noncomm_ring, horthTS i hi, mul_zero, zero_mul]
-        have hx3 : (Sa * Ta) * Σd = 0 := by
-          rw [hΣd, Finset.mul_sum]
+        have hx3 : (Sa * Ta) * Sd = 0 := by
+          rw [hSd, Finset.mul_sum]
           refine Finset.sum_eq_zero fun i hi ↦ ?_
           rw [show Sa * Ta * (L.wordS (D.word i) *
               algebraMap k A (d i) * L.wordT (D.word i)) =
             Sa * (Ta * L.wordS (D.word i)) *
               (algebraMap k A (d i) * L.wordT (D.word i)) from
               by noncomm_ring, horthTS i hi, mul_zero, zero_mul]
-        have hx4 : (Sa * Ta) * Σp = 0 := by
-          rw [hΣp, Finset.mul_sum]
+        have hx4 : (Sa * Ta) * Sp = 0 := by
+          rw [hSp, Finset.mul_sum]
           refine Finset.sum_eq_zero fun i hi ↦ ?_
           rw [show Sa * Ta * (L.wordS (D.word i) *
               L.wordT (D.word i)) =
             Sa * (Ta * L.wordS (D.word i)) * L.wordT (D.word i) from
               by noncomm_ring, horthTS i hi, mul_zero, zero_mul]
-        calc (Sa * da * Ta + (1 - Sa * Ta)) * (Σd + (1 - Σp))
-            = (Sa * da * Ta) * Σd + (Sa * da * Ta) +
-              (- ((Sa * da * Ta) * Σp)) + Σd + (1 - Σp) -
-              ((Sa * Ta) * Σd) - Sa * Ta +
-              (Sa * Ta) * Σp := by noncomm_ring
-          _ = Sa * da * Ta + Σd + (1 - (Sa * Ta + Σp)) := by
+        calc (Sa * da * Ta + (1 - Sa * Ta)) * (Sd + (1 - Sp))
+            = (Sa * da * Ta) * Sd + (Sa * da * Ta) +
+              (- ((Sa * da * Ta) * Sp)) + Sd + (1 - Sp) -
+              ((Sa * Ta) * Sd) - Sa * Ta +
+              (Sa * Ta) * Sp := by noncomm_ring
+          _ = Sa * da * Ta + Sd + (1 - (Sa * Ta + Sp)) := by
               rw [hx1, hx2, hx3, hx4]
               noncomm_ring
   -- assemble at the full index set

@@ -297,18 +297,21 @@ instance : InnerProductSpace ℝ (ULift.{w} F) where
   smul_left a b r := by
     simpa using real_inner_smul_left a.down b.down r
 
+/-- The universe lift of a real inner product space is isometric to it. -/
+def uliftIsometry : ULift.{w} F ≃ₗᵢ[ℝ] F where
+  toLinearEquiv := ULift.moduleEquiv
+  norm_map' _ := rfl
+
+@[simp] theorem uliftIsometry_apply (a : ULift.{w} F) :
+    uliftIsometry a = a.down := rfl
+
 /-- A linear isometry equivalence lifted to a higher universe. -/
-def uliftEquiv (f : F ≃ₗᵢ[ℝ] F) : ULift.{w} F ≃ₗᵢ[ℝ] ULift.{w} F where
-  toFun a := ULift.up (f a.down)
-  invFun a := ULift.up (f.symm a.down)
-  left_inv a := by simp
-  right_inv a := by simp
-  map_add' a b := by simp
-  map_smul' r a := by simp
-  norm_map' a := by simp [ULift.norm_def]
+def uliftEquiv (f : F ≃ₗᵢ[ℝ] F) : ULift.{w} F ≃ₗᵢ[ℝ] ULift.{w} F :=
+  (uliftIsometry.trans f).trans uliftIsometry.symm
 
 @[simp] theorem uliftEquiv_apply (f : F ≃ₗᵢ[ℝ] F) (a : ULift.{w} F) :
-    uliftEquiv f a = ULift.up (f a.down) := rfl
+    uliftEquiv f a = ULift.up (f a.down) := by
+  simp [uliftEquiv]
 
 /-- An orthogonal representation lifted to a higher universe. -/
 def uliftHom (ρ : G →* (F ≃ₗᵢ[ℝ] F)) :
@@ -318,7 +321,8 @@ def uliftHom (ρ : G →* (F ≃ₗᵢ[ℝ] F)) :
   map_mul' g h := by ext a; simp [map_mul]
 
 @[simp] theorem uliftHom_apply (ρ : G →* (F ≃ₗᵢ[ℝ] F)) (g : G)
-    (a : ULift.{w} F) : uliftHom ρ g a = ULift.up (ρ g a.down) := rfl
+    (a : ULift.{w} F) : uliftHom ρ g a = ULift.up (ρ g a.down) := by
+  simp [uliftHom]
 
 end Ulift
 
@@ -367,22 +371,23 @@ theorem IsKazhdanPair.lowerUniverse {G : Type u} [Group G] {Q : Finset G}
     IsKazhdanPair.{u, u} G Q ε := by
   refine ⟨h.1, ?_⟩
   intro E _ _ _ ρ x hx hnear
-  have hnear' : ∀ q ∈ Q,
-      ‖uliftHom.{u, u, w} ρ q (ULift.up x) - ULift.up x‖ < ε := by
-    intro q hq
-    have : uliftHom.{u, u, w} ρ q (ULift.up x) - ULift.up x =
-        ULift.up (ρ q x - x) := rfl
-    rw [this, ULift.norm_up]
-    exact hnear q hq
   obtain ⟨y, hy0, hy⟩ :=
-    h.2 (ULift.{w} E) (uliftHom ρ) (ULift.up x) (by rw [ULift.norm_up]; exact hx)
-      hnear'
+    h.2 (ULift.{w} E) (uliftHom ρ) (ULift.up x)
+      (by rw [ULift.norm_up]; exact hx)
+      (fun q hq ↦ by
+        have hd : uliftHom ρ q (ULift.up x) - ULift.up x =
+            ULift.up (ρ q x - x) := by
+          apply ULift.ext
+          simp
+        rw [hd, ULift.norm_up]
+        exact hnear q hq)
   refine ⟨y.down, ?_, fun g ↦ ?_⟩
   · intro hcontra
-    exact hy0 (by ext; simpa using hcontra)
-  · have := hy g
-    rw [uliftHom_apply] at this
-    exact congrArg ULift.down this
+    apply hy0
+    apply ULift.ext
+    simpa using hcontra
+  · have hg := congrArg ULift.down (hy g)
+    simpa using hg
 
 /-- Property `(T)` does not depend on the universe of the representation
 spaces. -/
