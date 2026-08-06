@@ -123,7 +123,8 @@ theorem pencil_free_exit [Nontrivial (BinaryLeavittAlgebra k)]
     ?_ ?_
   · intro i j
     have h1 : (Q.word j).length ≤ N :=
-      Finset.le_sup (Finset.mem_univ j)
+      Finset.le_sup (f := fun j : κT ↦ (Q.word j).length)
+        (Finset.mem_univ j)
     omega
   · intro i j
     have h1 : (P.word i).length ≤ r :=
@@ -185,7 +186,8 @@ theorem pencil_full_exit [Nontrivial (BinaryLeavittAlgebra k)]
     (a := -(N : ℤ)) (b := -1) Q P _ (fun j i ↦ hX j i) ?_ ?_
   · intro j i
     have h1 : (P.word i).length ≤ M :=
-      Finset.le_sup (Finset.mem_univ i)
+      Finset.le_sup (f := fun i : ιT ↦ (P.word i).length)
+        (Finset.mem_univ i)
     push_cast
     omega
   · intro j i
@@ -345,10 +347,12 @@ theorem narrowReduction_holds
     fun x hx ↦ exists_mul_mul_eq_one k hx
   obtain ⟨m, A₀, A₁, Cm, B₀, B₁, hval⟩ := exists_pencil_form k _ hu
   have hcard : Fintype.card (Fin (m + 1) → Fin 2) = 2 ^ (m + 1) := by
-    simp [Fintype.card_fun]
+    simp
   have hmem : u ∈ stableUnits (BinaryLeavittAlgebra k) := by
     refine pencil_unit_mem_pow k hdiv (m + 1) (2 ^ (m + 2))
-      (by rw [hcard]; omega) hcard
+      -- `omega` peels literal `+1`s off `2 ^ (m + 1 + 1)` but leaves the
+      -- `+2` in `2 ^ (m + 2)` opaque, so it never sees the two are equal
+      (by rw [hcard]; exact Nat.le_add_left _ _) hcard
       (fullBinaryCode (m + 1))
       ((family k).fullBinaryCode_complete (m + 1))
       (fullBinaryCode (m + 1))

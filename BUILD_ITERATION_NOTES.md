@@ -3164,3 +3164,43 @@ window bound), N4 (block-sum/κ_w transfer), N5 (the loop:
 induction on 2^{r+1} − κ; codeScalar normalization of a kernel
 vector into a B-free column + refine_column, both compiled;
 assembly stuckReduction_holds).
+
+## Session 54c: N1–N5 WRITTEN — the chain is closed in Lean (pending compile)
+
+Landed modules (registered in the aggregator, in dependency order):
+ - StrictNegativePencil.lean (N1): `entry_window_negative_of_B_full`
+   — generated from EntrywiseKill with the downward induction bound
+   relaxed from `1 ≤ d` to `0 ≤ d` and windows retargeted to
+   `[-N, -1]`.
+ - CodeShapeSupply.lean (N2): `exists_complete_deep_family` /
+   `exists_deep_code` (size ≥ 2^M, depths ≥ M; fullBinaryCode +
+   splits) and `exists_shallow_family` / `exists_shallow_code`
+   (1 ≤ κ ≤ 2^r, depths ≤ r; recursive halving with κ₀ = κ − κ/2,
+   κ₁ = κ/2, prepending 0/1, sum via cylinder_cons + sum_s_mul_t).
+   The shallow construction ELIMINATED the padding/kappa module: in
+   the loop κ never exceeds 2^{r+1}, so the full-stack exit needs
+   only a shallow column code (≤ r+1) against a deep row code (≥ r).
+ - PencilReshape.lean (N3): `reshaped_pencil_mem_iff` +
+   `exists_reshaped_pencil` (conjugation by two codePairUnits with
+   δ-data = codeBijection units) and `pencilVal_window_mem`.
+ - RefineLoopDischarge.lean (N5; N4 obsolete): pencilEntry_mem_window,
+   codePair_expansion, pencil_free_exit, pencil_full_exit,
+   pencil_unit_mem_pow (induction on the κ-deficit n with
+   2^{r+1} ≤ κ + n; branches: free exit / empty-κ contradiction /
+   full-stack exit / normalize+refine recursion reusing the
+   FullExtraction codeScalar block verbatim), narrowReduction_holds,
+   stuckReduction_from_loop (power-of-two row codes), and the
+   unconditional corollaries scalarReduction_holds,
+   stableUnits_eq_top_holds, glTwo/glFour_eq_elementary_holds.
+Manuscript updated: rem:elementaryK1 now describes the two-exit
+elimination; the trust-surface paragraph states the K₁ input is
+removed entirely with [ABC09] as independent confirmation.
+Compile-risk spots for the fix loop: List.cons_prefix_cons name,
+Nat.one_le_two_pow, Fintype.card_fun, `group` on units, inv_mem_iff,
+rcases on `e p` in depth transports, beta_reduce before rw [hrc],
+`rfl` closing the Sum.elim data conversion, set-variable defeq in
+hFF/hGG tails.  NOTE: StuckReduction (arbitrary card ι) has a
+power-of-two rounding gap in the full-stack exit and is NOT derived;
+the main chain does not need it (NarrowReduction proved directly at
+full binary codes).  MasterInduction/extraction pipeline retained as
+standalone structure theory.
