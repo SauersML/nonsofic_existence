@@ -196,6 +196,7 @@ import NonsoficGroupsExist.PencilCore
 import NonsoficGroupsExist.PencilForm
 import NonsoficGroupsExist.WindowDichotomy
 import NonsoficGroupsExist.CodePairTransport
+import NonsoficGroupsExist.CodeScalarMoves
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

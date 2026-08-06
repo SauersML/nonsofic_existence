@@ -307,6 +307,17 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       inverse has a nonpositive window and the unit lies in `H`;
       mirror when the degree `-1` part is right-full — the two
       terminal branches of the elimination
+    - [x] the code-pair transport (`CodePairTransport`): matrix data
+      indexed by two complete prefix codes of different sizes
+      multiplies by middle-code collapse; rectangular two-sided
+      inverse pairs transport to units (`codePairUnit`) — the
+      Leavitt `L^p ≅ L^q` mechanism the recursion runs on
+    - [x] scalar moves along arbitrary mixed-depth codes
+      (`CodeScalarMoves`): the transport of every invertible scalar
+      matrix along any complete prefix code is a unit of `H` —
+      transvections become incomparable unipotents, diagonals become
+      products of κ-corner insertions of central scalars, assembled
+      through Mathlib's transvection decomposition
     - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
       `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
       rows split off invertible `τ/ς` shift blocks by an exact

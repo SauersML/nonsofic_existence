@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.KazhdanGNS
+import NonsoficGroupsExist.KazhdanComplex
 
 /-!
 # Universe reduction for Kazhdan's property `(T)`
@@ -272,6 +273,55 @@ theorem cyclicMap_ne_zero (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
 
 end Complete
 
+section Ulift
+
+universe v
+
+variable {F : Type v} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+
+/-- A universe lift of a real inner product space is one again, with the same
+inner product and the same norm. -/
+instance : Inner ℝ (ULift.{w} F) := ⟨fun a b ↦ inner ℝ a.down b.down⟩
+
+@[simp] theorem inner_ulift (a b : ULift.{w} F) :
+    inner ℝ a b = inner ℝ a.down b.down := rfl
+
+instance : InnerProductSpace ℝ (ULift.{w} F) where
+  norm_sq_eq_re_inner a := by
+    simpa [ULift.norm_def] using
+      norm_sq_eq_re_inner (𝕜 := ℝ) (E := F) a.down
+  conj_inner_symm a b := by
+    simpa using real_inner_comm b.down a.down
+  add_left a b c := by
+    simpa using inner_add_left (𝕜 := ℝ) a.down b.down c.down
+  smul_left a b r := by
+    simpa using real_inner_smul_left a.down b.down r
+
+/-- A linear isometry equivalence lifted to a higher universe. -/
+def uliftEquiv (f : F ≃ₗᵢ[ℝ] F) : ULift.{w} F ≃ₗᵢ[ℝ] ULift.{w} F where
+  toFun a := ULift.up (f a.down)
+  invFun a := ULift.up (f.symm a.down)
+  left_inv a := by simp
+  right_inv a := by simp
+  map_add' a b := by simp
+  map_smul' r a := by simp
+  norm_map' a := by simp [ULift.norm_def]
+
+@[simp] theorem uliftEquiv_apply (f : F ≃ₗᵢ[ℝ] F) (a : ULift.{w} F) :
+    uliftEquiv f a = ULift.up (f a.down) := rfl
+
+/-- An orthogonal representation lifted to a higher universe. -/
+def uliftHom (ρ : G →* (F ≃ₗᵢ[ℝ] F)) :
+    G →* (ULift.{w} F ≃ₗᵢ[ℝ] ULift.{w} F) where
+  toFun g := uliftEquiv (ρ g)
+  map_one' := by ext a; simp [map_one]
+  map_mul' g h := by ext a; simp [map_mul]
+
+@[simp] theorem uliftHom_apply (ρ : G →* (F ≃ₗᵢ[ℝ] F)) (g : G)
+    (a : ULift.{w} F) : uliftHom ρ g a = ULift.up (ρ g a.down) := rfl
+
+end Ulift
+
 end KazhdanUniverse
 
 open KazhdanUniverse KazhdanGNS in
@@ -307,5 +357,49 @@ theorem HasKazhdanPropertyT.liftUniverse {G : Type u} [Group G]
     (h : HasKazhdanPropertyT.{u, u} G) : HasKazhdanPropertyT.{u, w} G := by
   obtain ⟨Q, a, hQ⟩ := h
   exact ⟨Q, a, hQ.liftUniverse⟩
+
+open KazhdanUniverse in
+/-- The converse reduction: a Kazhdan pair for representations on the larger
+universe is one for representations on the universe of the group, by lifting
+a representation along `ULift`. -/
+theorem IsKazhdanPair.lowerUniverse {G : Type u} [Group G] {Q : Finset G}
+    {ε : ℝ} (h : IsKazhdanPair.{u, max u w} G Q ε) :
+    IsKazhdanPair.{u, u} G Q ε := by
+  refine ⟨h.1, ?_⟩
+  intro E _ _ _ ρ x hx hnear
+  have hnear' : ∀ q ∈ Q,
+      ‖uliftHom.{u, u, w} ρ q (ULift.up x) - ULift.up x‖ < ε := by
+    intro q hq
+    have : uliftHom.{u, u, w} ρ q (ULift.up x) - ULift.up x =
+        ULift.up (ρ q x - x) := rfl
+    rw [this, ULift.norm_up]
+    exact hnear q hq
+  obtain ⟨y, hy0, hy⟩ :=
+    h.2 (ULift.{w} E) (uliftHom ρ) (ULift.up x) (by rw [ULift.norm_up]; exact hx)
+      hnear'
+  refine ⟨y.down, ?_, fun g ↦ ?_⟩
+  · intro hcontra
+    exact hy0 (by ext; simpa using hcontra)
+  · have := hy g
+    rw [uliftHom_apply] at this
+    exact congrArg ULift.down this
+
+/-- Property `(T)` does not depend on the universe of the representation
+spaces. -/
+theorem hasKazhdanPropertyT_universe_iff {G : Type u} [Group G] :
+    HasKazhdanPropertyT.{u, u} G ↔ HasKazhdanPropertyT.{u, max u w} G := by
+  constructor
+  · exact fun h ↦ h.liftUniverse
+  · rintro ⟨Q, a, hQ⟩
+    exact ⟨Q, a, hQ.lowerUniverse⟩
+
+/-- **Property `(T)` as formalized here is the textbook property `(T)`.**
+The real orthogonal formulation restricted to Hilbert spaces in the universe
+of the group is equivalent to the complex-unitary formulation on Hilbert
+spaces of every universe. -/
+theorem hasKazhdanPropertyT_iff_textbook {G : Type u} [Group G] :
+    HasKazhdanPropertyT.{u, u} G ↔ HasKazhdanPropertyTComplex.{u, max u w} G := by
+  rw [hasKazhdanPropertyT_universe_iff.{u, w}]
+  exact hasKazhdanPropertyT_iff_complex
 
 end NonsoficGroupsExist
