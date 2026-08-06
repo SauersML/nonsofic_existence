@@ -30,18 +30,10 @@ theorem exists_pseudoInverse_matrix {k : Type*} [Field k] {ι : Type*}
   -- P and Q are invertible (products of transvections)
   have hPunit : IsUnit P := by
     rw [hP]
-    refine isUnit_of_mul_eq_one _
-      ((L.reverse.map (Matrix.TransvectionStruct.toMatrix ∘
-        Matrix.TransvectionStruct.inv)).prod) ?_
-    rw [← List.map_map]
-    exact Matrix.Pivot.prod_mul_reverse_inv_prod L
+    exact IsUnit.of_mul_eq_one _ (Matrix.TransvectionStruct.prod_mul_reverse_inv_prod L)
   have hQunit : IsUnit Q := by
     rw [hQ]
-    refine isUnit_of_mul_eq_one _
-      ((L'.reverse.map (Matrix.TransvectionStruct.toMatrix ∘
-        Matrix.TransvectionStruct.inv)).prod) ?_
-    rw [← List.map_map]
-    exact Matrix.Pivot.prod_mul_reverse_inv_prod L'
+    exact IsUnit.of_mul_eq_one _ (Matrix.TransvectionStruct.prod_mul_reverse_inv_prod L')
   -- pseudo-inverse of the diagonal: entrywise inverse-or-zero
   set Dinv : Matrix ι ι k := Matrix.diagonal fun i ↦ (D i)⁻¹ with hD
   have hDDD : Matrix.diagonal D * Dinv * Matrix.diagonal D =
@@ -74,7 +66,7 @@ theorem exists_pseudoInverse_matrix {k : Type*} [Field k] {ι : Type*}
         rw [Units.mul_inv, Units.inv_mul, mul_one]
         noncomm_ring
     _ = (Pu : Matrix ι ι k) * Matrix.diagonal D *
-        (Qu : Matrix ι ι k) := by rw [hDDD]; noncomm_ring
+        (Qu : Matrix ι ι k) := by rw [hDDD]
 
 namespace LeavittFamily
 

@@ -127,6 +127,10 @@ def blockDiagUnit (g₀ g₁ : Aˣ) : Aˣ where
           rw [e1, e2, e3, e4]
       _ = 1 := by rw [← L.sum_s_mul_t]; abel
 
+@[simp] theorem blockDiagUnit_val (g₀ g₁ : Aˣ) :
+    ((L.blockDiagUnit g₀ g₁ : Aˣ) : A) =
+      L.s 0 * (g₀ : A) * L.t 0 + L.s 1 * (g₁ : A) * L.t 1 := rfl
+
 /-- The left block-diagonal move: `g·(c + s₁w) = gc + s₁(g₁w)`. -/
 theorem blockDiagUnit_mul_residual (g₀ g₁ : Aˣ) (c w : A) :
     ((L.blockDiagUnit g₀ g₁ : Aˣ) : A) * (c + L.s 1 * w) =
@@ -134,8 +138,7 @@ theorem blockDiagUnit_mul_residual (g₀ g₁ : Aˣ) (c w : A) :
         L.s 1 * ((g₁ : A) * w) := by
   have h01 : L.t 0 * L.s 1 = 0 := by rw [t_mul_s]; simp
   have h11 : L.t 1 * L.s 1 = 1 := by rw [t_mul_s]; simp
-  show (L.s 0 * (g₀ : A) * L.t 0 + L.s 1 * (g₁ : A) * L.t 1) *
-    (c + L.s 1 * w) = _
+  rw [blockDiagUnit_val]
   have e1 : (L.s 0 * (g₀ : A) * L.t 0 + L.s 1 * (g₁ : A) * L.t 1) *
       (L.s 1 * w) = L.s 1 * ((g₁ : A) * w) := by
     calc (L.s 0 * (g₀ : A) * L.t 0 + L.s 1 * (g₁ : A) * L.t 1) *
