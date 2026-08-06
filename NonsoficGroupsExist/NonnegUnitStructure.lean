@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.ZeroKOne
 import NonsoficGroupsExist.PureTailNilpotency
-import Mathlib.Algebra.GeomSum
+-- `Mathlib.Algebra.GeomSum` was split; `geom_sum_mul` lives in the Ring file.
+import Mathlib.Algebra.Ring.GeomSum
 
 /-!
 # Structure theorem for nonnegative narrow units
@@ -96,7 +97,7 @@ theorem nonneg_narrow_unit_inv_window
       BinaryLeavittAlgebra k) ∈
       Submodule.span k ((family k).degreeMonomials 0 (K : ℤ)) := by
   classical
-  obtain ⟨c, cinv, η, D, hc, hcinvw, hccinv, hcinvc, hηw, hD, hval⟩ :=
+  obtain ⟨c, cinv, η, D, -, hcinvw, -, hcinvc, hηw, hD, hval⟩ :=
     nonneg_narrow_unit_structure k u hu
   refine ⟨D, ?_⟩
   set S : BinaryLeavittAlgebra k :=
