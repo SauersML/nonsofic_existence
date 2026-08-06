@@ -2370,3 +2370,94 @@ graded-component machinery.  NEXT: finish the peeling induction
 inflation?), python-check on random invertible C = 0 pencils
 (construct from unbalanced code-changes, e.g. shifts +2/−2 at
 staggered depths), then formalize the pencil pipeline.
+
+## Session 43: (Q-pencil) SOLVED — complete elimination proof
+Setting: V invertible p×q matrix over L, every entry in
+k-span{t₀,t₁} ⊕ k ⊕ k-span{s₀,s₁}; write V = A₀t₀ + A₁t₁ + C +
+B₀s₀ + B₁s₁ with SCALAR A_z (p×q), C, B_z.  Rectangular allowed
+(L^p ≅ L^q via Leavitt).  Two master objects:
+  τ_q := [t₀I_q; t₁I_q]  (2q×q):  τ_q'τ_q = I_q (p₀+p₁=1),
+         τ_qτ_q' = I_{2q} (t_zs_w = δ_zw), τ_q' := (s₀I_q | s₁I_q).
+  ς_a := (s₀I_a | s₁I_a) (a×2a):  ς_aς_a† = I_a, ς_a†ς_a = I_{2a},
+         ς_a† := [t₀I_a; t₁I_a].
+KEY FACTORIZATION: any pure-t block T' = A₀'t₀+A₁'t₁ = (A₀'|A₁')·τ
+with τ two-sided invertible ⟹ T' left-invertible over L ⟺ the
+horizontal scalar concat (A₀'|A₁') has FULL COLUMN RANK (rank
+argument both ways; scalar left-inverse composed with τ').  Dually
+pure-s S' right-invertible ⟺ [B₀''; B₁''] vertical stack full ROW
+rank (θ-transpose duality).
+
+STEP 0 (Smith on C): GL(k) two-sided → C = diag(I_r, 0); scalar
+pivots clear their rows/cols by elementary L-ops → V ~ I_r ⊕ V',
+V' invertible with C' = 0.  [For square m×m narrow-unit pencils.]
+
+STEP 1 (parity): C'=0 ⟹ X := V'⁻¹ supported on ODD degrees.
+
+STEP 2 (branch dichotomy): top equation ((B∘X)_top = 0, strip with
+t_y) and bottom (X_bot·(A-part) = 0, strip with s_w):
+ (b) if 𝔅 := [B₀;B₁] (2p×q) full column rank: X = X_{−1} pure
+     deg −1; corner-split of VX=1 gives B_aΞ_b = δ_ab I_p where
+     Ξ_z := X_{−1}s_z, i.e. 𝔅·(Ξ₀|Ξ₁) = I_{2p}, and XV=1 deg-0
+     gives Ξ₀B₀+Ξ₁B₁ = I_q ⟹ q = 2p, 𝔅 ∈ GL_{2p}(k), Ξ scalar
+     = arrangement of 𝔅⁻¹; deg −2 equations kill A: X = G·τ_p
+     (G scalar invertible) ⟹ V = ς_p·G⁻¹ ~ ς_p.  TERMINAL.
+ (c) mirror (Ā := (A₀|A₁) p×2q full row rank): V ~ G'·τ_q.  TERMINAL.
+ (d) both: X pure deg−1 AND pure deg+1 ⟹ X = 0 absurd. VACUOUS.
+ (a) both deficient: rank 𝔅 < q and row-rank Ā < p: proceed.
+
+STEP 3 (block extraction, branch (a)): right-GL: ker𝔅 = last
+q−β coords (β := rank𝔅) → cols > β PURE-t; left-GL: coker rows →
+rows > α PURE-s (α := row-rank Ā); zero block (rows>α)×(cols>β).
+Invertibility blocks of X give: T' (α×(q−β) upper part of pure-t
+cols) LEFT-invertible ⟹ (A₀'|A₁') full column rank 2(q−β) ≤ α;
+S' ((p−α)×β) RIGHT-invertible ⟹ [B₀'';B₁''] full row rank
+2(p−α) ≤ β.  Normalize: left-GL_α: (A₀'|A₁') = [I_{2b}; 0]
+(b := q−β) → t-cols become [τ_b; 0]; right-GL_β: [B₀'';B₁'']G =
+[I_{2a}|0] (a := p−α) → s-rows become (ς_a | 0 | 0).
+
+STEP 4 (elimination): column-op (block unipotent, sources cols>β,
+targets cols≤β, DISJOINT sets ⟹ product of incomparable
+unipotents = 1 − Σ s_i x t_j ∈ H): subtract τ_b·(τ_b'·Y) — kills
+rows 1..2b of cols ≤ β entirely (τ_bτ_b' = I_{2b}).  Row-op with
+ς_a: kills cols 1..2a of rows ≤ α (ς_a†ς_a = I_{2a}); no
+interaction (multipliers vanish on already-cleared rows).  Result
+after permutation: V' ~ τ_b ⊕ M̃ ⊕ ς_a with M̃ ((α−2b)×(β−2a))
+invertible (block-diagonal inverse argument using one-sided
+inverses of τ, ς to kill off-diagonal blocks of the inverse),
+C(M̃) = 0.  Sizes strictly decrease ⟹ RECURSE (rectangular).
+Bases: 0×0 ✓; p×0/0×q force p=q=0; 1×1 impossible.
+
+STEP 5 (assembly): square narrow-unit pencil ⟹ V ~ I_r ⊕ perm ⊕
+(⊕ᵢ τ_{bᵢ} ⊕ ⊕ⱼ ς_{aⱼ}).  The transported L-element of this
+direct sum: each τ-column j with entries t₀,t₁ at rows i,i'
+contributes pairs (i ← j0), (i' ← j1); each ς-row i with s₀,s₁ at
+cols j,j' contributes (i0 ← j), (i1 ← j'); each diagonal 1 at
+(i,j) contributes (i ← j).  Sources: every col index appears once
+as source-block (children for τ-cols, itself otherwise) ⟹
+COMPLETE CODE; targets likewise ⟹ pairValue of a complete-code
+pair list = codeChange unit ∈ H (codeChange_mem_stableUnits).
+All moves: balancedEmbed(GL(k)) units ∈ H, incomparable-unipotent
+products ∈ H, permutation-balanced ∈ H ⟹ v ∈ H directly ⟹
+NarrowReduction k (no central factor even needed; bypasses
+TriangularFactorization, which stays as historical scaffolding).
+
+PENCIL TRANSPORT (level-n form; needed for Step 0 input): for v
+narrow with all monomials of depth ≤ n on both sides:
+t_i·S(a)T(b)·s_j (|i|=|j|=n) = T(i')S(j') (i = a++i', j = b++j',
+zero unless prefix-compatible) ∈ k-span{1, s₀, s₁, t₀, t₁} since
+||i'|−|j'|| ≤ 1: entries via wordT_append/wordS_append +
+wordT_mul_wordS_self/incomparable.  v = Σ_{ij} s_i V[i,j] t_j via
+Σ_{|i|=n} p_i = 1 (complete level-n code).
+
+FORMALIZATION PLAN (in order):
+ M1 PencilForm.lean: level-n entry decomposition + scalar-content.
+ M2 PencilMoves.lean: balancedEmbed-GL mult (entry transform),
+    block-unipotent col/row ops as products of incomparableUnit,
+    permutation moves.
+ M3 PencilRank.lean: field-linear-algebra: full-col-rank ⟹ GL
+    normalization [I;0] (reuse rank-normal-form guts / Mathlib),
+    Smith diag(I_r,0).
+ M4 PencilBranches.lean: parity, dichotomy (graded top/bottom
+    equations via exists_components on the inverse, corner strips).
+ M5 PencilRecursion.lean: Steps 3–4 induction.
+ M6 NarrowDischarge.lean: Step 5 ⟹ NarrowReduction k; rewire.
