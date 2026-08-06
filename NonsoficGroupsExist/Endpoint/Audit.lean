@@ -21,6 +21,9 @@ import NonsoficGroupsExist.Leavitt.GeneralScheme
 import NonsoficGroupsExist.Leavitt.GeneralCornerTheorem
 import NonsoficGroupsExist.Sofic.Normalization
 import NonsoficGroupsExist.Leavitt.FamilyVEmbedding
+import NonsoficGroupsExist.Sofic.FreeGroupResiduallyFinite
+import NonsoficGroupsExist.Endpoint.QuotientNonclosure
+import NonsoficGroupsExist.Leavitt.IntegralGeneralCorner
 
 /-!
 # Human-readable axiom report
@@ -125,3 +128,12 @@ the entire project namespace and fails on anything beyond classical Lean.
 -- nontrivial ring carrying a binary Leavitt family, with `eq:Ug` on tables.
 #print axioms NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily_injective
 #print axioms NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily_tableEquiv
+
+-- `rem:quotients`: free groups are residually finite, and none of the
+-- classes of sofic, LEF, or residually finite groups is closed under
+-- quotients.
+#print axioms NonsoficGroupsExist.freeGroup_residuallyFinite
+#print axioms NonsoficGroupsExist.isSofic_freeGroup
+#print axioms NonsoficGroupsExist.exists_sofic_group_with_nonsofic_quotient
+#print axioms NonsoficGroupsExist.exists_isLEF_group_with_non_isLEF_quotient
+#print axioms NonsoficGroupsExist.exists_residuallyFinite_group_with_non_residuallyFinite_quotient
