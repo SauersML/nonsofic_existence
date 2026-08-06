@@ -269,11 +269,13 @@ The proof is organized so that its trust surface is explicit and so that a skept
 
 A machine-checked audit is available as a second, independent layer, and it is reported in the margins: each numbered result below carries a note naming the modules and declarations of the accompanying Lean development that formalize it, or recording that it is formalized only in part, or that it is not formalized and why.  The notes are marginal in the strict sense---no argument in this paper appeals to one, and deleting all of them leaves the text unchanged---so a reader uninterested in formalization can ignore them throughout.  Appendix~\ref{app:lean} says what the development proves, what it assumes, and where it is stronger than the text.
 
-Theorems~\ref{thm:A} and~\ref{thm:D} rest on the following external inputs: Kun's expander decomposition theorem \cite{Kun19}, the Kun--Thom centralizer obstruction \cite{KunThom19}, property~\((T)\) for elementary groups over finitely generated rings \cite{ErshovJaikin10}, and classical facts about Thompson's group \(V\)---infinite, simple, finitely presented, and \(2\)-generated \cite{Higman74,CannonFloydParry96,BleakQuick17}.  Everything else is self-contained.  In the proof of Theorem~\ref{thm:A}, the two auxiliary matrices \(u\) and \(z\) are factored explicitly into elementary matrices, and every remaining elementary membership follows from the explicit Whitehead identity of Lemma~\ref{lem:whitehead} together with the perfectness of \(V\).  The analytic sections use no spectral theory: the only analytic inequality proved and used in the matching argument is the \(\ell^1\) co-area estimate of Lemma~\ref{lem:coarea}, established in a few lines from the layer-cake formula, while the approximation-theoretic depth is confined to the cited theorems of Kun and Kun--Thom.
+On the paper layer, Theorems~\ref{thm:A} and~\ref{thm:D} rest on the following external inputs: Kun's expander decomposition theorem \cite{Kun19}, cited in one-way form and with two proof repairs recorded in Remark~\ref{rem:kunaudit}; the Kun--Thom centralizer obstruction \cite{KunThom19}, with the repair recorded there as well; property~\((T)\) for elementary groups over finitely generated rings \cite{ErshovJaikin10}; and classical facts about Thompson's group \(V\)---infinite, simple, finitely presented, and \(2\)-generated \cite{Higman74,CannonFloydParry96,BleakQuick17}.  Everything else is self-contained.  In the proof of Theorem~\ref{thm:A}, the two auxiliary matrices \(u\) and \(z\) are factored explicitly into elementary matrices, and every remaining elementary membership follows from the explicit Whitehead identity of Lemma~\ref{lem:whitehead} together with the perfectness of \(V\).  The analytic sections use no spectral theory: the only analytic inequality proved and used in the matching argument is the \(\ell^1\) co-area estimate of Lemma~\ref{lem:coarea}, established in a few lines from the layer-cake formula, while the approximation-theoretic depth is confined to the cited theorems of Kun and Kun--Thom.
 
-Theorem~\ref{thm:B} additionally uses \(K_1(L)=0\) and the GE property of purely infinite simple rings \cite{AbramsAranda06,AraGoodearlPardo02,AraBrustengaCortinas09}.  The GE property is proved directly in Section~\ref{subsec:glel} from strong division, and Remark~\ref{rem:elementaryK1} presents an elementary elimination proof of \(K_1(L)=0\), formalized in full in the accompanying Lean development, which removes the \(K\)-theoretic input entirely; \cite{AraBrustengaCortinas09} is retained as an independent confirmation.
+On the machine layer, \emph{none of these inputs is external}.  The accompanying Lean development proves internally, in the exact forms used here: the one-way Kun decomposition, with both repairs; the Kun--Thom obstruction, in the essential form of Theorem~\ref{thm:kunthom}; property~\((T)\) for the rank-three elementary groups it uses, over every finite field, with an explicit Kazhdan pair; the non-LEF property of the witness, by a direct finite obstruction that bypasses simplicity and finite presentability of \(V\) entirely (Remark~\ref{rem:witnessroute}); and Shalom's finite-presentation theorem.  The endpoints of the development are closed theorems whose axioms are the three axioms of classical mathematics in Lean.  So the citations above carry this paper's proofs and the credit for the underlying mathematics, while the formalization independently re-proves each cited input; a reader may weight the two layers as they see fit.
 
-Theorem~\ref{thm:C} is self-contained apart from Shalom's finitely presented Kazhdan covers \cite{Shalom00}, used only for the Kazhdan refinement.
+Theorem~\ref{thm:B} additionally uses \(K_1(L)=0\) and the GE property of purely infinite simple rings \cite{AbramsAranda06,AraGoodearlPardo02,AraBrustengaCortinas09}.  Neither remains a dependency: the GE property is proved at every rank from strong division (Lemma~\ref{lem:GEapp}), and Appendix~\ref{app:K1} proves \(K_1(L)=0\) elementarily and effectively, so the \(K\)-theoretic citations are retained as independent confirmation, and \cite{AraGoodearlPardo02} is invoked as a dependency only for the perfectness of \(L^\times\) (Proposition~\ref{prop:glel}(ii)), which no theorem of this paper consumes.
+
+Theorem~\ref{thm:C} is self-contained apart from Shalom's finitely presented Kazhdan covers \cite{Shalom00}, used only for the Kazhdan refinement; the formalization proves Shalom's theorem internally as well.
 
 A reader who wants to check the headline claim should verify, in order: the five finite lemmas of Section~\ref{sec:toolkit}, each elementary and a few lines long; the proof of Theorem~\ref{thm:local} in Section~\ref{sec:criterion}, which assembles them and invokes Kun's theorem twice and the Kun--Thom theorem once, in exactly the forms stated in Section~\ref{subsec:kun}; the matrix identities of Sections~\ref{sec:leavitt} and~\ref{sec:scheme}, each a finite computation from the two Leavitt relations; and the two explicit factorizations of Section~\ref{sec:spine}.  That path proves Theorem~\ref{thm:A} in full.  Sections~\ref{sec:panorama} and~\ref{sec:fp} lie downstream and can be audited separately.
 
@@ -1004,7 +1006,7 @@ Let \(E\) be the subgroup generated by the listed matrices, and let \(A_0\subset
 \end{proof}
 
 \begin{theorem}[Ershov--Jaikin-Zapirain \cite{ErshovJaikin10}]\label{thm:ejz}%
-\leanpartial{\leanmod{FreeElementaryPropertyT}{controlSet_isKazhdanPair}}{The arbitrary finitely generated ring statement is manuscript-only.}%
+\leanpartial{\leanmod{FreeElementaryPropertyT}{controlSet_isKazhdanPair}\leanmod{FiniteFieldElementaryPropertyT}{finiteFieldElementaryThree_hasKazhdanPropertyT}}{Proved internally at rank three for finite-type algebras over every finite field, with an explicit Kazhdan pair; the arbitrary finitely generated ring statement is manuscript-only.}%
 Let \(A\) be a finitely generated associative unital ring and \(r\geq3\).  Then \(\EL_r(A)\) has Kazhdan's property~\((T)\).
 \end{theorem}
 
@@ -1147,6 +1149,17 @@ Thompson's group \(V\) is finitely generated and is not LEF.  Moreover \(V\) is 
 \begin{proof}
 \(V\) is finitely presented and infinite \cite{Higman74,CannonFloydParry96} and even \(2\)-generated \cite{BleakQuick17}.  If \(V\) were LEF, then being finitely presented it would be residually finite by Lemma~\ref{lem:fplef}; but \(V\) is infinite and simple, so its only finite quotient is trivial and it is not residually finite.  Perfectness: \([V,V]\) is a nontrivial normal subgroup of the simple group \(V\) (it is nontrivial since \(V\) is nonabelian, containing for instance a copy of every finite symmetric group permuting the leaves of a fixed tree), hence \([V,V]=V\).
 \end{proof}
+
+\begin{remark}[A two-relator route with a smaller trust surface]\label{rem:witnessroute}%
+\leanverified{\leanmod{ThompsonFObstruction}{not_isLEF_of_two_relations,finite_commute_of_two_relations}\leanmod{ThompsonWitness}{cornerWitnessSubgroup,not_isLEF_cornerWitnessSubgroup}\leanmod{ThompsonVWitness}{thompsonV_not_isLEF}}
+The proof above spends three citations---infinitude, simplicity, finite presentability.  There is a route that spends none, and it is the one the accompanying formalization takes; we record it because its trust surface is strictly smaller.  Suppose two elements \(a,b\) of a group satisfy the two standard relators of Thompson's group \(F\),
+\[
+ \bigl[\,ab^{-1},\,a^{-1}ba\,\bigr]=1,
+ \qquad
+ \bigl[\,ab^{-1},\,a^{-2}ba^{2}\,\bigr]=1 ,
+\]
+and do not commute.  Then the group is not LEF.  Indeed, in a \emph{finite} group these two relations force \([a,b]=1\): setting \(c_n=a^{-n}ba^{n}\), the relations propagate to \(b^{-1}c_nb=c_{n+1}\) for all \(n\geq1\), and periodicity of \(n\mapsto a^n\) closes an induction that drags \(c_0=b\) into the centralizer of \(b\)'s conjugates; a local embedding of a large enough finite subset would transfer the noncommuting pair, with its two relations, into a finite group.  Now \(V\) contains two explicit tree tables satisfying the \(F\)-relators and not commuting (any embedded copy of \(F\) provides them), so \(V\) is not LEF---with no appeal to a presentation of \(V\), to simplicity, or to Lemma~\ref{lem:fplef}.  In the formalization the witness inside the corner is a \(2\)-generated subgroup of explicit cylinder units satisfying the two relators, and its elementary membership is discharged by explicit cylinder-commutator and Whitehead identities rather than by perfectness of \(V\); nothing in the closed proof identifies any group with \(V\).
+\end{remark}
 
 \section{The compression scheme in adjacent ranks}\label{sec:scheme}
 
@@ -1447,7 +1460,7 @@ The factorizations of this section are identities in characteristic two and hold
 
 \section{Rank two and the full panorama}\label{sec:panorama}
 
-The compression--centralizer mechanism closes already in rank two, over a smaller group \(\Gamma\): the full diagonal unit group.  Combined with matrix self-similarity and the vanishing of \(K_1\) (Proposition~\ref{prop:glel}, with the elementary proof of Remark~\ref{rem:elementaryK1}), this yields Theorem~\ref{thm:B}.
+The compression--centralizer mechanism closes already in rank two, over a different and smaller group \(\Gamma\): the full diagonal unit group, with property~\((T)\) transported through self-similarity rather than supplied by Theorem~\ref{thm:ejz}.  Since all the groups in question turn out to be isomorphic, the value of the rank-two realization is not a new group but a map of the mechanism's boundary---it shows how little room the criterion actually needs.  Combined with matrix self-similarity and the vanishing of \(K_1\) (Proposition~\ref{prop:glel}, with the elementary proof of Appendix~\ref{app:K1}), this yields Theorem~\ref{thm:B}.
 
 \subsection{The two-by-two realization}\label{subsec:twobytwo}
 
@@ -1626,7 +1639,7 @@ Part (i) and part (ii) are exactly Theorem~\ref{thm:allranks}, with the explicit
 \end{proof}
 
 \begin{remark}[Two routes to rank four]\label{rem:tworoutes}
-For a finite field of characteristic two and rank \(m+1\geq4\), the membership hypotheses are discharged twice over: explicitly, with no \(K\)-theory, in Section~\ref{sec:spine}; and via Proposition~\ref{prop:glel} here.  Theorem~\ref{thm:B} in its full strength---all ranks down to two, all finite fields, and the unit group itself---uses the second route.
+For a finite field of characteristic two and rank \(m+1\geq4\), the membership hypotheses are discharged twice over: explicitly, with no \(K\)-theory, in Section~\ref{sec:spine}; and via Proposition~\ref{prop:glel} here.  Theorem~\ref{thm:B} in its full strength---all ranks down to two, all finite fields, and the unit group itself---uses the second route.  The step that makes the panorama characteristic-free is Proposition~\ref{prop:JinGamma}: the corner copy of \(V\) is elementary because its memberships go through perfectness and the Whitehead lemma, identities valid over every ring, rather than through transvection factorizations of transpositions, which require characteristic two.
 \end{remark}
 
 \section{Finitely presented nonsofic covers}\label{sec:fp}
