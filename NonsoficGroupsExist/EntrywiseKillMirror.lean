@@ -99,8 +99,8 @@ theorem entry_window_nonneg_of_A_full
   obtain ⟨N, hN⟩ := entry_window_nonpos_of_B_full k C R hR
     (fun j i ↦ B₀ i j) (fun j i ↦ B₁ i j) (fun j i ↦ Cm i j)
     (fun j i ↦ A₀ i j) (fun j i ↦ A₁ i j)
-    (thetaUnit k u) (by beta_reduce; exact hθval) G₀ G₁
-    (by beta_reduce; exact hG)
+    (thetaUnit k u) (by exact hθval) G₀ G₁
+    (by exact hG)
   refine ⟨N, fun j i ↦ ?_⟩
   -- transport the window back through `θ̂`
   have hentry : (family k).wordT (R.word i) *

@@ -386,6 +386,15 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       factors as (code bijection)·(scalar move): the scalar matrix
       is forced square and invertible because a kernel vector would
       give a vanishing column/row of a unit
+    - [x] the mirrored kill and the window intersection
+      (`EntrywiseKillMirror`): θ̂ flips windows, so a right inverse
+      of `(A₀|A₁)` pins inverse entries nonnegative; nonpos ∧ nonneg
+      = balanced by component uniqueness
+    - [x] the master induction (`MasterInduction.pencil_unit_mem`):
+      strong induction on total code size — extraction/mirror
+      branches recurse, both-stacks-full reaches the terminal, and
+      the single refinement configuration is isolated as the named
+      hypothesis `StuckReduction`
     - [ ] the refinement move and the round recursion: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the
