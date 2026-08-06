@@ -401,9 +401,9 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       (`NarrowReduction → ScalarReduction → B4 → GL = EL`) rests on
       one remaining Prop
     - [x] strict negativity (`StrictNegativePencil`): a full `B`-stack kills the balanced entry components too — the inverse entries live in `[-N, -1]`
-- [ ] code-shape supply: complete codes at prescribed size/depth profiles (shallow, deep, padded pair)
-- [ ] the reshaping exits: free exit (aspect ratio) and padded strict-negative exit via `window_nonpos`
-- [ ] the kappa block-sum transfer and the refine loop; `stuckReduction_holds`: `s`-free
+- [x] code-shape supply (`CodeShapeSupply`): deep codes (any size `≥ 2^M`, depths `≥ M`) and shallow codes (any size `≤ 2^r`, depths `≤ r`, by recursive halving)
+- [x] pencil reshaping (`PencilReshape`): code-pair conjugation preserves the class group; value-window bound over depth-controlled codes
+- [x] the refine-loop discharge (`RefineLoopDischarge`): free exit + strict-negative full-stack exit + the bounded column-growth loop — **`narrowReduction_holds`: the entire K₁-vanishing chain (`ScalarReduction`, checkpoint B4, `GL = EL`) closes UNCONDITIONALLY** (no padding, no extraction, no termination measure; the master-induction/extraction pipeline remains as standalone structure theory): `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the
       extracted middle re-transports along mixed-size complete codes

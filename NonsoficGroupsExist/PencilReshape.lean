@@ -138,6 +138,72 @@ theorem reshaped_pencil_mem_iff [Nontrivial A]
     rw [hueq]
     exact mul_mem (mul_mem (inv_mem hω₁mem) h) (inv_mem hω₂mem)
 
+include k in
+/-- Existence form of the reshaping: the reshaped pencil unit exists
+and is `stableUnits`-equivalent to the original. -/
+theorem exists_reshaped_pencil [Nontrivial A]
+    (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1)
+    (R P : BinaryPrefixCode ι) (hR : L.IsComplete R)
+    (hP : L.IsComplete P)
+    (C Q : BinaryPrefixCode κ) (hC : L.IsComplete C)
+    (hQ : L.IsComplete Q)
+    (E : ι → κ → A) (u : Aˣ)
+    (hu : (u : A) = ∑ i, ∑ j,
+      L.wordS (R.word i) * E i j * L.wordT (C.word j)) :
+    ∃ v : Aˣ, ((v : A) = ∑ i, ∑ j,
+      L.wordS (P.word i) * E i j * L.wordT (Q.word j)) ∧
+      (u ∈ stableUnits A ↔ v ∈ stableUnits A) := by
+  classical
+  set F : ι → ι → A := fun i i' ↦ if i = i' then 1 else 0 with hFdef
+  set G : κ → κ → A := fun j j' ↦ if j = j' then 1 else 0 with hGdef
+  have hFF : ∀ i i' : ι, (∑ j, F i j * F j i') =
+      if i = i' then (1 : A) else 0 := by
+    intro i i'
+    rw [Finset.sum_congr rfl (fun j _ ↦
+      show F i j * F j i' = if i = j then F j i' else 0 from by
+        show (if i = j then (1 : A) else 0) * F j i' = _
+        split_ifs <;> simp),
+      Finset.sum_ite_eq Finset.univ i (fun j ↦ F j i'),
+      if_pos (Finset.mem_univ i)]
+  have hGG : ∀ j j' : κ, (∑ l, G j l * G l j') =
+      if j = j' then (1 : A) else 0 := by
+    intro j j'
+    rw [Finset.sum_congr rfl (fun l _ ↦
+      show G j l * G l j' = if j = l then G l j' else 0 from by
+        show (if j = l then (1 : A) else 0) * G l j' = _
+        split_ifs <;> simp),
+      Finset.sum_ite_eq Finset.univ j (fun l ↦ G l j'),
+      if_pos (Finset.mem_univ j)]
+  set ω₁ : Aˣ := L.codePairUnit P hP R hR F F hFF hFF with hω₁
+  set ω₂ : Aˣ := L.codePairUnit C hC Q hQ G G hGG hGG with hω₂
+  have hcollapseL : ∀ (i : ι) (l : κ), (∑ j, F i j * E j l) = E i l := by
+    intro i l
+    rw [Finset.sum_congr rfl (fun j _ ↦
+      show F i j * E j l = if i = j then E j l else 0 from by
+        show (if i = j then (1 : A) else 0) * E j l = _
+        split_ifs <;> simp),
+      Finset.sum_ite_eq Finset.univ i (fun j ↦ E j l),
+      if_pos (Finset.mem_univ i)]
+  have hcollapseR : ∀ (i : ι) (l : κ), (∑ j, E i j * G j l) = E i l := by
+    intro i l
+    rw [Finset.sum_congr rfl (fun j _ ↦
+      show E i j * G j l = if j = l then E i j else 0 from by
+        show E i j * (if j = l then (1 : A) else 0) = _
+        split_ifs <;> simp),
+      Finset.sum_ite_eq' Finset.univ l (fun j ↦ E i j),
+      if_pos (Finset.mem_univ l)]
+  have hval : ((ω₁ * u * ω₂ : Aˣ) : A) = ∑ i, ∑ j,
+      L.wordS (P.word i) * E i j * L.wordT (Q.word j) := by
+    rw [Units.val_mul, Units.val_mul, hω₁, L.codePairUnit_val, hu,
+      L.codePair_mul R P.word C.word F E]
+    simp only [hcollapseL]
+    rw [hω₂, L.codePairUnit_val,
+      L.codePair_mul C P.word Q.word E G]
+    simp only [hcollapseR]
+  exact ⟨ω₁ * u * ω₂, hval,
+    L.reshaped_pencil_mem_iff (k := k) hdiv R P hR hP C Q hC hQ E u
+      (ω₁ * u * ω₂) hu hval⟩
+
 omit [DecidableEq ι] [DecidableEq κ] in
 /-- **The value window of a pencil over depth-controlled codes**:
 entry windows shift by row depth minus column depth. -/
