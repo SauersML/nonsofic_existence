@@ -343,9 +343,13 @@ instance freeGroup_residuallyFinite (α : Type*) :
     FreeGroupBall.wordHom (L := w.toWord) FreeGroup.isReduced_toWord,
     FreeGroupBall.wordHom_ne_one w hw⟩
 
+/-- Free groups are LEF, through residual finiteness. -/
+theorem isLEF_freeGroup (α : Type*) : IsLEF (FreeGroup α) :=
+  isLEF_of_residuallyFinite
+
 /-- Free groups are sofic, through residual finiteness and local
 embeddability. -/
 theorem isSofic_freeGroup (α : Type*) : IsSofic (FreeGroup α) :=
-  isSofic_of_isLEF isLEF_of_residuallyFinite
+  isSofic_of_isLEF (isLEF_freeGroup α)
 
 end NonsoficGroupsExist
