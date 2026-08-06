@@ -1103,3 +1103,40 @@ NEXT: (a) attack m ≤ −2, E > D by the β-recursion + padding rigidity
 m = −2 ansatz).  Even if (P) fails, mod-H moves + corner toolkit give
 the fallback.  Meanwhile: Theorems 1–3 + corner form are formalizable
 NOW and are needed regardless.
+
+## Session 24b: the peeling isomorphism; K₀ is no obstruction; plan
+MONOMIAL FACTS (recorded to avoid rederiving): S(a)T(b) nilpotent ⟺
+a,b prefix-incomparable (else powers persist: S(a)T(b)² = S(a)T(db)
+etc.).  t_is_j = δ_ij means NO t-before-s monomials exist; conjugation
+experiments (1+ν)(1+σ)(1−ν) with ν = S(1)T(00), σ = S(00)T(1) give
+window [−1,1] with negative part νσν-type surviving — no easy
+[0,1]-singular unit from small conjugates (νσ = S(1)T(1), σν =
+S(00)T(00), νσν = ν).
+
+PEELING THEOREM (new, verified by direct ring computation): let
+w = e + ζ be a unit ([0,1]-window normal form), x := w⁻¹, B := ζf =
+wf, b := x₋₁ (so bB = f from the graded equation x₋₁ζf = f, and
+x_dζf = 0 ∀d ≠ −1 — refined graded identities, both sides).  Set
+P := B·b = ζf·x₋₁: then
+  • P is a BALANCED idempotent (deg +1 · deg −1), P·B = B, (1−P)B = 0;
+  • τ(P) = τ(f)/2 (modular trace);
+  • Φ := (1−P)we : eL → (1−P)L is a RIGHT-MODULE ISOMORPHISM:
+    injective: Φy = 0 ⟹ wy = P wy = B(bwy) ⟹ y = (xB)(bwy) = f(bwy)
+    and y = ey ⟹ y = 0, using xB = Σx_dζf = f;
+    surjective: Φ(ex v) = (1−P)v since (1−P)B = 0.
+  ⟹ [e] = [1−P] in V(L).  BUT V(L(1,2))\{0} is the trivial monoid
+  (all nonzero f.g. projectives ≅), so NO K₀ obstruction — as
+  expected, the content is K₁-level.  Peeling gives a NEW [0,1]-unit
+  u'' := (1−P)we + ψ (ψ ∈ PL₁f an explicit cylinder-matching
+  partial isometry, degree +1 forced by trace scaling), but defect
+  bookkeeping rank((1−P)e) is not guaranteed to improve without
+  aligning P with e — open.
+DECISION FOR NEXT TURN: settle (P) for m ≤ −2 COMPUTATIONALLY first:
+implement exact L_𝔽₂(1,2) arithmetic (dict on word-pairs, prefix
+collapse), then for structured/random ζ with e = 1−p₁₁ (E=3, D=1,
+q=2) solve the LINEAR system wx = xw = 1 over 𝔽₂ with bounded
+monomial support (|a|,|b| ≤ 5, ~4k unknowns, bitset Gaussian
+elimination).  A solution = genuine counterexample certificate (then:
+moves route with corner toolkit + peeling).  No solutions across the
+sweep = strong signal (P) is true ⟹ hunt the proof via peeling
+alignment / β-recursion + ⊗I₂ rigidity.
