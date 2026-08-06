@@ -1010,3 +1010,40 @@ WRITTEN: GammaReduction.lean (complete, hypotheses explicit).
   content) per cycle.  ALSO available now: mixed-z tail support
   reduction means the ENTIRE session-13 loop machinery applies to
   mixed z with more freedom than previously exploited.
+
+## Session 23: dynamics computed; the invariant sharpened to 1 + ẑ
+- CORRECTION to session 22: the A-moves change γ' as an ELEMENT but
+  not its invertibility class: (z₋(1−p_{0w}))s₁ = z₋s₁ always
+  (t_{0w}s₁ = 0), and both old and new γ' are invertible iff
+  1 + ẑ is, ẑ := z₋s₁ BALANCED.  So the true obstruction datum is
+  the invertibility of 1 + ẑ — invariant under A-moves, prefix
+  kills, and the flip (γ ↔ γ' are flip partners of it).
+- THE FLIP EATS THE WINDOW: [1 + s₁z] = [1 + zs₁] with
+  zs₁ = ẑ + z₀s₁ ∈ [0,1] — no negative part.  If 1 + ẑ invertible:
+  factor and flip back ⟹ pure tail ⟹ NilpotentTailKill ⟹ DONE
+  (this is GammaReduction, already written).
+- CHIRALITY THEOREM (negative): [0,1]-forms with s₁-SUFFIX tails have
+  NO mirror p-split (s·t words never vanish; only t·s do) — all
+  annihilation-based movers live on the 1 + s₁(·) side.  Return to
+  normal form hence requires the sr1-pivot loop.
+- TWISTED ACTION found: right-mult by balanced h on v = c + z₀s₁ acts
+  as (c, z₀) ↦ (ch', z₀φ₁(h)) via s₁h = φ₁(h)s₁, φ₁(h) := s₁ht₁ —
+  wait: v·h = (1+ẑ)h + z₀φ₁(h)s₁ — the pair transforms with the
+  CORNER TWIST φ₁ on the tail.  Left-mult: (gc, gz₀).  The
+  (g,h)-orbit of (c, z₀) with the φ₁-twist is the corner-skew
+  structure at the unit level; φ₁(h) is never invertible (image in
+  p₁ corner) — the twist COMPRESSES the tail's right support.
+- REMAINING QUESTION (sharpest yet): unit 1 + s₁z with 1 + z₋s₁
+  singular: exhibit a move sequence reaching either invertible
+  1 + ẑ' or H directly.  Available: M = 1 nonlinear idempotent data
+  (P = s₁z₀y₋₁, E = C₁z₀, colsp(C₁) = ker γ', exact rank equalities),
+  the twisted (g,h)-action, sr1-pivot loop, deep A-moves.  IDEA for
+  next session: use the twisted action with h := suitable balanced
+  unit to compress z₀'s right support INTO the corner where the
+  M=1-idempotent data lives, making the balanced part invertible on
+  the complement — i.e. exploit that φ₁(h)-compression can REMOVE
+  exactly the tail content that couples to ker(1+ẑ), decoupling the
+  singular part which then must vanish by the unit equations (the
+  pure-singular case 1 + s₁z₋ + [tail coupling only to the regular
+  part] should force the M=1 system into the instance-1 pattern
+  where positive-side equations kill y₀'s p₀-part).
