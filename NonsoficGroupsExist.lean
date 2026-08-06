@@ -176,6 +176,7 @@ import NonsoficGroupsExist.DegreeShapeBridge
 import NonsoficGroupsExist.CylinderCornerRank
 import NonsoficGroupsExist.ZeroKOne
 import NonsoficGroupsExist.WidthTwoReduction
+import NonsoficGroupsExist.GammaDischarge
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

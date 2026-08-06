@@ -1765,3 +1765,31 @@ updates, final audit.
   certificate of 1 (from L_r) through composites that factor through
   the bottom chain — mirror of the (P)-argument with the roles of
   raising/lowering swapped.  START HERE NEXT SESSION.
+
+## Session 34: GammaDischarge GREEN — the normal-form case is a THEOREM
+- VERIFIER BUG FOUND AND FIXED in leavitt_search.py: monomial-set
+  comparison misses equalities needing p₀+p₁ = 1; replaced final
+  verification with the faithful stream action.  ρ now correctly
+  certified as a unit.  (P)-experiments re-validated with the fixed
+  net: still zero counterexamples.  A-nilpotency: FALSE for singular
+  c (ρ itself: a = S(0)T(00), a^k = S(0)T(0^{k+1}) ≠ 0); still
+  plausible for c = 1 (co-isometric-A searches: zero hits) — BUT NOW
+  IRRELEVANT:
+- **GammaDischarge.lean (COMPILED FIRST TRY): every unit with value
+  1 + s₁(z₋ + z₀) lies in stableUnits.**  Proof: (P) applied to the
+  unit's own [0,1]-window value gives IsUnit(1 + s₁z₋); flipUnit
+  gives the γ-partner g with value 1 + z₋s₁; inv_mem_levelSpan gives
+  the balanced inverse; the double flip w₂ := flip(Y,s₁, g⁻¹·flip(u))
+  exposes the pure tail and PureTailNilpotency supplies D; then the
+  compiled gamma_reduction closes.  NO dynamics, NO A-nilpotency, NO
+  swap cascade needed for this case.
+- REMAINING GAP (the only one): NARROW → NORMAL FORM plumbing:
+  every [−1,1]-window unit is mod-H equivalent to one with value
+  1 + s₁z, z ∈ [−1,0]-window.  Inventory: exists_narrow_representative
+  (compiled) gives the [−1,1] window; exists_corner_move (Φ-move,
+  compiled) gives [u] = [s₀(u+vw)t₀ + s₀vt₁ + s₁wt₀ + s₁t₁];
+  ResidualMoves (compiled) has blockDiagUnit/kill_move machinery;
+  exists_prefix_kill + exists_corner_transport (compiled).
+  Next: derive the funnel from the Φ-move: choosing v, w to make the
+  2×2-corner-form 1 + s₁(·)-shaped — the sr1-pivot (compiled:
+  exists_balanced_sr1_pivot) supplies the invertible block.
