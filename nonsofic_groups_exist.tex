@@ -1840,7 +1840,12 @@ The stated inverse is checked directly: \((1+yx)\bigl(1-y(1+xy)^{-1}x\bigr)=1+yx
 \[
  x_{12}(x)\;x_{21}(y)\;x_{12}\bigl(-(1+xy)^{-1}x\bigr)\;x_{21}\bigl(-(1+yx)y\bigr),
 \]
-again by direct computation.  Hence \(\diag\bigl((1+xy)(1+yx)^{-1},1\bigr)=\diag(1+xy,(1+yx)^{-1})\cdot\diag\bigl((1+yx)^{-1},(1+yx)\bigr)^{-1}\cdot\)\,(a Whitehead diagonal, Lemma~\ref{lem:whitehead}) lies in \(\EL_2(L)\), so \((1+xy)(1+yx)^{-1}\in H\).
+again by direct computation.  Hence
+\[
+ \diag\bigl((1+xy)(1+yx)^{-1},\,1\bigr)
+ =\diag\bigl(1+xy,\,(1+yx)^{-1}\bigr)\cdot\diag\bigl((1+yx)^{-1},\,1+yx\bigr),
+\]
+and the second factor is a Whitehead diagonal (Lemma~\ref{lem:whitehead}); both factors lie in \(\EL_2(L)\), so \((1+xy)(1+yx)^{-1}\in H\).
 \end{proof}
 
 \begin{lemma}[Corner insertion]\label{lem:kappaapp}%
@@ -1970,11 +1975,15 @@ Let \(z\in L\) be balanced with \(s_1z\) nilpotent, and let \(u\in L^\times\) ha
 \end{lemma}
 
 \begin{proof}
-Induct on the nilpotency index \(D\) of \(s_1z\); for \(D=1\), \(z=t_1(s_1z)=0\) and \(u=1\).  For \(D\geq2\), put \(r=t_1(s_1z)^{D-1}\in W[D-2,D-2]\)\,\((\cdot)\); factoring \(r=R\sigma\) with \(R=rt_0^{\,D-2}\) balanced (as in Lemma~\ref{lem:widthapp}) and taking a balanced pseudo-inverse \(\Xi\) of \(R\)---balanced elements are scalar matrices along a full code, and every scalar matrix \(R\) has a matrix \(\Xi\) with \(R\Xi R=R\)---one obtains an idempotent-like element \(e\) with \(e\,(s_1z)=0\) and \((s_1z)^{D-1}e=(s_1z)^{D-1}\).  The \emph{mover} \(1-s_1(ze)\) has square-zero tail, hence lies in \(H\) by Lemma~\ref{lem:unipapp}, and
+Induct on the nilpotency index \(D\) of \(s_1z\); for \(D=1\), \(z=t_1(s_1z)=0\) and \(u=1\).  For \(D\geq2\), put \(r=t_1(s_1z)^{D-1}\), of pure degree \(D-2\), so that \((s_1z)^{D-1}=s_1r\) and \(r\,(s_1z)=t_1(s_1z)^{D}=0\).  Factor \(r=Rs_0^{\,D-2}\) with \(R=rt_0^{\,D-2}\) balanced, take a balanced pseudo-inverse \(\Xi\) of \(R\)---balanced elements are scalar matrices along a full code, and every scalar matrix \(R\) admits \(\Xi\) with \(R\Xi R=R\)---and set
 \[
- (1+s_1z)\bigl(1-s_1(ze)\bigr)=1+s_1\bigl(z-ze\bigr)
+ e=t_0^{\,D-2}\,\Xi\,r,
 \]
-because \(z\,e\,s_1(ze)\)-cross terms vanish by \(e(s_1z)=0\).  The new tail satisfies \((s_1(z-ze))^{D-1}=(s_1z)^{D-1}(1-e)=0\), so its index is at most \(D-1\), and the inductive hypothesis applies.
+a balanced element with the two properties that drive the induction: \(e\,(s_1z)=t_0^{\,D-2}\Xi\,\bigl(r(s_1z)\bigr)=0\), and \(re=(rt_0^{\,D-2})\Xi r=R\Xi R\,s_0^{\,D-2}=Rs_0^{\,D-2}=r\), whence \((s_1z)^{D-1}e=s_1(re)=s_1r=(s_1z)^{D-1}\).  The \emph{mover} \(1-s_1(ze)=1-(s_1z)e\) lies in \(H\) by Lemma~\ref{lem:unipapp} with \((a,b)=(s_1z,-e)\), since \(ba=-e(s_1z)=0\); and for the same reason
+\[
+ \bigl(1-s_1(ze)\bigr)\,(1+s_1z)=1+s_1\bigl(z-ze\bigr),
+\]
+the cross term being \(-s_1(ze)(s_1z)=-s_1z\,\bigl(e(s_1z)\bigr)=0\).  The new tail satisfies \((s_1(z-ze))^{D-1}=(s_1z)^{D-1}(1-e)=0\), using \((1-e)(s_1z)=s_1z\) to telescope and then the second property of \(e\); so its index is at most \(D-1\), and the inductive hypothesis applies to \(u\) times the mover.
 \end{proof}
 
 \begin{lemma}[The keystone]\label{lem:keystoneapp}%
