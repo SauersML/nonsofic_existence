@@ -1447,3 +1447,35 @@ mathematics settled in sessions 24–25:
   IncomparableUnipotents, ShapeCalculus, GradedComponents,
   PureTailNilpotency, RankNormalForm, DegreeShapeBridge,
   CylinderCornerRank, ZeroKOne, WidthTwoReduction).
+
+## Session 28: width-3 analysis sharpened (math turn)
+- NEW STRUCTURAL FACT (corollary of (P)!): right- or left-
+  multiplication by [0,1]-window H-units can NEVER kill a nonzero
+  degree-(−1) part: (u·m)₋ = u₋·m₀ and m₀ is INVERTIBLE by (P).
+  So width-3 → width-2 requires movers with genuine negative parts:
+  the incomparable unipotents 1 + S(α)yT(β), |β| > |α| (∈ H ✓), and
+  their products, plus two-sided balanced units.
+- Canonical form for the bottom: rank-normalize a's rectangular
+  coefficient matrix (balanced g·a·h): WLOG a = τ_r = Σ_{i<r}
+  S(α_i)T(β_i), canonical partial isometry (orthonormal families).
+- c-invertible sub-case: u ~ 1 + A + B (A := c⁻¹a).  If A nilpotent
+  with (1+A) ∈ H then (1+A)⁻¹u = 1 + (1+A)⁻¹B still has negative
+  parts from the inverse tail ((−A)^jB ∈ L_{1−j}) — one-sided
+  clearing insufficient.  LDU needs Riccati C'(1+C') = −AB
+  (Artin–Schreier over 𝔽₂ — not always solvable): exact LDU fails,
+  mod-H version open.
+- NEXT SESSION PLAN:
+  1. COMPUTATIONAL probe (leavitt_search.py is ready): (a) do
+     width-3 units with invertible c always have nilpotent c⁻¹a?
+     (test 1 + t₀ + B ansatz over 𝔽₂); (b) explicitly H-reduce the
+     rebalancer ρ = S(0)T(00)+S(11)T(01)+S(10)T(1) by hand/machine
+     to discover the general move pattern (ρ IS in H by K₁ = 0; find
+     the witness!).  ρ's reduction pattern likely IS the algorithm.
+  2. Try: u·(1+ν) with ν = −ρ₀-pattern... general scheme: mixed
+     unipotent right-movers 1 + ν (ν ∈ L₋₁, monomial-incomparable
+     form) change a by c·ν (constraint a·ν = 0) — set up the
+     linear-algebra of {ν : aν = 0} acting on a via c·ν, iterate
+     with balanced renormalizations; measure: rank r of a.
+  3. Remember: [−1,0]-window units ∈ H by the MIRROR of the width-2
+     chain (s↔t antiautomorphism — formalizable as the op-algebra
+     family or by rerunning the argument on xw = 1 side).
