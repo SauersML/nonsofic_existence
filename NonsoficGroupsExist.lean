@@ -26,6 +26,8 @@ import NonsoficGroupsExist.ClassTwoApproximation
 import NonsoficGroupsExist.DirectedCoarea
 import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.Kazhdan
+import NonsoficGroupsExist.HilbertComplexification
+import NonsoficGroupsExist.KazhdanComplex
 import NonsoficGroupsExist.KazhdanFiniteGeneration
 import NonsoficGroupsExist.CharacterMass
 import NonsoficGroupsExist.RankTwoCompression
@@ -191,6 +193,7 @@ import NonsoficGroupsExist.RankOneNormalForm
 import NonsoficGroupsExist.NonnegUnitStructure
 import NonsoficGroupsExist.PencilCore
 import NonsoficGroupsExist.PencilForm
+import NonsoficGroupsExist.WindowDichotomy
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
