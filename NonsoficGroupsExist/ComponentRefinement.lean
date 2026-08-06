@@ -69,7 +69,7 @@ noncomputable def refineComponent (X : FiniteMultiGraph)
   have hV : 0 < Fintype.card Z.vertex := by
     change 0 < Fintype.card (P.block y)
     exact Fintype.card_pos_iff.mpr ⟨⟨y, P.self_mem y⟩⟩
-  let result := Z.exists_dominant_cell hexp
+  let result := Z.exists_dominant_cell hexp (hι := by infer_instance)
     (componentTargetLabel P Q q y) hV
   let D := Classical.choose result
   have hspec := Classical.choose_spec result

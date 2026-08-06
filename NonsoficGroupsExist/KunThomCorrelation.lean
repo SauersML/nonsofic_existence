@@ -174,11 +174,12 @@ theorem abs_scaledGramCorrelation_le_one {G : Type*}
     _ ≤ 1 := (div_le_one hcard).2 (norm_graphVector_sq_le c)
 
 /-- Localized diagonal replacement controls scaled correlation error. -/
-theorem abs_scaledPermutationCorrelation_sub_sq_le [Nonempty Y]
+theorem abs_scaledPermutationCorrelation_sub_sq_le (hY : Nonempty Y)
     (c p q : Equiv.Perm Y) :
     |scaledPermutationCorrelation c p -
         scaledPermutationCorrelation c q| ^ 2 ≤
       4 * hammingDistance Y p q := by
+  haveI := hY
   let x := graphVector c
   let d := permutationOperator (diagonalPerm p) x -
     permutationOperator (diagonalPerm q) x
@@ -263,12 +264,13 @@ theorem relativeCorrelation_approaches_gram_eventually
   have hcardNat : 0 < Fintype.card (A.model n) := by
     have := hNcard n hncard
     omega
-  letI : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcardNat
+  have hmodel : Nonempty (A.model n) := Fintype.card_pos_iff.mp hcardNat
+  letI := hmodel
   let p := A.map n (g⁻¹ * h, (1 : J))
   let q := (A.map n (g, (1 : J)))⁻¹ * A.map n (h, 1)
   have hclose : hammingDistance (A.model n) p q < η ^ 2 / 4 := by
     simpa [p, q] using hNclose n hnclose
-  have hsquare := abs_scaledPermutationCorrelation_sub_sq_le (c n) p q
+  have hsquare := abs_scaledPermutationCorrelation_sub_sq_le hmodel (c n) p q
   have habs : 0 ≤ |scaledPermutationCorrelation (c n) p -
       scaledPermutationCorrelation (c n) q| := abs_nonneg _
   have hlt : |scaledPermutationCorrelation (c n) p -

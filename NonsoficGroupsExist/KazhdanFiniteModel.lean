@@ -252,9 +252,10 @@ theorem norm_permutationOperators_centeredIndicator_sub_sq_le
   exact norm_permutationOperators_indicator_sub_sq_le p q U
 
 /-- Exact variance formula for a centered characteristic vector. -/
-theorem norm_centeredIndicator_sq [Nonempty Y] (U : Finset Y) :
+theorem norm_centeredIndicator_sq (hY : Nonempty Y) (U : Finset Y) :
     ‖centeredIndicator U‖ ^ 2 =
       (U.card : ℝ) * (1 - (U.card : ℝ) / Fintype.card Y) := by
+  haveI := hY
   rw [EuclideanSpace.real_norm_sq_eq]
   let a : ℝ := (U.card : ℝ) / Fintype.card Y
   have hpoint (y : Y) :
@@ -287,10 +288,11 @@ theorem norm_centeredIndicator_sq [Nonempty Y] (U : Finset Y) :
 
 /-- Centered characteristic vectors have normalized squared norm at most
 one, uniformly over the finite model and the subset. -/
-theorem norm_centeredIndicator_sq_div_card_le_one [Nonempty Y]
+theorem norm_centeredIndicator_sq_div_card_le_one (hY : Nonempty Y)
     (U : Finset Y) :
     ‖centeredIndicator U‖ ^ 2 / Fintype.card Y ≤ 1 := by
-  rw [norm_centeredIndicator_sq]
+  haveI := hY
+  rw [norm_centeredIndicator_sq hY]
   have hcardNat : 0 < Fintype.card Y := Fintype.card_pos
   have hcard : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardNat
   have hUleNat : U.card ≤ Fintype.card Y := Finset.card_le_univ U
@@ -309,8 +311,9 @@ theorem norm_centeredIndicator_sq_div_card_le_one [Nonempty Y]
   nlinarith [sq_nonneg ((U.card : ℝ) / Fintype.card Y)]
 
 /-- A centered characteristic vector has coordinate sum zero. -/
-theorem sum_centeredIndicator [Nonempty Y] (U : Finset Y) :
+theorem sum_centeredIndicator (hY : Nonempty Y) (U : Finset Y) :
     ∑ y : Y, centeredIndicator U y = 0 := by
+  haveI := hY
   have hcardNat : 0 < Fintype.card Y := Fintype.card_pos
   have hcard : (Fintype.card Y : ℝ) ≠ 0 := by exact_mod_cast hcardNat.ne'
   simp_rw [centeredIndicator_apply]
@@ -321,13 +324,14 @@ theorem sum_centeredIndicator [Nonempty Y] (U : Finset Y) :
 
 /-- For a transitive action, centered characteristic vectors are orthogonal
 to every invariant vector. -/
-theorem centeredIndicator_mem_orthogonal [Nonempty Y]
+theorem centeredIndicator_mem_orthogonal (hY : Nonempty Y)
     (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ) (U : Finset Y) :
     centeredIndicator U ∈
       (invariantSubmodule (permutationRepresentation σ))ᗮ := by
   rw [Submodule.mem_orthogonal]
   intro x hx
-  obtain ⟨y₀⟩ := ‹Nonempty Y›
+  haveI := hY
+  obtain ⟨y₀⟩ := hY
   have hxinv : ∀ g : G, permutationRepresentation σ g x = x :=
     (mem_invariantSubmodule (permutationRepresentation σ) x).1 hx
   have hxconstant : ∀ y z : Y, x y = x z :=
@@ -345,15 +349,16 @@ theorem centeredIndicator_mem_orthogonal [Nonempty Y]
       rw [hxconstant y y₀]
     _ = x y₀ * ∑ y : Y, centeredIndicator U y := by
       rw [Finset.mul_sum]
-    _ = 0 := by rw [sum_centeredIndicator]; ring
+    _ = 0 := by rw [sum_centeredIndicator hY]; ring
 
 /-- A nonempty subset of at most half the finite space has a nonzero centered
 characteristic vector. -/
-theorem centeredIndicator_ne_zero [Nonempty Y] (U : Finset Y)
+theorem centeredIndicator_ne_zero (hY : Nonempty Y) (U : Finset Y)
     (hU : U.Nonempty) (hhalf : 2 * U.card ≤ Fintype.card Y) :
     centeredIndicator U ≠ 0 := by
   intro hzero
-  have hnorm := norm_centeredIndicator_sq U
+  haveI := hY
+  have hnorm := norm_centeredIndicator_sq hY U
   rw [hzero, norm_zero, zero_pow (by norm_num : (2 : ℕ) ≠ 0)] at hnorm
   have hUposNat : 0 < U.card := Finset.card_pos.mpr hU
   have hUpos : (0 : ℝ) < U.card := by exact_mod_cast hUposNat
@@ -368,15 +373,16 @@ theorem centeredIndicator_ne_zero [Nonempty Y] (U : Finset Y)
 
 /-- A Kazhdan pair gives a uniform set-expansion estimate for every exact
 transitive finite action. -/
-theorem exists_symmDiff_lower_bound [Nonempty Y]
+theorem exists_symmDiff_lower_bound (hY : Nonempty Y)
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
     (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ)
     (U : Finset Y) (hU : U.Nonempty)
     (hhalf : 2 * U.card ≤ Fintype.card Y) :
     ∃ q ∈ Q, ε ^ 2 / 2 * U.card ≤
       (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := by
-  have hxorth := centeredIndicator_mem_orthogonal σ htrans U
-  have hxne := centeredIndicator_ne_zero U hU hhalf
+  haveI := hY
+  have hxorth := centeredIndicator_mem_orthogonal hY σ htrans U
+  have hxne := centeredIndicator_ne_zero hY U hU hhalf
   obtain ⟨q, hq, hmove⟩ :=
     exists_moved_mul_norm_of_mem_orthogonal hQ
       (permutationRepresentation σ) hxorth hxne
@@ -396,7 +402,7 @@ theorem exists_symmDiff_lower_bound [Nonempty Y]
       centeredIndicator U‖ ^ 2 = _
     rw [permutationOperator_centeredIndicator_sub,
       norm_permutationOperator_indicator_sub_sq]
-  have hnorm := norm_centeredIndicator_sq U
+  have hnorm := norm_centeredIndicator_sq hY U
   have hcardPosNat : 0 < Fintype.card Y := Fintype.card_pos
   have hcardPos : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hcardPosNat
   have hhalfReal : (2 : ℝ) * U.card ≤ Fintype.card Y := by
@@ -418,7 +424,7 @@ theorem exists_symmDiff_lower_bound [Nonempty Y]
     _ ≤ (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := hmoveSq
 
 /-- Summed generator form of the exact finite-action expansion estimate. -/
-theorem sum_symmDiff_lower_bound [Nonempty Y]
+theorem sum_symmDiff_lower_bound (hY : Nonempty Y)
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
     (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ)
     (U : Finset Y) (hU : U.Nonempty)
@@ -426,7 +432,7 @@ theorem sum_symmDiff_lower_bound [Nonempty Y]
     ε ^ 2 / 2 * U.card ≤
       ∑ q ∈ Q, (((U.map (σ q).toEmbedding) ∆ U).card : ℝ) := by
   obtain ⟨q, hq, hbound⟩ :=
-    exists_symmDiff_lower_bound hQ σ htrans U hU hhalf
+    exists_symmDiff_lower_bound hY hQ σ htrans U hU hhalf
   refine hbound.trans ?_
   exact Finset.single_le_sum
     (fun g _ ↦ Nat.cast_nonneg (((U.map (σ g).toEmbedding) ∆ U).card)) hq
@@ -447,17 +453,17 @@ def HasActionExpansion (σ : G →* Equiv.Perm Y) (Q : Finset G)
 
 /-- Every exact transitive finite action of a group with Kazhdan pair
 `(Q, ε)` has expansion constant `ε² / 2`. -/
-theorem hasActionExpansion_of_kazhdanPair [Nonempty Y]
+theorem hasActionExpansion_of_kazhdanPair (hY : Nonempty Y)
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
     (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ) :
     HasActionExpansion σ Q (ε ^ 2 / 2) := by
   intro U hU hhalf
-  have h := sum_symmDiff_lower_bound hQ σ htrans U hU hhalf
+  have h := sum_symmDiff_lower_bound hY hQ σ htrans U hU hhalf
   simpa [actionBoundarySize] using h
 
 /-- Concrete spectral-gap form for an exact finite permutation action: the
 orbit average contracts every centered characteristic vector. -/
-theorem norm_orbitAverage_centeredIndicator_le [Nonempty Y]
+theorem norm_orbitAverage_centeredIndicator_le (hY : Nonempty Y)
     {Q : Finset G} {ε : ℝ} (hQ : IsKazhdanPair.{u, v} G Q ε)
     (S : Finset G) (hQS : Q ⊆ S) (hone : 1 ∈ S) (hεone : ε ≤ 1)
     (σ : G →* Equiv.Perm Y) (htrans : IsTransitive σ) (U : Finset Y) :
@@ -466,7 +472,7 @@ theorem norm_orbitAverage_centeredIndicator_le [Nonempty Y]
       (1 - ε ^ 2 / (4 * S.card)) * ‖centeredIndicator U‖ := by
   apply norm_orbitAverage_le_of_mem_orthogonal hQ S hQS hone hεone
     (permutationRepresentation σ)
-  exact centeredIndicator_mem_orthogonal σ htrans U
+  exact centeredIndicator_mem_orthogonal hY σ htrans U
 
 omit [DecidableEq Y] in
 /-- Pointwise formula for the orbit average in a finite permutation
@@ -552,10 +558,11 @@ variable {M : FiniteModel}
 
 /-- Normalized Hilbert error is bounded by twice normalized Hamming error. -/
 theorem normalized_norm_permutationOperators_indicator_sub_sq_le
-    [Nonempty M] (p q : Equiv.Perm M) (U : Finset M) :
+    (hM : Nonempty M) (p q : Equiv.Perm M) (U : Finset M) :
     ‖permutationOperator p (indicator U) -
         permutationOperator q (indicator U)‖ ^ 2 / Fintype.card M ≤
       2 * hammingDistance M p q := by
+  haveI := hM
   have h := norm_permutationOperators_indicator_sub_sq_le p q U
   have hcardNat : 0 < Fintype.card M := Fintype.card_pos
   have hcard : (0 : ℝ) < Fintype.card M := by exact_mod_cast hcardNat
@@ -571,13 +578,13 @@ theorem normalized_norm_permutationOperators_indicator_sub_sq_le
 /-- The same normalized Hamming control for centered characteristic
 vectors. -/
 theorem normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
-    [Nonempty M] (p q : Equiv.Perm M) (U : Finset M) :
+    (hM : Nonempty M) (p q : Equiv.Perm M) (U : Finset M) :
     ‖permutationOperator p (centeredIndicator U) -
         permutationOperator q (centeredIndicator U)‖ ^ 2 /
         Fintype.card M ≤
       2 * hammingDistance M p q := by
   rw [permutationOperators_centeredIndicator_sub]
-  exact normalized_norm_permutationOperators_indicator_sub_sq_le p q U
+  exact normalized_norm_permutationOperators_indicator_sub_sq_le hM p q U
 
 /-- Approximate multiplicativity in a sofic approximation gives uniformly
 vanishing normalized Hilbert error on every centered characteristic vector.
@@ -781,7 +788,7 @@ omit [Group G] in
 every normalized centered-indicator coefficient by at most `√(2d)`.  The
 squared formulation avoids introducing square roots. -/
 theorem abs_normalizedPermutationCorrelation_sub_sq_le
-    [Nonempty M] (U : Finset M) (p q : Equiv.Perm M) :
+    (hM : Nonempty M) (U : Finset M) (p q : Equiv.Perm M) :
     |normalizedPermutationCorrelation M U p -
         normalizedPermutationCorrelation M U q| ^ 2 ≤
       2 * hammingDistance M p q := by
@@ -795,9 +802,10 @@ theorem abs_normalizedPermutationCorrelation_sub_sq_le
     have hright : 0 ≤ ‖x‖ * ‖d‖ := mul_nonneg (norm_nonneg _) (norm_nonneg _)
     have hleft : 0 ≤ |inner ℝ x d| := abs_nonneg _
     nlinarith
-  have hx := norm_centeredIndicator_sq_div_card_le_one U
+  haveI := hM
+  have hx := norm_centeredIndicator_sq_div_card_le_one hM U
   have hd := normalized_norm_permutationOperators_centeredIndicator_sub_sq_le
-    p q U
+    hM p q U
   change ‖d‖ ^ 2 / Fintype.card M ≤
       2 * hammingDistance M p q at hd
   have hquot :

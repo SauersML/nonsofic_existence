@@ -103,13 +103,14 @@ theorem le_crossing_of_cell (X : FiniteMultiGraph) {h : ℝ}
 every labelling has a part `i₀` of maximal size whose complement is at most
 `4e/h`, where `e` is the number of crossing edges. -/
 theorem exists_dominant_cell (X : FiniteMultiGraph) {h : ℝ}
-    (hch : X.HasCheegerLowerBound h) [Fintype ι] [Nonempty ι]
+    (hch : X.HasCheegerLowerBound h) [Fintype ι] (hι : Nonempty ι)
     (part : X.vertex → ι) (hV : 0 < Fintype.card X.vertex) :
     ∃ i₀ : ι,
       (∀ i : ι, (X.cell part {i}).card ≤ (X.cell part {i₀}).card) ∧
         h * ((Fintype.card X.vertex : ℝ) - (X.cell part {i₀}).card) ≤
           4 * (X.crossingEdges part).card := by
   classical
+  haveI := hι
   obtain ⟨i₀, -, hmax⟩ :=
     Finset.exists_max_image (Finset.univ : Finset ι)
       (fun i ↦ (X.cell part {i}).card) Finset.univ_nonempty

@@ -81,6 +81,7 @@ theorem of_norm_starProjection_le {U V : Submodule ℝ E} {epsilon : ℝ}
     [U.HasOrthogonalProjection]
     (h : ∀ v ∈ V, ‖U.starProjection v‖ ≤ epsilon * ‖v‖) :
     EpsilonOrthogonal U V epsilon := by
+  haveI := hι
   intro u hu v hv
   have hinner : inner ℝ u v = inner ℝ u (U.starProjection v) := by
     calc
@@ -112,7 +113,7 @@ universal class-two argument: the substantive finite-stage estimate is kept
 as the explicit hypothesis `hproj`, while density removes the finite-stage
 cutoff. -/
 theorem of_monotone_starProjection
-    {ι : Type*} [SemilatticeSup ι] [Nonempty ι]
+    {ι : Type*} [SemilatticeSup ι] (hι : Nonempty ι)
     {U V : Submodule ℝ E} {epsilon : ℝ}
     (W : ι → Submodule ℝ E) [∀ i, (W i).HasOrthogonalProjection]
     (hW : Monotone W) (hdense : ⊤ ≤ (⨆ i, W i).topologicalClosure)

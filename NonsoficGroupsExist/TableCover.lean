@@ -186,10 +186,13 @@ theorem isSofic_of_tableModels
 /-- For a countable group, local table models can be assembled into a
 sequential sofic approximation.  Models are amplified so their carriers
 diverge. -/
-theorem soficApproximation_of_tableModels [Countable G] [Nonempty G]
+theorem soficApproximation_of_tableModels [Countable G]
     (h : ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (TableModel G F ε)) :
     Nonempty (SoficApproximation G) := by
   classical
+  -- `G` is a group, so its carrier is inhabited by the identity; this is not
+  -- an assumption on the caller.
+  haveI : Nonempty G := ⟨1⟩
   obtain ⟨enum, henum⟩ : ∃ e : ℕ → G, Function.Surjective e :=
     exists_surjective_nat G
   set F : ℕ → Finset G := fun n ↦ insert 1 ((Finset.range (n + 1)).image enum) with hF
@@ -293,7 +296,7 @@ theorem soficApproximation_of_tableModels [Countable G] [Nonempty G]
 /-- The standard local definition of soficity yields a sequential sofic
 approximation for every countable group.  This closes the quantifier bridge
 between `IsSofic` and the analytic decomposition theorems. -/
-theorem soficApproximation_of_isSofic [Countable G] [Nonempty G]
+theorem soficApproximation_of_isSofic [Countable G]
     (h : IsSofic G) : Nonempty (SoficApproximation G) := by
   exact soficApproximation_of_tableModels fun F ε hε ↦
     tableModel_of_isSofic h F ε hε

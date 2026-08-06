@@ -257,7 +257,7 @@ theorem epsilonOrthogonal_of_stage_estimates
   have hdense : ⊤ ≤ (⨆ a, W a).topologicalClosure := by
     exact KazhdanFixedSpace.movingSubspaces_iSup_dense rho H hHsup hno
   apply HilbertEpsilonOrthogonality.of_monotone_starProjection
-    W hW hdense
+    (hι := by infer_instance) W hW hdense
   intro a u hu v hv
   simpa [W, H, KazhdanFixedSpace.subgroupMovingProjection,
     KazhdanFixedSpace.subgroupMovingSubspace] using hstage a u hu v hv

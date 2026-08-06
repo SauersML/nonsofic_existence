@@ -542,3 +542,46 @@ DERIVATION HARVEST:
   c-columns only in p₀?): check which moves move colsp(cp₁).
 - Non-units found: 1 + s₀ (stream surjectivity), 1 + s₁s₀t₁ (flip to
   1 + s₀).  Unit-ness genuinely constrains z₀.
+
+## Session 14: THE ENDGAME MATHEMATICS IS COMPLETE (verify then batch-write)
+For canonical residual u = c + s₁w (c, w balanced, p := p₀):
+KILL-SEQUENCE (all moves already-green families; four steps):
+0. NORMALIZE (right-mult by balanced unit h): make p·c·p' = 0 with
+   p-corner pcp invertible.  Possible since rank(pc) = half (R1);
+   column-reduce: ∃h invertible: (pc)h = [block | 0]  [F3-lemma].
+   After this: kill-condition ⟺ w·p' = 0; kill-ideal = {X : X = Xp}
+   (the move w += A(pc) reaches ALL of Mp since pcp invertible).
+1. ROW-MIX (left-mult by block-diagonal balanced unit g = g₀⊕g₁,
+   preserves pcp' = 0): tail w ↦ g₁'w.  Choose g₁' invertible so the
+   p-rows of the new ω := wp' span rowsp(ω) — always possible since
+   rank(ω) ≤ #columns(ω) = half ≤ #p-rows  [F1-lemma].
+   Result: rowsp(p'ω) ⊆ rowsp(pω), i.e. ∃N: p'ω = −N(pω)  [F2-lemma:
+   solvability of N·M = B from row-space containment].
+2. SET wp (free via kill-moves): pwp := 0, p'wp := N from step 1.
+3. TWIST (right-mult by the free unipotent 1 + s₀Yt₁ realizing
+   V' := −pω, a p-row/p'-col corner): (c, w) ↦ (c(1+V'), w + V').
+   The kill equation w_new = A·(p c_new) with c_new = c(1+V') splits
+   into: p-cols: Ap := wp (free ✓); p'-cols: ω + V' = (wp)·V' —
+   p-rows: (1 − pwp)V' = −pω: holds by V' := −pω, pwp = 0 ✓;
+   p'-rows: p'ω = (p'wp)(−pω) = −N(pω)·(−1)-sign-check: holds by
+   step 1-2 choice of N ✓.
+4. KILL: A(p c_new) = −w_new solvable ⟹ tail dead ⟹ u ≡ balanced
+   ⟹ ∈ H (balanced units green).  ScalarReduction FOLLOWS.
+SUPPORT LEMMAS TO FORMALIZE (all finite linear algebra over k):
+F1: ∀ω (n×half): ∃G invertible: bottom-rows(Gω) ∈ rowspan(top-rows).
+F2: rowsp(B) ⊆ rowsp(M) → ∃N: N·M = B (Basis.constr lift, transpose).
+F3: rank(M) = #rows → ∃H invertible: M·H = [M' | 0], M' invertible
+    (column reduction).
+MOVE-LEMMAS (element-level val-computations, all in green families):
+- right-mult h: (c, w) ↦ (ch, wh); left block-diag g: (gc, g₁'w) with
+  g₁' := t₁gs₁; kill-family: w += A(pc) via (1 + s₁(As₀)t₀);
+  V'-twist via (1 + s₀Yt₁) with s₀Yt₁-image = V' = pV'p':
+  (c, w) ↦ (c + cV', w + V').  [each: verify val-identity + junk-free]
+ENTRY: width-reduction (green) → [−1,1] → funnel (exists_corner_move
+with (v,w) = (−b, s₀)) → canonical c + s₁p₀.  EXIT: balanced → H.
+SIGN/BLOCK details need re-verification during formalization — the
+derivation was single-pass; treat each block identity as to-check.
+Then: ScalarReduction (BinaryLeavittAlgebra k) unconditional →
+upgrade BinaryLeavittDiagonal (drop hscalar) → B4/B5/B6 → final
+manuscript assembly.  BATCH-WRITE ALL OF THIS NEXT (user directive:
+write fully, then debug).
