@@ -665,3 +665,38 @@ write fully, then debug).
   settle "1 + nilpotent-in-tail ∈ H" cleanly, then reduce general
   residuals to the nilpotent case via the z₋-elimination (the
   y-negative-component recursion suggests: LOOP kills z₋?).
+
+## Session 15b (continuous run): square-zero tails DIE + written modules
+NEW MATH (verified on paper twice):
+- z₋ = 0 classification: 1 + s₁z₀ (z₀ balanced) unit ⟺ s₁z₀ nilpotent.
+- SQUARE-ZERO KILL: (s₁z)² = 0, z balanced ⟹ 1 + s₁z ∈ H via
+  pseudo-inverse: a := s₁z, b := ξz (zξz = z): ab = s₁z, ba = ξ(zs₁z)
+  = 0 since zs₁z = 0 by s₁-left-cancellation.  Uses vN-regularity of
+  balanced elements (matrix generalized inverse via Pivot
+  diagonalization: C = PDQ, C⁺ = Q⁻¹D⁺P⁻¹).
+- z₋-elimination observation: in the loop, if 1 + z₋s₁ is invertible
+  take t := 0: z ↦ (1+z₋s₁)⁻¹z₀ is PURE balanced-part — z₋ gone.
+WRITTEN THIS RUN (uncompiled): ResidualMoves.lean,
+ResidualReduction.lean (NarrowReduction hypothesis + full chain to
+ScalarReduction/B4/GL₂/GL₄), BalancedRegularity.lean
+(exists_pseudoInverse_matrix [name-risk: Matrix.Pivot or
+TransvectionStruct namespace for prod_mul_reverse_inv_prod],
+exists_balanced_pseudoInverse, square_zero_tail_mem_stableUnits).
+REMAINING MATH for NarrowReduction: (i) general nilpotency index D
+(flag/filtration splitting compatible with the ψ(e) := t₁es₁ twist,
+or dyadic induction — index-2 case DONE); (ii) z₋-elimination in the
+non-invertible case (sr1-t reinjects −û⁻¹tz₀; check whether the
+REACHED form after one loop always has invertible 1 + z₋'s₁ — the
+new z₋' = −û⁻¹tz₀ with t from sr1: is 1 − û⁻¹tz₀s₁ unit?
+û = 1 + z₋s₁ + tz₀s₁ ⟹ û − tz₀s₁ = 1 + z₋s₁: 1 − û⁻¹tz₀s₁ =
+û⁻¹(û − tz₀s₁) = û⁻¹(1 + z₋s₁) — PRODUCT OF INVERTIBLE-IFF:
+1 − z₋'s₁-NEW-c₂' = û⁻¹(1 + z₋s₁)?!?! CHECK THIS: c₂' := 1 + z^new₋s₁
+= 1 − û⁻¹tz₀s₁ = û⁻¹(û − tz₀s₁) = û⁻¹(1 + z₋s₁): INVERTIBLE ⟺
+1 + z₋s₁ invertible.  So: if 1 + z₋s₁ invertible: eliminate now;
+else c₂' is NON-invertible again — the invertibility of 1 + z₋s₁ is
+loop-INVARIANT?!  New attack for (ii): 1 + z₋s₁ non-invertible:
+z₋s₁ balanced: use IT as data — u = 1 + s₁z: FLIP: [1+s₁z] =
+[1+zs₁] = [(1 + z₋s₁) + z₀s₁] — the balanced part of the flipped
+form IS 1 + z₋s₁: run sr1 on the OTHER side/dual pivot, or note
+(1+zs₁)-unit with balanced-part-singular still fine — kill z₀s₁-part
+against it...  CONTINUE HERE NEXT MATH TURN.
