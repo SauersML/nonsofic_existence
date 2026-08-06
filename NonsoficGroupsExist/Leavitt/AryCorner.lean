@@ -122,7 +122,7 @@ variable {A : Type*} [Ring A] {n : ℕ} (F : CompleteMatrixFamily A (Fin (n + 2)
 range projections of all branches except the last. -/
 def cornerIdem : A := ∑ j : Fin (n + 1), F.left j.castSucc * F.right j.castSucc
 
-theorem cornerIdem_def :
+@[simp] theorem cornerIdem_def :
     F.cornerIdem = ∑ j : Fin (n + 1), F.left j.castSucc * F.right j.castSucc :=
   rfl
 
@@ -213,7 +213,7 @@ theorem cornerIdem_ne_zero [Nontrivial A] : F.cornerIdem ≠ 0 := by
 /-- The tail `f = e - p₀` of the corner idempotent. -/
 def cornerTail : A := F.cornerIdem - F.left 0 * F.right 0
 
-theorem cornerTail_def : F.cornerTail = F.cornerIdem - F.left 0 * F.right 0 :=
+@[simp] theorem cornerTail_def : F.cornerTail = F.cornerIdem - F.left 0 * F.right 0 :=
   rfl
 
 theorem cornerTail_mul_left_zero : F.cornerTail * F.left 0 = 0 := by
@@ -245,18 +245,18 @@ theorem cornerTail_mul_cornerTail :
 /-- `S₀ = s₀e`. -/
 def cornerS0 : A := F.left 0 * F.cornerIdem
 
-theorem cornerS0_def : F.cornerS0 = F.left 0 * F.cornerIdem := rfl
+@[simp] theorem cornerS0_def : F.cornerS0 = F.left 0 * F.cornerIdem := rfl
 
 /-- `T₀ = et₀`. -/
 def cornerT0 : A := F.cornerIdem * F.right 0
 
-theorem cornerT0_def : F.cornerT0 = F.cornerIdem * F.right 0 := rfl
+@[simp] theorem cornerT0_def : F.cornerT0 = F.cornerIdem * F.right 0 := rfl
 
 /-- `S₁ = s₀·s_{d-1}·t₀ + f`. -/
 def cornerS1 : A :=
   F.left 0 * (F.left (Fin.last (n + 1)) * F.right 0) + F.cornerTail
 
-theorem cornerS1_def :
+@[simp] theorem cornerS1_def :
     F.cornerS1 =
       F.left 0 * (F.left (Fin.last (n + 1)) * F.right 0) + F.cornerTail :=
   rfl
@@ -265,7 +265,7 @@ theorem cornerS1_def :
 def cornerT1 : A :=
   F.left 0 * (F.right (Fin.last (n + 1)) * F.right 0) + F.cornerTail
 
-theorem cornerT1_def :
+@[simp] theorem cornerT1_def :
     F.cornerT1 =
       F.left 0 * (F.right (Fin.last (n + 1)) * F.right 0) + F.cornerTail :=
   rfl
