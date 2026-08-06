@@ -28,6 +28,7 @@ import NonsoficGroupsExist.KazhdanImprovement
 import NonsoficGroupsExist.Kazhdan
 import NonsoficGroupsExist.HilbertComplexification
 import NonsoficGroupsExist.KazhdanComplex
+import NonsoficGroupsExist.KazhdanUniverse
 import NonsoficGroupsExist.KazhdanFiniteGeneration
 import NonsoficGroupsExist.CharacterMass
 import NonsoficGroupsExist.RankTwoCompression

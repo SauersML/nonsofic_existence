@@ -3,6 +3,8 @@ import NonsoficGroupsExist.SoficPositiveControl
 import NonsoficGroupsExist.KunDecomposition
 import NonsoficGroupsExist.KunThomTheorem
 import NonsoficGroupsExist.FreeElementaryPropertyT
+import NonsoficGroupsExist.KazhdanComplex
+import NonsoficGroupsExist.KazhdanUniverse
 
 /-!
 # Human-readable axiom report
@@ -37,3 +39,7 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.isLEF_of_finite
 #print axioms NonsoficGroupsExist.isLEF_multiplicative_int
 #print axioms NonsoficGroupsExist.isLEF_iff_textbook
+#print axioms NonsoficGroupsExist.isKazhdanPair_iff_complex
+#print axioms NonsoficGroupsExist.hasKazhdanPropertyT_iff_complex
+#print axioms NonsoficGroupsExist.IsKazhdanPair.liftUniverse
+#print axioms NonsoficGroupsExist.HasKazhdanPropertyT.liftUniverse

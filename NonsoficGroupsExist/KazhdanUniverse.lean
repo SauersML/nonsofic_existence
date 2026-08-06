@@ -46,6 +46,11 @@ theorem inner_orbit (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (a b : G) :
   rw [hb, (ρ a).inner_map_map]
   rfl
 
+/-- The representation of a product acts by composition. -/
+theorem apply_mul (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (t g : G) (v : E) :
+    ρ (t * g) v = ρ t (ρ g v) := by
+  rw [map_mul]; rfl
+
 @[simp] theorem coeff_one (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
     coeff ρ x 1 = ‖x‖ ^ 2 := by
   simp [coeff]
@@ -133,6 +138,28 @@ theorem uniformContinuous_preCyclic (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
     UniformContinuous (preCyclic ρ x) :=
   (lipschitzWith_preCyclic ρ x).uniformContinuous
 
+/-- The generator map intertwines left translation of the pre-GNS space with
+the representation on `E`. -/
+theorem preCyclic_preTranslation (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (s : G) :
+    ∀ ff : PreHilbertSpace (gnsFunction ρ x),
+      preCyclic ρ x (preTranslationLinearEquiv (gnsFunction ρ x) s ff) =
+        ρ s (preCyclic ρ x ff) := by
+  intro ff
+  induction ff using Finsupp.induction with
+  | zero => simp
+  | single_add i c f _ _ ih =>
+      have h1 : preCyclic ρ x (preTranslationLinearEquiv (gnsFunction ρ x) s
+            (Finsupp.single i c + f)) =
+          (c * i.2) • ρ (s * i.1) x + ρ s (preCyclic ρ x f) := by
+        rw [map_add, preTranslationLinearEquiv_single, map_add, ih,
+          preCyclic_single]
+        simp [leftIndexEquiv]
+      have h2 : ρ s (preCyclic ρ x (Finsupp.single i c + f)) =
+          (c * i.2) • ρ (s * i.1) x + ρ s (preCyclic ρ x f) := by
+        rw [map_add, preCyclic_single, (ρ s).map_add, (ρ s).map_smul,
+          apply_mul]
+      rw [h1, h2]
+
 section Complete
 
 variable [CompleteSpace E]
@@ -147,7 +174,6 @@ theorem continuous_cyclicMap (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) :
     Continuous (cyclicMap ρ x) :=
   UniformSpace.Completion.continuous_extension
 
-omit [CompleteSpace E] in
 omit [CompleteSpace E] in
 @[simp] theorem cyclicMap_coe (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
     (ff : PreHilbertSpace (gnsFunction ρ x)) :
@@ -207,6 +233,7 @@ theorem cyclicMap_sub (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
     cyclicMap ρ x (z - w) = cyclicMap ρ x z - cyclicMap ρ x w :=
   (cyclicIsometry ρ x).map_sub z w
 
+omit [CompleteSpace E] in
 /-- The embedding sends the cyclic vector to the orbit of `x`. -/
 @[simp] theorem cyclicMap_kernelVector (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
     (g : G) : cyclicMap ρ x (kernelVector (gnsFunction ρ x) g) = ρ g x := by
@@ -230,18 +257,8 @@ theorem cyclicMap_representation (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E) (s :
   | ih ff =>
       have hrep : representation (gnsFunction ρ x) s =
           translationOperator (gnsFunction ρ x) s := rfl
-      rw [hrep, translationOperator_coe, cyclicMap_coe, cyclicMap_coe]
-      induction ff using Finsupp.induction with
-      | zero => simp
-      | single_add i c f _ _ ih =>
-          rw [map_add, map_add, map_add, ih, preTranslationLinearEquiv_single]
-          congr 1
-          rw [preCyclic_single, preCyclic_single]
-          have hmul : ρ s * ρ i.1 = ρ (s * i.1) := (map_mul ρ s i.1).symm
-          rw [map_smul]
-          congr 1
-          rw [← hmul]
-          rfl
+      rw [hrep, translationOperator_coe, cyclicMap_coe, cyclicMap_coe,
+        preCyclic_preTranslation]
 
 /-- The embedding carries a nonzero vector to a nonzero vector. -/
 theorem cyclicMap_ne_zero (ρ : G →* (E ≃ₗᵢ[ℝ] E)) (x : E)
