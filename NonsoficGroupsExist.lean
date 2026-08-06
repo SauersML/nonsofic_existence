@@ -187,6 +187,7 @@ import NonsoficGroupsExist.CodeChangeInfrastructure
 import NonsoficGroupsExist.CodeChangeSwap
 import NonsoficGroupsExist.CodeChangeUnits
 import NonsoficGroupsExist.TriangularFactorization
+import NonsoficGroupsExist.RankOneNormalForm
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

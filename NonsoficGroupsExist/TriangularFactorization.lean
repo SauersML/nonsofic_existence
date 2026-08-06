@@ -64,8 +64,9 @@ theorem narrowReduction_of_triangularFactorization
   have hmem : u ∈ stableUnits (BinaryLeavittAlgebra k) := by
     rw [hu']
     exact mul_mem (mul_mem h1 h2) h3
-  exact stableUnits_le_centralClassGroup
-    (BinaryLeavittAlgebra k) hmem
+  -- `stableUnits_le_centralClassGroup` takes no explicit ring argument;
+  -- the ring is inferred from `hmem`.
+  exact stableUnits_le_centralClassGroup hmem
 
 end BinaryLeavitt
 end NonsoficGroupsExist

@@ -2236,3 +2236,32 @@ shape-rank argument on the mixed system, not a move-hunt.
   factorization); the compiled complement/section machinery
   (StableRankOne) and the shape calculus are the intended tools.
 - Registered in aggregator.
+
+## Session 42: RANK-ONE NORMAL FORM — the negative part is ONE monomial
+**Breakthrough.** The stable block move with P := A (the whole
+degree-(−1) part) and Q := 1 needs NO invertibility: through the
+mixed-depth code {00, 01, 1},
+  v̂ := (1 − S(00)·a·T(1)) · κ₀₀(u) · (1 + S(1)T(00))
+has value  [1 + S(00)(z−a)T(00) − S(00)aT(1)]  +  S(1)T(00),
+i.e. a [0,1]-window element plus the FIXED universal monomial
+s₁t₀₀ — verified by direct hand computation (the cross terms die by
+T(00)S(1) = 0, T(1)S(00) = 0; the T(1)S(1) = 1 collapse performs the
+A-kill).  Both multipliers are compiled incomparable unipotents; the
+corner embedding is compiled pairKappa.
+**RankOneNormalForm.lean WRITTEN** (exists_rank_one_normal_form,
+with the two-way stableUnits equivalence).  Registered.
+THE REMAINING QUESTION IS NOW (Q): units with value w + s₁t₀₀,
+w ∈ span[0,1], lie in central·H.  Notes toward (Q):
+- naive kills/code-changes rotate (computed: the S(00)aT(1)-junk
+  resurrects A; ρ-style Ω rotates the monomial corner);
+- if w is invertible ((P)-rank-one analog — OPEN), then
+  [v̂] = [1 + W⁻¹s₁·t₀₀] and the flip gives [1 + t₀₀W⁻¹s₁] — window
+  of W⁻¹ uncontrolled either way;
+- (Q) is (P)'s sibling: a shape-rank/graded-equation analysis of
+  units W + N with N the fixed rank-one lowering monomial.  The
+  inverse's graded equations now have the SPECIFIC N with N² = 0,
+  N = s₁t₀₀: very rigid.  ATTACK NEXT: mimic ZeroKOne — normalize
+  w's balanced part, corner system, but keep N as a known pivot.
+TriangularFactorization now follows from (Q) + this module (much
+weaker than full Birkhoff!) — next session: derive (Q) or replace
+TriangularFactorization by the (Q)-form as the named frontier.
