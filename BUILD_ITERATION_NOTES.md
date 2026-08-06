@@ -3129,3 +3129,38 @@ FORMALIZATION PLAN:
     2·2^⌈log₂ ι⌉ − κ) + assembly: pencil_unit_mem_unconditional,
     stuckReduction_holds : StuckReduction k, and NarrowReduction k
     outright via narrowReduction_of_stuckReduction.
+
+### Session 54b: exits made fully explicit (only ONE new code construction)
+
+The row code NEVER changes in the algorithm: it stays
+fullBinaryCode r, r := m+1, ι = 2^r.  This collapses the code
+supply to a single construction:
+  (a) exists_complete_deep_family: complete code of size n with all
+      depths ≥ M, for any n ≥ 2^M — from fullBinaryCode M by
+      n − 2^M arbitrary splits (split_family_free/sum, compiled);
+      splitting preserves the depth lower bound.
+FREE EXIT (fires at exactly κ = 2^{r+1} = 2ι): reshape only the
+column code, Q := fullBinaryCode (r+1) — uniform, no splits.  Value
+degrees ≤ r + 1 − (r+1) = 0.  One codeChange unit on the right.
+PADDED EXIT (B full at κ ≤ 2ι, entries ≤ −1 by StrictNegativePencil):
+pad count m' := 2^{r+2} − κ (≥ 2ι since κ ≤ 2ι).  Column side
+Q̃ := fullBinaryCode (r+2) — uniform!  Row side
+P̃ := 1·(fullBinaryCode r)  ∪  0·D,  D := deep code of size m' with
+depths ≥ r+1 (construction (a); m' ≥ 2^{r+1} ✓): old block = the
+1-subtree (ι words at depth r+1: old entries (r+2) − 1 − (r+1) ≤ 0 ✓),
+pads = the 0-subtree (depths ≥ r+2 = |Q̃pad| ✓ diagonal nonpos ✓).
+Pairing: any bijection pads(Q̃) ↔ pads(P̃).  The padded unit is
+ω₁ · κ_w(u) · ω₂ with |w| = ... realized instead directly as the
+block-sum unit ũ⁻¹ := g u⁻¹ h + e (g := Σ S(Q̃old_j)T(C_j),
+h := Σ S(R_i)T(P̃old_i), e := Σ_pads S(Q̃pad)T(P̃pad)); proof of
+unitality: gg'' = π_Qold, hh'' = 1, cross terms vanish on distinct
+code words, π_Qold + π_Qpad = 1.  Recovery: u = h·ũ·g with
+ũ := h''ug'' + e'', so u ∈ H once ũ ∈ H via the kappa/corner
+transfer (u = compression of ũ; check compiled pairKappaUnit /
+corner lemmas — or prove ũ = ω₁·κ_w(u)·ω₂ for w of depth matching
+the pad count and ω's code changes, then use the κ_w-transfer).
+STILL TO FORMALIZE: N2 (construction (a)), N3 (reshaped value
+window bound), N4 (block-sum/κ_w transfer), N5 (the loop:
+induction on 2^{r+1} − κ; codeScalar normalization of a kernel
+vector into a B-free column + refine_column, both compiled;
+assembly stuckReduction_holds).
