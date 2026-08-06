@@ -1793,3 +1793,28 @@ updates, final audit.
   Next: derive the funnel from the Φ-move: choosing v, w to make the
   2×2-corner-form 1 + s₁(·)-shaped — the sr1-pivot (compiled:
   exists_balanced_sr1_pivot) supplies the invertible block.
+
+## Session 34b: the last gap is EXACTLY one termination measure
+- With GammaDischarge + WidthTwoReduction compiled, the assembly gap
+  reduces to: **[−1,1]-window unit → [0,1]-window unit mod H** (the
+  residual c + s₁w forms are [0,1]-window, so WidthTwo covers them
+  directly; GammaDischarge covers 1+s₁z, z ∈ [−1,0]).
+- Φ-move funnel computations (v := 1, w := −X₋): relocates ALL
+  negative content into the (1,0)-corner slot as s₁X₋t₀ — relocation
+  only; iterating migrates it deeper (S(1^k)X₋T(0^k)), never kills.
+- 3×3 mixed-depth-code E-op game: (1,3)/(3,1)-slots shift degrees by
+  ±1, but the conservation law (deg P + deg Q = −1 vs slot-sum ≥ 0)
+  blocks every single-split placement.  CONFIRMED yet again: only
+  genuine content-kills advance; the compiled ones are the
+  p-split/prefix kills (z ↦ zp₁ column-kills on 1+s₁z forms, any z).
+- The κ₁-transport of a narrow unit gives 1 + s₁z with z ∈ [−2,0];
+  the naive p-split → corner-transport cycle is exactly the identity
+  (t₁s₁ = 1).  The cycle must be run with the KILL inserted:
+  z ↦ zp₁ destroys z·p₀-content permanently; the corner transport
+  then re-expands.  The termination measure must count column
+  content across the cycle.  **NEXT SESSION: run the machine BFS
+  (fixed verifier!) on 10 narrow units + ρ through the compiled
+  move-set (p-splits, swaps, balanced pivots, incomparable
+  unipotents, κ-transports, flips) and extract the decreasing
+  measure from the machine-found witnesses.**  The ρ-cascade
+  (σ-swaps by hand) is one data point; get ten more.
