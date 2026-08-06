@@ -105,11 +105,18 @@ theorem nonneg_narrow_unit_inv_window
   -- the truncated geometric series inverts the unipotent factor
   have hgeom : S * (1 + η) = 1 := by
     have h1 : S * ((-η) - 1) = (-η) ^ D - 1 := geom_sum_mul (-η) D
+    -- Give `neg_pow` its arguments: bare `rw [neg_pow]` fails to unify the
+    -- pattern `(-?a) ^ ?n` against `(-η) ^ D` here.
     have h2 : (-η) ^ D = 0 := by
-      rw [neg_pow, hD, mul_zero]
-    have h3 : S * (1 + η) = -(S * ((-η) - 1)) := by noncomm_ring
-    rw [h3, h1, h2]
-    noncomm_ring
+      rw [neg_pow η D, hD, mul_zero]
+    -- Route through `neg_injective` rather than asking `noncomm_ring` to
+    -- reconcile `-1 • (S * -1 • η)` with `S * η`.
+    rw [h2, zero_sub] at h1
+    have h3 : (-η) - 1 = -(1 + η) := by abel
+    -- Explicit arguments again: bare `mul_neg` will not unify `?a * -?b`
+    -- against `S * -(1 + η)` in this quotient ring.
+    rw [h3, mul_neg S (1 + η)] at h1
+    exact neg_injective h1
   have hone : S * cinv * (u : BinaryLeavittAlgebra k) = 1 := by
     rw [hval,
       show S * cinv * (c * (1 + η)) = S * (cinv * c) * (1 + η) from
@@ -138,8 +145,11 @@ theorem nonneg_narrow_unit_inv_window
         rw [pow_succ]
         have h1 := (family k).window_mul_mem_span (k := k) ih
           (Submodule.neg_mem _ hηw)
+        -- `refine <;> push_cast` leaves a single goal, so `omega` sequences
+        -- after the whole thing rather than running per-branch.
         refine (family k).span_degreeMonomials_mono ?_ ?_ h1 <;>
-          push_cast <;> omega
+          push_cast
+        omega
   have hS : S ∈ Submodule.span k
       ((family k).degreeMonomials 0 (D : ℤ)) := by
     rw [hSdef]

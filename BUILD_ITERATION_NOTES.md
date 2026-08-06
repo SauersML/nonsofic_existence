@@ -2297,3 +2297,49 @@ the 00-corner flag under c into position.  NEXT: use unit-ness of v
 (graded equations c x₀ + b x₋₁ + N x₁ = 1 etc. + the structure
 theorem) to prove the corrected flag condition is always reachable
 in the H-orbit {g·v·g′} — the last mathematical gap.
+
+## Session 42c: THE SCALAR-PENCIL REDUCTION (derived, not yet formalized)
+Level-n corner recoding linearizes every narrow unit COMPLETELY:
+for v = a + c + b narrow with all parts representable at level n,
+the 2^n × 2^n block matrix V[i,j] := t_i · v · s_j (|i| = |j| = n) has
+  t_i c s_j = C[i,j] · 1          (SCALAR — c balanced at level n),
+  t_i b s_j = Σ_x B[i·x, j] s_x   (k-combination of s₀, s₁ only),
+  t_i a s_j = Σ_x A[i, j·x] t_x   (k-combination of t₀, t₁ only).
+So v ≅ the PENCIL  V = A₀t₀ + A₁t₁ + C + B₀s₀ + B₁s₁  with SCALAR
+matrices A₀, A₁, C, B₀, B₁ ∈ M_{2^n}(k), invertible over M_m(L).
+H-transport: M_m(L)-elementary ops (arbitrary L off-diag entries) and
+GL_m(k) row/col ops are all stable-elementary = compiled H-moves.
+
+INFLATION (one more corner level, m → 2m), computed exactly:
+  t₀ ↦ [[t₀,0],[t₁,0]], t₁ ↦ [[0,t₀],[0,t₁]], 1 ↦ I₂,
+  s₀ ↦ [[s₀,s₁],[0,0]], s₁ ↦ [[0,0],[s₀,s₁]] (entrywise recoding), so
+  Â₀ = [[A₀,A₁],[0,0]], Â₁ = [[0,0],[A₀,A₁]], Ĉ = diag(C,C),
+  B̂₀ = [[B₀,0],[B₁,0]], B̂₁ = [[0,B₀],[0,B₁]].
+C = 0 is inflation-stable.
+
+ELIMINATION STEP (Smith on C): GL_m(k) both sides → C = diag(I_r, 0);
+the scalar pivots I_r clear ALL other L-entries in their rows and
+columns via elementary H-ops → V ~ diag(I_r, V′) with V′ an
+(m−r)-pencil with C′ = 0, still invertible.
+CRUX (the whole remaining problem, now finite-dimensional):
+  (Q-pencil, C = 0): classify invertible pencils
+  A₀t₀ + A₁t₁ + B₀s₀ + B₁s₁ over M_m(k) up to GL_m(k)·(inflation)·
+  (elementary H): show they reduce to direct sums realizing
+  code-change units (⟹ TriangularFactorization ⟹ K₁ = 0).
+Facts derived: pure-t and pure-s pencils are NEVER invertible
+(m = 1 checked; grading argument general); m = 1 C = 0 pencils are
+never units (to verify); code-change units have C ≠ 0 in general
+(every complete-code bijection with only ±1 length shifts must
+contain a balanced pair — dyadic mass equation P = 2/3 obstruction;
+unbalanced-only code-changes exist but need mixed shift sizes ±2 at
+staggered depths).
+NEXT SESSION: (1) python-verify the pencil recoding + elimination on
+ρ and on v̂ of random narrow units (leavitt_search.py stream solver);
+(2) solve (Q-pencil): likely via the "column space filtration"
+argument — B̄ := [B₀;B₁] : k^m → k^{2m} and Ā := (A₀,A₁) : k^{2m} → k^m
+with invertibility forcing exact interlocking (Fredholm/dimension
+count: rank conditions per inflation level stabilize), then peel
+rank-1 code-change pivots; (3) formalize: PencilTransport.lean
+(corner recoding ≅ + H-transport), PencilElimination.lean (Smith +
+clearing), PencilClassification.lean ((Q-pencil)) → discharge
+TriangularFactorization.
