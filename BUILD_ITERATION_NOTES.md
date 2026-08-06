@@ -2217,3 +2217,22 @@ SHARPEST REMAINING QUESTION: units with value 1 + t₀M·E + C + B
 quantities identified; the un-conserved handle must involve the
 INTERPLAY (the unit equations), as in (P)'s proof — likely a second
 shape-rank argument on the mixed system, not a move-hunt.
+
+## Session 41b: TriangularFactorization.lean — the frontier is ONE Prop
+- TriangularFactorization k (Prop): every narrow unit factors as
+  (nonpos-window unit)·(code-change unit)·(nonneg-window unit).
+- narrowReduction_of_triangularFactorization: the factorization
+  implies NarrowReduction — each factor dies by a compiled/written
+  theorem (window_nonpos [θ-transport], codeChange_mem_stableUnits
+  [session 40], window_nonneg [block-move]) — hence ScalarReduction,
+  B4, GL₂ = EL₂ etc. all follow through the COMPILED
+  ResidualReduction wiring.
+- THE ENTIRE FORMALIZATION IS NOW ASSEMBLED MODULO EXACTLY ONE NAMED
+  STATEMENT: TriangularFactorization k — the Birkhoff/LPU
+  factorization over the binary tree (session 37c; the honest
+  remaining mathematics after session 41's audit killed the 38b
+  shortcut).  Proof route: level-wise Gaussian elimination on the
+  tower with code-change pivots (banded-operator triangular
+  factorization); the compiled complement/section machinery
+  (StableRankOne) and the shape calculus are the intended tools.
+- Registered in aggregator.

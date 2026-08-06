@@ -208,6 +208,17 @@ theorem IsCompleteCode.merge {w : List (Fin 2)}
     rw [List.map_cons, List.sum_cons, ← hmerge, add_assoc]
     exact hsum
 
+/-- Acting on first components commutes with taking them.  Stated over a
+plain variable `l`: proving it in place would let `rw` zeta-unfold a
+`set`-bound list on one side only, leaving `rfl` with two spellings of the
+same term. -/
+theorem map_fst_map_fst (g : List (Fin 2) → List (Fin 2))
+    (l : List (List (Fin 2) × List (Fin 2))) :
+    (l.map (fun p ↦ (g p.1, p.2))).map Prod.fst =
+      (l.map Prod.fst).map g := by
+  rw [List.map_map, List.map_map]
+  rfl
+
 -- `k` is named only in the proof (`alignStep_mem (k := k)`), never in the
 -- statement, so it needs pulling in explicitly.  `include ... in` has to
 -- precede the docstring, or the doc comment is orphaned from its theorem.
@@ -396,8 +407,8 @@ theorem codeChange_mem_stableUnits [Nontrivial A]
       -- P₂-targets permute T
       have hP₂tgtEq : P₂.map Prod.fst =
           (P₁.map Prod.fst).map (swapWord y₁ (v ++ [1])) := by
-        rw [hP₂, List.map_map, List.map_map]
-        rfl
+        rw [hP₂]
+        exact map_fst_map_fst _ _
       have hP₂perm : (P₂.map Prod.fst).Perm (P₁.map Prod.fst) := by
         rw [hP₂tgtEq]
         exact map_swapWord_perm (hP₁perm.nodup_iff.mpr hTnodup)
@@ -412,7 +423,9 @@ theorem codeChange_mem_stableUnits [Nontrivial A]
           List.map_cons, List.map_map]
         have h1 : swapWord y₁ (v ++ [1])
             (swapWord x (v ++ [0]) p₀.1) = v ++ [0] := by
-          rw [← hx, swapWord_left, swapWord_other hv0y₁.symm hv01]
+          -- `swapWord_other` wants `w ≠ x` with `w = v ++ [0]`, `x = y₁`,
+          -- which is `hv0y₁` as stated — not its symm.
+          rw [← hx, swapWord_left, swapWord_other hv0y₁ hv01]
         have h2 : swapWord y₁ (v ++ [1])
             (swapWord x (v ++ [0]) p₁.1) = v ++ [1] := by
           rw [← hy, ← hy₁, swapWord_left]
@@ -455,7 +468,9 @@ theorem codeChange_mem_stableUnits [Nontrivial A]
       have hu₂val : (u₂ : A) = L.pairValue ((v, w) :: Q₂) := by
         rw [hu₂]
         show ((A₂ : Aˣ) : A) * (((A₁ : Aˣ) : A) * (u : A)) = _
-        rw [hu', hA₁act, ← hP₁, hA₂act, ← hP₂, hmergeval, hQ₂]
+        -- No `← hP₁`/`← hP₂`: `set` rewrote `hA₁act`/`hA₂act` in place, so
+        -- they already deliver `L.pairValue P₁` / `L.pairValue P₂` folded.
+        rw [hu', hA₁act, hA₂act, hmergeval, hQ₂]
       have hQ₂len : ((v, w) :: Q₂).length = m + 1 := by
         rw [List.length_cons, hQ₂, List.length_map, hQlen]
       have hu₂mem : u₂ ∈ stableUnits A := by
