@@ -39,6 +39,9 @@ The headline theorems, all reachable from `Endpoint/MainResults`:
 | `binaryLeavitt_finiteField_profile` | Theorem B's elementary ranks, over every finite field |
 | `binaryLeavittUnits_profile`, `binaryLeavittGL_profile` | Theorem B(i): the unit group and every `GL_r`, closed |
 | `KazhdanCover.exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Theorem C's Kazhdan refinement |
+| `AryLeavitt.aryLeavitt_EL4_not_isSofic` and companions | The `d`-ary generalization: units, `GL_r`, and `EL_r` of `L_k(1,d)` are nonsofic for every `d ≥ 2`, every finite field `k` |
+| `GeneralCornerTheorem.corner_not_isSofic` | The Leavitt-corner theorem at every adjacent pair of ranks `m ≥ 2`, at exactly the printed hypotheses |
+| `exists_sofic_group_with_nonsofic_quotient` | Soficity is not closed under quotients (free groups are residually finite, `freeGroup_residuallyFinite`) |
 
 ## What is proved here rather than assumed
 
@@ -70,6 +73,15 @@ cited remains an input to any endpoint:
   single-commutator certificates: every cylinder transposition is one explicit
   commutator (`cylinderSwap_is_commutator`). `V` itself is proved non-LEF
   along the way (`thompsonV_not_isLEF`).
+
+Classical inputs of the surrounding theory are proved rather than cited,
+too: LEF groups are sofic and residually finite groups are LEF
+(`Sofic/LEFSofic`), free groups are residually finite by the explicit
+ball-permutation construction (`Sofic/FreeGroupResiduallyFinite`), the
+inverse-compatible normalization of a sofic approximation is constructed
+pointwise (`Sofic/Normalization`), and Thompson's `V` embeds into the unit
+group of any nontrivial ring carrying a binary Leavitt family
+(`Leavitt/FamilyVEmbedding`).
 
 The `K₁`-theoretic inputs are eliminated as well, by the elementary two-exit
 elimination written out as Appendix A of the manuscript:
@@ -182,11 +194,16 @@ The library follows the paper's structure; each directory is a section.
 | `KunThom/` | §2.5 | The centralizer obstruction, proved (with the relation-to-permutation repair) |
 | `Matching/` | §3 | The five finite lemmas: refinement, conservation, pinning, selection, completion |
 | `Criterion/` | §4 | Median normalization, matching, localization; the compression–centralizer theorem |
-| `Leavitt/` | §5–§6 | Leaf calculus, self-similarity, rank equivalence, compressors, the corner witness |
+| `Leavitt/` | §5–§6 | Leaf calculus, self-similarity, rank equivalence, compressors, the corner witness; the `d`-ary corner route, the general-rank corner theorem, and the integral conditionals |
 | `PropertyT/` | §5 | Property `(T)` at rank three over every finite field, from an explicit `A₂` gap |
 | `KOne/` | Appendix A | The elementary `K₁` elimination: windows, pencils, the two-exit loop, all-ranks `GL = EL` |
 | `Covers/` | §9 | The finite-table and Kazhdan finitely presented covers |
-| `Endpoint/` | §1 | `MainResults`, `Public`, and the in-build `Audit` |
+| `Monsters/` | — | The elementary deduction layer of the omnimonster constructions: terminality, two conjugacy classes, verbal completeness, protection |
+| `Endpoint/` | §1 | `MainResults`, `Public`, `QuotientNonclosure`, and the in-build `Audit` |
+
+The `d`-ary layer and `Monsters/` deliberately prove more than the
+manuscript states: they sit inside the audit gates and the root import
+closure, but no numbered result of the paper maps onto them.
 
 The separate `Superseded` library holds developments that later proofs
 replaced (earlier `K₁` routes, the master-induction scaffolding). It is a

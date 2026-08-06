@@ -154,7 +154,10 @@ import NonsoficGroupsExist.Leavitt.PlaneEmbedding
 import NonsoficGroupsExist.Leavitt.GeneralRankWords
 import NonsoficGroupsExist.Leavitt.GeneralScheme
 import NonsoficGroupsExist.Leavitt.GeneralCornerTheorem
+import NonsoficGroupsExist.Leavitt.IntegralGeneralCorner
 import NonsoficGroupsExist.Sofic.LEFSofic
+import NonsoficGroupsExist.Sofic.FreeGroupResiduallyFinite
+import NonsoficGroupsExist.Endpoint.QuotientNonclosure
 import NonsoficGroupsExist.Leavitt.AryLeavitt
 import NonsoficGroupsExist.Leavitt.AryCornerMatrix
 import NonsoficGroupsExist.Leavitt.AryEndpoints

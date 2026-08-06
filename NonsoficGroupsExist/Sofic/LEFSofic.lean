@@ -27,8 +27,9 @@ Together with `isSofic_of_finite`, these place the classical inclusions
 
   finite ⊆ residually finite ⊆ LEF ⊆ sofic
 
-in the library.  The missing classical input for the quotient-nonclosure
-theorem — residual finiteness of free groups — is not proved here.
+in the library.  The classical input for the quotient-nonclosure theorem —
+residual finiteness of free groups — is `Sofic/FreeGroupResiduallyFinite`,
+and the theorem itself is `Endpoint/QuotientNonclosure`.
 -/
 
 namespace NonsoficGroupsExist
