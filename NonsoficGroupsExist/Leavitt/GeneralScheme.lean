@@ -295,7 +295,7 @@ theorem uPrimeMatrix_mul_uMatrix :
         rw [hq, sub_mul, one_mul, mul_sub]
         congr 1
         rw [pow_succ, pow_succ']
-        rw [mul_assoc, ← mul_assoc L.t0]
+        rw [mul_assoc]
         rw [show L.s0 ^ (j : ℕ) * (L.s0 * (L.t0 * L.t0 ^ (j : ℕ))) =
             L.s0 ^ (j : ℕ) * L.s0 * (L.t0 * L.t0 ^ (j : ℕ)) from by
           rw [mul_assoc]]
@@ -321,7 +321,7 @@ theorem uPrimeMatrix_mul_uMatrix :
         · subst hkj
           rw [if_pos rfl, if_pos rfl]
         · rw [if_neg (fun h => hkj (Fin.castSucc_inj.mp h.symm)),
-            if_neg (castSucc_ne_last k), mul_zero, if_neg hkj]
+            if_neg (castSucc_ne_last j), mul_zero, if_neg hkj]
       rw [Finset.sum_congr rfl fun k _ => hsum k]
       rw [uMatrix_apply_last, if_neg (castSucc_ne_last j), mul_zero,
         add_zero]
@@ -354,7 +354,7 @@ def uUnit : (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ where
   inv_val := uPrimeMatrix_mul_uMatrix L
 
 /-- The involution matrix `z`, characteristic-free. -/
-def zMatrix (hm : 0 < m) : Matrix (Fin (m + 1)) (Fin (m + 1)) R :=
+def zMatrix (_hm : 0 < m) : Matrix (Fin (m + 1)) (Fin (m + 1)) R :=
   planeMatrix 0 (last m) !![L.p0, L.s1; L.t1, 0]
 
 theorem zMatrix_mul_self (hm : 0 < m) :
@@ -384,8 +384,7 @@ theorem zMatrix_apply_col_zero (hm : 0 < m) (r : Fin (m + 1)) :
       rw [if_pos rfl]
       exact planeMatrix_apply_ji 0 (last m) _ (zero_ne_last hm)
     · rw [if_neg hrl, zMatrix,
-        planeMatrix_apply_off 0 (last m) _ hr0 hrl, if_neg
-          (fun h => hr0 h.symm)]
+        planeMatrix_apply_off 0 (last m) _ hr0 hrl, if_neg hr0]
 
 theorem zMatrix_apply_col_core (hm : 0 < m) {p : Fin (m + 1)} (hp0 : p ≠ 0)
     (hpl : p ≠ last m) (r : Fin (m + 1)) :
@@ -413,7 +412,7 @@ theorem zMatrix_apply_row_zero (hm : 0 < m) (c : Fin (m + 1)) :
       rw [if_pos rfl]
       exact planeMatrix_apply_ij 0 (last m) _ (zero_ne_last hm)
     · rw [if_neg hcl, zMatrix, planeMatrix]
-      simp [hc0, hcl, fun h : (0 : Fin (m + 1)) = c => hc0 h.symm]
+      simp [hc0, hcl]
 
 theorem zMatrix_apply_row_last (hm : 0 < m) (c : Fin (m + 1)) :
     zMatrix L hm (last m) c = if c = 0 then L.t1 else 0 := by
@@ -458,9 +457,9 @@ theorem uMatrix_mul_single (i j : Fin m) (b : R) :
             L.s1 * L.t1 * L.t0 ^ (j : ℕ) := by
           rw [uMatrix_apply_core, if_neg (Ne.symm (castSucc_ne_last j)),
             if_pos rfl]
-        rw [h2, mul_assoc L.s0, mul_assoc b, ← mul_assoc L.t0,
-          ← mul_assoc L.t0, L.t0_s1, zero_mul, zero_mul, mul_zero,
-          mul_zero]
+        have hzero : L.t0 * (L.s1 * L.t1 * L.t0 ^ (j : ℕ)) = 0 := by
+          rw [← mul_assoc, ← mul_assoc, L.t0_s1, zero_mul, zero_mul]
+        rw [h2, mul_assoc, mul_assoc, hzero, mul_zero, mul_zero]
       · have h2 : uMatrix L j.castSucc c = 0 := by
           rw [uMatrix_apply_core, if_neg hcj, if_neg hcl]
         rw [h2, mul_zero]
@@ -504,11 +503,11 @@ theorem zMatrix_mul_compressed_single (hm : 0 < m) (i j : Fin m) (b : R) :
         rw [zMatrix_apply_col_zero]
         by_cases hr0 : r = 0
         · subst hr0
-          rw [if_pos rfl, if_pos hi0.symm]
+          rw [if_pos rfl, if_pos rfl]
           rw [show L.p0 * (L.s0 * b * L.t0) = L.s0 * b * L.t0 from by
             rw [LeavittFamily.p0, mul_assoc L.s0, ← mul_assoc L.t0,
               L.t0_s0, one_mul, ← mul_assoc]]
-        · rw [if_neg hr0, if_neg (fun h => hr0 (hi0 ▸ h.symm))]
+        · rw [if_neg hr0, if_neg (fun h => hr0 h.symm)]
           by_cases hrl : r = last m
           · rw [if_pos hrl]
             rw [show L.t1 * (L.s0 * b * L.t0) = 0 from by

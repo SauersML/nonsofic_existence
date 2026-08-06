@@ -59,7 +59,7 @@ def elementaryCoefficientSubring (n : ℕ) (hn : 2 < n)
   carrier := {a | ∀ (i j : Fin n) (h : i ≠ j), elementaryUnit i j h a ∈ H}
   zero_mem' := by
     intro i j hij
-    simp
+    simpa using H.one_mem
   one_mem' := hunit
   add_mem' := by
     intro a b ha hb i j hij

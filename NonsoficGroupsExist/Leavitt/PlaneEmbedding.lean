@@ -70,34 +70,29 @@ theorem planeMatrix_apply_off {r c : ι} (hri : r ≠ i) (hrj : r ≠ j) :
 
 end Entries
 
-/-- The identity block embeds to the identity.
-
-The cases are driven by rewriting the goal at `r` and `c` rather than by
-`subst`, which would eliminate the plane coordinates `i`, `j` themselves and
-leave the entry lemmas unstatable. -/
+/-- The identity block embeds to the identity. -/
 theorem planeMatrix_one (i j : ι) (hij : i ≠ j) :
     planeMatrix i j (1 : Matrix (Fin 2) (Fin 2) R) = 1 := by
   ext r c
   by_cases hri : r = i
-  · by_cases hci : c = i
-    · rw [hri, hci, planeMatrix_apply_ii, Matrix.one_apply_eq,
-        Matrix.one_apply_eq]
+  · subst hri
+    by_cases hci : c = i
+    · subst hci
+      simp [planeMatrix, Matrix.one_apply]
     · by_cases hcj : c = j
-      · rw [hri, hcj, planeMatrix_apply_ij i j _ hij,
-          Matrix.one_apply_ne hij,
-          Matrix.one_apply_ne (by decide : (0 : Fin 2) ≠ 1)]
-      · rw [hri, planeMatrix_apply_row_i i j _ hci hcj,
-          Matrix.one_apply_ne (Ne.symm hci)]
+      · subst hcj
+        simp [planeMatrix, Matrix.one_apply, hij, Matrix.one_apply_ne hij]
+      · simp [planeMatrix, hci, hcj, Matrix.one_apply,
+          Ne.symm hci]
   · by_cases hrj : r = j
-    · by_cases hci : c = i
-      · rw [hrj, hci, planeMatrix_apply_ji i j _ hij,
-          Matrix.one_apply_ne (Ne.symm hij),
-          Matrix.one_apply_ne (by decide : (1 : Fin 2) ≠ 0)]
+    · subst hrj
+      by_cases hci : c = i
+      · subst hci
+        simp [planeMatrix, hri, Matrix.one_apply, Ne.symm hri]
       · by_cases hcj : c = j
-        · rw [hrj, hcj, planeMatrix_apply_jj i j _ hij, Matrix.one_apply_eq,
-            Matrix.one_apply_eq]
-        · rw [hrj, planeMatrix_apply_row_j i j _ hij hci hcj,
-            Matrix.one_apply_ne (Ne.symm hcj)]
+        · subst hcj
+          simp [planeMatrix, hij, Matrix.one_apply]
+        · simp [planeMatrix, hij, hci, hcj, Matrix.one_apply, Ne.symm hcj]
     · rw [planeMatrix_apply_off i j _ hri hrj, Matrix.one_apply]
 
 /-! ### Row splitting
@@ -113,15 +108,7 @@ theorem sum_split (i j : ι) (hij : i ≠ j) (f : ι → R) :
     Finset.mem_erase.mpr ⟨hij.symm, Finset.mem_univ j⟩
   rw [← Finset.add_sum_erase _ f (Finset.mem_univ i)]
   rw [← Finset.add_sum_erase _ f hj]
-  exact (add_assoc _ _ _).symm
-
-/-- Membership in the doubly punctured index set, unpacked in the orientation
-the entry lemmas ask for. -/
-theorem ne_of_mem_erase_erase {i j k : ι}
-    (hk : k ∈ (Finset.univ.erase i).erase j) : k ≠ i ∧ k ≠ j := by
-  obtain ⟨hkj, hk'⟩ := Finset.mem_erase.mp hk
-  obtain ⟨hki, -⟩ := Finset.mem_erase.mp hk'
-  exact ⟨hki, hkj⟩
+  ring
 
 /-! ### The multiplicative law -/
 
@@ -136,8 +123,9 @@ theorem planeMatrix_mul_apply_i (i j : ι) (hij : i ≠ j)
   have htail : ∑ k ∈ (Finset.univ.erase i).erase j,
       planeMatrix i j B i k * M k c = 0 := by
     refine Finset.sum_eq_zero fun k hk => ?_
-    obtain ⟨hki, hkj⟩ := ne_of_mem_erase_erase hk
-    rw [planeMatrix_apply_row_i i j B hki hkj, zero_mul]
+    obtain ⟨hkj, hki, -⟩ :=
+      Finset.mem_erase.mp hk |>.imp id (Finset.mem_erase.mp)
+    rw [planeMatrix_apply_row_i i j B hki.1 hkj, zero_mul]
   rw [htail, add_zero]
 
 theorem planeMatrix_mul_apply_j (i j : ι) (hij : i ≠ j)
@@ -148,8 +136,9 @@ theorem planeMatrix_mul_apply_j (i j : ι) (hij : i ≠ j)
   have htail : ∑ k ∈ (Finset.univ.erase i).erase j,
       planeMatrix i j B j k * M k c = 0 := by
     refine Finset.sum_eq_zero fun k hk => ?_
-    obtain ⟨hki, hkj⟩ := ne_of_mem_erase_erase hk
-    rw [planeMatrix_apply_row_j i j B hij hki hkj, zero_mul]
+    obtain ⟨hkj, hki, -⟩ :=
+      Finset.mem_erase.mp hk |>.imp id (Finset.mem_erase.mp)
+    rw [planeMatrix_apply_row_j i j B hij hki.1 hkj, zero_mul]
   rw [htail, add_zero]
 
 /-- Rows outside the plane are untouched. -/
@@ -158,8 +147,9 @@ theorem planeMatrix_mul_apply_off (i j : ι)
     (hrj : r ≠ j) (c : ι) :
     (planeMatrix i j B * M) r c = M r c := by
   rw [Matrix.mul_apply]
-  rw [Finset.sum_congr rfl fun k _ =>
-    congrArg (fun x => x * M k c) (planeMatrix_apply_off i j B hri hrj)]
+  rw [show ∀ k, planeMatrix i j B r k * M k c =
+      (if r = k then 1 else 0) * M k c from fun k => by
+    rw [planeMatrix_apply_off i j B hri hrj]]
   simp
 
 /-- Columns outside the plane are untouched by right multiplication. -/
@@ -167,18 +157,23 @@ theorem mul_planeMatrix_apply_off (i j : ι)
     (B : Matrix (Fin 2) (Fin 2) R) (M : Matrix ι ι R) (r : ι) {c : ι}
     (hci : c ≠ i) (hcj : c ≠ j) :
     (M * planeMatrix i j B) r c = M r c := by
-  have hentry : ∀ k : ι, planeMatrix i j B k c = if k = c then 1 else 0 := by
-    intro k
-    by_cases hki : k = i
-    · rw [hki, planeMatrix_apply_row_i i j B hci hcj, if_neg (Ne.symm hci)]
-    · by_cases hkj : k = j
-      · -- `i = j` would put `k` at `i`, which this branch excludes
-        have hij : i ≠ j := fun h => hki (hkj.trans h.symm)
-        rw [hkj, planeMatrix_apply_row_j i j B hij hci hcj,
-          if_neg (Ne.symm hcj)]
-      · rw [planeMatrix_apply_off i j B hki hkj]
   rw [Matrix.mul_apply]
-  rw [Finset.sum_congr rfl fun k _ => congrArg (fun x => M r k * x) (hentry k)]
+  rw [show ∀ k, M r k * planeMatrix i j B k c =
+      M r k * (if k = c then 1 else 0) from fun k => by
+    congr 1
+    by_cases hki : k = i
+    · subst hki
+      rw [planeMatrix_apply_row_i i j B hci.symm hcj.symm,
+        if_neg (fun h => hci h.symm)]
+    · by_cases hkj : k = j
+      · subst hkj
+        by_cases hij : k = i
+        · exact absurd hij hki
+        · rw [planeMatrix_apply_row_j i j B ?_ hci.symm hcj.symm,
+            if_neg (fun h => hcj h.symm)]
+          intro h
+          exact hki (h ▸ rfl)
+      · rw [planeMatrix_apply_off i j B hki hkj]]
   simp
 
 /-- Column `i` of `M * planeMatrix i j B` is the `B`-combination of columns
@@ -191,8 +186,9 @@ theorem mul_planeMatrix_apply_i (i j : ι) (hij : i ≠ j)
   have htail : ∑ k ∈ (Finset.univ.erase i).erase j,
       M r k * planeMatrix i j B k i = 0 := by
     refine Finset.sum_eq_zero fun k hk => ?_
-    obtain ⟨hki, hkj⟩ := ne_of_mem_erase_erase hk
-    rw [planeMatrix_apply_off i j B hki hkj, if_neg hki, mul_zero]
+    obtain ⟨hkj, hki, -⟩ :=
+      Finset.mem_erase.mp hk |>.imp id (Finset.mem_erase.mp)
+    rw [planeMatrix_apply_off i j B hki.1 hkj, if_neg hki.1, mul_zero]
   rw [htail, add_zero]
 
 theorem mul_planeMatrix_apply_j (i j : ι) (hij : i ≠ j)
@@ -203,8 +199,9 @@ theorem mul_planeMatrix_apply_j (i j : ι) (hij : i ≠ j)
   have htail : ∑ k ∈ (Finset.univ.erase i).erase j,
       M r k * planeMatrix i j B k j = 0 := by
     refine Finset.sum_eq_zero fun k hk => ?_
-    obtain ⟨hki, hkj⟩ := ne_of_mem_erase_erase hk
-    rw [planeMatrix_apply_off i j B hki hkj, if_neg hkj, mul_zero]
+    obtain ⟨hkj, hki, -⟩ :=
+      Finset.mem_erase.mp hk |>.imp id (Finset.mem_erase.mp)
+    rw [planeMatrix_apply_off i j B hki.1 hkj, if_neg hkj, mul_zero]
   rw [htail, add_zero]
 
 /-- **Plane matrices multiply blockwise.** -/
@@ -213,77 +210,105 @@ theorem planeMatrix_mul (i j : ι) (hij : i ≠ j)
     planeMatrix i j B * planeMatrix i j C = planeMatrix i j (B * C) := by
   ext r c
   by_cases hri : r = i
-  · rw [hri, planeMatrix_mul_apply_i i j hij B _ c]
-    by_cases hci : c = i
-    · rw [hci, planeMatrix_apply_ii, planeMatrix_apply_ji i j C hij,
+  · subst hri
+    rw [planeMatrix_mul_apply_i r j hij B _ c]
+    by_cases hci : c = r
+    · subst hci
+      rw [planeMatrix_apply_ii, planeMatrix_apply_ji r j C hij,
         planeMatrix_apply_ii, Matrix.mul_apply, Fin.sum_univ_two]
     · by_cases hcj : c = j
-      · rw [hcj, planeMatrix_apply_ij i j C hij,
-          planeMatrix_apply_jj i j C hij, planeMatrix_apply_ij i j _ hij,
-          Matrix.mul_apply, Fin.sum_univ_two]
-      · rw [planeMatrix_apply_row_i i j C hci hcj,
-          planeMatrix_apply_row_j i j C hij hci hcj,
-          planeMatrix_apply_row_i i j _ hci hcj, mul_zero, mul_zero, add_zero]
+      · subst hcj
+        rw [planeMatrix_apply_ij r c C hij, planeMatrix_apply_jj r c C hij,
+          planeMatrix_apply_ij r c _ hij, Matrix.mul_apply, Fin.sum_univ_two]
+      · rw [planeMatrix_apply_row_i r j C (fun h => hci h) hcj,
+          planeMatrix_apply_row_j r j C hij (fun h => hci h) hcj,
+          planeMatrix_apply_row_i r j _ (fun h => hci h) hcj,
+          mul_zero, mul_zero, add_zero]
   · by_cases hrj : r = j
-    · rw [hrj, planeMatrix_mul_apply_j i j hij B _ c]
+    · subst hrj
+      rw [planeMatrix_mul_apply_j i r hij B _ c]
       by_cases hci : c = i
-      · rw [hci, planeMatrix_apply_ii, planeMatrix_apply_ji i j C hij,
-          planeMatrix_apply_ji i j _ hij, Matrix.mul_apply, Fin.sum_univ_two]
-      · by_cases hcj : c = j
-        · rw [hcj, planeMatrix_apply_ij i j C hij,
-            planeMatrix_apply_jj i j C hij, planeMatrix_apply_jj i j _ hij,
-            Matrix.mul_apply, Fin.sum_univ_two]
-        · rw [planeMatrix_apply_row_i i j C hci hcj,
-            planeMatrix_apply_row_j i j C hij hci hcj,
-            planeMatrix_apply_row_j i j _ hij hci hcj, mul_zero, mul_zero,
-            add_zero]
+      · subst hci
+        rw [planeMatrix_apply_ii, planeMatrix_apply_ji c r C hij,
+          planeMatrix_apply_ji c r _ hij, Matrix.mul_apply, Fin.sum_univ_two]
+      · by_cases hcj : c = r
+        · subst hcj
+          rw [planeMatrix_apply_ij i c C hij, planeMatrix_apply_jj i c C hij,
+            planeMatrix_apply_jj i c _ hij, Matrix.mul_apply,
+            Fin.sum_univ_two]
+        · rw [planeMatrix_apply_row_i i r C hci (fun h => hcj h),
+            planeMatrix_apply_row_j i r C hij hci (fun h => hcj h),
+            planeMatrix_apply_row_j i r _ hij hci (fun h => hcj h),
+            mul_zero, mul_zero, add_zero]
     · rw [planeMatrix_mul_apply_off i j B _ hri hrj,
         planeMatrix_apply_off i j C hri hrj,
         planeMatrix_apply_off i j _ hri hrj]
 
 /-! ### Transvections are plane matrices -/
 
-/-- The entries of a transvection, with the guards written in the orientation
-`planeMatrix` uses, so that a case split on `r` and `c` against the plane
-coordinates discharges both sides. -/
-theorem elementaryUnit_val_apply (i j : ι) (hij : i ≠ j) (a : R) (r c : ι) :
-    ((elementaryUnit i j hij a : (Matrix ι ι R)ˣ) : Matrix ι ι R) r c =
-      (if c = r then 1 else 0) + (if r = i ∧ c = j then a else 0) := by
-  have hone : (1 : Matrix ι ι R) r c = if c = r then 1 else 0 := by
-    rw [Matrix.one_apply]
-    by_cases h : r = c
-    · rw [if_pos h, if_pos h.symm]
-    · rw [if_neg h, if_neg fun hc => h hc.symm]
-  change (1 + Matrix.single i j a) r c = _
-  rw [Matrix.add_apply, hone, Matrix.single_apply]
-  congr 1
-  by_cases h : r = i ∧ c = j
-  · rw [if_pos ⟨h.1.symm, h.2.symm⟩, if_pos h]
-  · rw [if_neg fun hh => h ⟨hh.1.symm, hh.2.symm⟩, if_neg h]
-
 theorem elementaryUnit_val_planeMatrix (i j : ι) (hij : i ≠ j) (a : R) :
     ((elementaryUnit i j hij a : (Matrix ι ι R)ˣ) : Matrix ι ι R) =
       planeMatrix i j !![1, a; 0, 1] := by
   ext r c
-  rw [elementaryUnit_val_apply]
-  by_cases hri : r = i <;> by_cases hrj : r = j <;>
-    by_cases hci : c = i <;> by_cases hcj : c = j <;>
-    simp_all [planeMatrix] <;>
-    first
-      | exact if_congr eq_comm rfl rfl
-      | exact fun h => absurd h.symm (by assumption)
+  by_cases hri : r = i
+  · subst hri
+    by_cases hci : c = r
+    · subst hci
+      simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+        Matrix.single_apply, hij]
+    · by_cases hcj : c = j
+      · subst hcj
+        simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+          Matrix.single_apply, hij, Ne.symm hij]
+      · simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+          Matrix.single_apply, Ne.symm hci, hcj, fun h : j = c => hcj h.symm]
+  · by_cases hrj : r = j
+    · subst hrj
+      by_cases hci : c = i
+      · subst hci
+        simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+          Matrix.single_apply, hij, Ne.symm hri, fun h : r = c => hri h.symm]
+      · by_cases hcj : c = r
+        · subst hcj
+          simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+            Matrix.single_apply, hij, Ne.symm hij]
+        · simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+            Matrix.single_apply, hij, hci, Ne.symm hcj,
+            fun h : r = c => hcj h.symm]
+    · simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+        Matrix.single_apply, hri, hrj, fun h : i = r => hri h.symm]
 
 /-- The opposite transvection, in the same plane orientation. -/
 theorem elementaryUnit_val_planeMatrix' (i j : ι) (hij : i ≠ j) (a : R) :
     ((elementaryUnit j i hij.symm a : (Matrix ι ι R)ˣ) : Matrix ι ι R) =
       planeMatrix i j !![1, 0; a, 1] := by
   ext r c
-  rw [elementaryUnit_val_apply]
-  by_cases hri : r = i <;> by_cases hrj : r = j <;>
-    by_cases hci : c = i <;> by_cases hcj : c = j <;>
-    simp_all [planeMatrix] <;>
-    first
-      | exact if_congr eq_comm rfl rfl
-      | exact fun h => absurd h.symm (by assumption)
+  by_cases hri : r = i
+  · subst hri
+    by_cases hci : c = r
+    · subst hci
+      simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+        Matrix.single_apply, Ne.symm hij]
+    · by_cases hcj : c = j
+      · subst hcj
+        simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+          Matrix.single_apply, hij, Ne.symm hij, fun h : j = r => hij h.symm]
+      · simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+          Matrix.single_apply, Ne.symm hci, hcj, fun h : r = c => hci h.symm]
+  · by_cases hrj : r = j
+    · subst hrj
+      by_cases hci : c = i
+      · subst hci
+        simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+          Matrix.single_apply, hij, Ne.symm hri, fun h : r = c => hri h.symm]
+      · by_cases hcj : c = r
+        · subst hcj
+          simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+            Matrix.single_apply, hij, Ne.symm hij]
+        · simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+            Matrix.single_apply, hij, hci, Ne.symm hcj,
+            fun h : r = c => hcj h.symm]
+    · simp [elementaryUnit, planeMatrix, Matrix.one_apply,
+        Matrix.single_apply, hri, hrj, fun h : j = r => hrj h.symm]
 
 end NonsoficGroupsExist
