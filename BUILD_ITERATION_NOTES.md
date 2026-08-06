@@ -2896,3 +2896,38 @@ progress theorem (the only open math; 583/583 machine-verified);
       (block move + κ-transport + orthogonality) is code-agnostic.
   NEXT SESSION: settle the inner terminal (try (4) seriously first —
   reread WindowNonnegReduction's proof shape; then (1)); then M5.
+
+## Session 50: INNER TERMINAL FULLY DERIVED
+The M5 branch structure is now: (extract) ∨ (mirror-extract) ∨
+(col-refine: kerB ≠ 0) ∨ (row-refine: cokerA ≠ 0) ∨ TERMINAL-(a)
+[kerB = 0 ∧ cokerA-rows = 0, i.e. BOTH C-less stacks full].
+TERMINAL-(a) — complete derivation, all with compiled pieces:
+ (a1) ENTRYWISE KILL, both directions: entries y_{ji} :=
+      T(Cⱼ)u⁻¹S(Rᵢ); strip equations Σⱼ x_{ij}·y_{ji'} = δᵢᵢ'•1
+      (x = pE-entries; insertion of Σ p_{Cⱼ} = 1) and the mirror
+      Σᵢ y_{j'i}·x_{ij} = δ_{j'j}•1.  Downward induction at the top
+      entry-degree: only B-part·y^{(D)} survives at degree D+1; t_w
+      strips give Σⱼ B_wᵢⱼ y^{(D)}_{ji'} = 0; the scalar left
+      inverse (G₀,G₁) of the B-stack combines these to
+      y^{(D)}_{j₀i'} = 0.  B-full ⟹ entries nonpos.  Mirror: bottom
+      equations + s_z-strips + right inverse of (A₀|A₁) ⟹ entries
+      nonneg.  Both ⟹ Y-BALANCED.
+ (a2) PADDING: balanced entries live in levelSpan(M) for common M;
+      u⁻¹ = Σ scalar·S(Cⱼα)T(Rᵢβ) over the M-refinements of C and R
+      (uniform under-word refinement keeps codes complete/free —
+      have split machinery; M-fold refinement = words ++ level-M).
+ (a3) SQUARENESS: the scalar matrix W over the refined code pair is
+      invertible over k: a kernel vector v₀ of W gives (after the
+      right codeScalar move, compiled) a ZERO COLUMN of a unit:
+      0 = u⁻¹·S(word) ⟹ S(word) = 0 ⟹ contradiction (t·s = 1).
+      Applied to both W and Wᵀ: |C-ref| = |R-ref| AND det W ≠ 0.
+ (a4) DECOMPOSITION: pick a common index equiv; ω := code bijection
+      (C-ref → R-ref) ∈ H (codeBijection_mem_stableUnits);
+      ω⁻¹·u⁻¹ = codeScalar(R-ref, W′) ∈ H (codeScalar_unit_mem)
+      ⟹ u⁻¹ ∈ H ⟹ u ∈ H.
+With this, THE ONLY REMAINING OPEN MATH is refine-branch
+termination (unchanged; 583/583 machine-verified).  FORMALIZATION
+ORDER: EntryStrip.lean (insertion identity + two-sided entry
+collapse); EntrywiseKill.lean (a1); BalancedCodePencil.lean
+(a2+a3+a4); StackDichotomy.lean (scalar left-inverse-or-kernel);
+M5 shell; M6.
