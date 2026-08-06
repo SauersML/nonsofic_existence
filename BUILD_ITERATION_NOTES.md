@@ -1236,3 +1236,15 @@ argument on xw-side).
   incomparable unipotents + balanced pivots (Bruhat/LPU over the
   cylinder groupoid), to a [0,1]- or [−1,0]-window unit; then (P)
   chain finishes NarrowReduction, hence ScalarReduction, B4, Theorem C.
+
+## Session 25c: (P) computationally CONFIRMED over F2
+Exact L_F2(1,2) arithmetic (scratchpad leavitt_search.py): monomial
+prefix-collapse product, stream-module equation generation, linear
+solve for bounded-support inverse, EXACT algebra verification of any
+solution.  Selftests: relations, t_is_j, known unit/non-unit ✓.
+RESULT: e = 1−p₁₁ (singular, rank 3/4): exhaustive over all 1023
+nonzero degree-1 perturbations on the 10 shallow monomials (|b|≤1),
+plus 100 random deeper samples (|b|≤2, up to 6 terms): ZERO units.
+Control with e = 1 and nilpotent tail: unit correctly found.
+Matches THEOREM (P) exactly.  The mathematics is settled; remaining
+math gap is ONLY width-3 → width-2 (session 25b plan).
