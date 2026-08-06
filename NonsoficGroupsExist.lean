@@ -180,6 +180,9 @@ import NonsoficGroupsExist.GammaDischarge
 import NonsoficGroupsExist.KillMoves
 import NonsoficGroupsExist.BlockMoveTailKill
 import NonsoficGroupsExist.WindowNonnegReduction
+import NonsoficGroupsExist.OppositeTranspose
+import NonsoficGroupsExist.ThetaStable
+import NonsoficGroupsExist.WindowNonposReduction
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

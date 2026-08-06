@@ -2015,3 +2015,29 @@ session: (1) write the mirror chain (mechanical, ~4 modules:
 mirror-(P) via xw-side, mirror-PureTail, mirror-κ-transport pieces,
 mirror-WidthTwo/window-nonpos); (2) prove LPU by bottom-stripping
 with the weighted measure; (3) V-generation lemma; (4) assembly.
+
+## Session 38: the θ-route — mirror chain in THREE files, all written
+- OppositeTranspose.lean: oppositeFamily (op-ring carries the family
+  with s↔t; relations via op_mul reversal); θ := lift(oppositeFamily
+  (family k)); θ̂ := unop∘θ with add/mul-anti/one/zero/smul/sub
+  lemmas; generator exchange (lift_generator); word reversal
+  θ̂(S(a)) = T(a); adjoin_generators_eq_top (mkAlgHom_surjective +
+  FreeAlgebra.adjoin_range_ι + map_adjoin); INVOLUTION via
+  adjoin_induction; WINDOW FLIP span[lo,hi] → span[−hi,−lo];
+  thetaUnit.
+- ThetaStable.lean: thetaMat := entrywise-θ̂ transpose;
+  anti-multiplicativity (mul_apply + thetaHat_sum);
+  thetaMat_single; thetaMatUnit; closure transport
+  (Subgroup.closure_induction: transvections ↦ transposed
+  transvections, products reverse — subgroups don't care);
+  thetaMatUnit_diagUnit (diagonal is transpose-fixed);
+  **thetaUnit_mem_stableUnits_iff** (both directions via involution).
+- WindowNonposReduction.lean: [−N,0]-window units ∈ H, three-line
+  transport through window_nonneg.
+- All registered.  This replaces the planned 4-module mechanical
+  mirror chain (mirror-(P), mirror-PureTail, mirror-WidthTwo,
+  mirror-nonneg) with one anti-automorphism — and transports ANY
+  future one-sided theorem for free.
+- REMAINING: the mixing step (narrow with both signs → product of
+  one-sided factors mod H: the LPU statement) + V-generation +
+  NarrowReduction assembly + docstrings.

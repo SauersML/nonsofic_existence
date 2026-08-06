@@ -69,8 +69,10 @@ theorem window_nonneg_mem_stableUnits
           simp only [Finset.mem_Icc]
           omega), add_comm]
       have hu1 : (u : BinaryLeavittAlgebra k) = 1 + (a + η) := by
+        -- `ring` needs commutativity; the goal `↑u = 1 + (↑u - 1)` is purely
+        -- additive, so `abel` is the right normaliser here.
         rw [← hτsplit]
-        ring
+        abel
       have haw : a ∈ Submodule.span k
           (L.degreeMonomials 0 ((N : ℤ) + 1)) := by
         rw [ha]
@@ -227,12 +229,13 @@ theorem window_nonneg_mem_stableUnits
                 (L.wordS [0, 0] * (-(L.s 1)) * L.wordT [1, 0]) := by
               noncomm_ring
           _ = 1 - X₀ - X₁ := by
-              -- Not `noncomm_ring`: it normalises `-x` to `-1 • x` and then
-              -- cannot reconcile `A * (-1 • B)` with `-1 • (A * B)`.  Pull
-              -- the signs out first and finish additively.
+              -- `noncomm_ring` normalises `-x` to `-1 • x` but never moves a
+              -- scalar out of a product, so it stalls with `A * (-1 • B)` on
+              -- the left and `-1 • (A * B)` on the right.  Migrate the scalar
+              -- outwards by hand; that alone closes the goal.
               rw [hcross, hX₀, hX₁]
-              simp only [mul_neg, neg_mul, add_zero]
-              abel
+              noncomm_ring
+              simp only [mul_smul_comm, smul_mul_assoc]
       have hm₁val : (m₁ : BinaryLeavittAlgebra k) = 1 + Y₀ + Y₁ := by
         show (1 + L.wordS [0, 1] * q₀ * L.wordT [0, 0]) *
           (1 + L.wordS [1, 0] * q₁ * L.wordT [0, 0]) = _
@@ -285,19 +288,19 @@ theorem window_nonneg_mem_stableUnits
             = 1 + K + Y₀ + Y₁ + K * Y₀ + K * Y₁ - X₀ - X₁ -
               X₀ * K - X₁ * K - X₀ * Y₀ - X₀ * Y₁ - X₁ * Y₀ -
               X₁ * Y₁ - X₀ * K * Y₀ - X₀ * K * Y₁ - X₁ * K * Y₀ -
-              X₁ * K * Y₁ := by noncomm_ring
+              X₁ * K * Y₁ := by
+              -- Same scalar-migration gap: the expansion leaves
+              -- `(-1 • X₀) * K` against `-1 • (X₀ * K)`.
+              noncomm_ring
+              simp only [smul_mul_assoc]
+              abel
           _ = 1 + K + Y₀ + Y₁ - X₀ - X₁ - (X₀ * Y₀ + X₁ * Y₁) := by
+              -- The triple products need no separate treatment: `X₀ * K = 0`
+              -- already fires inside `X₀ * K * Y₀`, leaving `0 * Y₀`.
               rw [hKYfactsA, hKYfactsB, hXKfactsA, hXKfactsB,
                 hXY₀₁, hXY₁₀]
-              rw [show X₀ * K * Y₀ = 0 from by
-                  rw [hXKfactsA]; noncomm_ring,
-                show X₀ * K * Y₁ = 0 from by
-                  rw [hXKfactsA]; noncomm_ring,
-                show X₁ * K * Y₀ = 0 from by
-                  rw [hXKfactsB]; noncomm_ring,
-                show X₁ * K * Y₁ = 0 from by
-                  rw [hXKfactsB]; noncomm_ring]
-              noncomm_ring
+              simp only [zero_mul, add_zero, sub_zero]
+              abel
           _ = 1 + (L.wordS [0, 0] * a * L.wordT [0, 0] - X₀ - X₁ +
               Y₀ + Y₁) := by
               rw [hXY, hK]
@@ -326,20 +329,26 @@ theorem window_nonneg_mem_stableUnits
         · have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs00w haw) ht00w
           refine L.span_degreeMonomials_mono ?_ ?_ h1 <;> omega
-        · rw [hX₀]
-          refine L.span_degreeMonomials_mono (by omega) (by omega)
-            (Submodule.subset_span
-              ⟨[0, 0, 0], [0, 1], by simp, by simp, ?_⟩)
-          rw [show ([0, 0, 0] : List (Fin 2)) = [0, 0] ++ [0] from
-            rfl, L.wordS_append]
-          simp [wordS]
-        · rw [hX₁]
-          refine L.span_degreeMonomials_mono (by omega) (by omega)
-            (Submodule.subset_span
-              ⟨[0, 0, 1], [1, 0], by simp, by simp, ?_⟩)
-          rw [show ([0, 0, 1] : List (Fin 2)) = [0, 0] ++ [1] from
-            rfl, L.wordS_append]
-          simp [wordS]
+        -- Pin the intermediate window to `1 1` explicitly.  Feeding
+        -- `subset_span` straight into `span_degreeMonomials_mono` leaves
+        -- `lo`/`hi` as metavariables, so neither the `simp`s nor the
+        -- `omega`s have anything to solve against.
+        · have hx₀ : X₀ ∈ Submodule.span k (L.degreeMonomials 1 1) := by
+            rw [hX₀]
+            refine Submodule.subset_span
+              ⟨[0, 0, 0], [0, 1], by simp, by simp, ?_⟩
+            rw [show ([0, 0, 0] : List (Fin 2)) = [0, 0] ++ [0] from
+              rfl, L.wordS_append]
+            simp [wordS]
+          exact L.span_degreeMonomials_mono (by omega) (by omega) hx₀
+        · have hx₁ : X₁ ∈ Submodule.span k (L.degreeMonomials 1 1) := by
+            rw [hX₁]
+            refine Submodule.subset_span
+              ⟨[0, 0, 1], [1, 0], by simp, by simp, ?_⟩
+            rw [show ([0, 0, 1] : List (Fin 2)) = [0, 0] ++ [1] from
+              rfl, L.wordS_append]
+            simp [wordS]
+          exact L.span_degreeMonomials_mono (by omega) (by omega) hx₁
         · rw [hY₀]
           have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs01w hq₀w) ht00w

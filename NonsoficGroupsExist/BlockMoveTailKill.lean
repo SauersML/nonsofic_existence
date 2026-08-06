@@ -227,7 +227,7 @@ theorem pure_positive_tail_mem_stableUnits
               -- outwards by hand, then finish additively.
               rw [hcross, hX₀, hX₁]
               noncomm_ring
-              simp only [mul_smul_comm, smul_mul_assoc] <;> abel
+              simp only [mul_smul_comm, smul_mul_assoc]
       have hm₁val : (m₁ : BinaryLeavittAlgebra k) = 1 + Y₀ + Y₁ := by
         show (1 + L.wordS [0, 1] * q₀ * L.wordT [0, 0]) *
           (1 + L.wordS [1, 0] * q₁ * L.wordT [0, 0]) = _
@@ -284,13 +284,15 @@ theorem pure_positive_tail_mem_stableUnits
               -- Same scalar-migration gap as in `hm₂val`: the expansion
               -- leaves `(-1 • X₀) * K` against `-1 • (X₀ * K)`.
               noncomm_ring
-              simp only [smul_mul_assoc] <;> abel
+              simp only [smul_mul_assoc]
+              abel
           _ = 1 + K + Y₀ + Y₁ - X₀ - X₁ - (X₀ * Y₀ + X₁ * Y₁) := by
               -- The triple products need no separate treatment: `X₀ * K = 0`
               -- already fires inside `X₀ * K * Y₀`, leaving `0 * Y₀`.
               rw [hKYfactsA, hKYfactsB, hXKfactsA, hXKfactsB,
                 hXY₀₁, hXY₁₀]
-              simp only [zero_mul, add_zero, sub_zero] <;> abel
+              simp only [zero_mul, add_zero, sub_zero]
+              abel
           _ = 1 + (L.wordS [0, 0] * a * L.wordT [0, 0] - X₀ - X₁ +
               Y₀ + Y₁) := by
               rw [hXY, hK, hτsplit]
