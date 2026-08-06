@@ -9,8 +9,12 @@ on:
     paths:
       - nonsofic_groups_exist.tex
       - .github/workflows/build-pdf.yml
-      - scripts/check_lean_refs.py
-      - scripts/lean_decls.py
+      # The margin-reference gate is a gate, so a change to it must re-run it.
+      # Naming the two entry points was not enough once they grew a shared
+      # library: an edit to `claim_map.py` could change what counts as a valid
+      # reference, or stop the check firing at all, without this workflow ever
+      # running.  `prover.yml` watches all of `scripts/` for the same reason.
+      - scripts/**
   workflow_dispatch:
 
 permissions:
