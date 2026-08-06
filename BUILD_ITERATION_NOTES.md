@@ -1248,3 +1248,94 @@ plus 100 random deeper samples (|b|≤2, up to 6 terms): ZERO units.
 Control with e = 1 and nilpotent tail: unit correctly found.
 Matches THEOREM (P) exactly.  The mathematics is settled; remaining
 math gap is ONLY width-3 → width-2 (session 25b plan).
+
+## Session 25d: Lean writing begun; exact roadmap for the (P)-chain
+WRITTEN (uncompiled, registered in aggregator):
+- IncomparableUnipotents.lean: incomparable_unipotent_mem_stableUnits
+  (any unit valued 1 + s_a·y·t_b, a,b incomparable, ∈ H);
+  incomparableUnit (explicit unit, inverse 1 − s_a y t_b);
+  signedSwap := product of three incomparable unipotents ∈ H;
+  signedSwap_val = 1 − p_a − p_b + s_at_b − s_bt_a (X/Y collapse
+  lemmas hXX hXY hYX hXYX then calc + noncomm_ring).
+- ShapeCalculus.lean: shapeMonomials p q; ShapeRep p q M x
+  (x = ΣΣ M γ δ • s_γt_δ, index types Fin p → Fin 2);
+  shapeRep_mem_span; exists_shapeRep (span_induction; Matrix.single —
+  check pin API: `Matrix.single` vs `Matrix.stdBasisMatrix`!);
+  shapeRep_entry (t_γ·x·s_δ = algebraMap (M γ δ), via
+  prefixCode_orthogonal (fullBinaryCode _)); shapeRep_unique (needs
+  hinj : Injective (algebraMap k A)); shapeRep_one (via
+  fullBinaryCode_complete; unfolds IsComplete/fullBinaryCode — check
+  those defs' exact shapes); shapeRep_mul (quadruple sum collapse);
+  span_shapeMonomials_le_succ (trailing-cylinder split; ofFn/snoc
+  juggling `List.ofFn_succ'`, `Fin.snoc` — COMPILE-RISK, may need
+  hand lemma).
+
+REMAINING LEAN MODULES for the (P)-chain (in dependency order), all
+mathematics settled in sessions 24–25:
+1. GradedComponents.lean:
+   a. exhaustion: ∀ x : A(=BinaryLeavitt k) ∃ lo hi, x ∈ span
+      (degreeMonomials lo hi).  Route: RingQuot.mkAlgHom_surjective +
+      FreeAlgebra induction; generators s0,s1,t0,t1 ∈ window [−1,1];
+      products via window_mul_mem_span; sums via span-window-union
+      (monotone: span_degreeMonomials_mono).
+   b. component decomposition: x ∈ span(window lo hi) → ∃ y_d ∈
+      span(deg d d), x = Σ_{d=lo}^{hi} y_d (span_induction).
+   c. uniqueness of components (graded_independence_all) + extraction
+      lemma: two window elements equal ⟹ components equal.
+2. PureTailNilpotency.lean (THEOREM 2): u unit, ↑u = 1 + η,
+   η ∈ span(deg 1 1) ⟹ ∃ D, η^D = 0.  Decompose u⁻¹ by (1);
+   componentwise equations of u⁻¹·(1+η) = 1 and (1+η)u⁻¹ = 1;
+   downward induction kills negative components (x_m = 0 for m < 0
+   directly from x_m + ηx_{m−1} = 0 chain bottom-up: at the LOWEST m:
+   x_m = 0 if m<0 — careful: equation at degree m is x_m + ηx_{m−1}
+   = δ_{m0} with x_{m−1} = 0); then x_0 = 1, x_d = (−η)^d, top:
+   η·x_M = 0 gives η^{M+1} = 0.
+3. RankNormalForm.lean (THEOREM 3 + normalization): c ∈ span
+   (levelMonomials q):
+   a. IsUnit c ↔ IsUnit (its balancedEmbed matrix) — have
+      exists_balancedEmbed_eq + injectivity + multiplicativity in
+      BalancedStableRank; inverse stays balanced.
+   b. c = g·e·h with g,h balanced-VALUED units of A and e a 0/1
+      diagonal cylinder idempotent (Matrix.Pivot diagonal + absorb
+      units into diagonal scaling).
+4. ZeroKOne.lean (THEOREM (P), the keystone):
+   statement: [Nontrivial A] (hdiv …) {c ζ : A} (hc : c ∈ span deg 0 0)
+   (hζ : ζ ∈ span deg 1 1) (u : Aˣ) (hu : ↑u = c + ζ) : IsUnit c.
+   Proof skeleton (sessions 24/25, VERIFIED numerically):
+   - normalize c = geh (3b); pass to unit w := g⁻¹uh⁻¹-value e + ζ'.
+   - suppose e ≠ 1 (else done).  x := w⁻¹; decompose (1); graded
+     equations; (R1/R2): x_dζf = δ_{d,−1}f, fζx_d = δ_{d,−1}f
+     (f := 1−e); downward expansion x_d = Σ_j (−ζ)^j f x_{d−j};
+     corner system Σ_j G_j Y_{−1−j} = f, G_j := (−1)^j fζ^{j+1}f,
+     Y_c := fx_cf.
+   - shapes: pick interface ℓ big; G_j ∈ span(shape ℓ (ℓ−1−j)), Y_c ∈
+     span(shape (ℓ−1−j) ℓ) (padding); exists_shapeRep; shapeRep_mul;
+     f's canonical matrix at (ℓ,ℓ) is 0/1-diagonal with D_ℓ = |T|·2^{ℓ−q}
+     ones; shapeRep_unique identifies Σ M(G_j)M(Y_j) with it.
+   - rank: D_ℓ = rank(diag) ≤ Σ_j rank(M(G_j)M(Y_j)) ≤ Σ_j 2^{ℓ−1−j}
+     ≤ 2^ℓ − 2^{ℓ−1−J}.  Wait — need the SHARPER f-corner bound only
+     if e-rank enters; actually the plain bound suffices when f = 1…
+     NO: correct bound: rank ≤ min dims = card(Fin (ℓ−1−j) → Fin 2)
+     = 2^{ℓ−1−j}, and D_ℓ ≥ 2^{ℓ−q} ≥ … CHECK: need Σ_j 2^{ℓ−1−j} <
+     D_ℓ?  D_ℓ = |T_f|2^{ℓ−q} with |T_f| ≥ 1: Σ_{j=0}^{J}2^{ℓ−1−j} =
+     2^ℓ−2^{ℓ−1−J} which EXCEEDS D_ℓ when f is small — MUST use the
+     corner-supported rank bound: Y_c = f·x_c·f ⟹ M(Y_c) = M(f at
+     (ℓ−1−j))·M(x-part) ⟹ rank ≤ rank M(f at ℓ−1−j) = D_{ℓ−1−j};
+     then Σ_j D_{ℓ−1−j} = D_ℓ(1−2^{−(J+1)}) < D_ℓ ✓.  (Session 25
+     proof used exactly this; keep f-factorization of Y explicit.)
+   - Mathlib rank lemmas: Matrix.rank_mul_le_left/right,
+     rank_add_le (check name; else via LinearMap.range sup),
+     rank_diagonal, rank_one.
+5. WidthTwoReduction.lean: every unit with value ∈ 1 + span(window
+   [0,1])… general: value ∈ span(window 0 1) ⟹ u ∈ stableUnits:
+   (P) → c unit → c-balanced-valued ∈ H (mem_stableUnits_of_val_mem_
+   levelSpan via span_degree_zero_le_levelSpan); tail 1 + c⁻¹ζ:
+   Theorem 2 nilpotency; κ₁-transport (pairKappaUnit s₁ t₁) to
+   1 + s₁(ηt₁) with ηt₁ balanced (window mult); nilpotency transports
+   ((s₁ηt₁)^D = s₁η^Dt₁); NilpotentTailKill.  Mirror [−1,0] version
+   via the same argument on the anti-side OR omit (probably only one
+   side needed).
+6. Width-3 → width-2: MATH STILL OPEN (session 25b: Bruhat/LPU with
+   swap pivots; swaps now ∈ H).  THE remaining mathematical gap.
+   After it: NarrowReduction ⟹ ScalarReduction (ResidualReduction
+   wiring, written) ⟹ B4 ⟹ Theorem C.

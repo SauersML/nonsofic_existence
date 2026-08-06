@@ -167,6 +167,8 @@ import NonsoficGroupsExist.TailSupportReduction
 import NonsoficGroupsExist.WindowProductClosure
 import NonsoficGroupsExist.NilpotentTailKill
 import NonsoficGroupsExist.GammaReduction
+import NonsoficGroupsExist.IncomparableUnipotents
+import NonsoficGroupsExist.ShapeCalculus
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
