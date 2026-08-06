@@ -21,6 +21,9 @@ open MatrixDiagonalization
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
 variable {ι κ : Type*} [Fintype ι] [DecidableEq ι]
 variable [Fintype κ] [DecidableEq κ]
+-- `codeBijection_mem_stableUnits` is stated over a base field, so `atom_peel`
+-- has to carry one too.
+variable {k : Type*} [Field k] [Algebra k A]
 
 /-- Collapse of a diagonal code pair to the plain bijection sum. -/
 theorem codeDelta_collapse (τ σ : ι → List (Fin 2)) :
@@ -39,6 +42,8 @@ theorem codeDelta_collapse (τ σ : ι → List (Fin 2)) :
     _ = L.wordS (τ i) * L.wordT (σ i) := by
         rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ i)]
 
+-- `k` is named only in the proof; must precede the docstring.
+include k in
 /-- **The atom peel.**  If the pencil data of `u` over `(R, C)` has a
 `[t₀; t₁]`-column at `(i₁, i₂; j₀)` and the rows `i₁, i₂` vanish
 elsewhere, then along any complete code `D` on the remaining rows
@@ -108,8 +113,6 @@ theorem atom_peel [Nontrivial A]
       by_cases hi1 : i = i₁
       · subst hi1
         rw [hσi₁] at h
-        have hlen : (D d₁ ++ [(0 : Fin 2)]).length ≤
-            (D d₁ ++ [(1 : Fin 2)]).length := by simp
         have heq := h.eq_of_length (by simp)
         have := List.append_inj_right heq rfl
         simp at this
@@ -195,7 +198,7 @@ theorem atom_peel [Nontrivial A]
     rw [hu₁, L.codePairUnit_val]
     exact L.codeDelta_collapse R.word σ
   have hu₁mem : u₁ ∈ stableUnits A :=
-    L.codeBijection_mem_stableUnits hdiv R.word σ
+    L.codeBijection_mem_stableUnits (k := k) hdiv R.word σ
       (fun i j h ↦ R.prefix_free h) hR hσfree hσsum u₁ hu₁val
   -- the row collapse helper: a word meeting the intermediate code in
   -- exactly one place reduces the residual double sum to one row
@@ -243,10 +246,10 @@ theorem atom_peel [Nontrivial A]
     · rw [if_neg hp]
       have hpq : d₁ ≠ p := Ne.symm hp
       exact L.wordT_mul_wordS_of_incomparable _ _
-        ((incomparable_append_single (hDfree hpq)
-          (hDfree (Ne.symm hpq)) 1).2)
-        ((incomparable_append_single (hDfree hpq)
-          (hDfree (Ne.symm hpq)) 1).1)
+        ((incomparable_append_single (hDfree (Ne.symm hpq))
+          (hDfree hpq) 1).2)
+        ((incomparable_append_single (hDfree (Ne.symm hpq))
+          (hDfree hpq) 1).1)
   have hcol₁ : ∀ p : {i : ι // i ≠ i₂},
       L.wordT (σ i₁) * L.wordS (D p) =
       if p = d₁ then L.wordT [0] else 0 := by
@@ -257,10 +260,10 @@ theorem atom_peel [Nontrivial A]
     · rw [if_neg hp]
       have hpq : d₁ ≠ p := Ne.symm hp
       exact L.wordT_mul_wordS_of_incomparable _ _
-        ((incomparable_append_single (hDfree hpq)
-          (hDfree (Ne.symm hpq)) 0).2)
-        ((incomparable_append_single (hDfree hpq)
-          (hDfree (Ne.symm hpq)) 0).1)
+        ((incomparable_append_single (hDfree (Ne.symm hpq))
+          (hDfree hpq) 0).2)
+        ((incomparable_append_single (hDfree (Ne.symm hpq))
+          (hDfree hpq) 0).1)
   have hcolo : ∀ (i : ι) (hi2 : i ≠ i₂), i ≠ i₁ →
       ∀ p : {i : ι // i ≠ i₂},
       L.wordT (σ i) * L.wordS (D p) =
