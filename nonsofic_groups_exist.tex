@@ -211,7 +211,7 @@ is infinite, finitely generated, has property~\((T)\), and is not sofic.  In par
 The proof of Theorem~\ref{thm:A} is engineered for audit.  The two auxiliary matrices of the construction are exhibited as explicit products of elementary matrices; every remaining elementary membership follows from one explicit Whitehead identity together with explicit commutator certificates---every cylinder transposition is a single commutator of units; the ranks below four are reached by an explicit isomorphism between the elementary groups of any two ranks \(\geq2\) over \(R\) (Proposition~\ref{prop:rankequiv}); and no \(K\)-theory is used.
 
 \begin{mainthm}\label{thm:B}%
-\leanverified{\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}}%
+\leanverified{\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}\leanmod{KOne/AllRanksElementary}{glAll_eq_elementary}}%
 Let \(k\) be a finite field and let \(L=L_k(1,2)\).
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item The unit group \(L^\times\) is infinite, finitely generated, has property~\((T)\), and is not sofic.
@@ -275,7 +275,7 @@ On the paper layer, Theorems~\ref{thm:A} and~\ref{thm:D} rest on the following e
 
 On the machine layer, \emph{none of these inputs is external}.  The accompanying Lean development proves internally, in the exact forms used here: the one-way Kun decomposition, with both repairs; the Kun--Thom obstruction, in the essential form of Theorem~\ref{thm:kunthom}; property~\((T)\) for the rank-three elementary groups it uses, over every finite field, with an explicit Kazhdan pair; the non-LEF property of the witness, by the two-relator obstruction (Lemma~\ref{lem:tworelator}); and Shalom's finite-presentation theorem.  The endpoints of the development are closed theorems whose axioms are the three axioms of classical mathematics in Lean.  So the citations above carry this paper's proofs and the credit for the underlying mathematics, while the formalization independently re-proves each cited input; a reader may weight the two layers as they see fit.
 
-Theorem~\ref{thm:B} additionally uses \(K_1(L)=0\) and the GE property of purely infinite simple rings \cite{AbramsAranda06,AraGoodearlPardo02,AraBrustengaCortinas09}.  Neither remains a dependency: the GE property is proved at every rank from strong division (Lemma~\ref{lem:GEapp}), and Appendix~\ref{app:K1} proves \(K_1(L)=0\) elementarily and effectively, so the \(K\)-theoretic citations are retained as independent confirmation, and \cite{AraGoodearlPardo02} is invoked as a dependency only for the perfectness of \(L^\times\) (Proposition~\ref{prop:glel}(ii)), which no theorem of this paper consumes.
+Theorem~\ref{thm:B} additionally needs \(K_1(L)=0\), the collapse \(\GL_r=\EL_r\), and the perfectness of \(L^\times\), classically consequences of \cite{AbramsAranda06,AraGoodearlPardo02,AraBrustengaCortinas09}.  None remains a dependency: Appendix~\ref{app:K1} proves all three elementarily and effectively---\(K_1\) by the two-exit elimination, the collapse at every rank, and perfectness through the three-leaf self-similarity---so the \(K\)-theoretic citations are retained purely as independent confirmation.
 
 Theorem~\ref{thm:C} is self-contained apart from Shalom's finitely presented Kazhdan covers \cite{Shalom00}, used only for the Kazhdan refinement; the formalization proves Shalom's theorem internally as well.
 
@@ -1647,19 +1647,10 @@ using \(p_1s_1=s_1\), \(t_1p_1=t_1\), \(t_0p_0=t_0\), \(p_0s_0=s_0\), \(t_0s_1=0
 
 \subsection{\texorpdfstring{$K_1$}{K1} vanishes and \texorpdfstring{$\GL=\EL$}{GL=EL}}\label{subsec:glel}
 
-We isolate the ring-theoretic external input in the exact form used.
-
-\begin{theorem}[Ara--Goodearl--Pardo \cite{AraGoodearlPardo02}]\label{thm:agp}%
-\leanpartial{\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_mul_diag,binaryLeavitt_exists_elementary_mul_diag}\leanmod{Leavitt/LeavittSimplicity}{exists_mul_mul_eq_one}}{The rank-two GE form is Lean-backed; part (b) remains a cited input.}%
-Let \(R\) be a purely infinite simple unital ring.  Then:
-\begin{enumerate}[label=\textup{(\alph*)}]
-\item \(R\) is a GE-ring: for every \(r\geq1\), every matrix in \(\GL_r(R)\) is a product of elementary matrices and a matrix \(\diag(a,1,\dots,1)\) with \(a\in R^\times\);
-\item the natural map \(R^\times=\GL_1(R)\to K_1(R)\) is surjective and induces an isomorphism \(R^\times/[R^\times,R^\times]\cong K_1(R)\).
-\end{enumerate}
-\end{theorem}
+Every ring-theoretic fact this subsection needs is proved in Appendix~\ref{app:K1}; for context we recall the theorem of Ara--Goodearl--Pardo \cite{AraGoodearlPardo02}, of which the facts below are the \(L_k(1,2)\)-instances: a purely infinite simple unital ring \(R\) is a GE-ring (every matrix in \(\GL_r(R)\) is a product of elementary matrices and one \(\diag(a,1,\dots,1)\)), and \(R^\times/[R^\times,R^\times]\cong K_1(R)\).  Neither statement is invoked in any proof of this paper.
 
 \begin{proposition}\label{prop:glel}%
-\leanpartial{\leanmod{KOne/RefineLoopDischarge}{glTwo_eq_elementary_holds,glFour_eq_elementary_holds,stableUnits_eq_top_holds}}{$K_1(L)=0$ in Whitehead form is unconditional; the $\GL=\EL$ collapse is formalized at ranks two and four.}%
+\leanverified{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,stableUnits_eq_top_holds}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary,binaryLeavittUnits_perfect}}%
 Let \(k\) be any field and \(L=L_k(1,2)\).  Then:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \(K_1(L)=0\);
@@ -1671,7 +1662,7 @@ Let \(k\) be any field and \(L=L_k(1,2)\).  Then:
 \begin{proof}
 Parts (i) and (iii) are proved, elementarily and in full, in Appendix~\ref{app:K1}: Theorem~\ref{thm:K1app} establishes \(K_1(L)=0\) in Whitehead form---every unit \(u\) has \(\diag(u,1)\in\EL_2(L)\)---and Corollary~\ref{cor:K1consequences} deduces \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\) via the elementary diagonalization of Lemma~\ref{lem:GEapp}.  The only input of the appendix beyond the Leavitt relations is strong division (Lemma~\ref{lem:division}), which holds because \(L\) is purely infinite simple: the graph criteria of \cite{AbramsAranda06} are immediate for the rose \(R_2\) with one vertex and two loops---the single vertex admits no nontrivial hereditary saturated subset, every cycle has an exit, and the vertex lies on a cycle.
 
-For (ii): Theorem~\ref{thm:agp}(b) identifies \(K_1(L)\) with \(L^\times/[L^\times,L^\times]\), so (i) gives \(L^\times=[L^\times,L^\times]\).
+Part (ii) is Corollary~\ref{cor:K1consequences} as well: \(\Theta_{\mathcal C_3}\) identifies \(L^\times\) with \(\GL_3(L)=\EL_3(L)\), and every elementary generator is a commutator by the Steinberg relation, so \(L^\times\) is its own commutator subgroup.  (Classically, (ii) also follows from (i) and the Ara--Goodearl--Pardo identification of \(K_1\) with the abelianized unit group.)
 
 For an independent confirmation of (i), the \(K\)-theory of Leavitt path algebras \cite{AraBrustengaCortinas09} gives the exact sequence
 \[
@@ -1697,7 +1688,7 @@ The elimination of Remark~\ref{rem:elementaryK1}, written out in Appendix~\ref{a
 \subsection{Finite fields: all ranks and the unit group}\label{subsec:allranks}
 
 \begin{theorem}\label{thm:el2}%
-\leanverified{\leanmod{Leavitt/RankTwoCompression}{rankTwo_not_isSofic}}%
+\leanverified{\leanmod{Leavitt/RankTwoCompression}{rankTwo_not_isSofic}\leanmod{KOne/AllRanksElementary}{binaryLeavittRankTwo_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}\leannote{Instantiated over $L_k(1,2)$ for every finite field, by the rank-two compression itself.}}%
 Let \(k\) be a finite field and \(L=L_k(1,2)\).  Then \(\EL_2(L)=\GL_2(L)\) is infinite, finitely generated, has property~\((T)\), and is not sofic.
 \end{theorem}
 
@@ -1868,10 +1859,10 @@ Since \(\diag(uv,1)=\diag(u,1)\diag(v,1)\), \(H\) is a subgroup of \(L^\times\).
 For every nonzero \(x\in L\) there are \(p,q\in L\) with \(pxq=1\).
 \end{lemma}
 
-The first consequence is a Gaussian elimination for invertible matrices, which we prove at every rank; it is the GE property of Theorem~\ref{thm:agp}(a) in elementary form.
+The first consequence is a Gaussian elimination for invertible matrices, which we prove at every rank; it is the GE property of purely infinite simple rings \cite{AraGoodearlPardo02} in elementary form.
 
 \begin{lemma}[Elementary diagonalization]\label{lem:GEapp}%
-\leanpartial{\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_mul_diag,binaryLeavitt_exists_elementary_mul_diag}}{Rank two is formalized; the higher-rank induction is manuscript-only.}
+\leanpartial{\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_mul_diag,binaryLeavitt_exists_elementary_mul_diag}}{Rank two is formalized, and every conclusion drawn from this lemma is closed at every rank by flattening (Corollary~\ref{cor:K1consequences}); the higher-rank induction printed here is an alternative paper proof.}
 Let \(A\) be a nontrivial unital ring in which every nonzero element \(x\) admits \(p,q\) with \(pxq=1\), and let \(X\in\GL_r(A)\), \(r\geq2\).  Then there are \(E,F\in\EL_r(A)\) and \(u\in A^\times\) with
 \[
  E\,X\,F=\diag(u,1,\dots,1).
@@ -2200,15 +2191,19 @@ Let \(u\in L^\times\).  By width reduction (Lemma~\ref{lem:widthapp}), \([u]=[u'
 \subsection*{A.6.\ Consequences and effectivity}
 
 \begin{corollary}\label{cor:K1consequences}%
-\leanverified{\leanmod{KOne/RefineLoopDischarge}{glTwo_eq_elementary_holds,glFour_eq_elementary_holds}}
-For every field \(k\) and \(L=L_k(1,2)\): \(K_1(L)=0\); and \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\).
+\leanverified{\leanmod{KOne/RefineLoopDischarge}{glTwo_eq_elementary_holds,glFour_eq_elementary_holds}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary,binaryLeavittUnits_perfect}}
+For every field \(k\) and \(L=L_k(1,2)\): \(K_1(L)=0\); \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\); and \(L^\times\) is perfect.
 \end{corollary}
 
 \begin{proof}
-For \(X\in\GL_r(L)\), Lemma~\ref{lem:GEapp} writes \(EXF=\diag(u,1,\dots,1)\), and Theorem~\ref{thm:K1app} places the diagonal factor in \(\EL_r(L)\); hence \(X\in\EL_r(L)\).  The same normal form computes \(K_1\): every class of \(\GL_r(L)/\EL_r(L)\)-stabilized is represented by \(\diag(u,1,\dots,1)\), which is elementary.
+\emph{Rank two.}  For \(X\in\GL_2(L)\), Lemma~\ref{lem:GEapp} writes \(EXF=\diag(u,1)\), and Theorem~\ref{thm:K1app} places the diagonal factor in \(\EL_2(L)\); hence \(\GL_2(L)=\EL_2(L)\).
+
+\emph{Every rank, by flattening.}  The coefficient isomorphism \(\Theta_{\mathcal C}^{-1}:L\cong M_n(L)\) of Proposition~\ref{prop:selfsim} carries \(\EL_p\) onto \(\EL_p\) entrywise, and block flattening identifies \(\EL_p(M_q(L))=\EL_{pq}(L)\) inside \(\GL_{pq}(L)\) for \(p\geq2\) (the two inclusions proved in Proposition~\ref{prop:rankequiv}); both maps are restrictions of ring isomorphisms of the ambient matrix rings, so each transports the \emph{equality} \(\GL=\EL\).  Starting from rank two: \(\GL_2(L)=\EL_2(L)\) transports through \(L\cong M_n(L)\) and flattening to \(\GL_{2n}(L)=\EL_{2n}(L)\) for every \(n\); and for arbitrary \(r\geq2\), the same two maps with the roles of \(r\) and \(2\) exchanged transport \(\GL_{2r}=\EL_{2r}\), already established, back down to \(\GL_r(L)=\EL_r(L)\).  This is the route the formalization takes; alternatively, Lemma~\ref{lem:GEapp} at rank \(r\) applies directly.
+
+\emph{\(K_1\) and perfectness.}  The normal form computes \(K_1\): every stabilized class of \(\GL_r(L)/\EL_r(L)\) is represented by \(\diag(u,1,\dots,1)\), which is elementary, so \(K_1(L)=0\).  For perfectness, \(\Theta_{\mathcal C_3}\) restricts to a group isomorphism \(\GL_3(L)\cong L^\times\), and \(\GL_3(L)=\EL_3(L)\) is perfect: by the Steinberg relation, every generator \(x_{ij}(a)=[\,x_{il}(a),x_{lj}(1)\,]\) with \(l\notin\{i,j\}\) is a commutator.  Hence \(L^\times=[L^\times,L^\times]\).
 \end{proof}
 
-The proof of Theorem~\ref{thm:K1app} is an algorithm, and every step is effective Gaussian elimination over \(k\): the width reduction processes one graded component per corner move; the pencil form is a change of basis at depth \(m+1\); each loop pass computes a kernel vector or a left inverse of the stack; and both exits are reshapes along explicitly constructed codes followed by the window inductions, each step of which is again explicit.  For a unit supported on monomials of depth at most \(d\), all codes involved have at most \(2^{d+2}\) words and the loop executes at most \(2^{d+2}\) times, giving the complexity bound of Remark~\ref{rem:effectiveWH}: the elementary factorization of \(\diag(u,1,\dots,1)\) is computed in time polynomial in \(2^d\) and in the number of monomials of \(u\).
+The proof of Theorem~\ref{thm:K1app} is an algorithm, and every step is effective Gaussian elimination over \(k\): the width reduction processes one graded component per corner move; the pencil form is a change of basis at depth \(m+1\); each loop pass computes a kernel vector or a left inverse of the stack; and both exits are reshapes along explicitly constructed codes followed by the window inductions, each step of which is again explicit.  For a unit supported on monomials of depth at most \(d\), all codes involved have at most \(2^{d+2}\) words and the loop executes at most \(2^{d+1}\) times, giving the complexity bound of Remark~\ref{rem:effectiveWH}: the elementary factorization of \(\diag(u,1,\dots,1)\) is computed in time polynomial in \(2^d\) and in the number of monomials of \(u\).
 
 \section{The Lean formalization}\label{app:lean}
 
@@ -2226,7 +2221,7 @@ The accompanying development
  \url{https://github.com/SauersML/nonsofic_existence}
 \end{center}
 is a Lean~4 library (toolchain \texttt{v4.32.2}, on \texttt{mathlib4} at the
-same tag) of roughly \(260\) modules.  It is not a transcription of this
+same tag) of a few hundred modules.  It is not a transcription of this
 paper.  It is an independent formal proof of the same headline theorem, and in
 several places it proves more than the paper claims: Kun's theorem
 (Theorem~\ref{thm:kun}) and the Kun--Thom obstruction (Theorem~\ref{thm:kunthom})
@@ -2240,7 +2235,9 @@ The public endpoints are
  \texttt{universalLeavittEL4\_not\_isSofic}, \quad
  \texttt{exists\_finitelyPresented\_nonsofic\_group},
 \end{center}
-all in the module \texttt{MainResults}.  Each is a closed theorem: it takes no
+all in the module \texttt{MainResults}; the module \texttt{Public} is the
+curated reading path, naming each public declaration against the theorem of
+this paper it establishes.  Each endpoint is a closed theorem: it takes no
 hypothesis naming Kun, Kun--Thom, or Ershov--Jaikin-Zapirain, and no
 \(\mathrm{Nonempty}\) premise standing in for a construction.  The
 property-\((T)\), compression, non-LEF, and expander-decomposition inputs are
@@ -2368,13 +2365,14 @@ below it uses it.
 \subsection*{What is not formalized}
 
 Beyond Lemma~\ref{lem:fplef}, which is absent because the Lean proof does not
-need it, the gaps are those marked \textit{formalized in part} in the margins:
-the arbitrary-finitely-generated-ring form of Theorem~\ref{thm:ejz} (the
-rank-three finite-field cases the endpoints use are proved, in every
-characteristic); part~(b) of Theorem~\ref{thm:agp}, which remains a cited
-input; the higher-rank induction of Lemma~\ref{lem:GEapp} and with it the
-\(\GL_r=\EL_r\) collapse of Proposition~\ref{prop:glel}, formalized at ranks
-two and four rather than all ranks; the essential-expander definition
+need it---the two-relator obstruction replaces the residual-finiteness
+route, and the lemma is used only in commentary---the gaps are those marked
+\textit{formalized in part} in the margins, and they have shrunk to three:
+the higher-rank induction printed in Lemma~\ref{lem:GEapp}, which the
+formal route does not take (it reaches every rank by the flattening
+transport of \(\texttt{AllRanksElementary}\), so the \emph{statements} at
+every rank are closed; only this particular alternative proof is
+paper-only); the essential-expander definition
 (Definition~\ref{def:essential}), which the library realizes through the
 matching-certificate repair rather than as a definition of its own; and the
 complexity bounds of Remark~\ref{rem:effectiveWH}, whose underlying
