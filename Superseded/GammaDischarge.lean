@@ -1,7 +1,7 @@
 import NonsoficGroupsExist.ZeroKOne
 import NonsoficGroupsExist.PureTailNilpotency
 import NonsoficGroupsExist.RankNormalForm
-import NonsoficGroupsExist.GammaReduction
+import Superseded.GammaReduction
 import NonsoficGroupsExist.LeavittSimplicity
 
 /-!

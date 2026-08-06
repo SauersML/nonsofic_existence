@@ -142,7 +142,6 @@ import NonsoficGroupsExist.Leavitt
 import NonsoficGroupsExist.UniversalLeavittOver
 import NonsoficGroupsExist.LeavittNormalForm
 import NonsoficGroupsExist.DiagonalClassGroup
-import NonsoficGroupsExist.DiagonalDescent
 import NonsoficGroupsExist.GLIsElementary
 import NonsoficGroupsExist.LeavittDiagonalClass
 import NonsoficGroupsExist.BinaryLeavittDiagonal
@@ -166,10 +165,8 @@ import NonsoficGroupsExist.ResidualNormalForm
 import NonsoficGroupsExist.ResidualMoves
 import NonsoficGroupsExist.ResidualReduction
 import NonsoficGroupsExist.BalancedRegularity
-import NonsoficGroupsExist.TailSupportReduction
 import NonsoficGroupsExist.WindowProductClosure
 import NonsoficGroupsExist.NilpotentTailKill
-import NonsoficGroupsExist.GammaReduction
 import NonsoficGroupsExist.IncomparableUnipotents
 import NonsoficGroupsExist.ShapeCalculus
 import NonsoficGroupsExist.GradedComponents
@@ -179,9 +176,6 @@ import NonsoficGroupsExist.DegreeShapeBridge
 import NonsoficGroupsExist.CylinderCornerRank
 import NonsoficGroupsExist.ZeroKOne
 import NonsoficGroupsExist.WidthTwoReduction
-import NonsoficGroupsExist.GammaDischarge
-import NonsoficGroupsExist.KillMoves
-import NonsoficGroupsExist.BlockMoveTailKill
 import NonsoficGroupsExist.WindowNonnegReduction
 import NonsoficGroupsExist.OppositeTranspose
 import NonsoficGroupsExist.ThetaStable
@@ -189,12 +183,8 @@ import NonsoficGroupsExist.WindowNonposReduction
 import NonsoficGroupsExist.CodeChangeInfrastructure
 import NonsoficGroupsExist.CodeChangeSwap
 import NonsoficGroupsExist.CodeChangeUnits
-import NonsoficGroupsExist.TriangularFactorization
-import NonsoficGroupsExist.RankOneNormalForm
-import NonsoficGroupsExist.NonnegUnitStructure
 import NonsoficGroupsExist.PencilCore
 import NonsoficGroupsExist.PencilForm
-import NonsoficGroupsExist.WindowDichotomy
 import NonsoficGroupsExist.CodePairTransport
 import NonsoficGroupsExist.CodeScalarMoves
 import NonsoficGroupsExist.CodeRelativeFullness

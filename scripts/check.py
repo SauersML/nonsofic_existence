@@ -31,6 +31,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 LIB = "NonsoficGroupsExist"
 
+# Every Lean library in the repository.  `Superseded` holds superseded
+# developments: off the trust surface, since the audit walks the environment of
+# `NonsoficGroupsExist` only and never loads it -- but still compiled, and
+# still scanned here.  Superseded is not the same as unchecked, and a `sorry`
+# in code CI builds is a defect wherever it lives.
+LIBS = (LIB, "Superseded")
+
 IMPORT_RE = re.compile(r"^import\s+([A-Za-z0-9_.]+)", re.MULTILINE)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -104,20 +111,30 @@ class Findings:
         return 1 if self.rows else 0
 
 
-def module_files(root: Path) -> dict[str, Path]:
-    """Module name -> path, for every ``.lean`` file under the library."""
+def module_files(root: Path, lib: str = LIB) -> dict[str, Path]:
+    """Module name -> path, for every ``.lean`` file under ``lib``."""
     out = {}
-    lib_root = root / f"{LIB}.lean"
+    lib_root = root / f"{lib}.lean"
     if lib_root.exists():
-        out[LIB] = lib_root
-    for p in sorted((root / LIB).rglob("*.lean")):
-        rel = p.relative_to(root).with_suffix("")
-        out[".".join(rel.parts)] = p
+        out[lib] = lib_root
+    if (root / lib).is_dir():
+        for p in sorted((root / lib).rglob("*.lean")):
+            rel = p.relative_to(root).with_suffix("")
+            out[".".join(rel.parts)] = p
+    return out
+
+
+def all_module_files(root: Path) -> dict[str, Path]:
+    """Every module of every library in the repository."""
+    out: dict[str, Path] = {}
+    for lib in LIBS:
+        out.update(module_files(root, lib))
     return out
 
 
 def import_closure(modules: dict[str, Path], start: str) -> set[str]:
-    """Modules reachable from ``start`` by following in-library imports."""
+    """Modules reachable from ``start`` by following imports within its library."""
+    lib = start.split(".", 1)[0]
     seen: set[str] = set()
     stack = [start]
     while stack:
@@ -127,7 +144,7 @@ def import_closure(modules: dict[str, Path], start: str) -> set[str]:
         seen.add(m)
         text = modules[m].read_text(encoding="utf-8", errors="replace")
         for imp in IMPORT_RE.findall(text):
-            if imp == LIB or imp.startswith(LIB + "."):
+            if imp == lib or imp.startswith(lib + "."):
                 stack.append(imp)
     return seen
 
@@ -142,21 +159,24 @@ def check_import_closure(root: Path, f: Findings) -> None:
     because neither ever loaded it.  An orphan is therefore either a missing
     import or dead code to delete, and the repository cannot tell you which.
     """
-    modules = module_files(root)
-    if LIB not in modules:
-        f.add("import closure", f"root module {LIB}.lean not found")
-        return
-    reachable = import_closure(modules, LIB)
-    for name in sorted(modules):
-        if name not in reachable:
-            rel = modules[name].relative_to(root)
-            f.add("orphan module",
-                  f"{rel}: not in the import closure of {LIB}.lean, so `lake build` "
-                  f"never compiles it and no audit ever sees it")
+    for lib in LIBS:
+        modules = module_files(root, lib)
+        if not modules:
+            continue
+        if lib not in modules:
+            f.add("import closure", f"root module {lib}.lean not found")
+            continue
+        reachable = import_closure(modules, lib)
+        for name in sorted(modules):
+            if name not in reachable:
+                rel = modules[name].relative_to(root)
+                f.add("orphan module",
+                      f"{rel}: not in the import closure of {lib}.lean, so `lake build` "
+                      f"never compiles it and no audit ever sees it")
 
 
 def check_forbidden(root: Path, f: Findings) -> None:
-    for name, path in sorted(module_files(root).items()):
+    for name, path in sorted(all_module_files(root).items()):
         text = path.read_text(encoding="utf-8", errors="replace")
         rel = path.relative_to(root)
         for label, pattern in FORBIDDEN:
@@ -363,7 +383,7 @@ def main() -> int:
         return self_test()
     f = run(REPO)
     status = f.report()
-    n = len(module_files(REPO))
+    n = len(all_module_files(REPO))
     verdict = "clean" if status == 0 else "FINDINGS"
     print(f"source scan: {n} modules, {len(f.rows)} findings, {verdict}")
     return status

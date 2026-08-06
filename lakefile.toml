@@ -1,6 +1,6 @@
 name = "NonsoficGroupsExist"
 version = "0.1.0"
-defaultTargets = ["NonsoficGroupsExist"]
+defaultTargets = ["NonsoficGroupsExist", "Superseded"]
 
 [[require]]
 name = "mathlib"
@@ -22,3 +22,14 @@ moreLeanArgs = ["-DwarningAsError=true"]
 name = "Audit"
 srcDir = "scripts"
 roots = ["Audit.DeclFilter", "Audit.Scan", "Audit.Plants"]
+
+# Superseded developments.  A separate library, not a subdirectory, and named
+# `Superseded` rather than `Archive` because Mathlib ships a library called
+# `Archive` and the target name resolves to that one.  The library root does
+# not import it, so
+# `scripts/Audit.lean` -- which walks the environment of that root -- never
+# sees these declarations.  It is a default target so CI still builds it and
+# it cannot rot; it is off the trust surface, not out of maintenance.
+[[lean_lib]]
+name = "Superseded"
+moreLeanArgs = ["-DwarningAsError=true"]
