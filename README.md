@@ -378,6 +378,14 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       scalar left inverse of `[B₀;B₁]` annihilates every positive
       component of every inverse entry, at arbitrary mixed-depth
       codes (the mixed-code replacement for the window dichotomy)
+    - [x] the terminal node (`BalancedCodePencil`,
+      `StackDichotomy`, `RefinedCodes`): word-combination
+      independence, the stack dichotomy (scalar left inverse or
+      kernel vector), uniform code refinements, and the terminal
+      theorem — a unit whose inverse has balanced corner entries
+      factors as (code bijection)·(scalar move): the scalar matrix
+      is forced square and invertible because a kernel vector would
+      give a vanishing column/row of a unit
     - [ ] the refinement move and the round recursion: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the

@@ -2981,3 +2981,41 @@ REMAINING for BalancedCodePencil (installment 2, next session):
 THEN: mirror entrywise kill (θ-transport of entry_window_nonpos —
 gives entries nonneg when (A₀|A₁) full); M5 shell; refine
 termination; M6.
+
+## Session 52: BalancedCodePencil COMPLETE + StackDichotomy
+balanced_entries_mem_stableUnits fully written (no sorries): common
+level (choose+sup), scalar data (exists_balancedEmbed_eq per entry),
+the four-fold reindex hval (codePair_partition + rfl-embed-expansion
++ append-collapses + sum_prod_type/sum_comm), zero-column hinj
+(x₀ := Σ v₀•S(RM q); u⁻¹x₀ = 0 by orthogonality collapse + map_sum;
+x₀ = u(u⁻¹x₀) = 0; wordS_combo), zero-row hinj' (p₀-sum FIRST, then
+sum_comm and map_sum against hu₀ — note the vanishing only holds
+after summing p₀!), hcard via mulVecLin-injectivity + finrank_pi,
+ω := codePairUnit-δδ along equivOfCardEq (AtomPeel pattern),
+hu₂val via codePair_mul + δ-collapse + sum_equiv-reindex,
+hdet via exists_mulVec_eq_zero_iff + hinj, codeScalar_unit_mem,
+u⁻¹ = ω⁻¹(ω u⁻¹).
+REMAINING for goal (1):
+ (i) mirror entrywise kill: entries NONNEG when (A₀|A₁) full — via
+     θ-transport of entry_window_nonpos_of_B_full (θ̂ swaps the
+     pencil B-data with A-data and reverses entries:
+     θ̂(T(Cⱼ)u⁻¹S(Rᵢ)) = T(Rᵢ)θ̂(u)⁻¹-hmm θ̂(u⁻¹)-S(Cⱼ);
+     thetaHat_mem_span_degree flips the window sign) — OR prove
+     symmetrically with s_z-right-strips (bottom equations).
+ (ii) window-intersection lemma: x ∈ span[−N,0] ∩ span[0,N'] ⟹
+     x ∈ span[0,0] (components_unique on the two decompositions).
+ (iii) M5 shell: strong induction on card ι + card κ; branches via
+     stack_left_inverse_or_kernel ×2:
+     - both left/right-inverses ⟹ EntrywiseKill + mirror + (ii) ⟹
+       balanced entries ⟹ BalancedCodePencil ⟹ H;
+     - B-kernel v₀: if also Cm·v₀ = 0-condition (check the C-column
+       against v₀!): full_extraction; else refine-branch;
+     - A-side mirror likewise (mirror_extraction);
+     NOTE the extraction needs ker[B;C] (WITH C); the dichotomy
+     gives ker[B] only — the M5 branch logic must test the
+     C-inclusive stack for extraction and fall to refine when only
+     the C-less kernel exists (the stuck branch).
+ (iv) refine termination (open; 583/583 verified; the coker-A
+     structural fact from session 45b is the key).
+ (v) M6: exists_pencil_form at fullBinaryCode-codes (uniform level)
+     feeding M5; conclude NarrowReduction k; rewire; cleanup.
