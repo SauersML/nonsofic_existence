@@ -190,6 +190,7 @@ import NonsoficGroupsExist.TriangularFactorization
 import NonsoficGroupsExist.RankOneNormalForm
 import NonsoficGroupsExist.NonnegUnitStructure
 import NonsoficGroupsExist.PencilCore
+import NonsoficGroupsExist.PencilForm
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

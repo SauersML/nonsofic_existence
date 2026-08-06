@@ -2461,3 +2461,23 @@ FORMALIZATION PLAN (in order):
     equations via exists_components on the inverse, corner strips).
  M5 PencilRecursion.lean: Steps 3–4 induction.
  M6 NarrowDischarge.lean: Step 5 ⟹ NarrowReduction k; rewire.
+
+## Session 43b: Pencil pipeline M1 + M2 WRITTEN
+- PencilCore.lean (M1): balancedEmbed_unit_mem_stableUnits (scalar
+  moves ∈ H via levelSpan) and sum_incomparable_unipotent_mem[′]
+  (block unipotents with disjoint row/col supports ∈ H, by
+  cons-induction peeling incomparable unipotents; cross terms die on
+  prefixCode_orthogonal).  Transport layer itself was ALREADY
+  compiled: prefixRingEquiv (fullBinaryCode n) : M_{2ⁿ}(A) ≃+* A with
+  matrixRingEquiv_apply/symm_apply and unitsEquiv.
+- PencilForm.lean (M2): wordT_balancedEmbed_wordS (entry extraction
+  via RingEquiv.symm_apply_apply), smul_t/s_expand, pencil_entry_A/B
+  (asymmetric peeling: row word's LAST letter → t-generator with
+  balanced residue evaluated at level m via a·s_z splits; column
+  word's LAST letter → s-generator via s_z·(t_z·b) splits),
+  exists_pencil_form: every narrow element = level-(m+1) matrix with
+  entries A₀ᵢⱼ•t₀ + A₁ᵢⱼ•t₁ + Cᵢⱼ•1 + B₀ᵢⱼ•s₀ + B₁ᵢⱼ•s₁.
+NEXT (M3–M6): Smith-on-C elimination; C=0 branch dichotomy (parity,
+rank arguments on 𝔅/Ā via graded equations of the inverse matrix);
+the τ/ς extraction recursion; NarrowDischarge.  See session 43 notes
+for the complete paper proof.
