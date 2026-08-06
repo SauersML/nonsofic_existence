@@ -1668,3 +1668,22 @@ mathematics settled in sessions 24–25:
 - Alternative still open: BFS move-search engine to machine-discover
   H-reduction witnesses for the 10 concrete instances (swaps +
   balanced pivots + unipotents), then generalize.  ENGINE NEXT TURN.
+
+## Session 31c: A-nilpotency — the toy case resolves; BVP structure
+- B = 0 toy: U = A + T: polynomial cofactor P with (A+T)P = T^r
+  forces P_i = ±A^{r-1-i} by the (now clean, first-order) downward
+  recursion, and the bottom boundary A·P₀ = 0 gives **A^r = 0** —
+  the mechanism works exactly.  Conversely non-nilpotent A (e.g. t₀)
+  makes A+T non-invertible over k(T) (graded independence of powers
+  blocks resummation).
+- General B ≠ 0: the system A P_i + P_{i-1} + B P_{i-2} = δ_{ir} is
+  a two-point BOUNDARY VALUE problem (the BP_{i-2} term refers
+  downward), not a recursion; the cofactor P is UNIQUE (U regular);
+  boundary: A P₀ = P₀ A = 0.  The claim A^r-ish = 0 should follow
+  from solvability + uniqueness + the bottom boundary — likely via
+  eliminating B by the SAME grouped-coefficient trick as (P)-N≥2
+  (group all paths reaching depth i into a single coefficient).
+  Concretely: iterate the substitution P_{i-1} = δ − AP_i − BP_{i-2}
+  into itself to express P_{-1} = 0 as (grouped polynomial in A, B
+  acting on seeds) — the resulting identity at the bottom is the
+  nilpotency statement.  FINISH NEXT TURN.
