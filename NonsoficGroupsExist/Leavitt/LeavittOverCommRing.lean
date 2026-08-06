@@ -14,7 +14,8 @@ coefficients.  This module restates the construction at that generality.
 The case `R = ℤ` is the *integral* binary Leavitt algebra `L_ℤ(1,2)`, the
 coefficient ring for which the property-`(T)` input of
 Ershov–Jaikin-Zapirain is stated in the literature but not yet formalized
-in this library; `IntegralConditional` consumes the algebra built here.
+in this library; a formalization of that input would apply
+`GeneralCornerTheorem.corner_not_isSofic` to the algebra built here.
 
 Concretely, `CommRingLeavitt.LeavittAlgebra R` is the quotient of the free
 associative `R`-algebra on `s₀,s₁,t₀,t₁` by exactly

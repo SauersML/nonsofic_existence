@@ -194,7 +194,7 @@ The library follows the paper's structure; each directory is a section.
 | `KunThom/` | §2.5 | The centralizer obstruction, proved (with the relation-to-permutation repair) |
 | `Matching/` | §3 | The five finite lemmas: refinement, conservation, pinning, selection, completion |
 | `Criterion/` | §4 | Median normalization, matching, localization; the compression–centralizer theorem |
-| `Leavitt/` | §5–§6 | Leaf calculus, self-similarity, rank equivalence, compressors, the corner witness; the `d`-ary corner route, the general-rank corner theorem, and the integral conditionals |
+| `Leavitt/` | §5–§6 | Leaf calculus, self-similarity, rank equivalence, compressors, the corner witness; the `d`-ary corner route, the general-rank corner theorem, and the integral finite-generation layer |
 | `PropertyT/` | §5 | Property `(T)` at rank three over every finite field, from an explicit `A₂` gap |
 | `KOne/` | Appendix A | The elementary `K₁` elimination: windows, pencils, the two-exit loop, all-ranks `GL = EL` |
 | `Covers/` | §9 | The finite-table and Kazhdan finitely presented covers |

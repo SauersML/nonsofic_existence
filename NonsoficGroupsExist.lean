@@ -146,7 +146,7 @@ import NonsoficGroupsExist.Leavitt.AryCorner
 import NonsoficGroupsExist.Leavitt.FamilyRankFour
 import NonsoficGroupsExist.Leavitt.RawSwapCompressors
 import NonsoficGroupsExist.Leavitt.LeavittOverCommRing
-import NonsoficGroupsExist.Leavitt.IntegralConditional
+import NonsoficGroupsExist.Leavitt.IntegralGeneration
 import NonsoficGroupsExist.Leavitt.ElementaryPerfect
 import NonsoficGroupsExist.Leavitt.AryProfile
 import NonsoficGroupsExist.Leavitt.SelfSimilarityAlgebra
@@ -154,7 +154,6 @@ import NonsoficGroupsExist.Leavitt.PlaneEmbedding
 import NonsoficGroupsExist.Leavitt.GeneralRankWords
 import NonsoficGroupsExist.Leavitt.GeneralScheme
 import NonsoficGroupsExist.Leavitt.GeneralCornerTheorem
-import NonsoficGroupsExist.Leavitt.IntegralGeneralCorner
 import NonsoficGroupsExist.Sofic.LEFSofic
 import NonsoficGroupsExist.Sofic.FreeGroupResiduallyFinite
 import NonsoficGroupsExist.Endpoint.QuotientNonclosure
@@ -276,8 +275,6 @@ import NonsoficGroupsExist.Monsters.Terminality
 import NonsoficGroupsExist.Monsters.TwoConjugacyClasses
 import NonsoficGroupsExist.Monsters.VerbalCompleteness
 import NonsoficGroupsExist.Monsters.Protection
-import NonsoficGroupsExist.Monsters.CountableEmbedding
-import NonsoficGroupsExist.Monsters.LeavittMonsters
 import NonsoficGroupsExist.Endpoint.Audit
 import NonsoficGroupsExist.Endpoint.Public
 

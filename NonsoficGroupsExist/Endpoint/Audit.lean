@@ -12,7 +12,7 @@ import NonsoficGroupsExist.KOne.RefineLoopDischarge
 import NonsoficGroupsExist.Kazhdan.ShalomFinitePresentation
 import NonsoficGroupsExist.Covers.KazhdanCover
 import NonsoficGroupsExist.Leavitt.FamilyRankFour
-import NonsoficGroupsExist.Leavitt.IntegralConditional
+import NonsoficGroupsExist.Leavitt.IntegralGeneration
 import NonsoficGroupsExist.Leavitt.RawSwapCompressors
 import NonsoficGroupsExist.Leavitt.SelfSimilarityAlgebra
 import NonsoficGroupsExist.Leavitt.PlaneEmbedding
@@ -23,7 +23,6 @@ import NonsoficGroupsExist.Sofic.Normalization
 import NonsoficGroupsExist.Leavitt.FamilyVEmbedding
 import NonsoficGroupsExist.Sofic.FreeGroupResiduallyFinite
 import NonsoficGroupsExist.Endpoint.QuotientNonclosure
-import NonsoficGroupsExist.Leavitt.IntegralGeneralCorner
 
 /-!
 # Human-readable axiom report

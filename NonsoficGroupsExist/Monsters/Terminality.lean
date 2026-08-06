@@ -16,8 +16,9 @@ property of soficity that `Sofic/SoficTransfer` already proves --
 `isSofic_of_injective`.  No small-cancellation input is involved, and nothing
 in this file is specific to any particular construction: the hypotheses are
 `IsSimpleGroup` and `¬ IsSofic`, so the conclusions apply to any simple
-nonsofic group, however obtained.  `Monsters/LeavittMonsters` supplies the
-nonsofic half from this library's own witness.
+nonsofic group, however obtained.  No such group is constructed in this
+library; the small-cancellation constructions that produce them are
+paper-only.
 
 The soficity of finite groups, used for the finite-quotient and
 quotient-minimality statements, is the positive control
