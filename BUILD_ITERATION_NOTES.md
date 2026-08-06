@@ -2343,3 +2343,30 @@ rank-1 code-change pivots; (3) formalize: PencilTransport.lean
 (corner recoding ≅ + H-transport), PencilElimination.lean (Smith +
 clearing), PencilClassification.lean ((Q-pencil)) → discharge
 TriangularFactorization.
+
+## Session 42d: (Q-pencil) constraints derived
+For V = A₀t₀ + A₁t₁ + B₀s₀ + B₁s₁ (C = 0) invertible over M_m(L):
+1. PARITY: V has only odd degrees ⟹ V·X_even = 0 ⟹ X := V⁻¹ is
+   supported on ODD degrees only.
+2. If 𝔅 := [B₀;B₁] (2m×m scalar) had full column rank m, the top
+   equation B∘X_T = 0 (T ≥ 1) kills X_T (left-multiply by t_y and use
+   a scalar left inverse of 𝔅), forcing X = X_{−1} pure; then the
+   balanced part of V·X_{−1} = 1 splits over the M₂-corner blocks
+   into  Bᵢ·Ξⱼ = δᵢⱼ·I_m  (Ξⱼ := X_{−1}sⱼ ∈ M_m(L₀)), i.e.
+   𝔅·(Ξ₀|Ξ₁) = I_{2m} — impossible: row-reduce 𝔅 by G ∈ GL_{2m}(k)
+   to put ≥ m zero rows; those rows of G·I_{2m} can't be zero.
+   CONCLUSION: rank 𝔅 < m, and dually rank(A₀|A₁) < m (row rank),
+   via the mirrored bottom equations on X·V = 1.
+3. Hence ∃ v ≠ 0 with B₀v = B₁v = 0: column V·v = (A₀v)t₀ + (A₁v)t₁
+   is PURE-t (and dually a pure-s row) — the Kronecker
+   minimal-index chains begin.  Expected endgame: induction peeling
+   Kronecker chains until the pencil is a direct sum of shift blocks
+   = pencil forms of unbalanced code-change units; each peel uses a
+   stabilized block move (the pure-t column as P with its scalar
+   content pivoted by GL_m(k)).
+Everything in 1–2 is elementary and formalizable with the compiled
+graded-component machinery.  NEXT: finish the peeling induction
+(does a pure-t column always split off a shift block after
+inflation?), python-check on random invertible C = 0 pencils
+(construct from unbalanced code-changes, e.g. shifts +2/−2 at
+staggered depths), then formalize the pencil pipeline.
