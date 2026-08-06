@@ -2603,3 +2603,31 @@ element) — then recurse as L-units, no matrices).
   never creates A-content), needs a second tier for rank-preserving
   steps.  Next session: settle code-relative statements + termination
   (python experiments on small pencils can guide), then M4/M5.
+
+## Session 44b: termination probe + recursion without padding
+- experiments/pencil_loop.py (exact F2 monomial arithmetic, fresh):
+  random narrow units (products of incomparable unipotents, cylinder
+  transpositions, ρ-type code changes, filtered to window [−1,1]),
+  full round loop [T1/T2 rank checks → extraction availability →
+  GL-normalize + refine a B-free column/row].  RESULT: 120/120 reach
+  extraction; worst case needed 2 refinements; no illegal entries, no
+  stuck states.  Strong evidence for within-round termination.
+- NO-PADDING REALIZATION: the cross-round recursion needs no
+  squaring-up at all — matVal generalizes to a PAIR of complete
+  prefix codes of DIFFERENT sizes (v := Σ S(rᵢ)·E(i,j)·T(cⱼ); unit
+  transport works since Σ p_r = 1 = Σ p_c).  The extracted middle M̃
+  re-embeds along any complete codes with |R'| resp. |C'| words as an
+  honest NARROW UNIT whose pencil is M̃ verbatim; total size |R'|+|C'|
+  strictly decreases each round (a, b ≥ 1 blocks extracted).  So
+  termination across rounds is BY SIZE; only within-round refinement
+  termination needs a proof (probe: ≤ 2 in practice; conjecture: the
+  A-stack rank strictly drops per refinement round or extraction
+  becomes available — prove next session).
+- README now tracks the NarrowReduction program as a checklist under
+  B4; tick items as modules land (per user request).
+REMAINING LEAN (in order): M4a mixed-code matVal + unit transport
+(generalize PencilCore/prefixRingEquiv to code pairs); M4b the
+extraction lemma; M4c refinement legality lemma (pure bookkeeping:
+E(i,j0) = E(i,j)·s₀ identities); M5 the round recursion (strong
+induction on |R|+|C|); M6 NarrowDischarge → NarrowReduction k; then
+cleanup + full build.
