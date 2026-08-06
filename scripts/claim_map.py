@@ -152,6 +152,16 @@ def audit_report_closure(repo: Path | None = None) -> set[str]:
     return seen
 
 
+def module_path(module: str, repo: Path | None = None) -> Path | None:
+    """The file a margin note's module name refers to, wherever it now lives."""
+    base = Path(repo) if repo is not None else REPO
+    direct = base / LIB / f"{module}.lean"
+    if direct.is_file():
+        return direct
+    matches = sorted((base / LIB).rglob(f"{module.rsplit('/', 1)[-1]}.lean"))
+    return matches[0] if len(matches) == 1 else None
+
+
 def resolve(claims: list[Claim], repo: Path | None = None
             ) -> tuple[dict[str, set[str]], list[str]]:
     """Return the module→declaration index and every unresolved reference."""
@@ -163,9 +173,13 @@ def resolve(claims: list[Claim], repo: Path | None = None
     problems: list[str] = []
     for claim in claims:
         for module, decl in claim.declarations:
-            if not (base / LIB / f"{module}.lean").is_file():
+            # A note may name a module either by bare name or by path within the
+            # library.  Resolving both means moving a module into a
+            # subdirectory is not, by itself, a broken reference: the paper
+            # names `Whitehead`, and `Leavitt/Whitehead.lean` answers to it.
+            if not module_path(module, base):
                 problems.append(f"{claim.label}: no such module {LIB}/{module}.lean")
-            elif decl not in declared.get(module, set()):
+            elif decl not in declared.get(module.rsplit("/", 1)[-1], set()):
                 elsewhere = sorted(m for m, names in declared.items() if decl in names)
                 hint = f" (declared in {', '.join(elsewhere)})" if elsewhere else ""
                 problems.append(f"{claim.label}: {module}.lean does not declare `{decl}`{hint}")
