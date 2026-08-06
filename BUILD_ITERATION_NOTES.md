@@ -3019,3 +3019,29 @@ REMAINING for goal (1):
      structural fact from session 45b is the key).
  (v) M6: exists_pencil_form at fullBinaryCode-codes (uniform level)
      feeding M5; conclude NarrowReduction k; rewire; cleanup.
+
+## Session 53: M5 SHELL + M6 DISCHARGE WRITTEN — chain closed mod ONE Prop
+- EntrywiseKillMirror.lean: mem_balanced_of_nonpos_nonneg (component
+  uniqueness on the two window decompositions),
+  entry_window_nonneg_of_A_full (θ-transport of the direct kill:
+  entries of (θu)⁻¹ are θ̂ of entries of u⁻¹ with codes swapped;
+  thetaHat_mem_span_degree flips the window).
+- MasterInduction.lean: def StuckReduction (the isolated refinement
+  configuration: pencil unit, no C-inclusive kernel on either side,
+  but a C-less kernel exists); pencil_unit_mem — strong induction on
+  card ι + card κ: empty-index contradiction, column/row extraction
+  branches recursing via full_extraction/mirror_extraction
+  (card_subtype_compl arithmetic), both-stacks-full terminal via the
+  two kills + intersection + balanced_entries_mem_stableUnits, and
+  the two stuck arrivals dispatched to StuckReduction.
+- NarrowDischarge.lean: narrowReduction_of_stuckReduction —
+  exists_pencil_form at fullBinaryCode(m+1) + pencil_unit_mem +
+  stableUnits_le_centralClassGroup.  THE ENTIRE K₁-VANISHING CHAIN
+  (NarrowReduction → ScalarReduction → B4 → GL = EL → Theorem C) NOW
+  RESTS ON THE SINGLE PROP StuckReduction k.
+REMAINING for goal (1): discharge StuckReduction (the refinement
+termination argument — 583/583 machine-verified; the batch-refine +
+coker-A structural fact from session 45b is the plan); then
+retire/derive TriangularFactorization, refresh stale docstrings,
+audit, full build.  Then goal (2): manuscript rewrite; goal (3):
+novel results.
