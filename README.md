@@ -400,7 +400,10 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       statement `StuckReduction k` — the ENTIRE `K₁`-vanishing chain
       (`NarrowReduction → ScalarReduction → B4 → GL = EL`) rests on
       one remaining Prop
-    - [ ] the refinement move and the round recursion: `s`-free
+    - [x] strict negativity (`StrictNegativePencil`): a full `B`-stack kills the balanced entry components too — the inverse entries live in `[-N, -1]`
+- [ ] code-shape supply: complete codes at prescribed size/depth profiles (shallow, deep, padded pair)
+- [ ] the reshaping exits: free exit (aspect ratio) and padded strict-negative exit via `window_nonpos`
+- [ ] the kappa block-sum transfer and the refine loop; `stuckReduction_holds`: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the
       extracted middle re-transports along mixed-size complete codes
