@@ -2568,3 +2568,38 @@ by a mixed-depth complete-code bijection — exists for any two
 nonempty cylinder sets; conjugation by that code-change unit maps
 matVal(τ⊕M̃⊕ς) to 1 + (corner content of a DEEPER-level narrow
 element) — then recurse as L-units, no matrices).
+
+## Session 44: M3 WRITTEN + the refinement move (index shift) found
+- WindowDichotomy.lean (M3) WRITTEN: matrix-free statements!
+  mem_stableUnits_of_deg_one_left_full: if ∃ g₀ g₁ with
+  g₀·(t₀b) + g₁·(t₁b) = 1 (b := deg-1 part of the narrow unit v),
+  then v ∈ H — proof: graded equations of v·v⁻¹ = 1 via
+  exists_components + components_unique (z_D := a·y(D+1) + c·y_D +
+  b·y(D+(−1)); sum-reindexing via addRightEmbedding +
+  Finset.map_add_right_Icc + sum_subset trimming), top-down kill of
+  positive components (b·y_d = 0 ⟹ y_d = g₀t₀(b y_d) + g₁t₁(b y_d)
+  = 0), then window_nonpos on v⁻¹ and inv_mem.  Mirror:
+  mem_stableUnits_of_deg_neg_one_right_full via v⁻¹·v = 1 and
+  (a·s₀)h₀ + (a·s₁)h₁ = 1.  NOTE: the full-rank hypothesis is
+  equivalent to balanced-coefficient fullness (project g's to their
+  degree-0 components), i.e. to the scalar stack ranks.
+- THE REFINEMENT MOVE (new, replaces inflation for the stuck branch):
+  in a pencil over a PAIR OF COMPLETE PREFIX CODES (row code, column
+  code — not necessarily uniform level), any column j whose entries
+  are s-FREE (B-content zero, i.e. j ∈ ker of the B-stack after
+  right-GL normalization) may be REPLACED by its two children j0, j1:
+  E(i, j0) = E(i,j)·s₀ = A₀(i,j)·1 + C(i,j)·s₀ (pencil-legal!), and
+  E(i, j1) = A₁(i,j) + C(i,j)·s₁.  No multiplication — same v, refined
+  column code.  Effect: the refined columns' A-content → C-content,
+  C-content → B-content, A-content of children = 0.  Dually t-free
+  rows refine.  This is the Wiener–Hopf partial-index shift.
+- LOOP: T1-fail ⟹ ker[B-stack] ≠ 0 ⟹ (right-GL) B-free columns
+  exist ⟹ zero columns impossible (invertibility), pure-t columns →
+  τ-extraction, else refine.  OPEN: (i) the dichotomy/extraction
+  lemmas must be stated CODE-RELATIVE (the current WindowDichotomy is
+  intrinsic — fine at top level, but the loop needs the code-relative
+  B-stack); (ii) TERMINATION of the refine loop — candidate measure:
+  rank of the A-stack (refinement zeroes refined columns' A-content;
+  never creates A-content), needs a second tier for rank-preserving
+  steps.  Next session: settle code-relative statements + termination
+  (python experiments on small pencils can guide), then M4/M5.
