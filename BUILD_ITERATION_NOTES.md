@@ -1605,3 +1605,25 @@ mathematics settled in sessions 24–25:
   glFour-machinery relates [diag(v, I₃)] to [v].  Same for all N by
   induction (top-split drops window by one each time).
   **THE (B2) GAP IS CLOSED.**
+
+## Session 30b: negative-side analysis; conservation law; test queue
+- CONSERVATION LAW (proved): under E-block-moves + mixed-depth
+  transport, the sum of entry-degrees around any directed cycle of
+  the block structure is invariant; DIAGONAL entries' degrees are
+  absolutely invariant.  So negative content can never be removed by
+  block-moves/transport alone — genuine content-kills (swaps, e-row
+  unipotents) are required.  (Positive-side B2 escaped because
+  deg-sum +2 splits into two nonneg slots.)
+- Case c invertible (e = 1): swap cascade blocked (no free columns:
+  c = 1 has full support).  HOPE: A := c⁻¹·w₋ is NILPOTENT for units
+  1 + A + B (then 1+A ∈ H by mirror width-2; but naive factoring
+  widens the window — needs care even if true).
+  Graded equations give: A x_m = 0, x_m = −A x_{m+1},
+  (1 − BA) x_{m+1} = −A x_{m+2}, … — nilpotency-flavored.
+- COMPUTATIONAL QUEUE (leavitt_search.py ready, run next turn):
+  (1) is 1 + s₀ + t₀ a unit in L_F2(1,2)?  (Toeplitz symbol says no
+  within ⟨s₀,t₀⟩, but L(1,2) is simple — inverse could use s₁,t₁!)
+  (2) search units 1 + A + B with A non-nilpotent (A = t₀-ansatz,
+  random B); (3) if all A's nilpotent: conjecture + prove via the
+  graded chain; (4) exhaustive small-window [−1,1]-unit census to
+  map the singular-c stratum.
