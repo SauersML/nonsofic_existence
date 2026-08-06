@@ -372,6 +372,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       (swapping `t`- and `s`-data), so a kernel vector of the row
       stack extracts through the transposed side and transports
       back — one fewer column, equivalent membership
+    - [x] the inner-node dichotomy engine (`EntryStrip`,
+      `EntrywiseKill`): strip equations `Σⱼ xᵢⱼ·y_{ji'} = δᵢᵢ'`
+      through any complete code, and the entrywise graded kill — a
+      scalar left inverse of `[B₀;B₁]` annihilates every positive
+      component of every inverse entry, at arbitrary mixed-depth
+      codes (the mixed-code replacement for the window dichotomy)
     - [ ] the refinement move and the round recursion: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the

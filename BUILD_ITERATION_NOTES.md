@@ -2931,3 +2931,23 @@ ORDER: EntryStrip.lean (insertion identity + two-sided entry
 collapse); EntrywiseKill.lean (a1); BalancedCodePencil.lean
 (a2+a3+a4); StackDichotomy.lean (scalar left-inverse-or-kernel);
 M5 shell; M6.
+
+## Session 50b: EntryStrip + EntrywiseKill WRITTEN
+- EntryStrip.lean: wordT_pencilVal_wordS (two-sided strips recover
+  entries, arbitrary E), strip_insert (products strip through a
+  complete code's partition of unity).
+- EntrywiseKill.lean: t_zero/one_strip_scombo helpers;
+  entry_window_nonpos_of_B_full — common window via choose +
+  Finset.sup, per-entry graded components via choose, strip
+  equations from strip_insert + Units.mul_inv + entry extraction,
+  degreewise equations via components_unique (z-function summed over
+  Icc(−N−1, N+1) with the three shifted sums per code entry), the
+  downward kill with the two t_w-strip relations and the scalar
+  left-inverse combination (sum_smul/smul_smul juggling), and entry
+  reassembly into span(dM(−N, 0)).
+STILL FOR M5: the mirror kill (θ or symmetric: entries nonneg of A
+full — likely via thetaHat on this theorem); BalancedCodePencil
+(a2–a4: padding to scalar W over refined codes, squareness via
+zero-column impossibility, ω·codeScalar decomposition);
+StackDichotomy (left-inverse-or-kernel linear algebra); the M5 shell
+(strong induction, five branches); refine-branch termination; M6.
