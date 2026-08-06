@@ -1750,3 +1750,18 @@ updates, final audit.
   formalization or rerun of the chain on the xw-side;
   (4) singular-c width-3 assembly (swap cascade with supply from
   E ≥ D-rank-bound); (5) NarrowReduction wiring, docstrings, audit.
+
+## Session 33b: BVP notes for the fresh session
+- Upward elimination of the cofactor BVP produces
+  1 = A·P_r + (1−BA)·P_{r−1} − B²P_{r−3} + ... with B^{2j}·A-middle
+  terms — A not left-factorable; elimination alone insufficient.
+- Modular trace in char 2: τ(AP_r) = τ(BP_{r−2}) = 0 (doubling dies),
+  so (L_r) gives τ(P_{r−1}) = 1 — the balanced middle coefficient has
+  full normalized trace.  One more constraint for the rank attack.
+- The decisive step is expected from combining: degrees of P_i
+  (P_i ∈ L_{i−r+1}, so the BOTTOM half P₀..P_{r−2} has negative
+  degrees = SHAPE-SHRINKING maps), the boundary AP₀ = P₀A = 0, and
+  the shape-rank method: at level ℓ, express the identity-block
+  certificate of 1 (from L_r) through composites that factor through
+  the bottom chain — mirror of the (P)-argument with the roles of
+  raising/lowering swapped.  START HERE NEXT SESSION.
