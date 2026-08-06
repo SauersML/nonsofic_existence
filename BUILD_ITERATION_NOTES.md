@@ -2951,3 +2951,33 @@ full — likely via thetaHat on this theorem); BalancedCodePencil
 zero-column impossibility, ω·codeScalar decomposition);
 StackDichotomy (left-inverse-or-kernel linear algebra); the M5 shell
 (strong induction, five branches); refine-branch termination; M6.
+
+## Session 51: StackDichotomy + RefinedCodes + combo independence
+- StackDichotomy.lean: stack_left_inverse_or_kernel (via mulVecLin
+  kernel cases + LinearMap.exists_leftInverse_of_injective +
+  toMatrix'/toLin' transport; entries via Fintype.sum_sum_type) and
+  the transposed mirror with mul_comm massage.
+- RefinedCodes.lean (user-polished): not_prefix_append_of_
+  incomparable/same, cylinder_level_split (induction with consEquiv;
+  NOTE user fixes: append_assoc+singleton_append instead of
+  append_cons chains; Fintype.sum_prod_type must NOT be applied with
+  explicit `_` — higher-order unification times out), refined_free,
+  refined_sum, codePair_partition.
+- BalancedCodePencil.lean (installment 1): wordS/wordT_combo_eq_zero
+  — k-independence of code words via one-sided strips; these are the
+  zero-column/row engines for the squareness argument.
+REMAINING for BalancedCodePencil (installment 2, next session):
+ main theorem balanced_entries_mem_stableUnits following session-50
+ notes: common level via choose+sup (EntrywiseKill pattern); W-data
+ via exists_balancedEmbed_eq; hval: the four-fold reindex
+ u⁻¹ = Σ_pΣ_q S(CM p)·map(W' p q)·T(RM q) (codePair_partition +
+ matrixRingEquiv_apply + wordS/T_append + sum_prod_type);
+ hinj/hinj' via x₀ := Σ v₀•S(RM q), u⁻¹x₀ = 0 ⟹ x₀ = 0 ⟹ combo
+ lemmas; hcard via finrank_le_finrank_of_injective + finrank_pi;
+ ω via codePairUnit-δδ (AtomPeel u₁ pattern) along equivOfCardEq;
+ u₂ := ω·u⁻¹ = codeScalar(RM, W''); IsUnit W'' via
+ injective_iff_surjective + LinearEquiv + toMatrix'-two-sided;
+ codeScalar_unit_mem; conclude u⁻¹ = ω⁻¹u₂ ∈ H.
+THEN: mirror entrywise kill (θ-transport of entry_window_nonpos —
+gives entries nonneg when (A₀|A₁) full); M5 shell; refine
+termination; M6.
