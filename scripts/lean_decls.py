@@ -102,9 +102,20 @@ def index_file(path: Path) -> dict[str, Path]:
     return found
 
 
-def build_index() -> dict[str, Path]:
+def build_index(repo: Path | None = None) -> dict[str, Path]:
+    """Index the development rooted at `repo` (the repository by default).
+
+    The root is a parameter so that `check.py --self-test` can run the same
+    detectors against a synthetic tree; a detector that only works on the real
+    corpus cannot be calibrated.
+    """
+    base = Path(repo) if repo is not None else REPO_ROOT
+    roots = (base / "NonsoficGroupsExist", base / "NonsoficGroupsExist.lean",
+             base / "scripts")
     index: dict[str, Path] = {}
-    for root in LEAN_ROOTS:
+    for root in roots:
+        if not root.exists():
+            continue
         paths = sorted(root.rglob("*.lean")) if root.is_dir() else [root]
         for path in paths:
             index.update(index_file(path))

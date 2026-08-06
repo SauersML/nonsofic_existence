@@ -33,6 +33,9 @@ LIB = "NonsoficGroupsExist"
 
 IMPORT_RE = re.compile(r"^import\s+([A-Za-z0-9_.]+)", re.MULTILINE)
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import claim_map  # noqa: E402  (path set above)
+
 # Each entry is (label, compiled regex).  Matches are reported with file:line.
 #
 # `sorry` is scanned here AND caught by the kernel audit as `sorryAx`.  That is
@@ -73,6 +76,10 @@ SCAN_TAGS: tuple[str, ...] = (
     "unsafe / implemented_by / opaque escape hatch",
     "warningAsError disabled",
     "maxHeartbeats budget bump",
+    "unmapped result",
+    "dangling Lean reference",
+    "axiom-report pinning",
+    "stale generated claim map",
 )
 
 
@@ -171,8 +178,71 @@ def check_forbidden(root: Path, f: Findings) -> None:
 # What no longer gets checked anywhere: module docstrings (`/-! ... -/`), which
 # belong to no declaration.  One of the original four was exactly that.
 
+def check_claim_map(root: Path, f: Findings) -> None:
+    """The paper's margin notes must name declarations that exist.
+
+    The manuscript asserts, on each numbered result, which Lean declarations
+    formalize it.  Nothing about editing either side keeps that true: rename a
+    theorem and the paper goes on pointing at it, in a PDF that still compiles
+    and a library that still builds.  Only a scan that reads both can tell.
+
+    Three ways it can be wrong, and all three are findings:
+
+      * a result states something the paper never claims is formalized -- the
+        note is simply missing, so the reader cannot tell whether that is a gap
+        in the formalization or a gap in the bookkeeping;
+      * a note names a module or declaration the library does not contain;
+      * the set of cited modules outside the `#print axioms` report drifts from
+        the set pinned in `claim_map`, so the paper's audit story quietly stops
+        describing the audit that actually runs.
+    """
+    tex = root / claim_map.TEX_NAME
+    if not tex.is_file():
+        return
+
+    claims = claim_map.read_claims(tex)
+
+    for claim in claims:
+        if claim.env in claim_map.RESULT_ENVS and claim.status is None:
+            f.add("unmapped result",
+                  f"{tex.name}:{claim.line}: `{claim.label}` ({claim.env}) carries no "
+                  f"Lean note, so the paper neither claims it is formalized nor says "
+                  f"it is not")
+
+    _, problems = claim_map.resolve(claims, root)
+    for problem in problems:
+        f.add("dangling Lean reference", f"{tex.name}: {problem}")
+
+    # Pinned only against the real corpus; the synthetic tree used by
+    # --self-test has its own, empty, expectation.
+    expected = (claim_map.CITED_OUTSIDE_AXIOM_REPORT
+                if root == REPO else frozenset())
+    closure = claim_map.audit_report_closure(root)
+    cited = {m for c in claims for m, _ in c.blocks}
+    actual = frozenset(m for m in cited if m not in closure)
+    for module in sorted(actual - expected):
+        f.add("axiom-report pinning",
+              f"{module} is cited by the paper but is outside the import closure of "
+              f"{LIB}/Audit.lean, and is not pinned in claim_map.CITED_OUTSIDE_AXIOM_REPORT")
+    for module in sorted(expected - actual):
+        f.add("axiom-report pinning",
+              f"{module} is pinned in claim_map.CITED_OUTSIDE_AXIOM_REPORT but is no "
+              f"longer both cited and outside the {LIB}/Audit.lean closure; the pin is stale")
+
+    # The committed table is a build product.  Checking it here is what makes
+    # it safe for the README to point at instead of restating: a table nobody
+    # regenerates is exactly the hand-maintained table this replaced.
+    generated = root / claim_map.GENERATED
+    if generated.is_file():
+        if generated.read_text(encoding="utf-8") != claim_map.render(root):
+            f.add("stale generated claim map",
+                  f"{claim_map.GENERATED} no longer matches the manuscript and the "
+                  f"library; regenerate it with `python3 scripts/claim_map.py --write`")
+
+
 CHECKS = [
     ("import closure", check_import_closure),
+    ("claim map", check_claim_map),
     ("forbidden constructs", check_forbidden),
 ]
 
@@ -189,12 +259,24 @@ def run(root: Path) -> Findings:
 # look identical from the outside.
 # --------------------------------------------------------------------------
 
+# The claim-map detectors read a manuscript as well as a library, so the
+# synthetic corpus carries a miniature of each: one result, one margin note,
+# and an `Audit` module whose import closure the note's module lies inside.
+_TEX = claim_map.TEX_NAME
+
 CLEAN_TREE = {
-    f"{LIB}.lean": f"import {LIB}.Alpha\nimport {LIB}.Beta\n",
+    f"{LIB}.lean": f"import {LIB}.Alpha\nimport {LIB}.Beta\nimport {LIB}.Audit\n",
     f"{LIB}/Alpha.lean": "theorem alpha : True := trivial\n",
     f"{LIB}/Beta.lean":
         f"import {LIB}.Alpha\n-- an ordinary comment that claims nothing\n"
         "theorem beta : True := trivial\n",
+    f"{LIB}/Audit.lean": f"import {LIB}.Alpha\n#print axioms alpha\n",
+    _TEX: (
+        "\\begin{lemma}\\label{lem:demo}%\n"
+        "\\leanverified{\\leanmod{Alpha}{alpha}}%\n"
+        "A statement.\n"
+        "\\end{lemma}\n"
+    ),
 }
 
 PLANTS = {
@@ -212,6 +294,24 @@ PLANTS = {
     "maxHeartbeats budget bump":
         {f"{LIB}/Alpha.lean":
          "set_option maxHeartbeats 400000 in\ntheorem a : True := trivial\n"},
+    # A result the paper states and never says anything about: the reader
+    # cannot distinguish "not formalized" from "nobody wrote the note".
+    "unmapped result":
+        {_TEX: "\\begin{theorem}\\label{thm:silent}%\nA statement.\n\\end{theorem}\n"},
+    # A note that points at a declaration the library does not have -- what a
+    # rename on the Lean side leaves behind.
+    "dangling Lean reference":
+        {_TEX: ("\\begin{lemma}\\label{lem:demo}%\n"
+                "\\leanverified{\\leanmod{Alpha}{alpha_renamed_away}}%\n"
+                "A statement.\n\\end{lemma}\n")},
+    # The committed table left behind by an edit to either side.
+    "stale generated claim map":
+        {"docs/CLAIM_MAP.md": "# TeX map\n\nstale contents\n"},
+    # A citation of a module the axiom report never reaches, unpinned.
+    "axiom-report pinning":
+        {_TEX: ("\\begin{lemma}\\label{lem:demo}%\n"
+                "\\leanverified{\\leanmod{Beta}{beta}}%\n"
+                "A statement.\n\\end{lemma}\n")},
 }
 
 
