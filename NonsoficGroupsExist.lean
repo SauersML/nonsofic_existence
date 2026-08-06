@@ -218,6 +218,8 @@ import NonsoficGroupsExist.MasterInduction
 import NonsoficGroupsExist.NarrowDischarge
 import NonsoficGroupsExist.RefineStep
 import NonsoficGroupsExist.StrictNegativePencil
+import NonsoficGroupsExist.CodeShapeSupply
+import NonsoficGroupsExist.PencilReshape
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
