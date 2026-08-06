@@ -1,4 +1,6 @@
-import NonsoficGroupsExist.KOne.NarrowDischarge
+import NonsoficGroupsExist.KOne.PencilForm
+import NonsoficGroupsExist.KOne.StackDichotomy
+import NonsoficGroupsExist.KOne.ResidualReduction
 import NonsoficGroupsExist.KOne.StrictNegativePencil
 import NonsoficGroupsExist.KOne.CodeShapeSupply
 import NonsoficGroupsExist.KOne.PencilReshape

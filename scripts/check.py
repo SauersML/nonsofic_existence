@@ -85,6 +85,7 @@ SCAN_TAGS: tuple[str, ...] = (
     "maxHeartbeats budget bump",
     "unmapped result",
     "dangling Lean reference",
+    "dangling Lean reference (wrapped note)",
     "axiom-report pinning",
     "stale generated claim map",
 )
@@ -230,8 +231,14 @@ def check_claim_map(root: Path, f: Findings) -> None:
                   f"it is not")
 
     _, problems = claim_map.resolve(claims, root)
+    wrapped = {c.label for c in claims if c.status and c.wrapped}
     for problem in problems:
-        f.add("dangling Lean reference", f"{tex.name}: {problem}")
+        # Labels contain colons, so the label is recognised by prefix rather
+        # than by splitting on the first one.
+        tag = ("dangling Lean reference (wrapped note)"
+               if any(problem.startswith(f"{label}:") for label in wrapped)
+               else "dangling Lean reference")
+        f.add(tag, f"{tex.name}: {problem}")
 
     # Pinned only against the real corpus; the synthetic tree used by
     # --self-test has its own, empty, expectation.
@@ -325,6 +332,14 @@ PLANTS = {
     "dangling Lean reference":
         {_TEX: ("\\begin{lemma}\\label{lem:demo}%\n"
                 "\\leanverified{\\leanmod{Alpha}{alpha_renamed_away}}%\n"
+                "A statement.\n\\end{lemma}\n")},
+    # A note wrapped across lines.  Before brace-balanced parsing this lost
+    # every \leanmod after the newline silently, so the reference below went
+    # unchecked rather than reported.
+    "dangling Lean reference (wrapped note)":
+        {_TEX: ("\\begin{lemma}\\label{lem:demo}%\n"
+                "\\leanverified{\\leanmod{Alpha}{alpha}%\n"
+                "\\leanmod{Alpha}{alpha_renamed_away}}%\n"
                 "A statement.\n\\end{lemma}\n")},
     # The committed table left behind by an edit to either side.
     "stale generated claim map":

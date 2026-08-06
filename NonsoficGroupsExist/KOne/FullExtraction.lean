@@ -274,7 +274,7 @@ theorem full_extraction [Nontrivial A]
   -- STEP 5: peel the atom
   haveI : Nonempty {i : ι // i ≠ i₂'} := ⟨⟨i₁', hne'⟩⟩
   obtain ⟨D, hDfree, hDsum⟩ :=
-    L.exists_complete_family_of_nonempty {i : ι // i ≠ i₂'}
+    L.exists_complete_family_of_nonempty {i : ι // i ≠ i₂'} ⟨⟨i₁', hne'⟩⟩
   -- the cleared entries, in raw form
   set Ecl : ι → κ → A := fun i j ↦ L.pencilEntry (k := k)
     (if j ≠ j₀ ∧ (i = i₁' ∨ i = i₂') then 0

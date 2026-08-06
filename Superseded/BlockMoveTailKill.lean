@@ -1,5 +1,5 @@
-import NonsoficGroupsExist.WidthTwoReduction
-import NonsoficGroupsExist.IncomparableUnipotents
+import NonsoficGroupsExist.KOne.WidthTwoReduction
+import NonsoficGroupsExist.KOne.IncomparableUnipotents
 
 /-!
 # Pure positive tails die: the block-move induction

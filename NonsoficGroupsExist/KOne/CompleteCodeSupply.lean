@@ -75,10 +75,11 @@ theorem exists_complete_family : ∀ m : ℕ, 1 ≤ m →
 /-- Every nonempty finite index type carries a complete prefix
 family. -/
 theorem exists_complete_family_of_nonempty (ι' : Type*) [Fintype ι']
-    [Nonempty ι'] :
+    (hι' : Nonempty ι') :
     ∃ w : ι' → List (Fin 2),
       (∀ ⦃p q : ι'⦄, p ≠ q → ¬w p <+: w q) ∧
       ∑ p, L.cylinder (w p) = 1 := by
+  haveI := hι'
   obtain ⟨w, hfree, hsum⟩ := L.exists_complete_family
     (Fintype.card ι') Fintype.card_pos
   obtain ⟨hf, hs⟩ := L.family_transport (Fintype.equivFin ι') w

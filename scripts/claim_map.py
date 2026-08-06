@@ -76,6 +76,7 @@ class Claim:
     status: str | None = None          # None when the statement carries no note
     blocks: list[tuple[str, list[str]]] = field(default_factory=list)
     note: str = ""
+    wrapped: bool = False              # the note spans more than one line
 
     @property
     def declarations(self) -> list[tuple[str, str]]:
@@ -86,26 +87,43 @@ def _strip_comments(text: str) -> str:
     return COMMENT_RE.sub("", text)
 
 
+def _balanced(source: str, at: int) -> tuple[str, int]:
+    """The brace group starting at `at`, and the index just past it."""
+    if at >= len(source) or source[at] != "{":
+        return "", at
+    depth = 0
+    for i in range(at, len(source)):
+        if source[i] == "{":
+            depth += 1
+        elif source[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return source[at + 1:i], i + 1
+    return source[at + 1:], len(source)
+
+
 def _parse_note(source: str, at: int) -> tuple[str, list, str] | None:
     """Parse the margin note beginning at `at`, if there is one."""
     m = NOTE_RE.match(source, at)
     if not m:
         return None
-    # Take the balanced remainder of the note command; the notes are written on
-    # one logical line, so the line is a safe bound.
-    end = source.find("\n", m.end())
-    body = source[m.end(): end if end != -1 else len(source)]
+    # Read the note's brace groups by matching braces, not by stopping at the
+    # end of the line.  Bounding this by the line silently dropped every
+    # \leanmod after the first newline -- no error, just declarations quietly
+    # missing from a table whose whole job is to notice things going missing.
+    body, nxt = _balanced(source, m.end())
+    trailing, _ = _balanced(source, nxt)
     blocks = [(mod.strip(), [d.strip() for d in decls.split(",") if d.strip()])
               for mod, decls in LEANMOD_RE.findall(body)]
     note = ""
     if nm := LEANNOTE_RE.search(body):
         note = re.sub(r"\s+", " ", nm.group(1)).strip()
-    elif m.group(1) in ("partial", "absent"):
-        # The trailing brace group of \leanpartial / the sole group of
-        # \leanabsent carries the explanation.
-        tail = body[body.rfind("}{") + 2:] if "}{" in body else body
-        note = re.sub(r"\s+", " ", tail.strip("{} \t")).strip()
-    return m.group(1), blocks, note
+    elif m.group(1) == "absent":
+        note = re.sub(r"\s+", " ", body).strip()
+    elif m.group(1) == "partial":
+        # \leanpartial takes the module blocks, then the explanation.
+        note = re.sub(r"\s+", " ", trailing).strip()
+    return m.group(1), blocks, note, "\n" in body
 
 
 def read_claims(tex: Path) -> list[Claim]:
@@ -122,7 +140,7 @@ def read_claims(tex: Path) -> list[Claim]:
                 # A note follows the label, on the next line.
                 nxt = offset + len(line) + 1
                 if parsed := _parse_note(source, nxt):
-                    claim.status, claim.blocks, claim.note = parsed
+                    claim.status, claim.blocks, claim.note, claim.wrapped = parsed
                 claims.append(claim)
                 env = None
             elif line.lstrip().startswith("\\end{"):

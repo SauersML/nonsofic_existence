@@ -1,6 +1,6 @@
-import NonsoficGroupsExist.NilpotentTailKill
-import NonsoficGroupsExist.WhiteheadFlip
-import NonsoficGroupsExist.LeavittBalancedUnits
+import NonsoficGroupsExist.KOne.NilpotentTailKill
+import NonsoficGroupsExist.Leavitt.WhiteheadFlip
+import NonsoficGroupsExist.Leavitt.LeavittBalancedUnits
 
 /-!
 # The γ-elimination chain

@@ -60,7 +60,7 @@ theorem t_one_collapse (P Q : A) :
     one_mul, zero_add]
 
 /-- **The row-clearing move.** -/
-theorem row_clear [Nontrivial A]
+theorem row_clear
     (R : BinaryPrefixCode ι) (C : BinaryPrefixCode κ)
     (A₀ A₁ Cm B₀ B₁ : ι → κ → k) (u : Aˣ)
     (hu : (u : A) = ∑ i, ∑ j, L.wordS (R.word i) *

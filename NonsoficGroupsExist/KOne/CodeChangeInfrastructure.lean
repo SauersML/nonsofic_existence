@@ -40,6 +40,14 @@ structure IsCompleteCode (c : List (List (Fin 2))) : Prop where
   pairwise_incomp : c.Pairwise (fun a b ↦ ¬a <+: b ∧ ¬b <+: a)
   complete : (c.map (fun w ↦ L.cylinder w)).sum = 1
 
+/-- Positive control: the one-word code consisting of the empty word is
+complete, witnessed outright. -/
+theorem isCompleteCode_nil : L.IsCompleteCode [[]] := by
+  refine ⟨List.pairwise_singleton _ _, ?_⟩
+  rw [List.map_singleton, List.sum_singleton]
+  show L.wordS [] * L.wordT [] = 1
+  rw [wordS_nil, wordT_nil, one_mul]
+
 /-- Every nonempty list has a member of maximal image value. -/
 theorem exists_max_length_mem {c : List (List (Fin 2))}
     (hne : c ≠ []) :

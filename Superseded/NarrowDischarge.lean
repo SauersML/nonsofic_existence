@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.KOne.MasterInduction
+import Superseded.MasterInduction
 import NonsoficGroupsExist.KOne.PencilForm
 import NonsoficGroupsExist.KOne.ResidualReduction
 

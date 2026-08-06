@@ -221,7 +221,12 @@ def disclaimerPhrases : List String :=
 rather than a regex because Lean has no regex and this needs none. -/
 def mentionsConditionality (s : String) : Bool :=
   let lower := s.toLower
-  disclaimerPhrases.any fun p => (lower.splitOn p).length > 1
+  disclaimerPhrases.any fun p =>
+    let hits := (lower.splitOn p).length - 1
+    -- "unconditional(ly)" contains "conditional"; a substring hit inside a
+    -- word that asserts the opposite is not a disclaimer.
+    let shielded := (lower.splitOn ("un" ++ p)).length - 1
+    hits > shielded
 
 /-- Does this binder relocate a mathematical obligation onto the caller?
 

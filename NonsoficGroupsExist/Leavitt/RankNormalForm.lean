@@ -129,7 +129,7 @@ theorem inv_mem_levelSpan_of_val_mem [Nontrivial A] {n : ℕ} (u : Aˣ)
 /-- **Rank normal form**: every balanced element is equivalent, via
 balanced-valued units with balanced inverses, to a cylinder-sum
 idempotent; full support certifies invertibility. -/
-theorem exists_rank_normal_form [Nontrivial A] {n : ℕ} {c : A}
+theorem exists_rank_normal_form {n : ℕ} {c : A}
     (hc : c ∈ Submodule.span k (L.levelMonomials n)) :
     ∃ (g h : Aˣ) (S : Finset (Fin n → Fin 2)),
       (g : A) ∈ Submodule.span k (L.levelMonomials n) ∧

@@ -1,6 +1,6 @@
-import NonsoficGroupsExist.WidthTwoReduction
-import NonsoficGroupsExist.IncomparableUnipotents
-import NonsoficGroupsExist.GradedComponents
+import NonsoficGroupsExist.KOne.WidthTwoReduction
+import NonsoficGroupsExist.KOne.IncomparableUnipotents
+import NonsoficGroupsExist.KOne.GradedComponents
 
 /-!
 # The rank-one normal form for narrow units

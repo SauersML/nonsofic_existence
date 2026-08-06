@@ -79,6 +79,20 @@ def IsKazhdanPairComplex (G : Type u) [Group G] (Q : Finset G) (ε : ℝ) : Prop
         (∀ q ∈ Q, ‖ρ q x - x‖ < ε) →
           ∃ y : E, y ≠ 0 ∧ ∀ g : G, ρ g y = y
 
+/-- Positive control: the empty set is a complex Kazhdan pair for the
+trivial group, at tolerance one, witnessed outright. -/
+theorem isKazhdanPairComplex_punit :
+    IsKazhdanPairComplex PUnit (∅ : Finset PUnit) 1 := by
+  refine ⟨one_pos, ?_⟩
+  intro E _ _ _ ρ x hx _hq
+  refine ⟨x, ?_, ?_⟩
+  · intro h
+    rw [h, norm_zero] at hx
+    exact one_ne_zero hx.symm
+  · intro g
+    rw [Subsingleton.elim g 1, map_one]
+    rfl
+
 /-- Kazhdan's property `(T)` in its textbook complex-unitary form. -/
 def HasKazhdanPropertyTComplex (G : Type u) [Group G] : Prop :=
   ∃ Q : Finset G, ∃ ε : ℝ, IsKazhdanPairComplex.{u, v} G Q ε

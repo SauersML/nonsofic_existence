@@ -58,7 +58,7 @@ theorem thetaHat_pencilVal {ι κ : Type*} [Fintype ι] [Fintype κ]
 
 /-- **The mirrored extraction step**: a kernel vector of the row
 stack yields a pencil unit over one fewer column. -/
-theorem mirror_extraction [Nontrivial (BinaryLeavittAlgebra k)]
+theorem mirror_extraction
     (hdiv : ∀ x : BinaryLeavittAlgebra k, x ≠ 0 →
       ∃ p q : BinaryLeavittAlgebra k, p * x * q = 1)
     {ι κ : Type*} [Fintype ι] [DecidableEq ι]

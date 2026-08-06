@@ -206,8 +206,6 @@ import NonsoficGroupsExist.KOne.StackDichotomy
 import NonsoficGroupsExist.KOne.RefinedCodes
 import NonsoficGroupsExist.KOne.BalancedCodePencil
 import NonsoficGroupsExist.KOne.EntrywiseKillMirror
-import NonsoficGroupsExist.KOne.MasterInduction
-import NonsoficGroupsExist.KOne.NarrowDischarge
 import NonsoficGroupsExist.KOne.RefineStep
 import NonsoficGroupsExist.KOne.StrictNegativePencil
 import NonsoficGroupsExist.KOne.CodeShapeSupply

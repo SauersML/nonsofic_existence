@@ -1,6 +1,6 @@
-import NonsoficGroupsExist.GradedComponents
-import NonsoficGroupsExist.WindowNonposReduction
-import NonsoficGroupsExist.WindowNonnegReduction
+import NonsoficGroupsExist.KOne.GradedComponents
+import NonsoficGroupsExist.KOne.WindowNonposReduction
+import NonsoficGroupsExist.KOne.WindowNonnegReduction
 
 /-!
 # The window dichotomy: full one-sided degree parts kill the window

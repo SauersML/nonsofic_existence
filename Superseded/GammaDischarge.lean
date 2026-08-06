@@ -1,8 +1,8 @@
-import NonsoficGroupsExist.ZeroKOne
-import NonsoficGroupsExist.PureTailNilpotency
-import NonsoficGroupsExist.RankNormalForm
+import NonsoficGroupsExist.KOne.ZeroKOne
+import NonsoficGroupsExist.KOne.PureTailNilpotency
+import NonsoficGroupsExist.Leavitt.RankNormalForm
 import Superseded.GammaReduction
-import NonsoficGroupsExist.LeavittSimplicity
+import NonsoficGroupsExist.Leavitt.LeavittSimplicity
 
 /-!
 # The γ-hypotheses discharge: normal-form units lie in the class group

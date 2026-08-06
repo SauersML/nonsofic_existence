@@ -1,6 +1,6 @@
-import NonsoficGroupsExist.WindowNonposReduction
-import NonsoficGroupsExist.CodeChangeUnits
-import NonsoficGroupsExist.ResidualReduction
+import NonsoficGroupsExist.KOne.WindowNonposReduction
+import NonsoficGroupsExist.KOne.CodeChangeUnits
+import NonsoficGroupsExist.KOne.ResidualReduction
 
 /-!
 # Triangular factorization implies the narrow-window kill

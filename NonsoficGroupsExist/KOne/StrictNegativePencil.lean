@@ -23,7 +23,6 @@ variable (k : Type) [Field k]
 `[B₀; B₁]` forces every inverse entry into a strictly negative
 window. -/
 theorem entry_window_negative_of_B_full
-    [Nontrivial (BinaryLeavittAlgebra k)]
     {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ]
     (R : BinaryPrefixCode ι) (C : BinaryPrefixCode κ)

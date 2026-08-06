@@ -1,5 +1,5 @@
-import NonsoficGroupsExist.GLIsElementary
-import NonsoficGroupsExist.LeavittDiagonalClass
+import NonsoficGroupsExist.KOne.GLIsElementary
+import NonsoficGroupsExist.Leavitt.LeavittDiagonalClass
 
 /-!
 # Unstable descent for the diagonal class

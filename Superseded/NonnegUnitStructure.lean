@@ -1,5 +1,5 @@
-import NonsoficGroupsExist.ZeroKOne
-import NonsoficGroupsExist.PureTailNilpotency
+import NonsoficGroupsExist.KOne.ZeroKOne
+import NonsoficGroupsExist.KOne.PureTailNilpotency
 -- `Mathlib.Algebra.GeomSum` was split; `geom_sum_mul` lives in the Ring file.
 import Mathlib.Algebra.Ring.GeomSum
 

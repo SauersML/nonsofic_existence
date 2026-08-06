@@ -3,6 +3,8 @@ import Superseded.DiagonalDescent
 import Superseded.GammaDischarge
 import Superseded.GammaReduction
 import Superseded.KillMoves
+import Superseded.MasterInduction
+import Superseded.NarrowDischarge
 import Superseded.NonnegUnitStructure
 import Superseded.RankOneNormalForm
 import Superseded.TailSupportReduction

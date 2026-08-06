@@ -1,5 +1,5 @@
-import NonsoficGroupsExist.BalancedRegularity
-import NonsoficGroupsExist.LeavittGradingSpans
+import NonsoficGroupsExist.KOne.BalancedRegularity
+import NonsoficGroupsExist.Leavitt.LeavittGradingSpans
 
 /-!
 # Tail support reduction: tails restrict to the `p₁` corner

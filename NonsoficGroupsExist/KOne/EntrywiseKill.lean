@@ -49,7 +49,6 @@ theorem t_one_strip_scombo (β₀ β₁ : k') (Yv : A) :
 end StripHelpers
 
 theorem entry_window_nonpos_of_B_full
-    [Nontrivial (BinaryLeavittAlgebra k)]
     {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ]
     (R : BinaryPrefixCode ι) (C : BinaryPrefixCode κ)

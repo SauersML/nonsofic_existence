@@ -75,7 +75,7 @@ variable {k : Type*} [Field k] [Algebra k A]
 
 /-- **Balanced regularity**: every balanced element has a balanced
 pseudo-inverse. -/
-theorem exists_balanced_pseudoInverse [Nontrivial A] {n : ℕ} {z : A}
+theorem exists_balanced_pseudoInverse {n : ℕ} {z : A}
     (hz : z ∈ Submodule.span k (L.levelMonomials n)) :
     ∃ ξ : A, (∃ m, ξ ∈ Submodule.span k (L.levelMonomials m)) ∧
       z * ξ * z = z := by
