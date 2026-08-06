@@ -412,5 +412,16 @@ theorem glFour_eq_elementary_holds
   glFour_eq_elementary_of_narrowReduction k (narrowReduction_holds k)
     M
 
+/-- **`K₁(L_k(1,2)) = 0`, in Whitehead form**: every unit of the
+binary Leavitt algebra is stable — `diag(u, 1, …, 1)` is a product of
+elementary matrices.  Unconditional; this is the manuscript's
+Proposition `glel`(i) with the elementary two-exit proof
+(`rem:elementaryK1`/`rem:effectiveWH`) in place of the localization
+sequence. -/
+theorem K1_trivial [Nontrivial (BinaryLeavittAlgebra k)] :
+    ∀ u : (BinaryLeavittAlgebra k)ˣ,
+      u ∈ stableUnits (BinaryLeavittAlgebra k) :=
+  stableUnits_eq_top_holds k
+
 end BinaryLeavitt
 end NonsoficGroupsExist
