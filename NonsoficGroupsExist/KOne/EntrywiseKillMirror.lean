@@ -68,7 +68,6 @@ theorem mem_balanced_of_nonpos_nonneg {x : BinaryLeavittAlgebra k}
 /-- **The mirrored kill**: a scalar right inverse of the row stack
 `(A₀ | A₁)` forces every inverse entry into a nonnegative window. -/
 theorem entry_window_nonneg_of_A_full
-    [Nontrivial (BinaryLeavittAlgebra k)]
     {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ]
     (R : BinaryPrefixCode ι) (hR : (family k).IsComplete R)

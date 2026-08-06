@@ -61,7 +61,7 @@ stack yields a pencil unit over one fewer column. -/
 theorem mirror_extraction
     (hdiv : ∀ x : BinaryLeavittAlgebra k, x ≠ 0 →
       ∃ p q : BinaryLeavittAlgebra k, p * x * q = 1)
-    {ι κ : Type*} [Fintype ι] [DecidableEq ι]
+    {ι κ : Type*} [Fintype ι]
     [Fintype κ] [DecidableEq κ]
     (R : BinaryPrefixCode ι) (hR : (family k).IsComplete R)
     (C : BinaryPrefixCode κ) (hC : (family k).IsComplete C)

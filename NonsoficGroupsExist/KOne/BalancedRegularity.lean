@@ -86,7 +86,7 @@ theorem exists_balanced_pseudoInverse {n : ℕ} {z : A}
 
 /-- **Square-zero tails die**: if `(s₁z)² = 0` with `z` balanced, then
 any unit of value `1 + s₁z` lies in the diagonal class group. -/
-theorem square_zero_tail_mem_stableUnits [Nontrivial A] {n : ℕ}
+theorem square_zero_tail_mem_stableUnits {n : ℕ}
     {z : A} (hz : z ∈ Submodule.span k (L.levelMonomials n))
     (hsq : L.s 1 * z * (L.s 1 * z) = 0) (u : Aˣ)
     (hu : (u : A) = 1 + L.s 1 * z) :
