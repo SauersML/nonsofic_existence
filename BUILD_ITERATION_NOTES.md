@@ -2688,3 +2688,34 @@ drops or extraction fires).
   measure: dim(coker A-stack ∩ (surviving-C-cols)^⊥) strictly grows.
 - User expanded the goal: after formalization completes → fully
   update nonsofic_groups_exist.tex → pursue new results beyond it.
+
+## Session 46: M4b — the atom peel WRITTEN
+AtomPeel.lean: atom_peel — given pencil data E over (R, C) with a
+normalized shift-atom column (E i₁ j₀ = t₀, E i₂ j₀ = t₁, rows i₁ i₂
+zero elsewhere) and ANY complete code D on {i // i ≠ i₂}, produces
+u₂ with value the residual pencil over (D, C) (untouched block + one
+scalar pivot at (⟨i₁⟩, j₀)) and u ∈ H ↔ u₂ ∈ H.  Mechanism:
+- σ := the split of D at d₁ := ⟨i₁⟩ (children d₁·0 ↦ row i₁,
+  d₁·1 ↦ row i₂; others untouched); prefix-freeness by four-way case
+  analysis on incomparable_append_single; completeness by
+  double-erase + sum_bij' bridge + cylinder_split.
+- u₁ := codePairUnit(R, σ-code, δ, δ) — value Σ S(Rᵢ)T(σᵢ) by
+  codeDelta_collapse; u₁ ∈ H by codeBijection_mem_stableUnits.
+- hrow: a word colliding with D in exactly one place collapses the
+  residual double sum to one row (reused 3×: t₁/t₀/scalar patterns).
+- hfact: u = u₁·W by per-row case analysis; u₂ := u₁⁻¹·u — NO
+  inverse data for the residual needed.
+- NOTE: user fixed orientations live in parallel; remaining swaps +
+  unused hlen applied.  Recurring bug-class: incomparable_append_
+  single argument orientation — ALWAYS instantiate v := the
+  non-appended word, w := the appended-to word, and check which of
+  .1/.2 matches the goal.
+STILL NEEDED for the extraction branch: (i) peel-normalization —
+from "ker[B₀;B₁;C] ≠ 0" produce the (h1–h5)-normalized pencil via
+codeScalar GL-moves (pair-extension-to-basis linear algebra) and the
+exact right-multiplier (1 + N) clearing rows i₁,i₂ outside j₀
+(disjoint-support block unipotent, value computation like
+BlockMoveTailKill); (ii) the ς-mirror of the peel (or θ-transport);
+(iii) M5 master induction; (iv) the stuck-branch progress theorem
+(one batch refine ⟹ extraction/dichotomy — see session 45b notes for
+the coker-A structural fact); (v) M6 NarrowDischarge; cleanup.

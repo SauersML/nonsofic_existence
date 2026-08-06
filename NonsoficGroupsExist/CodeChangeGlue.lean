@@ -20,7 +20,11 @@ open MatrixDiagonalization
 
 variable {A : Type*} [Ring A] (L : LeavittFamily A)
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+-- `codeChange_mem_stableUnits` is stated over a base field (it carries
+-- `include k in`), so the wrappers below have to carry one as well.
+variable {k : Type*} [Field k] [Algebra k A]
 
+omit [DecidableEq ι] in
 /-- A word family whose members are pairwise incomparable and whose
 cylinders sum to `1`, in the list form of the generation theorem. -/
 theorem isCompleteCode_of_family (τ : ι → List (Fin 2))
@@ -36,9 +40,14 @@ theorem isCompleteCode_of_family (τ : ι → List (Fin 2))
   · rw [List.map_map]
     have h : (Finset.univ.toList.map
         ((fun w ↦ L.cylinder w) ∘ τ)).sum =
-        ∑ i, L.cylinder (τ i) := Finset.sum_toList _ _
+        ∑ i, L.cylinder (τ i) := Finset.sum_map_toList _ _
     rw [h, hsum]
 
+-- `k` is named only in the proof, so it needs including explicitly, while
+-- `DecidableEq ι` is never used; both directives must precede the docstring
+-- or the doc comment is orphaned from its theorem.
+omit [DecidableEq ι] in
+include k in
 /-- **Indexed code bijections lie in the class group**: the value
 `Σᵢ s_{τᵢ} t_{σᵢ}` over complete prefix families `τ`, `σ` is a
 code-change unit. -/
@@ -52,7 +61,7 @@ theorem codeBijection_mem_stableUnits [Nontrivial A]
     (u : Aˣ) (hu : (u : A) = ∑ i, L.wordS (τ i) * L.wordT (σ i)) :
     u ∈ stableUnits A := by
   classical
-  refine L.codeChange_mem_stableUnits hdiv
+  refine L.codeChange_mem_stableUnits (k := k) hdiv
     (Finset.univ.toList.map (fun i ↦ (τ i, σ i))).length
     (Finset.univ.toList.map (fun i ↦ (τ i, σ i))) rfl ?_ ?_ u ?_
   · rw [List.map_map]
@@ -62,25 +71,11 @@ theorem codeBijection_mem_stableUnits [Nontrivial A]
   · rw [hu]
     unfold pairValue
     rw [List.map_map]
-    exact (Finset.sum_toList _ _).symm
+    exact (Finset.sum_map_toList _ _).symm
 
-/-- Splitting a cylinder into its two children. -/
-theorem cylinder_split (w : List (Fin 2)) :
-    L.cylinder w = L.cylinder (w ++ [0]) + L.cylinder (w ++ [1]) := by
-  have h : ∀ z : Fin 2, L.cylinder (w ++ [z]) =
-      L.wordS w * (L.s z * L.t z) * L.wordT w := by
-    intro z
-    unfold cylinder
-    rw [wordS_append, wordT_append]
-    simp only [wordS_cons, wordS_nil, wordT_cons, wordT_nil, mul_one,
-      one_mul]
-    noncomm_ring
-  rw [h 0, h 1,
-    show L.cylinder w = L.wordS w * L.wordT w from rfl,
-    show L.wordS w * L.wordT w =
-      L.wordS w * (L.s 0 * L.t 0 + L.s 1 * L.t 1) * L.wordT w from by
-        rw [L.sum_s_mul_t, mul_one]]
-  noncomm_ring
+-- `cylinder_split` is already proved in `LeavittWords.lean` (as
+-- `lem:leaf`(iii)) with exactly this statement, and is in scope here, so the
+-- copy that stood at this point has been dropped rather than shadowed.
 
 /-- Prefix comparison against a one-letter extension. -/
 theorem incomparable_append_single {v w : List (Fin 2)}
@@ -102,6 +97,7 @@ theorem incomparable_append_single {v w : List (Fin 2)}
   · intro h
     exact hwv ((List.prefix_append w [z]).trans h)
 
+omit [Fintype ι] [DecidableEq ι] in
 /-- **The split family**: replacing the word at one index of a
 complete prefix family by its two children (indexed by
 `Bool ⊕ (everything else)`) is again a complete prefix family. -/
@@ -121,11 +117,11 @@ theorem split_family_free (τ : ι → List (Fin 2))
       simpa using this
     exact hz this
   · -- child versus another word
-    have hinc := L.incomparable_append_single
+    have hinc := incomparable_append_single
       (hfree i₂.2) (hfree (Ne.symm i₂.2)) z₁
     exact hinc.2 h
   · -- another word versus child
-    have hinc := L.incomparable_append_single
+    have hinc := incomparable_append_single
       (hfree i₁.2) (hfree (Ne.symm i₁.2)) z₂
     exact hinc.1 h
   · -- two other words
@@ -149,6 +145,9 @@ theorem split_family_sum (τ : ι → List (Fin 2))
       ∑ i ∈ Finset.univ.erase j₀, L.cylinder (τ i) :=
     (Finset.sum_subtype (Finset.univ.erase j₀)
       (fun x ↦ by simp [Finset.mem_erase]) (fun i ↦ L.cylinder (τ i))).symm
+  -- the two summands still read `Sum.elim … (Sum.inl a)` / `(Sum.inr a)`,
+  -- so `h1`/`h2` have nothing to match until those reduce
+  simp only [Sum.elim_inl, Sum.elim_inr]
   rw [h1, h2, Finset.add_sum_erase _ (fun i ↦ L.cylinder (τ i))
     (Finset.mem_univ j₀)]
   exact hsum

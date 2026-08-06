@@ -339,6 +339,12 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       through `codePair_mul` and the corner pairing
       `(t-combo)·(s-combo) = scalar` — feeding the window dichotomy
       at every refinement stage
+    - [x] the atom peel (`AtomPeel`): a unit whose pencil has a
+      normalized `[t₀; t₁]`-column factors as (code-change unit in
+      `H`) · (pencil unit over one fewer row) — the split source
+      family, its prefix-freeness and completeness, the three
+      collision patterns against the intermediate code, and the
+      exact row-collapse factorization `u = u₁ · (u₁⁻¹ u)`
     - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
       `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
       rows split off invertible `τ/ς` shift blocks by an exact
