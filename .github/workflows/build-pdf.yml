@@ -9,6 +9,8 @@ on:
     paths:
       - nonsofic_groups_exist.tex
       - .github/workflows/build-pdf.yml
+      - scripts/check_lean_refs.py
+      - scripts/lean_decls.py
   workflow_dispatch:
 
 permissions:
@@ -60,6 +62,14 @@ jobs:
             texlive-latex-extra \
             texlive-latex-recommended \
             texlive-science
+
+      # The manuscript's margin notes name Lean modules and declarations.  A
+      # rename on either side would leave the paper pointing at something that
+      # no longer exists, and LaTeX cannot notice that -- so check it here,
+      # before the PDF that would carry the broken reference is built.
+      - name: Check the Lean margin references resolve
+        shell: bash
+        run: python3 scripts/check_lean_refs.py
 
       - name: Compile, normalize, and validate PDF
         shell: bash
@@ -148,32 +158,48 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -- "$PDF_FILE"
+          # The PDF is a function of the TeX source alone, so only a *newer TeX
+          # source* on main can invalidate it.  Bailing whenever main merely
+          # advanced was wrong: this workflow is filtered on the `.tex` path, so
+          # a Lean-only commit landing mid-build triggers no run of its own, and
+          # the PDF it deferred to never got built.  Run 31092473277 lost
+          # c732171's PDF exactly that way -- green job, stale PDF on main.
+          built_tex="$(git rev-parse "$START_SHA:$TEX_FILE")"
 
-          if git diff --cached --quiet -- "$PDF_FILE"; then
-            echo "The committed PDF is already current."
-            exit 0
-          fi
+          # Hold the built PDF outside the work tree; the replay below resets
+          # the checkout to whatever main currently is.
+          pdf_holding="${RUNNER_TEMP}/${PDF_FILE}"
+          cp -- "$PDF_FILE" "$pdf_holding"
 
-          # Never attach a PDF built from old TeX to a newer main branch.
           git fetch origin main
-          remote_main="$(git rev-parse origin/main)"
-          if [[ "$remote_main" != "$START_SHA" ]]; then
-            echo "main advanced during this build; the newer push will build its own PDF."
-            exit 0
-          fi
 
-          git commit -m "build: update compiled PDF [skip ci]"
-
-          if ! git push origin HEAD:main; then
-            git fetch origin main
+          for attempt in 1 2 3; do
             remote_main="$(git rev-parse origin/main)"
 
-            if [[ "$remote_main" != "$START_SHA" ]]; then
-              echo "main advanced before the push completed; skipping stale PDF push."
+            if [[ "$(git rev-parse "$remote_main:$TEX_FILE")" != "$built_tex" ]]; then
+              echo "main carries a newer $TEX_FILE; that push builds the PDF matching it."
               exit 0
             fi
 
-            echo "The push failed even though main did not advance." >&2
-            exit 1
-          fi
+            # Replay the PDF onto current main, keeping whatever else landed.
+            git reset --hard "$remote_main"
+            cp -- "$pdf_holding" "$PDF_FILE"
+            git add -- "$PDF_FILE"
+
+            if git diff --cached --quiet -- "$PDF_FILE"; then
+              echo "The committed PDF is already current."
+              exit 0
+            fi
+
+            git commit -m "build: update compiled PDF [skip ci]"
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push rejected on attempt ${attempt}; main moved underneath it. Retrying."
+            git fetch origin main
+          done
+
+          echo "Could not push the updated PDF after 3 attempts." >&2
+          exit 1
