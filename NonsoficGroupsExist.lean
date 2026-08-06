@@ -248,6 +248,7 @@ import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
 import NonsoficGroupsExist.MainResults
 import NonsoficGroupsExist.UnitsGLProfile
+import NonsoficGroupsExist.AllRanksElementary
 import NonsoficGroupsExist.KazhdanTextbook
 import NonsoficGroupsExist.Audit
 import NonsoficGroupsExist.Public

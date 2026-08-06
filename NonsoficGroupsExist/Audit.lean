@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.MainResults
 import NonsoficGroupsExist.UnitsGLProfile
+import NonsoficGroupsExist.AllRanksElementary
 import NonsoficGroupsExist.SoficPositiveControl
 import NonsoficGroupsExist.KunDecomposition
 import NonsoficGroupsExist.KunThomTheorem
@@ -77,3 +78,12 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.Shalom.exists_presented_kazhdan_cover
 #print axioms NonsoficGroupsExist.Shalom.exists_finitelyPresented_kazhdan_cover
 #print axioms NonsoficGroupsExist.exists_kazhdan_finitelyPresented_cover_of_not_isSofic
+
+-- All-ranks collapse, perfectness, and the rank-two compression over
+-- `L_k(1,2)`: `GL_n = EL_n` for every `n ≥ 2` over every field, the unit
+-- group is perfect, and the two-by-two Leavitt-corner theorem closes over
+-- every finite field.
+#print axioms NonsoficGroupsExist.BinaryLeavitt.elementaryGroup_eq_top
+#print axioms NonsoficGroupsExist.BinaryLeavitt.glAll_eq_elementary
+#print axioms NonsoficGroupsExist.BinaryLeavitt.binaryLeavittUnits_perfect
+#print axioms NonsoficGroupsExist.binaryLeavittRankTwo_not_isSofic
