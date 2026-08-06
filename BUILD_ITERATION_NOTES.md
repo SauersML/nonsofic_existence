@@ -1818,3 +1818,51 @@ updates, final audit.
   unipotents, κ-transports, flips) and extract the decreasing
   measure from the machine-found witnesses.**  The ρ-cascade
   (σ-swaps by hand) is one data point; get ten more.
+
+## Session 35: WIDTH-3 SOLVED — the swap/unipotent kill algorithm
+Machine campaign (sound verifier): 9/9 random + 6/8 nasty narrow
+units reduced to [0,1]-window by 1-3 H-moves; the two stragglers
+reduce with depth-4 moves — witnesses reveal the complete mechanism:
+
+**THE TWO KILLS** (for u with value 1 + A + c₀ + B, A = Σλᵢ S(xᵢ)T(yᵢ)
+degree −1, WLOG all xᵢ ≠ ε by the padding identity
+T(b) = Σⱼ S(j)T(b++j)):
+1. UNIPOTENT KILL (right; left is mirror): for an A-monomial (x,y)
+   with x incomparable to y, to every T-side of A−ν, and to every
+   T-side of c₀ (the "supply condition"): u·(1 − λS(x)T(y)) has
+   degree-(−1) part A − ν EXACTLY (junk c₀ν = 0, Aν = 0, deg-(−2)
+   = 0, balanced junk Bν harmless).  Monomial count DROPS.
+   [1 − λS(x)T(y) ∈ H: incomparable unipotent, COMPILED.]
+2. SWAP CONVERT (left): for x-rooted A-content failing supply or
+   with comparable sides: σ_{x,β}·u with β FRESH (deep, incomparable
+   to x, to all S-sides of A and of c₀'s positive-depth part —
+   exists since finitely many non-ε cylinders never cover depth
+   |β| ≫ 0): (1−p_x) annihilates ALL x-rooted A-monomials
+   ((1−p_x)S(xw) = 0); junk σ₋·(scalar μ of u₀) = μS(x)T(β) is ONE
+   fresh monomial with incomparable sides satisfying supply
+   (killable by move 1); σ₋·c₀-deep = 0 and σ₋A-deg-(−2) = 0 by
+   freshness.  ρ's witness (swap(0,10) left, one move) is the
+   μ = 0 special case.
+**TERMINATION**: lexicographic (#A-monomials failing supply-or-
+comparable, #A-monomials): move 2 strictly drops the first
+coordinate (converts ≥1 bad to exactly ≤1 good); move 1 strictly
+drops the second keeping the first at 0.  All moves ∈ H via
+compiled certificates (signedSwap_mem, incomparable_unipotent).
+THEN: [0,1]-window reached ⟹ WidthTwoReduction ⟹ H.  **This
+completes NarrowReduction**: narrow → (this algorithm) → [0,1] → H.
+
+LEAN PLAN (final modules):
+- NegativePartKill.lean: (i) the padding-WLOG lemma (S-sides
+  nonempty); (ii) the two kill lemmas as class-moves with their
+  junk computations (pure word calculus + compiled H-certificates);
+  (iii) the induction on the finite monomial family (represent A
+  via a Finset of monomials with coefficients — use the span-
+  induction-friendly formulation: ∃ list of monomials, induct on
+  its length/badness); (iv) narrow_to_width2:
+  every narrow unit ~mod-H a [0,1]-window unit.
+- NarrowReductionProof.lean: assemble with
+  exists_narrow_representative + window_zero_one_mem_stableUnits +
+  ResidualReduction wiring → ScalarReduction → B4 unconditional.
+- Then: docstring updates (STALE_DISCLAIMER×3), audit re-run
+  (LAUNDERED_PROP/UNUSED clear once wired), README.
+NOTE: user is now handling all compilation — I write, they build.
