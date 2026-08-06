@@ -1421,3 +1421,29 @@ mathematics settled in sessions 24–25:
   (assembly: (P) + Theorem 3 + κ₁-transport + NilpotentTailKill ⟹
   every [0,1]-window unit ∈ H); the width-3 → width-2 mathematics;
   then NarrowReduction assembly and the compile-and-fix sweep.
+
+## Session 27b: WidthTwoReduction written — the (P)-chain is complete in Lean
+- WidthTwoReduction.lean: window_zero_one_mem_stableUnits — full
+  assembly: components split (Icc 0 1 = {0,1});
+  balanced_component_isUnit; balanced unit uc ∈ H with balanced
+  inverse; residual v := uc⁻¹u value 1 + η; pure_tail_nilpotent;
+  κ₁ := pairKappaUnit s₁ t₁ transport to 1 + s₁(ηt₁) (balanced,
+  nilpotency transported via (s₁ηt₁)^{m+1} = s₁η^{m+1}t₁);
+  nilpotent_tail_mem_stableUnits; assembly u = uc·(κv⁻¹)⁻¹·κ.
+  hdiv from LeavittSimplicity.exists_mul_mul_eq_one (implicit-x
+  signature: exists_mul_mul_eq_one k hx).
+  RISKS: t_one_mem_window name, pairKappaUnit explicit-arg order.
+- STATUS: the entire width-2 story is now WRITTEN in Lean end-to-end:
+  ZeroKOne (P) → RankNormalForm (Thm 3) → PureTailNilpotency (Thm 2)
+  → κ-transport → NilpotentTailKill → H.  What remains
+  mathematically: ONLY width-3 → width-2 (narrow units to [0,1] or
+  [1 + s₁z] form mod H).  Then: NarrowReduction := width-3 step +
+  window_zero_one_mem_stableUnits (+ flip for [−1,0]-forms if
+  needed); ScalarReduction wiring already written
+  (ResidualReduction); then B4; then the single compile-and-fix
+  sweep over all uncompiled modules (list: ResidualMoves,
+  ResidualReduction, BalancedRegularity, TailSupportReduction,
+  WindowProductClosure, NilpotentTailKill, GammaReduction,
+  IncomparableUnipotents, ShapeCalculus, GradedComponents,
+  PureTailNilpotency, RankNormalForm, DegreeShapeBridge,
+  CylinderCornerRank, ZeroKOne, WidthTwoReduction).
