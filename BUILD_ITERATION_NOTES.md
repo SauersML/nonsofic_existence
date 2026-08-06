@@ -2107,3 +2107,26 @@ Composition law Ω_{e,d}·Ω_{d,c} = Ω_{e,c} available throughout.
   → [u] = [Ω], Ω ∈ H (this lemma; to write)
   → NarrowReduction → ScalarReduction (COMPILED wiring) → B4
   → Theorem C unconditional; docstrings; audit.
+
+## Session 39: CodeChangeInfrastructure.lean written
+- IsCompleteCode (list-based: pairwise incomparability + cylinder
+  sum = 1); wordS_ne_zero; exists_max_length_mem (list induction);
+  exists_term_mul_ne_zero (sum-kill helper);
+  merge_identity_one (s_{v0}t_{w0} + s_{v1}t_{w1} = s_v t_w);
+  IsCompleteCode.incomp (Pairwise.forall with symmetry);
+  **exists_sibling_pair** (max-depth element m = w++[a]; m ≠ ε via a
+  second element + nil_prefix; completeness × wordS-nonzero forces a
+  code element comparable to the sibling w++[b]; length bookkeeping
+  pins it to equal the sibling; proper-prefix branch contradicts
+  prefix-freeness through v <+: w <+: m);
+  signFlip (1 − 2p_b as p+p, self-inverse via idempotency + abel);
+  signFlip_mem (balanced value in levelSpan b.length);
+  cylTransposition := signFlip · signedSwap ∈ H with value
+  1 − p_a − p_b + s_at_b + s_bt_a (the p_b-collapse calc).
+- Registered.  NEXT: CodeChangeUnits.lean — the generation induction:
+  code-change units Ω_{d,c} := Σ S(dᵢ)T(cᵢ) ∈ H by induction on
+  length, using: sibling pairs on both sides, ≤3 cylTransposition
+  multiplications to align the pairing, merge_identity_one to drop
+  to length−1, composition law Ω_{e,d}Ω_{d,c} = Ω_{e,c}.
+  Then: rectangular pivot; the Ω-intertwiner narrow-reduction;
+  assembly.

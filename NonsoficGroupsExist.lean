@@ -183,6 +183,7 @@ import NonsoficGroupsExist.WindowNonnegReduction
 import NonsoficGroupsExist.OppositeTranspose
 import NonsoficGroupsExist.ThetaStable
 import NonsoficGroupsExist.WindowNonposReduction
+import NonsoficGroupsExist.CodeChangeInfrastructure
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
