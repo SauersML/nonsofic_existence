@@ -1,5 +1,16 @@
 # Cluster build iteration — exact pending fixes (2026-08-05)
 
+CURRENT STATE (2026-08-05, later session): **the build is fully green.**
+3710/3710 targets, no errors and no warnings under
+`-DwarningAsError=true`, and `lake build Audit` is green too.  The
+per-module sections below are kept as a record of how each failure was
+diagnosed; they are history, not a TODO list.  Two notes for next time:
+
+* Lake is now 5.0.0 and has **no `-j`/`--jobs` flag** — cap the build
+  with `taskset -c 0-31 lake build` instead.
+* `lake` is not on the default remote PATH; prefix remote commands with
+  `export PATH=$HOME/.elan/bin:$PATH`.
+
 State: MSI auth works (breaker off; pushes via one-off credential helper
 pinned to SauersML: `git -c credential.helper= -c credential.helper='!f() {
 echo "username=SauersML"; echo "password=$(gh auth token -u SauersML)"; }; f'
