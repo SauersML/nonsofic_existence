@@ -526,10 +526,33 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | The complete adjacent-rank compression construction works in every characteristic | `RankFour.compressorSet_conjugation`, `RankFour.coreEmbedding_compressorSet_generate` | Formalized |
 | Kun's edited expander graphs have one uniform degree bound | `ExpanderDecomposition.degree_le`, `KunDecomposition.exists_expanderDecomposition` | Formalized |
 | Property `(T)` and hence nonsoficity over every finite field, in every characteristic | `FiniteFieldElementaryPropertyT.finiteFieldElementaryThree_hasKazhdanPropertyT`, `FiniteFieldLeavitt.ambient_not_isSofic`, `binaryLeavitt_finiteField_profile` | Formalized |
-| The rank-two compression theorem: `GL₂(A) = EL₂(A)` Kazhdan with Kazhdan units is nonsofic | `LeavittFamily.rankTwo_not_isSofic` | Formalized; the GE form `E·A·F = diag(u,1)` is Lean-backed (`MatrixDiagonalization.exists_elementary_mul_diag`), the `K₁(L) = 0` input remains manuscript-only |
+| The rank-two compression theorem: `GL₂(A) = EL₂(A)` Kazhdan with Kazhdan units is nonsofic | `LeavittFamily.rankTwo_not_isSofic` | Formalized; the GE form `E·A·F = diag(u,1)` is Lean-backed (`MatrixDiagonalization.exists_elementary_mul_diag`), and the `K₁(L) = 0` input is now unconditional (`BinaryLeavitt.K1_trivial`) |
 | Property `(T)` forces finite generation | `KazhdanFiniteGeneration.exists_symmetric_generating_finset` | Formalized |
-| `GL_r = EL_r` over the binary Leavitt algebra | `MatrixDiagonalization.binaryLeavitt_exists_elementary_mul_diag` | GE form at rank two Lean-backed; the diagonal-unit collapse (`K₁(L) = 0`) remains manuscript-only |
+| `GL_r = EL_r` over the binary Leavitt algebra | `MatrixDiagonalization.binaryLeavitt_exists_elementary_mul_diag`, `BinaryLeavitt.glTwo_eq_elementary_holds`, `BinaryLeavitt.glFour_eq_elementary_holds` | The diagonal-unit collapse (`K₁(L) = 0`) is unconditional via `BinaryLeavitt.K1_trivial`; the collapse itself is formalized at ranks two and four, not yet at all ranks |
 | A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
+
+## Margin cross-references in the manuscript
+
+`nonsofic_groups_exist.tex` carries a margin note on each numbered statement
+naming the Lean modules and declarations that formalize it, so the
+correspondence is visible at the point of use rather than only in this file.
+The notes are strictly marginal: no argument in the paper appeals to one, and
+setting `\leanlinksfalse` in the preamble removes all of them and leaves the
+text untouched.  Appendix A of the manuscript explains the three note forms
+(formalized / partly formalized / not formalized) and the trust surface.
+
+Nothing keeps such references true by itself, so they are checked rather than
+trusted:
+
+```
+python3 scripts/check_lean_refs.py
+```
+
+extracts every `\leanmod{Module}{decls}` from the manuscript and fails unless
+each module exists and each declaration is actually declared in it.  The PDF
+workflow runs it before compiling, so a stale reference blocks the build
+instead of shipping inside the PDF.  `scripts/lean_decls.py` builds the
+declaration index it resolves against, and prints it when run directly.
 
 ## TeX ↔ Lean alignment
 
@@ -575,12 +598,15 @@ so.
 | `thm:spine`, `thm:A` | `universalLeavitt_profile`, `universalLeavittEL4_not_isSofic`, `binaryLeavitt_finiteField_profile` | |
 | `thm:2x2` | `LeavittFamily.rankTwo_not_isSofic` (`RankTwoCompression`), with `eq:p0upper`/`eq:p0lower` as `rankTwoInvolution_conj_upperNil`/`rankTwoInvolution_conj_lowerNil` | finite generation of `Aˣ` derived via `KazhdanFiniteGeneration.exists_symmetric_generating_finset` |
 | `thm:agp`(a) (GE) | `MatrixDiagonalization.exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag`, from `BinaryLeavitt.exists_mul_mul_eq_one` (`LeavittSimplicity`) | rank-two form Lean-backed with a new direct proof |
-| `thm:agp`(b), `prop:glel` | — | manuscript-only: `K₁(L) = 0` and the diagonal-unit collapse; the membership machinery around it is recorded in the `B4` checkpoint |
+| `thm:agp`(b) | — | manuscript-only: the identification `K₁(R) ≅ R^×/[R^×, R^×]` remains a cited input |
+| `prop:glel` | `BinaryLeavitt.K1_trivial`, `stableUnits_eq_top_holds`, `glTwo_eq_elementary_holds`, `glFour_eq_elementary_holds` (`RefineLoopDischarge`) | part (i) unconditional in Whitehead form, by the elementary two-exit elimination of `rem:elementaryK1`; the `GL_r = EL_r` collapse is formalized at ranks two and four |
 | `thm:allranks`, `thm:B` | `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic` | proved over every finite field via self-similarity, without `K₁`/GE: all elementary ranks `≥ 2`, the full unit group, and every positive-rank `GL_r` |
 | `thm:el2` (rank two, `thm:2x2` discharge) | `RankTwoCompression.rankTwo_not_isSofic` | criterion formalized; its GE and property-`(T)` hypotheses over `L_k(1,2)` are the `B`-block |
 | `def:model`, `lem:models` | `TableCover.TableModel`, `TableCover.tableModel_of_isSofic`, `TableCover.exists_table_obstruction` | |
 | `thm:table` | `TableCover.tableGroup_no_model`, `TableCover.exists_finitelyPresented_obstruction`, `exists_finitelyPresented_nonsofic_group` | |
 | `thm:kcover` | — | manuscript-only (Shalom's finitely presented Kazhdan covers) |
+| `rem:elementaryK1` | `BinaryLeavitt.K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds` (`RefineLoopDischarge`) | the elementary elimination, formalized in full |
+| `rem:effectiveWH` | `BinaryLeavitt.narrowReduction_holds` (`RefineLoopDischarge`) | the elimination is formalized; the effectivity and complexity bounds are manuscript-only |
 | `thm:C` | `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | first assertion and the surjection; the Kazhdan refinement is manuscript-only |
 
 ## Module architecture
