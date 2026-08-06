@@ -224,7 +224,7 @@ For \(r\geq2\) one has \(\GL_r(L)=\EL_r(L)\).  Hence all the groups \(\GL_r(L)\)
 \end{mainthm}
 
 \begin{mainthm}\label{thm:C}%
-\leanverified{\leanmod{MainResults}{exists_finitelyPresented_nonsofic_group,exists_infinite_finitelyPresented_nonsofic_ambient_cover}}%
+\leanverified{\leanmod{MainResults}{exists_finitelyPresented_nonsofic_group,exists_infinite_finitelyPresented_nonsofic_ambient_cover}\leanmod{KazhdanCover}{exists_kazhdan_finitelyPresented_cover_of_not_isSofic}}%
 Every finitely generated nonsofic group is a quotient of an infinite finitely presented nonsofic group.  Every nonsofic group with property~\((T)\) is a quotient of an infinite finitely presented nonsofic group with property~\((T)\).  In particular, there is an infinite finitely presented property~\((T)\) group \(H\) that is not sofic; \(H\) may be chosen to surject onto \(L^\times\), and hence to have a quotient isomorphic to every group listed in Theorem~\ref{thm:B}.
 \end{mainthm}
 
@@ -1547,11 +1547,15 @@ Let \(k\) be any field and \(L=L_k(1,2)\).  Then:
 \end{proposition}
 
 \begin{proof}
-The algebra \(L\) is the Leavitt path algebra of the rose \(R_2\) with one vertex and two loops.  The graph criteria of \cite{AbramsAranda06} are immediate for \(R_2\): the single vertex admits no nontrivial hereditary saturated subset, every cycle has an exit (each loop exits into the other), and the vertex lies on a cycle; hence \(L\) is purely infinite simple.  The \(K\)-theory of Leavitt path algebras \cite{AraBrustengaCortinas09} gives the exact sequence
+Parts (i) and (iii) are proved, elementarily and in full, in Appendix~\ref{app:K1}: Theorem~\ref{thm:K1app} establishes \(K_1(L)=0\) in Whitehead form---every unit \(u\) has \(\diag(u,1)\in\EL_2(L)\)---and Corollary~\ref{cor:K1consequences} deduces \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\) via the elementary diagonalization of Lemma~\ref{lem:GEapp}.  The only input of the appendix beyond the Leavitt relations is strong division (Lemma~\ref{lem:division}), which holds because \(L\) is purely infinite simple: the graph criteria of \cite{AbramsAranda06} are immediate for the rose \(R_2\) with one vertex and two loops---the single vertex admits no nontrivial hereditary saturated subset, every cycle has an exit, and the vertex lies on a cycle.
+
+For (ii): Theorem~\ref{thm:agp}(b) identifies \(K_1(L)\) with \(L^\times/[L^\times,L^\times]\), so (i) gives \(L^\times=[L^\times,L^\times]\).
+
+For an independent confirmation of (i), the \(K\)-theory of Leavitt path algebras \cite{AraBrustengaCortinas09} gives the exact sequence
 \[
  K_1(k)\xrightarrow{\ 1-N^{\mathsf T}\ }K_1(k)\longrightarrow K_1(L)\longrightarrow K_0(k)\xrightarrow{\ 1-N^{\mathsf T}\ }K_0(k),
 \]
-where \(N\) is the adjacency matrix of the graph---here the \(1\times1\) matrix \((2)\), so \(1-N^{\mathsf T}=-1\).  This map acts as negation on \(K_0(k)\cong\Z\) and as inversion \(x\mapsto x^{-1}\) on \(K_1(k)\cong k^\times\); both are isomorphisms, hence \(K_1(L)=0\), proving (i).  Theorem~\ref{thm:agp} applies to \(R=L\).  Part (b) together with (i) gives \(L^\times=[L^\times,L^\times]\), proving (ii); and for \(g\in\GL_r(L)\), \(r\geq2\), part (a) writes \(g=e\cdot\diag(a,1,\dots,1)\) with \(e\in\EL_r(L)\) and \(a\in L^\times\).  By (ii), \(a\) is a product of commutators of units, so \(\diag(a,1,\dots,1)\in\EL_r(L)\) by the Whitehead commutator lemma (Lemma~\ref{lem:whitehead}).  Hence \(g\in\EL_r(L)\), proving (iii).  An elementary proof of (i), independent of the localization sequence and machine-verified, is described in Remark~\ref{rem:elementaryK1} below.
+where \(N\) is the adjacency matrix---here the \(1\times1\) matrix \((2)\), so \(1-N^{\mathsf T}=-1\), an isomorphism on both \(K_0(k)\cong\Z\) and \(K_1(k)\cong k^\times\), whence \(K_1(L)=0\).
 \end{proof}
 
 \begin{remark}\label{rem:khanh}
@@ -1669,7 +1673,7 @@ Hence for \(n\) large, \(\varphi_n\) is an \((F,\eps_0)\)-model of \(G\)---note 
 \end{proof}
 
 \begin{theorem}[Kazhdan covers]\label{thm:kcover}%
-\leanabsent{Manuscript-only: Shalom's finitely presented Kazhdan covers are not formalized.}%
+\leanverified{\leanmod{ShalomFinitePresentation}{exists_presented_kazhdan_cover,exists_finitelyPresented_kazhdan_cover}\leanmod{KazhdanCover}{exists_kazhdan_finitelyPresented_cover_of_not_isSofic}\leannote{Shalom's theorem is proved internally, not cited.}}%
 Let \(G\) be a nonsofic group with property~\((T)\).  Then there is an infinite finitely presented property-\((T)\) group \(H\) that is not sofic, together with a surjection \(H\onto G\).
 \end{theorem}
 
@@ -1715,6 +1719,369 @@ The Leavitt-corner theorem (Theorem~\ref{thm:corner}) applies to an arbitrary no
 \end{remark}
 
 \appendix
+
+\section{An elementary and effective proof of \texorpdfstring{$K_1(L_k(1,2))=0$}{K1(L)=0}}\label{app:K1}
+
+This appendix proves the vanishing of \(K_1\) announced in Remark~\ref{rem:elementaryK1}, in the Whitehead form in which Section~\ref{sec:panorama} uses it, by elementary means: no localization sequence, no spectra, and no input beyond the two Leavitt relations and one classical fact about \(L\) recorded as Lemma~\ref{lem:division} below.  The proof is an algorithm---a Gaussian elimination over the binary tree---and the complexity accounting of Remark~\ref{rem:effectiveWH} reads off from it.  Every lemma of this appendix is formalized in the accompanying Lean development, and the margin notes record the correspondence; the appendix is written to be read and checked entirely on paper.
+
+Throughout, \(k\) is a field and \(L=L_k(1,2)\).  Recall from Section~\ref{sec:leavitt} the word notation \(s_w\), \(s_w^*\) (we write \(t_w=s_w^*\) for the word \(w\), so \(t_w s_{w'}=\delta_{w,w'}\) for \(\abs w=\abs{w'}\)), the cylinder idempotents \(p_w=s_wt_w\), and complete leaf sets.  A \emph{complete code of depth \(\leq r\)} (resp.\ \(\geq r\)) is a complete leaf set all of whose words have length \(\leq r\) (resp.\ \(\geq r\)).
+
+\subsection*{A.1.\ The Whitehead class group}
+
+\begin{definition}\label{def:H}%
+\leanverified{\leanmod{DiagonalClassGroup}{stableUnits,ScalarReduction}}
+Let
+\[
+ H \;=\; \set{u\in L^\times \suchthat \diag(u,1)\in\EL_2(L)} .
+\]
+\end{definition}
+
+Since \(\diag(uv,1)=\diag(u,1)\diag(v,1)\), \(H\) is a subgroup of \(L^\times\).  The main theorem of this appendix is:
+
+\begin{theorem}\label{thm:K1app}%
+\leanverified{\leanmod{RefineLoopDischarge}{K1_trivial,narrowReduction_holds,scalarReduction_holds,stableUnits_eq_top_holds}}
+\(H=L^\times\).  Equivalently, for every \(u\in L^\times\) and every \(r\geq2\), the matrix \(\diag(u,1,\dots,1)\) is a product of elementary matrices in \(\EL_r(L)\).
+\end{theorem}
+
+(The two forms are equivalent because \(\EL_2\into\EL_r\) in the first two coordinates.)  The single external input is the following division property, a standard consequence of pure infiniteness and simplicity of \(L\) \cite{AbramsAranda06}; the accompanying formalization proves it from scratch, so a reader may take it either from the literature or from the machine-checked development.
+
+\begin{lemma}[Strong division]\label{lem:division}%
+\leanverified{\leanmod{LeavittSimplicity}{exists_mul_mul_eq_one}}
+For every nonzero \(x\in L\) there are \(p,q\in L\) with \(pxq=1\).
+\end{lemma}
+
+The first consequence is a Gaussian elimination for invertible matrices, which we prove at every rank; it is the GE property of Theorem~\ref{thm:agp}(a) in elementary form.
+
+\begin{lemma}[Elementary diagonalization]\label{lem:GEapp}%
+\leanpartial{\leanmod{MatrixDiagonalization}{exists_elementary_mul_diag,binaryLeavitt_exists_elementary_mul_diag}}{Rank two is formalized; the higher-rank induction is manuscript-only.}
+Let \(A\) be a nontrivial unital ring in which every nonzero element \(x\) admits \(p,q\) with \(pxq=1\), and let \(X\in\GL_r(A)\), \(r\geq2\).  Then there are \(E,F\in\EL_r(A)\) and \(u\in A^\times\) with
+\[
+ E\,X\,F=\diag(u,1,\dots,1).
+\]
+\end{lemma}
+
+\begin{proof}
+First let \(r=2\) and write \(X=\begin{psmallmatrix}a&b\\ c&d\end{psmallmatrix}\).  Assume first \(a\ne0\), and pick \(p,q\) with \(paq=1\).  Three elementary operations plant a literal \(1\) in the corner: the column operation \(C_2\mathrel{+}=C_1\cdot\rho\) with \(\rho=q(1-pb)\) replaces \(b\) by \(b'=a\rho+b\), which satisfies \(pb'=paq(1-pb)+pb=1\); the row operation \(R_2\mathrel{+}=wR_1\) with \(w=(1-d')p\), where \(d'=c\rho+d\), replaces \(d'\) by \(wb'+d'=(1-d')pb'+d'=1\); and with a \(1\) at position \((2,2)\), the operations \(R_1\mathrel{+}=(-b')R_2\) and \(C_1\mathrel{+}=C_2\cdot(-c'')\) (where \(c''\) is the current \((2,1)\) entry) clear the off-diagonal entries.  The result is \(\diag(v,1)\) with \(v\in A^\times\), since the product of invertible matrices is invertible and a triangular-free diagonal matrix is invertible exactly when its entries are.  If \(a=0\), then some entry of \(X\) is nonzero (as \(X\) is invertible and \(A\ne0\)), and one elementary row or column addition moves a nonzero element into position \((1,1)\); this reduces to the previous case.
+
+For \(r>2\), induct.  Pick any nonzero entry of \(X\) and, by one row and one column addition, arrange \(x_{11}\ne0\).  Run the four operations above in the coordinate pair \((1,r)\): they involve only rows and columns \(1\) and \(r\), and they produce a literal \(1\) at position \((r,r)\).  Using that \(1\), clear the rest of row \(r\) and column \(r\) by elementary operations.  The matrix is now \(\diag(X',1)\) with \(X'\in\GL_{r-1}(A)\), and the inductive hypothesis applies; for \(r-1=1\) the surviving corner is the unit \(u\).
+\end{proof}
+
+\begin{lemma}\label{lem:Hnormal}%
+\leanverified{\leanmod{DiagonalClassGroup}{conj_mem_elementaryGroup_of_division,stableUnits_normal}}
+\(\EL_2(L)\) is normal in \(\GL_2(L)\), and \(H\) is normal in \(L^\times\).
+\end{lemma}
+
+\begin{proof}
+Conjugation by an elementary matrix preserves \(\EL_2\); conjugation by \(\diag(u,v)\) sends \(x_{12}(a)\) to \(x_{12}(uav^{-1})\) and \(x_{21}(a)\) to \(x_{21}(vau^{-1})\), hence also preserves \(\EL_2\); and by Lemma~\ref{lem:GEapp} every element of \(\GL_2(L)\) is a product of elementary matrices and one matrix \(\diag(u,1)\).  For the second claim, if \(u\in H\) and \(g\in L^\times\), then \(\diag(gug^{-1},1)=\diag(g,1)\diag(u,1)\diag(g,1)^{-1}\in\EL_2(L)\) by the first claim.
+\end{proof}
+
+By Lemma~\ref{lem:Hnormal} the quotient \(L^\times/H\) is a group; we write \([u]\) for the class of \(u\), so that Theorem~\ref{thm:K1app} says \([u]=1\) for every unit.  Three families of moves generate equalities in \(L^\times/H\).
+
+\begin{lemma}[Unipotent moves]\label{lem:unipapp}%
+\leanverified{\leanmod{StableUnitsGenerators}{mem_stableUnits_of_val_unipotent}\leanmod{IncomparableUnipotents}{incomparableUnit_mem}}
+Let \(a,b\in L\) with \(ba=0\).  Then \(1+ab\in H\).  In particular, for prefix-incomparable words \(v,w\) and any \(x\in L\), the \emph{cylinder unipotent} \(1+s_vxt_w\) lies in \(H\).
+\end{lemma}
+
+\begin{proof}
+From \(ba=0\), \((ab)^2=a(ba)b=0\), so \(1+ab\) is a unit with inverse \(1-ab\), and the four-term identity
+\[
+ \diag(1+ab,\,1)=x_{12}(a)\,x_{21}(b)\,x_{12}(-a)\,x_{21}(-b)
+\]
+holds by direct block computation: \(x_{12}(a)x_{21}(b)=\begin{psmallmatrix}1+ab&a\\ b&1\end{psmallmatrix}\), multiplying by \(x_{12}(-a)\) clears the \((1,2)\) entry using \(-(1+ab)a+a=-a(ba)=0\), and \(x_{21}(-b)\) clears the \((2,1)\) entry.  For the particular case take \(a=s_vx\), \(b=t_w\): then \(ba=t_ws_v\,x=0\) since \(v,w\) are incomparable.
+\end{proof}
+
+\begin{lemma}[The flip]\label{lem:flipapp}%
+\leanverified{\leanmod{WhiteheadFlip}{flipUnit,diagPair_flipUnit_inv_mem,mul_flipUnit_inv_mem_stableUnits}}
+Let \(x,y\in L\) and suppose \(1+xy\in L^\times\).  Then \(1+yx\in L^\times\), with inverse \(1-y(1+xy)^{-1}x\), and
+\[
+ [\,1+xy\,]=[\,1+yx\,]
+ \qquad\text{in }L^\times/H .
+\]
+\end{lemma}
+
+\begin{proof}
+The stated inverse is checked directly: \((1+yx)\bigl(1-y(1+xy)^{-1}x\bigr)=1+yx-y(1+xy)(1+xy)^{-1}x=1\), and likewise on the other side.  The matrix \(\diag\bigl(1+xy,\,(1+yx)^{-1}\bigr)\) factors into four elementary matrices,
+\[
+ x_{12}(x)\;x_{21}(y)\;x_{12}\bigl(-(1+xy)^{-1}x\bigr)\;x_{21}\bigl(-(1+yx)y\bigr),
+\]
+again by direct computation.  Hence \(\diag\bigl((1+xy)(1+yx)^{-1},1\bigr)=\diag(1+xy,(1+yx)^{-1})\cdot\diag\bigl((1+yx)^{-1},(1+yx)\bigr)^{-1}\cdot\)\,(a Whitehead diagonal, Lemma~\ref{lem:whitehead}) lies in \(\EL_2(L)\), so \((1+xy)(1+yx)^{-1}\in H\).
+\end{proof}
+
+\begin{lemma}[Corner insertion]\label{lem:kappaapp}%
+\leanverified{\leanmod{LeavittDiagonalClass}{kappaUnit_mul_inv_mem_stableUnits,central_mem_stableUnits,stableUnits_eq_top}}
+For a binary word \(w\) and \(u\in L^\times\), the \emph{corner insertion} \(\kappa_w(u)=s_wut_w+(1-p_w)\) is a unit, and \([\kappa_w(u)]=[u]\).  Consequently every central unit lies in \(H\).
+\end{lemma}
+
+\begin{proof}
+The matrix \(X_w=\begin{psmallmatrix}s_w&1-p_w\\ 0&t_w\end{psmallmatrix}\) is invertible, with inverse \(\begin{psmallmatrix}t_w&0\\ 1-p_w&s_w\end{psmallmatrix}\) (using \(t_ws_w=1\) and \((1-p_w)s_w=0\)), and it intertwines:
+\[
+ X_w\,\diag(u,1)\,X_w^{-1}=\diag\bigl(\kappa_w(u),\,1\bigr).
+\]
+Thus \(\diag(\kappa_w(u)u^{-1},1)=[X_w,\diag(u,1)]\), a commutator of invertible matrices, one of which is elementary-diagonalizable; by Lemmas~\ref{lem:GEapp} and~\ref{lem:whitehead} such a commutator lies in \(\EL_2(L)\), so \(\kappa_w(u)u^{-1}\in H\).
+
+For a central unit \(c\), centrality gives \(s_0ct_0+s_1ct_1=c(s_0t_0+s_1t_1)=c\); on the other hand a direct computation using \(t_1s_0=0\) shows
+\[
+ \kappa_0(c)\,\kappa_1(c)=s_0ct_0+s_1ct_1 .
+\]
+Hence \([c]=[\kappa_0(c)][\kappa_1(c)]=[c]^2\) in \(L^\times/H\), and \([c]=1\).
+\end{proof}
+
+\subsection*{A.2.\ Code moves}
+
+Complete leaf sets play the role of block structures.  Two further families of units lie in \(H\).
+
+\begin{lemma}[Code scalars]\label{lem:codescalarapp}%
+\leanverified{\leanmod{CodeScalarMoves}{codeScalar_unit_mem}}
+Let \(\mathcal D=(w_1,\dots,w_\ell)\) be a complete leaf set and \(G\in\GL_\ell(k)\) an invertible scalar matrix.  Then
+\[
+ \Sigma_{\mathcal D}(G)\;=\;\sum_{i,j}s_{w_i}\,G_{ij}\,t_{w_j}
+\]
+is a unit of \(L\) lying in \(H\).
+\end{lemma}
+
+\begin{proof}
+The assignment \(G\mapsto\Sigma_{\mathcal D}(G)\) is unital and multiplicative by the leaf identities (Lemma~\ref{lem:leaf}), so \(\Sigma_{\mathcal D}(G)\) is a unit with inverse \(\Sigma_{\mathcal D}(G^{-1})\).  Over the field \(k\), \(G\) is a product of transvections and one diagonal matrix (Gaussian elimination).  A transvection \(I+\lambda E_{ij}\), \(i\ne j\), transports to \(1+\lambda\,s_{w_i}t_{w_j}\), a cylinder unipotent in \(H\) by Lemma~\ref{lem:unipapp} (leaves of a complete leaf set are pairwise incomparable).  A diagonal matrix \(\diag(d_1,\dots,d_\ell)\) transports to \(\prod_i\kappa_{w_i}(d_i)\) with central scalars \(d_i\in k^\times\); each factor lies in \(H\) by Lemma~\ref{lem:kappaapp}.
+\end{proof}
+
+\begin{lemma}[Code changes]\label{lem:codechangeapp}%
+\leanverified{\leanmod{CodeChangeUnits}{codeChange_mem_stableUnits}\leanmod{CodeChangeGlue}{codeBijection_mem_stableUnits}}
+Let \((\tau_1,\dots,\tau_\ell)\) and \((\sigma_1,\dots,\sigma_\ell)\) be complete leaf sets of the same size.  Then the \emph{code change}
+\[
+ \Omega\;=\;\sum_{i=1}^{\ell}s_{\tau_i}t_{\sigma_i}
+\]
+is a unit of \(L\) lying in \(H\).
+\end{lemma}
+
+\begin{proof}
+\(\Omega\) is a unit with inverse \(\sum_is_{\sigma_i}t_{\tau_i}\), by the leaf identities.  Note that the \(\Omega\) are precisely the images \(U_g\) of Thompson's group \(V\) under the embedding \eqref{eq:Ug}, together with their compositions with index bijections; the lemma is a generation theorem for the Higman--Thompson groupoid.  Induct on \(\ell\).  For \(\ell=1\) both sets are the empty word and \(\Omega=1\).  For \(\ell\geq2\), the source set, being the leaf set of a finite full binary tree, contains a sibling pair \(\sigma_a=w0\), \(\sigma_b=w1\).  Composing \(\Omega\) with at most two \emph{transpositions} aligns the pairing so that the targets of \(\sigma_a,\sigma_b\) are again a sibling pair \(v0,v1\) in the same order; here a transposition is a code change that swaps two leaves \(x,y\) of one complete leaf set and fixes the rest, i.e.\ \(T(x,y)=s_xt_y+s_yt_x+(1-p_x-p_y)\), and \(T(x,y)\in H\) because it is \(\Sigma_{\mathcal D}(P)\) for the corresponding scalar permutation matrix \(P\) on any complete leaf set \(\mathcal D\) refining \(\{x,y\}\)---a code scalar (Lemma~\ref{lem:codescalarapp}).  After alignment, the two sibling terms merge through the completeness relation, \(s_{v0}t_{w0}+s_{v1}t_{w1}=s_v(s_0t_0+s_1t_1)t_w=s_vt_w\), producing a code change between complete leaf sets of size \(\ell-1\); the inductive hypothesis and normality of \(H\) conclude.
+\end{proof}
+
+\begin{corollary}[Reshaping]\label{cor:reshapeapp}%
+\leanverified{\leanmod{PencilReshape}{reshaped_pencil_mem_iff,exists_reshaped_pencil,pencilVal_window_mem}}
+Let \((R_i)\), \((C_j)\), \((P_i)\), \((Q_j)\) be complete leaf sets, with \(\abs R=\abs P\) and \(\abs C=\abs Q\), and let \(E_{ij}\in L\).  If
+\[
+ u=\sum_{i,j}s_{R_i}\,E_{ij}\,t_{C_j}
+ \quad\text{and}\quad
+ v=\sum_{i,j}s_{P_i}\,E_{ij}\,t_{Q_j}
+\]
+are both units, then \(v=\Omega_1u\,\Omega_2\) for code changes \(\Omega_1=\sum_is_{P_i}t_{R_i}\) and \(\Omega_2=\sum_js_{C_j}t_{Q_j}\), and hence \(u\in H\iff v\in H\).
+\end{corollary}
+
+\begin{proof}
+\(\Omega_1u\Omega_2=\sum s_{P_i}(t_{R_i}s_{R_a})E_{ab}(t_{C_b}s_{C_j})t_{Q_j}=v\) by the leaf identities; apply Lemma~\ref{lem:codechangeapp} and normality.
+\end{proof}
+
+\subsection*{A.3.\ The degree filtration and width reduction}
+
+The defining relations of \(L\) are homogeneous for \(\deg s_i=+1\), \(\deg t_i=-1\), so the free-algebra grading descends: \(L=\bigoplus_{d\in\Z}L_d\) is \(\Z\)-graded, with \(L_d\) spanned by the monomials \(s_\alpha t_\beta\), \(\abs\alpha-\abs\beta=d\).  Write
+\[
+ W[a,b]=\operatorname{span}_k\set{s_\alpha t_\beta\suchthat a\leq\abs\alpha-\abs\beta\leq b},
+\]
+and, for \(x\in L\), write \(x=\sum_dx^{(d)}\) for its graded components.  Elements of \(W[0,0]\) are called \emph{balanced}; by the leaf identities, the balanced elements supported at depth \(\leq n\) are exactly the matrices \(\sum_{\gamma,\delta}G_{\gamma\delta}\,s_\gamma t_\delta\) over the full code \(\{0,1\}^n\) with scalar \(G\), i.e.\ the image of \(M_{2^n}(k)\) under \(\Sigma\)-transport---so Lemma~\ref{lem:codescalarapp} says: \emph{balanced units are exactly the transported invertible scalar matrices, and they lie in \(H\)}%
+\footnote{A balanced element that is a unit of \(L\) has invertible scalar matrix at its own depth---a singular matrix over a field is an annihilator of a nonzero matrix, hence a zero divisor---and therefore has balanced inverse.}.
+
+\begin{lemma}[Width reduction]\label{lem:widthapp}%
+\leanverified{\leanmod{LeavittWindowReduction}{exists_window_reduction}\leanmod{LeavittGradingSpans}{exists_corner_move}\leanmod{BinaryLeavittWindow}{exists_narrow_representative}}
+Every \(u\in L^\times\) satisfies \([u]=[u']\) for some unit \(u'\) with value in \(W[-1,1]\) (a \emph{narrow} unit).
+\end{lemma}
+
+\begin{proof}
+Every element of \(L\) lies in some window \(W[-M,N]\).  We show: if \(N\geq2\), then \([u]=[u'']\) for a unit \(u''\) with value in \(W[-M,\max(N-1,1)]\); the mirror statement for \(M\geq2\) follows by the same argument applied to the anti-automorphism \(\theta\) of Lemma~\ref{lem:thetaapp} below, and iterating both lands in \(W[-1,1]\).
+
+The engine is the \emph{corner move}: for any \(v,w\in L\),
+\[
+ \Bigl[\,u\,\Bigr]=\Bigl[\,s_0(u+vw)t_0+s_0vt_1+s_1wt_0+s_1t_1\,\Bigr],
+\]
+obtained by transporting the \(2\times2\) identity
+\(\begin{psmallmatrix}1&v\\ 0&1\end{psmallmatrix}
+ \begin{psmallmatrix}u&0\\ 0&1\end{psmallmatrix}
+ \begin{psmallmatrix}1&0\\ w&1\end{psmallmatrix}
+ =\begin{psmallmatrix}u+vw&v\\ w&1\end{psmallmatrix}\)
+along \(\Theta_{\mathcal C_2}\) of Proposition~\ref{prop:selfsim}: the images of the two unipotent factors are the cylinder-type unipotents \(1+s_0vt_1\) and \(1+s_1wt_0\), which lie in \(H\) by Lemma~\ref{lem:unipapp}, and the image of \(\diag(u,1)\) is \(\kappa_0(u)\), congruent to \(u\) by Lemma~\ref{lem:kappaapp}.
+
+Let \(x\) be the value of \(u\), with top component \(x^{(N)}\), \(N\geq2\).  Since \(y\,t_0s_0=y\) for every \(y\), the top component factors as \(x^{(N)}=b\,s_0\) with \(b=x^{(N)}t_0\in W[N-1,N-1]\).  Apply the corner move with \(v=-b\), \(w=s_0\): the new value is
+\[
+ s_0\bigl(x-x^{(N)}\bigr)t_0\;-\;s_0bt_1\;+\;s_1s_0t_0\;+\;s_1t_1 .
+\]
+The first summand lies in \(W[-M,N-1]\) (conjugation by \(s_0(\cdot)t_0\) preserves degree), the second has degree \(N-1\), and the last two have degrees \(1\) and \(0\).  Hence the new unit has value in \(W[-M,\max(N-1,1)]\), as claimed.
+\end{proof}
+
+\subsection*{A.4.\ Windows die}
+
+The next stage shows that units confined to a \emph{one-sided} window already lie in \(H\).  This is where the analytic heart of the argument sits.
+
+\begin{lemma}[Transpose]\label{lem:thetaapp}%
+\leanverified{\leanmod{ThetaStable}{thetaMatUnit_mem_elementaryGroup,thetaMatUnit_diagUnit}}
+The assignment \(s_i\mapsto t_i\), \(t_i\mapsto s_i\) extends to an anti-automorphism \(\theta\) of \(L\) with \(\theta^2=\id\); it maps \(W[a,b]\) onto \(W[-b,-a]\), and \(u\in H\iff\theta(u)\in H\).
+\end{lemma}
+
+\begin{proof}
+The relations are symmetric under the assignment composed with order reversal, so \(\theta\) exists; it negates degree.  Applying \(\theta\) entrywise to the transpose of matrices sends \(x_{ij}(a)\) to \(x_{ji}(\theta(a))\) and \(\diag(u,1)\) to \(\diag(\theta(u),1)\), so it preserves \(\EL_2\) and hence membership in \(H\).
+\end{proof}
+
+\begin{lemma}[Pure tails are nilpotent]\label{lem:nilpapp}%
+\leanverified{\leanmod{PureTailNilpotency}{pure_tail_nilpotent}}
+Let \(1+\eta\in L^\times\) with \(\eta\in W[1,1]\).  Then \(\eta\) is nilpotent.
+\end{lemma}
+
+\begin{proof}
+Let \(y=(1+\eta)^{-1}\), with graded components \(y^{(d)}\) supported in a finite window.  The equation \((1+\eta)y=1\) reads degreewise: \(y^{(d)}+\eta\,y^{(d-1)}=\delta_{d,0}\).  From the bottom of the window upward, \(y^{(d)}=0\) for \(d\) below the window; then \(y^{(d)}=-\eta y^{(d-1)}\) for \(d<0\) forces all negative components to vanish, \(y^{(0)}=1\), and \(y^{(d)}=(-\eta)^d\) for \(d>0\).  Since the window is finite, \((-\eta)^d=0\) for large \(d\).
+\end{proof}
+
+\begin{lemma}[Nilpotent tails die]\label{lem:niltailapp}%
+\leanverified{\leanmod{NilpotentTailKill}{nilpotent_tail_mem_stableUnits}\leanmod{RankNormalForm}{exists_rank_normal_form}}
+Let \(z\in L\) be balanced with \(s_1z\) nilpotent, and let \(u\in L^\times\) have value \(1+s_1z\).  Then \(u\in H\).
+\end{lemma}
+
+\begin{proof}
+Induct on the nilpotency index \(D\) of \(s_1z\); for \(D=1\), \(z=t_1(s_1z)=0\) and \(u=1\).  For \(D\geq2\), put \(r=t_1(s_1z)^{D-1}\in W[D-2,D-2]\)\,\((\cdot)\); factoring \(r=R\sigma\) with \(R=rt_0^{\,D-2}\) balanced (as in Lemma~\ref{lem:widthapp}) and taking a balanced pseudo-inverse \(\Xi\) of \(R\)---balanced elements are scalar matrices along a full code, and every scalar matrix \(R\) has a matrix \(\Xi\) with \(R\Xi R=R\)---one obtains an idempotent-like element \(e\) with \(e\,(s_1z)=0\) and \((s_1z)^{D-1}e=(s_1z)^{D-1}\).  The \emph{mover} \(1-s_1(ze)\) has square-zero tail, hence lies in \(H\) by Lemma~\ref{lem:unipapp}, and
+\[
+ (1+s_1z)\bigl(1-s_1(ze)\bigr)=1+s_1\bigl(z-ze\bigr)
+\]
+because \(z\,e\,s_1(ze)\)-cross terms vanish by \(e(s_1z)=0\).  The new tail satisfies \((s_1(z-ze))^{D-1}=(s_1z)^{D-1}(1-e)=0\), so its index is at most \(D-1\), and the inductive hypothesis applies.
+\end{proof}
+
+\begin{lemma}[The keystone]\label{lem:keystoneapp}%
+\leanverified{\leanmod{ZeroKOne}{balanced_component_isUnit}}
+Let \(u=c+\zeta\in L^\times\) with \(c\) balanced and \(\zeta\in W[1,1]\).  Then \(c\in L^\times\).
+\end{lemma}
+
+\begin{proof}
+Suppose not.  Balanced elements at depth \(n\) are scalar matrices \(M_{2^n}(k)\) along the full code; by the rank normal form over the field \(k\) there are balanced units \(g,h\) with \(gch=e:=\sum_{\gamma\in S}p_\gamma\), a cylinder idempotent over a subset \(S\) of the depth-\(n\) code, and \(c\) is invertible exactly when \(S\) is everything.  So assume \(S\) proper, and let \(f=1-e=\sum_{\gamma\in T}p_\gamma\) with \(T\ne\emptyset\).  Replace \(u\) by \(w=guh=e+\zeta'\) (with \(\zeta'=g\zeta h\in W[1,1]\)); invertibility of \(c\) is not affected.  Let \(y=w^{-1}\), with graded components \(y^{(d)}\), \(d\in[\mathrm{lo},\mathrm{hi}]\), and let \(M=-\mathrm{lo}\).
+
+The equation \(wy=1\) reads degreewise \(e\,y^{(d)}+\zeta'y^{(d-1)}=\delta_{d,0}\).  Multiplying the \(d=0\) equation by \(f\) on both sides (\(fe=0\), \(f^2=f\)) gives \(f=f\zeta'\,y^{(-1)}f\), and substituting the relation \(y^{(d)}=fy^{(d)}-\zeta'y^{(d-1)}\) (valid for \(d\leq-1\), from \(ey^{(d)}=-\zeta'y^{(d-1)}\)) repeatedly yields, after \(M\) steps (the components below the window vanish),
+\begin{equation}\label{eq:cornerid}
+ f\;=\;\sum_{j=0}^{M-1}\;\underbrace{f\zeta'(-\zeta')^{j}}_{\deg=j+1}\;\cdot\;\underbrace{f\,y^{(-1-j)}f}_{\deg=-1-j} .
+\end{equation}
+Now count ranks at a deep uniform interface.  For \(\ell\) large, every factor in \eqref{eq:cornerid} is represented by a scalar matrix between the full codes of appropriate depths: an element of \(W[d,d]\) supported at bounded depth is, for all large \(q\), a \(2^{q+d}\times2^{q}\) scalar matrix (pad with the completeness relation).  Representing the \(j\)-th summand at interface depths \(\ell\to\ell-1-j\to\ell\), the middle factor passes through the matrix of \(f\) at depth \(\ell-1-j\), whose rank is exactly \(\abs T\,2^{\ell-1-j-n}\).  Hence the matrix of the right-hand side of \eqref{eq:cornerid} at depth \(\ell\) has rank at most \(\sum_{j<M}\abs T\,2^{\ell-1-j-n}<\abs T\,2^{\ell-n}\)---a geometric series short of its limit---while the matrix of \(f\) at depth \(\ell\) has rank exactly \(\abs T\,2^{\ell-n}\).  This contradiction proves the lemma.
+\end{proof}
+
+\begin{proposition}[Windows die]\label{prop:windowsdieapp}%
+\leanverified{\leanmod{WindowNonnegReduction}{window_nonneg_mem_stableUnits}\leanmod{WindowNonposReduction}{window_nonpos_mem_stableUnits}\leanmod{WidthTwoReduction}{window_zero_one_mem_stableUnits}}
+A unit of \(L\) whose value lies in \(W[0,N]\) for some \(N\), or in \(W[-N,0]\), lies in \(H\).
+\end{proposition}
+
+\begin{proof}
+By the transpose (Lemma~\ref{lem:thetaapp}) it suffices to treat \(W[0,N]\); induct on \(N\).
+
+\emph{Base, \(N\leq1\).}  Let \(u=c+\zeta\), \(c\) balanced, \(\zeta\in W[1,1]\).  By the keystone (Lemma~\ref{lem:keystoneapp}) \(c\) is a balanced unit, so \(c\in H\) with balanced inverse, and \(u=c(1+\eta)\) with \(\eta=c^{-1}\zeta\in W[1,1]\).  By Lemma~\ref{lem:nilpapp} \(\eta\) is nilpotent.  The corner insertion \(\kappa_1(1+\eta)=1+s_1(\eta t_1)\) is congruent to \(1+\eta\) (Lemma~\ref{lem:kappaapp}), has balanced tail coefficient \(z=\eta t_1\), and \(s_1z=s_1\eta t_1\) inherits nilpotency from \(\eta\) (indeed \((s_1\eta t_1)^j=s_1\eta^jt_1\)); Lemma~\ref{lem:niltailapp} finishes.
+
+\emph{Step, \(N\geq2\).}  Write the value as \(1+(a+\eta)\) with \(a\in W[0,N-1]\)---subtracting \(1\) costs nothing since \(1\) is balanced---and \(\eta\) the top component, of degree \(N\).  Split \(\eta=s_0q_0+s_1q_1\) with \(q_z=t_z\eta\) of degree \(N-1\).  Perform the stable Whitehead block move along the four depth-two cylinders: with
+\[
+ X_z=s_{00}\,s_z\,t_{w_z},
+ \qquad
+ Y_z=s_{w_z}\,q_z\,t_{00},
+ \qquad
+ (w_0,w_1)=(01,10),
+\]
+set \(m_2=(1-X_0)(1-X_1)\) and \(m_1=(1+Y_0)(1+Y_1)\), products of cylinder unipotents in \(H\) (Lemma~\ref{lem:unipapp}), and let \(\kappa=\kappa_{00}(u)=1+s_{00}(a+\eta)t_{00}\), congruent to \(u\).  In the product \(m_2\,\kappa\,m_1\) all cross terms vanish by incomparability of the three cylinders \(00,01,10\), except
+\[
+ X_0Y_0+X_1Y_1=s_{00}\,(s_0q_0+s_1q_1)\,t_{00}=s_{00}\,\eta\,t_{00},
+\]
+which cancels the top component inside \(\kappa\).  The value of \(m_2\kappa m_1\) is therefore
+\[
+ 1+\bigl(s_{00}\,a\,t_{00}\;-\;X_0-X_1\;+\;Y_0+Y_1\bigr),
+\]
+whose components have degrees in \([0,N-1]\): the \(a\)-part keeps its degrees, \(\deg X_z=1\), and \(\deg Y_z=N-1\).  By induction \(m_2\kappa m_1\in H\), hence \(u\in H\).
+\end{proof}
+
+\subsection*{A.5.\ The pencil and the elimination loop}
+
+\begin{lemma}[Pencil form]\label{lem:pencilapp}%
+\leanverified{\leanmod{PencilForm}{exists_pencil_form}\leanmod{RefineLoopDischarge}{pencilEntry_mem_window,codePair_expansion}}
+Let \(x\in W[-1,1]\).  Then there are \(m\) and scalar matrices \(A_0,A_1,C,B_0,B_1\), indexed by the full code \(\mathcal F=\{0,1\}^{m+1}\), with
+\[
+ x=\sum_{i,j\in\mathcal F}s_i\,E_{ij}\,t_j,
+ \qquad
+ E_{ij}=A_{0,ij}\,t_0+A_{1,ij}\,t_1+C_{ij}\cdot1+B_{0,ij}\,s_0+B_{1,ij}\,s_1 .
+\]
+\end{lemma}
+
+\begin{proof}
+Choose \(m\) with all monomials of \(x\) of depth \(\leq m\), and expand \(x=\sum_{i,j}s_i(t_ixs_j)t_j\) along the full code of depth \(m+1\) (completeness relation on both sides).  For a monomial \(s_\alpha t_\beta\) of \(x\) and code words \(i,j\) of length \(m+1\): \(t_is_\alpha\) vanishes unless \(\alpha\) is a prefix of \(i\), in which case it is \(t_{i'}\) with \(\abs{i'}=m+1-\abs\alpha\geq1\), and symmetrically \(t_\beta s_j=s_{j'}\) with \(\abs{j'}=m+1-\abs\beta\geq1\); the product \(t_{i'}s_{j'}\) collapses, by the prefix calculus, to \(0\), a scalar, or a single letter \(s_z\) or \(t_z\), according to the degree \(\abs\alpha-\abs\beta\in\{-1,0,1\}\).  Hence each corner entry \(t_ixs_j\) lies in the five-dimensional scalar pencil space displayed.
+\end{proof}
+
+We call a unit in this form a \emph{pencil unit} over the code pair (rows, columns); the data is the quintuple of scalar matrices, and the \emph{stack} is the vertical block matrix \(\begin{psmallmatrix}B_0\\ B_1\end{psmallmatrix}\).
+
+\begin{lemma}[Strict negativity]\label{lem:strictnegapp}%
+\leanverified{\leanmod{StrictNegativePencil}{entry_window_negative_of_B_full}}
+Let \(u\) be a pencil unit over complete leaf sets \((R_i)\), \((C_j)\), and suppose the stack admits a scalar left inverse: matrices \(G_0,G_1\) with \(G_0B_0+G_1B_1=I\).  Then there is \(N\) such that every corner entry of the inverse,
+\[
+ y_{ji}=t_{C_j}\,u^{-1}\,s_{R_i},
+\]
+lies in \(W[-N,-1]\).
+\end{lemma}
+
+\begin{proof}
+All \(y_{ji}\) lie in a common finite window; let \(d^*\) be the largest degree in which any \(y_{ji}\) has a nonzero component, and suppose \(d^*\geq0\).  From \(u\,u^{-1}=1\), sandwiching and inserting the completeness relation for \((C_j)\),
+\[
+ \sum_jE_{ij}\,y_{ji'}=\delta_{ii'}\qquad(\text{all }i,i').
+\]
+Take the component of degree \(d^*+1\geq1\) on both sides.  On the left only the degree-\(+1\) part of \(E\) can contribute against \(y^{(d^*)}\)---components of \(y\) above \(d^*\) vanish---so
+\[
+ \sum_j\bigl(B_{0,ij}s_0+B_{1,ij}s_1\bigr)\,y^{(d^*)}_{ji'}=0 .
+\]
+Multiplying on the left by \(t_0\) and by \(t_1\) separates the two shifts: \(\sum_jB_{0,ij}y^{(d^*)}_{ji'}=0\) and \(\sum_jB_{1,ij}y^{(d^*)}_{ji'}=0\); that is, the stack annihilates the matrix \(Y=(y^{(d^*)}_{ji'})\) on the left.  Applying the scalar left inverse, \(Y=(G_0B_0+G_1B_1)Y=0\), contradicting the choice of \(d^*\).  Hence all components have degree \(\leq-1\).
+\end{proof}
+
+\begin{lemma}[Refinement step]\label{lem:refinestepapp}%
+\leanverified{\leanmod{RefineStep}{refine_column,pencilEntry_mul_s}\leanmod{GLVectorNormalization}{exists_isUnit_matrix_col}}
+Let \(u\) be a pencil unit over \((R,C)\) whose column \(j_0\) is \emph{stack-free}: \(B_{0,ij_0}=B_{1,ij_0}=0\) for all \(i\).  Then \(u\) is also a pencil unit over the code pair \((R,C')\), where \(C'\) replaces the word \(C_{j_0}\) by its two children \(C_{j_0}0\), \(C_{j_0}1\), with data given columnwise by
+\[
+ (A_0,A_1,C,B_0,B_1)_{\cdot\,j_0z}
+ =\bigl(0,\;0,\;A_{z,\cdot j_0},\;[z{=}0]\,C_{\cdot j_0},\;[z{=}1]\,C_{\cdot j_0}\bigr),
+\]
+all other columns unchanged.
+\end{lemma}
+
+\begin{proof}
+Insert \(1=s_0t_0+s_1t_1\) before \(t_{C_{j_0}}\): each term \(s_{R_i}E_{ij_0}t_{C_{j_0}}\) becomes \(\sum_z s_{R_i}\,(E_{ij_0}s_z)\,t_{C_{j_0}z}\), and for a stack-free entry the split identity
+\[
+ (a_0t_0+a_1t_1+c)\,s_z=a_z+c\,s_z
+\]
+shows \(E_{ij_0}s_z\) is again a pencil entry, with the \(A\)-data falling to the constant slot and the constant to the \(B\)-slot---the index shift of the Wiener--Hopf analogy.
+\end{proof}
+
+\begin{lemma}[Code supply]\label{lem:kraftapp}%
+\leanverified{\leanmod{CodeShapeSupply}{exists_shallow_code,exists_deep_code}}
+For \(1\leq\kappa\leq2^r\) there is a complete leaf set of size \(\kappa\) and depth \(\leq r\); for \(\kappa\geq2^M\) there is one of size \(\kappa\) and depth \(\geq M\).
+\end{lemma}
+
+\begin{proof}
+Kraft counting.  Shallow: start from the full code of depth \(\lceil\log_2\kappa\rceil\leq r\) and merge sibling pairs until \(\kappa\) leaves remain (each merge reduces the count by one and cannot increase depth).  Deep: start from the full code of depth \(M\), of size \(2^M\leq\kappa\), and split leaves (each split increases the count by one and produces words of length \(\geq M\)).
+\end{proof}
+
+\begin{theorem}[The elimination loop]\label{thm:loopapp}%
+\leanverified{\leanmod{RefineLoopDischarge}{pencil_free_exit,pencil_full_exit,pencil_unit_mem_pow}}
+Every pencil unit over a row code of \(2^r\) words lies in \(H\).
+\end{theorem}
+
+\begin{proof}
+Let \(u\) be a pencil unit over \((R,C)\), \(\abs R=2^r\), \(\abs C=\kappa\).  We induct on \(2^{r+1}-\kappa\) (when this is \(\leq0\), the first case below applies).
+
+\emph{Free exit (\(\kappa\geq2^{r+1}\)).}  By Lemma~\ref{lem:kraftapp} choose a shallow complete code \(P\) of size \(2^r\) and depth \(\leq r\), and a deep complete code \(Q\) of size \(\kappa\) and depth \(\geq r+1\).  Reshape \(u\) to the pair \((P,Q)\) (Corollary~\ref{cor:reshapeapp}).  Each pencil entry lies in \(W[-1,1]\), so each monomial of the reshaped value has degree at most \(\abs{P_i}+1-\abs{Q_j}\leq r+1-(r+1)=0\): the reshaped unit lies in \(W[-N',0]\) for some \(N'\), hence in \(H\) by Proposition~\ref{prop:windowsdieapp}, hence \(u\in H\).
+
+\emph{Full stack.}  If the stack has a scalar left inverse, Lemma~\ref{lem:strictnegapp} puts every corner entry \(y_{ji}\) of \(u^{-1}\) in \(W[-N,-1]\).  Expand \(u^{-1}=\sum_{j,i}s_{C_j}y_{ji}t_{R_i}\) and reshape to a shallow column code of depth \(\leq r+1\) (possible: \(\kappa\leq2^{r+1}\) in this branch, or the free exit applies) and a deep row code of depth \(\geq r\).  Monomial degrees are at most \((r+1)+(-1)-r=0\), so \(u^{-1}\in H\) by Proposition~\ref{prop:windowsdieapp}, and \(u\in H\).
+
+\emph{Refine.}  Otherwise the stack, having no scalar left inverse, has a nonzero kernel vector \(v\) (over the field \(k\), a matrix with trivial kernel has a left inverse).  Choose an invertible scalar matrix \(G\) whose \(j_0\)-th column is \(v\) (extend \(v\) to a basis).  The code scalar \(\Sigma_C(G)\) lies in \(H\) (Lemma~\ref{lem:codescalarapp}), and \(u\cdot\Sigma_C(G)\) is a pencil unit over \((R,C)\) with data multiplied columnwise by \(G\); its column \(j_0\) is stack-free because \(v\) kills both \(B_0\) and \(B_1\).  Apply the refinement step (Lemma~\ref{lem:refinestepapp}): a pencil unit over \((R,C')\) with \(\kappa+1\) columns.  The counter \(2^{r+1}-\kappa\) has dropped; the inductive hypothesis gives \(u\cdot\Sigma_C(G)\in H\), hence \(u\in H\).
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:K1app}]
+Let \(u\in L^\times\).  By width reduction (Lemma~\ref{lem:widthapp}), \([u]=[u']\) with \(u'\) narrow; by the pencil form (Lemma~\ref{lem:pencilapp}), \(u'\) is a pencil unit over the full code pair of depth \(m+1\), a row code of \(2^{m+1}\) words; by the elimination loop (Theorem~\ref{thm:loopapp}), \(u'\in H\).  Hence \(u\in H\).
+\end{proof}
+
+\subsection*{A.6.\ Consequences and effectivity}
+
+\begin{corollary}\label{cor:K1consequences}%
+\leanverified{\leanmod{RefineLoopDischarge}{glTwo_eq_elementary_holds,glFour_eq_elementary_holds}}
+For every field \(k\) and \(L=L_k(1,2)\): \(K_1(L)=0\); and \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\).
+\end{corollary}
+
+\begin{proof}
+For \(X\in\GL_r(L)\), Lemma~\ref{lem:GEapp} writes \(EXF=\diag(u,1,\dots,1)\), and Theorem~\ref{thm:K1app} places the diagonal factor in \(\EL_r(L)\); hence \(X\in\EL_r(L)\).  The same normal form computes \(K_1\): every class of \(\GL_r(L)/\EL_r(L)\)-stabilized is represented by \(\diag(u,1,\dots,1)\), which is elementary.
+\end{proof}
+
+The proof of Theorem~\ref{thm:K1app} is an algorithm, and every step is effective Gaussian elimination over \(k\): the width reduction processes one graded component per corner move; the pencil form is a change of basis at depth \(m+1\); each loop pass computes a kernel vector or a left inverse of the stack; and both exits are reshapes along explicitly constructed codes followed by the window inductions, each step of which is again explicit.  For a unit supported on monomials of depth at most \(d\), all codes involved have at most \(2^{d+2}\) words and the loop executes at most \(2^{d+2}\) times, giving the complexity bound of Remark~\ref{rem:effectiveWH}: the elementary factorization of \(\diag(u,1,\dots,1)\) is computed in time polynomial in \(2^d\) and in the number of monomials of \(u\).
 
 \section{The Lean formalization}\label{app:lean}
 
@@ -1775,10 +2142,9 @@ true.
  and which part is not.
 \item[\textnormal{\textit{not formalized}}]
  The statement is not formalized, and the line below says why.  This occurs
- exactly twice: at Lemma~\ref{lem:fplef}, which the Lean proof does not need
+ exactly once, at Lemma~\ref{lem:fplef}, which the Lean proof does not need
  because it replaces the residual-finiteness route by a direct finite
- obstruction, and at Theorem~\ref{thm:kcover}, which rests on Shalom's
- finitely presented Kazhdan covers.
+ obstruction.
 \end{description}
 
 The notes are decoration in the strict sense: setting \verb|\leanlinksfalse|
@@ -1866,13 +2232,27 @@ below it uses it.
 
 \subsection*{What is not formalized}
 
-Beyond the two absent items listed above, the gaps are those marked
-\textit{formalized in part} in the margins: the arbitrary-finitely-generated-ring form
-of Theorem~\ref{thm:ejz} (the characteristic-two cases the endpoints use are
-proved); part~(b) of Theorem~\ref{thm:agp}, which remains a cited input; the
-\(\GL_r=\EL_r\) collapse of Proposition~\ref{prop:glel}, formalized at ranks
-two and four rather than all ranks; and the complexity bounds of
-Remark~\ref{rem:effectiveWH}, whose underlying elimination is formalized.
+Beyond Lemma~\ref{lem:fplef}, which is absent because the Lean proof does not
+need it, the gaps are those marked \textit{formalized in part} in the margins:
+the arbitrary-finitely-generated-ring form of Theorem~\ref{thm:ejz} (the
+characteristic-two cases the endpoints use are proved); part~(b) of
+Theorem~\ref{thm:agp}, which remains a cited input; the \(\GL_r=\EL_r\)
+collapse of Proposition~\ref{prop:glel}, formalized at ranks two and four
+rather than all ranks; the essential-expander definition
+(Definition~\ref{def:essential}), which the library realizes through the
+matching-certificate repair rather than as a definition of its own; and the
+complexity bounds of Remark~\ref{rem:effectiveWH}, whose underlying
+elimination is formalized.
+
+Two of the paper's four external inputs are therefore cited here but proved
+there.  Kun's theorem and the Kun--Thom obstruction are the ones flagged in the
+margins at Theorems~\ref{thm:kun} and~\ref{thm:kunthom}; Shalom's theorem is
+the third, proved as \(\texttt{exists\_finitelyPresented\_kazhdan\_cover}\),
+so the Kazhdan half of Theorem~\ref{thm:C} rests on no external citation in the
+formalization either.  Only property~\((T)\) for elementary groups over
+arbitrary finitely generated rings (Theorem~\ref{thm:ejz}) remains genuinely
+imported, and the endpoints use only its characteristic-two cases, which are
+proved.
 
 It is worth being precise about what the last of these does and does not
 settle, because it is the one place where formalization changes the standing

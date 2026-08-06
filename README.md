@@ -529,7 +529,7 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
 | The rank-two compression theorem: `GL₂(A) = EL₂(A)` Kazhdan with Kazhdan units is nonsofic | `LeavittFamily.rankTwo_not_isSofic` | Formalized; the GE form `E·A·F = diag(u,1)` is Lean-backed (`MatrixDiagonalization.exists_elementary_mul_diag`), and the `K₁(L) = 0` input is now unconditional (`BinaryLeavitt.K1_trivial`) |
 | Property `(T)` forces finite generation | `KazhdanFiniteGeneration.exists_symmetric_generating_finset` | Formalized |
 | `GL_r = EL_r` over the binary Leavitt algebra | `MatrixDiagonalization.binaryLeavitt_exists_elementary_mul_diag`, `BinaryLeavitt.glTwo_eq_elementary_holds`, `BinaryLeavitt.glFour_eq_elementary_holds` | The diagonal-unit collapse (`K₁(L) = 0`) is unconditional via `BinaryLeavitt.K1_trivial`; the collapse itself is formalized at ranks two and four, not yet at all ranks |
-| A property-`(T)` finitely presented cover and the panorama of quotient claims | — | Manuscript-only |
+| A property-`(T)` finitely presented cover | `KazhdanCover.exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Formalized, via the internally proved Shalom cover |
 
 ## Margin cross-references in the manuscript
 
@@ -604,10 +604,10 @@ so.
 | `thm:el2` (rank two, `thm:2x2` discharge) | `RankTwoCompression.rankTwo_not_isSofic` | criterion formalized; its GE and property-`(T)` hypotheses over `L_k(1,2)` are the `B`-block |
 | `def:model`, `lem:models` | `TableCover.TableModel`, `TableCover.tableModel_of_isSofic`, `TableCover.exists_table_obstruction` | |
 | `thm:table` | `TableCover.tableGroup_no_model`, `TableCover.exists_finitelyPresented_obstruction`, `exists_finitelyPresented_nonsofic_group` | |
-| `thm:kcover` | — | manuscript-only (Shalom's finitely presented Kazhdan covers) |
+| `thm:kcover` | `Shalom.exists_presented_kazhdan_cover`, `Shalom.exists_finitelyPresented_kazhdan_cover` (`ShalomFinitePresentation`), `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` (`KazhdanCover`) | Formalized; Shalom's theorem is proved internally rather than cited.  Not reachable from `MainResults`, so it is outside the `#print axioms` report in `NonsoficGroupsExist/Audit.lean`, though `scripts/Audit.lean` still scans it |
 | `rem:elementaryK1` | `BinaryLeavitt.K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds` (`RefineLoopDischarge`) | the elementary elimination, formalized in full |
 | `rem:effectiveWH` | `BinaryLeavitt.narrowReduction_holds` (`RefineLoopDischarge`) | the elimination is formalized; the effectivity and complexity bounds are manuscript-only |
-| `thm:C` | `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | first assertion and the surjection; the Kazhdan refinement is manuscript-only |
+| `thm:C` | `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover` (`MainResults`); Kazhdan refinement `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` (`KazhdanCover`) | all three assertions formalized |
 
 ## Module architecture
 
