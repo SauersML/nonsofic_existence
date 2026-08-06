@@ -1968,3 +1968,32 @@ formulas ((a) and (b), word calculus, hypotheses = freshness
 incomparabilities); (iii) NegKillInduction.lean: list-induction over
 the negative part with the macro; (iv) NarrowReductionProof +
 B4/docstrings.  NO other mathematics remains.
+
+## Session 37b: generalized B2 written; swap-macro post-mortem; ρ anatomy
+- WindowNonnegReduction.lean WRITTEN (built from the user's fixed
+  BlockMoveTailKill by systematic transform, incorporating their
+  abel-fix, hK-fold fix, and base-case fix): **every unit with value
+  in span[0, N] is in stableUnits** — the block move never needs the
+  balanced part invertible.  ZeroKOneN permanently unnecessary.
+- GammaDischarge is actually SUBSUMED by window_zero_one (its value
+  1 + s₁z₋ + s₁z₀ lies in span[0,1]!) — keep as milestone, note for
+  the audit's redundancy pass.
+- SWAP-MACRO POST-MORTEM (3 failed repairs, each by the conservation
+  daemon): (i) left-kill of the fresh monomial resurrects p_xA via
+  the σ's S(β)T(x)A junk; (ii) the S-side-refresh second swap's
+  −p_v junk shields the kill (net zero); (iii) the balanced-swap
+  refresh's S(x)T(v) half resurrects via the kill.  LESSON: swaps
+  are invertible conjugations — content genuinely dies ONLY in
+  fully-supplied unipotent kills.
+- ρ-WITNESS ANATOMY (exact recompute): over 𝔽₂ the unsigned swap
+  contains 1 + p_x which annihilates x-rooted content BY DUPLICATION;
+  ρ has NO scalar part, so no fresh monomial appears; and the machine
+  chose β = 10 COMPARABLE to content so σ₋-junk collapsed into
+  balanced terms (T(10)S(10) = 1).  The machine plays 𝔽₂ billiards —
+  not a formalizable uniform strategy.
+- STRATEGIC RESET for the remaining gap ([−1,1] with genuine negative
+  part): write the MIRROR CHAIN (mechanical mirrors of compiled
+  proofs, xw-side): mirror-(P) → mirror-PureTail → mirror-WidthTwo →
+  mirror-window-nonneg ⟹ [−N, 0]-window units die.  Then the final
+  mixing question is sharply: value = c + A + B with A ≠ 0 ≠ B, and
+  the two one-sided theorems + abelian Units/H available.

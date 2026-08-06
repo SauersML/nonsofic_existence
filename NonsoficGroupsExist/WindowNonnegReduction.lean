@@ -2,13 +2,15 @@ import NonsoficGroupsExist.WidthTwoReduction
 import NonsoficGroupsExist.IncomparableUnipotents
 
 /-!
-# Pure positive tails die: the block-move induction
+# Nonnegative windows die: the block-move induction
 
-Every unit of the binary Leavitt algebra of the form `1 + τ` with `τ`
-of pure positive degrees `[1, N]` lies in the diagonal class group.
+Every unit of the binary Leavitt algebra whose value lies in the span
+of the degree window `[0, N]` belongs to the diagonal class group —
+the balanced part is arbitrary throughout; the collapse never uses
+invertibility.
 The induction peels the top degree: writing the top component as
 `η = s₀(t₀η) + s₁(t₁η)`, the depth-two corner embedding
-`κ(v) = 1 + s₀₀ τ t₀₀` is squeezed between two products of
+`κ(u) = 1 + s₀₀ (u-1) t₀₀` is squeezed between two products of
 incomparable unipotents; the cross terms collapse through the
 complete depth-two code and produce a unit with tail of degrees
 `[1, N-1]` — the depth-one corner picture of the stable Whitehead
@@ -23,15 +25,13 @@ open LeavittFamily MatrixDiagonalization
 
 variable (k : Type) [Field k]
 
-/-- **Pure positive tails die.** -/
-theorem pure_positive_tail_mem_stableUnits
+/-- **Nonnegative-window units lie in the diagonal class group.** -/
+theorem window_nonneg_mem_stableUnits
     [Nontrivial (BinaryLeavittAlgebra k)] :
-    ∀ (N : ℕ) {τ : BinaryLeavittAlgebra k},
-      τ ∈ Submodule.span k
-        ((family k).degreeMonomials 1 ((N : ℤ) + 1)) →
-      ∀ u : (BinaryLeavittAlgebra k)ˣ,
-        (u : BinaryLeavittAlgebra k) = 1 + τ →
-        u ∈ stableUnits (BinaryLeavittAlgebra k) := by
+    ∀ (N : ℕ) (u : (BinaryLeavittAlgebra k)ˣ),
+      (u : BinaryLeavittAlgebra k) ∈ Submodule.span k
+        ((family k).degreeMonomials 0 ((N : ℤ) + 1)) →
+      u ∈ stableUnits (BinaryLeavittAlgebra k) := by
   classical
   set L : LeavittFamily (BinaryLeavittAlgebra k) := family k with hL
   have hdiv : ∀ x : BinaryLeavittAlgebra k, x ≠ 0 →
@@ -40,27 +40,27 @@ theorem pure_positive_tail_mem_stableUnits
   intro N
   induction N with
   | zero =>
-      intro τ hτ u hu
-      refine window_zero_one_mem_stableUnits k u ?_
-      rw [hu]
-      -- `one_mem_window` lands in the window `0 0`; the target is `0 1`.
-      refine Submodule.add_mem _
-        (L.span_degreeMonomials_mono (by omega) (by omega)
-          (L.one_mem_window (k := k))) ?_
-      exact L.span_degreeMonomials_mono (by omega) (by omega) hτ
+      intro u hu
+      exact window_zero_one_mem_stableUnits k u
+        (L.span_degreeMonomials_mono (by omega) (by omega) hu)
   | succ N ih =>
-      intro τ hτ u hu
+      intro u hu
       rw [show (((N + 1 : ℕ) : ℤ) + 1) = (N : ℤ) + 2 from by
-        push_cast; ring] at hτ
+        push_cast; ring] at hu
+      have hzmem : (u : BinaryLeavittAlgebra k) - 1 ∈
+          Submodule.span k (L.degreeMonomials 0 ((N : ℤ) + 2)) :=
+        Submodule.sub_mem _ hu
+          (L.span_degreeMonomials_mono (by omega) (by omega)
+            (L.one_mem_window (k := k)))
       -- split off the top component
-      obtain ⟨y, hymem, hysupp, hysum⟩ := exists_components k hτ
+      obtain ⟨y, hymem, hysupp, hysum⟩ := exists_components k hzmem
       set η : BinaryLeavittAlgebra k := y ((N : ℤ) + 2) with hη
       set a : BinaryLeavittAlgebra k :=
-        ∑ d ∈ Finset.Icc (1 : ℤ) ((N : ℤ) + 1), y d with ha
-      have hτsplit : τ = a + η := by
+        ∑ d ∈ Finset.Icc (0 : ℤ) ((N : ℤ) + 1), y d with ha
+      have hτsplit : (u : BinaryLeavittAlgebra k) - 1 = a + η := by
         rw [hysum, ha, hη]
-        have hins : Finset.Icc (1 : ℤ) ((N : ℤ) + 2) =
-            insert ((N : ℤ) + 2) (Finset.Icc (1 : ℤ) ((N : ℤ) + 1))
+        have hins : Finset.Icc (0 : ℤ) ((N : ℤ) + 2) =
+            insert ((N : ℤ) + 2) (Finset.Icc (0 : ℤ) ((N : ℤ) + 1))
             := by
           ext d
           simp only [Finset.mem_Icc, Finset.mem_insert]
@@ -68,8 +68,11 @@ theorem pure_positive_tail_mem_stableUnits
         rw [hins, Finset.sum_insert (by
           simp only [Finset.mem_Icc]
           omega), add_comm]
+      have hu1 : (u : BinaryLeavittAlgebra k) = 1 + (a + η) := by
+        rw [← hτsplit]
+        ring
       have haw : a ∈ Submodule.span k
-          (L.degreeMonomials 1 ((N : ℤ) + 1)) := by
+          (L.degreeMonomials 0 ((N : ℤ) + 1)) := by
         rw [ha]
         refine Submodule.sum_mem _ fun d hd ↦ ?_
         have hd' := Finset.mem_Icc.mp hd
@@ -105,14 +108,15 @@ theorem pure_positive_tail_mem_stableUnits
       have hκmem : κ * u⁻¹ ∈ stableUnits (BinaryLeavittAlgebra k) :=
         pairKappaUnit_mul_inv_mem_stableUnits _ _ hts hdiv u
       have hκval : (κ : BinaryLeavittAlgebra k) =
-          1 + L.wordS [0, 0] * τ * L.wordT [0, 0] := by
+          1 + L.wordS [0, 0] * (a + η) * L.wordT [0, 0] := by
         show L.wordS [0, 0] * (u : BinaryLeavittAlgebra k) *
             L.wordT [0, 0] +
           (1 - L.wordS [0, 0] * L.wordT [0, 0]) = _
-        rw [hu]
-        have h1 : L.wordS [0, 0] * (1 + τ) * L.wordT [0, 0] =
+        rw [hu1]
+        have h1 : L.wordS [0, 0] * (1 + (a + η)) * L.wordT [0, 0] =
             L.wordS [0, 0] * L.wordT [0, 0] +
-            L.wordS [0, 0] * τ * L.wordT [0, 0] := by noncomm_ring
+            L.wordS [0, 0] * (a + η) * L.wordT [0, 0] := by
+          noncomm_ring
         rw [h1]
         noncomm_ring
       -- the four unipotent factors
@@ -129,7 +133,7 @@ theorem pure_positive_tail_mem_stableUnits
       set Y₁ : BinaryLeavittAlgebra k :=
         L.wordS [1, 0] * q₁ * L.wordT [0, 0] with hY₁
       set K : BinaryLeavittAlgebra k :=
-        L.wordS [0, 0] * τ * L.wordT [0, 0] with hK
+        L.wordS [0, 0] * (a + η) * L.wordT [0, 0] with hK
       -- vanishing between blocks
       have hz₁ : L.wordT [0, 1] * L.wordS [0, 0] = 0 :=
         L.wordT_mul_wordS_of_incomparable _ _ hinc₁' hinc₁
@@ -163,29 +167,31 @@ theorem pure_positive_tail_mem_stableUnits
           from by noncomm_ring, hsplitη]
       have hXKfactsA : X₀ * K = 0 := by
         rw [hX₀, hK, show L.wordS [0, 0] * L.s 0 * L.wordT [0, 1] *
-          (L.wordS [0, 0] * τ * L.wordT [0, 0]) =
+          (L.wordS [0, 0] * (a + η) * L.wordT [0, 0]) =
           L.wordS [0, 0] * L.s 0 *
-            (L.wordT [0, 1] * L.wordS [0, 0]) * τ * L.wordT [0, 0]
+            (L.wordT [0, 1] * L.wordS [0, 0]) * (a + η) *
+            L.wordT [0, 0]
           from by noncomm_ring, hz₁]
         noncomm_ring
       have hXKfactsB : X₁ * K = 0 := by
         rw [hX₁, hK, show L.wordS [0, 0] * L.s 1 * L.wordT [1, 0] *
-          (L.wordS [0, 0] * τ * L.wordT [0, 0]) =
+          (L.wordS [0, 0] * (a + η) * L.wordT [0, 0]) =
           L.wordS [0, 0] * L.s 1 *
-            (L.wordT [1, 0] * L.wordS [0, 0]) * τ * L.wordT [0, 0]
+            (L.wordT [1, 0] * L.wordS [0, 0]) * (a + η) *
+            L.wordT [0, 0]
           from by noncomm_ring, hz₂]
         noncomm_ring
       have hKYfactsA : K * Y₀ = 0 := by
-        rw [hY₀, hK, show L.wordS [0, 0] * τ * L.wordT [0, 0] *
+        rw [hY₀, hK, show L.wordS [0, 0] * (a + η) * L.wordT [0, 0] *
           (L.wordS [0, 1] * q₀ * L.wordT [0, 0]) =
-          L.wordS [0, 0] * τ *
+          L.wordS [0, 0] * (a + η) *
             (L.wordT [0, 0] * L.wordS [0, 1]) * q₀ * L.wordT [0, 0]
           from by noncomm_ring, hz₃]
         noncomm_ring
       have hKYfactsB : K * Y₁ = 0 := by
-        rw [hY₁, hK, show L.wordS [0, 0] * τ * L.wordT [0, 0] *
+        rw [hY₁, hK, show L.wordS [0, 0] * (a + η) * L.wordT [0, 0] *
           (L.wordS [1, 0] * q₁ * L.wordT [0, 0]) =
-          L.wordS [0, 0] * τ *
+          L.wordS [0, 0] * (a + η) *
             (L.wordT [0, 0] * L.wordS [1, 0]) * q₁ * L.wordT [0, 0]
           from by noncomm_ring, hz₄]
         noncomm_ring
@@ -221,13 +227,12 @@ theorem pure_positive_tail_mem_stableUnits
                 (L.wordS [0, 0] * (-(L.s 1)) * L.wordT [1, 0]) := by
               noncomm_ring
           _ = 1 - X₀ - X₁ := by
-              -- `noncomm_ring` normalises `-x` to `-1 • x` but never moves a
-              -- scalar out of a product, so it stalls with `A * (-1 • B)` on
-              -- the left and `-1 • (A * B)` on the right.  Migrate the scalar
-              -- outwards by hand, then finish additively.
+              -- Not `noncomm_ring`: it normalises `-x` to `-1 • x` and then
+              -- cannot reconcile `A * (-1 • B)` with `-1 • (A * B)`.  Pull
+              -- the signs out first and finish additively.
               rw [hcross, hX₀, hX₁]
-              noncomm_ring
-              simp only [mul_smul_comm, smul_mul_assoc] <;> abel
+              simp only [mul_neg, neg_mul, add_zero]
+              abel
       have hm₁val : (m₁ : BinaryLeavittAlgebra k) = 1 + Y₀ + Y₁ := by
         show (1 + L.wordS [0, 1] * q₀ * L.wordT [0, 0]) *
           (1 + L.wordS [1, 0] * q₁ * L.wordT [0, 0]) = _
@@ -280,20 +285,22 @@ theorem pure_positive_tail_mem_stableUnits
             = 1 + K + Y₀ + Y₁ + K * Y₀ + K * Y₁ - X₀ - X₁ -
               X₀ * K - X₁ * K - X₀ * Y₀ - X₀ * Y₁ - X₁ * Y₀ -
               X₁ * Y₁ - X₀ * K * Y₀ - X₀ * K * Y₁ - X₁ * K * Y₀ -
-              X₁ * K * Y₁ := by
-              -- Same scalar-migration gap as in `hm₂val`: the expansion
-              -- leaves `(-1 • X₀) * K` against `-1 • (X₀ * K)`.
-              noncomm_ring
-              simp only [smul_mul_assoc] <;> abel
+              X₁ * K * Y₁ := by noncomm_ring
           _ = 1 + K + Y₀ + Y₁ - X₀ - X₁ - (X₀ * Y₀ + X₁ * Y₁) := by
-              -- The triple products need no separate treatment: `X₀ * K = 0`
-              -- already fires inside `X₀ * K * Y₀`, leaving `0 * Y₀`.
               rw [hKYfactsA, hKYfactsB, hXKfactsA, hXKfactsB,
                 hXY₀₁, hXY₁₀]
-              simp only [zero_mul, add_zero, sub_zero] <;> abel
+              rw [show X₀ * K * Y₀ = 0 from by
+                  rw [hXKfactsA]; noncomm_ring,
+                show X₀ * K * Y₁ = 0 from by
+                  rw [hXKfactsA]; noncomm_ring,
+                show X₁ * K * Y₀ = 0 from by
+                  rw [hXKfactsB]; noncomm_ring,
+                show X₁ * K * Y₁ = 0 from by
+                  rw [hXKfactsB]; noncomm_ring]
+              noncomm_ring
           _ = 1 + (L.wordS [0, 0] * a * L.wordT [0, 0] - X₀ - X₁ +
               Y₀ + Y₁) := by
-              rw [hXY, hK, hτsplit]
+              rw [hXY, hK]
               noncomm_ring
       -- the new tail lives one degree lower
       have hs00w : L.wordS [0, 0] ∈ Submodule.span k
@@ -308,34 +315,31 @@ theorem pure_positive_tail_mem_stableUnits
       have hs10w : L.wordS [1, 0] ∈ Submodule.span k
           (L.degreeMonomials 2 2) :=
         Submodule.subset_span ⟨[1, 0], [], by simp, by simp, by simp⟩
-      have htail : L.wordS [0, 0] * a * L.wordT [0, 0] - X₀ - X₁ +
-          Y₀ + Y₁ ∈ Submodule.span k
-          (L.degreeMonomials 1 ((N : ℤ) + 1)) := by
+      have hu'mem : (u' : BinaryLeavittAlgebra k) ∈
+          Submodule.span k (L.degreeMonomials 0 ((N : ℤ) + 1)) := by
+        rw [hu'val]
+        refine Submodule.add_mem _
+          (L.span_degreeMonomials_mono (by omega) (by omega)
+            (L.one_mem_window (k := k))) ?_
         refine Submodule.add_mem _ (Submodule.add_mem _
           (Submodule.sub_mem _ (Submodule.sub_mem _ ?_ ?_) ?_) ?_) ?_
         · have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs00w haw) ht00w
           refine L.span_degreeMonomials_mono ?_ ?_ h1 <;> omega
-        -- Pin the intermediate window to `1 1` explicitly.  Feeding
-        -- `subset_span` straight into `span_degreeMonomials_mono` leaves
-        -- `lo`/`hi` as metavariables, so neither the `simp`s nor the
-        -- `omega`s have anything to solve against.
-        · have hx₀ : X₀ ∈ Submodule.span k (L.degreeMonomials 1 1) := by
-            rw [hX₀]
-            refine Submodule.subset_span
-              ⟨[0, 0, 0], [0, 1], by simp, by simp, ?_⟩
-            rw [show ([0, 0, 0] : List (Fin 2)) = [0, 0] ++ [0] from
-              rfl, L.wordS_append]
-            simp [wordS]
-          exact L.span_degreeMonomials_mono (by omega) (by omega) hx₀
-        · have hx₁ : X₁ ∈ Submodule.span k (L.degreeMonomials 1 1) := by
-            rw [hX₁]
-            refine Submodule.subset_span
-              ⟨[0, 0, 1], [1, 0], by simp, by simp, ?_⟩
-            rw [show ([0, 0, 1] : List (Fin 2)) = [0, 0] ++ [1] from
-              rfl, L.wordS_append]
-            simp [wordS]
-          exact L.span_degreeMonomials_mono (by omega) (by omega) hx₁
+        · rw [hX₀]
+          refine L.span_degreeMonomials_mono (by omega) (by omega)
+            (Submodule.subset_span
+              ⟨[0, 0, 0], [0, 1], by simp, by simp, ?_⟩)
+          rw [show ([0, 0, 0] : List (Fin 2)) = [0, 0] ++ [0] from
+            rfl, L.wordS_append]
+          simp [wordS]
+        · rw [hX₁]
+          refine L.span_degreeMonomials_mono (by omega) (by omega)
+            (Submodule.subset_span
+              ⟨[0, 0, 1], [1, 0], by simp, by simp, ?_⟩)
+          rw [show ([0, 0, 1] : List (Fin 2)) = [0, 0] ++ [1] from
+            rfl, L.wordS_append]
+          simp [wordS]
         · rw [hY₀]
           have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs01w hq₀w) ht00w
@@ -344,26 +348,14 @@ theorem pure_positive_tail_mem_stableUnits
           have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs10w hq₁w) ht00w
           refine L.span_degreeMonomials_mono ?_ ?_ h1 <;> omega
-      -- close the induction
-      have hu'mem : u' ∈ stableUnits (BinaryLeavittAlgebra k) := by
-        rcases Nat.eq_zero_or_pos N with hN0 | hNpos
-        · subst hN0
-          refine window_zero_one_mem_stableUnits k u' ?_
-          rw [hu'val]
-          refine Submodule.add_mem _
-            (L.span_degreeMonomials_mono (by omega) (by omega)
-              (L.one_mem_window (k := k))) ?_
-          exact L.span_degreeMonomials_mono (by omega) (by omega)
-            htail
-        · exact ih (τ := L.wordS [0, 0] * a * L.wordT [0, 0] -
-            X₀ - X₁ + Y₀ + Y₁) htail u' hu'val
-      -- assemble: u = (κ·u⁻¹)⁻¹-free form
+      have hu'H : u' ∈ stableUnits (BinaryLeavittAlgebra k) :=
+        ih u' hu'mem
       have hassemble : u = (κ * u⁻¹)⁻¹ * (m₂⁻¹ * u' * m₁⁻¹) := by
         rw [hu']
         group
       rw [hassemble]
       exact mul_mem (inv_mem hκmem)
-        (mul_mem (mul_mem (inv_mem hm₂mem) hu'mem) (inv_mem hm₁mem))
+        (mul_mem (mul_mem (inv_mem hm₂mem) hu'H) (inv_mem hm₁mem))
 
 end BinaryLeavitt
 end NonsoficGroupsExist

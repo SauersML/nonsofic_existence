@@ -179,6 +179,7 @@ import NonsoficGroupsExist.WidthTwoReduction
 import NonsoficGroupsExist.GammaDischarge
 import NonsoficGroupsExist.KillMoves
 import NonsoficGroupsExist.BlockMoveTailKill
+import NonsoficGroupsExist.WindowNonnegReduction
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
