@@ -143,6 +143,7 @@ import NonsoficGroupsExist.Matching.ConservativeMatching
 import NonsoficGroupsExist.Criterion.CriterionAssembly
 import NonsoficGroupsExist.Leavitt.Leavitt
 import NonsoficGroupsExist.Leavitt.AryCorner
+import NonsoficGroupsExist.Leavitt.FamilyRankFour
 import NonsoficGroupsExist.Leavitt.UniversalLeavittOver
 import NonsoficGroupsExist.Leavitt.LeavittNormalForm
 import NonsoficGroupsExist.Leavitt.DiagonalClassGroup
