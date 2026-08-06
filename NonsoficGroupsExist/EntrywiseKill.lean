@@ -105,9 +105,12 @@ theorem entry_window_nonpos_of_B_full
   have htPmem : ∀ i j, tP i j ∈
       Submodule.span k (L.degreeMonomials (-1) (-1)) := by
     intro i j
+    -- the two summands need *different* letters, so `<;>` cannot serve both:
+    -- it would have to solve `L.t ?m = L.t0` and `L.t ?m = L.t1` at one `?m`.
     refine Submodule.add_mem _ (Submodule.smul_mem _ _ ?_)
-      (Submodule.smul_mem _ _ ?_) <;>
-      exact Submodule.subset_span ⟨[], [_], by simp, by simp, by simp⟩
+      (Submodule.smul_mem _ _ ?_)
+    · exact Submodule.subset_span ⟨[], [0], by simp, by simp, by simp⟩
+    · exact Submodule.subset_span ⟨[], [1], by simp, by simp, by simp⟩
   have hcPmem : ∀ i j, cP i j ∈
       Submodule.span k (L.degreeMonomials 0 0) := fun i j ↦
     Submodule.smul_mem _ _ (L.one_mem_window (k := k))
@@ -115,8 +118,9 @@ theorem entry_window_nonpos_of_B_full
       Submodule.span k (L.degreeMonomials 1 1) := by
     intro i j
     refine Submodule.add_mem _ (Submodule.smul_mem _ _ ?_)
-      (Submodule.smul_mem _ _ ?_) <;>
-      exact Submodule.subset_span ⟨[_], [], by simp, by simp, by simp⟩
+      (Submodule.smul_mem _ _ ?_)
+    · exact Submodule.subset_span ⟨[0], [], by simp, by simp, by simp⟩
+    · exact Submodule.subset_span ⟨[1], [], by simp, by simp, by simp⟩
   -- the strip equations
   have hstrip : ∀ i i' : ι, (∑ j, (tP i j + cP i j + sP i j) *
       y j i') = if i = i' then (1 : BinaryLeavittAlgebra k) else 0 := by
@@ -125,7 +129,9 @@ theorem entry_window_nonpos_of_B_full
       ((u⁻¹ : (BinaryLeavittAlgebra k)ˣ) : BinaryLeavittAlgebra k)
       (R.word i) (R.word i')
     rw [Units.mul_inv, mul_one, L.prefixCode_orthogonal R i i'] at h1
-    rw [← h1]
+    -- `h1 : (if i = i' then 1 else 0) = ∑ j, …`, so the forward direction is
+    -- the one that turns the goal's `if` into the sum we can match termwise.
+    rw [h1]
     refine Finset.sum_congr rfl fun j _ ↦ ?_
     congr 1
     have h2 : L.wordT (R.word i) * (u : BinaryLeavittAlgebra k) *
