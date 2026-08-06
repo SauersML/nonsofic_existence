@@ -1722,3 +1722,31 @@ pseudo-inverse chains awaiting the final wiring], STALE_DISCLAIMER
 REMAINING: width-3 math (A-nilpotency finish + swap-cascade supply),
 its formalization, NarrowReduction proof + assembly, docstring
 updates, final audit.
+
+## Session 33: B2-N=2 is fully formalizable with COMPILED tools; H is normal
+- KEY REALIZATION: the commutator lemma is already formalized
+  (commutator_mem_elementaryGroup_of_division): H ⊴ Units and
+  Units/H is ABELIAN — free rearrangement of products mod H.
+  (Scaling-automorphism tricks die over 𝔽₂: k* trivial.)
+- B2-N=2 FORMALIZATION ROUTE (all ingredients compiled TODAY):
+  v = 1 + η₁ + η₂ ⟹ M₄-matrix M := E₁₂(−P)·diag(v,I₃)·E₂₁(Q),
+  P := (s₀,s₁,0), Q := (t₀η₂; t₁η₂; 0): entries in window [0,1];
+  transport via the EQUAL-depth code {00,01,10,11} (matrixRingEquiv,
+  formalized): û has value in span[0,1] ⟹ WidthTwoReduction ⟹ H;
+  diag(v,I₃)-descent via pairKappa/cornerDiag machinery (formalized);
+  elementary factors via transvection-pullback (formalized).
+  Degree-shift embeddings CANNOT exist (ring homs preserve 1; any
+  (s,t) with ts = 1 has balanced degree) — confirmed the transport
+  must use equal depths for nonneg windows, mixed depths otherwise.
+- Conservation law re-confirmed on 4-element mixed-depth codes
+  ({0,10,110,111}): the direct block-move on the NEGATIVE part
+  remains impossible (C-row and t-column degrees sum to −1 around
+  the cycle).  The negative side genuinely requires content-kills:
+  A-nilpotency (cofactor BVP, toy case done) + swap-cascade supply.
+- NEXT CONCRETE STEPS: (1) write BlockMoveTailKill.lean (B2-N=2 as
+  above — mechanical, all deps green); (2) finish A-nilpotency via
+  the grouped-coefficient elimination on the cofactor BVP;
+  (3) mirror width-2 chain ([−1,0]-windows) — either θ-antiauto
+  formalization or rerun of the chain on the xw-side;
+  (4) singular-c width-3 assembly (swap cascade with supply from
+  E ≥ D-rank-bound); (5) NarrowReduction wiring, docstrings, audit.
