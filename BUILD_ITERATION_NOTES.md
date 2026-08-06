@@ -894,3 +894,25 @@ REMAINING for NarrowReduction: only the z₋-elimination/(G) — with
   instance is the K = 1 case where the (1−π')-side forces the graded
   contradiction.  CONJECTURED PROOF SHAPE: induction on K, pushing
   the contradiction of the K = 1 case through the nilpotent cascade.
+
+## Session 20: second (G) instance + staircase formulation + chain plan
+- Second non-unit verified: u = (1 − p₁₁) + s₁₁t₁ (γ' = 1 − p₁₁
+  singular): the downward cascade forces t₁y₋₁ = t₁₁ and then
+  γ'y₋₁ acquires an s₁t₁₁-component outside Im(s₁₁t₁·) = s₁₁·L,
+  unsolvable by monomial prefix independence.  Pattern matches the
+  p₀-instance: singular γ' + unit-ness ⟹ cascade escapes the image.
+- (G) staircase formulation: u unit ⟺ 1 ∈ image of the staircase
+  operator (y₀,…,y_{−M}) ↦ γ'y₀ + s₁z₀y₋₁ subject to
+  γ'y_d + s₁z₀y_{d−1} = 0; (G) ⟺ solvability forces γ' invertible.
+  Fitting corner analysis (K=1): all corner equations are consistent
+  (tautological) — the contradiction must use monomial/prefix
+  independence ACROSS levels as in both instances.  Note π = p₁π
+  (kernels live under p₁ since p₀γ' = p₀), and the collapse
+  Z·s₁ = W₁ with πs₁W₁ = πs₁, πs₁W₀ = πs₀.
+- γ-ELIMINATION CHAIN (writable now, given γ-invertibility):
+  γ = 1 + z₋s₁ invertible ⟹ γ⁻¹ balanced (γx = 1 ⟹ γx₀ = 1 at the
+  balanced component ⟹ matrix-invertible in the subalgebra) ⟹
+  [1+s₁z] = flip = [γ(1 + γ⁻¹z₀s₁)] = [1 + γ⁻¹z₀s₁] = flip =
+  [1 + s₁(γ⁻¹-moved z₀)] pure z₋ = 0 ⟹ nilpotent automatic ⟹
+  NilpotentTailKill.  Writing this as GammaReduction.lean with
+  γ-invertibility as the explicit hypothesis.
