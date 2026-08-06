@@ -2041,3 +2041,40 @@ with the weighted measure; (3) V-generation lemma; (4) assembly.
 - REMAINING: the mixing step (narrow with both signs → product of
   one-sided factors mod H: the LPU statement) + V-generation +
   NarrowReduction assembly + docstrings.
+
+## Session 38b: THE MIXING CASE IS SOLVED — the Ω-intertwiner argument
+**Theorem (final gap).** Every narrow unit u (value A + c + B,
+A ∈ span[−1,−1], B ∈ span[1,1]) lies in H·[V], hence in
+centralClassGroup once V-elements are certified in H.
+PROOF:
+1. Rank-normalize A to the canonical partial isometry
+   τ = Σ_{i<r} S(aᵢ)T(bᵢ) (|a|=m, |b|=m+1, orthonormal families) by
+   balanced H-units (rectangular pivot — small new lemma).
+2. THE INTERTWINER: complete {bᵢ} and {aᵢ} to full prefix codes with
+   a bijective pairing whose degree profile is ⊆ {0, +1}: exactly r
+   completion pairs of degree +1 (volume bookkeeping:
+   Σ 2^{−|a'|}(1−2^{−d}) = r·2^{−m−1} is satisfiable with r
+   degree-1 pairs and the rest degree-0), with ALL completion pairs
+   (b'ⱼ, a'ⱼ) chosen FRESH: mutually incomparable and incomparable
+   to every S/T-side of the value.  Ω := Σ S(a-code)T(b-code), a
+   V-element (code-change unit).
+3. u·Ω⁻¹ computation: τ·Ω⁻¹ = Σ p_{aᵢ} (balanced!); the negative
+   part of u·Ω⁻¹ is EXACTLY c·(degree-(−1) part of Ω⁻¹) =
+   Σⱼ (c-column content)·S(b'ⱼ)T(a'ⱼ):
+   - c singular: place the degree-1 completion pairs in the FREE
+     columns (Sᶜ, refined deep) ⟹ negative part ZERO outright.
+   - c = 1 (invertible, normalized): the negative part is the r
+     FRESH canonical monomials S(b'ⱼ)T(a'ⱼ) themselves — both sides
+     fresh ⟹ the unipotent kills are FULLY SUPPLIED (hasup, hcsup
+     hold against all content by construction; no resurrection).
+   Either way: u·Ω⁻¹ ~ nonneg-window unit ⟹ ∈ H (compiled).
+4. Hence [u] = [Ω]; Ω ∈ H by the V-GENERATION LEMMA: refine to a
+   common deep code, factor into incomparable transpositions
+   σ (compiled ∈ H) with 3-cycles through incomparable spares for
+   comparable moves (Higman's induction on code size).
+REMAINING LEAN (fully specified, no open math):
+  (a) rectangular rank normal form for degree-(−1) parts;
+  (b) the Ω construction + the u·Ω⁻¹ value computation + kills;
+  (c) V-generation (induction on codes);
+  (d) NarrowReduction assembly → ScalarReduction (wiring compiled)
+      → B4 → Theorem C; docstrings; audit.

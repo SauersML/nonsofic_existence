@@ -17,6 +17,11 @@ namespace BinaryLeavitt
 
 open LeavittFamily MatrixDiagonalization
 
+-- `ᵀ` is scoped notation in the `Matrix` namespace; without this the
+-- transpose in `thetaMat` below does not parse.  `open scoped` takes the
+-- notation only, leaving the explicit `Matrix.*` references unshadowed.
+open scoped Matrix
+
 variable (k : Type) [Field k]
 
 /-- Entrywise-`θ̂` transpose on two-by-two matrices. -/

@@ -159,13 +159,17 @@ theorem thetaHat_thetaHat (x : BinaryLeavittAlgebra k) :
   | mem y hy =>
       obtain ⟨g, rfl⟩ := hy
       fin_cases g
-      · show thetaHat k (thetaHat k ((family k).s0)) = _
+      -- Spell out the right-hand side too.  With `= _` it stays the raw
+      -- `generator k ⟨0, _⟩` that `fin_cases` produced, and the residual
+      -- `(family k).s0 = generator k ⟨0, _⟩` is defeq only at a transparency
+      -- `rw`'s trailing `rfl` will not use.
+      · show thetaHat k (thetaHat k ((family k).s0)) = (family k).s0
         rw [thetaHat_s0, thetaHat_t0]
-      · show thetaHat k (thetaHat k ((family k).s1)) = _
+      · show thetaHat k (thetaHat k ((family k).s1)) = (family k).s1
         rw [thetaHat_s1, thetaHat_t1]
-      · show thetaHat k (thetaHat k ((family k).t0)) = _
+      · show thetaHat k (thetaHat k ((family k).t0)) = (family k).t0
         rw [thetaHat_t0, thetaHat_s0]
-      · show thetaHat k (thetaHat k ((family k).t1)) = _
+      · show thetaHat k (thetaHat k ((family k).t1)) = (family k).t1
         rw [thetaHat_t1, thetaHat_s1]
   | algebraMap c =>
       have h1 : (algebraMap k (BinaryLeavittAlgebra k)) c =
