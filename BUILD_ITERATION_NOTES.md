@@ -749,3 +749,34 @@ formalization plumbing).
   p₁-supported WLOG (formalizable now); (G) open with the
   (XX_d)-system attack.  These two remain the entire mathematical gap
   for NarrowReduction ⟹ ScalarReduction ⟹ manuscript completion.
+
+## Session 16: (i') reformulation, vacuous-split traps, W-induction base
+- (i) ⟺ (i'): units 1 + ζ with ζ pure degree +1; unit-ness FORCES ζ
+  nilpotent automatically (downward recursion kills negative inverse
+  components, x_d = (−ζ)^d, finiteness ⟹ nilpotency).  So (i') is:
+  1 + ζ, ζ ∈ L₁ nilpotent ⟹ ∈ H.
+- σ-form criterion: ζ = Bσ, ζ^D = R_{D−1}σ^D with
+  R_j := B·φ₀(B)···φ₀^j(B), φ₀(x) := s₀xt₀; nilpotency ⟺
+  R_{D−1}·p_{0^D} = 0 (NOT R = 0 — σ not right-injective).
+- VACUOUS-SPLIT TRAPS (documented so they're not retried): for
+  Bσ-forms, right-support splits of B are vacuous (pσ = σ, p'σ = 0);
+  for Cs₁-forms, left-p-splits vacuous (p's₁ = s₁, ps₁ = 0);
+  left-support splits vacuous by definition of support.  The ONE real
+  split is the proved s₁z-form/right-support: [1+s₁z] = [1+s₁zp₁].
+- Width-of-inverse induction: base W = 0 works (y balanced-valued
+  unit ⟹ y ∈ centralClass green ⟹ [u] = [y]⁻¹ trivial).  But width
+  is invariant under balanced multipliers and degree-(±1) H-movers
+  miss the top component — the step needs the same missing mechanism.
+- char-2 shortcut evaluated and rejected: (1+n)² = 1+n² gives only
+  2-torsion, not triviality.
+NEXT: (G) via the (XX_d) system remains the most structured target;
+for (i') the twisted-flag fixed-point construction (session 15d) with
+the ψ-compatible idempotents is the open front.  Also consider:
+represent 1 + ζ at depth D (index): entries of toMatrix_D(ζ) vanish
+except γ-starting-1-blocks with SHORTER words — check whether ζ^D = 0
+forces a STRICT block-triangular structure at depth D against the
+cylinder flag {p_{1^k0...}} — the cylinder flag is the natural
+φ-compatible flag and may make every nilpotent tail literally
+strictly triangular w.r.t. a balanced idempotent chain, giving the
+telescoping product decomposition into square-zero pieces with the
+ordered cross-conditions holding by flag-position.
