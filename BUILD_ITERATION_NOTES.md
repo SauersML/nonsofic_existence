@@ -1627,3 +1627,23 @@ mathematics settled in sessions 24–25:
   random B); (3) if all A's nilpotent: conjecture + prove via the
   graded chain; (4) exhaustive small-window [−1,1]-unit census to
   map the singular-c stratum.
+
+## Session 31: computational evidence + the A-nilpotency conjecture
+- 1 + s₀ + t₀ is NOT a unit (B=4,5 both fail) — consistent with the
+  Toeplitz symbol heuristic even inside simple L(1,2).
+- 10/10 randomly-found width-3 units 1 + A + B have NILPOTENT A
+  (all index 2); 180 adversarial trials with forced comparable
+  monomials (S(0)T(00), t₀, S(1)T(11)) in A: ZERO units.
+- CONJECTURE (A-nilp): 1 + A + B unit ⟹ A nilpotent.  Proof
+  candidates: (i) T-deformation: U := A + T + T²B is a unit of
+  L_{k(T)} (scalar·scaling-automorphism image); clearing
+  denominators U·Ṽ = q(T)·1 in L_k[T]; specialize/valuate at T = 0;
+  (ii) (P)-style rank argument on the two-sided graded recursion
+  A x_{d+1} + x_d + B x_{d−1} = δ_{d0}.
+- Under positive-unipotent movers (1+τ, τ ∈ [1,N]) u₋ is INVARIANT
+  (both sides); balanced movers act by u₋ ↦ g u₋ h; only swaps and
+  negative-unipotents genuinely change u₋.
+- NEXT: BFS/greedy move-search engine over H-moves (swaps, balanced
+  pivots, unipotents) on the 10 instances + ρ: extract the general
+  reduction algorithm from machine-found witnesses, then prove
+  termination.  This closes the last math gap empirically first.
