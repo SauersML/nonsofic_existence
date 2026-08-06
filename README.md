@@ -345,6 +345,13 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       family, its prefix-freeness and completeness, the three
       collision patterns against the intermediate code, and the
       exact row-collapse factorization `u = u₁ · (u₁⁻¹ u)`
+    - [x] the peel-normalization toolkit: block unipotents along any
+      prefix code (`MixedCodeMoves.code_unipotent_mem`), the shift
+      rigidity `x·(λ₀•t₀+λ₁•t₁) ≠ 1` forcing independent column
+      pairs, the invertible-matrix normalization of an independent
+      pair to standard atoms (`GLPairNormalization`), and the
+      coefficientwise action of transported scalar matrices on the
+      five pencil matrices (`PencilEntryArith`)
     - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
       `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
       rows split off invertible `τ/ς` shift blocks by an exact
