@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.ShapeCalculus
+import NonsoficGroupsExist.LeavittWindowReduction
 import Mathlib.LinearAlgebra.Matrix.Rank
 
 /-!
@@ -97,6 +98,24 @@ theorem shapeRep_finsetSum {p q : ℕ} {ι : Type*} (s : Finset ι)
 
 end LeavittFamily
 
+/-- Matrix rank is subadditive. -/
+theorem matrix_rank_add_le {m n R : Type*} [Fintype n] [Field R]
+    (A B : Matrix m n R) : (A + B).rank ≤ A.rank + B.rank := by
+  classical
+  have hle : LinearMap.range (A + B).mulVecLin ≤
+      LinearMap.range A.mulVecLin ⊔ LinearMap.range B.mulVecLin := by
+    rintro x ⟨v, rfl⟩
+    rw [Matrix.mulVecLin_add]
+    exact Submodule.add_mem_sup (LinearMap.mem_range_self _ v)
+      (LinearMap.mem_range_self _ v)
+  have hsup := Submodule.finrank_sup_add_finrank_inf_eq
+    (LinearMap.range A.mulVecLin) (LinearMap.range B.mulVecLin)
+  have hmono := Submodule.finrank_mono (R := R) hle
+  show Module.finrank R (LinearMap.range (A + B).mulVecLin) ≤
+    Module.finrank R (LinearMap.range A.mulVecLin) +
+    Module.finrank R (LinearMap.range B.mulVecLin)
+  omega
+
 /-- Sum of finitely many matrices has rank at most the sum of the
 ranks. -/
 theorem rank_finsetSum_le {m n R : Type*} [Fintype n] [Field R]
@@ -107,6 +126,6 @@ theorem rank_finsetSum_le {m n R : Type*} [Fintype n] [Field R]
   | empty => simp [Matrix.rank_zero]
   | insert a s ha ih =>
       rw [Finset.sum_insert ha, Finset.sum_insert ha]
-      exact le_trans (Matrix.rank_add_le _ _) (by omega)
+      exact le_trans (matrix_rank_add_le _ _) (by omega)
 
 end NonsoficGroupsExist

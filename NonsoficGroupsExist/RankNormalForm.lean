@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.BalancedStableRank
 import Mathlib.LinearAlgebra.Matrix.Transvection
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 
 /-!
 # Rank normal form for balanced elements
@@ -47,11 +48,13 @@ theorem balancedEmbed_indicator (n : ℕ) (S : Finset (Fin n → Fin 2)) :
       ∑ γ ∈ S, L.cylinder (List.ofFn γ) := by
   classical
   rw [L.balancedEmbed_diagonal]
-  rw [show ∀ γ : Fin n → Fin 2,
+  have hsw : ∀ γ : Fin n → Fin 2,
       (if γ ∈ S then (1 : k) else 0) • L.cylinder (List.ofFn γ) =
-      (if γ ∈ S then L.cylinder (List.ofFn γ) else 0) from
-    fun γ ↦ by split_ifs <;> simp]
-  · rw [Finset.sum_ite_mem, Finset.univ_inter]
+      (if γ ∈ S then L.cylinder (List.ofFn γ) else 0) := by
+    intro γ
+    split_ifs <;> simp
+  simp only [hsw]
+  rw [Finset.sum_ite_mem, Finset.univ_inter]
 
 /-- A balanced element that is a unit has an invertible matrix: a
 singular matrix would make it a zero divisor. -/
@@ -70,7 +73,7 @@ theorem isUnit_matrix_of_isUnit [Nontrivial A] {n : ℕ}
   have hCX : C * X = 0 := by
     ext i j
     have := congrFun hCv i
-    simpa [hX, Matrix.mul_apply, Matrix.mulVec, Matrix.dotProduct]
+    simpa [hX, Matrix.mul_apply, Matrix.mulVec, dotProduct]
       using this
   have hXne : X ≠ 0 := by
     obtain ⟨i, hi⟩ := Function.ne_iff.mp hv
@@ -145,14 +148,16 @@ theorem exists_rank_normal_form [Nontrivial A] {n : ℕ} {c : A}
     (Lt'.map Matrix.TransvectionStruct.toMatrix).prod with hQ
   have hPunit : IsUnit P := by
     have h := Matrix.TransvectionStruct.prod_mul_reverse_inv_prod Lt
-    refine (Matrix.isUnit_iff_isUnit_det P).mpr ?_
-    exact isUnit_of_mul_eq_one _ _
-      (by rw [← Matrix.det_mul, h, Matrix.det_one])
+    have hdet := congrArg Matrix.det h
+    rw [Matrix.det_mul, Matrix.det_one] at hdet
+    exact (Matrix.isUnit_iff_isUnit_det P).mpr
+      (isUnit_iff_ne_zero.mpr (left_ne_zero_of_mul_eq_one hdet))
   have hQunit : IsUnit Q := by
     have h := Matrix.TransvectionStruct.prod_mul_reverse_inv_prod Lt'
-    refine (Matrix.isUnit_iff_isUnit_det Q).mpr ?_
-    exact isUnit_of_mul_eq_one _ _
-      (by rw [← Matrix.det_mul, h, Matrix.det_one])
+    have hdet := congrArg Matrix.det h
+    rw [Matrix.det_mul, Matrix.det_one] at hdet
+    exact (Matrix.isUnit_iff_isUnit_det Q).mpr
+      (isUnit_iff_ne_zero.mpr (left_ne_zero_of_mul_eq_one hdet))
   set D₁ : Matrix (Fin n → Fin 2) (Fin n → Fin 2) k :=
     Matrix.diagonal (fun γ ↦ if dvec γ = 0 then 1 else dvec γ)
     with hD₁
@@ -181,15 +186,16 @@ theorem exists_rank_normal_form [Nontrivial A] {n : ℕ} {c : A}
     Units.map (L.balancedEmbed (k := k) n).toMonoidHom Qu⁻¹, S,
     L.balancedEmbed_mem_span n _, ?_, L.balancedEmbed_mem_span n _,
     ?_, ?_, ?_⟩
-  · rw [← Units.map_inv]
+  · rw [Units.coe_map_inv]
     exact L.balancedEmbed_mem_span n _
-  · rw [← Units.map_inv]
+  · rw [Units.coe_map_inv]
     exact L.balancedEmbed_mem_span n _
   · show L.balancedEmbed (k := k) n
         ((Pu⁻¹ : (Matrix _ _ k)ˣ) : Matrix _ _ k) * c *
       L.balancedEmbed (k := k) n
         ((Qu⁻¹ : (Matrix _ _ k)ˣ) : Matrix _ _ k) = _
-    rw [← hC, ← map_mul, ← map_mul, ← L.balancedEmbed_indicator, ← hE]
+    rw [← hC, ← map_mul, ← map_mul,
+      ← L.balancedEmbed_indicator (k := k) n S, ← hE]
     congr 1
     have hCform : C = (P * D₁) * (E * Q) := by
       rw [hCdec, hDE]
@@ -210,7 +216,7 @@ theorem exists_rank_normal_form [Nontrivial A] {n : ℕ} {c : A}
       simp [Matrix.diagonal_one]
     have hCunit : IsUnit C := by
       rw [hCdec, hDE, hEone, mul_one]
-      exact (hPunit.mul hD₁unit).mul hQunit
+      exact (hPunit.mul hD₁unit).mul ⟨Qu, hQu⟩
     rw [← hC]
     exact hCunit.map (L.balancedEmbed (k := k) n)
 
