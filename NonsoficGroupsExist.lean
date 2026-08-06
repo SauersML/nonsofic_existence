@@ -260,41 +260,58 @@ import NonsoficGroupsExist.MainResults
 import NonsoficGroupsExist.UnitsGLProfile
 import NonsoficGroupsExist.KazhdanTextbook
 import NonsoficGroupsExist.Audit
+import NonsoficGroupsExist.Public
 
 /-!
 # An unconditional construction of a finitely presented nonsofic group
 
-This library contains proved finite, asymptotic, Leavitt-family, elementary
-matrix, non-LEF-obstruction, localization, and finite-table results. It proves
-unconditionally that a nonsofic group exists and that a finitely presented
-nonsofic group exists.
+This library proves that a nonsofic group exists, and that a finitely
+presented one does.  Both are closed theorems: neither takes a hypothesis
+standing in for a construction, and neither is a parameterized implication
+advertised as an existence result.
 
-In particular, no declaration in this root module assumes a proposition named
-after Kun, Kun--Thom, or Ershov--Jaikin and then advertises the resulting
-parameterized implication as an existence theorem.  The uninstantiated
-`ExpanderDecomposition`, `MatchingCertificate`, and `LocalCriterionData` are
-specifications for intermediate mathematics, not proofs merely by being
-inhabited in interface lemmas.  The exact full-sequence Kun decomposition
-and Kun--Thom implication are now proved, as are property `(T)` for the
-universal-Leavitt rank-three core and rank-four ambient group. `MainResults` assembles
-them through the local criterion. Likewise,
-`UniversalRankFour.compressionSetup` is an actual inhabitant of the algebraic
-`CompressionSetup` interface.
+**Start at `NonsoficGroupsExist.Public`.**  It is the reading path -- the
+declarations a referee needs, each named against the theorem of
+`nonsofic_groups_exist.tex` it establishes.  The statement-by-statement
+correspondence with the manuscript is `docs/CLAIM_MAP.md`, generated from the
+paper's own margin notes and checked on every build.
 
-The coefficient ring used by the headline group is now the actual universal
-binary Leavitt algebra, defined as the presented quotient of the free algebra.
-Its stream-operator representation proves that quotient nontrivial; no
-faithfulness claim is needed. The two explicit
-cylinder units prove a genuine finite non-LEF obstruction for their generated
-corner subgroup; the development does not identify that subgroup with
-Thompson's group `V`.  Their generated subgroup is now embedded in `EL₃` by
-explicit cylinder-commutator and Whitehead identities.  The rank-four module
-also proves compressor conjugation, ambient generation, centralization, and
-trivial intersection, and `UniversalRankFour.compressionSetup` constructs the
-complete algebraic setup rather than accepting it from a caller.
+## What is proved here rather than assumed
 
-`MainResults.universalLeavittEL4_not_isSofic` supplies the initial
-nonsofic group. `TableCover` then constructs its finitely presented nonsofic
-cover, yielding the two premise-free public headline theorems in
-`MainResults`.
+The paper cites four external theorems; three of them are proved in this
+library, so they are inputs to the manuscript and not to the development:
+Kun's expander decomposition (`KunDecomposition`), the Kun--Thom centralizer
+obstruction (`KunThomTheorem`), and Shalom's finitely presented Kazhdan covers
+(`ShalomFinitePresentation`).  The fourth, property `(T)` for elementary
+groups over arbitrary finitely generated rings, is imported; the
+characteristic-two cases the endpoints use are proved in
+`FreeElementaryPropertyT`.
+
+The `K₁`-theoretic input is likewise eliminated: `BinaryLeavitt.K1_trivial`
+proves `K₁(L_k(1,2)) = 0` in Whitehead form by an elementary two-exit
+elimination, so the localization-sequence citation is confirmation rather than
+dependency.
+
+## The construction
+
+The coefficient ring is the actual universal binary Leavitt algebra, defined
+as the presented quotient of the free algebra; its stream-operator
+representation proves that quotient nontrivial, so no faithfulness claim is
+needed.  `UniversalRankFour.compressionSetup` constructs the algebraic setup
+rather than accepting it from a caller, and the corner subgroup carrying the
+non-LEF obstruction is identified with Thompson's group `V`
+(`ThompsonVWitness.thompsonV_not_isLEF`), proved non-LEF unconditionally with
+no Higman presentation input.
+
+`MainResults.universalLeavittEL4_not_isSofic` supplies the initial nonsofic
+group; `TableCover` builds its finitely presented cover, and `KazhdanCover`
+the Kazhdan one.
+
+## Trust surface
+
+`NonsoficGroupsExist.Audit` prints the axiom report for the public results on
+an ordinary build.  `scripts/Audit.lean` independently walks the transitive
+axiom closure of the whole namespace and fails on anything beyond `propext`,
+`Classical.choice`, and `Quot.sound`; `scripts/check.py` scans the source text
+for what the kernel cannot see, including files that are never compiled.
 -/
