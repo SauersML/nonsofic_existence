@@ -14,7 +14,7 @@ this table is that assertion, collected and resolved.
 | --- | --- | --- | --- |
 | `thm:A` | formalized | `MainResults`: `universalLeavittEL4_not_isSofic`, `universalLeavitt_profile`, `ambient_profile` |  |
 | `thm:B` | formalized | `MainResults`: `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`; `UnitsGLProfile`: `binaryLeavittUnits_profile`, `binaryLeavittGL_profile` |  |
-| `thm:C` | formalized | `MainResults`: `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover`; `KazhdanCover` †: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` |  |
+| `thm:C` | formalized | `MainResults`: `exists_finitelyPresented_nonsofic_group`, `exists_infinite_finitelyPresented_nonsofic_ambient_cover`; `KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` |  |
 | `thm:D` | formalized | `CriterionAssembly`: `isLEF_of_isSofic`, `not_isSofic_of_not_isLEF` |  |
 | `def:sofic` | formalized | `Sofic`: `SoficApproximation`, `IsSofic` |  |
 | `lem:normalization` | formalized | `Sofic`: `map_one_close`; `InverseNormalization`: `inverseError_negligible` |  |
@@ -69,7 +69,7 @@ this table is that assertion, collected and resolved.
 | `def:model` | formalized | `TableCover`: `TableModel` |  |
 | `lem:models` | formalized | `TableCover`: `tableModel_of_isSofic`, `exists_table_obstruction` |  |
 | `thm:table` | formalized | `TableCover`: `tableGroup_no_model`, `exists_finitelyPresented_obstruction` |  |
-| `thm:kcover` | formalized | `ShalomFinitePresentation` †: `exists_presented_kazhdan_cover`, `exists_finitelyPresented_kazhdan_cover`; `KazhdanCover` †: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Shalom's theorem is proved internally, not cited. |
+| `thm:kcover` | formalized | `ShalomFinitePresentation`: `exists_presented_kazhdan_cover`, `exists_finitelyPresented_kazhdan_cover`; `KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Shalom's theorem is proved internally, not cited. |
 | `def:H` | formalized | `DiagonalClassGroup`: `stableUnits`, `ScalarReduction` |  |
 | `thm:K1app` | formalized | `RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds`, `stableUnits_eq_top_holds` |  |
 | `lem:division` | formalized | `LeavittSimplicity`: `exists_mul_mul_eq_one` |  |

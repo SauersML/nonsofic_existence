@@ -7,6 +7,8 @@ import NonsoficGroupsExist.FreeElementaryPropertyT
 import NonsoficGroupsExist.KazhdanComplex
 import NonsoficGroupsExist.KazhdanUniverse
 import NonsoficGroupsExist.RefineLoopDischarge
+import NonsoficGroupsExist.ShalomFinitePresentation
+import NonsoficGroupsExist.KazhdanCover
 
 /-!
 # Human-readable axiom report
@@ -64,3 +66,14 @@ the entire project namespace and fails on anything beyond classical Lean.
 -- of every positive-rank `GL_r` over every finite field.
 #print axioms NonsoficGroupsExist.binaryLeavittUnits_profile
 #print axioms NonsoficGroupsExist.binaryLeavittGL_profile
+
+-- Theorem C's Kazhdan half.  These were proved but sat outside this module's
+-- import closure, so an ordinary build never reported their axioms and the
+-- manuscript's alignment table lost track of them entirely -- it recorded
+-- `thm:kcover` as manuscript-only while the theorem was sitting here, proved.
+-- Shalom's theorem is proved internally rather than cited, so it belongs in
+-- the report alongside the Kun and Kun--Thom inputs it sits next to in the
+-- paper's trust surface.
+#print axioms NonsoficGroupsExist.Shalom.exists_presented_kazhdan_cover
+#print axioms NonsoficGroupsExist.Shalom.exists_finitelyPresented_kazhdan_cover
+#print axioms NonsoficGroupsExist.exists_kazhdan_finitelyPresented_cover_of_not_isSofic
