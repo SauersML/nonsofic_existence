@@ -47,7 +47,14 @@ FORBIDDEN = [
     ("unsafe / implemented_by / opaque escape hatch",
      re.compile(r"^[ \t]*unsafe[ \t]|@\[implemented_by|^[ \t]*opaque[ \t]")),
     ("warningAsError disabled", re.compile(r"warningAsError[ \t]*(:=)?[ \t]*false")),
-    ("maxHeartbeats disabled", re.compile(r"set_option[ \t]+maxHeartbeats[ \t]+0")),
+    # Any value, not just 0: `maxHeartbeats 400000` and `maxHeartbeats 0` differ
+    # only in how long the same unfixed proof is allowed to flail.  A timeout is
+    # a statement about the proof -- a `whnf` that unfolds something that should
+    # be irreducible, a `simp` set that should be a `rw`, a `decide` that should
+    # be a lemma -- and the fix is the cheaper proof, not the larger budget.
+    # `synthInstance.maxHeartbeats` and friends are caught by the same rule.
+    ("maxHeartbeats budget bump",
+     re.compile(r"set_option[ \t]+([A-Za-z0-9_]+\.)*maxHeartbeats(?![A-Za-z0-9_])")),
 ]
 
 
@@ -65,7 +72,7 @@ SCAN_TAGS: tuple[str, ...] = (
     "native_decide (trusts the compiler, not the kernel)",
     "unsafe / implemented_by / opaque escape hatch",
     "warningAsError disabled",
-    "maxHeartbeats disabled",
+    "maxHeartbeats budget bump",
 )
 
 
@@ -200,8 +207,11 @@ PLANTS = {
         {f"{LIB}/Alpha.lean": "opaque alpha : Nat\n"},
     "warningAsError disabled":
         {f"{LIB}/Alpha.lean": "set_option warningAsError false\n"},
-    "maxHeartbeats disabled":
-        {f"{LIB}/Alpha.lean": "set_option maxHeartbeats 0 in\ntheorem a : True := trivial\n"},
+    # A raise, not `0`: the plant is the case the old `maxHeartbeats 0` regex
+    # walked straight past, so it fails against the detector it replaced.
+    "maxHeartbeats budget bump":
+        {f"{LIB}/Alpha.lean":
+         "set_option maxHeartbeats 400000 in\ntheorem a : True := trivial\n"},
 }
 
 
