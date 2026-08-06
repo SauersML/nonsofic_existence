@@ -1,0 +1,155 @@
+name: Independent kernel re-check
+
+# `prover.yml` already replays every olean through a *fresh Lean kernel*
+# (`leanchecker --fresh`).  That catches an elaborator bug, but by construction
+# it cannot catch a bug in the kernel doing the checking: the same code is both
+# the thing under test and the test.  This workflow closes that one gap by
+# re-checking the headline theorems with `nanoda`, an independently written
+# kernel, fed from `lean4export`.
+#
+# It is deliberately NOT part of the `prover.yml` gate.  Its failure mode is
+# "Lean's kernel disagrees with an independent implementation", which is not a
+# statement about the commit that triggered it, and it is far too slow to sit
+# in front of every push.  Weekly, plus on demand.
+#
+# NOTE: this workflow has not yet had a successful run; the first scheduled
+# execution is its first real test.  It is isolated by design (separate
+# workflow, restore-only caches) so that a failure here cannot break the
+# gating build or poison its caches.
+
+on:
+  schedule:
+    # Sundays, 05:00 UTC.
+    - cron: '0 5 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  recheck:
+    name: Re-check headline theorems with an independent kernel
+    runs-on: ubuntu-latest
+    # A cache hit makes this quick; a cold run has to rebuild the library
+    # before it can export anything.
+    timeout-minutes: 340
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Cache Lean toolchain
+        id: elan-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: ${{ runner.os }}-elan-${{ hashFiles('lean-toolchain') }}
+
+      - name: Install elan
+        if: steps.elan-cache.outputs.cache-hit != 'true'
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+
+      - name: Add elan to PATH
+        run: echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      # RESTORE ONLY, and never save.  This job must not be able to write a
+      # cache entry that `prover.yml` would later restore: the gating build's
+      # caches are its own, and a half-populated entry written from here would
+      # silently degrade it.  Worst case this job pays for a cold build.
+      - name: Restore Lake dependencies
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake/packages
+          key: ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+          restore-keys: |
+            ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            ${{ runner.os }}-lake-deps-
+
+      - name: Restore compiled project
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake/build
+          key: ${{ runner.os }}-nonsofic-build-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean') }}
+          restore-keys: |
+            ${{ runner.os }}-nonsofic-build-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean') }}-
+            ${{ runner.os }}-nonsofic-build-
+
+      - name: Fetch precompiled Mathlib
+        run: lake exe cache get
+
+      - name: Build project
+        run: lake build
+
+      # lean4export is pinned to the tag matching this project's minor version
+      # and then forced onto the project's exact toolchain.  Oleans are
+      # version-locked: an exporter built with a different Lean cannot read the
+      # oleans we are trying to export, so this override is load-bearing, not
+      # cosmetic.
+      - name: Build lean4export
+        run: |
+          set -euo pipefail
+          git clone --branch v4.32.0 --depth 1 \
+            https://github.com/leanprover/lean4export.git ../lean4export
+          cd ../lean4export
+          cat ../nonsofic_existence/lean-toolchain > lean-toolchain
+          lake build
+          test -x .lake/build/bin/lean4export
+
+      - name: Build nanoda
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ammkrn/nanoda_lib.git ../nanoda_lib
+          cd ../nanoda_lib
+          # Clear inherited RUSTFLAGS: an injected `-l` (e.g. a BLAS flag from a
+          # host profile) leaks into build-script linking and breaks the build
+          # long before any real code is compiled.
+          RUSTFLAGS= cargo build --release
+          test -x target/release/nanoda_bin
+
+      # The allow list is the same three axioms `scripts/Audit.lean` enforces.
+      # `unpermitted_axiom_hard_error: false` is deliberate: the prelude
+      # *declares* `sorryAx` so metaprograms can mention it, and a declaration
+      # that no exported theorem invokes is not a defect.  With this setting an
+      # unpermitted axiom is skipped rather than admitted, so anything that
+      # actually *uses* one still fails hard.
+      - name: Write nanoda configuration
+        run: |
+          cat > nanoda-config.json <<'JSON'
+          {
+            "use_stdin": true,
+            "permitted_axioms": ["propext", "Classical.choice", "Quot.sound"],
+            "unpermitted_axiom_hard_error": false,
+            "nat_extension": true,
+            "string_extension": true
+          }
+          JSON
+          cat nanoda-config.json
+
+      # Only the headline theorems and their transitive dependencies, not the
+      # whole environment: this is the same roster `scripts/Audit.lean` pins as
+      # `headlineTheorems`, and exporting just their closure keeps the run
+      # inside a standard runner's memory.  Streamed over a pipe so the export
+      # never has to be materialised on disk.
+      - name: Export and re-check with nanoda
+        run: |
+          set -euo pipefail
+          lake env ../lean4export/.lake/build/bin/lean4export NonsoficGroupsExist -- \
+            NonsoficGroupsExist.nonsofic_groups_exist \
+            NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group \
+            NonsoficGroupsExist.exists_infinite_finitelyPresented_nonsofic_ambient_cover \
+            NonsoficGroupsExist.universalLeavittEL4_not_isSofic \
+            NonsoficGroupsExist.universalLeavittEL3_not_isSofic \
+            NonsoficGroupsExist.universalLeavittUnits_not_isSofic \
+            NonsoficGroupsExist.universalLeavittGL_not_isSofic \
+            NonsoficGroupsExist.binaryLeavittUnits_not_isSofic \
+            NonsoficGroupsExist.binaryLeavittGL_not_isSofic \
+            NonsoficGroupsExist.BinaryLeavitt.thompsonV_not_isLEF \
+            NonsoficGroupsExist.universalLeavitt_profile \
+            NonsoficGroupsExist.binaryLeavitt_finiteField_profile \
+            NonsoficGroupsExist.ambient_profile \
+            NonsoficGroupsExist.ambient_full_profile \
+          | ../nanoda_lib/target/release/nanoda_bin nanoda-config.json

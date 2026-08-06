@@ -11,6 +11,38 @@ diagnosed; they are history, not a TODO list.  Two notes for next time:
 * `lake` is not on the default remote PATH; prefix remote commands with
   `export PATH=$HOME/.elan/bin:$PATH`.
 
+## What MSI Agate can and cannot do (measured 2026-08-05)
+
+Agate is RHEL 8.10, kernel `4.18.0-553`, **glibc 2.28**.  Consequences, all
+verified rather than guessed:
+
+* **No Lean executable can be built there.**  The toolchain's bundled `clang`
+  needs `GLIBC_2.29` and dies with a version error, so any `lake build` that
+  reaches a `:c.o` target fails.  Library builds are unaffected because they
+  stop at oleans -- which is why the corpus has always built fine and why
+  `lean4export` cannot be built there at all.  Anything needing a Lean binary
+  has to run on GHA (Ubuntu) or inside a container.
+* **No Landlock** (needs kernel >= 5.13), so `landrun` -- and therefore
+  `leanprover/comparator`'s sandbox -- cannot run on Agate.  `systemctl --user`
+  also has no bus on the compute nodes.
+* **Cargo builds need `RUSTFLAGS=` cleared.**  The login profile injects
+  `-llapack -lopenblas`, which leaks into *build-script* linking; every crate
+  with a build script fails with `unable to find library -lopenblas` before
+  any real code compiles.
+
+## Do not try to walk proof terms from a downstream script
+
+In Lean 4.32 an importing module cannot see the proof bodies of imported
+theorems: `ConstantInfo.value?` is `none` for them, in the elaboration
+environment *and* in `env.setExporting false |>.checked.get`.  Axiom data is
+precomputed per-module by `exportedAxiomsExt` when the olean is written, and
+`Lean.collectAxioms` reads that table rather than re-walking bodies -- see the
+comment in `Lean/Util/CollectAxioms.lean`, "axiom collection never crosses
+module boundaries".  So a `lake env lean` script that traverses `value?` is
+silently walking *types only* and will report a closure far smaller than the
+truth.  Re-checking actual proof terms requires a tool that reads the oleans
+directly: `leanchecker` (already in CI) or `lean4export`.
+
 State: MSI auth works (breaker off; pushes via one-off credential helper
 pinned to SauersML: `git -c credential.helper= -c credential.helper='!f() {
 echo "username=SauersML"; echo "password=$(gh auth token -u SauersML)"; }; f'
