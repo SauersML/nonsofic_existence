@@ -257,3 +257,207 @@ if __name__ == "__main__":
         if out in ("MAXREF", "ILLEGAL"):
             print("PROBLEM:", out, "unit:", sorted(v)[:8], "...")
     print(results, "worst refinement count:", worst)
+
+# ---------------------------------------------------------------------------
+# Session 54 instrumentation: classify the doubly-deficient (case-4) events.
+# At each refinement step record the stack ranks, and test the batch-refine
+# conjecture: some u0 in coker[A0|A1] is also orthogonal to the C-columns of
+# the B-spanned column set J_B  (equivalently, row extraction fires after
+# batch-refining every kernel column).
+def left_kernel_vec(rows, ncols):
+    return kernel_vec(rows, ncols)
+
+def case4_probe(trials=400, seed=11):
+    random.seed(seed)
+    from collections import Counter
+    events = Counter()
+    conj_fail = 0
+    case4_total = 0
+    for trial in range(trials):
+        v = rand_narrow_unit(nf=random.randint(2, 5))
+        if v is None:
+            continue
+        n = max(depth(v), 1)
+        R = [tuple(w) for w in itertools.product((0, 1), repeat=n)]
+        C = list(R)
+        steps = 0
+        while steps <= 40:
+            E = pencil(v, R, C)
+            if E is None:
+                events["ILLEGAL"] += 1
+                break
+            b_stack = stack_cols(E, R, C, ["s0", "s1"])
+            bker = kernel_vec(b_stack, len(C))
+            a_stack = [[E[(i, j)].get(k, 0) for i in R]
+                       for k in ["t0", "t1"] for j in C]
+            aker = kernel_vec(a_stack, len(R))
+            if bker is None and aker is None:
+                events["TERMINAL(both full)"] += 1
+                break
+            if bker is None:
+                events["case3(B full, A def)"] += 1
+                break
+            if aker is None:
+                events["case2(B def, A full)"] += 1
+                break
+            # both deficient: extraction?
+            bc = stack_cols(E, R, C, ["s0", "s1", "one"])
+            if kernel_vec(bc, len(C)) is not None:
+                events["EXTRACT-t"] += 1
+                break
+            ac = [[E[(i, j)].get(k, 0) for i in R]
+                  for k in ["t0", "t1", "one"] for j in C]
+            if kernel_vec(ac, len(R)) is not None:
+                events["EXTRACT-s"] += 1
+                break
+            # genuine case 4
+            case4_total += 1
+            events[f"case4@step{steps}"] += 1
+            # conjecture test: batch-refine all kernel columns of [B0;B1],
+            # i.e. find J_B = a complement of ker restricted... over F2 we
+            # compute ker basis, normalize columns so kernel = coordinate
+            # subspace, then ask: exists u0 with u0^T [A0|A1] = 0 and
+            # u0^T C(.,j) = 0 for all j in J_B.
+            # kernel basis of b_stack:
+            m = [r[:] for r in b_stack]
+            pivots = {}
+            rank = 0
+            for col in range(len(C)):
+                for r in range(rank, len(m)):
+                    if m[r][col]:
+                        m[rank], m[r] = m[r], m[rank]
+                        for r2 in range(len(m)):
+                            if r2 != rank and m[r2][col]:
+                                m[r2] = [x ^ y for x, y in zip(m[r2], m[rank])]
+                        pivots[col] = rank
+                        rank += 1
+                        break
+            JB = sorted(pivots)  # pivot columns: B-spanned complement
+            # rows over R of the test stack: columns of A on ALL j, plus C on JB
+            test_rows = [[E[(i, j)].get(k, 0) for i in R]
+                         for k in ["t0", "t1"] for j in range(len(C))
+                         for j in [C[j]]]
+            test_rows += [[E[(i, C[j])].get("one", 0) for i in R] for j in JB]
+            if kernel_vec(test_rows, len(R)) is None:
+                conj_fail += 1
+                events[f"CONJ-FAIL@step{steps}"] += 1
+            # refine one kernel column (as before) and continue
+            v, j0 = col_gl(v, C, bker)
+            C = [j for j in C if j != j0] + [j0 + (0,), j0 + (1,)]
+            steps += 1
+    print(dict(events))
+    print("case4 events:", case4_total, "conjecture failures:", conj_fail)
+
+
+def rank_evolution_probe(trials=400, seed=11):
+    """At each case-4 refinement, record whether rank[B0;B1] strictly grew
+    and whether dim ker[B0;B1] (= |C| - rank) changed."""
+    random.seed(seed)
+    from collections import Counter
+    ev = Counter()
+    chains = []
+    for trial in range(trials):
+        v = rand_narrow_unit(nf=random.randint(2, 5))
+        if v is None:
+            continue
+        n = max(depth(v), 1)
+        R = [tuple(w) for w in itertools.product((0, 1), repeat=n)]
+        C = list(R)
+        steps = 0
+        chain = []
+        while steps <= 40:
+            E = pencil(v, R, C)
+            if E is None:
+                break
+            b_stack = stack_cols(E, R, C, ["s0", "s1"])
+            rB = rank_f2(b_stack and [list(col) for col in zip(*b_stack)] or [])
+            # rank of the stack as a matrix rows=2|R| cols=|C|:
+            rB = rank_f2(b_stack) if b_stack else 0
+            a_stack = [[E[(i, j)].get(k, 0) for i in R]
+                       for k in ["t0", "t1"] for j in C]
+            rA = rank_f2(a_stack) if a_stack else 0
+            bker = kernel_vec(b_stack, len(C))
+            aker = kernel_vec(a_stack, len(R))
+            if bker is None or aker is None:
+                break
+            bc = stack_cols(E, R, C, ["s0", "s1", "one"])
+            if kernel_vec(bc, len(C)) is not None:
+                break
+            ac = [[E[(i, j)].get(k, 0) for i in R]
+                  for k in ["t0", "t1", "one"] for j in C]
+            if kernel_vec(ac, len(R)) is not None:
+                break
+            chain.append((len(R), len(C), rB, rA,
+                          len(C) - rB, len(R) - rA))
+            v, j0 = col_gl(v, C, bker)
+            C = [j for j in C if j != j0] + [j0 + (0,), j0 + (1,)]
+            steps += 1
+        if len(chain) >= 2:
+            chains.append(chain)
+            for a, b in zip(chain, chain[1:]):
+                dRank = b[2] - a[2]
+                dKer = b[4] - a[4]
+                ev[f"dRankB={dRank},dKerB={dKer}"] += 1
+    print(dict(ev))
+    for ch in chains[:6]:
+        print(ch)
+
+
+def stall_probe(trials=3000, seed=23):
+    """Big sweep: chain lengths, consecutive stalls, and candidate measures
+    along column-only case-4 refinement chains."""
+    random.seed(seed)
+    from collections import Counter
+    ev = Counter()
+    maxchain, maxstall = 0, 0
+    badrows = []
+    for trial in range(trials):
+        v = rand_narrow_unit(nf=random.randint(2, 6))
+        if v is None:
+            continue
+        n = max(depth(v), 1)
+        R = [tuple(w) for w in itertools.product((0, 1), repeat=n)]
+        C = list(R)
+        steps, stall_run, prev_rB = 0, 0, None
+        chain = []
+        while steps <= 60:
+            E = pencil(v, R, C)
+            if E is None:
+                ev["ILLEGAL"] += 1
+                break
+            b_stack = stack_cols(E, R, C, ["s0", "s1"])
+            rB = rank_f2(b_stack) if b_stack else 0
+            bker = kernel_vec(b_stack, len(C))
+            a_stack = [[E[(i, j)].get(k, 0) for i in R]
+                       for k in ["t0", "t1"] for j in C]
+            aker = kernel_vec(a_stack, len(R))
+            if bker is None or aker is None:
+                ev["KILL"] += 1
+                break
+            bc = stack_cols(E, R, C, ["s0", "s1", "one"])
+            if kernel_vec(bc, len(C)) is not None:
+                ev["EXT-t"] += 1
+                break
+            ac = [[E[(i, j)].get(k, 0) for i in R]
+                  for k in ["t0", "t1", "one"] for j in C]
+            if kernel_vec(ac, len(R)) is not None:
+                ev["EXT-s"] += 1
+                break
+            if prev_rB is not None:
+                if rB == prev_rB:
+                    stall_run += 1
+                    maxstall = max(maxstall, stall_run)
+                else:
+                    stall_run = 0
+            prev_rB = rB
+            chain.append((len(C), rB))
+            v, j0 = col_gl(v, C, bker)
+            C = [j for j in C if j != j0] + [j0 + (0,), j0 + (1,)]
+            steps += 1
+        maxchain = max(maxchain, steps)
+        if steps >= 6:
+            badrows.append((trial, chain))
+    print(dict(ev), "maxchain:", maxchain, "maxstall(consecutive):", maxstall)
+    for t, ch in badrows[:8]:
+        print("long chain trial", t, ch)
+

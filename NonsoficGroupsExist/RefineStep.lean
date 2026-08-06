@@ -30,18 +30,17 @@ theorem pencilEntry_mul_s (a₀ a₁ c : k) :
         (if z = 0 then c else 0) (if z = 0 then 0 else c) := by
   intro z
   unfold pencilEntry
-  fin_cases z
-  · rw [add_mul, add_mul, add_mul, smul_mul_assoc, smul_mul_assoc,
-      smul_mul_assoc, smul_mul_assoc, smul_mul_assoc, t_mul_s,
-      t_mul_s, if_pos rfl, if_neg (show ¬(1 : Fin 2) = 0 by decide),
-      one_mul, smul_zero, zero_smul, zero_smul]
-    simp
-  · rw [add_mul, add_mul, add_mul, smul_mul_assoc, smul_mul_assoc,
-      smul_mul_assoc, smul_mul_assoc, smul_mul_assoc, t_mul_s,
-      t_mul_s, if_neg (show ¬(0 : Fin 2) = 1 by decide), if_pos rfl,
-      one_mul, smul_zero, zero_smul, zero_smul]
+  -- `pencilEntry` is a four-fold sum, so four `add_mul`s are needed before
+  -- the five `smul_mul_assoc`s all have something to match.  `fin_cases`
+  -- leaves `z` as `(fun i => i) ⟨0, _⟩`, so the `if_pos`/`if_neg` witnesses
+  -- no longer match syntactically; let `simp` discharge the conditions.
+  fin_cases z <;>
+    rw [add_mul, add_mul, add_mul, add_mul, smul_mul_assoc,
+      smul_mul_assoc, smul_mul_assoc, smul_mul_assoc,
+      smul_mul_assoc] <;>
     simp
 
+omit [DecidableEq ι] in
 /-- **The refinement step**: the pencil value over `(R, C)` with a
 `B`-free column `j₀` equals the pencil value over the column code
 split at `j₀`, indexed by `Fin 2 ⊕ {j // j ≠ j₀}`, with the shifted
@@ -106,8 +105,9 @@ theorem refine_column (R : BinaryPrefixCode ι)
           noncomm_ring
   rw [hsplit]
   -- match the two summand families
+  -- `Sum.elim … (inl z)` reduces, so `congr 1` closes the `Fin 2` family by
+  -- `rfl` on its own and leaves only the `erase j₀` vs subtype reindexing.
   congr 1
-  · exact Finset.sum_congr rfl fun z _ ↦ rfl
   · refine (Finset.sum_bij' (i := fun (q : {j : κ // j ≠ j₀}) _ ↦ q.1)
       (j := fun j hj ↦ (⟨j, (Finset.mem_erase.mp hj).1⟩ :
         {j : κ // j ≠ j₀})) ?_ ?_ ?_ ?_ ?_).symm

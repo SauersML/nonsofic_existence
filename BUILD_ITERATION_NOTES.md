@@ -3045,3 +3045,87 @@ coker-A structural fact from session 45b is the plan); then
 retire/derive TriangularFactorization, refresh stale docstrings,
 audit, full build.  Then goal (2): manuscript rewrite; goal (3):
 novel results.
+
+## Session 54: StuckReduction SOLVED — the two-exit algorithm (no
+## extraction, no termination measure)
+
+Numerics first (experiments/pencil_loop.py, case4_probe /
+rank_evolution_probe / stall_probe, 3000 trials): every narrow unit
+resolves by extraction at uniform starting codes; case 4 (both
+C-less stacks deficient) is real (264 events, chains up to 9,
+consecutive rank-stalls up to 4); the batch-refine ⟹ row-extract
+conjecture from session 45b is FALSE (8/264).  So the extraction
+route needs a genuine termination argument.  It turns out none is
+needed: the master induction can be BYPASSED entirely.
+
+KEY REALIZATIONS.
+(1) `refine_column` needs only a B-free column — no condition on
+the C-data.  Any kernel vector of [B₀;B₁] can be normalized into a
+B-free column by a codeScalar move (compiled) and split (compiled).
+So whenever ker[B₀;B₁] ≠ 0 we may grow κ by one at FIXED ι.
+Once κ > 2ι the kernel is automatic (rank ≤ 2ι), so the refinement
+loop can always continue to any target κ.
+(2) FREE EXIT.  A pencil unit u = Σ S(R_i) E_ij T(C_j) (E narrow,
+degrees in [−1,1]) with κ ≥ 2·2^⌈log₂ ι⌉ lies in stableUnits
+directly: conjugate by two codeChange units (compiled), replacing R
+by a complete code P of size ι with max depth M_ι := ⌈log₂ ι⌉ and C
+by a complete code Q of size κ with min depth ≥ M_ι + 1 (exists
+since κ ≥ 2^{M_ι+1}: split the full level-(M_ι+1) code).  Value
+degrees ≤ max|P| + 1 − min|Q| ≤ 0, so window_nonpos_mem_stableUnits
+(compiled) applies.  Kraft bounds show this aspect threshold is
+achievable exactly when stated.
+(3) STRICT NEGATIVITY.  If [B₀;B₁] has full column rank (scalar
+left inverse G, compiled dichotomy), the compiled kill pins
+X_ji := T(C_j) u⁻¹ S(R_i) to the window [−N, 0]; then the
+degree-(+1) component of the strip Σ_j E_ij X_ji' = δ_ii' reads
+Σ_j (B₀ij s₀ + B₁ij s₁) X⁰_ji' = 0 (X⁰ := balanced component; the
+A- and C-slots cannot reach degree +1 against a nonpos window).
+Stripping with t₀, t₁ gives Σ_j B_zij X⁰_ji' = 0 in L, and the
+SCALAR left inverse G applies verbatim to L-valued vectors:
+X⁰ = G·(BX⁰) = 0.  Hence X_ji ∈ span dM(−N, −1): strictly negative.
+(4) PADDED EXIT.  With entries ≤ −1 the reshaped value needs only
+max|Q| ≤ min|P| + 1.  Rounding can obstruct this (e.g. ι=5, κ=9),
+but corner padding fixes it: κ_w-insertion at a word w of depth m
+(κ_w(u) = s_w u t_w + (1 − p_w), value = S(w)uT(w) + Σ_{comp(w)}
+S(v)T(v)) realizes the block sum u ⊕ I_m as a pencil over codes
+(wR ∪ comp(w), wC ∪ comp(w)); code changes then redistribute the
+words freely.  Choose d := ⌈log₂ ι⌉, m := 2^{d+1} − κ (≥ 0 since
+κ ≤ 2ι ≤ 2^{d+1}; rank bound + the loop invariant κ ≥ ι).  Take
+Q̃ := full level (d+1) (old block max depth d+1, pads at d+1) and
+P̃ := a complete code of size ι+m, all depths ≥ d, with the m pad
+words at depth ≥ d+1 — constructed from the full level-d code by
+s := ι + 2^d − κ splits of which x := 2^d − ι hit level-d words
+(0 ≤ x ≤ s ⟺ ι ≤ 2^d and κ ≤ 2ι ✓; deep-word count s + x =
+2^d − ι + s ≥ m ✓).  Old entries: (d+1) − 1 − d ≤ 0 ✓; pad
+diagonal: (d+1) − |P̃pad| ≤ 0 ✓.  Value nonpos ⟹ padded unit ∈ H
+⟹ κ_w(u) ∈ H (code changes) ⟹ u ∈ H (kappa corner transfer).
+
+THE ALGORITHM (proves: EVERY pencil unit over complete codes with
+κ ≥ ι lies in stableUnits; narrow units enter at ι = κ = 2^{m+1}):
+  while κ < 2·2^⌈log₂ ι⌉:
+    if ker[B₀;B₁] ≠ 0: codeScalar-normalize; refine_column  (κ += 1)
+    else: B full ⟹ strict-negativity ⟹ padded exit.  STOP.
+  free exit.  STOP.
+Termination: the loop counter 2·2^⌈log₂ ι⌉ − κ strictly decreases;
+ι never changes.  No extraction, no atom peel, no terminal theorem,
+no master induction needed for the main chain (they remain as
+standalone structure results).  StuckReduction k follows a fortiori
+(the stuck hypotheses are simply unused), which closes
+NarrowReduction, ScalarReduction, B4, GL = EL, and Theorem C
+unconditionally.
+
+FORMALIZATION PLAN:
+ N1 StrictNegativePencil.lean: (3) — balanced component of the
+    inverse entries dies under a full B-stack.
+ N2 CodeShapeSupply.lean: complete codes of size n with max depth
+    ⌈log₂ n⌉; of size n ≥ 2^M with min depth ≥ M; the padded pair
+    (P̃, Q̃) with its pad pairing (list-based, split-construction).
+ N3 PencilReshape.lean: value window of Σ S(Q_j) X_ji T(P_i) from
+    entry windows and depth bounds; the codeChange conjugation
+    identity ω₁ u ω₂ = reshaped pencil.
+ N4 KappaBlockSum.lean: κ_w(u) as a pencil over the augmented
+    codes; κ_w(u) ∈ H ⟺ u ∈ H from the compiled corner machinery.
+ N5 RefineLoopDischarge.lean: the κ-growth loop (induction on
+    2·2^⌈log₂ ι⌉ − κ) + assembly: pencil_unit_mem_unconditional,
+    stuckReduction_holds : StuckReduction k, and NarrowReduction k
+    outright via narrowReduction_of_stuckReduction.
