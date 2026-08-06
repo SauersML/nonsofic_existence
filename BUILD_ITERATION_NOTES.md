@@ -1647,3 +1647,24 @@ mathematics settled in sessions 24–25:
   pivots, unipotents) on the 10 instances + ρ: extract the general
   reduction algorithm from machine-found witnesses, then prove
   termination.  This closes the last math gap empirically first.
+
+## Session 31b: the Ω-homogeneous cofactor system for A-nilpotency
+- U := A + T·1 + T²B ∈ L_k[T] is HOMOGENEOUS of weight 1 for the
+  grading Ω := deg_T − deg_L.  From unit-ness over k(T): clearing
+  denominators UṼ = ṼU = q(T)·1 and PROJECTING onto Ω-components:
+  for ANY j with q_j ≠ 0 there is an Ω-homogeneous two-sided
+  cofactor P with U·P = P·U = T^j·1.
+- Choosing j := r := ord_T(q): r ≥ 1 is FORCED — r = 0 would make U
+  invertible in L_k[T], and T := 0 gives A two-sided-invertible of
+  pure degree −1, contradicting no-homogeneous-units.  ✓
+- The cofactor system (P = Σ T^i P_i, P_i of L-degree i−r+1):
+    A·P_i + P_{i−1} + B·P_{i−2} = δ_{ir},   (two-sided versions)
+  with A·P₀ = P₀·A = 0 at the bottom and the window finite — the
+  same shape as the (P)-corner system with A in the pivot slot.
+  REMAINING: extract A-nilpotency (or directly 1+A+B ∈ H) from this
+  system by the rank/factorization method; the specialization
+  T := 0 of U·P = T^r·1 gives A·P(0)... wait P(0) = P₀: A·P₀ = 0 —
+  consistent; the content is in the higher T-coefficients.
+- Alternative still open: BFS move-search engine to machine-discover
+  H-reduction witnesses for the 10 concrete instances (swaps +
+  balanced pivots + unipotents), then generalize.  ENGINE NEXT TURN.
