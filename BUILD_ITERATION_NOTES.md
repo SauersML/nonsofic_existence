@@ -729,3 +729,23 @@ Also: entry into 1+s₁z-form from the [−1,1]-window: [window-unit] =
 1 + s₁z-form; both formalizable with existing machinery (sr1 needs
 the element-level block dictionary — the remaining nontrivial
 formalization plumbing).
+
+## Session 15d: exact p-split; (i) reduced to p'-supported tails
+- EXACT IDENTITY: (1 + s₁z₀p₀)(1 + s₁z₀p₁) = 1 + s₁z₀ (cross term has
+  p₀s₁ = 0).  First factor has square-zero tail ((s₁z₀p₀)² = 0 same
+  way) ⟹ in H by square_zero_tail_mem_stableUnits.  So
+  [1 + s₁z₀] = [1 + s₁(z₀p₁)] ALWAYS — tails reduce to p₁-supported.
+- p₁-supported tail: s₁(z₀s₁t₁)·— κ₁-sandwich: 1 + s₁(z₀s₁)t₁ =
+  κ₁(1 + z₀s₁) ⟹ corner transport (green) gives [1+s₁z₀] = [1+z₀s₁]
+  — an independent derivation of the flip for these shapes, with all
+  factors explicit.
+- Twisted-product criterion: n = s₁z₀ nilpotent of index D ⟺
+  Q_{D−1} := z₀·φ(z₀)·…·φ^{D−1}(z₀) = 0 where φ(x) := s₁xt₁
+  (multiplicative!).  Flag-splitting attempts (support idempotents
+  σ_k): D = 2, 3 terminate; D ≥ 4 the junk factors block clean
+  telescoping — needs the fixed-point support construction or another
+  route.  Deep-matrix triangularity fails (degree persists).
+- STATE: (i) index-2 proved; index-general open but tails now
+  p₁-supported WLOG (formalizable now); (G) open with the
+  (XX_d)-system attack.  These two remain the entire mathematical gap
+  for NarrowReduction ⟹ ScalarReduction ⟹ manuscript completion.
