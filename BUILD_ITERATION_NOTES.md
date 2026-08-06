@@ -2130,3 +2130,33 @@ Composition law Ω_{e,d}·Ω_{d,c} = Ω_{e,c} available throughout.
   to length−1, composition law Ω_{e,d}Ω_{d,c} = Ω_{e,c}.
   Then: rectangular pivot; the Ω-intertwiner narrow-reduction;
   assembly.
+
+## Session 39b: CodeChangeSwap.lean written; generation-induction design
+- pairValue (list of (target, source) pairs), perm-invariance;
+  swapWord; cylTransposition_mul_term (the three-branch collapse
+  computation: t = x ↦ y, t = y ↦ x, incomparable ↦ fixed);
+  cylTransposition_mul_pairValue (list version).  Registered.
+- MAIN INDUCTION DESIGN (CodeChangeUnits.lean, next write):
+  theorem: ∀ n P, P.length = n → IsCompleteCode (P.map .snd) →
+    IsCompleteCode (P.map .fst) → ∀ u, ↑u = pairValue P → u ∈ H.
+  n = 0: complete-empty impossible (0 = 1 vs Nontrivial).
+  n = 1: cylinder w = 1 forces w = ε (else the opposite-letter word
+    kills it: p_w = 1 ⟹ S(other) = p_w·S(other)·... contradiction
+    via wordT_mul_wordS_of_incomparable + wordS_ne_zero);
+    both codes = [ε]: value = 1: u = 1 ∈ H.
+  n ≥ 2: source siblings (w0, w1) via exists_sibling_pair on
+    (P.map .snd); extract their pairs to the head via
+    List.perm_cons_erase twice (pairValue-perm-invariant; the pair
+    containing w1 survives the first erase since sources are
+    distinct); target siblings (v0, v1) on (P.map .fst);
+    ALIGN with ≤2 cylTransposition multiplications (4 by_cases on
+    x = v0 / y' = v1, using the transposition-mul-pairValue lemma;
+    all targets pairwise equal-or-incomparable since they form a
+    prefix-free code — IsCompleteCode.incomp);
+    MERGE via merge_identity_one: pairValue ((v0,w0)::(v1,w1)::Q) =
+    pairValue ((v,w)::Q); new codes complete (cylinder sum unchanged
+    by the merge identity; prefix-freeness of the merged word by the
+    10-line children argument); IH at n−1; unwind the ≤2
+    transposition units (∈ H via cylTransposition_mem).
+- After that: rectangular pivot lemma; the Ω-intertwiner
+  narrow-reduction (session 38b design); assembly.

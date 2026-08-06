@@ -184,6 +184,7 @@ import NonsoficGroupsExist.OppositeTranspose
 import NonsoficGroupsExist.ThetaStable
 import NonsoficGroupsExist.WindowNonposReduction
 import NonsoficGroupsExist.CodeChangeInfrastructure
+import NonsoficGroupsExist.CodeChangeSwap
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

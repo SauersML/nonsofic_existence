@@ -72,14 +72,22 @@ theorem exists_term_mul_ne_zero {c : List (List (Fin 2))}
     (h : (c.map f).sum * x ≠ 0) :
     ∃ v ∈ c, f v * x ≠ 0 := by
   by_contra hall
-  push_neg at hall
+  push Not at hall
   apply h
-  induction c with
-  | nil => simp
-  | cons a t ih =>
-      rw [List.map_cons, List.sum_cons, add_mul,
-        hall a List.mem_cons_self, zero_add]
-      exact ih fun v hv ↦ hall v (List.mem_cons_of_mem a hv)
+  -- Induct inside a standalone `have`.  Running `induction c` on the main
+  -- goal auto-generalises `h` and `hall` (both mention `c`), so `ih` picks
+  -- up extra arguments and `fun v hv ↦ …` ends up binding `v` to a proof.
+  have key : ∀ l : List (List (Fin 2)),
+      (∀ v ∈ l, f v * x = 0) → (l.map f).sum * x = 0 := by
+    intro l
+    induction l with
+    | nil => intro _; simp
+    | cons a t ih =>
+        intro hl
+        rw [List.map_cons, List.sum_cons, add_mul,
+          hl a List.mem_cons_self, zero_add]
+        exact ih fun v hv ↦ hl v (List.mem_cons_of_mem a hv)
+  exact key c hall
 
 /-- The merge identity: sibling terms combine. -/
 theorem merge_identity_one (v w : List (Fin 2)) :
@@ -98,10 +106,11 @@ theorem merge_identity_one (v w : List (Fin 2)) :
 theorem IsCompleteCode.incomp {c : List (List (Fin 2))}
     (hc : L.IsCompleteCode c) {a b : List (Fin 2)} (ha : a ∈ c)
     (hb : b ∈ c) (hab : a ≠ b) : ¬a <+: b ∧ ¬b <+: a := by
-  have hsymm : Symmetric
-      (fun a b : List (Fin 2) ↦ ¬a <+: b ∧ ¬b <+: a) :=
-    fun _ _ h ↦ ⟨h.2, h.1⟩
-  exact hc.pairwise_incomp.forall hsymm ha hb hab
+  -- `List.Pairwise.forall` now takes symmetry as a `Std.Symm` *instance*
+  -- rather than an explicit argument (`Symmetric` itself is deprecated).
+  haveI : Std.Symm (fun a b : List (Fin 2) ↦ ¬a <+: b ∧ ¬b <+: a) :=
+    ⟨fun _ _ h ↦ ⟨h.2, h.1⟩⟩
+  exact hc.pairwise_incomp.forall ha hb hab
 
 /-- **Sibling pair at maximal depth**: a complete prefix code with at
 least two elements contains both children of some word. -/
@@ -119,7 +128,7 @@ theorem exists_sibling_pair [Nontrivial A] {c : List (List (Fin 2))}
     intro hmeps
     obtain ⟨x, hx, hxm⟩ : ∃ x ∈ c, x ≠ m := by
       by_contra hall
-      push_neg at hall
+      push Not at hall
       have : c.length ≤ 1 := by
         rcases c with _ | ⟨a, _ | ⟨b, t⟩⟩
         · simp
@@ -141,8 +150,10 @@ theorem exists_sibling_pair [Nontrivial A] {c : List (List (Fin 2))}
   obtain ⟨w, a, rfl⟩ : ∃ (w : List (Fin 2)) (a : Fin 2),
       m = w ++ [a] := by
     refine ⟨m.dropLast, m.getLast hmne, ?_⟩
-    rw [← List.dropLast_concat_getLast hmne]
-    rfl
+    -- `rw` cannot build a motive here: the proof `hmne` mentions `m`, so
+    -- abstracting `m` makes `m.getLast hmne` ill-typed.  Use the lemma
+    -- directly instead of rewriting with it.
+    exact (List.dropLast_append_getLast hmne).symm
   -- the sibling word
   set b : Fin 2 := if a = 0 then 1 else 0 with hb
   have hab : a ≠ b := by
@@ -161,7 +172,7 @@ theorem exists_sibling_pair [Nontrivial A] {c : List (List (Fin 2))}
   -- the witness is comparable with the sibling word
   have hcomp : v <+: (w ++ [b]) ∨ (w ++ [b]) <+: v := by
     by_contra hnc
-    push_neg at hnc
+    push Not at hnc
     apply hvne
     rw [cylinder, mul_assoc,
       show L.wordT v * L.wordS (w ++ [b]) = 0 from
@@ -199,7 +210,7 @@ theorem exists_sibling_pair [Nontrivial A] {c : List (List (Fin 2))}
   have hvv : (w ++ [b]) ∈ c := hveq ▸ hv
   fin_cases a
   · refine ⟨w, hm, ?_⟩
-    have hb1 : b = 1 := by rw [hb]
+    have hb1 : b = 1 := by rw [hb]; rfl
     rwa [hb1] at hvv
   · refine ⟨w, ?_, hm⟩
     have hb0 : b = 0 := by rw [hb]; rfl
