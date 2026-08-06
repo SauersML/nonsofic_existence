@@ -41,9 +41,10 @@ theorem IsCompleteCode.perm {c c' : List (List (Fin 2))}
 /-- `swapWord x x` is the identity. -/
 theorem swapWord_self (x w : List (Fin 2)) : swapWord x x w = w := by
   unfold swapWord
-  split_ifs with h1 h2
+  -- With `y := x` both branches test the same condition `w = x`, so
+  -- `split_ifs` yields two goals, not three.
+  split_ifs with h1
   · rw [h1]
-  · rw [h2]
   · rfl
 
 theorem swapWord_left (x y : List (Fin 2)) : swapWord x y x = y := by
@@ -158,7 +159,7 @@ theorem alignStep_mul_pairValue (x y : List (Fin 2))
   · subst hxy
     rw [show P.map (fun p ↦ (swapWord x x p.1, p.2)) = P.map id from
       List.map_congr_left fun p _ ↦ by
-        rw [swapWord_self], List.map_id]
+        rw [swapWord_self]; rfl, List.map_id]
     show (1 : A) * _ = _
     rw [one_mul]
   · exact L.cylTransposition_mul_pairValue _ _ P hP
@@ -207,6 +208,10 @@ theorem IsCompleteCode.merge {w : List (Fin 2)}
     rw [List.map_cons, List.sum_cons, ← hmerge, add_assoc]
     exact hsum
 
+-- `k` is named only in the proof (`alignStep_mem (k := k)`), never in the
+-- statement, so it needs pulling in explicitly.  `include ... in` has to
+-- precede the docstring, or the doc comment is orphaned from its theorem.
+include k in
 /-- **Code-change units lie in the diagonal class group.** -/
 theorem codeChange_mem_stableUnits [Nontrivial A]
     (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1) :
@@ -268,10 +273,13 @@ theorem codeChange_mem_stableUnits [Nontrivial A]
         simp only [List.length_cons] at this
         omega
       -- transported data
+      -- `L` is an explicit argument of `perm` and sits *before* the
+      -- `IsCompleteCode` one, so dot notation would feed the permutation
+      -- into `L`'s slot.  Name the argument instead.
       have hsrc' : L.IsCompleteCode ((p₀ :: p₁ :: Q).map Prod.snd) :=
-        hsrc.perm (hperm.map _)
+        hsrc.perm (L := L) (hperm.map _)
       have htgt' : L.IsCompleteCode ((p₀ :: p₁ :: Q).map Prod.fst) :=
-        htgt.perm (hperm.map _)
+        htgt.perm (L := L) (hperm.map _)
       have hu' : (u : A) = L.pairValue (p₀ :: p₁ :: Q) := by
         rw [hu]
         exact L.pairValue_perm hperm
@@ -324,15 +332,21 @@ theorem codeChange_mem_stableUnits [Nontrivial A]
         rw [hP₁tgtEq]
         exact map_swapWord_perm hTnodup hxT hv0
       have htgt₁ : L.IsCompleteCode (P₁.map Prod.fst) :=
-        htgt'.perm hP₁perm.symm
+        htgt'.perm (L := L) hP₁perm.symm
       -- basic distinctness facts
       have hxy : x ≠ y := by
         have h := hTnodup
         rw [hT, List.map_cons, List.map_cons, List.nodup_cons] at h
-        exact fun heq ↦ h.1 (heq ▸ List.mem_cons_self)
+        -- `▸` cannot place the cast here; state the membership goal up
+        -- front (defeq folds `p₀.1`/`p₁.1` back to `x`/`y`) and rewrite.
+        intro heq
+        apply h.1
+        show x ∈ y :: (Q.map Prod.fst)
+        rw [heq]
+        exact List.mem_cons_self
       have hv01 : (v ++ [0] : List (Fin 2)) ≠ v ++ [1] := by
         intro h
-        simpa using h
+        simp at h
       -- the second head target after the first swap
       set y₁ : List (Fin 2) := swapWord x (v ++ [0]) y with hy₁
       have hv0y₁ : (v ++ [0] : List (Fin 2)) ≠ y₁ := by
@@ -435,7 +449,7 @@ theorem codeChange_mem_stableUnits [Nontrivial A]
             (v ++ [0]) :: (v ++ [1]) :: Q₂.map Prod.fst := by
           rw [hP₂struct, List.map_cons, List.map_cons, hQ₂]
         rw [← h1]
-        exact htgt₁.perm hP₂perm.symm
+        exact htgt₁.perm (L := L) hP₂perm.symm
       -- run the induction hypothesis on the merged list
       set u₂ : Aˣ := A₂ * (A₁ * u) with hu₂
       have hu₂val : (u₂ : A) = L.pairValue ((v, w) :: Q₂) := by

@@ -2187,3 +2187,33 @@ Composition law Ω_{e,d}·Ω_{d,c} = Ω_{e,c} available throughout.
   (Perm.pairwise_iff symmetry witness inline — thanks!).
 - REMAINING WRITES: rectangular pivot; the Ω-intertwiner narrow
   reduction (session 38b); NarrowReduction/B4 assembly; docstrings.
+
+## Session 41: Ω-argument full degree-audit — simplification AND a gap
+POSITIVE (real, keeps): **the rectangular pivot is unnecessary.**
+Column-canonicalization of the negative part comes from the COMPILED
+balanced rank normal form via the squaring trick:
+  Â := s₀·A is balanced; g·Â·h = E := Σ_{γ∈S} p_γ;
+  then A·h = t₀·g⁻¹·E  (A = t₀s₀A = t₀Â — three lines).
+So mod a right H-unit, A = t₀·M·E-form with M balanced: its COLUMN
+code is the canonical S-cylinder family.  One-sided suffices.
+NEGATIVE (gap in session 38b, found by full degree bookkeeping):
+after the κ-corner transport and the profile-balanced Ω
+(deg-(−1) pairs 00γ→1γ, deg(+1) pairs 1γ→01γ, deg-0 rest at common
+depth D = n+2 — sizes match exactly at that depth!), the value·Ω⁻¹
+computation gives negative part = Σ_γ S(1γ)T(01γ) from the scalar,
+BUT the balanced image Ã·Ω⁻¹ = Σ (WS(γ))T(1γ) has T-sides exactly
+{1γ} — the kill of S(1γ)T(01γ) fails hcsup there, and the kill
+formula replaces the monomial by (WS(γ))T(01γ); summed:
+new-negative = W·E_S·T(01) vs old Ã = W·E_S·T(00) — A PURE CORNER
+ROTATION, zero net progress (conservation in purest form).
+Also: the c-singular free-column supply is NOT joint-free in general
+(relative column positions are invariant under one-sided moves).
+STATUS: the mixing case ([−1,1] with both signs) is STILL OPEN.
+What IS newly available and free: the θ-transported mirror of
+GammaDischarge (units 1 + z·t₁, z ∈ span[0,1] are in H — three-line
+transport), and the t₀ME-structure of the negative part.
+SHARPEST REMAINING QUESTION: units with value 1 + t₀M·E + C + B
+(M balanced-unit-times-cylsum): kill the t₀-column.  All conserved
+quantities identified; the un-conserved handle must involve the
+INTERPLAY (the unit equations), as in (P)'s proof — likely a second
+shape-rank argument on the mixed system, not a move-hunt.
