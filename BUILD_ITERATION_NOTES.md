@@ -916,3 +916,63 @@ REMAINING for NarrowReduction: only the z₋-elimination/(G) — with
   [1 + s₁(γ⁻¹-moved z₀)] pure z₋ = 0 ⟹ nilpotent automatic ⟹
   NilpotentTailKill.  Writing this as GammaReduction.lean with
   γ-invertibility as the explicit hypothesis.
+
+## Session 21: (G) system fully catalogued; GammaReduction.lean written
+WRITTEN: GammaReduction.lean (complete, hypotheses explicit).
+(G) DERIVATION STATE — the master catalogue:
+- MASTER FORM: u = p₀ + s₁·h with h := t₁ + z ∈ window[−1,0];
+  h·(ys₁) = 1 (h right-invertible ALWAYS); (ys₁)h = 1 − yp₀ with
+  f := yp₀ idempotent ≠ 0, p₀fp₀ = p₀, hf = 0.
+- Λ-IDENTITY: s₁·Λ(x) = γ'x − p₀x where Λ(x) := (t₁ + z₋)x = h₋x.
+- THE (S)-SYSTEM (t₁-extraction of positive equations):
+  z₀y_d = −Λ(y_{d+1}) for 0 ≤ d ≤ N (y_{N+1} = 0).
+- THE (C)-SYSTEM (negative side, coefficients C^{(j)}_w = y_{−j}s_w):
+  γ'C^{(M)}_w = 0 at the bottom; z₀C^{(j+1)}_{wi} = −Λ(C^{(j)}_w)s_i;
+  z₀C^{(1)}_i = [i=1] − Λ(y₀)s_i.
+- ker γ' = {q : p₀q = 0, h₋q = 0}; kernels live under p₁; the flip
+  kernel: left-kernel rows q' satisfy q's₁(1 + z₋s₁) = 0.
+- INSTANCE VERIFICATIONS through (S): instance 1 (Λ = 0): z₀
+  invertible forced, positive side forces z₀y₀ = 0 ⟹ y₀ = 0 ⟹
+  contradicts p₀y₀ = p₀.  Instance 2: (S)-top forces y_N = 0 (N ≥ 1),
+  then y₀ = p₀, then (XX₀) demands s₁₁t₁y₋₁ = p₁ — impossible by
+  prefix independence (p₁₁ ≠ p₁).
+- TAUTOLOGY TRAPS documented: p₀s₁ = 0 absorbs every naive q'-pairing;
+  the corner equations are self-consistent — the contradiction is
+  GLOBAL, coupling the finite (S)+(C) system with p₀y₀ = p₀.
+- NEXT ATTACK: dimension/rank count over k of the finite staircase
+  system: the unknowns (y_d components at bounded window/level) vs
+  the equations; γ'-singularity creates a strict solvability defect
+  that p₀y₀ = p₀ cannot meet — formalize the count on the finite-
+  dimensional filtration pieces (all data at a common level m and
+  bounded degree window; the staircase matrix is block-bidiagonal
+  with γ' on the diagonal and s₁z₀ off-diagonal; det-style argument:
+  the system forces 1 ∈ Im(bidiagonal operator) whose cokernel
+  contains the γ'-cokernel at the 0-block — CHECK: is the d=0 block
+  row exactly γ'y₀ + s₁z₀y₋₁ = 1 with coker(γ') obstructing modulo
+  the s₁z₀-column? The instances say the s₁z₀-column cannot cover the
+  γ'-cokernel because its image is s₁-prefixed while the cokernel
+  needs p₀-content: p₀·(s₁z₀X) = 0 but p₀·1 = p₀ ≠ 0 — wait:
+  p₀γ'y₀ = p₀y₀ = p₀ ✓ consistent... the p₀-row of the d=0 equation
+  is auto-satisfied; the obstruction sits in the p₁-row where
+  γ'|p₁-part = p₁ + s₁z₋ acts — TRY: q'-left-kernel pairing against
+  the d = 0 equation DIRECTLY: q'γ' = 0 ⟹ q' = q's₁z₀y₋₁ (derived);
+  iterate this DOWN the C-system: q' = q's₁z₀C-terms and
+  z₀C^{(j)} = −Λ(C^{(j-1)})s-recursion pushes q' into
+  q'·s₁·(z₀-Λ-chains) of length M+1 ending at γ'C^{(M)} = 0-kernel
+  coefficients... then the chain terminates with q'·(...)·0 = q' ⟹
+  q' = 0 IF each step is genuinely composable — CHECK THIS NEXT:
+  q' = q's₁z₀y₋₁ = q's₁z₀(C_0t_0 + C_1t_1), substitute
+  z₀C_i-hmm z₀C_i appears LEFT-multiplied inside; the recursion gives
+  z₀C^{(1)}_i in terms of Λ(y₀) NOT of deeper C's — the descent
+  direction is (G_{w,i}): z₀C^{(j+1)} = −Λ(C^{(j)})s_i: so
+  q' = q's₁·z₀·y₋₁ needs z₀y₋₁ = z₀(C_0t_0+C_1t_1): z₀C_i-BUT the
+  system gives z₀C^{(1)}_i directly = [i=1] − Λ(y₀)s_i!!! SUBSTITUTE:
+  q' = q's₁([1-slot term] + corrections): q' = q's₁(z₀C_0t_0 + z₀C_1t_1)
+  = q's₁(−Λ(y₀)s_0·t_0 + (1 − Λ(y₀)s_1)t_1)
+  = q's₁t_1 + q's₁Λ(y₀)(−s_0t_0 − s_1t_1)
+  = q'p₁ − q's₁Λ(y₀)  [since s_0t_0+s_1t_1 = 1]
+  AND s₁Λ(y₀) = γ'y₀ − p₀y₀ = γ'y₀ − p₀ (Λ-identity + P!):
+  q's₁Λ(y₀) = q'γ'y₀ − q'p₀ = 0 − q'p₀:
+  ⟹ q' = q'p₁ + q'p₀ = q' — TAUTOLOGY AGAIN (p₀+p₁ = 1).  ALL linear
+  pairings are consistent; the contradiction MUST be nonlinear
+  (rank/dimension count) or use the mirror system (yu = 1) jointly.
