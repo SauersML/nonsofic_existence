@@ -108,6 +108,7 @@ import NonsoficGroupsExist.Matching.Refinement
 import NonsoficGroupsExist.Matching.Selection
 import NonsoficGroupsExist.Matching.MedianNormalization
 import NonsoficGroupsExist.Sofic.LEF
+import NonsoficGroupsExist.Sofic.FinitelyPresentedLEF
 import NonsoficGroupsExist.Sofic.ThompsonFObstruction
 import NonsoficGroupsExist.Criterion.Scheme
 import NonsoficGroupsExist.Criterion.Criterion

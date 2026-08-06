@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Endpoint.MainResults
+import NonsoficGroupsExist.Sofic.FinitelyPresentedLEF
 import NonsoficGroupsExist.Leavitt.UnitsGLProfile
 import NonsoficGroupsExist.KOne.AllRanksElementary
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
@@ -87,3 +88,6 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.BinaryLeavitt.glAll_eq_elementary
 #print axioms NonsoficGroupsExist.BinaryLeavitt.binaryLeavittUnits_perfect
 #print axioms NonsoficGroupsExist.binaryLeavittRankTwo_not_isSofic
+
+-- `lem:fplef`, closed: finitely presented LEF groups are residually finite.
+#print axioms NonsoficGroupsExist.finitelyPresented_isLEF_residuallyFinite

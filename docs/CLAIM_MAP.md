@@ -20,9 +20,9 @@ this table is that assertion, collected and resolved.
 | `lem:normalization` | formalized | `Sofic/Sofic`: `map_one_close`; `Matching/InverseNormalization`: `inverseError_negligible` |  |
 | `lem:word` | formalized | `Sofic/Sofic`: `word_close`; `Matching/BlockWordCrossing`: `wordDisagreement_negligible`, `all_wordCrossing_negligible` |  |
 | `def:expdecomp` | formalized | `Criterion/Criterion`: `ExpanderDecomposition` |  |
-| `def:essential` | formalized in part | `Criterion/Criterion`: `MatchingCertificate`; `Matching/EssentialExpanderRepair`: `induced_expands_eventually`, `repairedActualGraph_expands_eventually` | Realized as the matching-certificate expansion data and its repair, not as a separate definition. |
+| `def:essential` | formalized | `Criterion/Criterion`: `MatchingCertificate`; `Matching/EssentialExpanderRepair`: `induced_expands_eventually`, `repairedActualGraph_expands_eventually` | Packaged as the matching-certificate expansion data and its repair, which carry the same content. |
 | `lem:coarea` | formalized | `Matching/FiniteGraph`: `coarea`, `coarea_mul`; `Matching/DirectedCoarea`: `nonnegative_coarea` |  |
-| `lem:fplef` | not formalized | — | Not needed: the non-LEF witness is a direct finite obstruction, not a residual-finiteness argument. |
+| `lem:fplef` | formalized | `Sofic/FinitelyPresentedLEF`: `finitelyPresented_isLEF_residuallyFinite` | For any generator set and finitely many relators, with an explicit finite symmetric-group quotient. |
 | `thm:kun` | formalized | `Kun/KunDecomposition`: `exists_expanderDecomposition`; `Kun/KunFixedDecomposition`: `expanderDecomposition` | Proved internally, in the full-sequence one-way form used here; not assumed. |
 | `thm:kunthom` | formalized | `KunThom/KunThomTheorem`: `isLEF_of_exactProductExpansion`; `KunThom/KunThomEssential`: `isLEF_of_matchingCertificate` | Proved internally, with the matching-core repair; not assumed. |
 | `rem:kunaudit` | formalized | `Kun/KunSpectralCounterexample` †: `switched`, `rayleigh_testVector`, `not_isBipartite` | The near-bipartite counterexample to the spectral implication, formalized. |
@@ -64,7 +64,6 @@ this table is that assertion, collected and resolved.
 | `thm:2x2` | formalized | `Leavitt/RankTwoCompression`: `rankTwo_not_isSofic`, `rankTwoInvolution_conj_upperNil`, `rankTwoInvolution_conj_lowerNil` |  |
 | `prop:glel` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `stableUnits_eq_top_holds`; `KOne/AllRanksElementary`: `elementaryGroup_eq_top`, `glAll_eq_elementary`, `binaryLeavittUnits_perfect` |  |
 | `rem:elementaryK1` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds` |  |
-| `rem:effectiveWH` | formalized in part | `KOne/RefineLoopDischarge`: `narrowReduction_holds` | The elimination behind it is formalized; the complexity bounds are manuscript-only. |
 | `thm:el2` | formalized | `Leavitt/RankTwoCompression`: `rankTwo_not_isSofic`; `KOne/AllRanksElementary`: `binaryLeavittRankTwo_not_isSofic`; `Leavitt/UnitsGLProfile`: `binaryLeavittUnits_profile`, `binaryLeavittGL_profile` | Instantiated over $L_k(1,2)$ for every finite field, by the rank-two compression itself. |
 | `thm:allranks` | formalized | `Endpoint/MainResults`: `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_not_isSofic`, `binaryLeavittGL_not_isSofic`, `universalLeavittEL3_not_isSofic` | Proved over every finite field via self-similarity, without $K_1$ or GE. |
 | `def:model` | formalized | `Covers/TableCover`: `TableModel` |  |
@@ -74,7 +73,7 @@ this table is that assertion, collected and resolved.
 | `def:H` | formalized | `Leavitt/DiagonalClassGroup`: `stableUnits`, `ScalarReduction` |  |
 | `thm:K1app` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds`, `stableUnits_eq_top_holds` |  |
 | `lem:division` | formalized | `Leavitt/LeavittSimplicity`: `exists_mul_mul_eq_one` |  |
-| `lem:GEapp` | formalized in part | `Leavitt/MatrixDiagonalization`: `exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag` | Rank two is formalized, and every conclusion drawn from this lemma is closed at every rank by flattening (Corollary~\ref{cor:K1consequences}); the higher-rank induction printed here is an alternative paper proof. |
+| `lem:GEapp` | formalized | `Leavitt/MatrixDiagonalization`: `exists_elementary_mul_diag`, `binaryLeavitt_exists_elementary_mul_diag` |  |
 | `lem:Hnormal` | formalized | `Leavitt/DiagonalClassGroup`: `conj_mem_elementaryGroup_of_division`, `stableUnits_normal` |  |
 | `lem:unipapp` | formalized | `KOne/StableUnitsGenerators`: `mem_stableUnits_of_val_unipotent`; `KOne/IncomparableUnipotents`: `incomparableUnit_mem` |  |
 | `lem:flipapp` | formalized | `Leavitt/WhiteheadFlip`: `flipUnit`, `diagPair_flipUnit_inv_mem`, `mul_flipUnit_inv_mem_stableUnits` |  |

@@ -366,7 +366,7 @@ Let \((X_n)\) be a sequence of graphs of uniformly bounded degree on vertex sets
 \end{definition}
 
 \begin{definition}\label{def:essential}%
-\leanpartial{\leanmod{Criterion/Criterion}{MatchingCertificate}\leanmod{Matching/EssentialExpanderRepair}{induced_expands_eventually,repairedActualGraph_expands_eventually}}{Realized as the matching-certificate expansion data and its repair, not as a separate definition.}%
+\leanverified{\leanmod{Criterion/Criterion}{MatchingCertificate}\leanmod{Matching/EssentialExpanderRepair}{induced_expands_eventually,repairedActualGraph_expands_eventually}\leannote{Packaged as the matching-certificate expansion data and its repair, which carry the same content.}}%
 A sequence of bounded-degree graphs \((X_n)\) is an \emph{essential expander sequence} if it is edit-equivalent to an expander sequence.
 \end{definition}
 
@@ -405,7 +405,7 @@ since an edge \(\{x,y\}\) lies in \(\partial U_t\) exactly for \(t\) in an inter
 A group \(J\) is \emph{LEF} (locally embeddable into finite groups) \cite{VershikGordon97} if for every finite subset \(F\subseteq J\) there are a finite group \(P\) and a map \(\varphi:F\to P\) that is injective and satisfies \(\varphi(g)\varphi(h)=\varphi(gh)\) whenever \(g,h,gh\in F\).  Every LEF group is sofic; finite and residually finite groups are LEF.
 
 \begin{lemma}\label{lem:fplef}%
-\leanabsent{Not needed: the non-LEF witness is a direct finite obstruction, not a residual-finiteness argument.}%
+\leanverified{\leanmod{Sofic/FinitelyPresentedLEF}{finitelyPresented_isLEF_residuallyFinite}\leannote{For any generator set and finitely many relators, with an explicit finite symmetric-group quotient.}}%
 A finitely presented LEF group is residually finite.
 \end{lemma}
 
@@ -1660,7 +1660,7 @@ Let \(k\) be any field and \(L=L_k(1,2)\).  Then:
 \end{proposition}
 
 \begin{proof}
-Parts (i) and (iii) are proved, elementarily and in full, in Appendix~\ref{app:K1}: Theorem~\ref{thm:K1app} establishes \(K_1(L)=0\) in Whitehead form---every unit \(u\) has \(\diag(u,1)\in\EL_2(L)\)---and Corollary~\ref{cor:K1consequences} deduces \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\) via the elementary diagonalization of Lemma~\ref{lem:GEapp}.  The only input of the appendix beyond the Leavitt relations is strong division (Lemma~\ref{lem:division}), which holds because \(L\) is purely infinite simple: the graph criteria of \cite{AbramsAranda06} are immediate for the rose \(R_2\) with one vertex and two loops---the single vertex admits no nontrivial hereditary saturated subset, every cycle has an exit, and the vertex lies on a cycle.
+Parts (i) and (iii) are proved, elementarily and in full, in Appendix~\ref{app:K1}: Theorem~\ref{thm:K1app} establishes \(K_1(L)=0\) in Whitehead form---every unit \(u\) has \(\diag(u,1)\in\EL_2(L)\)---and Corollary~\ref{cor:K1consequences} deduces \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\), by rank-two elimination and flattening transport.  The only input of the appendix beyond the Leavitt relations is strong division (Lemma~\ref{lem:division}), which holds because \(L\) is purely infinite simple: the graph criteria of \cite{AbramsAranda06} are immediate for the rose \(R_2\) with one vertex and two loops---the single vertex admits no nontrivial hereditary saturated subset, every cycle has an exit, and the vertex lies on a cycle.
 
 Part (ii) is Corollary~\ref{cor:K1consequences} as well: \(\Theta_{\mathcal C_3}\) identifies \(L^\times\) with \(\GL_3(L)=\EL_3(L)\), and every elementary generator is a commutator by the Steinberg relation, so \(L^\times\) is its own commutator subgroup.  (Classically, (ii) also follows from (i) and the Ara--Goodearl--Pardo identification of \(K_1\) with the abelianized unit group.)
 
@@ -1680,9 +1680,8 @@ For an independent recent account of generation phenomena for unit groups and ma
 The classical computation of \(K_1(L)\) goes through the localization sequence of \cite{AraBrustengaCortinas09}.  Appendix~\ref{app:K1} replaces this input by a complete elementary proof---a Gaussian elimination over the binary tree, in the spirit of a Wiener--Hopf factorization whose ``symbol'' is a matrix pencil with two shift variables.  In outline: a width reduction narrows every unit, modulo the Whitehead class group \(H\) of Definition~\ref{def:H}, to one whose value lies in the degree window \([-1,1]\); at a sufficiently deep leaf set such a narrow unit becomes a matrix pencil with scalar coefficient matrices \((A_0,A_1,C,B_0,B_1)\) over the five-dimensional space \(kt_0\oplus kt_1\oplus k\oplus ks_0\oplus ks_1\), indexed by a pair of complete leaf sets; and a single loop with two exits eliminates the pencil, splitting one column per pass (the index shift of the Wiener--Hopf analogy) until either a reshape by two tree tables lands the value in a one-sided degree window, or the stacked matrix \([B_0;B_1]\) acquires a scalar left inverse and the \emph{inverse} unit lands there instead; one-sided windows die by a block-move induction whose base is the keystone Lemma~\ref{lem:keystoneapp}.  Every step is carried out in Appendix~\ref{app:K1} and formalized in the accompanying Lean development, so the \(K_1\)-theoretic input of \cite{AraBrustengaCortinas09} is eliminated from the trust surface of Theorem~\ref{thm:B}; the citation is retained as an independent confirmation.
 \end{remark}
 
-\begin{remark}[Effective Wiener--Hopf factorization over the binary tree]\label{rem:effectiveWH}%
-\leanpartial{\leanmod{KOne/RefineLoopDischarge}{narrowReduction_holds}}{The elimination behind it is formalized; the complexity bounds are manuscript-only.}%
-The elimination of Remark~\ref{rem:elementaryK1}, written out in Appendix~\ref{app:K1}, is an algorithm, and it yields a factorization theorem of independent interest.  Call a unit \emph{nonpositive} (resp.\ \emph{nonnegative}) if its value lies in the span of monomials \(s_\alpha t_\beta\) with \(|\alpha|\le|\beta|\) (resp.\ \(\ge\)); these are the two ``triangular'' classes of the tree-coded Wiener--Hopf analogy, and each lies in \(H\) by an explicit block-move induction.  The algorithm shows: \emph{every unit of \(L=L_k(1,2)\) factors as a central scalar times a product of tree-table units (Thompson's group \(V\)), code-scalar units (elements of \(\GL_n(k)\) transported along a complete prefix code), and a single nonpositive unit conjugated by two tree tables}.  All factors are effectively computable: given \(u\) supported on monomials of depth at most \(d\), the width reduction and the pencil loop run at codes with at most \(2^{d+2}\) words, each loop step is Gaussian elimination over \(k\) on matrices of that size, and the loop executes at most \(2^{d+1}\) times---so the factorization, and with it an explicit factorization of any \(\diag(u,1,\dots,1)\) into elementary matrices, is computed in time polynomial in \(2^{d}\) and in the number of monomials of \(u\).  In the classical Wiener--Hopf picture the loop plays the role of index normalization: each refinement is the index shift that trades a constant diagonal for a shift atom, and the two exits are the two triangular factorizations.  We are not aware of a prior effective factorization---or of any elementary proof of \(K_1(L_k(1,2))=0\)---in the literature; the localization-sequence computation of \cite{AraBrustengaCortinas09} is neither elementary nor effective.
+\begin{remark}[Effective Wiener--Hopf factorization over the binary tree]\label{rem:effectiveWH}
+The proof in Appendix~\ref{app:K1} is an algorithm, and unwinding its run records a factorization of independent interest: \emph{every unit of \(L=L_k(1,2)\) is an explicit product of cylinder unipotents \(1+s_vxt_w\), code-scalar units (matrices over \(k\) transported along a complete leaf set), tree-table units (elements of Thompson's group \(V\)), and one unit of nonpositive degree window conjugated by two tree tables}---the moves that the width reduction, the loop, and the two exits actually perform, in the order they perform them.  The run is effective, with bounds read off the printed proof: for \(u\) supported on monomials of depth at most \(d\), the pencil sits over the full code of depth \(m+1\leq d+1\), so every code involved has at most \(2^{d+2}\) words; each loop pass is one Gaussian elimination over \(k\) at that size; and the loop counter of Theorem~\ref{thm:loopapp} starts at \(2^{m+1}\) columns and exits by \(2^{m+2}\), so at most \(2^{d+1}\) passes occur.  The factorization, and with it an explicit factorization of any \(\diag(u,1,\dots,1)\) into elementary matrices, is therefore computed in time polynomial in \(2^{d}\) and in the number of monomials of \(u\).  In the classical Wiener--Hopf picture the loop is index normalization: each refinement is the index shift that trades a constant diagonal for a shift atom, and the two exits are the two triangular factorizations.  We are not aware of a prior effective factorization---or of any elementary proof of \(K_1(L_k(1,2))=0\)---in the literature; the localization-sequence computation of \cite{AraBrustengaCortinas09} is neither elementary nor effective.
 \end{remark}
 
 \subsection{Finite fields: all ranks and the unit group}\label{subsec:allranks}
@@ -1859,20 +1858,18 @@ Since \(\diag(uv,1)=\diag(u,1)\diag(v,1)\), \(H\) is a subgroup of \(L^\times\).
 For every nonzero \(x\in L\) there are \(p,q\in L\) with \(pxq=1\).
 \end{lemma}
 
-The first consequence is a Gaussian elimination for invertible matrices, which we prove at every rank; it is the GE property of purely infinite simple rings \cite{AraGoodearlPardo02} in elementary form.
+The first consequence is a Gaussian elimination for invertible two-by-two matrices; it is the rank-two case of the GE property of purely infinite simple rings \cite{AraGoodearlPardo02} in elementary form, and rank two is all the sequel needs---every higher rank is reached by flattening (Corollary~\ref{cor:K1consequences}).
 
 \begin{lemma}[Elementary diagonalization]\label{lem:GEapp}%
-\leanpartial{\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_mul_diag,binaryLeavitt_exists_elementary_mul_diag}}{Rank two is formalized, and every conclusion drawn from this lemma is closed at every rank by flattening (Corollary~\ref{cor:K1consequences}); the higher-rank induction printed here is an alternative paper proof.}
-Let \(A\) be a nontrivial unital ring in which every nonzero element \(x\) admits \(p,q\) with \(pxq=1\), and let \(X\in\GL_r(A)\), \(r\geq2\).  Then there are \(E,F\in\EL_r(A)\) and \(u\in A^\times\) with
+\leanverified{\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_mul_diag,binaryLeavitt_exists_elementary_mul_diag}}
+Let \(A\) be a nontrivial unital ring in which every nonzero element \(x\) admits \(p,q\) with \(pxq=1\), and let \(X\in\GL_2(A)\).  Then there are \(E,F\in\EL_2(A)\) and \(u\in A^\times\) with
 \[
- E\,X\,F=\diag(u,1,\dots,1).
+ E\,X\,F=\diag(u,1).
 \]
 \end{lemma}
 
 \begin{proof}
-First let \(r=2\) and write \(X=\begin{psmallmatrix}a&b\\ c&d\end{psmallmatrix}\).  Assume first \(a\ne0\), and pick \(p,q\) with \(paq=1\).  Three elementary operations plant a literal \(1\) in the corner: the column operation \(C_2\mathrel{+}=C_1\cdot\rho\) with \(\rho=q(1-pb)\) replaces \(b\) by \(b'=a\rho+b\), which satisfies \(pb'=paq(1-pb)+pb=1\); the row operation \(R_2\mathrel{+}=wR_1\) with \(w=(1-d')p\), where \(d'=c\rho+d\), replaces \(d'\) by \(wb'+d'=(1-d')pb'+d'=1\); and with a \(1\) at position \((2,2)\), the operations \(R_1\mathrel{+}=(-b')R_2\) and \(C_1\mathrel{+}=C_2\cdot(-c'')\) (where \(c''\) is the current \((2,1)\) entry) clear the off-diagonal entries.  The result is \(\diag(v,1)\) with \(v\in A^\times\), since the product of invertible matrices is invertible and a triangular-free diagonal matrix is invertible exactly when its entries are.  If \(a=0\), then some entry of \(X\) is nonzero (as \(X\) is invertible and \(A\ne0\)), and one elementary row or column addition moves a nonzero element into position \((1,1)\); this reduces to the previous case.
-
-For \(r>2\), induct.  Pick any nonzero entry of \(X\) and, by one row and one column addition, arrange \(x_{11}\ne0\).  Run the four operations above in the coordinate pair \((1,r)\): they involve only rows and columns \(1\) and \(r\), and they produce a literal \(1\) at position \((r,r)\).  Using that \(1\), clear the rest of row \(r\) and column \(r\) by elementary operations.  The matrix is now \(\diag(X',1)\) with \(X'\in\GL_{r-1}(A)\), and the inductive hypothesis applies; for \(r-1=1\) the surviving corner is the unit \(u\).
+Write \(X=\begin{psmallmatrix}a&b\\ c&d\end{psmallmatrix}\).  Assume first \(a\ne0\), and pick \(p,q\) with \(paq=1\).  Three elementary operations plant a literal \(1\) in the corner: the column operation \(C_2\mathrel{+}=C_1\cdot\rho\) with \(\rho=q(1-pb)\) replaces \(b\) by \(b'=a\rho+b\), which satisfies \(pb'=paq(1-pb)+pb=1\); the row operation \(R_2\mathrel{+}=wR_1\) with \(w=(1-d')p\), where \(d'=c\rho+d\), replaces \(d'\) by \(wb'+d'=(1-d')pb'+d'=1\); and with a \(1\) at position \((2,2)\), the operations \(R_1\mathrel{+}=(-b')R_2\) and \(C_1\mathrel{+}=C_2\cdot(-c'')\) (where \(c''\) is the current \((2,1)\) entry) clear the off-diagonal entries.  The result is \(\diag(v,1)\) with \(v\in A^\times\), since the product of invertible matrices is invertible and a triangular-free diagonal matrix is invertible exactly when its entries are.  If \(a=0\), then some entry of \(X\) is nonzero (as \(X\) is invertible and \(A\ne0\)), and one elementary row or column addition moves a nonzero element into position \((1,1)\); this reduces to the previous case.
 \end{proof}
 
 \begin{lemma}\label{lem:Hnormal}%
@@ -2196,11 +2193,11 @@ For every field \(k\) and \(L=L_k(1,2)\): \(K_1(L)=0\); \(\GL_r(L)=\EL_r(L)\) fo
 \end{corollary}
 
 \begin{proof}
-\emph{Rank two.}  For \(X\in\GL_2(L)\), Lemma~\ref{lem:GEapp} writes \(EXF=\diag(u,1)\), and Theorem~\ref{thm:K1app} places the diagonal factor in \(\EL_2(L)\); hence \(\GL_2(L)=\EL_2(L)\).
+\emph{Rank two.}  For \(X\in\GL_2(L)\), Lemma~\ref{lem:GEapp} writes \(EXF=\diag(u,1)\), and Theorem~\ref{thm:K1app} places the diagonal factor in \(\EL_2(L)\); hence \(\GL_2(L)=\EL_2(L)\).  (This is the only use of Gaussian elimination; every higher rank now follows by transport.)
 
-\emph{Every rank, by flattening.}  The coefficient isomorphism \(\Theta_{\mathcal C}^{-1}:L\cong M_n(L)\) of Proposition~\ref{prop:selfsim} carries \(\EL_p\) onto \(\EL_p\) entrywise, and block flattening identifies \(\EL_p(M_q(L))=\EL_{pq}(L)\) inside \(\GL_{pq}(L)\) for \(p\geq2\) (the two inclusions proved in Proposition~\ref{prop:rankequiv}); both maps are restrictions of ring isomorphisms of the ambient matrix rings, so each transports the \emph{equality} \(\GL=\EL\).  Starting from rank two: \(\GL_2(L)=\EL_2(L)\) transports through \(L\cong M_n(L)\) and flattening to \(\GL_{2n}(L)=\EL_{2n}(L)\) for every \(n\); and for arbitrary \(r\geq2\), the same two maps with the roles of \(r\) and \(2\) exchanged transport \(\GL_{2r}=\EL_{2r}\), already established, back down to \(\GL_r(L)=\EL_r(L)\).  This is the route the formalization takes; alternatively, Lemma~\ref{lem:GEapp} at rank \(r\) applies directly.
+\emph{Every rank, by flattening.}  The coefficient isomorphism \(\Theta_{\mathcal C}^{-1}:L\cong M_n(L)\) of Proposition~\ref{prop:selfsim} carries \(\EL_p\) onto \(\EL_p\) entrywise, and block flattening identifies \(\EL_p(M_q(L))=\EL_{pq}(L)\) inside \(\GL_{pq}(L)\) for \(p\geq2\) (the two inclusions proved in Proposition~\ref{prop:rankequiv}); both maps are restrictions of ring isomorphisms of the ambient matrix rings, so each transports the \emph{equality} \(\GL=\EL\).  Starting from rank two: \(\GL_2(L)=\EL_2(L)\) transports through \(L\cong M_n(L)\) and flattening to \(\GL_{2n}(L)=\EL_{2n}(L)\) for every \(n\); and for arbitrary \(r\geq2\), the same two maps with the roles of \(r\) and \(2\) exchanged transport \(\GL_{2r}=\EL_{2r}\), already established, back down to \(\GL_r(L)=\EL_r(L)\).  This is the route the formalization takes.
 
-\emph{\(K_1\) and perfectness.}  The normal form computes \(K_1\): every stabilized class of \(\GL_r(L)/\EL_r(L)\) is represented by \(\diag(u,1,\dots,1)\), which is elementary, so \(K_1(L)=0\).  For perfectness, \(\Theta_{\mathcal C_3}\) restricts to a group isomorphism \(\GL_3(L)\cong L^\times\), and \(\GL_3(L)=\EL_3(L)\) is perfect: by the Steinberg relation, every generator \(x_{ij}(a)=[\,x_{il}(a),x_{lj}(1)\,]\) with \(l\notin\{i,j\}\) is a commutator.  Hence \(L^\times=[L^\times,L^\times]\).
+\emph{\(K_1\) and perfectness.}  Since \(\GL_r(L)=\EL_r(L)\) at every rank, every class of the stable quotient defining \(K_1(L)\) is trivial: \(K_1(L)=0\).  For perfectness, \(\Theta_{\mathcal C_3}\) restricts to a group isomorphism \(\GL_3(L)\cong L^\times\), and \(\GL_3(L)=\EL_3(L)\) is perfect: by the Steinberg relation, every generator \(x_{ij}(a)=[\,x_{il}(a),x_{lj}(1)\,]\) with \(l\notin\{i,j\}\) is a commutator.  Hence \(L^\times=[L^\times,L^\times]\).
 \end{proof}
 
 The proof of Theorem~\ref{thm:K1app} is an algorithm, and every step is effective Gaussian elimination over \(k\): the width reduction processes one graded component per corner move; the pencil form is a change of basis at depth \(m+1\); each loop pass computes a kernel vector or a left inverse of the stack; and both exits are reshapes along explicitly constructed codes followed by the window inductions, each step of which is again explicit.  For a unit supported on monomials of depth at most \(d\), all codes involved have at most \(2^{d+2}\) words and the loop executes at most \(2^{d+1}\) times, giving the complexity bound of Remark~\ref{rem:effectiveWH}: the elementary factorization of \(\diag(u,1,\dots,1)\) is computed in time polynomial in \(2^d\) and in the number of monomials of \(u\).
@@ -2257,19 +2254,9 @@ statement.  A line underneath, when there is one, records a way in which the
 Lean statement is \emph{stronger} than the one printed here---that Kun's
 theorem is proved rather than assumed, say.
 
-Two phrases override the plain reading, and they appear only where they are
-true.
-
-\begin{description}[leftmargin=0pt,labelsep=0.6em,style=nextline]
-\item[\textnormal{\textit{formalized in part}}]
- Only part of the statement is formalized.  The line below says which part is,
- and which part is not.
-\item[\textnormal{\textit{not formalized}}]
- The statement is not formalized, and the line below says why.  This occurs
- exactly once, at Lemma~\ref{lem:fplef}, which the Lean proof does not need
- because it replaces the residual-finiteness route by a direct finite
- obstruction.
-\end{description}
+The note system provides two further forms, for statements formalized only
+in part or not at all; neither occurs in this paper---every numbered
+statement carries the plain form.
 
 The notes are decoration in the strict sense: setting \verb|\leanlinksfalse|
 in the preamble removes every one of them, leaving the text of the paper
@@ -2362,23 +2349,15 @@ below it uses it.
 \end{tabular}
 \end{center}
 
-\subsection*{What is not formalized}
+\subsection*{Coverage}
 
-Beyond Lemma~\ref{lem:fplef}, which is absent because the Lean proof does not
-need it---the two-relator obstruction replaces the residual-finiteness
-route, and the lemma is used only in commentary---the gaps are those marked
-\textit{formalized in part} in the margins, and they have shrunk to three:
-the higher-rank induction printed in Lemma~\ref{lem:GEapp}, which the
-formal route does not take (it reaches every rank by the flattening
-transport of \(\texttt{AllRanksElementary}\), so the \emph{statements} at
-every rank are closed; only this particular alternative proof is
-paper-only); the essential-expander definition
-(Definition~\ref{def:essential}), which the library realizes through the
-matching-certificate repair rather than as a definition of its own; and the
-complexity bounds of Remark~\ref{rem:effectiveWH}, whose underlying
-elimination is formalized.
+Every numbered statement of this paper is formalized, at its stated
+generality or beyond, and no margin note carries a partiality flag.  What is
+paper-only is commentary: the operation count in
+Remark~\ref{rem:effectiveWH}, which is arithmetic read off the printed proof
+of a formalized algorithm, and the concluding remarks.
 
-Every one of the paper's external inputs is therefore cited here but proved
+Every one of the paper's external inputs is likewise cited here but proved
 there.  Kun's theorem and the Kun--Thom obstruction are flagged in the
 margins at Theorems~\ref{thm:kun} and~\ref{thm:kunthom}; Shalom's theorem is
 proved as \(\texttt{exists\_finitelyPresented\_kazhdan\_cover}\), so the
