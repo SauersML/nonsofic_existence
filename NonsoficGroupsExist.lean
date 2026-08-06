@@ -163,6 +163,7 @@ import NonsoficGroupsExist.ResidualNormalForm
 import NonsoficGroupsExist.ResidualMoves
 import NonsoficGroupsExist.ResidualReduction
 import NonsoficGroupsExist.BalancedRegularity
+import NonsoficGroupsExist.TailSupportReduction
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

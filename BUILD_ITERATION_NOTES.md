@@ -780,3 +780,39 @@ cylinder flag {p_{1^k0...}} — the cylinder flag is the natural
 strictly triangular w.r.t. a balanced idempotent chain, giving the
 telescoping product decomposition into square-zero pieces with the
 ordered cross-conditions holding by flag-position.
+
+## Session 17: TailSupportReduction written + (G)-unimodularity extracted
+WRITTEN (uncompiled): TailSupportReduction.lean — mul_p0_mem_span /
+mul_p1_mem_span (right multiplication by corner projections selects
+monomials by first t-letter, staying in the balanced span at depth
+n+1), and exists_tail_support_reduction: the exact p-split
+[1 + s₁z] = [1 + s₁(z·p₁)] with the explicit square-zero left mover
+1 − s₁(zp₀) ∈ H.
+(G)-DERIVATION ADVANCE (from the (V_d) bottom cascade of the flipped
+form v = γ + z₀s₁, x := v⁻¹):
+- L_{−M} elements expand as Σ (x s_w) t_w with BALANCED coefficients;
+  {t_w}-independence (right-multiply by s_w) extracts balanced
+  equations from every graded component.
+- The degree-0 equation yields the UNIMODULARITY
+  γ·x₀ + (z₀p₁)·Y = 1 with Y := s₁(x₋₁s₀)t₀ + s₁(x₋₁s₁)t₁ balanced
+  (every p₁-row-supported balanced Y arises as s₁(t₁Y s₀)t₀ +
+  s₁(t₁Y s₁)t₁).
+- Rectangular sr1 (green) ⟹ ∃T balanced: û := γ + (z₀p₁)T invertible
+  with balanced inverse.
+- Pivot + flip: [v] = [1 + s₁·z^new] with
+  z^new = (1 − t₁T)û⁻¹z₀:  z^new₀ = û⁻¹z₀,  z^new₋ = −t₁Tû⁻¹z₀,
+  and the balanced part of the new flipped form is
+  c = 1 − p₁Tû⁻¹z₀, giving p·c = p EXACTLY (kill-ideal = Mp).
+- γ^new = 1 − t₁Tû⁻¹z₀s₁; invertibility of γ^new ⟺ invertibility of
+  1 − p₁Tû⁻¹z₀ = c (ab/ba flip).  So the loop's γ-question becomes
+  the invertibility of the new balanced part c — one more application
+  of the SAME extraction to the new form may close (G) by a
+  finite-descent (each round the balanced part is 1 − p₁(...) with
+  p-corner IDENTITY — its singularity lives in the p₁-corner only;
+  the p₁-corner of c is 1 − (p₁Tû⁻¹z₀)-corner: iterate the corner:
+  candidate终 termination: the corner perturbations are compressions
+  by t₁·(...)·s₁ which STRICTLY deepen the cylinder support —
+  after finitely many rounds the perturbation's corner support
+  exhausts and c becomes unipotent-plus-identity ⟹ invertible).
+NEXT: nail the corner-depth termination for (G); then (i') general
+index remains (p₁-supported reduction now WRITTEN).
