@@ -5,6 +5,7 @@ import NonsoficGroupsExist.KunThomTheorem
 import NonsoficGroupsExist.FreeElementaryPropertyT
 import NonsoficGroupsExist.KazhdanComplex
 import NonsoficGroupsExist.KazhdanUniverse
+import NonsoficGroupsExist.RefineLoopDischarge
 
 /-!
 # Human-readable axiom report
@@ -46,3 +47,13 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.IsKazhdanPair.lowerUniverse
 #print axioms NonsoficGroupsExist.hasKazhdanPropertyT_universe_iff
 #print axioms NonsoficGroupsExist.hasKazhdanPropertyT_iff_textbook
+
+-- The unconditional K₁-vanishing chain (session 54): narrow reduction,
+-- scalar reduction, checkpoint B4, GL = EL, and the Whitehead-form
+-- headline.  All must report only the three standard axioms.
+#print axioms NonsoficGroupsExist.BinaryLeavitt.narrowReduction_holds
+#print axioms NonsoficGroupsExist.BinaryLeavitt.scalarReduction_holds
+#print axioms NonsoficGroupsExist.BinaryLeavitt.stableUnits_eq_top_holds
+#print axioms NonsoficGroupsExist.BinaryLeavitt.glTwo_eq_elementary_holds
+#print axioms NonsoficGroupsExist.BinaryLeavitt.glFour_eq_elementary_holds
+#print axioms NonsoficGroupsExist.BinaryLeavitt.K1_trivial

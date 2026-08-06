@@ -3221,3 +3221,17 @@ packages L^× = k^×·H; a named `unit_factorization` with the factor
 inventory would be stronger); (b) generalize the two-exit loop to
 L_k(1,n) (n-ary trees — the same pigeonhole gives κ ≤ n^{r+1});
 (c) the elementary-width bound for GL_r(L) = EL_r(L).
+
+## Session 54e: GREEN — the K₁ chain is fully verified
+
+Full `lake build`: 3769 jobs, success (two transient SIGTERM-143
+resource kills on the way; incremental resume finished).  Axiom
+audit: narrowReduction_holds, scalarReduction_holds,
+stableUnits_eq_top_holds, glTwo/glFour_eq_elementary_holds,
+K1_trivial all depend on [propext, Classical.choice, Quot.sound]
+only — no sorryAx, no residual hypotheses.  The six theorems are now
+tracked in Audit.lean.  GOAL (1) COMPLETE: the manuscript's K₁ input
+is a machine-verified elementary theorem.  N1/N2/N3/N5 compiled
+essentially first-try (the compile loop's earlier touches to
+PencilReshape/RefineLoopDischarge included the MatrixDiagonalization
+open, include k, and omit annotations).
