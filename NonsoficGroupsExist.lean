@@ -170,6 +170,8 @@ import NonsoficGroupsExist.GammaReduction
 import NonsoficGroupsExist.IncomparableUnipotents
 import NonsoficGroupsExist.ShapeCalculus
 import NonsoficGroupsExist.GradedComponents
+import NonsoficGroupsExist.PureTailNilpotency
+import NonsoficGroupsExist.RankNormalForm
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

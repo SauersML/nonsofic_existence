@@ -1354,3 +1354,32 @@ mathematics settled in sessions 24–25:
   comparing the two decompositions of ↑u·↑u⁻¹ = 1);
   RankNormalForm; ZeroKOne (the (P) keystone); WidthTwoReduction;
   then the width-3 math.
+
+## Session 26: PureTailNilpotency + RankNormalForm written
+- PureTailNilpotency.lean (Theorem 2 formalized): widen inverse's
+  window to lo ≤ −1 ≤ 0 ≤ hi; exists_components on ↑u⁻¹; two
+  decompositions of 1 over Icc lo (hi+1) (shifted sum via
+  addRightEmbedding + Finset.map_add_right_Icc + insert-argument);
+  components_unique; upward kill of negatives (ℕ-indexed induction
+  from lo); y 0 = 1; y n = (−η)^n; top equation ⟹ η^(hi.toNat+1) = 0
+  (even/odd sign handling via Even.neg_pow/Odd.neg_pow).
+  NAME RISKS for sweep: Finset.sum_ite_eq' arg order,
+  Finset.map_add_right_Icc, addRightEmbedding simp,
+  add_eq_zero_iff_eq_neg, pow_succ' direction, neg_mul_eq_neg_mul.
+- RankNormalForm.lean: balancedEmbed_diagonal (diagonal ↦ weighted
+  cylinder sums via matrixRingEquiv_diagonal + diagonal_map);
+  balancedEmbed_indicator (Finset.sum_ite_mem + univ_inter);
+  isUnit_matrix_of_isUnit (singular ⟹ zero divisor via
+  Matrix.exists_mulVec_eq_zero_iff, all-columns-v matrix X);
+  inv_mem_levelSpan_of_val_mem (THEOREM 3: balanced units have
+  balanced inverses — inverse-uniqueness calc);
+  exists_rank_normal_form (Pivot decomposition, D = D₁·E splitting,
+  transvection products invertible via det route, g/h :=
+  Units.map balancedEmbed of Pu⁻¹/Qu⁻¹, value = cylinder sum over
+  S := filter (dvec ≠ 0), S = univ → IsUnit c).
+  NAME RISKS: Matrix.exists_mulVec_eq_zero_iff (field/domain +
+  direction), Matrix.TransvectionStruct.prod_mul_reverse_inv_prod,
+  Units.map_inv direction, Matrix.dotProduct vs dotProduct in simpa,
+  RingHom.mapMatrix_apply, Matrix.diagonal_map hypothesis.
+- Registered in aggregator.  NEXT: ZeroKOne.lean (the (P) keystone —
+  see 25d roadmap step 4), then WidthTwoReduction, then width-3 math.
