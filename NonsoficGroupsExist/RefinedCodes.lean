@@ -63,10 +63,17 @@ theorem cylinder_level_split (M : ℕ) :
             rw [show w ++ List.ofFn (Fin.cons z α) =
               (w ++ [z]) ++ List.ofFn α from by
                 rw [List.ofFn_succ]
-                simp [List.append_cons]]
+                -- `List.append_cons` rewrites `l ++ a :: m` to `l ++ [a] ++ m`,
+                -- whose own `[a] ++ m` matches the pattern again; reassociate
+                -- instead of splitting off the head.
+                simp only [Fin.cons_zero, Fin.cons_succ,
+                  List.append_assoc, List.singleton_append]]
         _ = ∑ p : Fin 2 × (Fin M → Fin 2),
-            L.cylinder (w ++ List.ofFn (Fin.cons p.1 p.2)) :=
-            (Fintype.sum_prod_type _).symm
+            L.cylinder (w ++ List.ofFn (Fin.cons p.1 p.2)) := by
+            -- as a `rw` the summand is determined first-order by matching the
+            -- product sum; passing `_` instead makes it a higher-order unfold
+            -- through the `Fin M → Fin 2` `Fintype` instance, which times out.
+            rw [Fintype.sum_prod_type]
         _ = ∑ α : Fin (M + 1) → Fin 2,
             L.cylinder (w ++ List.ofFn α) :=
             Fintype.sum_equiv (Fin.consEquiv fun _ ↦ Fin 2) _ _

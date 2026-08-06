@@ -279,10 +279,15 @@ theorem entry_window_nonpos_of_B_full
                 (∑ j, sP i j * Y (j, i') d) = (family k).t 0 * 0 := by
               rw [hsPrel i]
             rw [mul_zero, Finset.mul_sum] at h
-            rw [Finset.sum_congr rfl (fun j _ ↦ by
-              rw [show sP i j = B₀ i j • (family k).s 0 +
-                  B₁ i j • (family k).s 1 from rfl]
-              exact (family k).t_zero_strip_scombo _ _ _)] at h
+            -- both sides of the congruence are still metavariables here, so a
+            -- `rw` inside would close the goal by `rfl` and leave `h` unchanged.
+            -- `show … from` pins them instead, and the summand `sP i j` matches
+            -- `h` syntactically so the outer rewrite can fire.
+            rw [Finset.sum_congr rfl (fun j _ ↦
+              show (family k).t 0 * (sP i j * Y (j, i') d) =
+                  B₀ i j • Y (j, i') d from
+                t_zero_strip_scombo (family k) (β₀ := B₀ i j)
+                  (β₁ := B₁ i j) (Yv := Y (j, i') d))] at h
             exact h
           have hBrel₁ : ∀ i : ι,
               (∑ j, B₁ i j • Y (j, i') d) = 0 := by
@@ -291,10 +296,11 @@ theorem entry_window_nonpos_of_B_full
                 (∑ j, sP i j * Y (j, i') d) = (family k).t 1 * 0 := by
               rw [hsPrel i]
             rw [mul_zero, Finset.mul_sum] at h
-            rw [Finset.sum_congr rfl (fun j _ ↦ by
-              rw [show sP i j = B₀ i j • (family k).s 0 +
-                  B₁ i j • (family k).s 1 from rfl]
-              exact (family k).t_one_strip_scombo _ _ _)] at h
+            rw [Finset.sum_congr rfl (fun j _ ↦
+              show (family k).t 1 * (sP i j * Y (j, i') d) =
+                  B₁ i j • Y (j, i') d from
+                t_one_strip_scombo (family k) (β₀ := B₀ i j)
+                  (β₁ := B₁ i j) (Yv := Y (j, i') d))] at h
             exact h
           -- combine with the scalar left inverse
           calc Y (j₀, i') d
