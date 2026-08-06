@@ -2265,3 +2265,35 @@ w ∈ span[0,1], lie in central·H.  Notes toward (Q):
 TriangularFactorization now follows from (Q) + this module (much
 weaker than full Birkhoff!) — next session: derive (Q) or replace
 TriangularFactorization by the (Q)-form as the named frontier.
+
+## Session 42b: STRUCTURE THEOREM for nonneg narrow units
+NonnegUnitStructure.lean WRITTEN:
+- nonneg_narrow_unit_structure: every unit with value in span[0,1]
+  equals c·(1+η) with c invertible balanced (balanced inverse cinv,
+  via balanced_component_isUnit = compiled (P) + rank normal form +
+  inv_mem_levelSpan_of_val_mem) and η pure-degree-1 NILPOTENT
+  (pure_tail_nilpotent).
+- nonneg_narrow_unit_inv_window: inverses of [0,1]-window units have
+  NONNEG windows (truncated geometric series (Σ(−η)^i)·cinv, via
+  geom_sum_mul; explicit inverse formula proved by left-inverse
+  uniqueness).
+This is the rigorous UPPER-TRIANGULAR LEG of Birkhoff.  θ-transport
+gives the lower leg for free when needed.
+CONSERVATION SHARPENED (derivation this session): for ANY block-move
+family, deposits P at (1,j)/Q at (j,1) must share the block pair, so
+deposit degrees sum to deg P + deg Q = −1 — one deposit is always
+negative; multi-pair splits ΣPᵢQᵢ with all deposits nonneg force
+window(ΣPᵢQᵢ) ≥ 0 ≠ deg(−1).  Hence the rank-one normal form
+(single monomial S(1)T(00) deposit with scalar 1) is OPTIMAL within
+stable elementary moves; (Q) requires using the unit structure of w.
+ANSATZ RESULT for (Q): v = w + s₁t₀₀ factors as
+(1 + s₁·y·t₀₀)·(nonneg unit)  ⟺  y·(t₀₀·c) = t₀₀ solvable with y
+balanced (c := balanced part of w; the quadratic term dies via
+t₀₀s₁ = 0!).  Solvable ⟺ V₀·c = V₀ at some level (V₀ := rowspace of
+t₀₀, i.e. the 00-corner coordinate subspace).  c = 1 case: y = 1 ✓
+(v = 1+N unipotent).  General c fails ⟹ the code-change factor Ω is
+genuinely needed exactly when V₀·c ≠ V₀: Ω must move the defect of
+the 00-corner flag under c into position.  NEXT: use unit-ness of v
+(graded equations c x₀ + b x₋₁ + N x₁ = 1 etc. + the structure
+theorem) to prove the corrected flag condition is always reachable
+in the H-orbit {g·v·g′} — the last mathematical gap.

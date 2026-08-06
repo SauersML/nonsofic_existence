@@ -43,7 +43,7 @@ theorem exists_rank_one_normal_form
       ∃ p q : BinaryLeavittAlgebra k, p * x * q = 1 :=
     fun x hx ↦ exists_mul_mul_eq_one k hx
   -- split off the degree `-1` part of the value
-  obtain ⟨y, hymem, hysupp, hysum⟩ := exists_components k hu
+  obtain ⟨y, hymem, -, hysum⟩ := exists_components k hu
   set a : BinaryLeavittAlgebra k := y (-1) with ha
   have haw : a ∈ Submodule.span k (L.degreeMonomials (-1) (-1)) :=
     hymem _
@@ -58,7 +58,8 @@ theorem exists_rank_one_normal_form
         omega
       rw [hIcc, Finset.sum_insert (by simp),
         Finset.sum_insert (by simp), Finset.sum_singleton]
-      ring
+      -- purely additive; `ring` needs commutativity
+      abel
     rw [h1]
     exact Submodule.add_mem _
       (L.span_degreeMonomials_mono (by omega) (by omega) (hymem 0))
@@ -79,7 +80,11 @@ theorem exists_rank_one_normal_form
         ((u : BinaryLeavittAlgebra k) - 1) * L.wordT [0, 0] =
         L.wordS [0, 0] * (u : BinaryLeavittAlgebra k) *
           L.wordT [0, 0] -
-        L.wordS [0, 0] * L.wordT [0, 0] := by noncomm_ring
+        L.wordS [0, 0] * L.wordT [0, 0] := by
+      -- `noncomm_ring` leaves `A * ((-1 • 1) * B)` against
+      -- `-1 • (A * B)`; migrate the scalar outwards.
+      noncomm_ring
+      simp only [smul_mul_assoc, mul_smul_comm, one_mul]
     rw [h1]
     noncomm_ring
   -- the two incomparable-unipotent block moves
@@ -115,7 +120,8 @@ theorem exists_rank_one_normal_form
       (mR : BinaryLeavittAlgebra k) =
       1 + L.wordS [0, 0] * z * L.wordT [0, 0] +
         L.wordS [1] * L.wordT [0, 0] := by
-    rw [hκval, hmRval, ← hz]
+    -- No `← hz`: `set` already folded `↑u - 1` into `z`.
+    rw [hκval, hmRval]
     have hcross : L.wordS [0, 0] * z * L.wordT [0, 0] *
         (L.wordS [1] * 1 * L.wordT [0, 0]) = 0 := by
       rw [show L.wordS [0, 0] * z * L.wordT [0, 0] *
@@ -137,10 +143,11 @@ theorem exists_rank_one_normal_form
       (1 + L.wordS [0, 0] * (z - a) * L.wordT [0, 0] -
         L.wordS [0, 0] * a * L.wordT [1]) +
       L.wordS [1] * L.wordT [0, 0] := by
-    show (mL : BinaryLeavittAlgebra k) *
-      ((κ : BinaryLeavittAlgebra k) * (mR : BinaryLeavittAlgebra k))
-      = _
-    rw [hstep₁, hmLval]
+    -- `u' = mL * κ * mR` associates to the *left*, so the `show` must
+    -- match that; reassociate afterwards to expose `↑κ * ↑mR` for `hstep₁`.
+    show ((mL : BinaryLeavittAlgebra k) * (κ : BinaryLeavittAlgebra k))
+      * (mR : BinaryLeavittAlgebra k) = _
+    rw [mul_assoc, hstep₁, hmLval]
     have hc₁ : L.wordS [0, 0] * (-a) * L.wordT [1] *
         (L.wordS [0, 0] * z * L.wordT [0, 0]) = 0 := by
       rw [show L.wordS [0, 0] * (-a) * L.wordT [1] *
@@ -156,6 +163,7 @@ theorem exists_rank_one_normal_form
         L.wordS [0, 0] * (-a) * (L.wordT [1] * L.wordS [1]) *
           L.wordT [0, 0] from by noncomm_ring, hone₁]
       noncomm_ring
+      simp only [smul_mul_assoc, mul_smul_comm]
     calc (1 + L.wordS [0, 0] * (-a) * L.wordT [1]) *
           (1 + L.wordS [0, 0] * z * L.wordT [0, 0] +
             L.wordS [1] * L.wordT [0, 0])
@@ -171,6 +179,10 @@ theorem exists_rank_one_normal_form
           L.wordS [1] * L.wordT [0, 0] := by
           rw [hc₁, hc₂]
           noncomm_ring
+          -- after migrating the scalars out, the two sides differ only
+          -- in the order of the summands
+          simp only [smul_mul_assoc, mul_smul_comm]
+          abel
   -- the `[0,1]`-window part
   have hs00w : L.wordS [0, 0] ∈ Submodule.span k
       (L.degreeMonomials 2 2) :=
@@ -192,7 +204,7 @@ theorem exists_rank_one_normal_form
           Submodule.span k (L.degreeMonomials 0 1) := by
         rw [hz]
         rw [show (u : BinaryLeavittAlgebra k) - 1 - a =
-          ((u : BinaryLeavittAlgebra k) - a) - 1 from by ring]
+          ((u : BinaryLeavittAlgebra k) - a) - 1 from by abel]
         exact Submodule.sub_mem _ hrest
           (L.span_degreeMonomials_mono (by omega) (by omega)
             (L.one_mem_window (k := k)))
@@ -204,10 +216,9 @@ theorem exists_rank_one_normal_form
       refine L.span_degreeMonomials_mono ?_ ?_ h1 <;> omega
   refine ⟨u', 1 + L.wordS [0, 0] * (z - a) * L.wordT [0, 0] -
     L.wordS [0, 0] * a * L.wordT [1], hwmem, ?_, ?_⟩
+  -- `rw [hu'val]` closes this outright; `L` is reducibly `family k`, so
+  -- the follow-up rewrite had no goal left to act on.
   · rw [hu'val]
-    have hs1 : L.wordS [1] * L.wordT [0, 0] =
-        (family k).wordS [1] * (family k).wordT [0, 0] := rfl
-    rw [hs1]
   · constructor
     · intro huH
       rw [hu']
