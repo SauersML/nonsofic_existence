@@ -20,8 +20,9 @@ theorem exists_isUnit_matrix_col {k : Type*} [Field k]
     ∃ G : Matrix ι ι k, IsUnit G ∧
       G.mulVec (Pi.single j₀ 1) = v := by
   classical
+  -- `linearIndependent_unique` is now the iff form `linearIndependent_unique_iff`
   have hli : LinearIndependent k ![v] :=
-    linearIndependent_unique ![v] (by simpa using hv)
+    linearIndependent_unique_iff.mpr (by simpa using hv)
   have hrange : LinearIndepOn k id (Set.range ![v]) :=
     hli.linearIndepOn_id
   set B : Basis (hrange.extend (Set.subset_univ _)) k (ι → k) :=

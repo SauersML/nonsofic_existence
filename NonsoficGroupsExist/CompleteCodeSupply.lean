@@ -26,8 +26,10 @@ theorem family_transport {ι ι' : Type*} [Fintype ι] [Fintype ι']
   constructor
   · intro p q hpq
     exact hfree (fun h ↦ hpq (e.injective h))
-  · rw [← Fintype.sum_equiv e (fun p ↦ L.cylinder ((w ∘ e) p))
+  · -- forward direction: rewrite the `e`-indexed sum into the `ι`-indexed one
+    rw [Fintype.sum_equiv e (fun p ↦ L.cylinder ((w ∘ e) p))
       (fun i ↦ L.cylinder (w i)) (fun p ↦ rfl)]
+    exact hsum
 
 /-- **Complete prefix families of every positive size.** -/
 theorem exists_complete_family : ∀ m : ℕ, 1 ≤ m →
@@ -46,8 +48,12 @@ theorem exists_complete_family : ∀ m : ℕ, 1 ≤ m →
         have hsum' := L.split_family_sum w hsum j₀
         have hcard : Fintype.card (Fin (n + 1)) =
             Fintype.card (Fin 2 ⊕ {i : Fin n // i ≠ j₀}) := by
-          rw [Fintype.card_sum, Fintype.card_fin, Fintype.card_fin,
-            Fintype.card_subtype_compl, Fintype.card_subtype_eq]
+          -- `card_subtype_compl` reintroduces `Fintype.card (Fin n)`, which
+          -- the earlier `card_fin` rewrites cannot have touched; without a
+          -- second pass `omega` sees it as an opaque atom unrelated to `n`.
+          rw [Fintype.card_sum, Fintype.card_subtype_compl,
+            Fintype.card_subtype_eq]
+          simp only [Fintype.card_fin]
           omega
         set e := Fintype.equivOfCardEq hcard with he
         obtain ⟨hf, hs⟩ := L.family_transport e
@@ -59,7 +65,9 @@ theorem exists_complete_family : ∀ m : ℕ, 1 ≤ m →
         subst hn0
         refine ⟨fun _ ↦ [], ?_, ?_⟩
         · intro i j hij
-          exact absurd (Subsingleton.elim i j) hij
+          -- instance search will not reduce `Fin (0 + 1)` to `Fin 1`, so
+          -- `Subsingleton` is not found; go through the value instead.
+          exact absurd (Fin.ext (by omega)) hij
         · rw [Fin.sum_univ_one]
           show L.wordS [] * L.wordT [] = 1
           rw [wordS_nil, wordT_nil, one_mul]

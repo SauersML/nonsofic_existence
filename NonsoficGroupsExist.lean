@@ -205,6 +205,7 @@ import NonsoficGroupsExist.GLPairNormalization
 import NonsoficGroupsExist.PencilEntryArith
 import NonsoficGroupsExist.CompleteCodeSupply
 import NonsoficGroupsExist.GLVectorNormalization
+import NonsoficGroupsExist.RowClearMove
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence
