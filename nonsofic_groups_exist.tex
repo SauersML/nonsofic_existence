@@ -61,38 +61,46 @@
   \fi}
 \makeatother
 
+% A note carries no label of its own: a module name followed by declaration
+% names is already the statement that those declarations formalize this
+% result.  Only the two exceptional cases need a word, and the word they get
+% says which case it is.  Blocks after the first are separated by a thin skip.
+\newif\ifleanfirstblock
+
+\newcommand{\leangap}{%
+  \ifleanfirstblock\leanfirstblockfalse\else\par\nobreak\vspace{1.7pt}\fi}
+
 \newcommand{\leandecl}[1]{\par\nobreak\texttt{\fontsize{6.3}{7.3}\selectfont #1}}
 \newcommand{\leanmod}[2]{%
-  \par\nobreak\vspace{1.2pt}%
+  \leangap
   {\fontsize{6.7}{7.9}\selectfont
    \href{\leanfileurl{#1}}{\color{leangreen}\textsl{\leanbreakable{#1}}}}%
   \forcsvlist{\leandecl}{#2}}
-\newcommand{\leanbadge}[2]{%
-  {\fontsize{6.4}{7.6}\selectfont\textsc{lean}\,#2}\par\nobreak}
+\newcommand{\leantag}[1]{%
+  \leangap{\fontsize{6.4}{7.6}\selectfont\textit{#1}}\par\nobreak}
 \newcommand{\leannote}[1]{%
-  \par\nobreak\vspace{1.2pt}%
+  \par\nobreak\vspace{1.7pt}%
   {\fontsize{6.3}{7.3}\selectfont\textit{#1}}}
 
 \newcommand{\leanverified}{\begingroup\leanactiveus\leanverifiedaux}
 \newcommand{\leanverifiedaux}[1]{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangreen}%
-      \leanbadge{}{\ensuremath{\checkmark}}#1}%
+    \marginnote{\raggedright\color{leangreen}\leanfirstblocktrue #1}%
   \fi
   \endgroup}
 
 \newcommand{\leanpartial}{\begingroup\leanactiveus\leanpartialaux}
 \newcommand{\leanpartialaux}[2]{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangreen}%
-      \leanbadge{}{\,\textup{part}}#1\leannote{#2}}%
+    \marginnote{\raggedright\color{leangreen}\leanfirstblocktrue
+      \leantag{formalized in part}#1\leannote{#2}}%
   \fi
   \endgroup}
 
 \newcommand{\leanabsent}[1]{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangrey}%
-      \leanbadge{}{\,\textup{---}}\leannote{#1}}%
+    \marginnote{\raggedright\color{leangrey}\leanfirstblocktrue
+      \leantag{not formalized}\leannote{#1}}%
   \fi}
 
 \setlist[enumerate]{leftmargin=2.35em}
@@ -259,7 +267,7 @@ The third layer is a finite multiplication-table construction.  Every finitely g
 
 The proof is organized so that its trust surface is explicit and so that a skeptical reader can audit it in layers.
 
-A machine-checked audit is available as a second, independent layer, and it is reported in the margins: each numbered statement below carries a note naming the modules and declarations of the accompanying Lean development that formalize it, or recording that it is formalized only in part, or that it is not formalized and why.  The notes are marginal in the strict sense---no argument in this paper appeals to one, and deleting all of them leaves the text unchanged---so a reader uninterested in formalization can ignore them throughout.  Appendix~\ref{app:lean} says what the development proves, what it assumes, and where it is stronger than the text.
+A machine-checked audit is available as a second, independent layer, and it is reported in the margins: each numbered result below carries a note naming the modules and declarations of the accompanying Lean development that formalize it, or recording that it is formalized only in part, or that it is not formalized and why.  The notes are marginal in the strict sense---no argument in this paper appeals to one, and deleting all of them leaves the text unchanged---so a reader uninterested in formalization can ignore them throughout.  Appendix~\ref{app:lean} says what the development proves, what it assumes, and where it is stronger than the text.
 
 Theorems~\ref{thm:A} and~\ref{thm:D} rest on the following external inputs: Kun's expander decomposition theorem \cite{Kun19}, the Kun--Thom centralizer obstruction \cite{KunThom19}, property~\((T)\) for elementary groups over finitely generated rings \cite{ErshovJaikin10}, and classical facts about Thompson's group \(V\)---infinite, simple, finitely presented, and \(2\)-generated \cite{Higman74,CannonFloydParry96,BleakQuick17}.  Everything else is self-contained.  In the proof of Theorem~\ref{thm:A}, the two auxiliary matrices \(u\) and \(z\) are factored explicitly into elementary matrices, and every remaining elementary membership follows from the explicit Whitehead identity of Lemma~\ref{lem:whitehead} together with the perfectness of \(V\).  The analytic sections use no spectral theory: the only analytic inequality proved and used in the matching argument is the \(\ell^1\) co-area estimate of Lemma~\ref{lem:coarea}, established in a few lines from the layer-cake formula, while the approximation-theoretic depth is confined to the cited theorems of Kun and Kun--Thom.
 
@@ -353,7 +361,8 @@ The conventions are robust in exactly the two directions in which they interface
 Let \((X_n)\) be a sequence of graphs of uniformly bounded degree on vertex sets \(Y_n\) with \(\abs{Y_n}\to\infty\).  An \emph{expander decomposition} of \((X_n)\) consists of graphs \(\widetilde X_n\) on \(Y_n\), of uniformly bounded degree, with \(\ed(X_n,\widetilde X_n)=o(\abs{Y_n})\), together with a constant \(h>0\) such that every connected component of every \(\widetilde X_n\) has Cheeger constant at least \(h\).
 \end{definition}
 
-\begin{definition}\label{def:essential}
+\begin{definition}\label{def:essential}%
+\leanpartial{\leanmod{Criterion}{MatchingCertificate}\leanmod{EssentialExpanderRepair}{induced_expands_eventually,repairedActualGraph_expands_eventually}}{Realized as the matching-certificate expansion data and its repair, not as a separate definition.}%
 A sequence of bounded-degree graphs \((X_n)\) is an \emph{essential expander sequence} if it is edit-equivalent to an expander sequence.
 \end{definition}
 
@@ -420,7 +429,8 @@ Theorem~\ref{thm:kunthom} states the theorem of \cite{KunThom19} in its \emph{es
 
 \emph{Interface.}  The proof in \cite{KunThom19} is carried out for \emph{regularly labeled} graphs: each generator label has exactly one outgoing directed edge at every vertex.  An approximation normalized as in Lemma~\ref{lem:normalization} supplies this structure.  Every generator acts by a genuine permutation, and an inverse pair of generators acts by an inverse pair of permutations, so the two directed arcs of a pair combine into one undirected labeled edge; identity loops are discarded by the conventions of Section~\ref{subsec:graphs}.  Distinct labels rarely collide: for generators \(g,h\) with \(h\ne g^{\pm1}\), a collision \(\sigma_n(g)y=\sigma_n(h)y\) makes \(y\) a preimage under the permutation \(\sigma_n(h)\) of a fixed point of \(\sigma_n(h)^{-1}\sigma_n(g)\), which agrees with \(\sigma_n(h^{-1}g)\) outside a vanishing fraction of points by approximate multiplicativity and has a vanishing fraction of fixed points by asymptotic faithfulness.  These properties are verified for the localized approximation at the end of the proof of Theorem~\ref{thm:local}.
 
-\begin{remark}[Audit of the two cited proofs]\label{rem:kunaudit}
+\begin{remark}[Audit of the two cited proofs]\label{rem:kunaudit}%
+\leanverified{\leanmod{KunSpectralCounterexample}{switched,rayleigh_testVector,not_isBipartite}\leannote{The near-bipartite counterexample to the spectral implication, formalized.}}%
 Because the two theorems above carry the entire approximation-theoretic weight of this paper, their published proofs were audited line by line in the course of the formalization, with three findings; we record them here both to delimit exactly what is imported and to credit the arguments of \cite{Kun19,KunThom19}, which survive intact.
 
 First, Theorem~3 of \cite{Kun19} is stated as a four-way equivalence, and its spectral implication \((4)\Rightarrow(1)\) fails as written: it invokes the Cheeger--Alon--Milman bound, which separates the nonconstant Markov spectrum from \(+1\) but not from \(-1\), and near-bipartite uniform expanders (a two-edge switch in each graph of a bipartite expander family, repeated) satisfy (2)--(4) while violating (1).  This does not affect the present paper, nor Theorem~1 of \cite{Kun19}: the decomposition theorem needs only the forward implications, and Theorem~\ref{thm:kun} above is exactly that one-way statement---the only form used here and the form proved in the formalization.
@@ -868,7 +878,8 @@ The subgroup \(J\) is required to lie in \(\Gamma\), and this is used twice: thr
 
 Throughout, \(k\) is a field and \(L=L_k(1,2)\) is the binary Leavitt algebra \eqref{eq:leavitt}, with generators \(s_0,s_1,t_0,t_1\) and relations \(t_is_j=\delta_{ij}\), \(s_0t_0+s_1t_1=1\).  Everything in this section is a consequence of the two relations alone, and it costs nothing to say so once and for all.
 
-\begin{definition}\label{def:family}
+\begin{definition}\label{def:family}%
+\leanverified{\leanmod{Leavitt}{LeavittFamily}}%
 A \emph{binary Leavitt family} in a unital ring \(A\) is a quadruple \((s_0,s_1,t_0,t_1)\) of elements of \(A\) satisfying
 \[
  t_is_j=\delta_{ij}\quad(i,j\in\{0,1\})
@@ -885,7 +896,8 @@ a pair of orthogonal idempotents summing to \(1\): \(p_ip_j=\delta_{ij}p_i\), si
 
 Two remarks on size.  The algebra \(L\) itself is infinite-dimensional over \(k\): the elements \(s_{0^i}s_1\), \(i\geq0\), are killed on the left by mutually orthogonal projections and are linearly independent.  And a family forces infinitude with no reference to \(L\):
 
-\begin{lemma}\label{lem:family-infinite}
+\begin{lemma}\label{lem:family-infinite}%
+\leanverified{\leanmod{Leavitt}{infinite,s0_pow_injective}}%
 A nontrivial unital ring \(A\) carrying a binary Leavitt family is infinite.
 \end{lemma}
 
@@ -1742,24 +1754,31 @@ all built inside the library.
 
 \subsection*{How to read the margin notes}
 
-Each numbered statement of the paper carries a note in the margin, in one of
-three forms.
+Every numbered result of the paper---every definition, lemma, proposition,
+corollary, and theorem---carries a note in the margin.  Remarks carry one only
+when they have formal content of their own; the concluding commentary does
+not.
+
+A note in its plain form is a module name in italic, hyperlinked to its source
+file, followed in typewriter by the declarations in that module that carry the
+content.  That is the whole claim: those declarations formalize this
+statement.  A line underneath, when there is one, records a way in which the
+Lean statement is \emph{stronger} than the one printed here---that Kun's
+theorem is proved rather than assumed, say.
+
+Two phrases override the plain reading, and they appear only where they are
+true.
 
 \begin{description}[leftmargin=0pt,labelsep=0.6em,style=nextline]
-\item[\textnormal{\textsc{lean}\,\(\checkmark\)}]
- The statement is formalized.  The italic name is the module, hyperlinked to
- its source file; the typewriter names below it are the declarations in that
- module that carry the content.  A note underneath records any way in which
- the Lean statement is \emph{stronger} than the one printed here.
-\item[\textnormal{\textsc{lean}\,part}]
- Part of the statement is formalized.  The note says which part, and which
- part is not.
-\item[\textnormal{\textsc{lean}\,---}]
- The statement is not formalized, and the note says why.  There are exactly
- two: Lemma~\ref{lem:fplef}, which the Lean proof does not need because it
- replaces the residual-finiteness route by a direct finite obstruction, and
- Theorem~\ref{thm:kcover}, which rests on Shalom's finitely presented Kazhdan
- covers.
+\item[\textnormal{\textit{formalized in part}}]
+ Only part of the statement is formalized.  The line below says which part is,
+ and which part is not.
+\item[\textnormal{\textit{not formalized}}]
+ The statement is not formalized, and the line below says why.  This occurs
+ exactly twice: at Lemma~\ref{lem:fplef}, which the Lean proof does not need
+ because it replaces the residual-finiteness route by a direct finite
+ obstruction, and at Theorem~\ref{thm:kcover}, which rests on Shalom's
+ finitely presented Kazhdan covers.
 \end{description}
 
 The notes are decoration in the strict sense: setting \verb|\leanlinksfalse|
@@ -1848,7 +1867,7 @@ below it uses it.
 \subsection*{What is not formalized}
 
 Beyond the two absent items listed above, the gaps are those marked
-\textsc{lean}\,part in the margins: the arbitrary-finitely-generated-ring form
+\textit{formalized in part} in the margins: the arbitrary-finitely-generated-ring form
 of Theorem~\ref{thm:ejz} (the characteristic-two cases the endpoints use are
 proved); part~(b) of Theorem~\ref{thm:agp}, which remains a cited input; the
 \(\GL_r=\EL_r\) collapse of Proposition~\ref{prop:glel}, formalized at ranks
