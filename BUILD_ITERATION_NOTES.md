@@ -1901,3 +1901,27 @@ NOTE: user is now handling all compilation — I write, they build.
   Order of writing: B2 (BlockMoveTailKill.lean), ZeroKOneN,
   KillMovesSwap, NegativePartInduction, NarrowReductionProof,
   assembly + docstrings.
+
+## Session 36: BlockMoveTailKill.lean WRITTEN (B2, all N)
+- pure_positive_tail_mem_stableUnits: units 1 + τ, τ ∈ span[1, N+1],
+  are in stableUnits — plain induction on N.  Base: WidthTwo.
+  Step: top-component split via exists_components + Icc-insert;
+  branch coefficients q_i := t_i·η; corner embed κ at word 00
+  (pairKappaUnit, value 1 + S(00)τT(00)); multipliers
+  m₂ := (1 − S(00)s₀T(01))(1 − S(00)s₁T(10)),
+  m₁ := (1 + S(01)q₀T(00))(1 + S(10)q₁T(00)) — products of compiled
+  incomparable unipotents, cross terms die by T(0i)S(00) = 0 /
+  T(00)S(i0) = 0; the 18-term expansion of m₂·κ·m₁ collapses
+  (X_iK = KY_i = X₀Y₁ = X₁Y₀ = 0; X₀Y₀ + X₁Y₁ = S(00)ηT(00) via the
+  completeness split) to value 1 + S(00)aT(00) − X₀ − X₁ + Y₀ + Y₁
+  with tail ∈ span[1, N] — IH closes; assembly through κ·u⁻¹ ∈ H.
+- All negation isolated (m₂-value via -(s i)-middle in
+  incomparableUnit; no mid-product sub before distribution lemmas).
+  Cast discipline: window top stated as (N : ℤ) + 1; succ-case
+  normalizes ↑(N+1)+1 → ↑N+2 once at entry.
+- Registered in aggregator.  Awaiting user's compile.
+- REMAINING WRITES: ZeroKOneN (grouped-coefficient (P) for [0,N] —
+  needed to factor c out before B2 in the assembly);
+  NegativePartInduction (the kill-move induction, needs the honest
+  swap lemma with positive junk); NarrowReductionProof + B4 wiring;
+  docstrings.
