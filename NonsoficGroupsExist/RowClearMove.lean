@@ -126,12 +126,11 @@ theorem row_clear [Nontrivial A]
     -- `sum_map` leaves the `Prod.mk j₀` embedding applied, so the summand
     -- is not yet in the shape `sum_neg_distrib` matches.
     rw [Finset.singleton_product, Finset.sum_map, hN]
-    simp only [Function.Embedding.coeFn_mk]
-    rw [← Finset.sum_neg_distrib]
-    refine congrArg (1 + ·) (Finset.sum_congr rfl fun j _ ↦ ?_)
-    show -(L.wordS (C.word j₀) * x j * L.wordT (C.word j)) =
-      L.wordS (C.word j₀) * -(x j) * L.wordT (C.word j)
-    noncomm_ring
+    -- `sum_map` leaves the `Prod.mk j₀` embedding applied; then pull the
+    -- sign out of each summand so the sum itself can be negated.
+    simp only [Function.Embedding.coeFn_mk, mul_neg, neg_mul,
+      Finset.sum_neg_distrib]
+    abel
   -- the atom column of the value
   have hpE0 : (L.pencilEntry (k := k) 0 0 0 0 0 : A) = 0 := by
     unfold pencilEntry
