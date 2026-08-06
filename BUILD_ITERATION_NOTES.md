@@ -2515,3 +2515,56 @@ the five matrices; single incomparable-unipotent col/row ops at the
 value level) — independent of the branch analysis, safe to build.
 M4 = the dichotomy + extraction; its (d)-case needs the filtration
 derivation FIRST (paper math next session).
+
+## Session 43d: (d)-branch analysis — top level CLOSED, inner case framed
+KEY REALIZATION: at the TOP level (square, word-indexed) the pencil
+is just the narrow unit v itself, so window theorems apply:
+- If [B₀;B₁] (2p×q, C-less stack) has full column rank: the top
+  equation B∘x_T = 0 left-strips (t_y·B∘ = B_y) to B₀x_T = B₁x_T = 0
+  ⟹ x_T = 0 for every T ≥ 0 ⟹ the inverse has window ⊆ [−R, −1] ⟹
+  v⁻¹ is a NONPOS-window unit ⟹ v⁻¹ ∈ H (window_nonpos_mem_
+  stableUnits, COMPILED) ⟹ v ∈ H.  INSTANT.
+- Mirror: (A₀|A₁) full row rank ⟹ x's window ⊆ [1, T] via right
+  t-strips (x_{−R}A_z = 0) ⟹ v⁻¹ nonneg-window ⟹ v ∈ H.  INSTANT.
+- So the top level only needs extraction when BOTH C-less stacks are
+  deficient — and then ker[B₀;B₁] ≠ 0 hmm NOTE: pure-t columns need
+  ker[B₀;B₁;C] ≠ 0 (with C).  Remaining top-level case: [B₀;B₁]
+  column-deficient but [B₀;B₁;C] full — extraction unavailable, window
+  argument unavailable.  Handle via the relation system below, or:
+  v ∈ ker[B₀;B₁], Cv ≠ 0: column = t-content + constant-content —
+  a "quasi-pivot" column; possibly clearable by scalar ops first
+  (GL-normalize so that ker[B₀;B₁]-columns have C-content in pivot
+  position, then those columns are t₀,t₁,constant-only…).
+STRIP CALCULUS facts (all derivable from compiled word lemmas):
+- t_y·(B₀s₀+B₁s₁) = B_y;  (A₀t₀+A₁t₁)·s_y = A_y (right-strip);
+- s-sums do NOT right-strip (y·s₀ + z·s₁ = 0 does not force y = 0:
+  p₁s₀ = 0), so only VX-top and XV-bottom equations strip cleanly.
+- XV = 1 expands in PURE T-monomials when X is a scalar t-polynomial:
+  exact relation system (S0) Σ_z X_{[z]}B_z = I and
+  (S_u) X_u C + Σ_z X_{z::u}B_z + [|u|≥2] X_{tail u}A_{head u} = 0.
+- VX = 1 has mixed s_zT(v) monomials; boundary depth 1 gives corner
+  relations B_zX_{[y]} = δ_{zy}I via double strips
+  (t_a·(eq·S(u))·s_b); deeper: entangled but finite linear algebra.
+INNER RECURSION CAVEAT: the rectangular children of the extraction
+cannot use window theorems directly (the ambient matVal mixes the
+frozen τ/ς blocks' windows).  Options: (i) solve the (S_u)-system
+combinatorially for rectangular 4a/4b terminals; (ii) restructure the
+recursion to stay at L-level (re-transport each child through a
+corner isomorphism p_w L p_w ≅ L so children are again NARROW UNITS
+of L at a deeper level — then the WHOLE recursion is: narrow unit →
+either window-killed (∈ H instantly) or extraction reduces the
+pencil size at fixed level → eventually window-killed; each child is
+an honest L-unit and the top-level trichotomy applies verbatim!!).
+Option (ii) is much better for formalization: need the corner
+transport "unit of p_R·L·p_R-corner with identity complement ↦ unit
+of L via a code-change conjugation" — i.e. τ_b⊕M̃⊕ς_a-value ~ (code
+change moves) ~ 1⊕M̃'-value with M̃' the SAME pencil re-indexed at
+possibly UNEQUAL row/col cylinder sets — needs the rectangular-corner
+code-change conjugation lemma (source/target cylinder counts differ;
+Leavitt L^p ≅ L^q makes the corners isomorphic via explicit
+code-change conjugators).  NEXT SESSION: derive option (ii) cleanly
+(the conjugator: pair the R-rows-complement to the C-cols-complement
+by a mixed-depth complete-code bijection — exists for any two
+nonempty cylinder sets; conjugation by that code-change unit maps
+matVal(τ⊕M̃⊕ς) to 1 + (corner content of a DEEPER-level narrow
+element) — then recurse as L-units, no matrices).
