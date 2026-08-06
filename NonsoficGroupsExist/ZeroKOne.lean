@@ -68,13 +68,16 @@ theorem balanced_component_isUnit [Nontrivial (BinaryLeavittAlgebra k)]
       L.cylinder (List.ofFn γ) * L.cylinder (List.ofFn δ) =
       if γ = δ then L.cylinder (List.ofFn γ) else 0 := by
     intro γ δ
+    have horth : L.wordT (List.ofFn γ) * L.wordS (List.ofFn δ) =
+        if γ = δ then 1 else 0 :=
+      L.prefixCode_orthogonal (fullBinaryCode n) γ δ
     unfold cylinder
     rw [show L.wordS (List.ofFn γ) * L.wordT (List.ofFn γ) *
         (L.wordS (List.ofFn δ) * L.wordT (List.ofFn δ)) =
       L.wordS (List.ofFn γ) *
         (L.wordT (List.ofFn γ) * L.wordS (List.ofFn δ)) *
         L.wordT (List.ofFn δ) from by noncomm_ring,
-      L.prefixCode_orthogonal (fullBinaryCode n) γ δ]
+      horth]
     by_cases hγδ : γ = δ
     · rw [if_pos hγδ, if_pos hγδ, mul_one, hγδ]
     · rw [if_neg hγδ, if_neg hγδ]
@@ -163,8 +166,8 @@ theorem balanced_component_isUnit [Nontrivial (BinaryLeavittAlgebra k)]
       ((w⁻¹ : (BinaryLeavittAlgebra k)ˣ) : BinaryLeavittAlgebra k) := by
     have hmap : D = Finset.map (addRightEmbedding (1 : ℤ))
         (Finset.Icc (lo - 1) hi) := by
-      rw [Finset.map_add_right_Icc]
-      congr 1 <;> omega
+      rw [Finset.map_add_right_Icc,
+        show lo - 1 + 1 = lo from by ring]
     rw [hmap, Finset.sum_map]
     have hstep : ∀ d ∈ Finset.Icc (lo - 1) hi,
         y (addRightEmbedding (1 : ℤ) d - 1) = y d := by
@@ -246,32 +249,46 @@ theorem balanced_component_isUnit [Nontrivial (BinaryLeavittAlgebra k)]
         have h1 := heq 0 h0D
         rw [if_pos rfl] at h1
         have h2 := congrArg (fun z ↦ f * z * f) h1
-        simp only [] at h2
         rw [show f * (e * y 0 + ζ' * y (0 - 1)) * f =
             (f * e) * (y 0 * f) + f * ζ' * y (0 - 1) * f from by
               noncomm_ring,
           hfe, zero_mul, zero_add, mul_one, hff] at h2
         rw [Finset.sum_range_zero, zero_add, pow_zero, mul_one]
-        rw [show (-1 - ((0 : ℕ) : ℤ)) = 0 - 1 from by push_cast; ring]
+        rw [show (-1 - ((0 : ℕ) : ℤ)) = 0 - 1 from by omega]
         exact h2.symm
     | succ m ih =>
         refine ih.trans ?_
         rw [Finset.sum_range_succ]
         have hexp := hsubst (-1 - (m : ℤ)) (by omega)
-        have hstep : f * ζ' * (-ζ') ^ m * y (-1 - (m : ℤ)) * f =
-            GG m * YY m +
-            f * ζ' * (-ζ') ^ (m + 1) * y (-1 - ((m + 1 : ℕ) : ℤ)) * f
+        have h3 := congrArg
+          (fun z ↦ f * ζ' * (-ζ') ^ m * z * f) hexp
+        have hpow0 : (-ζ') ^ (m + 1) + (-ζ') ^ m * ζ' = 0 := by
+          rw [pow_succ, ← mul_add, neg_add_cancel, mul_zero]
+        have hzero : f * ζ' * (-ζ') ^ (m + 1) *
+              y (-1 - ((m + 1 : ℕ) : ℤ)) * f +
+            f * ζ' * (-ζ') ^ m * (ζ' * y (-1 - (m : ℤ) - 1)) * f = 0
             := by
-          have h3 := congrArg
-            (fun z ↦ f * ζ' * (-ζ') ^ m * z * f) hexp
-          simp only [] at h3
-          rw [h3, hGG, hYY]
-          simp only []
-          rw [pow_succ,
-            show (-1 - ((m + 1 : ℕ) : ℤ)) = (-1 - (m : ℤ)) - 1 from by
-              push_cast; ring]
+          rw [show (-1 - ((m + 1 : ℕ) : ℤ)) = -1 - (m : ℤ) - 1 from by
+            omega]
+          calc f * ζ' * (-ζ') ^ (m + 1) * y (-1 - (m : ℤ) - 1) * f +
+                f * ζ' * (-ζ') ^ m * (ζ' * y (-1 - (m : ℤ) - 1)) * f
+              = f * ζ' * ((-ζ') ^ (m + 1) + (-ζ') ^ m * ζ') *
+                  y (-1 - (m : ℤ) - 1) * f := by noncomm_ring
+            _ = 0 := by rw [hpow0, mul_zero, zero_mul, zero_mul]
+        have hrem : f * ζ' * (-ζ') ^ (m + 1) *
+            y (-1 - ((m + 1 : ℕ) : ℤ)) * f =
+            -(f * ζ' * (-ζ') ^ m * (ζ' * y (-1 - (m : ℤ) - 1)) * f)
+            := eq_neg_of_add_eq_zero_left hzero
+        have hstep : f * ζ' * (-ζ') ^ m * y (-1 - (m : ℤ)) * f =
+            GG m * YY m -
+            f * ζ' * (-ζ') ^ m * (ζ' * y (-1 - (m : ℤ) - 1)) * f := by
+          rw [h3]
+          simp only [hGG, hYY]
+          rw [mul_sub, sub_mul]
+          congr 1
           noncomm_ring
-        rw [hstep, add_assoc]
+        rw [hstep, hrem]
+        abel
   -- termination of the expansion
   set M : ℕ := (-lo).toNat with hM
   have hstar : f = ∑ j ∈ Finset.range M, GG j * YY j := by
@@ -339,7 +356,6 @@ theorem balanced_component_isUnit [Nontrivial (BinaryLeavittAlgebra k)]
     have hGmem : GG j ∈
         Submodule.span k (L.shapeMonomials ℓ (ℓ - 1 - j)) := by
       refine hnG j ℓ (ℓ - 1 - j) (by omega) ?_
-      push_cast
       omega
     have hfmem : f ∈ Submodule.span k
         (L.shapeMonomials (ℓ - 1 - j) (ℓ - 1 - j)) := by
@@ -348,7 +364,6 @@ theorem balanced_component_isUnit [Nontrivial (BinaryLeavittAlgebra k)]
     have hrmem : y (-1 - (j : ℤ)) * f ∈
         Submodule.span k (L.shapeMonomials (ℓ - 1 - j) ℓ) := by
       refine hnR j (ℓ - 1 - j) ℓ (by omega) ?_
-      push_cast
       omega
     obtain ⟨MG, hMG⟩ := L.exists_shapeRep hGmem
     obtain ⟨Mf, hMf⟩ := L.exists_shapeRep hfmem
