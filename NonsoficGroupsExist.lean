@@ -234,6 +234,7 @@ import NonsoficGroupsExist.ThompsonWitness
 import NonsoficGroupsExist.MatchedComponents
 import NonsoficGroupsExist.SoficTransfer
 import NonsoficGroupsExist.MainResults
+import NonsoficGroupsExist.KazhdanTextbook
 import NonsoficGroupsExist.Audit
 
 /-!
