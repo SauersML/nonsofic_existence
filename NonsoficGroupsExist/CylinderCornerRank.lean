@@ -168,8 +168,7 @@ theorem card_le_rank_of_shapeRep_cylSum [Nontrivial A] {n ℓ : ℕ}
     rw [Finset.sum_eq_single (wf p')]
     · rw [Matrix.mul_apply, Finset.sum_eq_single (wf p)]
       · rw [hU, hV]
-        simp only [Matrix.of_apply, if_pos rfl]
-        rw [one_mul, mul_one, hentry p p', Matrix.one_apply]
+        simp [hentry p p', Matrix.one_apply]
       · intro w _ hw
         rw [hU]
         simp only [Matrix.of_apply, if_neg hw]
@@ -183,7 +182,8 @@ theorem card_le_rank_of_shapeRep_cylSum [Nontrivial A] {n ℓ : ℕ}
     · intro hmem
       exact absurd (Finset.mem_univ _) hmem
   have hcard : Fintype.card ι = T.card * 2 ^ (ℓ - n) := by
-    rw [hι, Fintype.card_prod, Fintype.card_coe, Fintype.card_fun,
+    show Fintype.card ({γ // γ ∈ T} × (Fin (ℓ - n) → Fin 2)) = _
+    rw [Fintype.card_prod, Fintype.card_coe, Fintype.card_fun,
       Fintype.card_fin, Fintype.card_fin]
   calc (T.card * 2 ^ (ℓ - n) : ℕ)
       = Fintype.card ι := hcard.symm
