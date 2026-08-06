@@ -1525,3 +1525,27 @@ mathematics settled in sessions 24–25:
 - The endgame is now a bounded list of concrete lemmas.  NO open
   conceptual mysteries remain — all remaining items have identified
   attack routes.
+
+## Session 29b: [0,2]-tail-kill (B2) reconnaissance
+- Unit 1 + τ (τ ∈ [1,N]) has pure-nonneg inverse 1 + τ' with x₀ = 1
+  (bottom-up recursion — same as PureTailNilpotency's first half).
+- Circularity check: κ-transport → p-split → prefix-kill → corner
+  transport returns exactly to 1 + τ (t₁s₁ = 1 collapses zs₁ = τ).
+  Flips conserve the window under every row/column split tried
+  (first-letter, last-letter, depth-N splits all return [1,N]).
+- Corner-localization: κ₁₁-transport (pair S(11), T(11)) puts the
+  tail in the p₁₁-corner; right-mult by ν := S(0)yT(11β′) acts as
+  PURE ADDITION ((κv)ν = ν since T(11)S(0) = 0); left-mult mixes via
+  T(β′)τ.  Free-corner arithmetic is available but no kill found yet.
+- MOST PROMISING for (B2, N = 2): generalize NilpotentTailKill's
+  induction (lemma i′) to mixed z ∈ [0,1]-window tails 1 + s₁z:
+  the p-split z ↦ zp₁ is free for mixed z (session 22), and the
+  pseudo-inverse/mover machinery (BalancedRegularity) needs the
+  balanced PART of z only — investigate whether the index-drop
+  recursion survives with the degree-1 part of z along for the ride.
+  Alternatively: (B2) via the session-22-style unipotent factor
+  1 − s₀a₀t₁ (∈ H, βα = t₁s₀a₀ = 0) which keeps windows nonneg —
+  look for the right composite.
+- Meta-status: remaining math = (a) free-cylinder supply for the
+  swap cascade (rank-inequality flavored, session 24's E ≥ D bound
+  is the template) + (B2, N = 2).  Both concrete, both bounded.
