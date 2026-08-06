@@ -23,7 +23,7 @@ generality:
 > hence so are `EL_{m+1}(A)` for every `m ≥ 1`, the unit group `Aˣ`, and
 > every `GL_{m+1}(A)`.
 
-The point of the generality is the dossier's corner route: a `d`-ary Leavitt
+The point of the generality is the corner route: a `d`-ary Leavitt
 family places a binary family in the corner ring of `AryCorner`, and this
 module applied to that corner produces nonsofic subgroups inside the `d`-ary
 unit group.  The subring hypotheses (finite type, countable, nontrivial) hold

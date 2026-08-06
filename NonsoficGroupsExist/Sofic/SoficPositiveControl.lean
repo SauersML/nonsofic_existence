@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Sofic.Sofic
+import NonsoficGroupsExist.Sofic.SoficTransfer
 import Mathlib.Algebra.Group.TypeTags.Hom
 import Mathlib.Algebra.Group.TypeTags.Finite
 import Mathlib.Data.Finset.Lattice.Fold
@@ -99,6 +100,50 @@ theorem isSofic_of_finite (G : Type) [Group G] [Finite G] : IsSofic G := by
   classical
   letI : Fintype G := Fintype.ofFinite G
   exact isSofic_of_fintype G
+
+/-! ### Finite groups in an arbitrary universe
+
+`FiniteModel` carries a `Type` and `regularModel` therefore models a group by
+itself only in universe zero.  A finite group in any universe is still sofic:
+enumerate it and use the left regular representation on the enumeration, a
+group that does live in `Type`.  This is what lets a statement about an
+arbitrary nonsofic group avoid carrying `Infinite` as a hypothesis. -/
+
+/-- The left regular representation of a group transported along an
+enumeration `e : G ≃ Fin n`. -/
+def enumRegular {G : Type*} [Group G] {n : ℕ} (e : G ≃ Fin n) :
+    G →* Equiv.Perm (Fin n) where
+  toFun g := e.symm.trans ((Equiv.mulLeft g).trans e)
+  map_one' := by ext x; simp
+  map_mul' g h := by
+    ext x
+    simp [Equiv.Perm.mul_apply]
+
+/-- The transported regular representation is faithful: reading it at `e 1`
+returns `e g`. -/
+theorem enumRegular_injective {G : Type*} [Group G] {n : ℕ} (e : G ≃ Fin n) :
+    Function.Injective (enumRegular e) := by
+  intro g h hgh
+  have hx : (enumRegular e g) (e 1) = (enumRegular e h) (e 1) := by rw [hgh]
+  simp only [enumRegular, MonoidHom.coe_mk, OneHom.coe_mk, Equiv.trans_apply,
+    Equiv.symm_apply_apply, Equiv.coe_mulLeft, mul_one] at hx
+  exact e.injective hx
+
+/-- Every finite group is sofic, in every universe. -/
+theorem isSofic_of_finite' (G : Type*) [Group G] [Finite G] : IsSofic G := by
+  classical
+  letI : Fintype G := Fintype.ofFinite G
+  exact isSofic_of_injective (enumRegular (Fintype.equivFin G))
+    (enumRegular_injective _) (isSofic_of_finite (Equiv.Perm (Fin (Fintype.card G))))
+
+/-- **A nonsofic group is infinite.**  The contrapositive of `isSofic_of_finite'`,
+so that theorems about nonsofic groups need not assume infiniteness separately.
+-/
+theorem infinite_of_not_isSofic (G : Type*) [Group G] (h : ¬ IsSofic G) :
+    Infinite G := by
+  rcases finite_or_infinite G with hfin | hinf
+  · exact absurd (isSofic_of_finite' G) h
+  · exact hinf
 
 /-- The infinite cyclic group is sofic.  On a prescribed finite set, reduce
 integers modulo an odd modulus larger than twice every absolute value in the

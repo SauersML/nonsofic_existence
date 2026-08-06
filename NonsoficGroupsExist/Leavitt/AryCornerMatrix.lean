@@ -4,7 +4,7 @@ import NonsoficGroupsExist.Leavitt.ElementaryGroup
 /-!
 # Corner matrices, corner algebras, and elementary transport
 
-Three transport devices for the dossier's corner route.
+Three transport devices for the corner route of `AryCorner`.
 
 * An `Algebra k` structure on the corner ring `eAe` of an idempotent in a
   `k`-algebra: scalars act by `c ↦ (algebraMap k A c) * e`, which is central
@@ -19,9 +19,9 @@ Three transport devices for the dossier's corner route.
   so every elementary group over the corner embeds into the corresponding
   elementary group over the ambient ring.
 
-This is how nonsoficity of the elementary groups over the §9 corner
-subalgebra reaches the elementary groups of the `d`-ary ring itself, in every
-rank at least two.
+This is how nonsoficity of the elementary groups over the corner subalgebra
+reaches the elementary groups of the `d`-ary ring itself, in every rank at
+least two.
 -/
 
 namespace NonsoficGroupsExist

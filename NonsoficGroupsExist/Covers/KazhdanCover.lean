@@ -141,19 +141,22 @@ theorem presentedGroup_toGroup_mk {rels : Set (FreeGroup α)}
 
 end HomExt
 
-/-- **Theorem `thm:kcover`** (Kazhdan covers): every infinite nonsofic
+/-- **Theorem `thm:kcover`** (Kazhdan covers): every nonsofic
 group with property `(T)` is covered by an infinite finitely presented
-property-`(T)` group that is not sofic.  Finite generation is not a
-hypothesis: property `(T)` forces it
-(`KazhdanFiniteGeneration.exists_symmetric_generating_finset`). -/
+property-`(T)` group that is not sofic.  Neither finite generation nor
+infiniteness is a hypothesis: property `(T)` forces the first
+(`KazhdanFiniteGeneration.exists_symmetric_generating_finset`) and
+nonsoficity forces the second (`infinite_of_not_isSofic`), so this is the
+second assertion of Theorem `thm:C` exactly as printed. -/
 theorem exists_kazhdan_finitelyPresented_cover_of_not_isSofic
-    [Infinite G] (hns : ¬ IsSofic G)
+    (hns : ¬ IsSofic G)
     (hT : HasKazhdanPropertyT.{u, u} G) :
     ∃ (Γ : Type) (_ : Group Γ) (φ : Γ →* G),
       Function.Surjective φ ∧ Infinite Γ ∧
         Group.IsFinitelyPresented Γ ∧
         HasKazhdanPropertyT.{0, 0} Γ ∧ ¬ IsSofic Γ := by
   classical
+  haveI : Infinite G := infinite_of_not_isSofic G hns
   obtain ⟨F, ε, -, hε, hbad⟩ := exists_table_obstruction hns
   obtain ⟨S, -, -, hgen⟩ :=
     KazhdanFiniteGeneration.exists_symmetric_generating_finset G hT

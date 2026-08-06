@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Sofic.SoficErrors
+import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import Mathlib.GroupTheory.PresentedGroup
 import Mathlib.GroupTheory.FinitelyPresentedGroup
 import Mathlib.GroupTheory.Finiteness
@@ -587,14 +588,16 @@ theorem exists_finitelyPresented_cover_of_not_isSofic
   letI : Group.IsFinitelyPresented (tableGroup F h₁) := inferInstance
   exact ⟨tableGroup F h₁, inferInstance, inferInstance, hnsofic⟩
 
-/-- The finite-table construction retains its quotient map.  When the
-original finitely generated nonsofic group is infinite, the presented cover is
-therefore infinite as well. -/
+/-- The finite-table construction retains its quotient map, and the cover is
+infinite.  Infiniteness of the original group is not a hypothesis: a nonsofic
+group is infinite (`infinite_of_not_isSofic`), since finite groups are sofic.
+This is the first assertion of Theorem `thm:C` as printed. -/
 theorem exists_infinite_finitelyPresented_cover_of_not_isSofic
-    [Group.FG G] [Infinite G] (h : ¬ IsSofic G) :
+    [Group.FG G] (h : ¬ IsSofic G) :
     ∃ (H : Type u) (_ : Group H),
       Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬ IsSofic H ∧
         ∃ π : H →* G, Function.Surjective π := by
+  haveI : Infinite G := infinite_of_not_isSofic G h
   obtain ⟨F, h₁, _, _, _, hnsofic, hsurj⟩ :=
     exists_finitelyPresented_obstruction h
   letI : Group.IsFinitelyPresented (tableGroup F h₁) := inferInstance

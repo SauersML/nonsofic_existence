@@ -5,14 +5,14 @@ import Mathlib.RingTheory.Idempotents
 /-!
 # A unital binary Leavitt family in a corner of every `d`-ary Leavitt ring
 
-Section 9 of the compression dossier: if a ring `A` carries a `d`-ary Leavitt
+If a ring `A` carries a `d`-ary Leavitt
 family `(sᵢ, tᵢ)`, `i < d`, with `d ≥ 2` — packaged here as a
 `CompleteMatrixFamily A (Fin (n + 2))` with `d = n + 2` — then the idempotent
 
   `e = p₀ + ⋯ + p_{d-2}`,   `pᵢ = sᵢtᵢ`,
 
 is nonzero whenever `A` is, and its corner `eAe` contains a **unital binary
-Leavitt family**.  The dossier's leaf calculus collapses to closed forms: with
+Leavitt family**.  The leaf calculus collapses to closed forms: with
 `f = e - p₀` the four corner elements are
 
   `S₀ = s₀e`,   `T₀ = et₀`,
@@ -118,7 +118,7 @@ namespace CompleteMatrixFamily
 
 variable {A : Type*} [Ring A] {n : ℕ} (F : CompleteMatrixFamily A (Fin (n + 2)))
 
-/-- The dossier §9 corner idempotent `e = p₀ + ⋯ + p_{d-2}`: the sum of the
+/-- The corner idempotent `e = p₀ + ⋯ + p_{d-2}`: the sum of the
 range projections of all branches except the last. -/
 def cornerIdem : A := ∑ j : Fin (n + 1), F.left j.castSucc * F.right j.castSucc
 
@@ -201,7 +201,7 @@ theorem cornerIdem_mul_left_zero : F.cornerIdem * F.left 0 = F.left 0 := by
 theorem right_zero_mul_cornerIdem : F.right 0 * F.cornerIdem = F.right 0 := by
   simpa using F.right_mul_cornerIdem 0
 
-/-- In a nontrivial ring the §9 corner idempotent is nonzero: `t₀es₀ = 1`. -/
+/-- In a nontrivial ring the corner idempotent is nonzero: `t₀es₀ = 1`. -/
 theorem cornerIdem_ne_zero [Nontrivial A] : F.cornerIdem ≠ 0 := by
   intro h
   have h0 : F.cornerIdem * F.left 0 = F.left 0 := F.cornerIdem_mul_left_zero
@@ -240,7 +240,7 @@ theorem cornerTail_mul_cornerTail :
   rw [sub_mul, cornerIdem_mul_cornerTail, mul_assoc, right_zero_mul_cornerTail,
     mul_zero, sub_zero]
 
-/-! ### The four corner elements (dossier equation (9.2), closed forms) -/
+/-! ### The four corner elements, in closed form -/
 
 /-- `S₀ = s₀e`. -/
 def cornerS0 : A := F.left 0 * F.cornerIdem
@@ -398,7 +398,7 @@ theorem cornerS0_mul_cornerT0_add_cornerS1_mul_cornerT1 :
 
 /-! ### The binary family in the corner ring -/
 
-/-- **Dossier §9.**  The corner `eAe` of the idempotent
+/-- **The binary family in the corner.**  The corner `eAe` of the idempotent
 `e = p₀ + ⋯ + p_{d-2}` of any `d`-ary Leavitt family, `d ≥ 2`, carries a
 unital binary Leavitt family.  For `d > 2` the corner is proper, matching the
 `K₀` obstruction to a unital binary family in `A` itself. -/
@@ -414,7 +414,7 @@ def cornerBinaryFamily :
   t1_s1 := Subtype.ext F.cornerT1_mul_cornerS1
   sum_range := Subtype.ext F.cornerS0_mul_cornerT0_add_cornerS1_mul_cornerT1
 
-/-- The corner ring of the §9 idempotent is nontrivial whenever `A` is. -/
+/-- The corner ring of the idempotent is nontrivial whenever `A` is. -/
 theorem cornerBinaryFamily_nontrivial [Nontrivial A] :
     Nontrivial F.isIdempotentElem_cornerIdem.Corner :=
   corner_nontrivial _ F.cornerIdem_ne_zero

@@ -256,6 +256,12 @@ import NonsoficGroupsExist.Endpoint.MainResults
 import NonsoficGroupsExist.Leavitt.UnitsGLProfile
 import NonsoficGroupsExist.KOne.AllRanksElementary
 import NonsoficGroupsExist.Kazhdan.KazhdanTextbook
+import NonsoficGroupsExist.Monsters.Terminality
+import NonsoficGroupsExist.Monsters.TwoConjugacyClasses
+import NonsoficGroupsExist.Monsters.VerbalCompleteness
+import NonsoficGroupsExist.Monsters.Protection
+import NonsoficGroupsExist.Monsters.CountableEmbedding
+import NonsoficGroupsExist.Monsters.LeavittMonsters
 import NonsoficGroupsExist.Endpoint.Audit
 import NonsoficGroupsExist.Endpoint.Public
 

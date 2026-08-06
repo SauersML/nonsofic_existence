@@ -5,16 +5,16 @@ import Mathlib.GroupTheory.Subgroup.Simple
 /-!
 # Homomorphic terminality of a simple nonsofic group
 
-Section 10.5 of the omnimonster dossier: for a *simple* nonsofic group,
-nonsoficity is not a defect at the margin but a total one.  Every homomorphism
-into a sofic group is trivial, so the group has no nontrivial sofic image at
-all, and it embeds in no sofic group.  Section 10.3: every proper quotient is
-sofic, so a simple nonsofic group is quotient-minimal among nonsofic groups.
+For a *simple* nonsofic group, nonsoficity is not a defect at the margin but a
+total one.  Every homomorphism into a sofic group is trivial, so the group has
+no nontrivial sofic image at all, and it embeds in no sofic group.  Dually,
+every proper quotient of it is sofic, so a simple nonsofic group is
+quotient-minimal among nonsofic groups.
 
 Everything here is two lines from simplicity together with the one permanence
 property of soficity that `Sofic/SoficTransfer` already proves --
 `isSofic_of_injective`.  No small-cancellation input is involved, and nothing
-in this file is specific to the dossier's construction: the hypotheses are
+in this file is specific to any particular construction: the hypotheses are
 `IsSimpleGroup` and `¬ IsSofic`, so the conclusions apply to any simple
 nonsofic group, however obtained.  `Monsters/LeavittMonsters` supplies the
 nonsofic half from this library's own witness.
@@ -35,7 +35,7 @@ variable {G H S : Type*} [Group G] [Group H] [Group S]
 
 /-- Containing a nonsofic group is an obstruction to soficity: the
 contrapositive of `isSofic_of_injective`.  This is the only permanence fact
-about soficity the dossier uses. -/
+about soficity anything in this directory uses. -/
 theorem not_isSofic_of_injective (f : H →* G) (hf : Function.Injective f)
     (hH : ¬ IsSofic H) : ¬ IsSofic G :=
   fun hG ↦ hH (isSofic_of_injective f hf hG)
@@ -49,7 +49,7 @@ theorem not_injective_of_isSofic (hG : ¬ IsSofic G) (hS : IsSofic S)
 
 /-! ### Terminality -/
 
-/-- **Section 10.5.**  Every homomorphism from a simple nonsofic group to a
+/-- **Terminality.**  Every homomorphism from a simple nonsofic group to a
 sofic group is trivial.  The kernel is normal, hence trivial or everything; if
 it were trivial the group would embed in a sofic group and so be sofic. -/
 theorem hom_eq_one_of_not_isSofic [IsSimpleGroup G] (hG : ¬ IsSofic G)
@@ -77,7 +77,7 @@ theorem hom_eq_one_of_finite [IsSimpleGroup G] (hG : ¬ IsSofic G)
 
 /-! ### Quotient-minimality -/
 
-/-- **Section 10.3.**  Every proper quotient of a simple group is trivial,
+/-- **Quotient-minimality.**  Every proper quotient of a simple group is trivial,
 hence finite, hence sofic.  A simple nonsofic group is therefore minimal for
 nonsoficity under passage to quotients, while remaining non-minimal under
 passage to subgroups whenever it contains a proper nonsofic subgroup. -/
@@ -102,9 +102,8 @@ theorem isSofic_of_proper_quotient {Q : Type} [Group Q] [IsSimpleGroup G]
 
 /-! ### Endomorphisms
 
-Simplicity alone; recorded here because the dossier lists them alongside the
-terminality statements and they are what makes "every proper quotient is
-trivial" usable in the endomorphism direction. -/
+Simplicity alone; recorded here because they are what makes "every proper
+quotient is trivial" usable in the endomorphism direction. -/
 
 /-- Every nontrivial endomorphism of a simple group is injective. -/
 theorem injective_of_exists_ne_one [IsSimpleGroup G] (φ : G →* G)

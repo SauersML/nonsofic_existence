@@ -10,13 +10,13 @@ relations
 
   `tᵢsⱼ = δᵢⱼ`,   `∑ᵢ sᵢtᵢ = 1`,
 
-the presentation `(L_d)` of the compression dossier.  The images of the
-generators form a `CompleteMatrixFamily` over `Fin d` — the repository's
-packaging of a `d`-ary Leavitt family.
+the `d`-ary analogue of the two Leavitt relations `(eq:leavitt)` of the
+manuscript.  The images of the generators form a `CompleteMatrixFamily` over
+`Fin d` — the repository's packaging of a `d`-ary Leavitt family.
 
 The quotient is nontrivial because it acts on `k`-valued functions on
 infinite `d`-ary streams by prefixing and deleting initial letters
-(the dossier's shift representation, §7).  Faithfulness of this
+(the shift representation).  Faithfulness of this
 representation is neither claimed nor needed.  Countability over a countable
 field and finite type over `k` are inherited from the free algebra.
 -/
@@ -37,7 +37,7 @@ def freeS (i : Fin d) : Free k d := FreeAlgebra.ι k (Sum.inl i)
 /-- The generator `tᵢ` of the free algebra. -/
 def freeT (i : Fin d) : Free k d := FreeAlgebra.ι k (Sum.inr i)
 
-/-- The defining relations `(L_d)`. -/
+/-- The defining relations `tᵢsⱼ = δᵢⱼ` and `∑ᵢ sᵢtᵢ = 1`. -/
 inductive Relation : Free k d → Free k d → Prop
   | orthogonal (i j : Fin d) :
       Relation (freeT k d i * freeS k d j) (if i = j then 1 else 0)
