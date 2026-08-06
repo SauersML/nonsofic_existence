@@ -1,24 +1,16 @@
 import NonsoficGroupsExist.IncomparableUnipotents
 
 /-!
-# The two kill moves for negative parts
+# The unipotent kill move for negative parts
 
 The width-three reduction eliminates the degree `-1` part of a narrow
-unit by two moves, each an explicit product with a compiled
-diagonal-class-group certificate:
-
-* **unipotent kill** — right multiplication by `1 - λ·s_x t_y` for an
-  incomparable pair removes the term `λ·s_x t_y` from the negative
-  part exactly, provided the annihilation hypotheses hold (the
-  "supply conditions"); the only other effect is a balanced shift.
-
-* **swap convert** — left multiplication by the signed swap
-  `σ_{x,β}` with a fresh deep `β` annihilates ALL `x`-rooted negative
-  content (through the `1 - p_x` factor) and leaves in exchange a
-  single fresh monomial `s_x t_β` with incomparable sides.
-
-Both conclusions are exact value formulas, ready for the terminating
-induction.
+unit monomial by monomial.  This file provides the workhorse: right
+multiplication by the incomparable unipotent `1 - λ·s_x t_y` removes
+the term `λ·s_x t_y` from the value exactly, provided the supply
+(annihilation) hypotheses hold; the only other effect is a balanced
+shift by `-λ·b·s_x t_y`.  The conclusion is an exact value formula,
+ready for the terminating induction, and the class relation is an
+equivalence through the compiled incomparable-unipotent certificate.
 -/
 
 namespace NonsoficGroupsExist
