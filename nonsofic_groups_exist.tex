@@ -13,6 +13,7 @@
 \usepackage{marginnote}
 \usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\hypersetup{pdftitle={Nonsofic Groups Exist},pdfsubject={sofic groups, property (T), Leavitt algebras},pdfkeywords={sofic groups, property (T), expander graphs, Leavitt algebras, Thompson's group, elementary groups}}
 
 %%% --------------------------------------------------------------------
 %%% Margin cross-references to the accompanying Lean development.
@@ -1083,7 +1084,7 @@ Let \(A\) be a unital ring.  Recall \(x_{ij}(a)=I_r+aE_{ij}\) for \(i\ne j\), th
 where \([g,h]=ghg^{-1}h^{-1}\).
 
 \begin{lemma}[Whitehead commutator lemma]\label{lem:whitehead}%
-\leanverified{\leanmod{Leavitt/Whitehead}{whitehead_commutator,whitehead_diagonal}\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_whitehead}\leanmod{Leavitt/DiagonalElementary}{firstDiagonalUnit_mem_of_mem_commutator}\leannote{The two displayed identities are the \texttt{Whitehead} pair; the closing clause---a product of commutators of units at a diagonal position lies in $\EL_m$---is \texttt{firstDiagonalUnit\_mem\_of\_mem\_commutator}, stated at the rank the argument uses.}}%
+\leanverified{\leanmod{Leavitt/Whitehead}{whitehead_commutator,whitehead_diagonal}\leanmod{Leavitt/MatrixDiagonalization}{exists_elementary_whitehead}\leanmod{Leavitt/DiagonalElementary}{firstDiagonalUnit_mem_of_mem_commutator}\leannote{The two displayed identities are the \texttt{Whitehead} pair; the closing clause---a product of commutators of units at a diagonal position lies in $\EL_m$---is \texttt{firstDiagonalUnit_mem_of_mem_commutator}, stated at the rank the argument uses.}}%
 Let \(A\) be a unital ring and \(a,b\in A^\times\).  Put
 \[
  w(a)=x_{12}(a)\,x_{21}(-a^{-1})\,x_{12}(a)=\begin{pmatrix}0&a\\-a^{-1}&0\end{pmatrix}.
@@ -1298,11 +1299,10 @@ Thompson's group \(V\) is not LEF.
 
 \begin{proof}
 Let \(x_0,x_1\in V\) be the tree tables
-\[
- x_0:\ \{\,00\mapsto0,\ 01\mapsto10,\ 1\mapsto11\,\},
- \qquad
+\begin{gather*}
+ x_0:\ \{\,00\mapsto0,\ 01\mapsto10,\ 1\mapsto11\,\},\\
  x_1:\ \{\,0\mapsto0,\ 100\mapsto10,\ 101\mapsto110,\ 11\mapsto111\,\}
-\]
+\end{gather*}
 (\(x_1\) acts as \(x_0\) inside the cylinder \(1\) and as the identity outside it; Figure~\ref{fig:x0} draws the pair of trees of \(x_0\)).  Both relators \eqref{eq:Frelators} hold for \((a,b)=(x_0,x_1)\): each side is a composition of finitely many prefix substitutions, and refining all tables to a common leaf depth and comparing leaf images is a finite computation.  The pair does not commute: on the point \(011^\infty\) of the Cantor set,
 \[
  x_0x_1(011^\infty)=x_0(011^\infty)=101^\infty,
