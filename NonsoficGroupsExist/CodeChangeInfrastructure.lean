@@ -245,6 +245,9 @@ section Scalars
 
 variable {k : Type*} [Field k] [Algebra k A]
 
+-- `k` occurs only in the proof body (`Submodule.span k`), never in the
+-- statement, so it is not auto-included and has to be pulled in explicitly.
+include k in
 /-- The sign flip lies in the diagonal class group. -/
 theorem signFlip_mem [Nontrivial A]
     (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1)
@@ -265,6 +268,8 @@ noncomputable def cylTransposition {a b : List (Fin 2)}
     (hab : ¬a <+: b) (hba : ¬b <+: a) : Aˣ :=
   L.signFlip b * L.signedSwap hab hba
 
+-- Same story as `signFlip_mem`: `k` is named only in the proof term.
+include k in
 theorem cylTransposition_mem [Nontrivial A]
     (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1)
     {a b : List (Fin 2)} (hab : ¬a <+: b) (hba : ¬b <+: a) :

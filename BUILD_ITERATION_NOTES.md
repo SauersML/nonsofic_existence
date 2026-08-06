@@ -2160,3 +2160,30 @@ Composition law Ω_{e,d}·Ω_{d,c} = Ω_{e,c} available throughout.
     transposition units (∈ H via cylTransposition_mem).
 - After that: rectangular pivot lemma; the Ω-intertwiner
   narrow-reduction (session 38b design); assembly.
+
+## Session 40: CodeChangeUnits.lean — THE V-GENERATION THEOREM WRITTEN
+- codeChange_mem_stableUnits: for pair lists P with both projections
+  complete prefix codes, any unit valued Σ S(tᵢ)T(sᵢ) is in H.
+  Strong induction on |P|:
+  n = 0: completeness gives 0 = 1, absurd.  n = 1: cylinder = 1
+  forces ε (eq_nil_of_cylinder_eq_one via the opposite first letter),
+  value = 1.
+  n = m+2: source siblings extracted to the head via perm_cons_erase
+  (twice, mem_erase_of_ne); hypotheses transported (IsCompleteCode.
+  perm, pairValue_perm); target siblings from exists_sibling_pair;
+  TWO alignSteps (uniform id-or-transposition, alignStep_mul_pairValue
+  handles both) sending head targets to (v0, v1) — the key
+  distinctness hv0y₁ by three-way case analysis on swapWord;
+  target-code completeness maintained via map_swapWord_perm
+  (nodup + membership); explicit head structure hP₂struct; MERGE via
+  merge_identity_one; merged codes complete via IsCompleteCode.merge
+  (children-prefix argument + cylinder-sum preservation); IH at m+1;
+  unwind with alignStep_mem + group.
+- Supporting: swapWord_self/left/right/other; map_swapWord_perm
+  (erase-erase decomposition, fixes off-support, Perm.swap);
+  eq_nil_of_cylinder_eq_one; alignStep (dependent-if unit) + action
+  + membership; IsCompleteCode.{nodup, perm, merge}.
+- User is live-fixing binder/deprecation issues in parallel
+  (Perm.pairwise_iff symmetry witness inline — thanks!).
+- REMAINING WRITES: rectangular pivot; the Ω-intertwiner narrow
+  reduction (session 38b); NarrowReduction/B4 assembly; docstrings.
