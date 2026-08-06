@@ -1339,3 +1339,18 @@ mathematics settled in sessions 24–25:
    swap pivots; swaps now ∈ H).  THE remaining mathematical gap.
    After it: NarrowReduction ⟹ ScalarReduction (ResidualReduction
    wiring, written) ⟹ B4 ⟹ Theorem C.
+
+## Session 25e: GradedComponents.lean written
+- exists_components: window element = Σ_{d ∈ Icc lo hi} y d with
+  y d ∈ span(deg d d), vanishing outside window (span_induction;
+  if-then-else component functions; Finset.sum_eq_single).
+- components_unique: via graded_independence_all on differences.
+- exists_mem_span_degreeMonomials ALREADY EXISTS (BinaryLeavittWindow,
+  compiled green) — exhaustion is done.
+- NEXT MODULES TO WRITE (roadmap in 25d): PureTailNilpotency (use
+  exists_components on u⁻¹ + components_unique on the product
+  equations — the product of window elements decomposes via
+  window_mul_mem_span then extract componentwise equations by
+  comparing the two decompositions of ↑u·↑u⁻¹ = 1);
+  RankNormalForm; ZeroKOne (the (P) keystone); WidthTwoReduction;
+  then the width-3 math.
