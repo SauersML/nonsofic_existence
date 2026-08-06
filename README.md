@@ -352,6 +352,15 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       pair to standard atoms (`GLPairNormalization`), and the
       coefficientwise action of transported scalar matrices on the
       five pencil matrices (`PencilEntryArith`)
+    - [x] complete-code supply and vector normalization
+      (`CompleteCodeSupply`, `GLVectorNormalization`): complete
+      prefix families of every positive size by iterated splitting,
+      and any nonzero vector as a column of an invertible matrix
+    - [x] the row-clearing move (`RowClearMove`): once a column
+      carries the exact shift atom, one square-zero block unipotent
+      erases the atom rows everywhere else — collision lemmas,
+      `t_z`-collapses, and the full value computation splitting both
+      double sums at the distinguished rows
     - [ ] the extraction step: when the scalar stacks `[B₀;B₁;C]` /
       `(A₀|A₁|C)` are rank-deficient, pure-`t` columns and pure-`s`
       rows split off invertible `τ/ς` shift blocks by an exact

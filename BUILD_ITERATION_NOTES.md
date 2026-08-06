@@ -2783,3 +2783,39 @@ ASSEMBLY MAP for exnorm (next session, all ingredients now exist):
      lemma (exists G invertible with G.mulVec e_{j₀} = v₀ — i.e.
      v₀ as a COLUMN of an invertible matrix; equivalently extend
      {v₀} to a basis — write exists_isUnit_matrix_col_eq next).
+
+## Session 47: normalization toolkit COMPLETE
+All extraction-step ingredients now written (pending user compile):
+- CompleteCodeSupply: family_transport, exists_complete_family
+  (induction: root code + split_family via equivOfCardEq),
+  exists_complete_family_of_nonempty.
+- GLVectorNormalization: exists_isUnit_matrix_col (v ≠ 0 as the
+  j₀-column of an invertible matrix, via linearIndependent_unique +
+  linearIndepOn_id + Basis.extend + one swap; NOTE the modern name
+  linearIndepOn_id replaces to_subtype_range — user fixed the pair
+  version).
+- RowClearMove: pencilVal_mul_wordS (column collapse),
+  t_zero/one_collapse, row_clear — the correction N (square-zero,
+  code_unipotent_mem on {j₀}×erase j₀), the atom-column value
+  (u·S(C j₀) = S(R i₁)t₀ + S(R i₂)t₁), the correction identity
+  u·N = Σ_{j≠j₀}(atom-row terms), and the final six-way
+  add_sum_erase split closed by abel.
+REMAINING for goal (1): (a) FullExtraction.lean — compose:
+ exists kernel vector of [B₀;B₁;Cm]-stack ⟹ (right codeScalar move
+ with exists_isUnit_matrix_col putting v₀ into column j₀;
+ pencilVal_mul_codeScalar) ⟹ (column j₀ pure-t; independence via
+ t_combo_not_left_invertible against the witness T(C j₀)u⁻¹ +
+ dependence-dichotomy over k) ⟹ (left codeScalar move with
+ exists_isUnit_matrix_mulVec_pair; codeScalar_mul_pencilVal) ⟹
+ row_clear ⟹ atom_peel (D from exists_complete_family_of_nonempty;
+ nonempty since independence forces card ι ≥ 2).
+ (b) the ς-mirror (mirror FullExtraction: pure-s ROW: either θ-
+ transport or the symmetric proofs — the row-versions of
+ pencilVal_mul_wordS-hmm wordT-mul-pencilVal etc).
+ (c) M5 master induction (strong induction on card ι + card κ;
+ branches: b = 0/a = 0 window-kill-direct; witness-dichotomy via
+ CodeRelativeFullness + WindowDichotomy; extraction via
+ FullExtraction; stuck-branch: batch refine + progress theorem).
+ (d) M6 NarrowDischarge (exists_pencil_form bridge; top-level codes
+ are fullBinaryCode; conclude NarrowReduction k).
+ (e) cleanup + full build.

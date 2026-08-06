@@ -123,8 +123,11 @@ theorem row_clear [Nontrivial A]
     show (1 : A) - N = 1 + ∑ p ∈ ({j₀} : Finset κ) ×ˢ
       Finset.univ.erase j₀, L.wordS (C.word p.1) * -(x p.2) *
         L.wordT (C.word p.2)
-    rw [Finset.singleton_product, Finset.sum_map, hN,
-      ← Finset.sum_neg_distrib]
+    -- `sum_map` leaves the `Prod.mk j₀` embedding applied, so the summand
+    -- is not yet in the shape `sum_neg_distrib` matches.
+    rw [Finset.singleton_product, Finset.sum_map, hN]
+    simp only [Function.Embedding.coeFn_mk]
+    rw [← Finset.sum_neg_distrib]
     refine congrArg (1 + ·) (Finset.sum_congr rfl fun j _ ↦ ?_)
     show -(L.wordS (C.word j₀) * x j * L.wordT (C.word j)) =
       L.wordS (C.word j₀) * -(x j) * L.wordT (C.word j)
@@ -153,7 +156,7 @@ theorem row_clear [Nontrivial A]
       hB₀0 i₁, hB₁0 i₁, if_pos rfl, if_neg hne]
     unfold pencilEntry
     simp only [one_smul, zero_smul, add_zero, zero_add]
-    noncomm_ring
+    abel
   -- the subtracted correction
   have hK : (u : A) * N = ∑ j ∈ Finset.univ.erase j₀,
       (L.wordS (R.word i₁) * L.pencilEntry (k := k) (A₀ i₁ j)
