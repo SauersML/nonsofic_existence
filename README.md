@@ -6,56 +6,86 @@ finitely presented one does — settling a question of Weiss, open since 2000.
 The witness is explicit: `EL₄(L_{𝔽₂}(1,2))`, the rank-four elementary group
 over the universal binary Leavitt algebra, defined as the quotient of the free
 algebra by its five displayed relations. It is infinite, finitely generated,
-has Kazhdan's property `(T)`, and is not sofic. `TableCover` then builds its
-finitely presented cover and `KazhdanCover` the Kazhdan one.
+has Kazhdan's property `(T)`, and is not sofic — and by an explicit rank
+equivalence, so is `EL_{m+1}(L_{𝔽₂}(1,2))` for every `m ≥ 1`. `TableCover`
+builds a finitely presented nonsofic cover and `KazhdanCover` a Kazhdan one.
 
-The accompanying manuscript is `nonsofic_groups_exist.tex`; every numbered
-result in it carries a margin note naming the declarations below that
-formalize it.
+The accompanying manuscript is `nonsofic_groups_exist.tex`. Every numbered
+result in it carries a margin note naming the declarations that formalize it,
+and the correspondence is machine-checked in both directions (see below).
 
 ```
 lake exe cache get && lake build     # the library, with its axiom reports
-lake env lean scripts/Audit.lean     # kernel audit: axioms and statements
+lake env lean scripts/Audit.lean     # kernel audit: axioms, statements, findings
 python3 scripts/check.py             # source audit: what the kernel cannot see
 ```
 
 ## Where to start reading
 
 `NonsoficGroupsExist.Public` — the reading path. It proves nothing; it names
-the ~20 declarations a referee needs, each against the theorem of the
-manuscript it establishes, and you follow the imports downward from there.
+the declarations a referee needs, each against the theorem of the manuscript
+it establishes, and you follow the imports downward from there.
 
-The headline theorems, all in `MainResults`:
+The headline theorems, all reachable from `Endpoint/MainResults`:
 
 | Declaration | Statement |
 | --- | --- |
 | `nonsofic_groups_exist` | A nonsofic group exists |
 | `universalLeavittEL4_not_isSofic` | The explicit witness is not sofic |
 | `ambient_full_profile` | It is countable, finitely generated, infinite, and Kazhdan too |
+| `universalLeavitt_profile` | The same profile at every elementary rank `≥ 2` (Theorem A in full) |
 | `exists_finitelyPresented_nonsofic_group` | A finitely presented nonsofic group exists |
 | `exists_infinite_finitelyPresented_nonsofic_ambient_cover` | One of them covers the explicit group |
+| `binaryLeavitt_finiteField_profile` | Theorem B's elementary ranks, over every finite field |
+| `binaryLeavittUnits_profile`, `binaryLeavittGL_profile` | Theorem B(i): the unit group and every `GL_r`, closed |
+| `KazhdanCover.exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Theorem C's Kazhdan refinement |
 
 ## What is proved here rather than assumed
 
-The manuscript cites four external theorems. Three are proved in this library,
-so they are inputs to the paper and not to the development:
+The manuscript's proofs cite external theorems, as papers do. This library
+proves **every one of them internally**, in the exact forms used, so nothing
+cited remains an input to any endpoint:
 
-- **Kun's expander decomposition** — `KunDecomposition.exists_expanderDecomposition`,
-  in the one-way full-sequence form used. (The four-way equivalence of Kun's
-  Theorem 3 is *not* imported; its spectral implication fails as written, and
-  the counterexample is formalized in `KunSpectralCounterexample`. See the
+- **Kun's expander decomposition** —
+  `KunDecomposition.exists_expanderDecomposition`, in the one-way,
+  full-sequence form used. (The four-way equivalence of Kun's Theorem 3 is
+  *not* imported; its spectral implication fails as written, and the
+  counterexample is formalized in `KunSpectralCounterexample`. See the
   literature audit below.)
-- **The Kun–Thom centralizer obstruction** — `KunThomTheorem.isLEF_of_exactProductExpansion`.
-- **Shalom's finitely presented Kazhdan covers** — `Shalom.exists_finitelyPresented_kazhdan_cover`.
+- **The Kun–Thom centralizer obstruction** —
+  `KunThomTheorem.isLEF_of_exactProductExpansion`, with its essential-expander
+  wrapper `KunThomEssential.isLEF_of_matchingCertificate`.
+- **Property `(T)` at rank three** —
+  `FiniteFieldElementaryPropertyT.finiteFieldElementaryThree_hasKazhdanPropertyT`:
+  for finite-type algebras over every finite field, in every characteristic,
+  with an explicit Kazhdan pair. This is the case the manuscript states and
+  consumes; `LeavittRankEquivalence.rankSuccEquiv` spreads it to every rank.
+- **Shalom's finitely presented Kazhdan covers** —
+  `Shalom.exists_finitelyPresented_kazhdan_cover`.
+- **The non-LEF witness** — no simplicity or finite-presentation theorem for
+  Thompson's `V` is used. `ThompsonFObstruction` proves the two-relator
+  obstruction (two noncommuting elements satisfying the Thompson-`F` relators
+  kill LEF), the witness is a two-generator subgroup of explicit cylinder
+  units (`ThompsonWitness`), and its elementary membership goes through
+  single-commutator certificates: every cylinder transposition is one explicit
+  commutator (`cylinderSwap_is_commutator`). `V` itself is proved non-LEF
+  along the way (`thompsonV_not_isLEF`).
 
-The fourth, property `(T)` for elementary groups over arbitrary finitely
-generated rings, is genuinely imported; the characteristic-two cases the
-endpoints use are proved in `FreeElementaryPropertyT`.
+The `K₁`-theoretic inputs are eliminated as well, by the elementary two-exit
+elimination written out as Appendix A of the manuscript:
 
-The `K₁`-theoretic input is eliminated as well: `BinaryLeavitt.K1_trivial`
-proves `K₁(L_k(1,2)) = 0` in Whitehead form by an elementary two-exit
-elimination, so the Ara–Brustenga–Cortiñas localization sequence is
-independent confirmation rather than a dependency.
+- `BinaryLeavitt.K1_trivial` — `K₁(L_k(1,2)) = 0` in Whitehead form, over
+  every field, so the Ara–Brustenga–Cortiñas localization sequence is
+  independent confirmation rather than a dependency.
+- `BinaryLeavitt.elementaryGroup_eq_top` / `glAll_eq_elementary` —
+  `GL_n(L_k(1,2)) = EL_n` at **every** rank `n ≥ 2`, by flattening transport
+  from rank two, with no Gaussian elimination beyond the formalized rank-two
+  case.
+- `BinaryLeavitt.binaryLeavittUnits_perfect` — the unit group is perfect,
+  removing the last use of Ara–Goodearl–Pardo.
+- `binaryLeavittRankTwo_not_isSofic` — the manuscript's rank-two realization
+  (`thm:el2`), instantiated by the two-by-two compression theorem itself:
+  every one of its hypotheses is a closed theorem here.
 
 ## Trust surface
 
@@ -67,8 +97,12 @@ Three independent gates, none subsuming another:
 
 - `NonsoficGroupsExist.Audit` prints the axiom report on an ordinary build.
 - `scripts/Audit.lean` walks the transitive axiom closure of the whole
-  namespace through the kernel environment, and pins the headline statements
-  by restating them — a weakened statement stops typechecking.
+  namespace through the kernel environment, pins the headline statements by
+  restating them — a weakened statement stops typechecking — and runs twelve
+  finding scans (laundered propositions, unwitnessed structures, unused
+  binders, stale disclaimers, and more). **All twelve report zero findings**
+  over the full namespace; the named propositions it depends on carry positive
+  controls (closed witnesses), so no hypothesis class is vacuously assumed.
 - `scripts/check.py` scans the source text, which sees what the kernel cannot:
   comments, docstrings, and files that are never compiled at all. Every
   detector is calibrated in both directions by `--self-test`.
@@ -79,7 +113,6 @@ discharged as theorems rather than left as caveats:
 `hasKazhdanPropertyT_iff_textbook` shows the real-orthogonal, own-universe
 property `(T)` used throughout is the textbook complex-unitary property over
 every universe; `isLEF_iff_textbook` does the same for local embeddability.
-
 
 ## How to verify
 
@@ -101,144 +134,98 @@ The source scan must report every planted calibration defect, all project
 modules in the root import closure, and no real-source finding. The build must
 finish with zero warnings and errors. Each public and load-bearing declaration
 printed by `NonsoficGroupsExist.Audit` must report exactly `propext`,
-`Classical.choice`, and `Quot.sound`; `scripts/Audit.lean` additionally rejects
-any other axiom in the transitive closure of the entire namespace.
+`Classical.choice`, and `Quot.sound`; `scripts/Audit.lean` additionally
+rejects any other axiom in the transitive closure of the entire namespace and
+fails on any finding in any scan.
 
 CI also runs the pinned Lean toolchain's built-in `leanchecker --fresh` on
-`NonsoficGroupsExist.olean`. The exact command is in
-`.github/workflows/prover.yml`; success is exit status zero after every
-imported olean has been replayed into a fresh kernel environment. A cold
-dependency download requires several gigabytes, and a cold project build can
-take hours; subsequent cached builds are substantially faster.
+`NonsoficGroupsExist.olean`; success is exit status zero after every imported
+olean has been replayed into a fresh kernel environment. A cold dependency
+download requires several gigabytes, and a cold project build can take hours;
+cached builds are substantially faster.
 
 The `official/` directory contains OpenAI's proof documents. They are not
-imported by Lean and are distinct from the main
-`nonsofic_groups_exist.tex` manuscript. The validated built PDF is
-intentionally committed to `main` by the PDF workflow.
+imported by Lean and are distinct from the main `nonsofic_groups_exist.tex`
+manuscript. The validated built PDF is intentionally committed to `main` by
+the PDF workflow.
 
-## Claim map
+## Claim map and margin notes
 
 Every numbered result of `nonsofic_groups_exist.tex` is listed with its Lean
 counterpart in **[docs/CLAIM_MAP.md](docs/CLAIM_MAP.md)** — status, modules,
 declarations, and any way the Lean statement differs in generality from the
-printed one.
-
-That file is generated, not maintained.  The table it replaced was written by
-hand and drifted into contradicting itself: one row recorded `thm:kcover` as
-manuscript-only while the checklist above it recorded the same theorem as
-formalized, and the manuscript inherited the wrong half.  The generated table
-is derived from the manuscript's own margin notes resolved against the Lean
-source, and `scripts/check.py` fails if it goes stale, so the two cannot
-disagree without CI saying so.
+printed one. That file is generated from the manuscript's own margin notes
+resolved against the Lean source, and `scripts/check.py` fails if it goes
+stale, so the two cannot disagree without CI saying so.
 
 ```
 python3 scripts/claim_map.py           # summary: statuses and coverage
 python3 scripts/claim_map.py --write   # regenerate docs/CLAIM_MAP.md
-python3 scripts/claim_map.py --json    # the map as data
+python3 scripts/check_lean_refs.py     # every \leanmod margin note resolves
 ```
 
+The margin notes are strictly marginal: no argument in the paper appeals to
+one, and setting `\leanlinksfalse` in the preamble removes all of them and
+leaves the text untouched. The PDF workflow runs the reference check before
+compiling, so a stale note blocks the build instead of shipping inside the
+PDF.
 
-## Margin cross-references in the manuscript
+## Library layout
 
-`nonsofic_groups_exist.tex` carries a margin note on each numbered statement
-naming the Lean modules and declarations that formalize it, so the
-correspondence is visible at the point of use rather than only in this file.
-The notes are strictly marginal: no argument in the paper appeals to one, and
-setting `\leanlinksfalse` in the preamble removes all of them and leaves the
-text untouched.  Appendix A of the manuscript explains the three note forms
-(formalized / partly formalized / not formalized) and the trust surface.
+The library follows the paper's structure; each directory is a section.
 
-Nothing keeps such references true by itself, so they are checked rather than
-trusted:
-
-```
-python3 scripts/check_lean_refs.py
-```
-
-extracts every `\leanmod{Module}{decls}` from the manuscript and fails unless
-each module exists and each declaration is actually declared in it.  The PDF
-workflow runs it before compiling, so a stale reference blocks the build
-instead of shipping inside the PDF.  `scripts/lean_decls.py` builds the
-declaration index it resolves against, and prints it when run directly.
-
-## Module architecture
-
-| Layer | Principal modules | Role |
+| Directory | Paper | Contents |
 | --- | --- | --- |
-| External definitions | `Sofic`, `LEF`, `Kazhdan`, `ElementaryGroup` | Hamming models, local embeddings, real-orthogonal property `(T)`, and `EL_n` |
-| Kun decomposition | `KunFiniteMarkov` through `KunDecomposition` and `KunFixedDecomposition` | Turns property `(T)` sofic models into negligible-edit uniform expander components |
-| Compression matching | `CompressionSetup`, `Criterion`, `MatchingPreparation`, `MatchingSelection`, `SelectionOutput` | Matches core and ambient components and localizes the product action |
-| Kun–Thom obstruction | `KunThomFiniteMarkov` through `KunThomTheorem` and `KunThomEssential` | Extracts LEF from exact-product expansion after repairing the relation to a permutation |
-| Property `(T)` | `FreeRoot*`, `A2*`, `Kazhdan*`, `FreeElementaryPropertyT` | Proves the free characteristic-two `EL₃` Kazhdan input |
-| Universal Leavitt witness | `UniversalLeavitt`, `LeavittRankEquivalence`, `UniversalRankFour`, `UniversalPropertyT`, `UniversalCompressionSetup` | Constructs the closed `EL₄(L_{𝔽₂}(1,2))` setup |
-| Finite-field compression | `FiniteFieldLeavitt` | Constructs the complete rank-four setup over every finite field; property `(T)` and nonsoficity currently specialize to characteristic two |
-| Endpoint and verification | `CriterionAssembly`, `TableCover`, `MainResults`, `Audit`; `scripts/Audit.lean` | Closes nonsoficity, builds the finitely presented cover, and audits statements and axioms |
+| `Sofic/` | §2 | Sofic approximations, LEF, generator graphs, the two-relator obstruction |
+| `Kazhdan/` | §2 | Real-orthogonal property `(T)`, complexification, universe transfer, GNS |
+| `Kun/` | §2.5 | The one-way expander decomposition, proved (with the Lemma 10 repair) |
+| `KunThom/` | §2.5 | The centralizer obstruction, proved (with the relation-to-permutation repair) |
+| `Matching/` | §3 | The five finite lemmas: refinement, conservation, pinning, selection, completion |
+| `Criterion/` | §4 | Median normalization, matching, localization; the compression–centralizer theorem |
+| `Leavitt/` | §5–§6 | Leaf calculus, self-similarity, rank equivalence, compressors, the corner witness |
+| `PropertyT/` | §5 | Property `(T)` at rank three over every finite field, from an explicit `A₂` gap |
+| `KOne/` | Appendix A | The elementary `K₁` elimination: windows, pencils, the two-exit loop, all-ranks `GL = EL` |
+| `Covers/` | §9 | The finite-table and Kazhdan finitely presented covers |
+| `Endpoint/` | §1 | `MainResults`, `Public`, and the in-build `Audit` |
+
+The separate `Superseded` library holds developments that later proofs
+replaced (earlier `K₁` routes, the master-induction scaffolding). It is a
+default build target so it cannot rot, but the library root does not import
+it: nothing in it is on the trust surface.
 
 ## Literature audit: Kun's spectral characterization
 
 Version 5 of Kun's *On sofic approximations of Property (T) groups*
 ([arXiv:1606.04471](https://arxiv.org/abs/1606.04471)) states Theorem 3 as an
-equivalence.  Its final implication, `(4) -> (1)`, is not valid as written.
-The proof invokes the ordinary Cheeger/Dodziuk--Alon--Milman eigenvalue-gap
-bound to obtain an estimate for `M^2`.  Ordinary Cheeger expansion bounds the
-nonconstant spectrum away from `+1`; it does not bound the bottom of the
-Markov spectrum away from `-1`.  Uniform expanders can be arbitrarily close to
-bipartite, so their least eigenvalues can approach `-1` without being exactly
-`-1`.  More explicitly, make a degree-preserving two-edge switch in each graph
-of a bipartite expander family, and then form one sequence containing repeated
-copies of every switched graph.  The components retain a uniform Cheeger
-constant, while their least Markov eigenvalues approach `-1`.  Repeating a
-least-eigenvalue eigenvector on all copies makes its `L2` norm proportional to
-the square root of the total vertex count, so the additive `L-infinity` error
-in condition `(1)` cannot absorb the defect.  This gives a sequence satisfying
-conditions `(2)`, `(3)`, and `(4)` but not `(1)`.  Thus the full four-way
-equivalence must not be imported or used here.
+equivalence. Its final implication, `(4) → (1)`, is not valid as written: the
+proof invokes the Cheeger/Dodziuk–Alon–Milman bound, which separates the
+nonconstant Markov spectrum from `+1` but not from `-1`, and uniform expanders
+can be arbitrarily close to bipartite. Concretely, a degree-preserving
+two-edge switch in each graph of a bipartite expander family, repeated, gives
+a sequence satisfying conditions `(2)`–`(4)` but not `(1)`; the counterexample
+is formalized in `KunSpectralCounterexample`. The equivalence is therefore not
+imported here.
 
-This defect does not by itself refute Kun's Theorem 1.  In the same paper,
-Proposition 11 establishes condition `(2)`, and the proof of Theorem 1 needs
-only the forward combinatorial implications `(2) -> (3) -> (4)`.  The invalid
-spectral implication `(4) -> (1)` is the reverse direction.  This repository's
-required Kun dependency is therefore the one-way expander-decomposition
-result.  The compiled Lean proof derives it from the forward property-`(T)`
-partition-and-repair argument without appealing to the false equivalence.  It
-also uses a full-sequence diagonal accuracy choice, so its conclusion applies
-to the given approximation rather than only a subsequence.
+This defect does not refute Kun's Theorem 1: Proposition 11 of the same paper
+establishes condition `(2)`, and Theorem 1 needs only the forward
+implications. This repository's Kun dependency is exactly that one-way
+expander-decomposition result, proved from the forward property-`(T)`
+partition-and-repair argument, with a full-sequence diagonal accuracy choice
+so the conclusion applies to the given approximation rather than a
+subsequence.
 
-The proved result is the full-generality one-way theorem: for every infinite
-finitely generated property-`(T)` group, every finite symmetric generating set
-containing the identity, and every sofic approximation, construct an
-asymptotically edge-equivalent bounded-degree multigraph whose connected
-components have one uniform positive Cheeger constant.  The fully explicit
-headline declaration for an arbitrary generated set is
-`KunDecomposition.exists_expanderDecomposition`; the generated-set wrapper is
-`KunFixedDecomposition.expanderDecomposition`.
-
-## Literature proof gaps and compiled repairs
-
-The false spectral converse above is not the only issue in the cited proofs.
-Kun's proof of the forward expander-decomposition result normalizes a Markov
-defect in Lemma 10 without first excluding the case in which that defect is
-zero.  The Lean development splits off the zero-vector case before
-normalization and proves the homogeneous displacement estimate separately in
-`Kazhdan.lean`; the subsequent finite-model partition and graph-repair chain
-uses that total estimate.  Thus the compiled proof of Result A does not inherit
-the division-by-zero gap.
-
-The published Kun--Thom centralizer argument also constructs a general
-relation but later treats it as though it were already the graph of a
-permutation.  The Lean proof measures the row and column fibers of the improved
-relation itself, extracts its injective matching core, and completes that core
-to the genuine permutation `repairRelation`.  The theorem
-`KunThomTheorem.isLEF_of_exactProductExpansion`, and its essential-expander
-wrapper `KunThomEssential.isLEF_of_matchingCertificate`, compile without an
-assumed Kun--Thom theorem.  These are repairs of gaps in proofs of the results;
-they do not make the false spectral equivalence true.
-
+Two further proof-level gaps were found and repaired in the course of
+formalization. Kun's Lemma 10 normalizes a Markov defect without excluding
+the case in which it vanishes; the Lean proof splits off the zero-vector case
+before dividing (`Kazhdan.lean`). The published Kun–Thom argument constructs
+a relation between finite models and later treats it as the graph of a
+permutation; the Lean proof extracts the injective matching core of the
+relation and completes it to the genuine permutation `repairRelation`. These
+are repairs of gaps in proofs of true results; they do not make the spectral
+equivalence true.
 
 ## Development history
 
-The checklist archaeology -- what was proved when, in what order, and the
-intermediate results named along the way -- lives in
+The checklist archaeology — what was proved when, in what order, and the
+intermediate results named along the way — lives in
 [docs/HISTORY.md](docs/HISTORY.md), alongside `BUILD_ITERATION_NOTES.md`.
-
-
