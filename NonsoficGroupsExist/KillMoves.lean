@@ -45,42 +45,41 @@ theorem unipotent_kill_step {x y : List (Fin 2)} (hxy : ¬x <+: y)
     rw [hu, hmval]
     have hνform : ν = -(algebraMap k A lam) *
         (L.wordS x * L.wordT y) := by
-      rw [hν, map_neg]
-      have hcomm : L.wordS x * (-(algebraMap k A lam)) =
-          -(algebraMap k A lam) * L.wordS x :=
-        (Algebra.commutes (-lam) (L.wordS x)).symm
-      rw [hcomm, mul_assoc]
+      -- Pull the sign back *into* the scalar first.  `Algebra.commutes` is
+      -- stated for `algebraMap k A (-lam)`, so normalising to
+      -- `-(algebraMap k A lam)` up front makes every rewrite below miss.
+      rw [hν, ← map_neg, ← Algebra.commutes (-lam) (L.wordS x), mul_assoc]
     have haν : a * ν = 0 := by
-      rw [hνform, show a * (-(algebraMap k A lam) *
-        (L.wordS x * L.wordT y)) = -(algebraMap k A lam) *
-        (a * (L.wordS x * L.wordT y)) from by
-          rw [← mul_assoc, ← mul_assoc,
-            (Algebra.commutes (-lam) a).symm, map_neg, mul_assoc,
-            mul_assoc],
-        hasup, mul_zero]
+      rw [hνform, ← map_neg, ← mul_assoc,
+        ← Algebra.commutes (-lam) a, mul_assoc, hasup, mul_zero]
     have hcν : c * ν = 0 := by
-      rw [hνform, show c * (-(algebraMap k A lam) *
-        (L.wordS x * L.wordT y)) = -(algebraMap k A lam) *
-        (c * (L.wordS x * L.wordT y)) from by
-          rw [← mul_assoc, ← mul_assoc,
-            (Algebra.commutes (-lam) c).symm, map_neg, mul_assoc,
-            mul_assoc],
-        hcsup, mul_zero]
+      rw [hνform, ← map_neg, ← mul_assoc,
+        ← Algebra.commutes (-lam) c, mul_assoc, hcsup, mul_zero]
     have hbν : b * ν = -(algebraMap k A lam) *
         (b * (L.wordS x * L.wordT y)) := by
-      rw [hνform, ← mul_assoc, ← mul_assoc,
-        (Algebra.commutes (-lam) b).symm, map_neg, mul_assoc,
-        mul_assoc]
+      have hc : b * algebraMap k A lam = algebraMap k A lam * b :=
+        (Algebra.commutes lam b).symm
+      rw [hνform]
+      calc b * (-(algebraMap k A lam) * (L.wordS x * L.wordT y))
+          = -(b * algebraMap k A lam) * (L.wordS x * L.wordT y) := by
+            noncomm_ring
+        _ = -(algebraMap k A lam * b) * (L.wordS x * L.wordT y) := by
+            rw [hc]
+        _ = -(algebraMap k A lam) * (b * (L.wordS x * L.wordT y)) := by
+            noncomm_ring
     calc (1 + a + c + b) * (1 + ν)
         = 1 + a + c + b + ν + a * ν + c * ν + b * ν := by noncomm_ring
       _ = 1 + a + c + b + ν + b * ν := by
           rw [haν, hcν]
-          noncomm_ring
+          abel
       _ = 1 + (a - algebraMap k A lam * (L.wordS x * L.wordT y)) +
           (c - algebraMap k A lam * (b * (L.wordS x * L.wordT y))) +
           b := by
-          rw [hνform, hbν, map_neg]
-          noncomm_ring
+          -- `hbν` must fire before `hνform`, otherwise rewriting `ν`
+          -- everywhere destroys the `b * ν` occurrence it matches on.
+          rw [hbν, hνform]
+          simp only [neg_mul]
+          abel
   · constructor
     · intro huH
       exact mul_mem huH hmmem

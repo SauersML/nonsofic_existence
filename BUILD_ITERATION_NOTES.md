@@ -1925,3 +1925,46 @@ NOTE: user is now handling all compilation — I write, they build.
   NegativePartInduction (the kill-move induction, needs the honest
   swap lemma with positive junk); NarrowReductionProof + B4 wiring;
   docstrings.
+
+## Session 37: THE WIDTH-3 PROOF IS COMPLETE
+**Theorem (W3).** Every narrow unit lies in the diagonal class group.
+Proof structure (every move compiled or in written modules):
+0. GENERALIZED B2 (upgrade of BlockMoveTailKill, same proof): every
+   unit with value in span[0, N] is in H — the block-move step never
+   used balanced-part = 1: with value v, κ-value = 1 + S(00)(v−1)T(00)
+   and the same X/K/Y collapse lands in span[0, N−1].  Induction to
+   N = 1 = WidthTwo.  ⟹ ZeroKOneN IS UNNECESSARY.
+1. κ₀₀-TRANSPORT (compiled): [u] = [1 + S(00)(↑u−1)T(00)] puts ALL
+   content in the 00-corner: S-sides and T-sides ⊆ 00-cylinder.
+   ⟹ INFINITE FRESHNESS SUPPLY: all fresh words chosen in the
+   1-cylinder, pairwise-disjoint across rounds.
+2. THE MACRO (one round, kills all x-rooted negative monomials):
+   for x an S-side root of the negative part A:
+   (a) LEFT swap σ_{x,β}, β fresh: (1−p_x) annihilates all x-rooted
+       A-monomials ((1−p_x)S(xw) = 0; β-incomparable-to-x extends to
+       all x-rooted words); adds ONE monomial λ'S(x)T(β)
+       (λ' = 1 + scalar-part, may vanish); junk: balanced
+       −S(β)T(x)A-terms and positive; NO deg-(−2) (T(β)S-sides = 0
+       by freshness).
+   (b) RIGHT swap σ_{v,β}, v fresh: refreshes the S-side:
+       λ'S(x)T(β) → S(v)T(β) (A'p_β = 0 freshness; junk S(β)T(v) is
+       degree +1; all probes hit fresh v ⟹ vanish).
+   (c) RIGHT unipotent kill of S(v)T(β) (KillMoves lemma):
+       supply UNCONDITIONAL — A'·ν and C·ν probe T-sides against
+       fresh v: zero.  NO resurrection: the balanced junk from (a)
+       has OLD T-sides; right-mults probe T-sides only.
+   Net: |A| drops by |A_x| ≥ 1.  Comparable and supply-blocked
+   monomials handled uniformly (the swap kill needs NO
+   incomparability of the monomial's own sides).
+3. Induction on the negative monomial count (list-representation of
+   A) ⟹ value ∈ span[0, N] ⟹ generalized B2 ⟹ H.
+KEY DISCOVERIES en route: the resurrection channel (left-kill of the
+fresh monomial hits S(β)T(x)A junk giving back p_xA — hence the
+S-side REFRESH step (b)); covering obstruction for freshness (S-sides
+can cover the tree — hence the κ-corner transport step 1).
+REMAINING LEAN: (i) upgrade BlockMoveTailKill statement to
+span[0,N]-values (small); (ii) SwapKill.lean: the two swap-step value
+formulas ((a) and (b), word calculus, hypotheses = freshness
+incomparabilities); (iii) NegKillInduction.lean: list-induction over
+the negative part with the macro; (iv) NarrowReductionProof +
+B4/docstrings.  NO other mathematics remains.

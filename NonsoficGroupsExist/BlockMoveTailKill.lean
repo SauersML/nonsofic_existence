@@ -43,7 +43,10 @@ theorem pure_positive_tail_mem_stableUnits
       intro τ hτ u hu
       refine window_zero_one_mem_stableUnits k u ?_
       rw [hu]
-      refine Submodule.add_mem _ (L.one_mem_window (k := k)) ?_
+      -- `one_mem_window` lands in the window `0 0`; the target is `0 1`.
+      refine Submodule.add_mem _
+        (L.span_degreeMonomials_mono (by omega) (by omega)
+          (L.one_mem_window (k := k))) ?_
       exact L.span_degreeMonomials_mono (by omega) (by omega) hτ
   | succ N ih =>
       intro τ hτ u hu
@@ -308,20 +311,26 @@ theorem pure_positive_tail_mem_stableUnits
         · have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs00w haw) ht00w
           refine L.span_degreeMonomials_mono ?_ ?_ h1 <;> omega
-        · rw [hX₀]
-          refine L.span_degreeMonomials_mono (by omega) (by omega)
-            (Submodule.subset_span
-              ⟨[0, 0, 0], [0, 1], by simp, by simp, ?_⟩)
-          rw [show ([0, 0, 0] : List (Fin 2)) = [0, 0] ++ [0] from
-            rfl, L.wordS_append]
-          simp [wordS]
-        · rw [hX₁]
-          refine L.span_degreeMonomials_mono (by omega) (by omega)
-            (Submodule.subset_span
-              ⟨[0, 0, 1], [1, 0], by simp, by simp, ?_⟩)
-          rw [show ([0, 0, 1] : List (Fin 2)) = [0, 0] ++ [1] from
-            rfl, L.wordS_append]
-          simp [wordS]
+        -- Pin the intermediate window to `1 1` explicitly.  Feeding
+        -- `subset_span` straight into `span_degreeMonomials_mono` leaves
+        -- `lo`/`hi` as metavariables, so neither the `simp`s nor the
+        -- `omega`s have anything to solve against.
+        · have hx₀ : X₀ ∈ Submodule.span k (L.degreeMonomials 1 1) := by
+            rw [hX₀]
+            refine Submodule.subset_span
+              ⟨[0, 0, 0], [0, 1], by simp, by simp, ?_⟩
+            rw [show ([0, 0, 0] : List (Fin 2)) = [0, 0] ++ [0] from
+              rfl, L.wordS_append]
+            simp [wordS]
+          exact L.span_degreeMonomials_mono (by omega) (by omega) hx₀
+        · have hx₁ : X₁ ∈ Submodule.span k (L.degreeMonomials 1 1) := by
+            rw [hX₁]
+            refine Submodule.subset_span
+              ⟨[0, 0, 1], [1, 0], by simp, by simp, ?_⟩
+            rw [show ([0, 0, 1] : List (Fin 2)) = [0, 0] ++ [1] from
+              rfl, L.wordS_append]
+            simp [wordS]
+          exact L.span_degreeMonomials_mono (by omega) (by omega) hx₁
         · rw [hY₀]
           have h1 := L.window_mul_mem_span (k := k)
             (L.window_mul_mem_span (k := k) hs01w hq₀w) ht00w
@@ -336,7 +345,9 @@ theorem pure_positive_tail_mem_stableUnits
         · subst hN0
           refine window_zero_one_mem_stableUnits k u' ?_
           rw [hu'val]
-          refine Submodule.add_mem _ (L.one_mem_window (k := k)) ?_
+          refine Submodule.add_mem _
+            (L.span_degreeMonomials_mono (by omega) (by omega)
+              (L.one_mem_window (k := k))) ?_
           exact L.span_degreeMonomials_mono (by omega) (by omega)
             htail
         · exact ih (τ := L.wordS [0, 0] * a * L.wordT [0, 0] -
