@@ -207,6 +207,7 @@ import NonsoficGroupsExist.CompleteCodeSupply
 import NonsoficGroupsExist.GLVectorNormalization
 import NonsoficGroupsExist.RowClearMove
 import NonsoficGroupsExist.FullExtraction
+import NonsoficGroupsExist.MirrorExtraction
 import NonsoficGroupsExist.MatrixDiagonalization
 import NonsoficGroupsExist.LeavittSimplicity
 import NonsoficGroupsExist.LeavittRankEquivalence

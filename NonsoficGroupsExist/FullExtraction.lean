@@ -33,6 +33,7 @@ theorem pencilEntry_t (a b : k) :
   unfold pencilEntry
   simp
 
+omit [DecidableEq ι] in
 /-- Factoring a proportional `t`-column. -/
 theorem t_column_factor (R : BinaryPrefixCode ι) (c : ι → k)
     (lam₀ lam₁ : k) :
@@ -42,11 +43,12 @@ theorem t_column_factor (R : BinaryPrefixCode ι) (c : ι → k)
       (lam₀ • L.t 0 + lam₁ • L.t 1) := by
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
-  rw [smul_mul_assoc, mul_add, mul_smul_comm, mul_smul_comm,
-    smul_add, smul_smul, smul_smul, mul_comm (c i) lam₀,
-    mul_comm (c i) lam₁]
-  rw [mul_comm lam₀ (c i), mul_comm lam₁ (c i)]
+  -- `smul_add`/`smul_smul` land exactly on the left-hand side; the two
+  -- `mul_comm` pairs in the original chain simply undid each other.
+  rw [smul_mul_assoc]
+  simp only [mul_add, mul_smul_comm, smul_add, smul_smul]
 
+omit [DecidableEq κ] in
 /-- **The full extraction step.** -/
 theorem full_extraction [Nontrivial A]
     (hdiv : ∀ x : A, x ≠ 0 → ∃ p q : A, p * x * q = 1)
@@ -76,9 +78,13 @@ theorem full_extraction [Nontrivial A]
   have hGent : ∀ l, G l j₀ = v₀ l := by
     intro l
     have h := congrFun hGcol l
-    simp only [Matrix.mulVec_single] at h
+    -- `mulVec_single` leaves an `op 1 •`; reduce it and the `col` projection
+    simp only [Matrix.mulVec_single, MulOpposite.op_one, one_smul,
+      Matrix.col_apply] at h
     exact h
-  obtain ⟨Gm, hGm⟩ := hGu
+  -- destructure a copy: a bare `obtain … := hGu` clears `hGu`, which is
+  -- still needed by `codeScalar_unit_mem` below.
+  obtain ⟨Gm, hGm⟩ := id hGu
   set uG : Aˣ := ⟨L.codeScalar (k := k) C G,
     L.codeScalar (k := k) C ((Gm⁻¹ : (Matrix κ κ k)ˣ) : Matrix κ κ k),
     by rw [L.codeScalar_mul, ← hGm, Units.mul_inv,
@@ -199,7 +205,8 @@ theorem full_extraction [Nontrivial A]
     have h := congrFun hG'b i
     rw [Pi.single_apply] at h
     exact h
-  obtain ⟨G'm, hG'm⟩ := hG'u
+  -- copy again: `hG'u` is still needed by `codeScalar_unit_mem` below
+  obtain ⟨G'm, hG'm⟩ := id hG'u
   set uG' : Aˣ := ⟨L.codeScalar (k := k) R G',
     L.codeScalar (k := k) R
       ((G'm⁻¹ : (Matrix ι ι k)ˣ) : Matrix ι ι k),

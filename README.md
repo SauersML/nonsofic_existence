@@ -368,9 +368,10 @@ first checklist below are genuine manuscript-scope results not yet in Lean.
       forced by column left-invertibility against the shift
       rigidity, left scalar move onto standard atoms, the
       row-clearing block unipotent, and the atom peel, composed
-    - [ ] the ς-mirror of the extraction (pure-`s` rows / kernel of
-      the row stack `(A₀|A₁|C)`), by the symmetric argument or
-      θ-transport
+    - [x] the ς-mirror (`MirrorExtraction`): `θ̂` transposes pencils
+      (swapping `t`- and `s`-data), so a kernel vector of the row
+      stack extracts through the transposed side and transports
+      back — one fewer column, equivalent membership
     - [ ] the refinement move and the round recursion: `s`-free
       pencil columns split into their two children (the Wiener–Hopf
       index shift — a pure re-indexing, no multiplication), and the
