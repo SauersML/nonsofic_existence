@@ -3204,3 +3204,20 @@ power-of-two rounding gap in the full-stack exit and is NOT derived;
 the main chain does not need it (NarrowReduction proved directly at
 full binary codes).  MasterInduction/extraction pipeline retained as
 standalone structure theory.
+
+## Session 54d: goal (3) opened — effective Wiener–Hopf factorization
+
+Added rem:effectiveWH to the manuscript: the two-exit elimination as
+an effective factorization theorem — every unit of L_k(1,2) is a
+central scalar times tree tables (V), code scalars (GL_n(k) along
+complete prefix codes), and one tree-table conjugate of a nonpositive
+unit; all computable by Gaussian elimination at codes of ≤ 2^{d+2}
+words, total time polynomial in 2^d and the monomial count.  Claimed
+novelty: no prior effective factorization or elementary proof of
+K₁(L_k(1,2)) = 0 in the literature ([ABC09] is neither).
+NEXT (goal 3 continuation candidates): (a) Lean-side headline
+export naming the factorization (scalarReduction_holds already
+packages L^× = k^×·H; a named `unit_factorization` with the factor
+inventory would be stronger); (b) generalize the two-exit loop to
+L_k(1,n) (n-ary trees — the same pigeonhole gives κ ≤ n^{r+1});
+(c) the elementary-width bound for GL_r(L) = EL_r(L).
