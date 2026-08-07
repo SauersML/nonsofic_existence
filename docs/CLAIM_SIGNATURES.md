@@ -1941,6 +1941,13 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
       (τ : (n : ℕ) → G → Equiv.Perm (S.model n).carrier) → S.IsCloseTo τ → SoficApproximation G
 ```
 
+## `NonsoficGroupsExist.SoficApproximation.restrict`
+
+```lean
+{G : Type u_1} →
+  [inst : Group G] → SoficApproximation G → (K : Subgroup G) → SoficApproximation ↥K
+```
+
 ## `NonsoficGroupsExist.SoficApproximation.smallBlockVertices_negligible`
 
 ```lean
@@ -2152,6 +2159,22 @@ CountableNonsoficGroupExists
     (∀ (k : ℕ), Vanishing fun n => e n k) → Vanishing fun n => e n (diagonalLevel e n)
 ```
 
+## `NonsoficGroupsExist.elGen_commutator`
+
+```lean
+∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
+  (i j k : ι) (hij : i ≠ j) (hjk : j ≠ k) (hik : i ≠ k) (a b : R),
+  elGen i j hij a * elGen j k hjk b * (elGen i j hij a)⁻¹ * (elGen j k hjk b)⁻¹ =
+    elGen i k hik (a * b)
+```
+
+## `NonsoficGroupsExist.elGen_mul`
+
+```lean
+∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
+  (i j : ι) (h : i ≠ j) (a b : R), elGen i j h a * elGen i j h b = elGen i j h (a + b)
+```
+
 ## `NonsoficGroupsExist.elementaryGroup_eq_closure_of_adjoin_int`
 
 ```lean
@@ -2160,6 +2183,16 @@ CountableNonsoficGroupExists
     ∀ (s : Finset R),
       Algebra.adjoin ℤ ↑s = ⊤ →
         Subgroup.closure ↑(finiteElementaryGenerators n s) = elementaryGroup (Fin n) R
+```
+
+## `NonsoficGroupsExist.elementaryGroup_finite_quotient_trivial`
+
+```lean
+∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
+  {Q : Type u_3} [inst_3 : Group Q] [Infinite R] [Finite Q],
+  (∀ (x : R), x ≠ 0 → ∃ u v, u * x * v = 1) →
+    (∀ (l k : ι), l ≠ k → ∃ i, i ≠ l ∧ i ≠ k) →
+      ∀ (φ : ↥(elementaryGroup ι R) →* Q) (g : ↥(elementaryGroup ι R)), φ g = 1
 ```
 
 ## `NonsoficGroupsExist.elementaryGroup_finitelyGenerated`
@@ -2225,6 +2258,14 @@ CountableNonsoficGroupExists
           Infinite Γ ∧ Group.IsFinitelyPresented Γ ∧ HasKazhdanPropertyT Γ ∧ ¬IsSofic Γ
 ```
 
+## `NonsoficGroupsExist.exists_ne_zero_mem_elementaryKernel`
+
+```lean
+∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
+  {Q : Type u_3} [inst_3 : Group Q] [Infinite R] [Finite Q] (φ : ↥(elementaryGroup ι R) →* Q)
+  (i j : ι) (h : i ≠ j), ∃ a, a ≠ 0 ∧ φ (elGen i j h a) = 1
+```
+
 ## `NonsoficGroupsExist.exists_residuallyFinite_group_with_non_residuallyFinite_quotient`
 
 ```lean
@@ -2278,6 +2319,13 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {G : Type u} [inst : Group G], ¬IsSofic G → ∃ F ε, 1 ∈ F ∧ 0 < ε ∧ IsEmpty (TableModel G F ε)
+```
+
+## `NonsoficGroupsExist.exists_third_index`
+
+```lean
+∀ {ι : Type u_1} [inst : Fintype ι] [DecidableEq ι],
+  3 ≤ Fintype.card ι → ∀ (l k : ι), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
 ## `NonsoficGroupsExist.finiteFieldElementaryThree_hasKazhdanPropertyT`
@@ -2368,6 +2416,19 @@ CountableNonsoficGroupExists
 ∀ {G : Type u_1} [inst : Group G], IsSofic G ↔ IsSoficWeakLocal G
 ```
 
+## `NonsoficGroupsExist.isSofic_of_finite`
+
+```lean
+∀ (G : Type) [inst : Group G] [Finite G], IsSofic G
+```
+
+## `NonsoficGroupsExist.isSofic_of_injective`
+
+```lean
+∀ {G : Type u_1} {H : Type u_2} [inst : Group G] [inst_1 : Group H] (f : H →* G),
+  Function.Injective ⇑f → IsSofic G → IsSofic H
+```
+
 ## `NonsoficGroupsExist.isSofic_of_isSoficWeak`
 
 ```lean
@@ -2439,6 +2500,12 @@ CountableNonsoficGroupExists
 {Y : Type u_1} → (k : ℕ) → Equiv.Perm Y → Equiv.Perm (Fin k → Y)
 ```
 
+## `NonsoficGroupsExist.rankFour_exists_third_index`
+
+```lean
+∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
+```
+
 ## `NonsoficGroupsExist.refineComponent`
 
 ```lean
@@ -2486,6 +2553,27 @@ CountableNonsoficGroupExists
 
 ```lean
 ¬IsSofic ↥UniversalRankFour.Core
+```
+
+## `NonsoficGroupsExist.universalLeavittEL4_finite_quotient_trivial`
+
+```lean
+∀ {Q : Type u_1} [inst : Group Q] [Finite Q] (φ : ↥UniversalRankFour.Ambient →* Q)
+  (g : ↥UniversalRankFour.Ambient), φ g = 1
+```
+
+## `NonsoficGroupsExist.universalLeavittEL4_no_finite_quotient`
+
+```lean
+∀ {Q : Type u_1} [inst : Group Q] [Finite Q] (φ : ↥UniversalRankFour.Ambient →* Q), φ = 1
+```
+
+## `NonsoficGroupsExist.universalLeavittEL4_no_soficEmbedding`
+
+```lean
+∀ {ι : Type u_1} (𝒰 : Ultrafilter ι) (X : ι → FiniteModel),
+  (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
+    ∀ (f : ↥UniversalRankFour.Ambient →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL4_not_isSofic`

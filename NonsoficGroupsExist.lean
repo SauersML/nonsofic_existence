@@ -270,6 +270,7 @@ import NonsoficGroupsExist.Leavitt.ThompsonWitness
 import NonsoficGroupsExist.Matching.MatchedComponents
 import NonsoficGroupsExist.Sofic.SoficTransfer
 import NonsoficGroupsExist.Endpoint.MainResults
+import NonsoficGroupsExist.Endpoint.StructuralProfile
 import NonsoficGroupsExist.Leavitt.UnitsGLProfile
 import NonsoficGroupsExist.KOne.AllRanksElementary
 import NonsoficGroupsExist.Kazhdan.KazhdanTextbook
