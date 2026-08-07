@@ -60,7 +60,7 @@ instance binaryLeavittWhiteheadK1_subsingleton (k : Type) [Field k] :
   rw [ha, hb]
 
 /-- The trivial group structure on the Whitehead `K₁`, in `Unique` form. -/
-noncomputable def binaryLeavittWhiteheadK1Unique (k : Type) [Field k] :
+@[reducible] noncomputable def binaryLeavittWhiteheadK1Unique (k : Type) [Field k] :
     Unique (BinaryLeavittWhiteheadK1 k) where
   default := 1
   uniq a := Subsingleton.elim a 1

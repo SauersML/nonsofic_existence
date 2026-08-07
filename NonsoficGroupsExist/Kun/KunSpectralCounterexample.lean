@@ -533,9 +533,8 @@ theorem second_eq_inr {e : Ix m × Ix m} (h0 : e ≠ (0, 0)) (h1 : e ≠ (1, 1))
 theorem mem_boundary_of {U : Finset (Side m)} {e : Ix m × Ix m}
     (h : ((switched m).first e ∈ U ∧ (switched m).second e ∉ U) ∨
       ((switched m).second e ∈ U ∧ (switched m).first e ∉ U)) :
-    e ∈ (switched m).boundary U := by
-  simp only [FiniteMultiGraph.boundary, Finset.mem_filter, Finset.mem_univ, true_and]
-  exact h
+    e ∈ (switched m).boundary U :=
+  Finset.mem_filter.mpr ⟨Finset.mem_univ e, h⟩
 
 /-- Every unswitched crossing occurrence other than the two moved ones is still
 a crossing occurrence of `switched m`. -/
