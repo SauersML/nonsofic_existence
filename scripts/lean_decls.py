@@ -44,7 +44,12 @@ DECL_RE = re.compile(
     re.UNICODE,
 )
 NAMESPACE_RE = re.compile(rf"^namespace\s+(?P<name>{_IDENT})", re.UNICODE)
-SECTION_RE = re.compile(rf"^section(?:\s+(?P<name>{_IDENT}))?\s*$", re.UNICODE)
+# `noncomputable section` opens a section like any other; missing the prefix
+# made the later bare `end` pop a NAMESPACE instead, silently stripping the
+# prefix from every declaration indexed after it in the file.  The elaborated
+# signature gate (`scripts/Signatures.lean`) is what caught it.
+SECTION_RE = re.compile(
+    rf"^(?:noncomputable\s+)?section(?:\s+(?P<name>{_IDENT}))?\s*$", re.UNICODE)
 END_RE = re.compile(rf"^end(?:\s+(?P<name>{_IDENT}))?\s*$", re.UNICODE)
 
 

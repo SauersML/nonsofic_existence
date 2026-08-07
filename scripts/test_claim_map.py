@@ -139,6 +139,26 @@ class Resolve(unittest.TestCase):
         self.assertEqual(len(problems), 1)
         self.assertIn("does not declare", problems[0])
 
+    def test_noncomputable_section_keeps_namespace(self):
+        # A bare `end` closing a `noncomputable section` must not pop the
+        # namespace; the declaration after it keeps its full prefix.
+        lean = ("namespace NonsoficGroupsExist\n"
+                "namespace Deep\n"
+                "noncomputable section\n"
+                "theorem inside : True := trivial\n"
+                "end\n"
+                "end Deep\n"
+                "theorem after : True := trivial\n"
+                "end NonsoficGroupsExist\n")
+        d = _tree({"A.lean": lean})
+        try:
+            import lean_decls
+            index = lean_decls.build_index(Path(d.name))
+            self.assertIn("NonsoficGroupsExist.Deep.inside", index)
+            self.assertIn("NonsoficGroupsExist.after", index)
+        finally:
+            d.cleanup()
+
     def test_dangling_reference_is_an_error(self):
         files = {"A.lean": "namespace NonsoficGroupsExist\ntheorem real : True := trivial\nend NonsoficGroupsExist\n"}
         tex = TEX_HEAD + "\\leanverified{\\leanmod{A}{ghost}}%" + TEX_TAIL

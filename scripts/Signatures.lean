@@ -43,7 +43,8 @@ alone cannot check.\n"
 run_cmd do
   let env ← getEnv
   let input ← IO.FS.readFile declsPath
-  let names := input.splitOn "\n" |>.map String.trim |>.filter (· ≠ "")
+  let names := input.splitOn "\n" |>.map (fun s => s.trimAscii.toString)
+    |>.filter (· ≠ "")
   if names.isEmpty then
     throwError "{declsPath}: no declarations listed; \
 run `python3 scripts/claim_map.py --write` first"
