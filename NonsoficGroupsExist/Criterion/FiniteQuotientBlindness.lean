@@ -181,4 +181,45 @@ theorem compressedImage_eq' [Finite Q] (φ : H →* Q) (Γ : Subgroup H) {t : H}
   · intro K L hle hcard
     exact Subgroup.eq_of_le_of_card_ge hle hcard
 
+/-! ## Centralized subgroups survive every compression
+
+A compressor `t` that *centralizes* a subgroup `F ≤ Γ` cannot compress it away:
+`φ(f) = t f t⁻¹ = f`, so `F ≤ φⁿ(Γ)` for every `n` and the iterated images have
+nontrivial intersection.
+
+This is the group-theoretic half of an obstruction to the most natural
+construction of a compression-witnessing model.  If one tries to realize the
+self-similarity as an infinite tensor product `⊗_{n∈ℤ} A` with `ρ(t)` the
+shift and `ρ ∘ φ = shift ∘ ρ`, then any `γ ∈ ⋂ₙ φⁿ(Γ)` has
+`ρ(γ) ∈ ⋂ₙ ⊗_{k≥n} A = ℂ` by tail triviality of an infinite tensor product --
+a scalar unitary, whose trace has modulus one, contradicting `τ(ρ(γ)) = 0`.
+
+For elementary groups over monoid rings the hypothesis always holds: a monomial
+substitution fixes the constants, so the compressor centralizes the copy of
+`SL_r(k)` of constant matrices, and the intersection is never trivial.  The
+tensor-shift construction is therefore unavailable there, for every compressor,
+however the levels are arranged. -/
+
+/-- A subgroup centralized by the compressor is fixed by the compression. -/
+theorem centralized_le_compressed (Γ : Subgroup H) (F : Subgroup H) (hFΓ : F ≤ Γ)
+    {t : H} (hcent : ∀ f ∈ F, t * f * t⁻¹ = f) :
+    ∀ f ∈ F, ∃ γ ∈ Γ, t * γ * t⁻¹ = f :=
+  fun f hf ↦ ⟨f, hFΓ hf, hcent f hf⟩
+
+/-- Iterating: a centralized subgroup lies in every iterate of the compression,
+so the iterated images cannot separate its points. -/
+theorem centralized_mem_iterate (F : Subgroup H) {t : H}
+    (hcent : ∀ f ∈ F, t * f * t⁻¹ = f) :
+    ∀ (n : ℕ), ∀ f ∈ F, t ^ n * f * (t ^ n)⁻¹ = f := by
+  intro n
+  induction n with
+  | zero => intro f _; simp
+  | succ n ih =>
+      intro f hf
+      have hstep : t ^ (n + 1) * f * (t ^ (n + 1))⁻¹
+          = t * (t ^ n * f * (t ^ n)⁻¹) * t⁻¹ := by
+        rw [pow_succ']
+        group
+      rw [hstep, ih f hf, hcent f hf]
+
 end NonsoficGroupsExist
