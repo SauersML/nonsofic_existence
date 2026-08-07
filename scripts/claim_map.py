@@ -61,6 +61,7 @@ STATUS = {"verified": "formalized", "partial": "formalized in part",
 CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "ElementaryNoFiniteQuotients",
     "ExactCompression",
+    "HyperlinearMetric",
     "CommutantRigidity",
     "KunSpectralCounterexample",
     "SoficAmplification",
