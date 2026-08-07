@@ -297,6 +297,12 @@ One entry per declaration named by a manuscript margin note, in the order of `do
     u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
 ```
 
+## `NonsoficGroupsExist.BinaryLeavittClassicalK1`
+
+```lean
+(k : Type) → [Field k] → Type
+```
+
 ## `NonsoficGroupsExist.BinaryLeavittWhiteheadK1`
 
 ```lean
@@ -737,12 +743,50 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ∀ (m : ℕ), ¬KunSpectral.IsBipartite (KunSpectral.switched (m + 1))
 ```
 
+## `NonsoficGroupsExist.KunSpectral.rayleigh_repeatedTestVector`
+
+```lean
+∀ (j m : ℕ),
+  KunSpectral.rayleigh (KunSpectral.repeated j m) (KunSpectral.repeatedTestVector j m) =
+    -1 + 4 / (↑m + 2) ^ 2
+```
+
 ## `NonsoficGroupsExist.KunSpectral.rayleigh_testVector`
 
 ```lean
 ∀ (m : ℕ),
   KunSpectral.rayleigh (KunSpectral.switched m) (KunSpectral.testVector m) =
     -1 + 4 / (↑m + 2) ^ 2
+```
+
+## `NonsoficGroupsExist.KunSpectral.repeated_component_expands`
+
+```lean
+∀ (j m : ℕ),
+  4 ≤ m →
+    ∀ (x : (KunSpectral.repeated j m).vertex.carrier),
+      ((KunSpectral.repeated j m).induce
+            ((KunSpectral.repeatedBlocks j m).block x)).HasCheegerLowerBound
+        1
+```
+
+## `NonsoficGroupsExist.KunSpectral.repetition_of_components`
+
+```lean
+∀ (c : ℝ),
+  0 < c →
+    ∀ (N : ℕ),
+      ∃ j m,
+        4 ≤ m ∧
+          N ≤ Fintype.card (KunSpectral.repeated j m).vertex.carrier ∧
+            (∀ (x : (KunSpectral.repeated j m).vertex.carrier),
+                ((KunSpectral.repeated j m).induce
+                      ((KunSpectral.repeatedBlocks j m).block x)).HasCheegerLowerBound
+                  1) ∧
+              ¬KunSpectral.IsBipartite (KunSpectral.repeated j m) ∧
+                KunSpectral.rayleigh (KunSpectral.repeated j m)
+                    (KunSpectral.repeatedTestVector j m) <
+                  -1 + c
 ```
 
 ## `NonsoficGroupsExist.KunSpectral.switched`
@@ -1956,6 +2000,18 @@ Countable ↥UniversalRankFour.Ambient ∧
 Group.FG ↥UniversalRankFour.Ambient ∧
   Infinite ↥UniversalRankFour.Ambient ∧
     HasKazhdanPropertyT ↥UniversalRankFour.Ambient ∧ ¬IsSofic ↥UniversalRankFour.Ambient
+```
+
+## `NonsoficGroupsExist.binaryLeavittClassicalK1_subsingleton`
+
+```lean
+∀ (k : Type) [inst : Field k], Subsingleton (BinaryLeavittClassicalK1 k)
+```
+
+## `NonsoficGroupsExist.binaryLeavittElementaryColim_eq_top`
+
+```lean
+∀ (k : Type) [inst : Field k], elementaryColim (BinaryLeavitt.BinaryLeavittAlgebra k) = ⊤
 ```
 
 ## `NonsoficGroupsExist.binaryLeavittGL_not_isSofic`

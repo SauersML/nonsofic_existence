@@ -797,10 +797,21 @@ theorem boundary_copy_subset (j m : ℕ) (c : Copy j) (U : Finset (Side m)) :
       = ((c, secondEnd m e) : Copy j × Side m) := rfl
   have he' := (mem_boundary_iff (switched m) U e).mp he
   refine (mem_boundary_iff (repeated j m) (U.map (copyVertexEmb j m c)) _).mpr ?_
-  rw [hfirst, hsecond, mem_copyVertexEmb_map, mem_copyVertexEmb_map]
+  -- Everything below crosses the `(repeated j m).vertex` / `Copy j × Side m`
+  -- boundary, which is definitional but not syntactic: hand terms over with
+  -- `exact`, never `rw`.
+  have hmem : ∀ v : Side m, v ∈ U →
+      ((c, v) : Copy j × Side m) ∈ U.map (copyVertexEmb j m c) :=
+    fun _ hv ↦ Finset.mem_map_of_mem _ hv
+  have hnot : ∀ v : Side m, v ∉ U →
+      ((c, v) : Copy j × Side m) ∉ U.map (copyVertexEmb j m c) := by
+    intro v hv hmem'
+    obtain ⟨w, hw, hEq⟩ := Finset.mem_map.mp hmem'
+    have hwv : w = v := by simpa [copyVertexEmb] using congrArg Prod.snd hEq
+    exact hv (hwv ▸ hw)
   rcases he' with ⟨h1, h2⟩ | ⟨h1, h2⟩
-  · exact Or.inl ⟨⟨rfl, h1⟩, fun h ↦ h2 h.2⟩
-  · exact Or.inr ⟨⟨rfl, h1⟩, fun h ↦ h2 h.2⟩
+  · exact Or.inl ⟨hmem _ h1, hnot _ h2⟩
+  · exact Or.inr ⟨hmem _ h1, hnot _ h2⟩
 
 /-- **Componentwise expansion, without the induced-subgraph wrapper.**  A
 vertex set lying inside a single copy, of at most half the vertices of that
@@ -967,8 +978,14 @@ theorem induce_copyBlock_hasCheegerLowerBound (j m : ℕ) (hm : 4 ≤ m) (c : Co
       exact blockEdge_mem_boundary j m c W e he
     · intro e _ e' _ h
       exact blockEdge_injective j m c h
-  have hfinal : W.card ≤ ((repeated j m).induce (copyBlock j m c)).boundaryCard W := by
-    omega
+  -- `calc` rather than `omega`: the two spellings of the switched boundary
+  -- count differ in an implicit type argument (`Side m` against the vertex
+  -- carrier), so omega sees two atoms where there is one quantity; calc
+  -- unifies the junctions up to defeq.
+  have hfinal : W.card ≤ ((repeated j m).induce (copyBlock j m c)).boundaryCard W :=
+    calc W.card = (W.map (blockVertexEmb j m c)).card := hcard.symm
+      _ ≤ (switched m).boundaryCard (W.map (blockVertexEmb j m c)) := hbnd
+      _ ≤ _ := hinj
   rw [one_mul]
   exact_mod_cast hfinal
 
