@@ -88,6 +88,31 @@ def induce (X : FiniteMultiGraph) (U : Finset X.vertex) : FiniteMultiGraph where
     intro h
     exact X.loopless e.1 (congrArg Subtype.val h)
 
+/-- Passing to an induced subgraph cannot raise a degree: every occurrence
+incident to a retained vertex inside the subgraph is one of its occurrences in
+the ambient graph. -/
+theorem induce_hasDegreeBound (X : FiniteMultiGraph) (U : Finset X.vertex)
+    {d : ℕ} (h : X.HasDegreeBound d) : (X.induce U).HasDegreeBound d := by
+  classical
+  intro x
+  refine le_trans ?_ (h x.1)
+  unfold FiniteMultiGraph.degree
+  refine Finset.card_le_card_of_injOn (fun a ↦ a.1) ?_ ?_
+  · intro a ha
+    have ha0 : a ∈ (X.induce U).incidentEdges x := ha
+    have ha1 : (X.induce U).first a = x ∨ (X.induce U).second a = x :=
+      (Finset.mem_filter.mp ha0).2
+    have hmem : a.1 ∈ X.incidentEdges x.1 := by
+      refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
+      rcases ha1 with h1 | h1
+      · have h2 : X.first a.1 = x.1 := congrArg Subtype.val h1
+        exact Or.inl h2
+      · have h2 : X.second a.1 = x.1 := congrArg Subtype.val h1
+        exact Or.inr h2
+    exact hmem
+  · intro a _ b _ hab
+    exact Subtype.ext hab
+
 /-- Boundary edge occurrences of a vertex finset. -/
 def boundary (X : FiniteMultiGraph) (U : Finset X.vertex) : Finset X.edge :=
   Finset.univ.filter fun e ↦
@@ -146,6 +171,31 @@ abbrev transport (X : FiniteMultiGraph) (Z : FiniteModel) (e : X.vertex ≃ Z) :
 @[simp] theorem transport_second (X : FiniteMultiGraph) (Z : FiniteModel)
     (e : X.vertex ≃ Z) (a : X.edge) :
     (X.transport Z e).second a = e (X.second a) := rfl
+
+/-- Transport preserves a uniform degree bound: the edge-occurrence type is
+unchanged and incidence is carried along the vertex equivalence. -/
+theorem transport_hasDegreeBound (X : FiniteMultiGraph) (Z : FiniteModel)
+    (e : X.vertex ≃ Z) {d : ℕ} (h : X.HasDegreeBound d) :
+    (X.transport Z e).HasDegreeBound d := by
+  classical
+  intro z
+  refine le_trans ?_ (h (e.symm z))
+  unfold FiniteMultiGraph.degree
+  refine Finset.card_le_card_of_injOn (fun a ↦ a) ?_ ?_
+  · intro a ha
+    have ha0 : a ∈ (X.transport Z e).incidentEdges z := ha
+    have ha1 : (X.transport Z e).first a = z ∨ (X.transport Z e).second a = z :=
+      (Finset.mem_filter.mp ha0).2
+    have hmem : a ∈ X.incidentEdges (e.symm z) := by
+      refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
+      rcases ha1 with h1 | h1
+      · have h2 : e (X.first a) = z := h1
+        exact Or.inl (e.eq_symm_apply.mpr h2)
+      · have h2 : e (X.second a) = z := h1
+        exact Or.inr (e.eq_symm_apply.mpr h2)
+    exact hmem
+  · intro a _ b _ hab
+    exact hab
 
 /-- Every edge occurrence belongs to the transported boundary exactly when
 the original occurrence belongs to the original boundary. -/

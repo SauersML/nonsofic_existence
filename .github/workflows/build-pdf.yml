@@ -167,17 +167,25 @@ jobs:
           fi
 
           # Rendering validation: this catches files that are structurally
-          # readable but fail in an actual PDF renderer.
+          # readable but fail in an actual PDF renderer.  Every page, not just
+          # the first -- margin notes and figures live throughout the
+          # document, and a renderer failure on page 40 is as disqualifying
+          # as one on page 1.  Low resolution keeps the full sweep cheap.
           pdftoppm \
-            -f 1 \
-            -l 1 \
-            -singlefile \
             -png \
-            -r 96 \
+            -r 72 \
             "$PDF_FILE" \
-            pdf-render-check/page-1
+            pdf-render-check/page
 
-          test -s pdf-render-check/page-1.png
+          page_count="$(pdfinfo "$PDF_FILE" | awk '/^Pages:/ {print $2}')"
+          rendered_count="$(ls pdf-render-check/page-*.png | wc -l)"
+          if [[ "$rendered_count" -ne "$page_count" ]]; then
+            echo "Rendered $rendered_count of $page_count pages" >&2
+            exit 1
+          fi
+          for f in pdf-render-check/page-*.png; do
+            test -s "$f"
+          done
 
       - name: Commit and push updated PDF
         shell: bash

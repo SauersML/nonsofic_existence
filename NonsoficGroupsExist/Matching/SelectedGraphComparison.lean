@@ -98,6 +98,21 @@ theorem selectedGraph_expands (n : ℕ) :
       rw [BlockIndex.block_representative] at h
       exact h)
 
+/-- The selected graph inherits the uniform degree bound of the expander
+decomposition: it is one induced subgraph of the edited graph, transported. -/
+theorem selectedGraph_hasDegreeBound (n : ℕ) :
+    (D.selectedGraph n).HasDegreeBound D.gammaDecomposition.degreeBound :=
+  FiniteMultiGraph.transport_hasDegreeBound
+    ((D.gammaDecomposition.modelGraph (D.matchingIndex n)).induce
+      (D.selectedComponent n).block)
+    (D.selectedFiniteModel n) (D.selectedGraphEquiv n)
+    (FiniteMultiGraph.induce_hasDegreeBound
+      (D.gammaDecomposition.modelGraph (D.matchingIndex n))
+      (D.selectedComponent n).block
+      (FiniteMultiGraph.transport_hasDegreeBound
+        (D.gammaDecomposition.graph (D.matchingIndex n)) _ _
+        (D.gammaDecomposition.degree_le (D.matchingIndex n))))
+
 theorem selected_gammaBoundary_le_graphError (n : ℕ) :
     (∑ t : D.setup.generatorsΓ,
       (Finset.univ.filter fun x : (D.selectedComponent n).block ↦

@@ -296,48 +296,61 @@ structure MatchingCertificate (K J : Type) [Group K] [Group J] where
   cheeger : ℝ
   cheeger_pos : 0 < cheeger
   expands : ∀ n, (graphs n).HasCheegerLowerBound cheeger
+  /-- The expanders are of uniformly bounded degree, as the printed notion of
+  an expander sequence requires. -/
+  degreeBound : ℕ
+  graphs_degree_le : ∀ n, (graphs n).HasDegreeBound degreeBound
   edit_negligible : approx.cardScale.Negligible
     fun n ↦ ((generatorGraph (approx.model n) generatorsK
       (fun k ↦ approx.map n (k, 1))).editDistance (graphs n)
         ((generatorGraphVertexEquiv (approx.model n) generatorsK
           (fun k ↦ approx.map n (k, 1))).trans (vertexEquiv n).symm) : ℕ)
 
-/-- **Definition `def:essential`.**  A sequence of graphs is an *essential
-expander sequence* along a diverging vertex scale when it is edit-equivalent
-to an expander sequence: graphs identified vertex by vertex with it, carrying
-one uniform positive Cheeger bound, at negligible edit distance.
+/-- **Definition `def:essential`.**  A sequence of bounded-degree graphs is an
+*essential expander sequence* along a diverging vertex scale when it is
+edit-equivalent to an expander sequence: graphs of uniformly bounded degree,
+identified vertex by vertex with it, carrying one uniform positive Cheeger
+bound, at negligible edit distance.
 
-Two points are conventions rather than differences.  The vertex sets are
-identified by an explicit equivalence instead of being equal on the nose,
-which is how every graph in this library carries its vertex set; and the
+Both degree bounds of the printed definition are present: the first conjunct
+is the hypothesis "sequence of bounded-degree graphs" on `X`, and the bound
+`dY` inside the existential is the one contained in the printed notion of an
+expander sequence (Section `subsec:graphs`), which quantifies over
+bounded-degree sequences.
+
+Two points are conventions rather than differences from the print.  The vertex
+sets are identified by an explicit equivalence instead of being equal on the
+nose, which is how every graph in this library carries its vertex set; and the
 divergence `|V(Xₙ)| → ∞` of the printed definition is carried by the
 `AsymptoticScale` against which the edit count is negligible, rather than
-restated.
-
-One point is a deliberate difference, recorded in the manuscript's margin
-note: the printed definition restricts to bounded-degree sequences, and this
-predicate does not.  It is therefore strictly weaker as a definition.  The
-sequences it is applied to are `T`-generator graphs, whose degree is at most
-`2|T|` by `generatorGraph_hasDegreeBound`, so the omitted bound is a
-hypothesis that is always available and never used. -/
+restated.  Modulo those two conventions the predicate is the printed
+definition. -/
 def IsEssentialExpanderSequence (scale : AsymptoticScale)
     (X : ℕ → FiniteMultiGraph) : Prop :=
-  ∃ (Y : ℕ → FiniteMultiGraph) (e : ∀ n, (X n).vertex ≃ (Y n).vertex) (h : ℝ),
-    0 < h ∧ (∀ n, (Y n).HasCheegerLowerBound h) ∧
-      scale.Negligible fun n ↦ ((X n).editDistance (Y n) (e n) : ℕ)
+  (∃ dX : ℕ, ∀ n, (X n).HasDegreeBound dX) ∧
+    ∃ (Y : ℕ → FiniteMultiGraph) (e : ∀ n, (X n).vertex ≃ (Y n).vertex)
+      (h : ℝ) (dY : ℕ),
+      0 < h ∧ (∀ n, (Y n).HasCheegerLowerBound h) ∧
+        (∀ n, (Y n).HasDegreeBound dY) ∧
+        scale.Negligible fun n ↦ ((X n).editDistance (Y n) (e n) : ℕ)
 
 /-- The `K`-generator graphs of a matching certificate are an essential
-expander sequence.  This is what the certificate's expansion and edit fields
-say, and it is why `MatchingCertificate` is the formal content of
-Definition `def:essential`: the fields are the existential witnesses. -/
+expander sequence.  This is what the certificate's expansion, degree and edit
+fields say, and it is why `MatchingCertificate` is the formal content of
+Definition `def:essential`: the fields are the existential witnesses.  The
+degree bound on the `K`-generator graphs themselves is not a field: it is
+`generatorGraph_hasDegreeBound`, with the explicit value `2|S_K|`. -/
 theorem MatchingCertificate.isEssentialExpanderSequence {K J : Type} [Group K]
     [Group J] (C : MatchingCertificate K J) :
     IsEssentialExpanderSequence C.approx.cardScale
       (fun n ↦ generatorGraph (C.approx.model n) C.generatorsK
         (fun k ↦ C.approx.map n (k, 1))) :=
-  ⟨C.graphs,
+  ⟨⟨2 * C.generatorsK.card, fun n ↦ generatorGraph_hasDegreeBound
+      (C.approx.model n) C.generatorsK (fun k ↦ C.approx.map n (k, 1))⟩,
+    C.graphs,
     fun n ↦ (generatorGraphVertexEquiv (C.approx.model n) C.generatorsK
       (fun k ↦ C.approx.map n (k, 1))).trans (C.vertexEquiv n).symm,
-    C.cheeger, C.cheeger_pos, C.expands, C.edit_negligible⟩
+    C.cheeger, C.degreeBound, C.cheeger_pos, C.expands, C.graphs_degree_le,
+    C.edit_negligible⟩
 
 end NonsoficGroupsExist

@@ -74,9 +74,10 @@ jobs:
     needs: gate
     if: ${{ github.event_name != 'schedule' || needs.gate.outputs.run == 'true' }}
     runs-on: ubuntu-latest
-    # 198 modules of analysis on top of Mathlib.  A cold first build can run for
-    # hours; every run saves whatever it compiled (see the cache-save steps), so
-    # even a run that hits this ceiling leaves the next one strictly warmer.
+    # A few hundred modules of analysis on top of Mathlib.  A cold first build
+    # can run for hours; every run saves whatever it compiled (see the
+    # cache-save steps), so even a run that hits this ceiling leaves the next
+    # one strictly warmer.
     timeout-minutes: 340
 
     steps:
@@ -225,6 +226,25 @@ jobs:
         id: kernel-audit
         continue-on-error: true
         run: lake env lean scripts/Audit.lean
+
+      # The name-level claim map says each mapped declaration exists; this
+      # step pins what each one *states*.  It regenerates the elaborated
+      # signatures of every mapped declaration and fails if the committed
+      # `docs/CLAIM_SIGNATURES.md` differs -- so a mapped theorem cannot lose
+      # a conclusion or gain a hypothesis without a red run and a reviewed
+      # diff of the signature file.
+      - name: Signature pinning (elaborated types of mapped declarations)
+        run: |
+          if grep -q '^PLACEHOLDER:' docs/CLAIM_SIGNATURES.md; then
+            # Not yet populated by a first build; generate for the log but do
+            # not gate until a real signature file is committed.
+            lake env lean scripts/Signatures.lean
+            echo "::warning::docs/CLAIM_SIGNATURES.md is a placeholder; commit the generated file to arm this gate"
+          else
+            lake env lean scripts/Signatures.lean
+            git diff --exit-code docs/CLAIM_SIGNATURES.md \
+              || { echo "::error::docs/CLAIM_SIGNATURES.md is stale; regenerate with 'lake env lean scripts/Signatures.lean' and commit the diff"; exit 1; }
+          fi
 
       # The toolchain's built-in checker replays every olean through a fresh
       # kernel environment, so a result that survives it does not rest on the

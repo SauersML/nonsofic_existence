@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Endpoint.MainResults
+import NonsoficGroupsExist.Endpoint.ManuscriptStatements
 import NonsoficGroupsExist.Sofic.FinitelyPresentedLEF
 import NonsoficGroupsExist.Leavitt.UnitsGLProfile
 import NonsoficGroupsExist.KOne.AllRanksElementary
@@ -73,6 +74,17 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.BinaryLeavitt.stableUnits_eq_top_holds
 #print axioms NonsoficGroupsExist.BinaryLeavitt.glTwo_eq_elementary_holds
 #print axioms NonsoficGroupsExist.BinaryLeavitt.glFour_eq_elementary_holds
+
+-- The exact manuscript endpoints: one declaration per printed headline
+-- statement, so the report records what each printed theorem rests on.
+#print axioms NonsoficGroupsExist.theoremB_exact
+#print axioms NonsoficGroupsExist.panorama_exact
+#print axioms NonsoficGroupsExist.theoremC_exact
+#print axioms NonsoficGroupsExist.theoremC_covers_theoremB_groups
+#print axioms NonsoficGroupsExist.theoremD_subgroups
+#print axioms NonsoficGroupsExist.cor_fgring_exact
+#print axioms NonsoficGroupsExist.cor_fgring_countableFree
+#print axioms NonsoficGroupsExist.binaryLeavittWhiteheadK1_subsingleton
 #print axioms NonsoficGroupsExist.BinaryLeavitt.K1_trivial
 
 -- The unit-group and general-linear profiles (Theorem B(i) closed): finite

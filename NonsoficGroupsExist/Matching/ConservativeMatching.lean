@@ -23,6 +23,8 @@ noncomputable def selectionOutput : SelectionOutput D where
   cheeger := D.gammaDecomposition.cheeger
   cheeger_pos := D.gammaDecomposition.cheeger_pos
   expands := D.selectedGraph_expands
+  degreeBound := D.gammaDecomposition.degreeBound
+  degree_le := D.selectedGraph_hasDegreeBound
   edit_negligible := by
     change Negligible D.selectedCard D.localizedSelectedEdit
     exact D.selectedGraph_edit_negligible

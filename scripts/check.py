@@ -267,6 +267,14 @@ def check_claim_map(root: Path, f: Findings) -> None:
             f.add("stale generated claim map",
                   f"{claim_map.GENERATED} no longer matches the manuscript and the "
                   f"library; regenerate it with `python3 scripts/claim_map.py --write`")
+        # The declaration list feeds `scripts/Signatures.lean`; if it drifts,
+        # the signature file pins the types of yesterday's mapping.
+        decls = root / claim_map.GENERATED_DECLS
+        if not decls.is_file() or \
+                decls.read_text(encoding="utf-8") != claim_map.render_decls(root):
+            f.add("stale generated claim map",
+                  f"{claim_map.GENERATED_DECLS} no longer matches the manuscript and "
+                  f"the library; regenerate it with `python3 scripts/claim_map.py --write`")
 
 
 CHECKS = [

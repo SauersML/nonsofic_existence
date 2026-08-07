@@ -182,13 +182,32 @@ def module_path(module: str, repo: Path | None = None) -> Path | None:
     return matches[0] if len(matches) == 1 else None
 
 
+def _matches(full: str, decl: str) -> bool:
+    """A cited name matches a declaration when it is a full dotted suffix.
+
+    Suffix matching, on component boundaries, is what lets a note cite either
+    `K1_trivial` or `BinaryLeavitt.K1_trivial`; the qualified form is how a
+    note disambiguates when one file declares the same short name in two
+    namespaces.
+    """
+    return full == decl or full.endswith("." + decl)
+
+
 def resolve(claims: list[Claim], repo: Path | None = None
             ) -> tuple[dict[str, set[str]], list[str]]:
-    """Return the module→declaration index and every unresolved reference."""
+    """Return the module→declaration index and every unresolved reference.
+
+    The index maps a module basename to the *fully qualified* names it
+    declares.  A reference resolves when exactly one declaration in the named
+    module matches it as a dotted suffix; zero matches is a dangling
+    reference, and two or more is an ambiguity the note must settle by
+    qualifying the name -- a check that certifies an ambiguous name proves
+    the wrong thing exists.
+    """
     base = Path(repo) if repo is not None else REPO
     declared: dict[str, set[str]] = {}
     for full, path in build_index(base).items():
-        declared.setdefault(path.stem, set()).add(full.split(".")[-1])
+        declared.setdefault(path.stem, set()).add(full)
 
     problems: list[str] = []
     for claim in claims:
@@ -199,11 +218,37 @@ def resolve(claims: list[Claim], repo: Path | None = None
             # names `Whitehead`, and `Leavitt/Whitehead.lean` answers to it.
             if not module_path(module, base):
                 problems.append(f"{claim.label}: no such module {LIB}/{module}.lean")
-            elif decl not in declared.get(module.rsplit("/", 1)[-1], set()):
-                elsewhere = sorted(m for m, names in declared.items() if decl in names)
+                continue
+            fulls = declared.get(module.rsplit("/", 1)[-1], set())
+            matches = sorted(f for f in fulls if _matches(f, decl))
+            if not matches:
+                elsewhere = sorted(m for m, names in declared.items()
+                                   if any(_matches(f, decl) for f in names))
                 hint = f" (declared in {', '.join(elsewhere)})" if elsewhere else ""
                 problems.append(f"{claim.label}: {module}.lean does not declare `{decl}`{hint}")
+            elif len(matches) > 1:
+                problems.append(
+                    f"{claim.label}: `{decl}` is ambiguous in {module}.lean "
+                    f"({', '.join(matches)}); qualify the note's name with a namespace suffix")
     return declared, problems
+
+
+def resolved_declarations(claims: list[Claim], repo: Path | None = None) -> list[str]:
+    """Every mapped declaration, fully qualified, sorted and deduplicated.
+
+    This is the input to `scripts/Signatures.lean`, which elaborates each name
+    and prints its type -- the layer that pins *statements*, where this module
+    pins only *names*.
+    """
+    base = Path(repo) if repo is not None else REPO
+    declared, _ = resolve(claims, base)
+    out: set[str] = set()
+    for claim in claims:
+        for module, decl in claim.declarations:
+            for full in declared.get(module.rsplit("/", 1)[-1], set()):
+                if _matches(full, decl):
+                    out.add(full)
+    return sorted(out)
 
 
 def to_markdown(claims: list[Claim], repo: Path | None = None) -> str:
@@ -235,6 +280,7 @@ def to_markdown(claims: list[Claim], repo: Path | None = None) -> str:
 
 
 GENERATED = Path("docs/CLAIM_MAP.md")
+GENERATED_DECLS = Path("docs/CLAIM_DECLS.txt")
 
 HEADER = """# TeX \u2194 Lean claim map
 
@@ -256,6 +302,19 @@ def render(repo: Path | None = None) -> str:
     return HEADER + to_markdown(claims, base) + "\n"
 
 
+def render_decls(repo: Path | None = None) -> str:
+    """The mapped declarations, fully qualified, one per line.
+
+    `scripts/Signatures.lean` reads this file after a build and writes each
+    declaration's elaborated type to `docs/CLAIM_SIGNATURES.md`; a name that
+    stops existing fails there with the kernel's authority rather than this
+    scan's.
+    """
+    base = Path(repo) if repo is not None else REPO
+    claims = read_claims(base / TEX_NAME)
+    return "\n".join(resolved_declarations(claims, base)) + "\n"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--write", action="store_true",
@@ -270,7 +329,8 @@ def main() -> int:
     if args.write:
         (REPO / GENERATED).parent.mkdir(parents=True, exist_ok=True)
         (REPO / GENERATED).write_text(render(), encoding="utf-8")
-        print(f"wrote {GENERATED}")
+        (REPO / GENERATED_DECLS).write_text(render_decls(), encoding="utf-8")
+        print(f"wrote {GENERATED} and {GENERATED_DECLS}")
         return 1 if problems else 0
     if args.markdown:
         print(to_markdown(claims))

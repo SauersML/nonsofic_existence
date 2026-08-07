@@ -277,6 +277,9 @@ import NonsoficGroupsExist.Monsters.VerbalCompleteness
 import NonsoficGroupsExist.Monsters.Protection
 import NonsoficGroupsExist.Endpoint.Audit
 import NonsoficGroupsExist.Endpoint.Public
+import NonsoficGroupsExist.Endpoint.ManuscriptStatements
+import NonsoficGroupsExist.KOne.WhiteheadQuotient
+import NonsoficGroupsExist.Leavitt.FiniteTypeCountable
 
 /-!
 # An unconditional construction of a finitely presented nonsofic group

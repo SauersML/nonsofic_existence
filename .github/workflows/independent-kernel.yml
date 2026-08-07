@@ -84,25 +84,40 @@ jobs:
       - name: Build project
         run: lake build
 
-      # lean4export is pinned to the tag matching this project's minor version
-      # and then forced onto the project's exact toolchain.  Oleans are
-      # version-locked: an exporter built with a different Lean cannot read the
-      # oleans we are trying to export, so this override is load-bearing, not
-      # cosmetic.
+      # lean4export is pinned to the exact commit behind the tag matching this
+      # project's minor version (a tag can be moved; a SHA cannot) and then
+      # forced onto the project's exact toolchain.  Oleans are version-locked:
+      # an exporter built with a different Lean cannot read the oleans we are
+      # trying to export, so this override is load-bearing, not cosmetic.
       - name: Build lean4export
+        env:
+          # Tag v4.32.0 at the time of pinning.
+          LEAN4EXPORT_SHA: 4e7915201d3f9f04470d9eae002fa695f7cdc589
         run: |
           set -euo pipefail
-          git clone --branch v4.32.0 --depth 1 \
-            https://github.com/leanprover/lean4export.git ../lean4export
+          git init -q ../lean4export
+          git -C ../lean4export remote add origin \
+            https://github.com/leanprover/lean4export.git
+          git -C ../lean4export fetch -q --depth 1 origin "$LEAN4EXPORT_SHA"
+          git -C ../lean4export checkout -q FETCH_HEAD
           cd ../lean4export
           cat ../nonsofic_existence/lean-toolchain > lean-toolchain
           lake build
           test -x .lake/build/bin/lean4export
 
+      # nanoda is pinned by SHA for the same reason: an independent kernel
+      # whose code can change under the workflow is not a reproducible check.
       - name: Build nanoda
+        env:
+          # Default-branch head at the time of pinning (2026-08-03).
+          NANODA_SHA: 418320295890faed83a96fd97907b12a3b6728c2
         run: |
           set -euo pipefail
-          git clone --depth 1 https://github.com/ammkrn/nanoda_lib.git ../nanoda_lib
+          git init -q ../nanoda_lib
+          git -C ../nanoda_lib remote add origin \
+            https://github.com/ammkrn/nanoda_lib.git
+          git -C ../nanoda_lib fetch -q --depth 1 origin "$NANODA_SHA"
+          git -C ../nanoda_lib checkout -q FETCH_HEAD
           cd ../nanoda_lib
           # Clear inherited RUSTFLAGS: an injected `-l` (e.g. a BLAS flag from a
           # host profile) leaks into build-script linking and breaks the build

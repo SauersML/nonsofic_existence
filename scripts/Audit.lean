@@ -137,6 +137,62 @@ example {H : Type} [Group H] [Finite H]
     f ThompsonFObstruction.generatorCommutator = 1 :=
   ThompsonFObstruction.finite_image_generatorCommutator_eq_one f h₁ h₂
 
+/-! ### The exact manuscript endpoints
+
+One pin per printed headline statement of `Endpoint/ManuscriptStatements`,
+restated verbatim so that a weakening stops typechecking here. -/
+
+example (k : Type) [Field k] [Finite k] :
+    ManuscriptProfile (BinaryLeavittUnits k) ∧
+      (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)),
+          (BinaryLeavitt.family k).IsComplete C →
+            Nonempty (BinaryLeavittGLRank k r ≃* BinaryLeavittUnits k)) ∧
+      (∀ r : ℕ, 2 ≤ r → BinaryLeavittELRank k r = ⊤) ∧
+      (∀ r : ℕ, 1 ≤ r → ManuscriptProfile (BinaryLeavittGLRank k r)) ∧
+      (∀ r : ℕ, 2 ≤ r → ManuscriptProfile ↥(BinaryLeavittELRank k r)) :=
+  theoremB_exact k
+
+example (k : Type) [Field k] [Finite k] :
+    ∃ (H : Type) (_ : Group H) (π : H →* BinaryLeavittUnits k),
+      Function.Surjective π ∧ Infinite H ∧ Group.IsFinitelyPresented H ∧
+        HasKazhdanPropertyT.{0, 0} H ∧ ¬ IsSofic H :=
+  theoremC_exact k
+
+example (k : Type) [Field k] [Finite k] :
+    ∃ (H : Type) (_ : Group H),
+      Infinite H ∧ Group.IsFinitelyPresented H ∧
+        HasKazhdanPropertyT.{0, 0} H ∧ ¬ IsSofic H ∧
+        (∃ π : H →* BinaryLeavittUnits k, Function.Surjective π) ∧
+        (∀ m : ℕ, ∃ π : H →* BinaryLeavittGL k m, Function.Surjective π) ∧
+        (∀ m : ℕ, 1 ≤ m →
+          ∃ π : H →* BinaryLeavittEL k m, Function.Surjective π) :=
+  theoremC_covers_theoremB_groups k
+
+example {G : Type} [Group G] [Countable G]
+    (Γ J : Subgroup G) (Q : Finset G) (q₀ : G)
+    (hTG : HasKazhdanPropertyT.{0, 0} G)
+    (hTΓ : HasKazhdanPropertyT.{0, 0} ↥Γ)
+    (hΓinf : Infinite ↥Γ) (hΓfg : Group.FG ↥Γ) (hJfg : Group.FG ↥J)
+    (hJΓ : J ≤ Γ)
+    (hgen : Subgroup.closure ((Γ : Set G) ∪ (Q : Set G)) = ⊤)
+    (hcompress : ∀ q ∈ Q, ∀ g ∈ Γ, q * g * q⁻¹ ∈ Γ)
+    (hq₀ : q₀ ∈ Q)
+    (hcent : ∀ x ∈ conjSubgroup q₀ Γ, ∀ y ∈ J, x * y = y * x)
+    (hdisj : conjSubgroup q₀ Γ ⊓ J = ⊥)
+    (hS : IsSofic G) : IsLEF ↥J :=
+  theoremD_subgroups Γ J Q q₀ hTG hTΓ hΓinf hΓfg hJfg hJΓ hgen hcompress
+    hq₀ hcent hdisj hS
+
+example (k : Type) [Field k] : Subsingleton (BinaryLeavittWhiteheadK1 k) :=
+  binaryLeavittWhiteheadK1_subsingleton k
+
+example (c : ℝ) (hc : 0 < c) :
+    ∃ m : ℕ, 4 ≤ m ∧ (KunSpectral.switched m).HasCheegerLowerBound 1 ∧
+      ¬ KunSpectral.IsBipartite (KunSpectral.switched m) ∧
+      KunSpectral.rayleigh (KunSpectral.switched m) (KunSpectral.testVector m)
+        < -1 + c :=
+  KunSpectral.no_uniform_spectral_gap c hc
+
 /-! ## 2. Transitive axiom closure -/
 
 /-- The axioms of classical Lean, which Mathlib itself uses.  Nothing else is
@@ -165,7 +221,16 @@ def headlineTheorems : List Name :=
    ``universalLeavitt_profile,
    ``binaryLeavitt_finiteField_profile,
    ``ambient_profile,
-   ``ambient_full_profile]
+   ``ambient_full_profile,
+   ``theoremB_exact,
+   ``panorama_exact,
+   ``theoremC_exact,
+   ``theoremC_covers_theoremB_groups,
+   ``theoremD_subgroups,
+   ``cor_fgring_exact,
+   ``cor_fgring_countableFree,
+   ``binaryLeavittWhiteheadK1_subsingleton,
+   ``KunSpectral.no_uniform_spectral_gap]
 
 /-- Every declaration of this development, taken from the environment rather
 than from a hand-maintained list, so that a new module cannot escape the

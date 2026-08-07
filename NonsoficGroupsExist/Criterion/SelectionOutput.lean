@@ -25,6 +25,10 @@ structure SelectionOutput {G Γ J : Type} [Group G] [Group Γ] [Group J]
   cheeger : ℝ
   cheeger_pos : 0 < cheeger
   expands : ∀ n, (graph n).HasCheegerLowerBound cheeger
+  /-- The selected components have uniformly bounded degree; this is the
+  bounded-degree half of the printed notion of an expander sequence. -/
+  degreeBound : ℕ
+  degree_le : ∀ n, (graph n).HasDegreeBound degreeBound
   /-- Completion and all graph transports change only a negligible number of
   generator-edge occurrences. -/
   edit_negligible : Negligible
@@ -56,6 +60,8 @@ noncomputable def toMatchingCertificate (O : SelectionOutput D) :
   cheeger := O.cheeger
   cheeger_pos := O.cheeger_pos
   expands := O.expands
+  degreeBound := O.degreeBound
+  graphs_degree_le := O.degree_le
   edit_negligible := by
     simpa [AsymptoticScale.Negligible, SoficApproximation.cardScale,
       Negligible, LocalizedApproximationData.toSoficApproximation] using
