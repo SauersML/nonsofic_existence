@@ -139,4 +139,46 @@ theorem ray_injective (Γ : Subgroup H) {t : H} (ht : ∀ γ ∈ Γ, t * γ * t�
     rwa [hsplit] at heq
   exact hout (compression_eq_of_pow_mem Γ ht (by omega) hpow γ hγ)
 
+/-! ## The pattern behind all of this
+
+Every category in which a compression collapses does so for one reason: it
+carries a *size* that conjugation preserves and that strict inclusion strictly
+decreases.  Finite sets have cardinality, finite-dimensional spaces have
+dimension, finite groups have order, compact groups have Haar measure.  A
+`II₁` factor has the trace -- and the trace is *additive under refinement*,
+hence blind to it, which is exactly why the compression question stays open
+there.
+
+`no_strict_compression_of_invariantSize` isolates the argument.  Every collapse
+proved in this development is an instance: `compressedImage_eq` takes
+`size = Nat.card`, `ExactCompression.fixedSet_image_eq` takes cardinality of a
+fixed set, `fixedSubmodule_map_eq` takes `finrank`. -/
+
+/-- **No strict compression against an invariant size.**  If subgroups of `Q`
+carry a size that conjugation preserves and that distinguishes proper
+inclusions, then a compression is an equality. -/
+theorem no_strict_compression_of_invariantSize (size : Subgroup Q → ℕ)
+    (hconj : ∀ (g : Q) (K : Subgroup Q),
+      size (K.map (MulAut.conj g).toMonoidHom) = size K)
+    (hsep : ∀ K L : Subgroup Q, K ≤ L → size L ≤ size K → K = L)
+    (K : Subgroup Q) (g : Q)
+    (hcomp : K.map (MulAut.conj g).toMonoidHom ≤ K) :
+    K.map (MulAut.conj g).toMonoidHom = K :=
+  hsep _ K hcomp (le_of_eq (hconj g K).symm)
+
+/-- The finite-group collapse, recovered from the pattern with `Nat.card`. -/
+theorem compressedImage_eq' [Finite Q] (φ : H →* Q) (Γ : Subgroup H) {t : H}
+    (ht : ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) :
+    (Γ.map φ).map (MulAut.conj (φ t)).toMonoidHom = Γ.map φ := by
+  classical
+  refine no_strict_compression_of_invariantSize (Q := Q)
+    (fun K : Subgroup Q ↦ Nat.card K) ?_ ?_ _ _
+    (compressedImage_le φ Γ ht)
+  · intro g K
+    exact Nat.card_congr
+      (Subgroup.equivMapOfInjective K (MulAut.conj g).toMonoidHom
+        (MulAut.conj g).injective).symm.toEquiv
+  · intro K L hle hcard
+    exact Subgroup.eq_of_le_of_card_ge hle hcard
+
 end NonsoficGroupsExist
