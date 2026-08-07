@@ -102,47 +102,16 @@ theorem uUnit_mul_coreEmbedding (g : elementaryGroup (Fin m) R) :
       simp
   | mul x y hxmem hymem hx hy =>
       rw [show (⟨x * y, _⟩ : elementaryGroup (Fin m) R) =
-          ⟨x, hxmem⟩ * ⟨y, hymem⟩ from Subtype.ext rfl, map_mul, map_mul]
-      calc
-        uUnit L * ((coreEmbedding ⟨x, hxmem⟩ : (Matrix _ _ R)ˣ) *
-            (coreEmbedding ⟨y, hymem⟩ : (Matrix _ _ R)ˣ)) =
-            (uUnit L * (coreEmbedding ⟨x, hxmem⟩ : (Matrix _ _ R)ˣ)) *
-              (coreEmbedding ⟨y, hymem⟩ : (Matrix _ _ R)ˣ) := by
-          group
-        _ = ((coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ) * uUnit L) *
-              (coreEmbedding ⟨y, hymem⟩ : (Matrix _ _ R)ˣ) := by rw [hx]
-        _ = (coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ) *
-              (uUnit L * (coreEmbedding ⟨y, hymem⟩ : (Matrix _ _ R)ˣ)) := by
-          group
-        _ = (coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ) *
-              ((coreEmbedding (L.elementaryCompressionEnd ⟨y, hymem⟩) :
-                (Matrix _ _ R)ˣ) * uUnit L) := by rw [hy]
-        _ = ((coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ) *
-              (coreEmbedding (L.elementaryCompressionEnd ⟨y, hymem⟩) :
-                (Matrix _ _ R)ˣ)) * uUnit L := by group
+          ⟨x, hxmem⟩ * ⟨y, hymem⟩ from Subtype.ext rfl, map_mul, map_mul,
+        map_mul]
+      push_cast
+      rw [← mul_assoc, hx, mul_assoc, hy, ← mul_assoc]
   | inv x hxmem hx =>
       rw [show (⟨x⁻¹, _⟩ : elementaryGroup (Fin m) R) =
           (⟨x, hxmem⟩ : elementaryGroup (Fin m) R)⁻¹ from Subtype.ext rfl,
-        map_inv, map_inv]
-      calc
-        uUnit L * ((coreEmbedding ⟨x, hxmem⟩ : (Matrix _ _ R)ˣ))⁻¹ =
-            ((coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ))⁻¹ *
-              ((coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-                (Matrix _ _ R)ˣ) * uUnit L) *
-                ((coreEmbedding ⟨x, hxmem⟩ : (Matrix _ _ R)ˣ))⁻¹ := by
-          group
-        _ = ((coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ))⁻¹ *
-              (uUnit L * (coreEmbedding ⟨x, hxmem⟩ : (Matrix _ _ R)ˣ)) *
-                ((coreEmbedding ⟨x, hxmem⟩ : (Matrix _ _ R)ˣ))⁻¹ := by
-          rw [hx]
-        _ = ((coreEmbedding (L.elementaryCompressionEnd ⟨x, hxmem⟩) :
-              (Matrix _ _ R)ˣ))⁻¹ * uUnit L := by group
+        map_inv, map_inv, map_inv]
+      push_cast
+      exact SemiconjBy.inv_right hx
 
 /-- The involution centralizes the whole compressed embedded core. -/
 theorem zUnit_commute_compressed_core (hm : 0 < m)
@@ -305,7 +274,7 @@ theorem coreEmbedding_compressorSet_generate (hm2 : 2 ≤ m)
     have := elementaryUnit_commutator (last m) i₁.castSucc (0 : Fin (m + 1))
       (Ne.symm (castSucc_ne_last i₁)) h₁ne0
       (Ne.symm (zero_ne_last hm)) a 1
-    simpa using this
+    simpa [commutatorElement_def] using this
   have hzeroLast : ∀ a : R,
       elementaryRoot (0 : Fin (m + 1)) (last m) (zero_ne_last hm) a ∈ H := by
     intro a
@@ -318,7 +287,7 @@ theorem coreEmbedding_compressorSet_generate (hm2 : 2 ≤ m)
     apply Subtype.ext
     have := elementaryUnit_commutator (0 : Fin (m + 1)) i₁.castSucc (last m)
       (Ne.symm h₁ne0) (castSucc_ne_last i₁) (zero_ne_last hm) a 1
-    simpa using this
+    simpa [commutatorElement_def] using this
   have hall : ∀ (i j : Fin (m + 1)) (hij : i ≠ j) (a : R),
       elementaryRoot i j hij a ∈ H := by
     intro i j hij a
@@ -355,9 +324,9 @@ section Witness
 
 variable (hm2 : 2 ≤ m)
 
-def idx0 (hm2 : 2 ≤ m) : Fin m := ⟨0, by omega⟩
+def idx0 : Fin m := ⟨0, lt_of_lt_of_le two_pos hm2⟩
 
-def idx1 (hm2 : 2 ≤ m) : Fin m := ⟨1, by omega⟩
+def idx1 : Fin m := ⟨1, lt_of_lt_of_le one_lt_two hm2⟩
 
 theorem idx0_ne_idx1 : idx0 hm2 ≠ idx1 hm2 := by
   intro h
@@ -370,18 +339,23 @@ def diagUnit (u : Rˣ) : (Matrix (Fin m) (Fin m) R)ˣ where
   inv := Matrix.diagonal fun k => if k = idx0 hm2 then (↑u⁻¹ : R) else 1
   val_inv := by
     rw [Matrix.diagonal_mul_diagonal]
-    rw [show ((fun k => if k = idx0 hm2 then (↑u : R) else 1) *
-        fun k => if k = idx0 hm2 then (↑u⁻¹ : R) else 1) =
+    rw [show (fun k => (if k = idx0 hm2 then (↑u : R) else 1) *
+        if k = idx0 hm2 then (↑u⁻¹ : R) else 1) =
         fun _ => (1 : R) from funext fun k => by
       by_cases hk : k = idx0 hm2 <;> simp [hk]]
     exact Matrix.diagonal_one
   inv_val := by
     rw [Matrix.diagonal_mul_diagonal]
-    rw [show ((fun k => if k = idx0 hm2 then (↑u⁻¹ : R) else 1) *
-        fun k => if k = idx0 hm2 then (↑u : R) else 1) =
+    rw [show (fun k => (if k = idx0 hm2 then (↑u⁻¹ : R) else 1) *
+        if k = idx0 hm2 then (↑u : R) else 1) =
         fun _ => (1 : R) from funext fun k => by
       by_cases hk : k = idx0 hm2 <;> simp [hk]]
     exact Matrix.diagonal_one
+
+theorem diagUnit_val (u : Rˣ) :
+    ((diagUnit hm2 u : (Matrix (Fin m) (Fin m) R)ˣ) :
+        Matrix (Fin m) (Fin m) R) =
+      Matrix.diagonal fun k => if k = idx0 hm2 then (↑u : R) else 1 := rfl
 
 /-- The diagonal witness as a homomorphism of unit groups. -/
 def diagUnitHom : Rˣ →* (Matrix (Fin m) (Fin m) R)ˣ where
@@ -434,12 +408,11 @@ theorem whiteheadWord_val (u : Rˣ) :
   rw [whiteheadWord, Units.val_mul, Units.val_mul]
   rw [elementaryUnit_val_planeMatrix _ _ hne (↑u : R)]
   rw [elementaryUnit_val_planeMatrix' _ _ hne (-(↑u⁻¹ : R))]
-  rw [elementaryUnit_val_planeMatrix _ _ hne (↑u : R)]
   rw [planeMatrix_mul _ _ hne, planeMatrix_mul _ _ hne]
   congr 1
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [Matrix.mul_apply, Fin.sum_univ_two, mul_add, add_mul]
+    simp [Matrix.mul_apply, Fin.sum_univ_two]
 
 /-- The balanced word `w(u)w(−1)`, with value `diag(u, u⁻¹)` in the
 plane. -/
@@ -472,52 +445,49 @@ theorem diagUnit_commutator_eq (a b : Rˣ) :
   have hne := idx0_ne_idx1 hm2
   apply Units.ext
   rw [Units.val_mul, Units.val_mul, balancedWord_val, balancedWord_val,
-    balancedWord_val, planeMatrix_mul _ _ hne, planeMatrix_mul _ _ hne]
+    balancedWord_val, planeMatrix_mul _ _ hne, planeMatrix_mul _ _ hne,
+    inv_inv]
   have hblock :
       (!![(↑a : R), 0; 0, (↑a⁻¹ : R)] * !![(↑b : R), 0; 0, (↑b⁻¹ : R)] *
         !![(↑(b * a)⁻¹ : R), 0; 0, (↑(b * a) : R)]) =
       !![(↑(⁅a, b⁆ : Rˣ) : R), 0; 0, 1] := by
-    have h1 : (↑a : R) * ↑b * ↑(b * a)⁻¹ = ↑(⁅a, b⁆ : Rˣ) := by
-      rw [← Units.val_mul, ← Units.val_mul]
-      congr 1
-      rw [commutatorElement_def, mul_inv_rev]
-    have h2 : (↑a⁻¹ : R) * ↑b⁻¹ * ↑(b * a) = 1 := by
-      rw [← Units.val_mul, ← Units.val_mul, ← Units.val_one]
+    have h1 : (↑a : R) * ↑b * ((↑a⁻¹ : R) * ↑b⁻¹) = ↑(⁅a, b⁆ : Rˣ) := by
+      rw [commutatorElement_def]
+      push_cast
+      rw [← mul_assoc]
+    have h2 : (↑a⁻¹ : R) * ↑b⁻¹ * ((↑b : R) * ↑a) = 1 := by
+      rw [← Units.val_mul, ← Units.val_mul, ← Units.val_mul,
+        ← Units.val_one]
       congr 1
       group
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp [Matrix.mul_apply, Fin.sum_univ_two, h1, h2]
-  rw [hblock]
+  rw [hblock, diagUnit_val]
   -- `planeMatrix` of a diagonal block with `1` in the second slot is the
   -- distinguished diagonal
   ext r c
   by_cases hr0 : r = idx0 hm2
-  · subst hr0
-    by_cases hc : c = r
-    · subst hc
-      rw [Matrix.diagonal_apply_eq]
-      rw [planeMatrix_apply_ii]
+  · rw [hr0]
+    by_cases hc : c = idx0 hm2
+    · rw [hc, Matrix.diagonal_apply_eq, planeMatrix_apply_ii]
       simp
     · rw [Matrix.diagonal_apply_ne _ (fun h => hc h.symm)]
       by_cases hc1 : c = idx1 hm2
-      · subst hc1
-        rw [planeMatrix_apply_ij _ _ _ hne]
+      · rw [hc1, planeMatrix_apply_ij _ _ _ hne]
         simp
-      · rw [planeMatrix_apply_row_i _ _ _ (fun h => hc h) hc1]
+      · rw [planeMatrix_apply_row_i _ _ _ hc hc1]
   · by_cases hr1 : r = idx1 hm2
-    · subst hr1
-      by_cases hc : c = r
-      · subst hc
-        rw [Matrix.diagonal_apply_eq, planeMatrix_apply_jj _ _ _ hne]
+    · rw [hr1]
+      by_cases hc : c = idx1 hm2
+      · rw [hc, Matrix.diagonal_apply_eq, planeMatrix_apply_jj _ _ _ hne]
         simp [Ne.symm (idx0_ne_idx1 hm2)]
       · by_cases hc0 : c = idx0 hm2
-        · subst hc0
-          rw [Matrix.diagonal_apply_ne _ (fun h => hc h.symm),
-            planeMatrix_apply_ji _ _ _ hne]
+        · rw [hc0, Matrix.diagonal_apply_ne _
+              (Ne.symm (idx0_ne_idx1 hm2)), planeMatrix_apply_ji _ _ _ hne]
           simp
         · rw [Matrix.diagonal_apply_ne _ (fun h => hc h.symm),
-            planeMatrix_apply_row_j _ _ _ hne hc0 (fun h => hc h)]
+            planeMatrix_apply_row_j _ _ _ hne hc0 hc]
     · rw [planeMatrix_apply_off _ _ _ hr0 hr1]
       by_cases hc : r = c
       · subst hc
@@ -541,7 +511,8 @@ theorem diagUnit_mem_of_mem_commutator {u : Rˣ} (hu : u ∈ commutator Rˣ) :
       obtain ⟨a, b, rfl⟩ := hz
       exact diagUnit_commutator_mem hm2 a b
   | one =>
-      simpa only [map_one] using (elementaryGroup (Fin m) R).one_mem
+      rw [show diagUnit hm2 (1 : Rˣ) = 1 from (diagUnitHom hm2).map_one]
+      exact (elementaryGroup (Fin m) R).one_mem
   | mul x y _ _ hx hy =>
       rw [show diagUnit hm2 (x * y) = diagUnit hm2 x * diagUnit hm2 y from
         (diagUnitHom hm2).map_mul x y]
@@ -550,8 +521,6 @@ theorem diagUnit_mem_of_mem_commutator {u : Rˣ} (hu : u ∈ commutator Rˣ) :
       rw [show diagUnit hm2 x⁻¹ = (diagUnit hm2 x)⁻¹ from
         (diagUnitHom hm2).map_inv x]
       exact Subgroup.inv_mem _ hx
-
-variable (L)
 
 /-- The corner witness, embedded on the distinguished diagonal slot of
 `EL_m(R)`. -/
@@ -594,13 +563,13 @@ theorem matrixCompression_commutes_diagUnit
       show (L.p0 + L.s1 * ↑u * L.t1) * (L.s1 * L.t1) = L.s1 * ↑u * L.t1
       rw [add_mul, LeavittFamily.p0, mul_assoc L.s0, ← mul_assoc L.t0,
         L.t0_s1, zero_mul, mul_zero, zero_add, mul_assoc (L.s1 * ↑u),
-        ← mul_assoc L.t1, L.t1_s1, one_mul, ← mul_assoc]]
+        ← mul_assoc L.t1, L.t1_s1, one_mul]]
     rw [show L.p1 * (↑(L.cornerHom u) : R) = L.s1 * ↑u * L.t1 from by
       rw [LeavittFamily.cornerHom, LeavittFamily.p1]
       show (L.s1 * L.t1) * (L.p0 + L.s1 * ↑u * L.t1) = L.s1 * ↑u * L.t1
       rw [mul_add, LeavittFamily.p0, mul_assoc L.s1, ← mul_assoc L.t1,
         L.t1_s0, zero_mul, mul_zero, zero_add, ← mul_assoc,
-        mul_assoc L.s1, L.t1_s1, mul_one]]
+        mul_assoc L.s1, ← mul_assoc L.t1, L.t1_s1, one_mul]]
   have hw_left : ∀ x : R,
       (↑(L.cornerHom u) : R) * (L.s0 * x * L.t0) = L.s0 * x * L.t0 := by
     intro x
@@ -615,19 +584,17 @@ theorem matrixCompression_commutes_diagUnit
     Matrix.diagonal fun k => if k = idx0 hm2 then ↑(L.cornerHom u) else 1
     from rfl]
   rw [Matrix.mul_diagonal, Matrix.diagonal_mul]
-  simp only [matrixCompression_apply]
+  simp only [LeavittFamily.matrixCompression_apply]
   by_cases hr : r = idx0 hm2
   · by_cases hc : c = idx0 hm2
     · have hrc : r = c := hr.trans hc.symm
       rw [if_pos hrc, if_pos hc, if_pos hr, add_mul, mul_add,
         hw_right (M r c), hw_left (M r c), hw_p1]
     · have hrc : r ≠ c := fun h => hc (h ▸ hr)
-      rw [if_pos hr, if_neg hc, if_neg hrc, zero_add, zero_add, mul_one,
-        hw_left]
+      rw [if_pos hr, if_neg hc, if_neg hrc, zero_add, mul_one, hw_left]
   · by_cases hc : c = idx0 hm2
     · have hrc : r ≠ c := fun h => hr (h.trans hc)
-      rw [if_pos hc, if_neg hr, if_neg hrc, zero_add, zero_add, one_mul,
-        hw_right]
+      rw [if_pos hc, if_neg hr, if_neg hrc, zero_add, one_mul, hw_right]
     · rw [if_neg hc, if_neg hr, mul_one, one_mul]
 
 /-- The compression endomorphism commutes with the embedded witness. -/
@@ -673,8 +640,8 @@ theorem compressionEnd_eq_witness_iff (g : elementaryGroup (Fin m) R)
       exact hval
     have hentry := congrArg
       (fun M : Matrix (Fin m) (Fin m) R => M (idx0 hm2) (idx0 hm2)) hmat
-    simp only [matrixCompression_apply] at hentry
-    rw [if_pos rfl] at hentry
+    simp only [LeavittFamily.matrixCompression_apply] at hentry
+    rw [if_true] at hentry
     rw [show ((diagUnit hm2 (L.cornerHom u) :
         (Matrix (Fin m) (Fin m) R)ˣ) : Matrix (Fin m) (Fin m) R)
           (idx0 hm2) (idx0 hm2) = ↑(L.cornerHom u) from by
@@ -693,7 +660,7 @@ theorem compressionEnd_eq_witness_iff (g : elementaryGroup (Fin m) R)
       rw [add_zero]
     rw [hentry] at hone
     rw [L.t1_cornerHom_s1] at hone
-    have hu1 : u = 1 := Units.ext hone.symm
+    have hu1 : u = 1 := Units.ext hone
     have hj1 : j = 1 := by
       apply Subtype.ext
       show (j : Rˣ) = 1
@@ -730,7 +697,7 @@ theorem countable_of_closure_finset_eq_top {G : Type*} [Group G]
     exact Subgroup.mem_top g
   obtain ⟨l, hl, hprod⟩ := Submonoid.exists_list_of_mem_closure hg
   refine ⟨l.attach.map fun x => ⟨x.1, hl x.1 x.2⟩, ?_⟩
-  rw [List.map_map]
+  simp only [List.map_map]
   have hmap : l.attach.map (Subtype.val ∘ fun x : {a // a ∈ l} =>
       (⟨x.1, hl x.1 x.2⟩ :
         ((S : Set G) ∪ (S : Set G)⁻¹ : Set G))) = l := by
@@ -875,6 +842,7 @@ noncomputable def compressionSetup [Nontrivial R]
         exact (compressionEnd_eq_witness_iff L hm2 g j).mp
           (coreEmbedding_injective h) }
 
+include hm2 in
 /-- **The Leavitt-corner theorem, at every adjacent pair of ranks.**  Let
 `R` be a nontrivial unital ring carrying a binary Leavitt family, `m ≥ 2`,
 and suppose: (i) `EL_m(R)` and `EL_{m+1}(R)` have property `(T)`; (ii) the
@@ -923,6 +891,7 @@ theorem zUnit_mem_of_charTwo (hm : 0 < m) :
   rw [h]
   exact involutionWord_mem L hm
 
+include L in
 /-- In characteristic two, hypothesis (ii) is discharged by the explicit
 elementary factorizations, and the corner theorem needs only the two
 property-`(T)` inputs. -/

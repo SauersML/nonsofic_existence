@@ -299,10 +299,6 @@ theorem uPrimeMatrix_mul_uMatrix :
         rw [show L.s0 ^ (j : ℕ) * (L.s0 * (L.t0 * L.t0 ^ (j : ℕ))) =
             L.s0 ^ (j : ℕ) * L.s0 * (L.t0 * L.t0 ^ (j : ℕ)) from by
           rw [mul_assoc]]
-        rw [show L.s0 ^ (j : ℕ) * L.s0 * (L.t0 * L.t0 ^ (j : ℕ)) =
-            L.s0 ^ (j : ℕ) * L.s0 * L.t0 * L.t0 ^ (j : ℕ) from by
-          rw [mul_assoc (L.s0 ^ (j : ℕ) * L.s0)]]
-        rw [mul_assoc (L.s0 ^ (j : ℕ) * L.s0)]
       rw [Finset.sum_congr rfl fun j _ => hterm j]
       rw [uMatrix_apply_last, if_pos rfl]
       rw [Fin.sum_univ_eq_sum_range
@@ -506,12 +502,13 @@ theorem zMatrix_mul_compressed_single (hm : 0 < m) (i j : Fin m) (b : R) :
           rw [if_pos rfl, if_pos rfl]
           rw [show L.p0 * (L.s0 * b * L.t0) = L.s0 * b * L.t0 from by
             rw [LeavittFamily.p0, mul_assoc L.s0, ← mul_assoc L.t0,
-              L.t0_s0, one_mul, ← mul_assoc]]
-        · rw [if_neg hr0, if_neg (fun h => hr0 h.symm)]
+              ← mul_assoc L.t0, L.t0_s0, one_mul, ← mul_assoc]]
+        · rw [if_neg hr0,
+            if_neg (show ¬((0 : Fin (m + 1)) = r) from fun h => hr0 h.symm)]
           by_cases hrl : r = last m
           · rw [if_pos hrl]
             rw [show L.t1 * (L.s0 * b * L.t0) = 0 from by
-              rw [← mul_assoc, L.t1_s0, zero_mul, zero_mul]]
+              rw [← mul_assoc, ← mul_assoc, L.t1_s0, zero_mul, zero_mul]]
           · rw [if_neg hrl, zero_mul]
       · rw [zMatrix_apply_col_core L hm hi0 (castSucc_ne_last i)]
         by_cases hri : r = i.castSucc
@@ -537,11 +534,12 @@ theorem compressed_single_mul_zMatrix (hm : 0 < m) (i j : Fin m) (b : R) :
       · rw [hj0, zMatrix_apply_row_zero]
         by_cases hc0 : c = 0
         · subst hc0
-          rw [if_pos rfl, if_pos hj0]
+          rw [if_pos rfl, if_pos rfl]
           rw [show L.s0 * b * L.t0 * L.p0 = L.s0 * b * L.t0 from by
             rw [LeavittFamily.p0, mul_assoc (L.s0 * b), ← mul_assoc L.t0,
-              L.t0_s0, one_mul, ← mul_assoc]]
-        · rw [if_neg hc0, if_neg (fun h => hc0 (hj0 ▸ h))]
+              L.t0_s0, one_mul]]
+        · rw [if_neg hc0,
+            if_neg (show ¬((0 : Fin (m + 1)) = c) from fun h => hc0 h.symm)]
           by_cases hcl : c = last m
           · rw [if_pos hcl]
             rw [show L.s0 * b * L.t0 * L.s1 = 0 from by
@@ -587,7 +585,7 @@ theorem zMatrix_mul_lastRow_single (hm : 0 < m) (j : Fin m)
     by_cases hrl : r = last m
     · rw [if_pos hrl, if_neg (fun h : r = 0 => by
         rw [h] at hrl
-        exact (zero_ne_last hm) hrl), if_pos rfl]
+        exact (zero_ne_last hm) hrl), if_pos hrl]
       rw [zMatrix_apply_row_core L hm hj0 (castSucc_ne_last j),
         if_pos hcj.symm, mul_one, ← mul_assoc, L.t1_s1, one_mul]
     · rw [if_neg hrl]
@@ -617,8 +615,8 @@ theorem zMatrix_mul_lastColumn_single (hm : 0 < m) (i : Fin m)
     by_cases hc0 : c = 0
     · rw [if_pos hc0]
       rw [zMatrix_apply_col_core L hm hi0 (castSucc_ne_last i),
-        if_pos hri.symm, one_mul]
-      rw [zMatrix_apply_row_last, if_pos hc0, ← mul_assoc]
+        if_pos hri, one_mul]
+      rw [zMatrix_apply_row_last, if_pos hc0]
     · rw [if_neg hc0]
       rw [zMatrix_apply_row_last, if_neg hc0, mul_zero]
   · rw [if_neg hri]
@@ -640,7 +638,7 @@ theorem zUnit_conj_lastRow (hm : 0 < m) (j : Fin m)
   show zMatrix L hm * (1 + Matrix.single 0 j.castSucc (L.s1 * a)) *
       zMatrix L hm = 1 + Matrix.single (last m) j.castSucc a
   rw [mul_add, mul_one, zMatrix_mul_lastRow_single L hm j hj0, add_mul,
-    mul_assoc, zMatrix_mul_self, mul_one, zMatrix_mul_self]
+    mul_assoc, zMatrix_mul_self, mul_one]
 
 /-- Conjugation form of the last-column identity:
 `z xᵢ₀(at₁) z = x_{iₙ}(a)`. -/
@@ -653,7 +651,7 @@ theorem zUnit_conj_lastColumn (hm : 0 < m) (i : Fin m)
   show zMatrix L hm * (1 + Matrix.single i.castSucc 0 (a * L.t1)) *
       zMatrix L hm = 1 + Matrix.single i.castSucc (last m) a
   rw [mul_add, mul_one, zMatrix_mul_lastColumn_single L hm i hi0, add_mul,
-    mul_assoc, zMatrix_mul_self, mul_one, zMatrix_mul_self]
+    mul_assoc, zMatrix_mul_self, mul_one]
 
 end GeneralScheme
 end NonsoficGroupsExist

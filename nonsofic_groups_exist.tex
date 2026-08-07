@@ -10,7 +10,7 @@
 \usepackage{microtype}
 \usepackage{array}
 \usepackage{etoolbox}
-\usepackage{marginnote}
+\usepackage{marginfix}
 \usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \hypersetup{pdftitle={Nonsofic Groups Exist},pdfsubject={sofic groups, property (T), Leavitt algebras},pdfkeywords={sofic groups, property (T), expander graphs, Leavitt algebras, Thompson's group, elementary groups}}
@@ -22,8 +22,7 @@
 %%% refers to one, no proof depends on one, and the paper reads exactly
 %%% the same with every one of them removed: replacing the line
 %%% `\leanlinkstrue' by `\leanlinksfalse' deletes all of them and changes
-%%% no other character of the document.  A grey preface note in the margin
-%%% at the start of Section 1 says what the notes are.
+%%% no other character of the document.
 %%%
 %%% Usage, placed immediately after a \label:
 %%%   \leanverified{\leanmod{decl_one,decl_two}{Module}}
@@ -41,7 +40,6 @@
 
 \setlength{\marginparwidth}{1.3in}
 \setlength{\marginparsep}{8pt}
-\renewcommand*{\marginfont}{\normalfont\scriptsize}
 
 % Lean names are long and full of underscores.  Underscores must already be
 % active when an argument is *read*, so the entry points below open a group
@@ -88,21 +86,21 @@
 \newcommand{\leanverified}{\begingroup\leanactiveus\leanverifiedaux}
 \newcommand{\leanverifiedaux}[1]{%
   \ifleanlinks
-    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangreen}\leanfirstblocktrue #1}%
+    \marginpar{\raggedright\rightskip 0pt plus 1fil\color{leangreen}\leanfirstblocktrue #1}%
   \fi
   \endgroup}
 
 \newcommand{\leanpartial}{\begingroup\leanactiveus\leanpartialaux}
 \newcommand{\leanpartialaux}[2]{%
   \ifleanlinks
-    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangreen}\leanfirstblocktrue
+    \marginpar{\raggedright\rightskip 0pt plus 1fil\color{leangreen}\leanfirstblocktrue
       \leantag{formalized in part}#1\leannote{#2}}%
   \fi
   \endgroup}
 
 \newcommand{\leanabsent}[1]{%
   \ifleanlinks
-    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangrey}\leanfirstblocktrue
+    \marginpar{\raggedright\rightskip 0pt plus 1fil\color{leangrey}\leanfirstblocktrue
       \leantag{not formalized}\leannote{#1}}%
   \fi}
 
@@ -281,23 +279,23 @@ Figure~\ref{fig:architecture} charts how the three layers assemble.
 \node[box] (tool) at (0,2.0)  {five finite lemmas\\Section~\ref{sec:toolkit}};
 \node[box] (leav) at (0,0.5)  {compressors $u$, $z$;\\corner copy of $V$; witness $J$\\Sections~\ref{sec:leavitt}--\ref{sec:scheme}};
 \node[box] (ejz)  at (0,-1.1) {property $(T)$ at rank $3$,\\rank equivalence\\Theorem~\ref{thm:ejz}, Prop.~\ref{prop:rankequiv}};
-\node[box] (fact) at (0,-2.5) {explicit factorizations\\over $\F_2$ (Section~\ref{sec:spine})};
-\node[box] (k1)   at (0,-3.8) {$K_1(L)=0$, $\GL_r=\EL_r$,\\self-similarity\\Section~\ref{sec:panorama}, App.~\ref{app:K1}};
-\node[box] (cov)  at (0,-5.2) {finite-table and\\Kazhdan covers (Section~\ref{sec:fp})};
+\node[box] (cov)  at (0,-3.4) {finite-table and\\Kazhdan covers (Section~\ref{sec:fp})};
 \node[main] (critD)  at (5.3,3.2)  {compression--centralizer\\criterion\\Theorem~\ref{thm:D}};
 \node[main] (corner) at (5.3,-0.4) {Leavitt-corner theorem\\Theorem~\ref{thm:corner}};
-\node[main] (A) at (9.05,1.0)  {Theorem~\ref{thm:A}\\$\EL_{m+1}(L_{\F_2}(1,2))$\\is not sofic};
-\node[main] (B) at (9.05,-1.6) {Theorem~\ref{thm:B}\\all ranks, $\GL_r$,\\and $L^\times$};
-\node[main] (C) at (9.05,-4.0) {Theorem~\ref{thm:C}\\finitely presented\\nonsofic covers};
+\node[box]  (fact) at (9.05,3.8)  {explicit factorizations\\over $\F_2$ (Section~\ref{sec:spine})};
+\node[main] (A)    at (9.05,2.0)  {Theorem~\ref{thm:A}\\$\EL_{m+1}(L_{\F_2}(1,2))$\\is not sofic};
+\node[box]  (k1)   at (9.05,-0.1) {$K_1(L)=0$, $\GL_r=\EL_r$,\\self-similarity\\Section~\ref{sec:panorama}, App.~\ref{app:K1}};
+\node[main] (B)    at (9.05,-2.0) {Theorem~\ref{thm:B}\\all ranks, $\GL_r$,\\and $L^\times$};
+\node[main] (C)    at (9.05,-3.9) {Theorem~\ref{thm:C}\\finitely presented\\nonsofic covers};
 \draw[arr] (kun) -- (critD);
 \draw[arr] (kt) -- (critD);
 \draw[arr] (tool) -- (critD);
 \draw[arr] (critD) -- (corner);
 \draw[arr] (leav) -- (corner);
 \draw[arr] (ejz) -- (corner);
-\draw[arr] (corner.east) -- (A.west);
+\draw[arr] (corner) -- (A);
 \draw[arr] (fact) -- (A);
-\draw[arr] (corner.east) -- (B.west);
+\draw[arr] (corner) -- (B);
 \draw[arr] (k1) -- (B);
 \draw[arr] (B) -- (C);
 \draw[arr] (cov) -- (C);
@@ -398,7 +396,7 @@ The conventions are robust in exactly the two directions in which they interface
 \end{remark}
 
 \begin{definition}\label{def:expdecomp}%
-\leanverified{\leanmod{Criterion/Criterion}{ExpanderDecomposition}\leannote{The Lean structure carries more than the definition printed here: besides the degree bound, the negligible edit distance and the componentwise Cheeger bound, it records a block structure standing for the components, an occurrence-level witness for the edge edits with negligible unmatched count, and the almost invariance \eqref{eq:gamma-inv}.  Everything extra is supplied by the proof of Theorem~\ref{thm:kun} and consumed by Section~\ref{sec:criterion}, so the object produced is stronger than the one defined here, never weaker.}}%
+\leanverified{\leanmod{Criterion/Criterion}{ExpanderDecomposition}\leannote{The Lean structure is stronger than the printed definition: it also records the block structure, an edge-edit witness, and the almost invariance \eqref{eq:gamma-inv}, supplied by Theorem~\ref{thm:kun} and consumed in Section~\ref{sec:criterion}.}}%
 Let \((X_n)\) be a sequence of graphs of uniformly bounded degree on vertex sets \(Y_n\) with \(\abs{Y_n}\to\infty\).  An \emph{expander decomposition} of \((X_n)\) consists of graphs \(\widetilde X_n\) on \(Y_n\), of uniformly bounded degree, with \(\ed(X_n,\widetilde X_n)=o(\abs{Y_n})\), together with a constant \(h>0\) such that every connected component of every \(\widetilde X_n\) has Cheeger constant at least \(h\).
 \end{definition}
 
@@ -412,7 +410,7 @@ A sequence of bounded-degree graphs \((X_n)\) is an \emph{essential expander seq
 The single analytic inequality used in this paper is the following co-area estimate.
 
 \begin{lemma}[\(\ell^1\) co-area estimate]\label{lem:coarea}%
-\leanverified{\leanmod{Matching/FiniteGraph}{coarea,coarea_mul}\leanmod{Matching/DirectedCoarea}{nonnegative_coarea}\leannote{Connectivity is not assumed: the Cheeger lower bound is all the proof uses, so the Lean statement holds for every finite multigraph.}}%
+\leanverified{\leanmod{Matching/FiniteGraph}{coarea,coarea_mul}\leanmod{Matching/DirectedCoarea}{nonnegative_coarea}\leannote{The Lean statement holds for every finite multigraph: the proof uses only the Cheeger lower bound.}}%
 Let \(X\) be a finite connected graph and \(f:V(X)\to\mathbb R\).  Let \(c\in\mathbb R\) be such that
 \[
  \abs{\set{x\suchthat f(x)>c}}\leq\tfrac12\abs{V(X)}
@@ -455,14 +453,14 @@ Let \(J=\langle T\mid W\rangle\) with \(T,W\) finite and \(T\) symmetric, and le
 We use two structure theorems for sofic approximations of Kazhdan groups.
 
 \begin{theorem}[Kun \cite{Kun19}]\label{thm:kun}%
-\leanverified{\leanmod{Kun/KunDecomposition}{exists_expanderDecomposition}\leanmod{Kun/KunFixedDecomposition}{expanderDecomposition}\leannote{Proved internally, in the full-sequence one-way form used here; not assumed.  The Lean statement asks the generating set to contain $1$, a normalization it may always be given, and does not use infinitude of $\Gamma$.}}%
+\leanverified{\leanmod{Kun/KunDecomposition}{exists_expanderDecomposition}\leanmod{Kun/KunFixedDecomposition}{expanderDecomposition}\leannote{Proved internally, in the full-sequence one-way form used here.  The Lean statement normalizes the generating set to contain $1$ and holds for every $\Gamma$, finite or not.}}%
 Let \(\Gamma\) be an infinite finitely generated property-\((T)\) group with a finite symmetric generating set \(S\), and let \(\sigma_n:\Gamma\to\Sym(Y_n)\) be a sofic approximation.  Then the \(S\)-generator graphs \(X(Y_n,\sigma_n,S)\) admit an expander decomposition.  Moreover, the modified graphs \(\widetilde X_n\) may be chosen of degree at most \(d\), with the Cheeger constants of all components bounded below by a single constant \(h>0\); the constants \(d\) and \(h\) depend only on \((\Gamma,S)\).
 \end{theorem}
 
 Kun's theorem proves Bowen's conjecture: sofic approximations of infinite Kazhdan groups are essentially disjoint unions of expanders.  Theorem~\ref{thm:kun} is deliberately a \emph{one-way} statement: the four-way equivalence of \cite[Theorem~3]{Kun19} contains a spectral implication that fails as written and is not imported anywhere in this paper; Remark~\ref{rem:kunaudit} records this precisely, together with two local repairs to the published proofs of the theorems of this subsection.  The companion result of Kun and Thom is an obstruction for centralizers.
 
 \begin{theorem}[Kun--Thom \cite{KunThom19}]\label{thm:kunthom}%
-\leanverified{\leanmod{KunThom/KunThomTheorem}{isLEF_of_exactProductExpansion}\leanmod{KunThom/KunThomEssential}{isLEF_of_matchingCertificate}\leannote{Proved internally, with the matching-core repair; not assumed.  As in Theorem~\ref{thm:kun} the generating set is normalized to contain $1$.}}%
+\leanverified{\leanmod{KunThom/KunThomTheorem}{isLEF_of_exactProductExpansion}\leanmod{KunThom/KunThomEssential}{isLEF_of_matchingCertificate}\leannote{Proved internally, with the matching-core repair; the generating set is normalized to contain $1$, as in Theorem~\ref{thm:kun}.}}%
 Let \(\Lambda\) be an infinite finitely generated property-\((T)\) group with finite symmetric generating set \(S_\Lambda\), and let \(\Delta\) be a finitely generated group.  Suppose \(\Lambda\times\Delta\) admits a sofic approximation \(\pi_n:\Lambda\times\Delta\to\Sym(D_n)\) such that the \(S_\Lambda\)-generator graphs \(X\bigl(D_n,\pi_n|_\Lambda,S_\Lambda\bigr)\) form an essential expander sequence.  Then \(\Delta\) is LEF.
 \end{theorem}
 
@@ -490,7 +488,7 @@ This section isolates five elementary lemmas about finite graphs, permutations, 
 \subsection{Expander refinement}
 
 \begin{lemma}[Expander refinement]\label{lem:refine}%
-\leanverified{\leanmod{Matching/Refinement}{exists_dominant_cell,le_crossing_of_cell}\leanmod{Matching/ComponentRefinement}{refineComponent}\leannote{Stated per component rather than as the displayed sum: \texttt{exists_dominant_cell} is the assignment $C\mapsto i(C)$ with its bound on one component, and \texttt{refineComponent} applies it componentwise, which is how Section~\ref{sec:criterion} consumes the lemma.}}%
+\leanverified{\leanmod{Matching/Refinement}{exists_dominant_cell,le_crossing_of_cell}\leanmod{Matching/ComponentRefinement}{refineComponent}\leannote{Stated per component: \texttt{exists_dominant_cell} is the assignment $C\mapsto i(C)$ with its bound on one component, and \texttt{refineComponent} applies it componentwise, as Section~\ref{sec:criterion} consumes it.}}%
 Let \(X\) be a finite graph, every connected component of which has Cheeger constant at least \(h>0\).  Let \(V(X)=A_1\sqcup\dots\sqcup A_r\) be a partition, and let \(e\) be the number of edges of \(X\) whose endpoints lie in different parts.  Then there is an assignment \(C\mapsto i(C)\) of a part to each component of \(X\), with \(\abs{C\cap A_{i(C)}}\) maximal, such that
 \[
  \sum_{C}\abs[\big]{C\setminus A_{i(C)}}\;\leq\;\frac{4e}{h}.
@@ -818,7 +816,7 @@ The mechanism of this subsection is drawn in Figure~\ref{fig:matching}.
 \end{figure}
 
 \begin{proposition}[Matching]\label{prop:match}%
-\leanverified{\leanmod{Matching/MedianNormalization}{medianNormalize}\leanmod{Matching/MatchingPreparation}{acceptable_symmDiff_le}\leanmod{Criterion/Criterion}{symmDiff_le_of_pinned,matching_injective}\leannote{Stated per component rather than as one statement about the subcollections $\cG_{q,n}$: \texttt{acceptable_symmDiff_le} is \eqref{eq:match} for a single acceptable component, and \texttt{matching_injective} is the injectivity clause.}}%
+\leanverified{\leanmod{Matching/MedianNormalization}{medianNormalize}\leanmod{Matching/MatchingPreparation}{acceptable_symmDiff_le}\leanmod{Criterion/Criterion}{symmDiff_le_of_pinned,matching_injective}\leannote{Stated per component: \texttt{acceptable_symmDiff_le} is \eqref{eq:match} for a single acceptable component, and \texttt{matching_injective} is the injectivity clause.}}%
 Fix \(q\in Q\).  There are subcollections \(\cG_{q,n}\subseteq\cP_n\) such that:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \(\sum_{C\in\cP_n\setminus\cG_{q,n}}\abs C=o(N_n)\);
@@ -1373,7 +1371,7 @@ Define the column \(b\in A^{m\times1}\), the row \(c\in A^{1\times m}\), and the
 \end{equation}
 
 \begin{lemma}\label{lem:uinv}%
-\leanverified{\leanmod{Leavitt/LeavittMatrixCompression}{matrixCompressionHom,matrixCompressionUnit,matrixCompression_recover}\leanmod{Leavitt/RankFourCompressors}{compressor,compressor_val}\leannote{The six identities are not needed in the formalization: \texttt{compressor} is built as a product of elementary transvections, so its invertibility holds by construction rather than by exhibiting $u'$, and \texttt{compressor_val} identifies it with the matrix \eqref{eq:udef}.}}%
+\leanverified{\leanmod{Leavitt/LeavittMatrixCompression}{matrixCompressionHom,matrixCompressionUnit,matrixCompression_recover}\leanmod{Leavitt/RankFourCompressors}{compressor,compressor_val}\leannote{\texttt{compressor} is a product of elementary transvections, invertible by construction, and \texttt{compressor_val} identifies it with the matrix \eqref{eq:udef}.}}%
 The following identities hold in \(A\):
 \[
  bc=p_1I_m,
@@ -1579,7 +1577,7 @@ The two computations quantify over every \(g\in V\), so they prove the claims fo
 \subsection{The Leavitt-corner theorem}\label{subsec:corner-thm}
 
 \begin{theorem}[Leavitt-corner theorem]\label{thm:corner}%
-\leanverified{\leanmod{Leavitt/GeneralCornerTheorem}{corner_not_isSofic,compressionSetup,coreEmbedding_compressorSet_generate,witnessEmbedding,corner_not_isSofic_of_charTwo}\leanmod{Leavitt/GeneralScheme}{uUnit,zUnit,uMatrix_mul_uPrimeMatrix}\leanmod{Criterion/CompressionSetup}{CompressionSetup}\leannote{Formalized at every adjacent pair $(m,m+1)$ with $m\geq2$, at exactly the printed hypotheses: nontrivial ring, binary family, $(T)$ at both ranks, and the membership hypothesis (ii); finite generation and countability of the groups are derived from $(T)$, not assumed.  The witness is the Whitehead diagonal in the plane $(0,1)$, and \texttt{corner_not_isSofic_of_charTwo} discharges (ii) in characteristic two through the elementary words of \texttt{Leavitt/GeneralRankWords}.}}%
+\leanverified{\leanmod{Leavitt/GeneralCornerTheorem}{corner_not_isSofic,compressionSetup,coreEmbedding_compressorSet_generate,witnessEmbedding,corner_not_isSofic_of_charTwo}\leanmod{Leavitt/GeneralScheme}{uUnit,zUnit,uMatrix_mul_uPrimeMatrix}\leanmod{Criterion/CompressionSetup}{CompressionSetup}\leannote{Formalized at every adjacent pair $(m,m+1)$ with $m\geq2$, at exactly the printed hypotheses: nontrivial ring, binary family, $(T)$ at both ranks, and the membership hypothesis (ii); finite generation and countability of the groups are derived from $(T)$.  The witness is the Whitehead diagonal in the plane $(0,1)$, and \texttt{corner_not_isSofic_of_charTwo} discharges (ii) in characteristic two through the elementary words of \texttt{Leavitt/GeneralRankWords}.}}%
 Let \(A\) be a nontrivial associative unital ring carrying a binary Leavitt family, let \(m\geq2\), and put \(n=m+1\).  Let \(u,z\in\GL_n(A)\) be the matrices \eqref{eq:udef} and \eqref{eq:zdef}.  Assume:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \(\EL_m(A)\) and \(\EL_n(A)\) have property~\((T)\);

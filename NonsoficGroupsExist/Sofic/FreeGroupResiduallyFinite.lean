@@ -338,6 +338,7 @@ detected by a homomorphism to a finite symmetric group, acting on the ball
 of the element's own word length. -/
 instance freeGroup_residuallyFinite (α : Type*) :
     Group.ResiduallyFinite (FreeGroup α) := by
+  classical
   apply Group.residuallyFinite_of_forall_exists_finite_monoidHom
   intro w hw
   exact ⟨Equiv.Perm (Fin (w.toWord.length + 1)), inferInstance,
