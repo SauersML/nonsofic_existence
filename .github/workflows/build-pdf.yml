@@ -116,6 +116,19 @@ jobs:
             exit 1
           fi
 
+          # Nothing may protrude or collide: no overfull boxes anywhere (the
+          # margin notes included -- a note wider than the margin is an
+          # overfull hbox), and no marginpar the placement machinery lost or
+          # had to move.  marginfix stacks the notes, so a clean document
+          # compiles with zero hits here.
+          if grep -Eq \
+            'Overfull \\[hv]box|[Ll]ost marginpar|Marginpar on page [0-9]+ moved' \
+            "$log_file"; then
+            echo "Overflowing or colliding material in the final LaTeX pass:" >&2
+            grep -E 'Overfull \\[hv]box|[Ll]ost marginpar|Marginpar on page [0-9]+ moved' "$log_file" >&2
+            exit 1
+          fi
+
           # Rewrite the pdfTeX output into a conservative format that GitHub,
           # browser PDF.js viewers, and older PDF readers handle reliably:
           # linearized PDF 1.4 with no PDF 1.5 object streams.
