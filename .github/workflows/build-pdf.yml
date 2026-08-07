@@ -195,6 +195,31 @@ jobs:
             test -s "$f"
           done
 
+      # The blinded variant must also build, and must actually be blind: the
+      # identifying repository string may survive into neither the extracted
+      # text nor the decompressed link annotations.  Built to a scratch
+      # directory; nothing from this step is committed.
+      - name: Build and verify the anonymous variant
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build-anon
+          sed 's/\\anonymousfalse/\\anonymoustrue/' "$TEX_FILE" > build-anon/anon.tex
+          latexmk \
+            -pdf \
+            -outdir=build-anon \
+            -interaction=nonstopmode \
+            -halt-on-error \
+            -file-line-error \
+            build-anon/anon.tex
+          test -s build-anon/anon.pdf
+          qpdf --qdf --object-streams=disable build-anon/anon.pdf build-anon/anon-qdf.pdf
+          if pdftotext build-anon/anon.pdf - | grep -q "github.com/SauersML" \
+             || grep -aq "github.com/SauersML" build-anon/anon-qdf.pdf; then
+            echo "The anonymous build leaks the repository URL." >&2
+            exit 1
+          fi
+
       - name: Commit and push updated PDF
         shell: bash
         env:

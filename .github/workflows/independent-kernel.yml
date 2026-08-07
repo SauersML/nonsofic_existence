@@ -167,3 +167,27 @@ jobs:
           lake env ../lean4export/.lake/build/bin/lean4export NonsoficGroupsExist -- \
             $roster \
           | ../nanoda_lib/target/release/nanoda_bin nanoda-config.json
+
+      # Negative calibration: the checker must be able to say NO.  A planted
+      # axiom outside the allow list, actually USED by an exported theorem,
+      # must fail the pipeline -- otherwise "no unpermitted axioms" is
+      # indistinguishable from a flag that never worked.  The plant exists
+      # only inside this job; it is never committed, and the tree is restored
+      # afterwards.
+      - name: Negative calibration (planted axiom must be rejected)
+        run: |
+          set -euo pipefail
+          cat > NonsoficGroupsExist/PlantedKernelCalibration.lean <<'LEAN'
+          axiom plantedCalibrationAxiom : False
+          theorem plantedCalibrationTheorem : False := plantedCalibrationAxiom
+          LEAN
+          lake build NonsoficGroupsExist.PlantedKernelCalibration
+          if lake env ../lean4export/.lake/build/bin/lean4export \
+              NonsoficGroupsExist.PlantedKernelCalibration -- \
+              plantedCalibrationTheorem \
+            | ../nanoda_lib/target/release/nanoda_bin nanoda-config.json; then
+            echo "::error::planted unpermitted axiom was ACCEPTED; the independent check cannot say no"
+            exit 1
+          fi
+          echo "planted axiom correctly rejected"
+          rm NonsoficGroupsExist/PlantedKernelCalibration.lean

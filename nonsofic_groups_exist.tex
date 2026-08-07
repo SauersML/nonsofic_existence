@@ -182,7 +182,9 @@
 %   \email{author@institution.edu}
 %   % Optional: \curraddr{...}  \urladdr{...}
 % For multiple authors, repeat \author, \address, \email for each.
-\date{August 2026}
+% The revision line makes the PDF self-identifying: `\leancommit' is `main'
+% in the committed source and the exact commit in the CI-built PDF.
+\date{August 2026\ifanonymous\else\\[2pt]{\normalsize repository revision \texttt{\leanbreakable{\leancommit}}}\fi}
 
 \subjclass[2020]{20F65, 20E26, 20F05, 05C48, 16S88, 19B99}
 \keywords{sofic groups, property (T), expander graphs, Leavitt algebras, Thompson's group, elementary groups}
