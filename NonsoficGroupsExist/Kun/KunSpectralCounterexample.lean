@@ -384,9 +384,9 @@ def inlEmb (m : ℕ) : Ix m ↪ Side m := ⟨Sum.inl, Sum.inl_injective⟩
 /-- The right inclusion, as an embedding. -/
 def inrEmb (m : ℕ) : Ix m ↪ Side m := ⟨Sum.inr, Sum.inr_injective⟩
 
-theorem inlEmb_apply (i : Ix m) : inlEmb m i = Sum.inl i := rfl
+@[simp] theorem inlEmb_apply (i : Ix m) : inlEmb m i = Sum.inl i := rfl
 
-theorem inrEmb_apply (i : Ix m) : inrEmb m i = Sum.inr i := rfl
+@[simp] theorem inrEmb_apply (i : Ix m) : inrEmb m i = Sum.inr i := rfl
 
 /-- The split of a vertex set across the two sides.  This is the `a + b` of the
 counting argument. -/

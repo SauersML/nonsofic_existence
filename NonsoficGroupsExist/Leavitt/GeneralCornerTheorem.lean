@@ -352,7 +352,7 @@ def diagUnit (u : Rˣ) : (Matrix (Fin m) (Fin m) R)ˣ where
       by_cases hk : k = idx0 hm2 <;> simp [hk]]
     exact Matrix.diagonal_one
 
-theorem diagUnit_val (u : Rˣ) :
+@[simp] theorem diagUnit_val (u : Rˣ) :
     ((diagUnit hm2 u : (Matrix (Fin m) (Fin m) R)ˣ) :
         Matrix (Fin m) (Fin m) R) =
       Matrix.diagonal fun k => if k = idx0 hm2 then (↑u : R) else 1 := rfl

@@ -43,8 +43,8 @@ which is what a referee checking the paper against the library wants.
 * `theoremB_exact` -- Theorem B, all clauses at once: the four-property profile
   of `Lˣ`, of every `GL_r(L)` (`r ≥ 1`) and of every `EL_r(L)` (`r ≥ 2`),
   together with `GL_r(L) = EL_r(L)` for `r ≥ 2` and the isomorphism attached to
-  every ordered complete leaf set.  `panorama_exact` is the same statement under
-  the manuscript's other name for it, Theorem `thm:allranks`.
+  every ordered complete leaf set.  The Panorama theorem `thm:allranks` is this
+  same statement under the manuscript's other name; one declaration serves both.
 * `theoremB_Theta`, `theoremB_Theta_apply` -- the isomorphism `Θ_C` of equation
   `eq:Theta-main` and its printed formula `(a_ij) ↦ ∑ αᵢ a_ij αⱼ*`.
 * `theoremC_exact`, `theoremC_covers_theoremB_groups` -- Theorem C's final
@@ -140,10 +140,10 @@ export NonsoficGroupsExist (universalLeavitt_profile binaryLeavitt_finiteField_p
 
 /-! ### One endpoint per printed theorem -/
 
-export NonsoficGroupsExist (ManuscriptProfile theoremB_exact panorama_exact
-  theoremB_Theta theoremB_Theta_apply theoremC_first theoremC_second
-  theoremC_exact theoremC_covers_theoremB_groups theoremD_subgroups
-  cor_fgring_exact cor_fgring_countableFree)
+export NonsoficGroupsExist.Manuscript (ManuscriptProfile theoremB_exact
+  theoremB_Theta theoremB_Theta_apply theoremC_first
+  theoremC_second theoremC_exact theoremC_covers_theoremB_groups
+  theoremD_subgroups cor_fgring_exact cor_fgring_countableFree)
 
 /-! ### `K₁` as a group, and the countability that `cor:fgring` no longer needs -/
 

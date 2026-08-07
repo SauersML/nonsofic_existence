@@ -142,6 +142,8 @@ example {H : Type} [Group H] [Finite H]
 One pin per printed headline statement of `Endpoint/ManuscriptStatements`,
 restated verbatim so that a weakening stops typechecking here. -/
 
+open Manuscript
+
 example (k : Type) [Field k] [Finite k] :
     ManuscriptProfile (BinaryLeavittUnits k) ∧
       (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)),
@@ -222,13 +224,12 @@ def headlineTheorems : List Name :=
    ``binaryLeavitt_finiteField_profile,
    ``ambient_profile,
    ``ambient_full_profile,
-   ``theoremB_exact,
-   ``panorama_exact,
-   ``theoremC_exact,
-   ``theoremC_covers_theoremB_groups,
-   ``theoremD_subgroups,
-   ``cor_fgring_exact,
-   ``cor_fgring_countableFree,
+   ``Manuscript.theoremB_exact,
+   ``Manuscript.theoremC_exact,
+   ``Manuscript.theoremC_covers_theoremB_groups,
+   ``Manuscript.theoremD_subgroups,
+   ``Manuscript.cor_fgring_exact,
+   ``Manuscript.cor_fgring_countableFree,
    ``binaryLeavittWhiteheadK1_subsingleton,
    ``KunSpectral.no_uniform_spectral_gap]
 

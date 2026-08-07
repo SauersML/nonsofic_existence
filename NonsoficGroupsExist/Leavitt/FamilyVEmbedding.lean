@@ -134,12 +134,17 @@ theorem MapsCylinder.comp {f g : Equiv.Perm Boundary} {u v z : List (Fin 2)}
   intro x
   rw [Equiv.Perm.mul_apply, hg, hf]
 
-theorem mapsCylinder_one (w : List (Fin 2)) :
+@[simp] theorem mapsCylinder_one (w : List (Fin 2)) :
     MapsCylinder 1 w w := fun _ ↦ rfl
 
 /-- `f` acts as a prefix substitution on every cylinder of depth `N`. -/
 def HasDepth (f : Equiv.Perm Boundary) (N : ℕ) : Prop :=
   ∀ w : List (Fin 2), w.length = N → ∃ v, MapsCylinder f w v
+
+/-- The identity has every depth: the satisfiability witness for `HasDepth`,
+so the predicate is established and not only ever assumed. -/
+theorem hasDepth_one (N : ℕ) : HasDepth 1 N :=
+  fun w _ ↦ ⟨w, mapsCylinder_one w⟩
 
 open Classical in
 /-- The image word of a cylinder under a prefix substitution. -/

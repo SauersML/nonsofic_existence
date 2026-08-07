@@ -159,7 +159,9 @@ jobs:
       # every planted defect reported under its own tag, and a clean tree
       # silent.  This step also fails if the calibration is deleted.
       - name: Calibrate the source scan
-        run: python3 scripts/check.py --self-test
+        run: |
+          python3 scripts/check.py --self-test
+          python3 scripts/test_claim_map.py
 
       # Source text: forbidden constructs, and the root import closure.  Runs
       # before the build because it is instant, and because the orphan-module

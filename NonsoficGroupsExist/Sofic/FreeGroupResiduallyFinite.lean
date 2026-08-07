@@ -77,6 +77,26 @@ def IsTarget (a : α) (y : Fin (L.length + 1)) : Prop :=
   (0 < y.val ∧ PlusAt L a (L.length - y.val)) ∨
     (y.val < L.length ∧ MinusAt L a (L.length - 1 - y.val))
 
+/-! ### Satisfiability witnesses
+
+The four position predicates above are consumed as hypotheses throughout the
+construction; the witnesses below exhibit each one on the one-letter word it
+describes, so none is a proposition the corpus only ever assumes. -/
+
+theorem plusAt_singleton (a : α) : PlusAt [(a, true)] a 0 :=
+  ⟨Nat.one_pos, rfl⟩
+
+theorem minusAt_singleton (a : α) : MinusAt [(a, false)] a 0 :=
+  ⟨Nat.one_pos, rfl⟩
+
+theorem isSource_singleton (a : α) :
+    IsSource [(a, true)] a ⟨0, Nat.succ_pos _⟩ :=
+  Or.inl ⟨Nat.one_pos, plusAt_singleton a⟩
+
+theorem isTarget_singleton (a : α) :
+    IsTarget [(a, true)] a ⟨1, Nat.succ_lt_succ Nat.zero_lt_one⟩ :=
+  Or.inl ⟨Nat.one_pos, plusAt_singleton a⟩
+
 /-- The forward map: `+1` letters push a point up, `-1` letters push it
 down.  Away from sources it is the identity; it is bijective only after
 the complement matching below. -/

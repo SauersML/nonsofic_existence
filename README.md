@@ -58,6 +58,16 @@ CI additionally replays every olean into a fresh kernel with the pinned
 toolchain's `leanchecker --fresh`. A cold build downloads several gigabytes
 and can take hours; cached builds are substantially faster.
 
+Read "verified" as the specific layer that ran, never as a blend. The layers,
+weakest to strongest: (1) the lexical source scan (`scripts/check.py`);
+(2) elaboration (`lake build`); (3) kernel axiom closure and environment
+scans (`scripts/Audit.lean`); (4) fresh-kernel olean replay (`leanchecker
+--fresh`); (5) manuscript statement correspondence — name resolution by the
+claim map, elaborated types by `docs/CLAIM_SIGNATURES.md`, verbatim
+restatement pins for the headliners; (6) replay through an independently
+written kernel (`independent-kernel.yml`), which is supplementary and not a
+gate.
+
 An axiom audit says nothing about whether the statement proved is the one
 intended. The two definitions carrying most of that weight are discharged as
 theorems: `hasKazhdanPropertyT_iff_textbook` identifies the real-orthogonal

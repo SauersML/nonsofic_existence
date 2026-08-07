@@ -87,6 +87,7 @@ jobs:
         shell: bash
         run: |
           python3 scripts/check.py --self-test
+          python3 scripts/test_claim_map.py
           python3 scripts/check.py
 
       - name: Compile, normalize, and validate PDF

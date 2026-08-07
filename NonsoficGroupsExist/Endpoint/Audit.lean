@@ -77,13 +77,12 @@ the entire project namespace and fails on anything beyond classical Lean.
 
 -- The exact manuscript endpoints: one declaration per printed headline
 -- statement, so the report records what each printed theorem rests on.
-#print axioms NonsoficGroupsExist.theoremB_exact
-#print axioms NonsoficGroupsExist.panorama_exact
-#print axioms NonsoficGroupsExist.theoremC_exact
-#print axioms NonsoficGroupsExist.theoremC_covers_theoremB_groups
-#print axioms NonsoficGroupsExist.theoremD_subgroups
-#print axioms NonsoficGroupsExist.cor_fgring_exact
-#print axioms NonsoficGroupsExist.cor_fgring_countableFree
+#print axioms NonsoficGroupsExist.Manuscript.theoremB_exact
+#print axioms NonsoficGroupsExist.Manuscript.theoremC_exact
+#print axioms NonsoficGroupsExist.Manuscript.theoremC_covers_theoremB_groups
+#print axioms NonsoficGroupsExist.Manuscript.theoremD_subgroups
+#print axioms NonsoficGroupsExist.Manuscript.cor_fgring_exact
+#print axioms NonsoficGroupsExist.Manuscript.cor_fgring_countableFree
 #print axioms NonsoficGroupsExist.binaryLeavittWhiteheadK1_subsingleton
 #print axioms NonsoficGroupsExist.BinaryLeavitt.K1_trivial
 
