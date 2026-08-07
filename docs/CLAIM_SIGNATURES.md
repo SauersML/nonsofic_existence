@@ -2,4 +2,2287 @@
 
 # Elaborated types of the mapped declarations
 
-PLACEHOLDER: run `lake env lean scripts/Signatures.lean` after the next build to populate this file. CI diffs it from then on.
+One entry per declaration named by a manuscript margin note, in the order of `docs/CLAIM_DECLS.txt`.  The types are printed by Lean from the elaborated environment, so this file records what each mapped declaration actually states -- the layer of the correspondence that name resolution alone cannot check.
+
+## `NonsoficGroupsExist.BinaryLeavitt.K1_trivial`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)]
+  (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.balanced_component_isUnit`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)]
+  {c ζ : BinaryLeavitt.BinaryLeavittAlgebra k},
+  c ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials 0 0) →
+    ζ ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials 1 1) →
+      ∀ (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ), ↑u = c + ζ → IsUnit c
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.binaryLeavittUnits_perfect`
+
+```lean
+∀ (k : Type) [inst : Field k], commutator (BinaryLeavittUnits k) = ⊤
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.elementaryGroup_eq_top`
+
+```lean
+∀ (k : Type) [inst : Field k] (n : ℕ),
+  2 ≤ n → elementaryGroup (Fin n) (BinaryLeavitt.BinaryLeavittAlgebra k) = ⊤
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.entry_window_negative_of_B_full`
+
+```lean
+∀ (k : Type) [inst : Field k] {ι : Type u_1} {κ : Type u_2} [inst_1 : Fintype ι] [DecidableEq ι]
+  [inst_3 : Fintype κ] [inst_4 : DecidableEq κ] (R : BinaryPrefixCode ι)
+  (C : BinaryPrefixCode κ),
+  (BinaryLeavitt.family k).IsComplete C →
+    ∀ (A₀ A₁ Cm B₀ B₁ : ι → κ → k) (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+      ↑u =
+          ∑ i,
+            ∑ j,
+              (BinaryLeavitt.family k).wordS (R.word i) *
+                  (BinaryLeavitt.family k).pencilEntry (A₀ i j) (A₁ i j) (Cm i j) (B₀ i j)
+                    (B₁ i j) *
+                (BinaryLeavitt.family k).wordT (C.word j) →
+        ∀ (G₀ G₁ : κ → ι → k),
+          (∀ (j j' : κ), ∑ i, (G₀ j i * B₀ i j' + G₁ j i * B₁ i j') = if j = j' then 1 else 0) →
+            ∃ N,
+              ∀ (j : κ) (i : ι),
+                (BinaryLeavitt.family k).wordT (C.word j) * ↑u⁻¹ *
+                    (BinaryLeavitt.family k).wordS (R.word i) ∈
+                  Submodule.span k ((BinaryLeavitt.family k).degreeMonomials (-↑N) (-1))
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.exists_mul_mul_eq_one`
+
+```lean
+∀ (k : Type) [inst : Field k] {x : BinaryLeavitt.BinaryLeavittAlgebra k},
+  x ≠ 0 → ∃ a b, a * x * b = 1
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.exists_narrow_representative`
+
+```lean
+∀ (k : Type) [inst : Field k] (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  ∃ u',
+    u' * u⁻¹ ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k) ∧
+      ↑u' ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials (-1) 1)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.exists_pencil_form`
+
+```lean
+∀ (k : Type) [inst : Field k],
+  ∀ v ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials (-1) 1),
+    ∃ m A₀ A₁ C B₀ B₁,
+      v =
+        ∑ i,
+          ∑ j,
+            (BinaryLeavitt.family k).wordS (List.ofFn i) *
+                (A₀ i j • (BinaryLeavitt.family k).t 0 + A₁ i j • (BinaryLeavitt.family k).t 1 +
+                    C i j • 1 +
+                  (B₀ i j • (BinaryLeavitt.family k).s 0 +
+                    B₁ i j • (BinaryLeavitt.family k).s 1)) *
+              (BinaryLeavitt.family k).wordT (List.ofFn j)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.glAll_eq_elementary`
+
+```lean
+∀ (k : Type) [inst : Field k] (n : ℕ),
+  2 ≤ n →
+    ∀ (M : (Matrix (Fin n) (Fin n) (BinaryLeavitt.BinaryLeavittAlgebra k))ˣ),
+      M ∈ elementaryGroup (Fin n) (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.glFour_eq_elementary_holds`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)]
+  (M : (Matrix (Fin 4) (Fin 4) (BinaryLeavitt.BinaryLeavittAlgebra k))ˣ),
+  M ∈ elementaryGroup (Fin 4) (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.glTwo_eq_elementary_holds`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)]
+  (M : (Matrix (Fin 2) (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k))ˣ),
+  M ∈ elementaryGroup (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.narrowReduction_holds`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)],
+  BinaryLeavitt.NarrowReduction k
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.pencil_free_exit`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)],
+  (∀ (x : BinaryLeavitt.BinaryLeavittAlgebra k), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (r : ℕ) {ιT κT : Type} [inst_2 : Fintype ιT] [DecidableEq ιT] [inst_4 : Fintype κT]
+      [DecidableEq κT],
+      1 ≤ Fintype.card ιT →
+        Fintype.card ιT ≤ 2 ^ r →
+          2 ^ (r + 1) ≤ Fintype.card κT →
+            ∀ (R : BinaryPrefixCode ιT),
+              (BinaryLeavitt.family k).IsComplete R →
+                ∀ (C : BinaryPrefixCode κT),
+                  (BinaryLeavitt.family k).IsComplete C →
+                    ∀ (A₀ A₁ Cm B₀ B₁ : ιT → κT → k)
+                      (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+                      ↑u =
+                          ∑ i,
+                            ∑ j,
+                              (BinaryLeavitt.family k).wordS (R.word i) *
+                                  (BinaryLeavitt.family k).pencilEntry (A₀ i j) (A₁ i j)
+                                    (Cm i j) (B₀ i j) (B₁ i j) *
+                                (BinaryLeavitt.family k).wordT (C.word j) →
+                        u ∈
+                          MatrixDiagonalization.stableUnits
+                            (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.pencil_full_exit`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)],
+  (∀ (x : BinaryLeavitt.BinaryLeavittAlgebra k), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (r : ℕ) {ιT κT : Type} [inst_2 : Fintype ιT] [DecidableEq ιT] [inst_4 : Fintype κT]
+      [inst_5 : DecidableEq κT],
+      2 ^ r ≤ Fintype.card ιT →
+        1 ≤ Fintype.card κT →
+          Fintype.card κT ≤ 2 ^ (r + 1) →
+            ∀ (R : BinaryPrefixCode ιT),
+              (BinaryLeavitt.family k).IsComplete R →
+                ∀ (C : BinaryPrefixCode κT),
+                  (BinaryLeavitt.family k).IsComplete C →
+                    ∀ (A₀ A₁ Cm B₀ B₁ : ιT → κT → k)
+                      (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+                      ↑u =
+                          ∑ i,
+                            ∑ j,
+                              (BinaryLeavitt.family k).wordS (R.word i) *
+                                  (BinaryLeavitt.family k).pencilEntry (A₀ i j) (A₁ i j)
+                                    (Cm i j) (B₀ i j) (B₁ i j) *
+                                (BinaryLeavitt.family k).wordT (C.word j) →
+                        ∀ (G₀ G₁ : κT → ιT → k),
+                          (∀ (j j' : κT),
+                              ∑ i, (G₀ j i * B₀ i j' + G₁ j i * B₁ i j') =
+                                if j = j' then 1 else 0) →
+                            u ∈
+                              MatrixDiagonalization.stableUnits
+                                (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.pencil_unit_mem_pow`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)],
+  (∀ (x : BinaryLeavitt.BinaryLeavittAlgebra k), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (r n : ℕ) {κT : Type} [inst_2 : Fintype κT] [DecidableEq κT],
+      2 ^ (r + 1) ≤ Fintype.card κT + n →
+        ∀ {ιT : Type} [inst_4 : Fintype ιT] [DecidableEq ιT],
+          Fintype.card ιT = 2 ^ r →
+            ∀ (R : BinaryPrefixCode ιT),
+              (BinaryLeavitt.family k).IsComplete R →
+                ∀ (C : BinaryPrefixCode κT),
+                  (BinaryLeavitt.family k).IsComplete C →
+                    ∀ (A₀ A₁ Cm B₀ B₁ : ιT → κT → k)
+                      (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+                      ↑u =
+                          ∑ i,
+                            ∑ j,
+                              (BinaryLeavitt.family k).wordS (R.word i) *
+                                  (BinaryLeavitt.family k).pencilEntry (A₀ i j) (A₁ i j)
+                                    (Cm i j) (B₀ i j) (B₁ i j) *
+                                (BinaryLeavitt.family k).wordT (C.word j) →
+                        u ∈
+                          MatrixDiagonalization.stableUnits
+                            (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.pure_tail_nilpotent`
+
+```lean
+∀ (k : Type) [inst : Field k] {η : BinaryLeavitt.BinaryLeavittAlgebra k},
+  η ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials 1 1) →
+    ∀ (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ), ↑u = 1 + η → ∃ D, η ^ D = 0
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.scalarReduction_holds`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)],
+  MatrixDiagonalization.ScalarReduction (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.stableUnits_eq_top_holds`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)]
+  (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.thetaMatUnit_diagUnit`
+
+```lean
+∀ (k : Type) [inst : Field k] (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  BinaryLeavitt.thetaMatUnit k (MatrixDiagonalization.diagUnit u) =
+    MatrixDiagonalization.diagUnit (BinaryLeavitt.thetaUnit k u)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.thetaMatUnit_mem_elementaryGroup`
+
+```lean
+∀ (k : Type) [inst : Field k]
+  {u : (Matrix (Fin 2) (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k))ˣ},
+  u ∈ elementaryGroup (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k) →
+    BinaryLeavitt.thetaMatUnit k u ∈
+      elementaryGroup (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.thompsonV_not_isLEF`
+
+```lean
+¬IsLEF ↥ThompsonV.thompsonV
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.vEmbedding`
+
+```lean
+(k : Type) → [inst : Field k] → ↥ThompsonV.thompsonV →* (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.vEmbedding_injective`
+
+```lean
+∀ (k : Type) [inst : Field k], Function.Injective ⇑(BinaryLeavitt.vEmbedding k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.window_nonneg_mem_stableUnits`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)] (N : ℕ)
+  (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  ↑u ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials 0 (↑N + 1)) →
+    u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.window_nonpos_mem_stableUnits`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)] (N : ℕ)
+  (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  ↑u ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials (-↑N - 1) 0) →
+    u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.window_zero_one_mem_stableUnits`
+
+```lean
+∀ (k : Type) [inst : Field k] [Nontrivial (BinaryLeavitt.BinaryLeavittAlgebra k)]
+  (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  ↑u ∈ Submodule.span k ((BinaryLeavitt.family k).degreeMonomials 0 1) →
+    u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
+## `NonsoficGroupsExist.BinaryLeavittWhiteheadK1`
+
+```lean
+(k : Type) → [Field k] → Type
+```
+
+## `NonsoficGroupsExist.CompleteMatrixFamily.matrixAlgEquiv`
+
+```lean
+{k : Type u_1} →
+  [inst : CommSemiring k] →
+    {A : Type u_2} →
+      [inst_1 : Ring A] →
+        [inst_2 : Algebra k A] →
+          {ι : Type u_3} →
+            [inst_3 : Fintype ι] →
+              [inst_4 : DecidableEq ι] → CompleteMatrixFamily A ι → Matrix ι ι A ≃ₐ[k] A
+```
+
+## `NonsoficGroupsExist.CompleteMatrixFamily.ringEquivMatrix`
+
+```lean
+{A : Type u_1} →
+  [inst : Ring A] →
+    {ι : Type u_2} →
+      [inst_1 : Fintype ι] →
+        [inst_2 : DecidableEq ι] → CompleteMatrixFamily A ι → A ≃+* Matrix ι ι A
+```
+
+## `NonsoficGroupsExist.CompressionSetup`
+
+```lean
+(G : Type u_1) →
+  (Γ : Type u_2) →
+    (J : Type u_3) → [Group G] → [Group Γ] → [Group J] → Type (max (max u_1 u_2) u_3)
+```
+
+## `NonsoficGroupsExist.DiagonalElementary.firstDiagonalUnit_mem_of_mem_commutator`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] {u : Rˣ},
+  u ∈ commutator Rˣ → DiagonalElementary.firstDiagonalUnitHom u ∈ elementaryGroup (Fin 3) R
+```
+
+## `NonsoficGroupsExist.DirectedCoarea.nonnegative_coarea`
+
+```lean
+∀ (Y : FiniteModel) (S : Finset (Equiv.Perm Y.carrier)) {h : ℝ},
+  DirectedCoarea.HasCheegerLowerBound Y S h →
+    ∀ (g : Y.carrier → ℝ),
+      (∀ (x : Y.carrier), 0 ≤ g x) →
+        (∀ (t : ℝ),
+            0 ≤ t → 2 * (DirectedCoarea.superlevel Y g t).card ≤ Fintype.card Y.carrier) →
+          h * ∑ x, g x ≤ DirectedCoarea.variation Y S g
+```
+
+## `NonsoficGroupsExist.EssentialExpanderRepair.induced_expands_eventually`
+
+```lean
+∀ {K J : Type} [inst : Group K] [inst_1 : Group J] (C : MatchingCertificate K J),
+  ∃ N,
+    ∀ n ≥ N,
+      ((EssentialExpanderRepair.actualGraph C n).induce
+            (EssentialExpanderRepair.retained C n)).HasCheegerLowerBound
+        (EssentialExpanderRepair.expansionConstant C)
+```
+
+## `NonsoficGroupsExist.EssentialExpanderRepair.repairedActualGraph_expands_eventually`
+
+```lean
+∀ {K J : Type} [inst : Group K] [inst_1 : Group J] (C : MatchingCertificate K J),
+  ∃ N,
+    ∀ n ≥ N,
+      (EssentialExpanderRepair.repairedActualGraph C n).HasCheegerLowerBound
+        (EssentialExpanderRepair.expansionConstant C)
+```
+
+## `NonsoficGroupsExist.ExpanderDecomposition`
+
+```lean
+{G : Type} → [inst : Group G] → SoficApproximation G → Finset G → Type 1
+```
+
+## `NonsoficGroupsExist.ExpanderDecomposition.normalized_pinning_global`
+
+```lean
+∀ {G : Type} [inst : Group G] {S : SoficApproximation G} {T : Finset G}
+  (D : ExpanderDecomposition S T) (P : (n : ℕ) → BlockStructure (S.model n)) (n : ℕ),
+  D.cheeger * ∑ y, |normalizedSize (P n) (D.blocks n) y - 1 / 2| ≤
+    ∑ B,
+      (D.indexedComponentGraph n B).edgeVariation fun x => normalizedSize (P n) (D.blocks n) ↑x
+```
+
+## `NonsoficGroupsExist.ExpanderDecomposition.smallBlockVertices_negligible`
+
+```lean
+∀ {G : Type} [inst : Group G] {S : SoficApproximation G} {T : Finset G} [Infinite G]
+  (D : ExpanderDecomposition S T),
+  (∀ g ∈ T, g⁻¹ ∈ T) →
+    Subgroup.closure ↑T = ⊤ →
+      ∀ (M : ℕ),
+        Negligible (fun n => ↑(Fintype.card (S.model n).carrier)) fun n =>
+          ↑(smallBlockVertices (D.blocks n) M).card
+```
+
+## `NonsoficGroupsExist.FamilyRankFour.ambient_not_isSofic`
+
+```lean
+∀ {A : Type} [inst : Ring A] (L : LeavittFamily A) (k : Type) [inst_1 : Field k] [Finite k]
+  [inst_3 : Algebra k A] [Algebra.FiniteType k A] [Nontrivial A] [Countable A],
+  ¬IsSofic ↥(RankFour.Ambient A)
+```
+
+## `NonsoficGroupsExist.FamilyRankFour.compressionSetup`
+
+```lean
+{A : Type} →
+  [inst : Ring A] →
+    (L : LeavittFamily A) →
+      (k : Type) →
+        [inst_1 : Field k] →
+          [Finite k] →
+            [inst_3 : Algebra k A] →
+              [Algebra.FiniteType k A] →
+                [Nontrivial A] →
+                  CompressionSetup ↥(RankFour.Ambient A) ↥(RankFour.Core A)
+                    ↥L.cornerWitnessSubgroup
+```
+
+## `NonsoficGroupsExist.FamilyRankFour.elementary_not_isSofic`
+
+```lean
+∀ {A : Type} [inst : Ring A] (L : LeavittFamily A) (k : Type) [inst_1 : Field k] [Finite k]
+  [inst_3 : Algebra k A] [Algebra.FiniteType k A] [Nontrivial A] [Countable A] (m : ℕ),
+  0 < m → ¬IsSofic ↥(elementaryGroup (Fin (m + 1)) A)
+```
+
+## `NonsoficGroupsExist.FamilyRankFour.gl_not_isSofic`
+
+```lean
+∀ {A : Type} [inst : Ring A] (L : LeavittFamily A) (k : Type) [inst_1 : Field k] [Finite k]
+  [inst_3 : Algebra k A] [Algebra.FiniteType k A] [Nontrivial A] [Countable A] (m : ℕ),
+  ¬IsSofic (Matrix (Fin (m + 1)) (Fin (m + 1)) A)ˣ
+```
+
+## `NonsoficGroupsExist.FamilyRankFour.units_not_isSofic`
+
+```lean
+∀ {A : Type} [inst : Ring A] (L : LeavittFamily A) (k : Type) [inst_1 : Field k] [Finite k]
+  [inst_3 : Algebra k A] [Algebra.FiniteType k A] [Nontrivial A] [Countable A], ¬IsSofic Aˣ
+```
+
+## `NonsoficGroupsExist.FiniteMultiGraph.coarea`
+
+```lean
+∀ (X : FiniteMultiGraph) {h : ℝ},
+  X.HasCheegerLowerBound h →
+    ∀ (f : X.vertex.carrier → ℝ) (c : ℝ),
+      FiniteMultiGraph.IsMedian f c → ∑ x, |f x - c| ≤ 1 / h * X.edgeVariation f
+```
+
+## `NonsoficGroupsExist.FiniteMultiGraph.coarea_mul`
+
+```lean
+∀ (X : FiniteMultiGraph) {h : ℝ},
+  X.HasCheegerLowerBound h →
+    ∀ (f : X.vertex.carrier → ℝ) (c : ℝ),
+      FiniteMultiGraph.IsMedian f c → h * ∑ x, |f x - c| ≤ X.edgeVariation f
+```
+
+## `NonsoficGroupsExist.FiniteMultiGraph.exists_dominant_cell`
+
+```lean
+∀ {ι : Type u_1} [inst : DecidableEq ι] (X : FiniteMultiGraph) {h : ℝ},
+  X.HasCheegerLowerBound h →
+    ∀ [Fintype ι],
+      Nonempty ι →
+        ∀ (part : X.vertex.carrier → ι),
+          0 < Fintype.card X.vertex.carrier →
+            ∃ i₀,
+              (∀ (i : ι), (X.cell part {i}).card ≤ (X.cell part {i₀}).card) ∧
+                h * (↑(Fintype.card X.vertex.carrier) - ↑(X.cell part {i₀}).card) ≤
+                  4 * ↑(X.crossingEdges part).card
+```
+
+## `NonsoficGroupsExist.FiniteMultiGraph.le_crossing_of_cell`
+
+```lean
+∀ {ι : Type u_1} [inst : DecidableEq ι] (X : FiniteMultiGraph) {h : ℝ},
+  X.HasCheegerLowerBound h →
+    ∀ (part : X.vertex.carrier → ι) (T : Finset ι),
+      (X.cell part T).Nonempty →
+        2 * (X.cell part T).card ≤ Fintype.card X.vertex.carrier →
+          ∀ D ≤ 4 * ↑(X.cell part T).card, h * D ≤ 4 * ↑(X.crossingEdges part).card
+```
+
+## `NonsoficGroupsExist.FiniteMultiGraph.median_pinning`
+
+```lean
+∀ {κ : Type u_1} [inst : Fintype κ] (X : κ → FiniteMultiGraph) {h : ℝ},
+  (∀ (k : κ), (X k).HasCheegerLowerBound h) →
+    ∀ (f : (k : κ) → (X k).vertex.carrier → ℝ),
+      (∀ (k : κ), FiniteMultiGraph.IsMedian (f k) (1 / 2)) →
+        Nonempty κ → ∑ k, ∑ x, |f k x - 1 / 2| ≤ 1 / h * ∑ k, (X k).edgeVariation (f k)
+```
+
+## `NonsoficGroupsExist.FreeElementaryPropertyT.controlSet_isKazhdanPair`
+
+```lean
+∀ (X : Type u_1) [inst : Fintype X],
+  ∃ epsilon,
+    IsKazhdanPair (↥(elementaryGroup (Fin 3) (FreeRootFiltration.FreeRing X)))
+      (FreeElementaryPropertyT.controlSet X) epsilon
+```
+
+## `NonsoficGroupsExist.GeneralCornerTheorem.compressionSetup`
+
+```lean
+{R : Type} →
+  [inst : Ring R] →
+    (L : LeavittFamily R) →
+      {m : ℕ} →
+        (hm : 0 < m) →
+          2 ≤ m →
+            [Nontrivial R] →
+              GeneralScheme.uUnit L ∈ elementaryGroup (Fin (m + 1)) R →
+                GeneralScheme.zUnit L hm ∈ elementaryGroup (Fin (m + 1)) R →
+                  HasKazhdanPropertyT ↥(elementaryGroup (Fin m) R) →
+                    CompressionSetup ↥(elementaryGroup (Fin (m + 1)) R)
+                      ↥(elementaryGroup (Fin m) R) ↥L.cornerWitnessSubgroup
+```
+
+## `NonsoficGroupsExist.GeneralCornerTheorem.coreEmbedding_compressorSet_generate`
+
+```lean
+∀ {R : Type} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} (hm : 0 < m),
+  2 ≤ m →
+    ∀ (hu : GeneralScheme.uUnit L ∈ elementaryGroup (Fin (m + 1)) R)
+      (hz : GeneralScheme.zUnit L hm ∈ elementaryGroup (Fin (m + 1)) R),
+      Subgroup.closure
+          (Set.range ⇑GeneralCornerTheorem.coreEmbedding ∪
+            ↑(GeneralCornerTheorem.compressorSet L hm hu hz)) =
+        ⊤
+```
+
+## `NonsoficGroupsExist.GeneralCornerTheorem.corner_not_isSofic`
+
+```lean
+∀ {R : Type} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} (hm : 0 < m),
+  2 ≤ m →
+    ∀ [Nontrivial R],
+      GeneralScheme.uUnit L ∈ elementaryGroup (Fin (m + 1)) R →
+        GeneralScheme.zUnit L hm ∈ elementaryGroup (Fin (m + 1)) R →
+          HasKazhdanPropertyT ↥(elementaryGroup (Fin (m + 1)) R) →
+            HasKazhdanPropertyT ↥(elementaryGroup (Fin m) R) →
+              ¬IsSofic ↥(elementaryGroup (Fin (m + 1)) R)
+```
+
+## `NonsoficGroupsExist.GeneralCornerTheorem.corner_not_isSofic_of_charTwo`
+
+```lean
+∀ {R : Type} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} [CharP R 2] [Nontrivial R],
+  0 < m →
+    2 ≤ m →
+      HasKazhdanPropertyT ↥(elementaryGroup (Fin (m + 1)) R) →
+        HasKazhdanPropertyT ↥(elementaryGroup (Fin m) R) →
+          ¬IsSofic ↥(elementaryGroup (Fin (m + 1)) R)
+```
+
+## `NonsoficGroupsExist.GeneralCornerTheorem.witnessEmbedding`
+
+```lean
+{R : Type} →
+  [inst : Ring R] →
+    (L : LeavittFamily R) →
+      {m : ℕ} → 2 ≤ m → ↥L.cornerWitnessSubgroup →* ↥(elementaryGroup (Fin m) R)
+```
+
+## `NonsoficGroupsExist.GeneralRank.comb`
+
+```lean
+{R : Type u_1} →
+  [inst : Ring R] → LeavittFamily R → {m : ℕ} → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
+```
+
+## `NonsoficGroupsExist.GeneralRank.combMatrix`
+
+```lean
+{R : Type u_1} →
+  [inst : Ring R] → LeavittFamily R → {m : ℕ} → ℕ → Matrix (Fin (m + 1)) (Fin (m + 1)) R
+```
+
+## `NonsoficGroupsExist.GeneralRank.comb_mem`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ},
+  GeneralRank.comb L ∈ elementaryGroup (Fin (m + 1)) R
+```
+
+## `NonsoficGroupsExist.GeneralRank.comb_val`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} [CharP R 2],
+  ↑(GeneralRank.comb L) = GeneralRank.combMatrix L m
+```
+
+## `NonsoficGroupsExist.GeneralRank.involutionWord`
+
+```lean
+{R : Type u_1} →
+  [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
+```
+
+## `NonsoficGroupsExist.GeneralRank.involutionWord_mem`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} (hm : 0 < m),
+  GeneralRank.involutionWord L hm ∈ elementaryGroup (Fin (m + 1)) R
+```
+
+## `NonsoficGroupsExist.GeneralRank.involutionWord_sq`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} [CharP R 2] (hm : 0 < m),
+  GeneralRank.involutionWord L hm * GeneralRank.involutionWord L hm = 1
+```
+
+## `NonsoficGroupsExist.GeneralRank.involutionWord_val`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} [CharP R 2] (hm : 0 < m),
+  ↑(GeneralRank.involutionWord L hm) =
+    planeMatrix 0 (GeneralRank.last m) !![L.p0, L.s1; L.t1, 0]
+```
+
+## `NonsoficGroupsExist.GeneralRank.partialComb_val`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} [CharP R 2],
+  ∀ k ≤ m, ↑(GeneralRank.partialComb L k) = GeneralRank.combMatrix L k
+```
+
+## `NonsoficGroupsExist.GeneralRank.piece`
+
+```lean
+{R : Type u_1} →
+  [inst : Ring R] → LeavittFamily R → {m : ℕ} → Fin m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
+```
+
+## `NonsoficGroupsExist.GeneralRank.piece_val`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ} [CharP R 2] (i : Fin m),
+  ↑(GeneralRank.piece L i) =
+    planeMatrix i.castSucc (GeneralRank.last m) !![L.s0, L.s1 * L.t1; 0, L.t0]
+```
+
+## `NonsoficGroupsExist.GeneralScheme.uMatrix_mul_uPrimeMatrix`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (L : LeavittFamily R) {m : ℕ},
+  GeneralScheme.uMatrix L * GeneralScheme.uPrimeMatrix L = 1
+```
+
+## `NonsoficGroupsExist.GeneralScheme.uUnit`
+
+```lean
+{R : Type u_1} →
+  [inst : Ring R] → LeavittFamily R → {m : ℕ} → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
+```
+
+## `NonsoficGroupsExist.GeneralScheme.zUnit`
+
+```lean
+{R : Type u_1} →
+  [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
+```
+
+## `NonsoficGroupsExist.IsEssentialExpanderSequence`
+
+```lean
+AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
+```
+
+## `NonsoficGroupsExist.IsSofic`
+
+```lean
+(G : Type u_1) → [Group G] → Prop
+```
+
+## `NonsoficGroupsExist.KunDecomposition.exists_expanderDecomposition`
+
+```lean
+∀ {G : Type} [inst : Group G] [Infinite G] {Q : Finset G} {ε : ℝ},
+  IsKazhdanPair G Q ε →
+    ∀ (S : Finset G),
+      Q ⊆ S →
+        1 ∈ S →
+          ε ≤ 1 →
+            (∀ g ∈ S, g⁻¹ ∈ S) →
+              Subgroup.closure ↑S = ⊤ →
+                ∀ (A : SoficApproximation G), Nonempty (ExpanderDecomposition A S)
+```
+
+## `NonsoficGroupsExist.KunFixedDecomposition.expanderDecomposition`
+
+```lean
+∀ {G : Type} [inst : Group G] [Infinite G],
+  HasKazhdanPropertyT G →
+    ∀ (S : Finset G),
+      1 ∈ S →
+        (∀ g ∈ S, g⁻¹ ∈ S) →
+          Subgroup.closure ↑S = ⊤ →
+            ∀ (A : SoficApproximation G), Nonempty (ExpanderDecomposition A S)
+```
+
+## `NonsoficGroupsExist.KunSpectral.hasCheegerLowerBound_one`
+
+```lean
+∀ (m : ℕ), 4 ≤ m → (KunSpectral.switched m).HasCheegerLowerBound 1
+```
+
+## `NonsoficGroupsExist.KunSpectral.no_uniform_spectral_gap`
+
+```lean
+∀ (c : ℝ),
+  0 < c →
+    ∃ m,
+      4 ≤ m ∧
+        (KunSpectral.switched m).HasCheegerLowerBound 1 ∧
+          ¬KunSpectral.IsBipartite (KunSpectral.switched m) ∧
+            KunSpectral.rayleigh (KunSpectral.switched m) (KunSpectral.testVector m) < -1 + c
+```
+
+## `NonsoficGroupsExist.KunSpectral.not_isBipartite`
+
+```lean
+∀ (m : ℕ), ¬KunSpectral.IsBipartite (KunSpectral.switched (m + 1))
+```
+
+## `NonsoficGroupsExist.KunSpectral.rayleigh_testVector`
+
+```lean
+∀ (m : ℕ),
+  KunSpectral.rayleigh (KunSpectral.switched m) (KunSpectral.testVector m) =
+    -1 + 4 / (↑m + 2) ^ 2
+```
+
+## `NonsoficGroupsExist.KunSpectral.switched`
+
+```lean
+ℕ → FiniteMultiGraph
+```
+
+## `NonsoficGroupsExist.KunThomEssential.isLEF_of_matchingCertificate`
+
+```lean
+∀ {K J : Type} [inst : Group K] [inst_1 : Group J] {Q : Finset K} {κ : ℝ},
+  IsKazhdanPair K Q κ →
+    ∀ (C : MatchingCertificate K J) (S : Finset K),
+      Q ⊆ S → C.generatorsK ⊆ S → 1 ∈ S → κ ≤ 1 → IsLEF J
+```
+
+## `NonsoficGroupsExist.KunThomTheorem.isLEF_of_exactProductExpansion`
+
+```lean
+∀ {K J : Type} [inst : Group K] [inst_1 : Group J] {Q : Finset K} {κ h : ℝ},
+  IsKazhdanPair K Q κ →
+    ∀ (S : Finset K),
+      Q ⊆ S →
+        1 ∈ S →
+          κ ≤ 1 →
+            ∀ (A : SoficApproximation (K × J)),
+              0 < h →
+                (∃ N,
+                    ∀ n ≥ N,
+                      DirectedCoarea.HasCheegerLowerBound (A.model n)
+                        (AlmostAutomorphism.productLabels A n S) h) →
+                  IsLEF J
+```
+
+## `NonsoficGroupsExist.LeavittFamily`
+
+```lean
+(A : Type u_1) → [NonAssocRing A] → Type u_1
+```
+
+## `NonsoficGroupsExist.LeavittFamily.binaryMatrixRingEquiv`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Matrix (Fin 2) (Fin 2) A ≃+* A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.central_mem_stableUnits`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (c : Aˣ), (∀ (x : A), ↑c * x = x * ↑c) → c ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.characteristicTwo_compressor`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [CharP A 2],
+  LeavittFamily.x21 (1 + L.t0) * LeavittFamily.x12 1 * LeavittFamily.x21 (1 + L.s0) *
+      LeavittFamily.x12 L.t0 =
+    !![L.s0, L.s1 * L.t1; 0, L.t0]
+```
+
+## `NonsoficGroupsExist.LeavittFamily.characteristicTwo_involution`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [CharP A 2],
+  LeavittFamily.x12 L.s1 * LeavittFamily.x21 L.t1 * LeavittFamily.x12 L.s1 =
+    !![L.p0, L.s1; L.t1, 0]
+```
+
+## `NonsoficGroupsExist.LeavittFamily.codeBijection_mem_stableUnits`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {ι : Type u_2} [inst_1 : Fintype ι]
+  {k : Type u_3} [inst_2 : Field k] [Algebra k A] [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (τ σ : ι → List (Fin 2)),
+      (∀ ⦃i j : ι⦄, i ≠ j → ¬τ i <+: τ j) →
+        ∑ i, L.cylinder (τ i) = 1 →
+          (∀ ⦃i j : ι⦄, i ≠ j → ¬σ i <+: σ j) →
+            ∑ i, L.cylinder (σ i) = 1 →
+              ∀ (u : Aˣ),
+                ↑u = ∑ i, L.wordS (τ i) * L.wordT (σ i) →
+                  u ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.codeChange_mem_stableUnits`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [Algebra k A] [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (n : ℕ) (P : List (List (Fin 2) × List (Fin 2))),
+      P.length = n →
+        L.IsCompleteCode (List.map Prod.snd P) →
+          L.IsCompleteCode (List.map Prod.fst P) →
+            ∀ (u : Aˣ), ↑u = L.pairValue P → u ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.codePair_expansion`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {ι : Type u_2} {κ : Type u_3}
+  [inst_1 : Fintype ι] [inst_2 : Fintype κ] (C : BinaryPrefixCode κ),
+  L.IsComplete C →
+    ∀ (R : BinaryPrefixCode ι),
+      L.IsComplete R →
+        ∀ (x : A),
+          x =
+            ∑ j,
+              ∑ i,
+                L.wordS (C.word j) * (L.wordT (C.word j) * x * L.wordS (R.word i)) *
+                  L.wordT (R.word i)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.codeScalar_unit_mem`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [inst_2 : Algebra k A] {ι : Type u_3} [inst_3 : Fintype ι] [inst_4 : DecidableEq ι]
+  [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (D : BinaryPrefixCode ι),
+      L.IsComplete D →
+        ∀ (G : Matrix ι ι k),
+          IsUnit G → ∀ (u : Aˣ), ↑u = L.codeScalar D G → u ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.commute_compressed_corner`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {x y : Aˣ},
+  x ∈ L.compressedSubgroup → y ∈ L.cornerSubgroup → Commute x y
+```
+
+## `NonsoficGroupsExist.LeavittFamily.compressed_inf_corner`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  L.compressedSubgroup ⊓ L.cornerSubgroup = ⊥
+```
+
+## `NonsoficGroupsExist.LeavittFamily.compressor_factorization`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  LeavittFamily.x21 (L.t0 - 1) * LeavittFamily.x12 1 * LeavittFamily.x21 (L.s0 - 1) *
+      LeavittFamily.x12 (-L.t0) =
+    !![L.s0, L.p1; 0, L.t0]
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cornerHom`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Aˣ →* Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cornerHom_s0`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (u : Aˣ), ↑(L.cornerHom u) * L.s0 = L.s0
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cornerWitnessSubgroup`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Subgroup Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cornerWitnessSubgroup_le_commutator`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A), L.cornerWitnessSubgroup ≤ commutator Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cylinderSwap_is_commutator`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a b : List (Fin 2)) (hab : ¬a <+: b)
+  (hba : ¬b <+: a), ∃ x y, L.cylinderSwap a b hab hba = x * y * x⁻¹ * y⁻¹
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cylinderSwap_mem_commutator`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a b : List (Fin 2)) (hab : ¬a <+: b)
+  (hba : ¬b <+: a), L.cylinderSwap a b hab hba ∈ commutator Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.cylinder_split`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a : List (Fin 2)),
+  L.cylinder a = L.cylinder (a ++ [0]) + L.cylinder (a ++ [1])
+```
+
+## `NonsoficGroupsExist.LeavittFamily.exists_corner_move`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (u : Aˣ) (v w : A),
+      ∃ u',
+        ↑u' =
+            L.s 0 * (↑u + v * w) * L.t 0 + L.s 0 * v * L.t 1 + L.s 1 * w * L.t 0 +
+              L.s 1 * L.t 1 ∧
+          u' * u⁻¹ ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.exists_deep_code`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (M m : ℕ),
+  2 ^ M ≤ m → ∃ D, L.IsComplete D ∧ ∀ (i : Fin m), M ≤ (D.word i).length
+```
+
+## `NonsoficGroupsExist.LeavittFamily.exists_rank_normal_form`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [inst_2 : Algebra k A] {n : ℕ} {c : A},
+  c ∈ Submodule.span k (L.levelMonomials n) →
+    ∃ g h S,
+      ↑g ∈ Submodule.span k (L.levelMonomials n) ∧
+        ↑g⁻¹ ∈ Submodule.span k (L.levelMonomials n) ∧
+          ↑h ∈ Submodule.span k (L.levelMonomials n) ∧
+            ↑h⁻¹ ∈ Submodule.span k (L.levelMonomials n) ∧
+              ↑g * c * ↑h = ∑ γ ∈ S, L.cylinder (List.ofFn γ) ∧ (S = Finset.univ → IsUnit c)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.exists_reshaped_pencil`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type} [inst_1 : Field k]
+  [Algebra k A] {ι : Type u_2} {κ : Type u_3} [inst_3 : Fintype ι] [DecidableEq ι]
+  [inst_5 : Fintype κ] [DecidableEq κ] [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (R P : BinaryPrefixCode ι),
+      L.IsComplete R →
+        L.IsComplete P →
+          ∀ (C Q : BinaryPrefixCode κ),
+            L.IsComplete C →
+              L.IsComplete Q →
+                ∀ (E : ι → κ → A) (u : Aˣ),
+                  ↑u = ∑ i, ∑ j, L.wordS (R.word i) * E i j * L.wordT (C.word j) →
+                    ∃ v,
+                      ↑v = ∑ i, ∑ j, L.wordS (P.word i) * E i j * L.wordT (Q.word j) ∧
+                        (u ∈ MatrixDiagonalization.stableUnits A ↔
+                          v ∈ MatrixDiagonalization.stableUnits A)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.exists_shallow_code`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (r κ : ℕ),
+  1 ≤ κ → κ ≤ 2 ^ r → ∃ Q, L.IsComplete Q ∧ ∀ (j : Fin κ), (Q.word j).length ≤ r
+```
+
+## `NonsoficGroupsExist.LeavittFamily.exists_window_reduction`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [inst_2 : Algebra k A] [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ {lo hi : ℤ} (u : Aˣ),
+      ↑u ∈ Submodule.span k (L.degreeMonomials lo hi) →
+        ∃ u',
+          u' * u⁻¹ ∈ MatrixDiagonalization.stableUnits A ∧
+            ↑u' ∈ Submodule.span k (L.degreeMonomials (-1) 1)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.incomparableUnit_mem`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {a b : List (Fin 2)} (hab : ¬a <+: b)
+  (hba : ¬b <+: a) (y : A), L.incomparableUnit hab hba y ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.infinite`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A], Infinite A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.isComplete_of_covers`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {ι : Type u_2} [inst_1 : Fintype ι]
+  (E : BinaryPrefixCode ι), ThompsonV.Covers E → L.IsComplete E
+```
+
+## `NonsoficGroupsExist.LeavittFamily.kappaUnit_mul_inv_mem_stableUnits`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (w : List (Fin 2)) [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (u : Aˣ), L.kappaUnit w u * u⁻¹ ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.matrixCompressionHom`
+
+```lean
+{ι : Type u_1} →
+  {A : Type u_2} →
+    [inst : Fintype ι] →
+      [inst_1 : DecidableEq ι] →
+        [inst_2 : Ring A] → LeavittFamily A → (Matrix ι ι A)ˣ →* (Matrix ι ι A)ˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.matrixCompressionUnit`
+
+```lean
+{ι : Type u_1} →
+  {A : Type u_2} →
+    [inst : Fintype ι] →
+      [inst_1 : DecidableEq ι] →
+        [inst_2 : Ring A] → LeavittFamily A → (Matrix ι ι A)ˣ → (Matrix ι ι A)ˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.matrixCompression_commutes_firstDiagonalCorner`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (M : Matrix (Fin 3) (Fin 3) A) (u : Aˣ),
+  L.matrixCompression M * ↑(DiagonalElementary.firstDiagonalUnitHom (L.cornerHom u)) =
+    ↑(DiagonalElementary.firstDiagonalUnitHom (L.cornerHom u)) * L.matrixCompression M
+```
+
+## `NonsoficGroupsExist.LeavittFamily.matrixCompression_recover`
+
+```lean
+∀ {ι : Type u_1} {A : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring A]
+  (L : LeavittFamily A) (M : Matrix ι ι A),
+  LeavittFamily.scalarDiagonal L.t0 * L.matrixCompression M *
+      LeavittFamily.scalarDiagonal L.s0 =
+    M
+```
+
+## `NonsoficGroupsExist.LeavittFamily.nilpotent_tail_mem_stableUnits`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [inst_2 : Algebra k A] [Nontrivial A] (D : ℕ) {z : A},
+  z ∈ Submodule.span k (L.degreeMonomials 0 0) →
+    (L.s 1 * z) ^ D = 0 →
+      ∀ (u : Aˣ), ↑u = 1 + L.s 1 * z → u ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.not_isLEF_cornerSubgroup`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a b : Aˣ),
+  Commute (a * b⁻¹) (a⁻¹ * b * a) →
+    Commute (a * b⁻¹) ((a ^ 2)⁻¹ * b * a ^ 2) → ¬Commute a b → ¬IsLEF ↥L.cornerSubgroup
+```
+
+## `NonsoficGroupsExist.LeavittFamily.not_isLEF_cornerWitnessSubgroup`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A],
+  ¬IsLEF ↥L.cornerWitnessSubgroup
+```
+
+## `NonsoficGroupsExist.LeavittFamily.pencilEntry_mem_window`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type} [inst_1 : Field k]
+  [inst_2 : Algebra k A] (a₀ a₁ c b₀ b₁ : k),
+  L.pencilEntry a₀ a₁ c b₀ b₁ ∈ Submodule.span k (L.degreeMonomials (-1) 1)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.pencilEntry_mul_s`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [inst_2 : Algebra k A] (a₀ a₁ c : k) (z : Fin 2),
+  L.pencilEntry a₀ a₁ c 0 0 * L.s z =
+    L.pencilEntry 0 0 (if z = 0 then a₀ else a₁) (if z = 0 then c else 0)
+      (if z = 0 then 0 else c)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.pencilVal_window_mem`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type} [inst_1 : Field k]
+  [inst_2 : Algebra k A] {ι : Type u_2} {κ : Type u_3} [inst_3 : Fintype ι] [inst_4 : Fintype κ]
+  {a b lo hi : ℤ} (P : BinaryPrefixCode ι) (Q : BinaryPrefixCode κ) (E : ι → κ → A),
+  (∀ (i : ι) (j : κ), E i j ∈ Submodule.span k (L.degreeMonomials a b)) →
+    (∀ (i : ι) (j : κ), lo ≤ ↑(P.word i).length + a - ↑(Q.word j).length) →
+      (∀ (i : ι) (j : κ), ↑(P.word i).length + b - ↑(Q.word j).length ≤ hi) →
+        ∑ i, ∑ j, L.wordS (P.word i) * E i j * L.wordT (Q.word j) ∈
+          Submodule.span k (L.degreeMonomials lo hi)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.prefixAlgEquiv`
+
+```lean
+{k : Type u_1} →
+  [inst : CommSemiring k] →
+    {A : Type u_2} →
+      [inst_1 : Ring A] →
+        [inst_2 : Algebra k A] →
+          {ι : Type u_3} →
+            [inst_3 : Fintype ι] →
+              [inst_4 : DecidableEq ι] →
+                (L : LeavittFamily A) →
+                  (E : BinaryPrefixCode ι) → L.IsComplete E → Matrix ι ι A ≃ₐ[k] A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.prefixRingEquiv`
+
+```lean
+{A : Type u_1} →
+  [inst : Ring A] →
+    (L : LeavittFamily A) →
+      {ι : Type u_2} →
+        [inst_1 : Fintype ι] →
+          [DecidableEq ι] → (E : BinaryPrefixCode ι) → L.IsComplete E → Matrix ι ι A ≃+* A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.prefixRingEquiv_apply`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {ι : Type u_2} [inst_1 : Fintype ι]
+  [inst_2 : DecidableEq ι] (E : BinaryPrefixCode ι) (hE : L.IsComplete E) (M : Matrix ι ι A),
+  (L.prefixRingEquiv E hE) M = ∑ i, ∑ j, L.wordS (E.word i) * M i j * L.wordT (E.word j)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.prefixUnitsEquiv`
+
+```lean
+{A : Type u_1} →
+  [inst : Ring A] →
+    (L : LeavittFamily A) →
+      {ι : Type u_2} →
+        [inst_1 : Fintype ι] →
+          [inst_2 : DecidableEq ι] →
+            (E : BinaryPrefixCode ι) → L.IsComplete E → (Matrix ι ι A)ˣ ≃* Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rankSuccEquiv`
+
+```lean
+{R : Type u} →
+  [inst : Ring R] →
+    LeavittFamily R →
+      (n m : ℕ) →
+        0 < n → 0 < m → ↥(elementaryGroup (Fin (n + 1)) R) ≃* ↥(elementaryGroup (Fin (m + 1)) R)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rankSuccToProduct`
+
+```lean
+{R : Type u} →
+  [inst : Ring R] →
+    LeavittFamily R →
+      (n m : ℕ) →
+        0 < n →
+          ↥(elementaryGroup (Fin (n + 1)) R) ≃* ↥(elementaryGroup (Fin (n + 1) × Fin (m + 1)) R)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rankSucc_propertyT_of_rankSucc`
+
+```lean
+∀ {R : Type u} [inst : Ring R] (L : LeavittFamily R) (n m : ℕ),
+  0 < n →
+    0 < m →
+      HasKazhdanPropertyT ↥(elementaryGroup (Fin (m + 1)) R) →
+        HasKazhdanPropertyT ↥(elementaryGroup (Fin (n + 1)) R)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rankTwoInvolution_conj_lowerNil`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a : A),
+  L.rankTwoInvolution * LeavittFamily.rankTwoDiagHom (L.rankTwoLowerNil a) *
+      L.rankTwoInvolution⁻¹ =
+    elementaryUnit 1 0 ⋯ (a * L.p0)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rankTwoInvolution_conj_upperNil`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a : A),
+  L.rankTwoInvolution * LeavittFamily.rankTwoDiagHom (L.rankTwoUpperNil a) *
+      L.rankTwoInvolution⁻¹ =
+    elementaryUnit 0 1 ⋯ (L.p0 * a)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rankTwo_not_isSofic`
+
+```lean
+∀ (A : Type) [inst : Ring A] [Nontrivial A] [Countable A] (L : LeavittFamily A),
+  elementaryGroup (Fin 2) A = ⊤ →
+    HasKazhdanPropertyT (Matrix (Fin 2) (Fin 2) A)ˣ →
+      HasKazhdanPropertyT Aˣ → ¬IsSofic (Matrix (Fin 2) (Fin 2) A)ˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.refine_column`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type u_2} [inst_1 : Field k]
+  [inst_2 : Algebra k A] {ι : Type u_3} {κ : Type u_4} [inst_3 : Fintype ι] [inst_4 : Fintype κ]
+  [inst_5 : DecidableEq κ] (R : BinaryPrefixCode ι) (C : BinaryPrefixCode κ)
+  (A₀ A₁ Cm B₀ B₁ : ι → κ → k) (j₀ : κ),
+  (∀ (i : ι), B₀ i j₀ = 0) →
+    (∀ (i : ι), B₁ i j₀ = 0) →
+      ∑ i,
+          ∑ j,
+            L.wordS (R.word i) * L.pencilEntry (A₀ i j) (A₁ i j) (Cm i j) (B₀ i j) (B₁ i j) *
+              L.wordT (C.word j) =
+        ∑ i,
+          ∑ p,
+            L.wordS (R.word i) *
+                Sum.elim
+                  (fun z =>
+                    L.pencilEntry 0 0 (if z = 0 then A₀ i j₀ else A₁ i j₀)
+                      (if z = 0 then Cm i j₀ else 0) (if z = 0 then 0 else Cm i j₀))
+                  (fun q => L.pencilEntry (A₀ i ↑q) (A₁ i ↑q) (Cm i ↑q) (B₀ i ↑q) (B₁ i ↑q)) p *
+              L.wordT (Sum.elim (fun z => C.word j₀ ++ [z]) (fun q => C.word ↑q) p)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.reshaped_pencil_mem_iff`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {k : Type} [inst_1 : Field k]
+  [Algebra k A] {ι : Type u_2} {κ : Type u_3} [inst_3 : Fintype ι] [DecidableEq ι]
+  [inst_5 : Fintype κ] [DecidableEq κ] [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (R P : BinaryPrefixCode ι),
+      L.IsComplete R →
+        L.IsComplete P →
+          ∀ (C Q : BinaryPrefixCode κ),
+            L.IsComplete C →
+              L.IsComplete Q →
+                ∀ (E : ι → κ → A) (u v : Aˣ),
+                  ↑u = ∑ i, ∑ j, L.wordS (R.word i) * E i j * L.wordT (C.word j) →
+                    ↑v = ∑ i, ∑ j, L.wordS (P.word i) * E i j * L.wordT (Q.word j) →
+                      (u ∈ MatrixDiagonalization.stableUnits A ↔
+                        v ∈ MatrixDiagonalization.stableUnits A)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.rootRotation`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.s0_pow_injective`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A],
+  Function.Injective fun n => L.s0 ^ n
+```
+
+## `NonsoficGroupsExist.LeavittFamily.stableUnits_eq_top`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A],
+  (∀ (x : A), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    (∀ (u : Aˣ),
+        ∃ c, (∀ (x : A), ↑c * x = x * ↑c) ∧ c⁻¹ * u ∈ MatrixDiagonalization.stableUnits A) →
+      ∀ (u : Aˣ), u ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.LeavittFamily.t0_cornerHom`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (u : Aˣ), L.t0 * ↑(L.cornerHom u) = L.t0
+```
+
+## `NonsoficGroupsExist.LeavittFamily.t1_cornerHom_s1`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (u : Aˣ),
+  L.t1 * ↑(L.cornerHom u) * L.s1 = ↑u
+```
+
+## `NonsoficGroupsExist.LeavittFamily.tableSum_eq_of_mapsCylinder`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {ι : Type u_2} {κ : Type u_3}
+  [inst_1 : Fintype ι] [inst_2 : Fintype κ] (f : Equiv.Perm ThompsonV.Boundary)
+  (E B : ι → List (Fin 2)) (E' B' : κ → List (Fin 2)),
+  ∑ i, L.wordS (E i) * L.wordT (E i) = 1 →
+    ∑ j, L.wordS (E' j) * L.wordT (E' j) = 1 →
+      (∀ (i : ι), ThompsonV.MapsCylinder f (E i) (B i)) →
+        (∀ (j : κ), ThompsonV.MapsCylinder f (E' j) (B' j)) → L.tableSum E B = L.tableSum E' B'
+```
+
+## `NonsoficGroupsExist.LeavittFamily.tableSum_mul`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {ι : Type u_2} {κ : Type u_3}
+  [inst_1 : Fintype ι] [inst_2 : Fintype κ] (E B : ι → List (Fin 2)) (E' B' : κ → List (Fin 2))
+  (idx : κ → ι) (suf : κ → List (Fin 2)),
+  (∀ (i i' : ι), i ≠ i' → ¬E i <+: E i') →
+    (∀ (j : κ), B' j = E (idx j) ++ suf j) →
+      L.tableSum E B * L.tableSum E' B' = L.tableSum E' fun j => B (idx j) ++ suf j
+```
+
+## `NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → ↥ThompsonV.thompsonV →* Aˣ
+```
+
+## `NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily_injective`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A],
+  Function.Injective ⇑L.vEmbeddingOfFamily
+```
+
+## `NonsoficGroupsExist.LeavittFamily.vEmbeddingOfFamily_tableEquiv`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) {m : ℕ} (E B : BinaryPrefixCode (Fin m))
+  (hE : ThompsonV.Covers E) (hB : ThompsonV.Covers B),
+  ↑(L.vEmbeddingOfFamily ⟨ThompsonV.tableEquiv E B hE hB, ⋯⟩) =
+    ∑ i, L.wordS (B.word i) * L.wordT (E.word i)
+```
+
+## `NonsoficGroupsExist.LeavittFamily.wordS_injective`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) [Nontrivial A] {v w : List (Fin 2)},
+  L.wordS v = L.wordS w → v = w
+```
+
+## `NonsoficGroupsExist.LeavittFamily.wordT_mul_wordS_of_incomparable`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a b : List (Fin 2)),
+  ¬a <+: b → ¬b <+: a → L.wordT a * L.wordS b = 0
+```
+
+## `NonsoficGroupsExist.LeavittFamily.wordT_mul_wordS_self`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (a : List (Fin 2)),
+  L.wordT a * L.wordS a = 1
+```
+
+## `NonsoficGroupsExist.LeavittFamily.z_sq`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A), L.z * L.z = 1
+```
+
+## `NonsoficGroupsExist.LocalCriterionData`
+
+```lean
+(G Γ J : Type) → [Group G] → [Group Γ] → [Group J] → Type 1
+```
+
+## `NonsoficGroupsExist.LocalCriterionData.acceptable_symmDiff_le`
+
+```lean
+∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J]
+  (D : LocalCriterionData G Γ J) {n : ℕ} {η : ℝ},
+  0 ≤ η →
+    2 * η < 1 →
+      ∀ (B : D.gammaDecomposition.componentIndex n),
+        D.ComponentAcceptable n η B →
+          ↑(symmDiff (D.matchImage n B) (D.matchTarget n B)).card ≤
+            (2 * η + 8 * η / (1 - 2 * η) ^ 2) *
+              ↑(BlockIndex.block (D.gammaDecomposition.blocks n) B).card
+```
+
+## `NonsoficGroupsExist.Localization.exists_completion`
+
+```lean
+∀ {Y : Type u_1} (D : Finset Y) (σ : Equiv.Perm Y), ∃ π, ∀ (x : ↥D), σ ↑x ∈ D → ↑(π x) = σ ↑x
+```
+
+## `NonsoficGroupsExist.Localization.involutiveCompletion`
+
+```lean
+{Y : Type u_1} →
+  [DecidableEq Y] → (D : Finset Y) → (σ : Equiv.Perm Y) → σ * σ = 1 → Equiv.Perm ↥D
+```
+
+## `NonsoficGroupsExist.LocalizedApproximationData.toSoficApproximation`
+
+```lean
+{H : Type} → [inst : Group H] → LocalizedApproximationData H → SoficApproximation H
+```
+
+## `NonsoficGroupsExist.Manuscript.cor_fgring_countableFree`
+
+```lean
+∀ (k A : Type) [inst : Field k] [Finite k] [inst_2 : Ring A] [Nontrivial A]
+  [inst_4 : Algebra k A] [Algebra.FiniteType k A] (L : LeavittFamily A),
+  (∀ (m : ℕ), 0 < m → ¬IsSofic ↥(elementaryGroup (Fin (m + 1)) A)) ∧
+    ¬IsSofic Aˣ ∧ ∀ (m : ℕ), ¬IsSofic (Matrix (Fin (m + 1)) (Fin (m + 1)) A)ˣ
+```
+
+## `NonsoficGroupsExist.Manuscript.cor_fgring_exact`
+
+```lean
+∀ (k A : Type) [inst : Field k] [Finite k] [inst_2 : Ring A] [Nontrivial A]
+  [inst_4 : Algebra k A] [Algebra.FiniteType k A] (L : LeavittFamily A),
+  Manuscript.ManuscriptProfile ↥(RankFour.Ambient A)
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremB_Theta`
+
+```lean
+(k : Type) →
+  [inst : Field k] →
+    {r : ℕ} →
+      (C : BinaryPrefixCode (Fin r)) →
+        (BinaryLeavitt.family k).IsComplete C →
+          Manuscript.BinaryLeavittGLRank k r ≃* BinaryLeavittUnits k
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremB_Theta_apply`
+
+```lean
+∀ (k : Type) [inst : Field k] {r : ℕ} (C : BinaryPrefixCode (Fin r))
+  (hC : (BinaryLeavitt.family k).IsComplete C) (M : Manuscript.BinaryLeavittGLRank k r),
+  ↑((Manuscript.theoremB_Theta k C hC) M) =
+    ∑ i,
+      ∑ j,
+        (BinaryLeavitt.family k).wordS (C.word i) * ↑M i j *
+          (BinaryLeavitt.family k).wordT (C.word j)
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremB_exact`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k],
+  Manuscript.ManuscriptProfile (BinaryLeavittUnits k) ∧
+    (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)),
+        (BinaryLeavitt.family k).IsComplete C →
+          Nonempty (Manuscript.BinaryLeavittGLRank k r ≃* BinaryLeavittUnits k)) ∧
+      (∀ (r : ℕ), 2 ≤ r → Manuscript.BinaryLeavittELRank k r = ⊤) ∧
+        (∀ (r : ℕ), 1 ≤ r → Manuscript.ManuscriptProfile (Manuscript.BinaryLeavittGLRank k r)) ∧
+          ∀ (r : ℕ), 2 ≤ r → Manuscript.ManuscriptProfile ↥(Manuscript.BinaryLeavittELRank k r)
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremC_covers_theoremB_groups`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k],
+  ∃ H x,
+    Infinite H ∧
+      Group.IsFinitelyPresented H ∧
+        HasKazhdanPropertyT H ∧
+          ¬IsSofic H ∧
+            (∃ π, Function.Surjective ⇑π) ∧
+              (∀ (m : ℕ), ∃ π, Function.Surjective ⇑π) ∧
+                ∀ (m : ℕ), 1 ≤ m → ∃ π, Function.Surjective ⇑π
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremC_exact`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k],
+  ∃ H x π,
+    Function.Surjective ⇑π ∧
+      Infinite H ∧ Group.IsFinitelyPresented H ∧ HasKazhdanPropertyT H ∧ ¬IsSofic H
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremC_first`
+
+```lean
+∀ (G : Type) [inst : Group G] [Group.FG G],
+  ¬IsSofic G →
+    ∃ H x, Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬IsSofic H ∧ ∃ π, Function.Surjective ⇑π
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremC_second`
+
+```lean
+∀ (G : Type) [inst : Group G],
+  ¬IsSofic G →
+    HasKazhdanPropertyT G →
+      ∃ H x π,
+        Function.Surjective ⇑π ∧
+          Infinite H ∧ Group.IsFinitelyPresented H ∧ HasKazhdanPropertyT H ∧ ¬IsSofic H
+```
+
+## `NonsoficGroupsExist.Manuscript.theoremD_subgroups`
+
+```lean
+∀ {G : Type} [inst : Group G] [Countable G] (Γ J : Subgroup G) (Q : Finset G) (q₀ : G),
+  HasKazhdanPropertyT G →
+    HasKazhdanPropertyT ↥Γ →
+      Infinite ↥Γ →
+        Group.FG ↥Γ →
+          Group.FG ↥J →
+            J ≤ Γ →
+              Subgroup.closure (↑Γ ∪ ↑Q) = ⊤ →
+                (∀ q ∈ Q, ∀ g ∈ Γ, q * g * q⁻¹ ∈ Γ) →
+                  q₀ ∈ Q →
+                    (∀ x ∈ Manuscript.conjSubgroup q₀ Γ, ∀ y ∈ J, x * y = y * x) →
+                      Manuscript.conjSubgroup q₀ Γ ⊓ J = ⊥ → IsSofic G → IsLEF ↥J
+```
+
+## `NonsoficGroupsExist.MatchingCertificate`
+
+```lean
+(K J : Type) → [Group K] → [Group J] → Type 1
+```
+
+## `NonsoficGroupsExist.MatchingCertificate.isEssentialExpanderSequence`
+
+```lean
+∀ {K J : Type} [inst : Group K] [inst_1 : Group J] (C : MatchingCertificate K J),
+  IsEssentialExpanderSequence C.approx.cardScale fun n =>
+    generatorGraph (C.approx.model n) C.generatorsK fun k => C.approx.map n (k, 1)
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.ScalarReduction`
+
+```lean
+(R : Type u_2) → [Ring R] → Prop
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.binaryLeavitt_exists_elementary_mul_diag`
+
+```lean
+∀ (k : Type) [inst : Field k]
+  (A : (Matrix (Fin 2) (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k))ˣ),
+  ∃ E F u,
+    E ∈ elementaryGroup (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k) ∧
+      F ∈ elementaryGroup (Fin 2) (BinaryLeavitt.BinaryLeavittAlgebra k) ∧
+        E * A * F = MatrixDiagonalization.diagUnit u
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.conj_mem_elementaryGroup_of_division`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] [Nontrivial R],
+  (∀ (x : R), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (X : (Matrix (Fin 2) (Fin 2) R)ˣ) {E : (Matrix (Fin 2) (Fin 2) R)ˣ},
+      E ∈ elementaryGroup (Fin 2) R → X * E * X⁻¹ ∈ elementaryGroup (Fin 2) R
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.diagPair_flipUnit_inv_mem`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (x y : A) (u : Aˣ) (hu : ↑u = 1 + x * y),
+  MatrixDiagonalization.diagPair u (MatrixDiagonalization.flipUnit x y u hu)⁻¹ ∈
+    elementaryGroup (Fin 2) A
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.exists_elementary_mul_diag`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] [Nontrivial R],
+  (∀ (x : R), x ≠ 0 → ∃ p q, p * x * q = 1) →
+    ∀ (A : (Matrix (Fin 2) (Fin 2) R)ˣ),
+      ∃ E F u,
+        E ∈ elementaryGroup (Fin 2) R ∧
+          F ∈ elementaryGroup (Fin 2) R ∧ E * A * F = MatrixDiagonalization.diagUnit u
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.exists_elementary_whitehead`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] (u : Rˣ),
+  ∃ E ∈ elementaryGroup (Fin 2) R, ↑E = !![↑u, 0; 0, ↑u⁻¹]
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.flipUnit`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → (x y : A) → (u : Aˣ) → ↑u = 1 + x * y → Aˣ
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.mem_stableUnits_of_val_unipotent`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] {u : Aˣ} (a b : A),
+  b * a = 0 → ↑u = 1 + a * b → u ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.mul_flipUnit_inv_mem_stableUnits`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (x y : A) (u : Aˣ) (hu : ↑u = 1 + x * y),
+  u * (MatrixDiagonalization.flipUnit x y u hu)⁻¹ ∈ MatrixDiagonalization.stableUnits A
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.stableUnits`
+
+```lean
+(R : Type u_2) → [inst : Ring R] → Subgroup Rˣ
+```
+
+## `NonsoficGroupsExist.MatrixDiagonalization.stableUnits_normal`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R], (MatrixDiagonalization.stableUnits R).Normal
+```
+
+## `NonsoficGroupsExist.RankFour.compressionEnd_injective`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  Function.Injective ⇑(RankFour.compressionEnd L)
+```
+
+## `NonsoficGroupsExist.RankFour.compressor`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → ↥(RankFour.Ambient A)
+```
+
+## `NonsoficGroupsExist.RankFour.compressorMatrix`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Matrix RankFour.Index RankFour.Index A
+```
+
+## `NonsoficGroupsExist.RankFour.compressorPiece`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Fin 3 → ↥(RankFour.Ambient A)
+```
+
+## `NonsoficGroupsExist.RankFour.compressorPiece_val`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (i : Fin 3),
+  ↑↑(RankFour.compressorPiece L i) = RankFour.compressorPieceMatrix L i
+```
+
+## `NonsoficGroupsExist.RankFour.compressor_conjugation`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A) (g : ↥(RankFour.Core A)),
+  RankFour.compressor L * RankFour.coreEmbedding g * (RankFour.compressor L)⁻¹ =
+    RankFour.coreEmbedding ((RankFour.compressionEnd L) g)
+```
+
+## `NonsoficGroupsExist.RankFour.compressor_val`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  ↑↑(RankFour.compressor L) = RankFour.compressorMatrix L
+```
+
+## `NonsoficGroupsExist.RankFour.coreEmbedding_compressorSet_generate`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  Subgroup.closure (Set.range ⇑RankFour.coreEmbedding ∪ ↑(RankFour.compressorSet L)) = ⊤
+```
+
+## `NonsoficGroupsExist.RankFour.involution`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → ↥(RankFour.Ambient A)
+```
+
+## `NonsoficGroupsExist.RankFour.involutionMatrix`
+
+```lean
+{A : Type u_1} → [inst : Ring A] → LeavittFamily A → Matrix RankFour.Index RankFour.Index A
+```
+
+## `NonsoficGroupsExist.RankFour.involution_sq`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  RankFour.involution L * RankFour.involution L = 1
+```
+
+## `NonsoficGroupsExist.RankFour.rawInvolutionWord_val`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (L : LeavittFamily A),
+  ↑↑(RankFour.rawInvolutionWord L) = RankFour.rawInvolutionMatrix L
+```
+
+## `NonsoficGroupsExist.Shalom.exists_finitelyPresented_kazhdan_cover`
+
+```lean
+∀ {G : Type u} [inst : Group G] (S : Finset G),
+  Subgroup.closure ↑S = ⊤ →
+    HasKazhdanPropertyT G →
+      ∃ Γ x φ, Function.Surjective ⇑φ ∧ Group.IsFinitelyPresented Γ ∧ HasKazhdanPropertyT Γ
+```
+
+## `NonsoficGroupsExist.Shalom.exists_presented_kazhdan_cover`
+
+```lean
+∀ {G : Type u} [inst : Group G] (S : Finset G),
+  Subgroup.closure ↑S = ⊤ →
+    HasKazhdanPropertyT G →
+      ∃ n rels φ, Function.Surjective ⇑φ ∧ HasKazhdanPropertyT (PresentedGroup ↑rels)
+```
+
+## `NonsoficGroupsExist.SoficApproximation`
+
+```lean
+(G : Type u_1) → [Group G] → Type (max 1 u_1)
+```
+
+## `NonsoficGroupsExist.SoficApproximation.all_wordCrossing_negligible`
+
+```lean
+∀ {G : Type} [inst : Group G] (S : SoficApproximation G)
+  (P : (n : ℕ) → BlockStructure (S.model n)) (T : Finset G),
+  (∀ g ∈ T, g⁻¹ ∈ T) →
+    Subgroup.closure ↑T = ⊤ →
+      (∀ g ∈ T, S.cardScale.Negligible fun n => ↑(wordCrossing (P n) (S.map n g)).card) →
+        ∀ (g : G), S.cardScale.Negligible fun n => ↑(wordCrossing (P n) (S.map n g)).card
+```
+
+## `NonsoficGroupsExist.SoficApproximation.exists_normalization`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (F : Finset G),
+  (∀ g ∈ F, g⁻¹ ∈ F) →
+    ∃ S',
+      ∃ (_ : ∀ (n : ℕ), S'.model n = S.model n),
+        (∀ (n : ℕ), S'.map n 1 = 1) ∧
+          (∀ (n : ℕ), ∀ g ∈ F, S'.map n g⁻¹ = (S'.map n g)⁻¹) ∧
+            ∀ (g : G) (ε : ℝ),
+              0 < ε →
+                ∃ N,
+                  ∀ n ≥ N, hammingDistance (S.model n) (S.map n g) ((S.normalize F).map n g) < ε
+```
+
+## `NonsoficGroupsExist.SoficApproximation.inverseError_negligible`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (g : G),
+  Negligible (fun n => ↑(Fintype.card (S.model n).carrier)) fun n => ↑(S.inverseError n g).card
+```
+
+## `NonsoficGroupsExist.SoficApproximation.map_one_close`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (ε : ℝ),
+  0 < ε → ∃ N, ∀ n ≥ N, hammingDistance (S.model n) (S.map n 1) 1 < ε
+```
+
+## `NonsoficGroupsExist.SoficApproximation.normalize`
+
+```lean
+{G : Type u_1} → [inst : Group G] → SoficApproximation G → Finset G → SoficApproximation G
+```
+
+## `NonsoficGroupsExist.SoficApproximation.normalize_close`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (F : Finset G) (g : G) (ε : ℝ),
+  0 < ε → ∃ N, ∀ n ≥ N, hammingDistance (S.model n) (S.map n g) ((S.normalize F).map n g) < ε
+```
+
+## `NonsoficGroupsExist.SoficApproximation.normalize_map_inv`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (F : Finset G),
+  (∀ g ∈ F, g⁻¹ ∈ F) →
+    ∀ (n : ℕ) {g : G}, g ∈ F → (S.normalize F).map n g⁻¹ = ((S.normalize F).map n g)⁻¹
+```
+
+## `NonsoficGroupsExist.SoficApproximation.normalize_map_one`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (F : Finset G) (n : ℕ),
+  (S.normalize F).map n 1 = 1
+```
+
+## `NonsoficGroupsExist.SoficApproximation.perturb`
+
+```lean
+{G : Type u_1} →
+  [inst : Group G] →
+    (S : SoficApproximation G) →
+      (τ : (n : ℕ) → G → Equiv.Perm (S.model n).carrier) → S.IsCloseTo τ → SoficApproximation G
+```
+
+## `NonsoficGroupsExist.SoficApproximation.smallBlockVertices_negligible`
+
+```lean
+∀ {G : Type} [inst : Group G] [Infinite G] (S : SoficApproximation G)
+  (P : (n : ℕ) → BlockStructure (S.model n)),
+  (∀ (g : G),
+      Negligible (fun n => ↑(Fintype.card (S.model n).carrier)) fun n =>
+        ↑(wordCrossing (P n) (S.map n g)).card) →
+    ∀ (M : ℕ),
+      Negligible (fun n => ↑(Fintype.card (S.model n).carrier)) fun n =>
+        ↑(smallBlockVertices (P n) M).card
+```
+
+## `NonsoficGroupsExist.SoficApproximation.wordDisagreement_negligible`
+
+```lean
+∀ {G : Type} [inst : Group G] (S : SoficApproximation G) (w : List G),
+  S.cardScale.Negligible fun n => ↑(S.wordDisagreement w n).card
+```
+
+## `NonsoficGroupsExist.SoficApproximation.word_close`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (S : SoficApproximation G) (w : List G) (ε : ℝ),
+  0 < ε →
+    ∃ N,
+      ∀ n ≥ N,
+        hammingDistance (S.model n) (S.map n w.prod)
+            (SoficApproximation.evaluateWord (S.map n) w) <
+          ε
+```
+
+## `NonsoficGroupsExist.TableModel`
+
+```lean
+(G : Type u_1) → [Group G] → Finset G → ℝ → Type (max 1 u_1)
+```
+
+## `NonsoficGroupsExist.ThompsonFObstruction.conjugacy_relation_all`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (a b : G),
+  b⁻¹ * ThompsonFObstruction.conjugateTerm a b 1 * b =
+      ThompsonFObstruction.conjugateTerm a b 2 →
+    b⁻¹ * ThompsonFObstruction.conjugateTerm a b 2 * b =
+        ThompsonFObstruction.conjugateTerm a b 3 →
+      ∀ (n : ℕ),
+        b⁻¹ * ThompsonFObstruction.conjugateTerm a b (n + 1) * b =
+          ThompsonFObstruction.conjugateTerm a b (n + 2)
+```
+
+## `NonsoficGroupsExist.ThompsonFObstruction.finite_commute_of_two_relations`
+
+```lean
+∀ {G : Type u_2} [inst : Group G] [Finite G] (a b : G),
+  Commute (a * b⁻¹) (a⁻¹ * b * a) → Commute (a * b⁻¹) ((a ^ 2)⁻¹ * b * a ^ 2) → Commute a b
+```
+
+## `NonsoficGroupsExist.ThompsonFObstruction.not_isLEF_of_two_relations`
+
+```lean
+∀ {G : Type u_2} [inst : Group G] (a b : G),
+  Commute (a * b⁻¹) (a⁻¹ * b * a) →
+    Commute (a * b⁻¹) ((a ^ 2)⁻¹ * b * a ^ 2) → ¬Commute a b → ¬IsLEF G
+```
+
+## `NonsoficGroupsExist.ThompsonV.tableEquiv`
+
+```lean
+{ι : Type u_1} →
+  (E B : BinaryPrefixCode ι) →
+    ThompsonV.Covers E → ThompsonV.Covers B → Equiv.Perm ThompsonV.Boundary
+```
+
+## `NonsoficGroupsExist.UniversalRankFour.witnessEmbedding`
+
+```lean
+↥UniversalRankFour.Witness →* ↥UniversalRankFour.Core
+```
+
+## `NonsoficGroupsExist.UniversalRankFour.witnessEmbedding_injective`
+
+```lean
+Function.Injective ⇑UniversalRankFour.witnessEmbedding
+```
+
+## `NonsoficGroupsExist.Whitehead.whitehead_commutator`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (a b : Aˣ),
+  Whitehead.diagonalPair (↑(a * b * a⁻¹ * b⁻¹)) 1 =
+    Whitehead.diagonalPair ↑a ↑a⁻¹ * Whitehead.diagonalPair ↑b ↑b⁻¹ *
+      Whitehead.diagonalPair ↑(b * a)⁻¹ ↑(b * a)
+```
+
+## `NonsoficGroupsExist.Whitehead.whitehead_diagonal`
+
+```lean
+∀ {A : Type u_1} [inst : Ring A] (a : Aˣ),
+  Whitehead.diagonalPair ↑a ↑a⁻¹ = Whitehead.w a * Whitehead.w (-1)
+```
+
+## `NonsoficGroupsExist.ambient_full_profile`
+
+```lean
+Countable ↥UniversalRankFour.Ambient ∧
+  Group.FG ↥UniversalRankFour.Ambient ∧
+    Infinite ↥UniversalRankFour.Ambient ∧
+      HasKazhdanPropertyT ↥UniversalRankFour.Ambient ∧ ¬IsSofic ↥UniversalRankFour.Ambient
+```
+
+## `NonsoficGroupsExist.ambient_profile`
+
+```lean
+Group.FG ↥UniversalRankFour.Ambient ∧
+  Infinite ↥UniversalRankFour.Ambient ∧
+    HasKazhdanPropertyT ↥UniversalRankFour.Ambient ∧ ¬IsSofic ↥UniversalRankFour.Ambient
+```
+
+## `NonsoficGroupsExist.binaryLeavittGL_not_isSofic`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k] (m : ℕ), ¬IsSofic (BinaryLeavittGL k m)
+```
+
+## `NonsoficGroupsExist.binaryLeavittGL_profile`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k] (m : ℕ),
+  Group.FG (BinaryLeavittGL k m) ∧
+    Infinite (BinaryLeavittGL k m) ∧
+      HasKazhdanPropertyT (BinaryLeavittGL k m) ∧ ¬IsSofic (BinaryLeavittGL k m)
+```
+
+## `NonsoficGroupsExist.binaryLeavittRankTwo_not_isSofic`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k], ¬IsSofic (BinaryLeavittGL k 1)
+```
+
+## `NonsoficGroupsExist.binaryLeavittUnits_not_isSofic`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k], ¬IsSofic (BinaryLeavittUnits k)
+```
+
+## `NonsoficGroupsExist.binaryLeavittUnits_profile`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k],
+  Group.FG (BinaryLeavittUnits k) ∧
+    Infinite (BinaryLeavittUnits k) ∧
+      HasKazhdanPropertyT (BinaryLeavittUnits k) ∧ ¬IsSofic (BinaryLeavittUnits k)
+```
+
+## `NonsoficGroupsExist.binaryLeavittWhiteheadK1_subsingleton`
+
+```lean
+∀ (k : Type) [inst : Field k], Subsingleton (BinaryLeavittWhiteheadK1 k)
+```
+
+## `NonsoficGroupsExist.binaryLeavitt_finiteField_profile`
+
+```lean
+∀ (k : Type) [inst : Field k] [Finite k] (m : ℕ),
+  1 ≤ m →
+    Group.FG ↥(BinaryLeavittEL k m) ∧
+      Infinite ↥(BinaryLeavittEL k m) ∧
+        HasKazhdanPropertyT ↥(BinaryLeavittEL k m) ∧ ¬IsSofic ↥(BinaryLeavittEL k m)
+```
+
+## `NonsoficGroupsExist.diagonalLevel_diverges`
+
+```lean
+∀ (e : ℕ → ℕ → ℝ),
+  (∀ (k : ℕ), Vanishing fun n => e n k) →
+    ∀ (k : ℕ), ∃ N, ∀ (n : ℕ), N ≤ n → k ≤ diagonalLevel e n
+```
+
+## `NonsoficGroupsExist.diagonalLevel_error`
+
+```lean
+∀ (e : ℕ → ℕ → ℝ),
+  (∀ (n k : ℕ), 0 ≤ e n k) →
+    (∀ (k : ℕ), Vanishing fun n => e n k) → Vanishing fun n => e n (diagonalLevel e n)
+```
+
+## `NonsoficGroupsExist.elementaryGroup_eq_closure_of_adjoin_int`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] [inst_1 : DecidableEq R] (n : ℕ),
+  2 < n →
+    ∀ (s : Finset R),
+      Algebra.adjoin ℤ ↑s = ⊤ →
+        Subgroup.closure ↑(finiteElementaryGenerators n s) = elementaryGroup (Fin n) R
+```
+
+## `NonsoficGroupsExist.elementaryGroup_finitelyGenerated`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] [inst_1 : Algebra (ZMod 2) R] [Algebra.FiniteType (ZMod 2) R]
+  (n : ℕ), 2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
+```
+
+## `NonsoficGroupsExist.elementaryGroup_finitelyGenerated_int`
+
+```lean
+∀ {R : Type u_1} [inst : Ring R] [Algebra.FiniteType ℤ R] (n : ℕ),
+  2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
+```
+
+## `NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group`
+
+```lean
+∃ G x, Group.IsFinitelyPresented G ∧ ¬IsSofic G
+```
+
+## `NonsoficGroupsExist.exists_finitelyPresented_obstruction`
+
+```lean
+∀ {G : Type u} [inst : Group G] [Group.FG G],
+  ¬IsSofic G →
+    ∃ F,
+      ∃ (h₁ : 1 ∈ F),
+        ∃ ε,
+          0 < ε ∧
+            IsEmpty (TableModel (tableGroup F h₁) (tableTestSet F h₁) ε) ∧
+              ¬IsSofic (tableGroup F h₁) ∧ Function.Surjective ⇑(tableEvaluation F h₁)
+```
+
+## `NonsoficGroupsExist.exists_infinite_finitelyPresented_nonsofic_ambient_cover`
+
+```lean
+∃ H x, Infinite H ∧ Group.IsFinitelyPresented H ∧ ¬IsSofic H ∧ ∃ π, Function.Surjective ⇑π
+```
+
+## `NonsoficGroupsExist.exists_isLEF_group_with_non_isLEF_quotient`
+
+```lean
+∃ H x N, ∃ (x_1 : N.Normal), IsLEF H ∧ ¬IsLEF (H ⧸ N)
+```
+
+## `NonsoficGroupsExist.exists_isUnit_matrix_col`
+
+```lean
+∀ {k : Type u_1} [inst : Field k] {ι : Type u_2} [inst_1 : Fintype ι] [inst_2 : DecidableEq ι]
+  {v : ι → k}, v ≠ 0 → ∀ (j₀ : ι), ∃ G, IsUnit G ∧ G.mulVec (Pi.single j₀ 1) = v
+```
+
+## `NonsoficGroupsExist.exists_kazhdan_finitelyPresented_cover_of_not_isSofic`
+
+```lean
+∀ {G : Type u} [inst : Group G],
+  ¬IsSofic G →
+    HasKazhdanPropertyT G →
+      ∃ Γ x φ,
+        Function.Surjective ⇑φ ∧
+          Infinite Γ ∧ Group.IsFinitelyPresented Γ ∧ HasKazhdanPropertyT Γ ∧ ¬IsSofic Γ
+```
+
+## `NonsoficGroupsExist.exists_residuallyFinite_group_with_non_residuallyFinite_quotient`
+
+```lean
+∃ H x N, ∃ (x_1 : N.Normal), Group.ResiduallyFinite H ∧ ¬Group.ResiduallyFinite (H ⧸ N)
+```
+
+## `NonsoficGroupsExist.exists_selection`
+
+```lean
+∀ {β : ℕ → Type u_1} (I : (n : ℕ) → Finset (β n)) (size : (n : ℕ) → β n → ℝ)
+  (E : ℕ → (n : ℕ) → β n → ℝ) (N : ℕ → ℝ),
+  (∀ (n : ℕ), 0 < N n) →
+    (∀ (n : ℕ), (I n).Nonempty) →
+      (∀ (n : ℕ), ∀ i ∈ I n, 0 < size n i) →
+        (∀ (r n : ℕ), ∀ i ∈ I n, 0 ≤ E r n i) →
+          (∀ (r r' n : ℕ) (i : β n), r ≤ r' → E r n i ≤ E r' n i) →
+            (∀ (n : ℕ), 1 / 2 * N n ≤ ∑ i ∈ I n, size n i) →
+              (∀ (r : ℕ), Negligible N fun n => ∑ i ∈ I n, E r n i) →
+                ∃ sel,
+                  (∀ (n : ℕ), sel n ∈ I n) ∧
+                    ∀ (r : ℕ), Vanishing fun n => E r n (sel n) / size n (sel n)
+```
+
+## `NonsoficGroupsExist.exists_selection_diverging`
+
+```lean
+∀ {β : ℕ → Type u_1} (I : (n : ℕ) → Finset (β n)) (size : (n : ℕ) → β n → ℝ)
+  (E : ℕ → (n : ℕ) → β n → ℝ) (N : ℕ → ℝ),
+  (∀ (n : ℕ), 0 < N n) →
+    (∀ (n : ℕ), (I n).Nonempty) →
+      (∀ (n : ℕ), ∀ i ∈ I n, 0 < size n i) →
+        (∀ (r n : ℕ), ∀ i ∈ I n, 0 ≤ E r n i) →
+          (∀ (r r' n : ℕ) (i : β n), r ≤ r' → E r n i ≤ E r' n i) →
+            (∀ (n : ℕ), 1 / 2 * N n ≤ ∑ i ∈ I n, size n i) →
+              (∀ (r : ℕ), Negligible N fun n => ∑ i ∈ I n, E r n i) →
+                (∀ (M : ℕ),
+                    Negligible N fun n => ∑ i ∈ I n, if size n i ≤ ↑M then size n i else 0) →
+                  ∃ sel,
+                    (∀ (n : ℕ), sel n ∈ I n) ∧
+                      (∀ (r : ℕ), Vanishing fun n => E r n (sel n) / size n (sel n)) ∧
+                        Diverges fun n => size n (sel n)
+```
+
+## `NonsoficGroupsExist.exists_sofic_group_with_nonsofic_quotient`
+
+```lean
+∃ H x N, ∃ (x_1 : N.Normal), IsSofic H ∧ ¬IsSofic (H ⧸ N)
+```
+
+## `NonsoficGroupsExist.exists_table_obstruction`
+
+```lean
+∀ {G : Type u} [inst : Group G], ¬IsSofic G → ∃ F ε, 1 ∈ F ∧ 0 < ε ∧ IsEmpty (TableModel G F ε)
+```
+
+## `NonsoficGroupsExist.finiteFieldElementaryThree_hasKazhdanPropertyT`
+
+```lean
+∀ {k A : Type} [inst : Field k] [Finite k] [inst_2 : Ring A] [inst_3 : Algebra k A]
+  [Algebra.FiniteType k A], HasKazhdanPropertyT ↥(elementaryGroup (Fin 3) A)
+```
+
+## `NonsoficGroupsExist.finitelyPresented_isLEF_residuallyFinite`
+
+```lean
+∀ {α : Type u_1} (rels : Finset (FreeGroup α)),
+  IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
+```
+
+## `NonsoficGroupsExist.freeGroup_residuallyFinite`
+
+```lean
+∀ (α : Type u_1), Group.ResiduallyFinite (FreeGroup α)
+```
+
+## `NonsoficGroupsExist.halfOrbit`
+
+```lean
+{G : Type u_1} → [Group G] → G → G
+```
+
+## `NonsoficGroupsExist.involutionNormalize`
+
+```lean
+{Y : Type u_1} → [DecidableEq Y] → Equiv.Perm Y → Equiv.Perm Y
+```
+
+## `NonsoficGroupsExist.isLEF_of_isSofic`
+
+```lean
+∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable G]
+  [Countable Γ] [Countable J] (C : CompressionSetup G Γ J),
+  HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → IsSofic G → IsLEF J
+```
+
+## `NonsoficGroupsExist.isLEF_of_soficApproximation`
+
+```lean
+∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable Γ]
+  [Countable J] (C : CompressionSetup G Γ J),
+  HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ∀ (A : SoficApproximation G), IsLEF J
+```
+
+## `NonsoficGroupsExist.isSofic_freeGroup`
+
+```lean
+∀ (α : Type u_1), IsSofic (FreeGroup α)
+```
+
+## `NonsoficGroupsExist.matching_injective`
+
+```lean
+∀ {α : Type u_1} [inst : DecidableEq α] (U₁ U₂ D : Finset α),
+  Disjoint U₁ U₂ → 2 * (symmDiff U₁ D).card < D.card → 2 * (symmDiff U₂ D).card < D.card → False
+```
+
+## `NonsoficGroupsExist.medianNormalize`
+
+```lean
+ℝ → ℝ → ℝ
+```
+
+## `NonsoficGroupsExist.not_isSofic_of_not_isLEF`
+
+```lean
+∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable G]
+  [Countable Γ] [Countable J] (C : CompressionSetup G Γ J),
+  HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ¬IsLEF J → ¬IsSofic G
+```
+
+## `NonsoficGroupsExist.permutation_conservation_full`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] (π : Y ≃ Y) (f : Y → ℝ),
+  ∑ y, max (f y - f (π y)) 0 = ∑ y, max (f (π y) - f y) 0 ∧
+    ∑ y, max (f (π y) - f y) 0 = 1 / 2 * ∑ y, |f (π y) - f y|
+```
+
+## `NonsoficGroupsExist.refineComponent`
+
+```lean
+{Y : FiniteModel} →
+  (X : FiniteMultiGraph) →
+    (P Q : BlockStructure Y) →
+      (q : Equiv.Perm Y.carrier) →
+        (y : Y.carrier) →
+          (e : X.vertex.carrier ≃ ↥(P.block y)) →
+            {h : ℝ} →
+              (X.transport (blockModel P y) e).HasCheegerLowerBound h →
+                ComponentRefinement X P Q q y
+```
+
+## `NonsoficGroupsExist.symmDiff_le_of_pinned`
+
+```lean
+∀ {α : Type u_1} [inst : DecidableEq α] {m η : ℝ},
+  0 < m →
+    0 ≤ η →
+      2 * η < 1 →
+        ∀ (C D U : Finset α),
+          U.card = C.card →
+            |medianNormalize m ↑C.card - 1 / 2| ≤ η →
+              |medianNormalize m ↑D.card - 1 / 2| ≤ η →
+                ↑(U \ D).card ≤ η * ↑C.card →
+                  ↑(symmDiff U D).card ≤ (2 * η + 8 * η / (1 - 2 * η) ^ 2) * ↑C.card
+```
+
+## `NonsoficGroupsExist.tableGroup_no_model`
+
+```lean
+∀ {G : Type u} [inst : Group G] (F : Finset G) (h₁ : 1 ∈ F) {ε : ℝ},
+  IsEmpty (TableModel G F ε) → IsEmpty (TableModel (tableGroup F h₁) (tableTestSet F h₁) ε)
+```
+
+## `NonsoficGroupsExist.tableModel_of_isSofic`
+
+```lean
+∀ {G : Type u} [inst : Group G],
+  IsSofic G → ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (TableModel G F ε)
+```
+
+## `NonsoficGroupsExist.universalLeavittEL3_not_isSofic`
+
+```lean
+¬IsSofic ↥UniversalRankFour.Core
+```
+
+## `NonsoficGroupsExist.universalLeavittEL4_not_isSofic`
+
+```lean
+¬IsSofic ↥UniversalRankFour.Ambient
+```
+
+## `NonsoficGroupsExist.universalLeavitt_profile`
+
+```lean
+∀ (m : ℕ),
+  1 ≤ m →
+    Group.FG ↥(UniversalLeavittEL m) ∧
+      Infinite ↥(UniversalLeavittEL m) ∧
+        HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
+```
