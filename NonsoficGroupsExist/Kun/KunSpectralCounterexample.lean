@@ -1,6 +1,8 @@
 import NonsoficGroupsExist.Matching.FiniteGraph
+import NonsoficGroupsExist.Criterion.Criterion
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Data.Fintype.Sum
+import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Finset.Prod
 import Mathlib.Tactic.Linarith
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
@@ -52,27 +54,54 @@ with `n = m + 2`, carrying one degree-preserving two-edge switch.
   "Cheeger constant at least `h` implies least Markov eigenvalue at least
   `-1 + c(h)`" can hold, which is the bound `(4) → (1)` is proved with.
 
+## The same family, repeated
+
+Conditions `(2)`–`(4)` are conditions on a *sequence*, and the sequence they
+describe is a disjoint union of expanders: expansion is asked of each
+component, not of the union.  `repeated j m` is `j + 1` disjoint copies of
+`switched m`, and each of the facts above survives the repetition.
+
+* `repeated_component_expands` — every component expands at rate `1`, in the
+  development's own componentwise vocabulary: a `BlockStructure` on the
+  vertices, each `induce`d block satisfying `HasCheegerLowerBound 1`.  That is
+  the shape of `ExpanderDecomposition`'s `component_expands` field, which is
+  how this library records condition `(4)`.  `repeated_boundaryCard_ge` is the
+  same content without the induced-subgraph wrapper.  The bound is
+  componentwise because it can only be componentwise: the *global* Cheeger
+  constant of `repeated j m` is `0`, since a whole copy has empty boundary, and
+  nothing here claims otherwise.
+* `rayleigh_repeatedTestVector` — repeating the extremal vector across the
+  copies leaves the Rayleigh quotient at exactly `-1 + 4/n²`, for every number
+  of copies.  Both quadratic forms are sums over edge occurrences, each is
+  multiplied by the number of copies, and the ratio does not move.
+* `not_isBipartite_repeated` — one copy already contains the triangle.
+* `repetition_of_components` — the three assembled with the vertex count above
+  any prescribed bound: for every `c > 0` and every `N` there is a member with
+  at least `N` vertices, componentwise Cheeger constant at least `1`, not
+  bipartite, and Rayleigh quotient already below `-1 + c`.
+
 ## Formalization boundary
 
-Two steps of the README's audit remain prose.
+One step of the README's audit remains prose.  This module does not state Kun's
+Theorem 3, and so does not literally refute the implication `(4) → (1)`: the
+numbered conditions are statements about sofic approximations of a group, and
+translating them into hypotheses on finite multigraphs is exactly the reading
+of the paper that the audit argues about.  What is checked here is the
+graph-theoretic fact the published proof needs and does not have — uniform
+expansion together with least Markov eigenvalue tending to `-1` — for one
+explicit family and for the sequence built from it.
 
-First, this module does not state Kun's Theorem 3, and so does not literally
-refute the implication `(4) → (1)`: the numbered conditions are statements
-about sofic approximations of a group, and translating them into hypotheses on
-a single finite multigraph is exactly the reading of the paper that the audit
-argues about.  What is checked here is the graph-theoretic fact the published
-proof needs and does not have — uniform expansion together with least Markov
-eigenvalue tending to `-1` — for one explicit family.
-
-Second, the repetition argument is not formalized: forming one sequence from
-many copies of each `switched m`, so that repeating the extremal vector across
-all copies makes its `L²` norm proportional to the square root of the total
-vertex count and the additive `L^∞` error in condition `(1)` cannot absorb the
-defect.  It is bookkeeping over the family rather than a spectral fact, and it
-is not a disjoint union of the `switched m` — a disjoint union has Cheeger
-constant `0`, since a whole copy has empty boundary — so it needs the
-approximation setting to state at all.  The spectral fact above is the part the
-published proof gets wrong.
+The repetition of components is no longer among the gaps.  It is formalized
+above in componentwise form, which is the form the numbered conditions ask for
+and the only form in which it holds: a disjoint union has global Cheeger
+constant `0`, so it is the components that are required to expand, and they do,
+at a rate independent of both the number of copies and `m`.  What the
+repetition buys in Kun's argument — an `L²` norm proportional to the square
+root of the total vertex count, so that the additive `L^∞` error in condition
+`(1)` cannot absorb the defect — is a statement about the approximation rather
+than about the graphs; what the graphs have to supply is a family of unbounded
+size carrying the three properties at fixed rates, and that is
+`repetition_of_components`.
 
 No declaration in the proof of the main results depends on this module -- the
 proof of Result A uses only the forward implications `(2) → (3) → (4)`.  The
@@ -654,6 +683,427 @@ theorem no_uniform_spectral_gap (c : ℝ) (hc : 0 < c) :
   refine ⟨m' + 1, hm, hasCheegerLowerBound_one (m' + 1) hm, not_isBipartite m', ?_⟩
   rw [rayleigh_testVector]
   linarith
+
+/-! ## The repetition of components
+
+Kun's conditions `(2)`--`(4)` are conditions on a *sequence* of graphs, and the
+sequence they describe is a disjoint union of expanders: expansion is asked of
+each component, not of the union.  `repeated j m` is `j + 1` disjoint copies of
+`switched m`, and every fact above survives the repetition -- componentwise,
+which is the only form in which it can survive.  The *global* Cheeger constant
+of a disjoint union is `0`, since a whole copy has empty boundary, so no
+statement about `(repeated j m).HasCheegerLowerBound` is made; what is proved
+is that each copy expands at the fixed rate `1`. -/
+
+/-- Copy indices.  Written with `j + 1` rather than `j` and a positivity
+hypothesis, for the reason recorded at `Ix`: the count has to be positive for
+the graph to have the intended shape, and this way it is positive by
+construction. -/
+abbrev Copy (j : ℕ) : Type := Fin (j + 1)
+
+theorem card_copy (j : ℕ) : Fintype.card (Copy j) = j + 1 := Fintype.card_fin (j + 1)
+
+/-- The vertex model of the repeated family: `j + 1` disjoint copies of the
+vertex set of `switched m`. -/
+def repeatedVertexModel (j m : ℕ) : FiniteModel :=
+  ⟨Copy j × Side m, inferInstance, inferInstance⟩
+
+/-- The edge model: `j + 1` disjoint copies of the edge set. -/
+def repeatedEdgeModel (j m : ℕ) : FiniteModel :=
+  ⟨Copy j × (Ix m × Ix m), inferInstance, inferInstance⟩
+
+/-- First endpoint, acting inside the copy named by the occurrence's own first
+coordinate.  Both endpoints keep that coordinate, so no occurrence joins two
+copies -- which is exactly why the global Cheeger constant is `0` and why the
+expansion statement below is componentwise. -/
+def repeatedFirst (j m : ℕ) (E : Copy j × (Ix m × Ix m)) : Copy j × Side m :=
+  (E.1, firstEnd m E.2)
+
+/-- Second endpoint, in the same copy. -/
+def repeatedSecond (j m : ℕ) (E : Copy j × (Ix m × Ix m)) : Copy j × Side m :=
+  (E.1, secondEnd m E.2)
+
+theorem repeatedFirst_ne_repeatedSecond (j m : ℕ) (E : Copy j × (Ix m × Ix m)) :
+    repeatedFirst j m E ≠ repeatedSecond j m E := fun h ↦
+  firstEnd_ne_secondEnd E.2 (congrArg Prod.snd h)
+
+/-- `j + 1` disjoint copies of `switched m`, as one finite multigraph. -/
+def repeated (j m : ℕ) : FiniteMultiGraph where
+  vertex := repeatedVertexModel j m
+  edge := repeatedEdgeModel j m
+  first := repeatedFirst j m
+  second := repeatedSecond j m
+  loopless := repeatedFirst_ne_repeatedSecond j m
+
+/-- `card_vertex` with the `FiniteModel` wrapper stripped.  The wrapped and
+unwrapped forms are definitionally equal but not syntactically equal, so `rw`
+needs whichever one the goal is written in. -/
+theorem card_side (m : ℕ) : Fintype.card (Side m) = 2 * (m + 2) := card_vertex m
+
+theorem card_repeated_vertex (j m : ℕ) :
+    Fintype.card (repeated j m).vertex = (j + 1) * (2 * (m + 2)) := by
+  show Fintype.card (Copy j × Side m) = (j + 1) * (2 * (m + 2))
+  rw [Fintype.card_prod, card_copy, card_side]
+
+/-! ### Transporting a vertex set into one copy -/
+
+/-- The inclusion of the vertices of `switched m` as copy `c`. -/
+def copyVertexEmb (j m : ℕ) (c : Copy j) : Side m ↪ Copy j × Side m where
+  toFun v := (c, v)
+  inj' := by
+    intro v w h
+    simpa using h
+
+/-- The inclusion of the edge occurrences of `switched m` as copy `c`. -/
+def copyEdgeEmb (j m : ℕ) (c : Copy j) : Ix m × Ix m ↪ Copy j × (Ix m × Ix m) where
+  toFun e := (c, e)
+  inj' := by
+    intro e f h
+    simpa using h
+
+theorem mem_copyVertexEmb_map (j m : ℕ) (c : Copy j) (U : Finset (Side m))
+    (x : Copy j × Side m) :
+    x ∈ U.map (copyVertexEmb j m c) ↔ x.1 = c ∧ x.2 ∈ U := by
+  constructor
+  · intro hx
+    obtain ⟨v, hv, hvx⟩ := Finset.mem_map.mp hx
+    have hvx' : ((c, v) : Copy j × Side m) = x := hvx
+    subst hvx'
+    exact ⟨rfl, hv⟩
+  · rintro ⟨h1, h2⟩
+    refine Finset.mem_map.mpr ⟨x.2, h2, ?_⟩
+    exact Prod.ext h1.symm rfl
+
+/-- Membership in a boundary, unfolded once.  `boundary` is a `Finset.filter`,
+which is all the boundary arguments below use. -/
+theorem mem_boundary_iff (X : FiniteMultiGraph) (U : Finset X.vertex) (e : X.edge) :
+    e ∈ X.boundary U ↔
+      (X.first e ∈ U ∧ X.second e ∉ U) ∨ (X.second e ∈ U ∧ X.first e ∉ U) := by
+  simp [FiniteMultiGraph.boundary]
+
+/-- Every occurrence leaving a vertex set of `switched m` still leaves the
+corresponding vertex set of copy `c`.  Only an inclusion is claimed, and only
+an inclusion is used; the reverse inclusion holds too, since an occurrence
+outside copy `c` has both endpoints outside the set, but nothing below needs
+it. -/
+theorem boundary_copy_subset (j m : ℕ) (c : Copy j) (U : Finset (Side m)) :
+    ((switched m).boundary U).map (copyEdgeEmb j m c)
+      ⊆ (repeated j m).boundary (U.map (copyVertexEmb j m c)) := by
+  intro E hE
+  obtain ⟨e, he, rfl⟩ := Finset.mem_map.mp hE
+  have hfirst : (repeated j m).first ((copyEdgeEmb j m c) e)
+      = ((c, firstEnd m e) : Copy j × Side m) := rfl
+  have hsecond : (repeated j m).second ((copyEdgeEmb j m c) e)
+      = ((c, secondEnd m e) : Copy j × Side m) := rfl
+  have he' := (mem_boundary_iff (switched m) U e).mp he
+  refine (mem_boundary_iff (repeated j m) (U.map (copyVertexEmb j m c)) _).mpr ?_
+  rw [hfirst, hsecond, mem_copyVertexEmb_map, mem_copyVertexEmb_map]
+  rcases he' with ⟨h1, h2⟩ | ⟨h1, h2⟩
+  · exact Or.inl ⟨⟨rfl, h1⟩, fun h ↦ h2 h.2⟩
+  · exact Or.inr ⟨⟨rfl, h1⟩, fun h ↦ h2 h.2⟩
+
+/-- **Componentwise expansion, without the induced-subgraph wrapper.**  A
+vertex set lying inside a single copy, of at most half the vertices of that
+copy, has at least as many occurrences leaving it *in the whole repeated graph*
+as it has vertices.  The hypothesis `hcopy` is what "inside a single copy"
+means, and it cannot be dropped: a set meeting every copy in half its vertices
+is half of `repeated j m`, and for that set the conclusion fails exactly as
+badly as the global Cheeger constant does. -/
+theorem repeated_boundaryCard_ge (j m : ℕ) (hm : 4 ≤ m) (c : Copy j)
+    (V : Finset (Copy j × Side m)) (hV : V.Nonempty)
+    (hcopy : ∀ x ∈ V, x.1 = c)
+    (hhalf : 2 * V.card ≤ Fintype.card (Side m)) :
+    V.card ≤ (repeated j m).boundaryCard V := by
+  obtain ⟨U, hVU⟩ : ∃ U : Finset (Side m), V = U.map (copyVertexEmb j m c) := by
+    refine ⟨V.image (fun x : Copy j × Side m ↦ x.2), ?_⟩
+    ext x
+    rw [mem_copyVertexEmb_map]
+    constructor
+    · intro hx
+      exact ⟨hcopy x hx, Finset.mem_image.mpr ⟨x, hx, rfl⟩⟩
+    · rintro ⟨h1, h2⟩
+      obtain ⟨y, hy, hyx⟩ := Finset.mem_image.mp h2
+      have hy1 : y.1 = c := hcopy y hy
+      have hyeq : y = x := Prod.ext (by rw [hy1, h1]) hyx
+      rw [← hyeq]
+      exact hy
+  have hcard : U.card = V.card := by rw [hVU, Finset.card_map]
+  have hUne : U.Nonempty :=
+    Finset.card_pos.mp (by rw [hcard]; exact Finset.card_pos.mpr hV)
+  have hside : Fintype.card (Side m) = 2 * (m + 2) := card_side m
+  have hUle : U.card ≤ m + 2 := by omega
+  have hbnd : U.card ≤ (switched m).boundaryCard U :=
+    card_le_boundaryCard m hm U hUne hUle
+  have hle : (switched m).boundaryCard U ≤ (repeated j m).boundaryCard V := by
+    have hsub : ((switched m).boundary U).map (copyEdgeEmb j m c)
+        ⊆ (repeated j m).boundary V := by
+      rw [hVU]
+      exact boundary_copy_subset j m c U
+    have hcards := Finset.card_le_card hsub
+    rwa [Finset.card_map] at hcards
+  omega
+
+/-! ### Componentwise expansion in the development's own vocabulary
+
+`ExpanderDecomposition` records componentwise expansion as a `BlockStructure`
+on the vertices together with `HasCheegerLowerBound` for each `induce`d block:
+its `component_expands` field.  That is the form Kun's condition `(4)` takes in
+this library, so it is the form the repeated family is given in. -/
+
+/-- The vertex set of one copy. -/
+def copyBlock (j m : ℕ) (c : Copy j) : Finset (Copy j × Side m) :=
+  Finset.univ.filter fun x ↦ x.1 = c
+
+theorem mem_copyBlock (j m : ℕ) (c : Copy j) (x : Copy j × Side m) :
+    x ∈ copyBlock j m c ↔ x.1 = c := by
+  simp [copyBlock]
+
+theorem copyBlock_eq_map (j m : ℕ) (c : Copy j) :
+    copyBlock j m c = (Finset.univ : Finset (Side m)).map (copyVertexEmb j m c) := by
+  ext x
+  rw [mem_copyBlock, mem_copyVertexEmb_map]
+  simp
+
+theorem card_copyBlock (j m : ℕ) (c : Copy j) :
+    (copyBlock j m c).card = 2 * (m + 2) := by
+  rw [copyBlock_eq_map, Finset.card_map, Finset.card_univ, card_side]
+
+/-- The copies, as a `BlockStructure` on the vertices. -/
+def repeatedBlocks (j m : ℕ) : BlockStructure (repeated j m).vertex where
+  block x := copyBlock j m x.1
+  self_mem x := (mem_copyBlock j m x.1 x).mpr rfl
+  eq_of_mem x y hy := by
+    have h : y.1 = x.1 := (mem_copyBlock j m x.1 y).mp hy
+    rw [h]
+
+/-- The vertices of copy `c`, as the vertex type of the induced subgraph. -/
+abbrev BlockVertex (j m : ℕ) (c : Copy j) : Type :=
+  { x : Copy j × Side m // x ∈ copyBlock j m c }
+
+/-- The occurrences of copy `c`, as the edge type of the induced subgraph. -/
+abbrev BlockEdge (j m : ℕ) (c : Copy j) : Type :=
+  { E : Copy j × (Ix m × Ix m) //
+      repeatedFirst j m E ∈ copyBlock j m c ∧ repeatedSecond j m E ∈ copyBlock j m c }
+
+/-- Forgetting the copy index identifies the vertices of one copy with the
+vertices of `switched m`. -/
+def blockVertexEmb (j m : ℕ) (c : Copy j) : BlockVertex j m c ↪ Side m where
+  toFun x := (x.1).2
+  inj' := by
+    intro x y h
+    have hx : (x.1).1 = c := (mem_copyBlock j m c x.1).mp x.2
+    have hy : (y.1).1 = c := (mem_copyBlock j m c y.1).mp y.2
+    exact Subtype.ext (Prod.ext (hx.trans hy.symm) h)
+
+theorem mem_map_blockVertexEmb (j m : ℕ) (c : Copy j)
+    (W : Finset (BlockVertex j m c)) (x : BlockVertex j m c) :
+    (x.1).2 ∈ W.map (blockVertexEmb j m c) ↔ x ∈ W := by
+  constructor
+  · intro h
+    obtain ⟨y, hy, hyx⟩ := Finset.mem_map.mp h
+    have hxy : y = x := (blockVertexEmb j m c).injective hyx
+    rw [← hxy]
+    exact hy
+  · intro h
+    exact Finset.mem_map.mpr ⟨x, h, rfl⟩
+
+/-- An occurrence of `switched m`, placed in copy `c`.  Both of its endpoints
+lie in that copy, so it is an occurrence of the induced subgraph. -/
+def blockEdge (j m : ℕ) (c : Copy j) (e : Ix m × Ix m) : BlockEdge j m c :=
+  ⟨(c, e), (mem_copyBlock j m c (c, firstEnd m e)).mpr rfl,
+    (mem_copyBlock j m c (c, secondEnd m e)).mpr rfl⟩
+
+theorem blockEdge_injective (j m : ℕ) (c : Copy j) :
+    Function.Injective (blockEdge j m c) := by
+  intro e e' h
+  have h1 : ((blockEdge j m c e).1).2 = ((blockEdge j m c e').1).2 := by rw [h]
+  exact h1
+
+theorem blockEdge_mem_boundary (j m : ℕ) (c : Copy j)
+    (W : Finset (BlockVertex j m c)) (e : Ix m × Ix m)
+    (he : e ∈ (switched m).boundary (W.map (blockVertexEmb j m c))) :
+    blockEdge j m c e ∈ ((repeated j m).induce (copyBlock j m c)).boundary W := by
+  have hf : firstEnd m e ∈ W.map (blockVertexEmb j m c)
+      ↔ ((repeated j m).induce (copyBlock j m c)).first (blockEdge j m c e) ∈ W :=
+    mem_map_blockVertexEmb j m c W
+      (((repeated j m).induce (copyBlock j m c)).first (blockEdge j m c e))
+  have hs : secondEnd m e ∈ W.map (blockVertexEmb j m c)
+      ↔ ((repeated j m).induce (copyBlock j m c)).second (blockEdge j m c e) ∈ W :=
+    mem_map_blockVertexEmb j m c W
+      (((repeated j m).induce (copyBlock j m c)).second (blockEdge j m c e))
+  have he' := (mem_boundary_iff (switched m) (W.map (blockVertexEmb j m c)) e).mp he
+  refine (mem_boundary_iff ((repeated j m).induce (copyBlock j m c)) W
+    (blockEdge j m c e)).mpr ?_
+  rcases he' with ⟨h1, h2⟩ | ⟨h1, h2⟩
+  · exact Or.inl ⟨hf.mp h1, fun h ↦ h2 (hs.mpr h)⟩
+  · exact Or.inr ⟨hs.mp h1, fun h ↦ h2 (hf.mpr h)⟩
+
+/-- **Each component expands at rate `1`.**  The induced subgraph on one copy
+satisfies the development's own `HasCheegerLowerBound 1`, uniformly in the
+number of copies and in `m`.  The counting is the single-copy bound
+`card_le_boundaryCard` carried along the copy inclusion: a copy has the vertex
+count of `switched m`, and the occurrences leaving a vertex set of `switched m`
+are occurrences leaving the corresponding set of the copy. -/
+theorem induce_copyBlock_hasCheegerLowerBound (j m : ℕ) (hm : 4 ≤ m) (c : Copy j) :
+    ((repeated j m).induce (copyBlock j m c)).HasCheegerLowerBound 1 := by
+  refine ⟨one_pos, ?_⟩
+  intro W hW hhalf
+  have hcardY : Fintype.card ((repeated j m).induce (copyBlock j m c)).vertex
+      = 2 * (m + 2) := by
+    simp only [FiniteMultiGraph.induce, Fintype.card_coe]
+    exact card_copyBlock j m c
+  rw [hcardY] at hhalf
+  have hcard : (W.map (blockVertexEmb j m c)).card = W.card := Finset.card_map _
+  have hUne : (W.map (blockVertexEmb j m c)).Nonempty :=
+    Finset.card_pos.mp (by rw [hcard]; exact Finset.card_pos.mpr hW)
+  have hUle : (W.map (blockVertexEmb j m c)).card ≤ m + 2 := by omega
+  have hbnd := card_le_boundaryCard m hm (W.map (blockVertexEmb j m c)) hUne hUle
+  have hinj : (switched m).boundaryCard (W.map (blockVertexEmb j m c))
+      ≤ ((repeated j m).induce (copyBlock j m c)).boundaryCard W := by
+    show ((switched m).boundary (W.map (blockVertexEmb j m c))).card
+      ≤ (((repeated j m).induce (copyBlock j m c)).boundary W).card
+    refine Finset.card_le_card_of_injOn (blockEdge j m c) ?_ ?_
+    · intro e he
+      exact blockEdge_mem_boundary j m c W e he
+    · intro e _ e' _ h
+      exact blockEdge_injective j m c h
+  have hfinal : W.card ≤ ((repeated j m).induce (copyBlock j m c)).boundaryCard W := by
+    omega
+  rw [one_mul]
+  exact_mod_cast hfinal
+
+/-- **Componentwise expansion in the vocabulary of condition `(4)`.**  Every
+block of `repeatedBlocks` induces a subgraph with Cheeger constant at least
+`1`.  This is literally the shape of `ExpanderDecomposition`'s
+`component_expands` field. -/
+theorem repeated_component_expands (j m : ℕ) (hm : 4 ≤ m)
+    (x : (repeated j m).vertex) :
+    ((repeated j m).induce ((repeatedBlocks j m).block x)).HasCheegerLowerBound 1 :=
+  induce_copyBlock_hasCheegerLowerBound j m hm x.1
+
+/-! ### The repeated test vector -/
+
+/-- The extremal vector of `switched m`, repeated across all copies. -/
+def repeatedTestVector (j m : ℕ) : (repeated j m).vertex → ℝ :=
+  fun p ↦ testVector m p.2
+
+/-- A sum over the occurrences of the repeated family whose summand depends
+only on the occurrence's position inside its copy is the single-copy sum,
+scaled by the number of copies.  Both quadratic forms have that shape, which is
+why the Rayleigh quotient does not move. -/
+theorem sum_copies (j m : ℕ) (g : (switched m).edge → ℝ) :
+    ∑ E : (repeated j m).edge, g E.2
+      = ((j : ℝ) + 1) * ∑ e : (switched m).edge, g e := by
+  have h1 : ∑ E : (repeated j m).edge, g E.2
+      = ∑ _c : Copy j, ∑ e : (switched m).edge, g e := by
+    show ∑ E : Copy j × (Ix m × Ix m), g E.2 = _
+    exact Fintype.sum_prod_type (fun E : Copy j × (Ix m × Ix m) ↦ g E.2)
+  rw [h1, Finset.sum_const, Finset.card_univ, card_copy, nsmul_eq_mul,
+    Nat.cast_add, Nat.cast_one]
+
+theorem adjacencyForm_repeated (j m : ℕ) :
+    adjacencyForm (repeated j m) (repeatedTestVector j m)
+      = ((j : ℝ) + 1) * adjacencyForm (switched m) (testVector m) := by
+  have hsum : ∑ E : (repeated j m).edge,
+      repeatedTestVector j m ((repeated j m).first E) *
+        repeatedTestVector j m ((repeated j m).second E)
+      = ((j : ℝ) + 1) * ∑ e : (switched m).edge,
+          testVector m ((switched m).first e) * testVector m ((switched m).second e) :=
+    sum_copies j m
+      (fun e ↦ testVector m ((switched m).first e) * testVector m ((switched m).second e))
+  show 2 * ∑ E : (repeated j m).edge,
+      repeatedTestVector j m ((repeated j m).first E) *
+        repeatedTestVector j m ((repeated j m).second E)
+    = ((j : ℝ) + 1) * (2 * ∑ e : (switched m).edge,
+        testVector m ((switched m).first e) * testVector m ((switched m).second e))
+  rw [hsum]
+  ring
+
+theorem degreeForm_repeated (j m : ℕ) :
+    degreeForm (repeated j m) (repeatedTestVector j m)
+      = ((j : ℝ) + 1) * degreeForm (switched m) (testVector m) := by
+  have hsum : ∑ E : (repeated j m).edge,
+      ((repeatedTestVector j m ((repeated j m).first E)) ^ 2
+        + (repeatedTestVector j m ((repeated j m).second E)) ^ 2)
+      = ((j : ℝ) + 1) * ∑ e : (switched m).edge,
+          ((testVector m ((switched m).first e)) ^ 2
+            + (testVector m ((switched m).second e)) ^ 2) :=
+    sum_copies j m
+      (fun e ↦ (testVector m ((switched m).first e)) ^ 2
+        + (testVector m ((switched m).second e)) ^ 2)
+  exact hsum
+
+/-- The denominator of the repeated Rayleigh quotient, explicitly.  It is
+positive, so the quotient is not a division by zero. -/
+theorem degreeForm_repeatedTestVector (j m : ℕ) :
+    degreeForm (repeated j m) (repeatedTestVector j m)
+      = ((j : ℝ) + 1) * (2 * ((m : ℝ) + 2) ^ 2) := by
+  rw [degreeForm_repeated, degreeForm_testVector]
+
+/-- Repetition does not move the Rayleigh quotient: numerator and denominator
+are both multiplied by the number of copies. -/
+theorem rayleigh_repeated_eq_switched (j m : ℕ) :
+    rayleigh (repeated j m) (repeatedTestVector j m)
+      = rayleigh (switched m) (testVector m) := by
+  have hj : ((j : ℝ) + 1) ≠ 0 := by positivity
+  show adjacencyForm (repeated j m) (repeatedTestVector j m)
+      / degreeForm (repeated j m) (repeatedTestVector j m)
+    = adjacencyForm (switched m) (testVector m) / degreeForm (switched m) (testVector m)
+  rw [adjacencyForm_repeated, degreeForm_repeated, mul_div_mul_left _ _ hj]
+
+/-- **The defect survives the repetition.**  The repeated extremal vector has
+the same Rayleigh quotient `-1 + 4/n²` on `j + 1` copies that the original
+vector has on one, for every number of copies. -/
+theorem rayleigh_repeatedTestVector (j m : ℕ) :
+    rayleigh (repeated j m) (repeatedTestVector j m) = -1 + 4 / ((m : ℝ) + 2) ^ 2 := by
+  rw [rayleigh_repeated_eq_switched]
+  exact rayleigh_testVector m
+
+/-- `-1` is still the floor for the repeated family, obtained from the general
+bound rather than from the computed value. -/
+theorem neg_one_le_rayleigh_repeated (j m : ℕ) :
+    -1 ≤ rayleigh (repeated j m) (repeatedTestVector j m) := by
+  refine neg_one_le_rayleigh (repeated j m) (repeatedTestVector j m) ?_
+  rw [degreeForm_repeatedTestVector]
+  positivity
+
+/-- Copy `0` already contains the triangle, so no `2`-colouring of the repeated
+family is proper. -/
+theorem not_isBipartite_repeated (j m : ℕ) : ¬ IsBipartite (repeated j (m + 1)) := by
+  rintro ⟨col, hcol⟩
+  refine not_isBipartite m ?_
+  refine ⟨fun v ↦ col ((0 : Copy j), v), ?_⟩
+  intro e
+  exact hcol ((0, e) : Copy j × (Ix (m + 1) × Ix (m + 1)))
+
+/-- **The repetition sentence, in checkable form.**  For every `c > 0` and
+every vertex count `N` the repeated family has a member with at least `N`
+vertices which is a disjoint union of expanders -- every component has Cheeger
+constant at least `1` -- is not bipartite, and carries a test vector whose
+normalized Markov Rayleigh quotient is already below `-1 + c`.
+
+This is the shape conditions `(2)`--`(4)` ask for, and it is available at every
+size: the expansion rate `1` does not decay as the graphs grow, and the defect
+does not stop shrinking.  What stands between this and a refutation of
+`(4) → (1)` is the identification of these graphs with the numbered conditions,
+which is a reading of another paper's text; see the module header. -/
+theorem repetition_of_components (c : ℝ) (hc : 0 < c) (N : ℕ) :
+    ∃ j m : ℕ, 4 ≤ m ∧ N ≤ Fintype.card (repeated j m).vertex ∧
+      (∀ x : (repeated j m).vertex,
+        ((repeated j m).induce ((repeatedBlocks j m).block x)).HasCheegerLowerBound 1) ∧
+      ¬ IsBipartite (repeated j m) ∧
+      rayleigh (repeated j m) (repeatedTestVector j m) < -1 + c := by
+  obtain ⟨m, hm, hdef⟩ := exists_small_defect c hc
+  obtain ⟨m', rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
+  refine ⟨N, m' + 1, hm, ?_,
+    fun x ↦ repeated_component_expands N (m' + 1) hm x,
+    not_isBipartite_repeated N m', ?_⟩
+  · rw [card_repeated_vertex]
+    calc N ≤ N + 1 := Nat.le_succ N
+      _ = (N + 1) * 1 := (Nat.mul_one _).symm
+      _ ≤ (N + 1) * (2 * (m' + 1 + 2)) := Nat.mul_le_mul (le_refl (N + 1)) (by omega)
+  · rw [rayleigh_repeatedTestVector]
+    linarith
 
 end KunSpectral
 end NonsoficGroupsExist

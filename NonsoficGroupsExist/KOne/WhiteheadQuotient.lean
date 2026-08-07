@@ -18,14 +18,12 @@ stabilization `diag(u, 1)` is elementary; it is normal
 is `K₁(L)` **in Whitehead form** — the Whitehead group of the diagonal class
 construction of `DiagonalClassGroup`.  Here it is proved trivial.
 
-What this is *not*: the classical `K₁(L) = colim_n GL_n(L)/E_n(L)` is a direct
-limit over the ranks, and that colimit object is **not** constructed anywhere in
-this library.  What the library does prove is the two facts that, taken
-together, compute the classical group: this Whitehead quotient is trivial, and
-`BinaryLeavitt.elementaryGroup_eq_top` (via `glAll_eq_elementary`) gives
-`GL_r(L) = EL_r(L)` at *every* rank `r ≥ 2`, so every term of the direct system
-is already trivial.  Deducing `K₁(L) = 0` from those two inputs is a one-line
-argument about colimits which is left to the reader; it is not formalized.
+The classical companion — `K₁(L) = colim_n GL_n(L)/E_∞(L)` as an actual direct
+limit over the ranks — is constructed in `KOne/ClassicalKOne.lean`:
+`BinaryLeavittClassicalK1` is that quotient, and
+`binaryLeavittClassicalK1_subsingleton` proves it trivial from
+`BinaryLeavitt.elementaryGroup_eq_top` at every rank.  So `K₁(L) = 0` holds in
+both forms, each as a statement about a constructed group.
 -/
 
 namespace NonsoficGroupsExist
