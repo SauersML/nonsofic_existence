@@ -45,7 +45,6 @@ BEGIN_RE = re.compile(r"\s*\\begin\{(" + "|".join(NOTE_ENVS) + r")\}")
 LABEL_RE = re.compile(r"\\label\{([^}]+)\}")
 NOTE_RE = re.compile(r"\\lean(verified|partial|absent)\b")
 LEANMOD_RE = re.compile(r"\\leanmod\{([^{}]*)\}\{([^{}]*)\}")
-LEANNOTE_RE = re.compile(r"\\leannote\{(.*?)\}\s*(?:\}|\\leanmod|$)", re.S)
 
 STATUS = {"verified": "formalized", "partial": "formalized in part",
           "absent": "not formalized"}
@@ -114,8 +113,11 @@ def _parse_note(source: str, at: int) -> tuple[str, list, str] | None:
     blocks = [(mod.strip(), [d.strip() for d in decls.split(",") if d.strip()])
               for mod, decls in LEANMOD_RE.findall(body)]
     note = ""
-    if nm := LEANNOTE_RE.search(body):
-        note = re.sub(r"\s+", " ", nm.group(1)).strip()
+    # The note's argument is a balanced brace group -- notes contain nested
+    # TeX like `\abs{D_{n,i(n)}}`, which a lazy regex truncated mid-formula.
+    if (pos := body.find("\\leannote")) != -1:
+        raw, _ = _balanced(body, pos + len("\\leannote"))
+        note = re.sub(r"\s+", " ", raw).strip()
     elif m.group(1) == "absent":
         note = re.sub(r"\s+", " ", body).strip()
     elif m.group(1) == "partial":
@@ -219,8 +221,9 @@ def to_markdown(claims: list[Claim], repo: Path | None = None) -> str:
         for module, decls in c.blocks:
             mark = "" if module.rsplit("/", 1)[-1] in closure else " \u2020"
             cells.append(f"`{module}`{mark}: " + ", ".join(f"`{d}`" for d in decls))
+        note = (c.note or "").replace("|", "\\|")
         out.append(
-            f"| `{c.label}` | {STATUS[c.status]} | {'; '.join(cells) or '—'} | {c.note or ''} |"
+            f"| `{c.label}` | {STATUS[c.status]} | {'; '.join(cells) or '—'} | {note} |"
         )
     out += [
         "",

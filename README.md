@@ -74,9 +74,13 @@ Every numbered result of the manuscript is listed with its Lean counterpart
 in **[docs/CLAIM_MAP.md](docs/CLAIM_MAP.md)** — modules, declarations, and
 any way the Lean statement differs in generality from the printed one. The
 table is generated from the manuscript's own margin notes resolved against
-the Lean source, and `scripts/check.py` fails if it goes stale, so the paper
-and the library cannot disagree without CI saying so. The margin notes are
-strictly marginal: no argument in the paper appeals to one.
+the Lean source, and `scripts/check.py` fails if a note names a declaration
+that does not exist or the table goes stale. That check is by name: it
+guarantees every mapped declaration exists, not that its elaborated statement
+matches the printed one — for the headline theorems that stronger pinning is
+done by restatement in `scripts/Audit.lean`, and for the rest the
+correspondence is a reviewed obligation. The margin notes are strictly
+marginal: no argument in the paper appeals to one.
 
 ## Nothing cited, everything proved
 
@@ -135,8 +139,11 @@ four-way equivalence. Its implication `(4) → (1)` is not valid as written:
 the cited Cheeger bound separates the Markov spectrum from `+1` but not from
 `-1`, and uniform expanders can be arbitrarily close to bipartite. A
 degree-preserving two-edge switch in each graph of a bipartite expander
-family gives a sequence satisfying `(2)`–`(4)` but not `(1)`; the
-counterexample is formalized in `KunSpectralCounterexample`. This does not
+family gives a sequence satisfying `(2)`–`(4)` but not `(1)`. The spectral
+half of this — the switched family, its non-bipartiteness, and the Rayleigh
+quotient running to `-1` — is formalized in `KunSpectralCounterexample`; the
+uniform Cheeger lower bound and the repetition bookkeeping remain paper
+arguments, as that module's header records. This does not
 affect Kun's Theorem 1, which needs only the forward implications — exactly
 the one-way form proved and used here. Two smaller proof-level gaps (the
 zero-defect case of Kun's Lemma 10, and a relation treated as a permutation

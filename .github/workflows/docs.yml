@@ -1,7 +1,8 @@
 # API documentation.  Deliberately NOT part of the proof gate: this workflow
 # never blocks a merge, and `doc-gen4` breaking must not be able to make the
-# repository look unproved.  The gates are `prover.yml` and
-# `independent-kernel.yml`.
+# repository look unproved.  The gate is `prover.yml`;
+# `independent-kernel.yml` is supplementary and, by its own design, not a
+# gate either.
 name: API documentation
 
 on:

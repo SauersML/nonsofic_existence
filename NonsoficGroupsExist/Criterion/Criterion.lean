@@ -307,15 +307,19 @@ expander sequence* along a diverging vertex scale when it is edit-equivalent
 to an expander sequence: graphs identified vertex by vertex with it, carrying
 one uniform positive Cheeger bound, at negligible edit distance.
 
-Two points where this is the printed definition read literally rather than a
-translation of it.  The vertex sets are identified by an explicit equivalence
-instead of being equal on the nose, which is how every graph in this library
-carries its vertex set; and the divergence `|V(Xₙ)| → ∞` of the printed
-definition is carried by the `AsymptoticScale` against which the edit count is
-negligible, rather than restated.  No degree bound is imposed: the sequences
-this is applied to are `T`-generator graphs, whose degree is at most `2|T|`
-by `generatorGraph_hasDegreeBound`, so a bound here would be a hypothesis
-that is always available and never used. -/
+Two points are conventions rather than differences.  The vertex sets are
+identified by an explicit equivalence instead of being equal on the nose,
+which is how every graph in this library carries its vertex set; and the
+divergence `|V(Xₙ)| → ∞` of the printed definition is carried by the
+`AsymptoticScale` against which the edit count is negligible, rather than
+restated.
+
+One point is a deliberate difference, recorded in the manuscript's margin
+note: the printed definition restricts to bounded-degree sequences, and this
+predicate does not.  It is therefore strictly weaker as a definition.  The
+sequences it is applied to are `T`-generator graphs, whose degree is at most
+`2|T|` by `generatorGraph_hasDegreeBound`, so the omitted bound is a
+hypothesis that is always available and never used. -/
 def IsEssentialExpanderSequence (scale : AsymptoticScale)
     (X : ℕ → FiniteMultiGraph) : Prop :=
   ∃ (Y : ℕ → FiniteMultiGraph) (e : ∀ n, (X n).vertex ≃ (Y n).vertex) (h : ℝ),

@@ -262,10 +262,12 @@ theorem degreeForm_testVector (m : ℕ) :
   ring
 
 /-- **The defect.**  The normalized Markov Rayleigh quotient of a single
-explicit vector is `-1 + 4/n²` on a family with uniform expansion.  Since the
-least eigenvalue is at most the Rayleigh quotient of any nonzero vector, no
-bound of the form "Cheeger constant at least `h` implies least eigenvalue at
-least `-1 + c(h)`" can hold. -/
+explicit vector on the switched family is `-1 + 4/n²`, so the least
+eigenvalue, which is at most the Rayleigh quotient of any nonzero vector,
+runs to `-1`.  Granting the uniform Cheeger bound for the family -- the
+unformalized half; see the module header -- no bound of the form "Cheeger
+constant at least `h` implies least eigenvalue at least `-1 + c(h)`" can
+hold. -/
 theorem rayleigh_testVector (m : ℕ) :
     rayleigh (switched m) (testVector m) = -1 + 4 / ((m : ℝ) + 2) ^ 2 := by
   have hpos : (0 : ℝ) < ((m : ℝ) + 2) ^ 2 := by positivity

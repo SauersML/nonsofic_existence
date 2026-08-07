@@ -8,6 +8,10 @@ on:
       - main
     paths:
       - nonsofic_groups_exist.tex
+      # The generated claim map is checked for staleness by this workflow's
+      # source audit, so a direct (hand) edit to it must trigger the check
+      # that rejects hand edits.
+      - docs/CLAIM_MAP.md
       - .github/workflows/build-pdf.yml
       # The margin-reference gate is a gate, so a change to it must re-run it.
       # Naming the two entry points was not enough once they grew a shared
@@ -74,6 +78,16 @@ jobs:
       - name: Check the Lean margin references resolve
         shell: bash
         run: python3 scripts/check_lean_refs.py
+
+      # The full source audit, not just reference resolution: a TeX-only edit
+      # can change a margin note's status or let docs/CLAIM_MAP.md go stale,
+      # and `prover.yml` does not trigger on the manuscript.  Running the
+      # whole scan here closes that window; it needs no Lean toolchain.
+      - name: Source audit and claim-map staleness
+        shell: bash
+        run: |
+          python3 scripts/check.py --self-test
+          python3 scripts/check.py
 
       - name: Compile, normalize, and validate PDF
         shell: bash

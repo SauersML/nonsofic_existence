@@ -294,14 +294,16 @@ paper's own margin notes and checked on every build.
 
 ## What is proved here rather than assumed
 
-The paper cites four external theorems; three of them are proved in this
-library, so they are inputs to the manuscript and not to the development:
-Kun's expander decomposition (`KunDecomposition`), the Kun--Thom centralizer
-obstruction (`KunThomTheorem`), and Shalom's finitely presented Kazhdan covers
-(`ShalomFinitePresentation`).  The fourth, property `(T)` for elementary
-groups over arbitrary finitely generated rings, is imported; the
-characteristic-two cases the endpoints use are proved in
-`FreeElementaryPropertyT`.
+Every theorem the paper cites for its own proofs is proved in this library,
+in the exact form used, so each is an input to the manuscript and not to the
+development: Kun's expander decomposition (`KunDecomposition`), the Kun--Thom
+centralizer obstruction (`KunThomTheorem`), Shalom's finitely presented
+Kazhdan covers (`ShalomFinitePresentation`), and property `(T)` for
+elementary groups over finite-type algebras over finite fields
+(`FiniteFieldElementaryPropertyT`, with the explicit Kazhdan pair of
+`FreeElementaryPropertyT`).  The Ershov--Jaikin-Zapirain theorem over an
+arbitrary finitely generated ring is not formalized, and nothing here needs
+it.
 
 The `K₁`-theoretic input is likewise eliminated: `BinaryLeavitt.K1_trivial`
 proves `K₁(L_k(1,2)) = 0` in Whitehead form by an elementary two-exit
