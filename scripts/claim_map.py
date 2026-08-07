@@ -299,6 +299,14 @@ The manuscript is the source of truth for the correspondence -- each numbered
 result carries a margin note naming the modules and declarations behind it, and
 this table is that assertion, collected and resolved.
 
+These checks are syntactic: they establish that the named declarations exist,
+resolve, and keep their signatures, not that a declaration is the intended
+mathematical translation of its printed statement.  The semantic layer is the
+endpoint bundles of `Endpoint/ManuscriptStatements.lean`
+(`theoremA_exact`, `theoremB_exact`, `theoremC_exact`, `theoremD_subgroups`),
+each of whose *type* is one printed statement, checkable by `#check` against
+the print.
+
 """
 
 

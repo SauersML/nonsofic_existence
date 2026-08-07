@@ -1531,6 +1531,17 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
         Manuscript.ManuscriptProfile ↥(elementaryGroup (Fin (m + 1)) A)
 ```
 
+## `NonsoficGroupsExist.Manuscript.theoremA_exact`
+
+```lean
+(∀ (m : ℕ),
+    1 ≤ m →
+      Group.FG ↥(UniversalLeavittEL m) ∧
+        Infinite ↥(UniversalLeavittEL m) ∧
+          HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)) ∧
+  ¬IsSofic ↥UniversalRankFour.Ambient ∧ CountableNonsoficGroupExists
+```
+
 ## `NonsoficGroupsExist.Manuscript.theoremB_Theta`
 
 ```lean
@@ -1559,13 +1570,15 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ```lean
 ∀ (k : Type) [inst : Field k] [Finite k],
   Manuscript.ManuscriptProfile (BinaryLeavittUnits k) ∧
-    (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)) (hC : (BinaryLeavitt.family k).IsComplete C)
-        (M : Manuscript.BinaryLeavittGLRank k r),
-        ↑((Manuscript.theoremB_Theta k C hC) M) =
-          ∑ i,
-            ∑ j,
-              (BinaryLeavitt.family k).wordS (C.word i) * ↑M i j *
-                (BinaryLeavitt.family k).wordT (C.word j)) ∧
+    (∀ (r : ℕ),
+        1 ≤ r →
+          ∀ (C : BinaryPrefixCode (Fin r)) (hC : (BinaryLeavitt.family k).IsComplete C)
+            (M : Manuscript.BinaryLeavittGLRank k r),
+            ↑((Manuscript.theoremB_Theta k C hC) M) =
+              ∑ i,
+                ∑ j,
+                  (BinaryLeavitt.family k).wordS (C.word i) * ↑M i j *
+                    (BinaryLeavitt.family k).wordT (C.word j)) ∧
       (∀ (r : ℕ), 2 ≤ r → Manuscript.BinaryLeavittELRank k r = ⊤) ∧
         (∀ (r : ℕ), 1 ≤ r → Manuscript.ManuscriptProfile (Manuscript.BinaryLeavittGLRank k r)) ∧
           ∀ (r : ℕ), 2 ≤ r → Manuscript.ManuscriptProfile ↥(Manuscript.BinaryLeavittELRank k r)
@@ -2090,6 +2103,12 @@ Group.FG ↥UniversalRankFour.Ambient ∧
     Group.FG ↥(BinaryLeavittEL k m) ∧
       Infinite ↥(BinaryLeavittEL k m) ∧
         HasKazhdanPropertyT ↥(BinaryLeavittEL k m) ∧ ¬IsSofic ↥(BinaryLeavittEL k m)
+```
+
+## `NonsoficGroupsExist.countable_nonsofic_groups_exist`
+
+```lean
+CountableNonsoficGroupExists
 ```
 
 ## `NonsoficGroupsExist.diagonalLevel_diverges`

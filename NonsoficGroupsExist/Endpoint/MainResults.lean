@@ -209,6 +209,19 @@ theorem nonsofic_groups_exist : NonsoficGroupExists := by
   exact ⟨UniversalRankFour.Ambient, inferInstance,
     universalLeavittEL4_not_isSofic⟩
 
+/-- The historical headline in its countable form: there exists a countable
+group which is not sofic. -/
+def CountableNonsoficGroupExists : Prop :=
+  ∃ (G : Type) (_ : Group G), Countable G ∧ ¬ IsSofic G
+
+/-- An unconditional, kernel-checked countable existence theorem: not every
+countable discrete group is sofic.  The witness is the ambient group of
+Theorem A, whose countability is the first conjunct of
+`ambient_full_profile`. -/
+theorem countable_nonsofic_groups_exist : CountableNonsoficGroupExists :=
+  ⟨UniversalRankFour.Ambient, inferInstance, ambient_full_profile.1,
+    ambient_full_profile.2.2.2.2⟩
+
 /-- An unconditional, kernel-checked finitely presented nonsofic-group
 existence theorem. -/
 theorem exists_finitelyPresented_nonsofic_group :

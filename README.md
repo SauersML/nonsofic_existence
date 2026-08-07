@@ -16,6 +16,7 @@ All reachable from `NonsoficGroupsExist/Endpoint/MainResults.lean`:
 | Declaration | Statement |
 | --- | --- |
 | `nonsofic_groups_exist` | A nonsofic group exists |
+| `countable_nonsofic_groups_exist` | A countable nonsofic group exists — the historical headline |
 | `universalLeavittEL4_not_isSofic` | The explicit witness is not sofic |
 | `universalLeavitt_profile` | The full profile — infinite, finitely generated, Kazhdan, nonsofic — at every elementary rank `≥ 2` (Theorem A) |
 | `binaryLeavitt_finiteField_profile`, `binaryLeavittUnits_profile`, `binaryLeavittGL_profile` | The same over every finite field, for elementary ranks, the unit group, and every `GL_r` (Theorem B) |
@@ -27,6 +28,20 @@ The transitive axiom closure of every public result is checked to contain no
 axioms beyond the three of classical Lean — `propext`, `Classical.choice`,
 `Quot.sound` — with no `sorry` and no project axioms (individual results may
 use a proper subset), and the library builds with `warningAsError=true`.
+
+## Formal versus manuscript trust surface
+
+The Lean development's external trust surface is smaller than the
+manuscript's: several results the paper cites are proved internally.
+
+| Input | Manuscript | Lean |
+| --- | --- | --- |
+| Kun expander decomposition | cited (arXiv v5), audited | proved — `Kun/KunDecomposition` |
+| Kun–Thom centralizer obstruction | cited (arXiv v2), audited | proved — `KunThom/KunThomTheorem` |
+| Property `(T)` at rank three | cited (Ershov–Jaikin) | proved — `PropertyT/FiniteFieldElementaryPropertyT` |
+| Strong division for `L_k(1,2)` | cited, from pure infinite simplicity | proved — `Leavitt/LeavittSimplicity` |
+| Shalom finitely presented Kazhdan covers | cited | proved — `Kazhdan/ShalomFinitePresentation` |
+| Residual finiteness of free groups | standard fact | proved — `Sofic/FreeGroupResiduallyFinite` |
 
 ## How to verify
 

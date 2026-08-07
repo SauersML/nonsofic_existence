@@ -39,6 +39,7 @@ the entire project namespace and fails on anything beyond classical Lean.
 -/
 
 #print axioms NonsoficGroupsExist.nonsofic_groups_exist
+#print axioms NonsoficGroupsExist.countable_nonsofic_groups_exist
 #print axioms NonsoficGroupsExist.universalLeavittEL4_not_isSofic
 #print axioms NonsoficGroupsExist.universalLeavittEL3_not_isSofic
 #print axioms NonsoficGroupsExist.universalLeavittUnits_not_isSofic
@@ -82,6 +83,7 @@ the entire project namespace and fails on anything beyond classical Lean.
 
 -- The exact manuscript endpoints: one declaration per printed headline
 -- statement, so the report records what each printed theorem rests on.
+#print axioms NonsoficGroupsExist.Manuscript.theoremA_exact
 #print axioms NonsoficGroupsExist.Manuscript.theoremB_exact
 #print axioms NonsoficGroupsExist.Manuscript.theoremC_exact
 #print axioms NonsoficGroupsExist.Manuscript.theoremC_covers_theoremB_groups
