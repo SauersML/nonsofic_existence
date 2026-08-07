@@ -2356,6 +2356,35 @@ CountableNonsoficGroupExists
   IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
 ```
 
+## `NonsoficGroupsExist.fixedSet`
+
+```lean
+{G : Type u_1} → {Y : Type u_2} → [inst : Group G] → (G →* Equiv.Perm Y) → Subgroup G → Set Y
+```
+
+## `NonsoficGroupsExist.fixedSet_conj`
+
+```lean
+∀ {G : Type u_1} {Y : Type u_2} [inst : Group G] (φ : G →* Equiv.Perm Y) (Γ : Subgroup G)
+  (t : G), {y | ∀ γ ∈ Γ, (φ (t * γ * t⁻¹)) y = y} = ⇑(φ t) '' fixedSet φ Γ
+```
+
+## `NonsoficGroupsExist.fixedSet_image_eq`
+
+```lean
+∀ {G : Type u_1} {Y : Type u_2} [inst : Group G] [Finite Y] (φ : G →* Equiv.Perm Y)
+  (Γ : Subgroup G) {t : G}, (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ⇑(φ t) '' fixedSet φ Γ = fixedSet φ Γ
+```
+
+## `NonsoficGroupsExist.fixedSet_smul_eq_of_closure`
+
+```lean
+∀ {G : Type u_1} {Y : Type u_2} [inst : Group G] [Finite Y] (φ : G →* Equiv.Perm Y)
+  (Γ : Subgroup G) (T : Set G),
+  (∀ t ∈ T, ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) →
+    Subgroup.closure (↑Γ ∪ T) = ⊤ → ∀ (g : G), ⇑(φ g) '' fixedSet φ Γ = fixedSet φ Γ
+```
+
 ## `NonsoficGroupsExist.freeGroup_residuallyFinite`
 
 ```lean
