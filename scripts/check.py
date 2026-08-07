@@ -88,6 +88,7 @@ SCAN_TAGS: tuple[str, ...] = (
     "dangling Lean reference (wrapped note)",
     "axiom-report pinning",
     "stale generated claim map",
+    "status contract",
 )
 
 
@@ -230,6 +231,19 @@ def check_claim_map(root: Path, f: Findings) -> None:
                   f"Lean note, so the paper neither claims it is formalized nor says "
                   f"it is not")
 
+    # A "verified" badge must not narrate its own boundary: a note that says
+    # part of the result remains prose belongs on a \leanpartial, where the
+    # explanation is the second argument.  Without this, the status vocabulary
+    # decays into one green color regardless of what the notes admit.
+    _CONTRACT = re.compile(r"remains? (?:a )?(?:paper|prose)|not formali[sz]ed|"
+                           r"unformali[sz]ed", re.I)
+    for claim in claims:
+        if claim.status == "verified" and _CONTRACT.search(claim.note or ""):
+            f.add("status contract",
+                  f"{tex.name}:{claim.line}: `{claim.label}` is marked verified "
+                  f"but its note admits an unformalized remainder; use "
+                  f"\\leanpartial and say exactly what is covered")
+
     _, problems = claim_map.resolve(claims, root)
     wrapped = {c.label for c in claims if c.status and c.wrapped}
     for problem in problems:
@@ -352,6 +366,12 @@ PLANTS = {
     # The committed table left behind by an edit to either side.
     "stale generated claim map":
         {"docs/CLAIM_MAP.md": "# TeX map\n\nstale contents\n"},
+    # A green badge whose own note admits a prose remainder.
+    "status contract":
+        {_TEX: ("\\begin{lemma}\\label{lem:demo}%\n"
+                "\\leanverified{\\leanmod{Alpha}{alpha}"
+                "\\leannote{the second half remains prose.}}%\n"
+                "A statement.\n\\end{lemma}\n")},
     # A citation of a module the axiom report never reaches, unpinned.
     "axiom-report pinning":
         {_TEX: ("\\begin{lemma}\\label{lem:demo}%\n"

@@ -59,11 +59,12 @@ open Lean Meta Elab Command
 
 namespace Audit
 
-/-- One finding.  `fatal` decides the exit code; everything else is reported
-so that the numbers exist before anyone argues about them. -/
+/-- One finding.  There is no severity field: the driver fails on any finding
+under any tag, so a policy knob here would be a budget nobody is meant to
+have.  (An earlier `fatal` flag documented a distinction the driver never
+implemented; it is gone rather than misleading.) -/
 structure Finding where
   tag : String
-  fatal : Bool
   decl : Name
   detail : String
   deriving Inhabited
@@ -159,7 +160,7 @@ def axiomScan (env : Environment) (names : Array Name) (allowed : List Name) :
   let mut out := #[]
   for a in bad do
     out := out.push
-      { tag := "AXIOM", fatal := true, decl := a,
+      { tag := "AXIOM", decl := a,
         detail := s!"reached from {(debtorsOf env names a).toList}" }
   return out
 
@@ -312,7 +313,7 @@ def vacuityScan (env : Environment) (names : Array Name) : MetaM (Array Finding)
   for p in ← propFormers env names do
     unless established.contains p do
       out := out.push
-        { tag := "LAUNDERED_PROP", fatal := false, decl := p,
+        { tag := "LAUNDERED_PROP", decl := p,
           detail := "named proposition the corpus only ever assumes: nothing is \
 ever proved to satisfy it, so a theorem refuting it is equally consistent with \
 it being unsatisfiable" }
@@ -320,7 +321,7 @@ it being unsatisfiable" }
     let fields ← propFields env n
     if !fields.isEmpty && !established.contains n then
       out := out.push
-        { tag := "UNWITNESSED", fatal := false, decl := n,
+        { tag := "UNWITNESSED", decl := n,
           detail := s!"structure with Prop-valued fields {fields.toList} that the \
 corpus never exhibits a closed term of" }
   return out
@@ -422,25 +423,25 @@ def declScan (env : Environment) (names : Array Name) : MetaM (Array Finding) :=
 
     if taut then
       out := out.push
-        { tag := "TAUTOLOGY", fatal := true, decl := n,
+        { tag := "TAUTOLOGY", decl := n,
           detail := "the conclusion is syntactically one of the premises" }
     let promisesUnconditional := promisesClaim n
     if propPremise && promisesUnconditional then
       out := out.push
-        { tag := "UNCONDITIONAL", fatal := true, decl := n,
+        { tag := "UNCONDITIONAL", decl := n,
           detail := "the name promises an unconditional result; the type carries \
 Prop premises" }
     unless hidden.isEmpty do
       out := out.push
-        { tag := "ASSUMPTION_INSTANCE", fatal := false, decl := n,
+        { tag := "ASSUMPTION_INSTANCE", decl := n,
           detail := s!"assumptions in instance syntax: {hidden.toList}" }
     unless empty.isEmpty do
       out := out.push
-        { tag := "EMPTY_PREMISE", fatal := true, decl := n,
+        { tag := "EMPTY_PREMISE", decl := n,
           detail := s!"premise of an empty type {empty.toList}: vacuously true" }
     if trivialConcl then
       out := out.push
-        { tag := "TRIVIAL", fatal := false, decl := n, detail := "concludes `True`" }
+        { tag := "TRIVIAL", decl := n, detail := "concludes `True`" }
 
     -- STALE_DISCLAIMER.  `propPremise` is the whole test: a docstring may call
     -- a result conditional exactly when the type says what it is conditional
@@ -449,7 +450,7 @@ Prop premises" }
     if let some doc ← findDocString? env n then
       if mentionsConditionality doc && !propPremise then
         out := out.push
-          { tag := "STALE_DISCLAIMER", fatal := true, decl := n,
+          { tag := "STALE_DISCLAIMER", decl := n,
             detail := "the docstring describes the result as conditional or \
 unproved; the statement carries no Prop premise to be conditional on" }
 
@@ -461,7 +462,7 @@ unproved; the statement carries no Prop premise to be conditional on" }
       i < lams && deadVal.contains i && !deliberate nm
     unless dead.isEmpty do
       out := out.push
-        { tag := "UNUSED", fatal := false, decl := n,
+        { tag := "UNUSED", decl := n,
           detail := s!"binders occurring in neither the rest of the type nor the \
 proof term: {(dead.map Prod.snd).toList}" }
 
@@ -469,7 +470,7 @@ proof term: {(dead.map Prod.snd).toList}" }
     let key := toString ci.type
     if let some other := byType[key]? then
       out := out.push
-        { tag := "DUPLICATE", fatal := false, decl := n,
+        { tag := "DUPLICATE", decl := n,
           detail := s!"same proposition already proved as {other}" }
     else
       byType := byType.insert key n
@@ -488,7 +489,7 @@ proof term: {(dead.map Prod.snd).toList}" }
       -- as though it had content, that holds by definition.
       unless (← getSimpTheorems).isLemma (.decl n) do
         out := out.push
-          { tag := "RFL", fatal := false, decl := n,
+          { tag := "RFL", decl := n,
             detail := "non-simp theorem whose proof term is `Eq.refl`" }
   return out
 

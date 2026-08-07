@@ -23,9 +23,10 @@ All reachable from `NonsoficGroupsExist/Endpoint/MainResults.lean`:
 | `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | ... and a finitely presented Kazhdan cover (Theorem C) |
 | `exists_sofic_group_with_nonsofic_quotient` | Soficity is not closed under quotients |
 
-Every public result reduces to exactly the three axioms of classical Lean —
-`propext`, `Classical.choice`, `Quot.sound` — with no `sorry` and no project
-axioms, and the library builds with `warningAsError=true`.
+The transitive axiom closure of every public result is checked to contain no
+axioms beyond the three of classical Lean — `propext`, `Classical.choice`,
+`Quot.sound` — with no `sorry` and no project axioms (individual results may
+use a proper subset), and the library builds with `warningAsError=true`.
 
 ## How to verify
 

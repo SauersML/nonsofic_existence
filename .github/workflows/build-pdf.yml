@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
           persist-credentials: true
@@ -107,6 +107,13 @@ jobs:
           mkdir -p build pdf-render-check
 
           # Keep the direct LaTeX output stable when the TeX source is unchanged.
+          # Pin the margin links to the exact commit being built: a published
+          # PDF is immutable and `main` is not.  The committed source keeps
+          # `main` for local reading; only the build sees the SHA.
+          tex_commit="$(git log -1 --format=%H -- "$TEX_FILE")"
+          sed -i "s|\\\\newcommand{\\\\leancommit}{main}|\\\\newcommand{\\\\leancommit}{${tex_commit}}|" "$TEX_FILE"
+          grep -q "leancommit}{${tex_commit}}" "$TEX_FILE"
+
           export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct -- "$TEX_FILE")"
           export FORCE_SOURCE_DATE=1
           export TZ=UTC

@@ -14,6 +14,10 @@ arbitrary isometry pairs, as needed for the depth-`n` matrix picture of
 the degree-zero subalgebra.
 -/
 
+-- Scoped to this file only: several `simp only` lists here carry lemmas that
+-- fire on some goals of a case split and not others; splitting every list
+-- per-branch was tried and read worse than the uniform list.  The linter has
+-- no per-branch view, so it flags the branch that did not need a lemma.
 set_option linter.unusedSimpArgs false
 
 open scoped commutatorElement

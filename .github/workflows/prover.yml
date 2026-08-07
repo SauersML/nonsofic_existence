@@ -47,7 +47,7 @@ jobs:
     outputs:
       run: ${{ steps.check.outputs.run }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 1
       - id: check
@@ -82,18 +82,18 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Cache Lean toolchain
         id: elan-cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.elan
           key: ${{ runner.os }}-elan-${{ hashFiles('lean-toolchain') }}
 
       - name: Install elan
         if: steps.elan-cache.outputs.cache-hit != 'true'
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+        run: curl https://raw.githubusercontent.com/leanprover/elan/464c9d28395000a2a0128e07081e4956d50eced2/elan-init.sh -sSf | sh -s -- -y
 
       - name: Add elan to PATH
         run: echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
@@ -109,7 +109,7 @@ jobs:
       # writes back a strictly better one.
       - name: Restore Lake dependencies
         id: lake-deps-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/packages
           key: ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.run_id }}
@@ -125,7 +125,7 @@ jobs:
       # stale olean is rebuilt, never trusted.
       - name: Restore compiled project
         id: build-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/build
           key: ${{ runner.os }}-nonsofic-build-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean') }}-${{ github.run_id }}
@@ -147,7 +147,7 @@ jobs:
       # build does improves it.
       - name: Save Lake dependencies
         if: always() && steps.lake-deps-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/packages
           key: ${{ steps.lake-deps-restore.outputs.cache-primary-key }}
@@ -210,7 +210,7 @@ jobs:
       # from zero each time.
       - name: Save compiled project
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/build
           key: ${{ steps.build-restore.outputs.cache-primary-key }}

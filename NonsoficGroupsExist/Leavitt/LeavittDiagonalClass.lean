@@ -23,6 +23,10 @@ open scoped commutatorElement
 namespace NonsoficGroupsExist
 namespace LeavittFamily
 
+-- Scoped to this file only: several `simp only` lists here carry lemmas that
+-- fire on some goals of a case split and not others; splitting every list
+-- per-branch was tried and read worse than the uniform list.  The linter has
+-- no per-branch view, so it flags the branch that did not need a lemma.
 set_option linter.unusedSimpArgs false
 
 open MatrixDiagonalization

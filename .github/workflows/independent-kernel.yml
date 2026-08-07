@@ -41,18 +41,18 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Cache Lean toolchain
         id: elan-cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.elan
           key: ${{ runner.os }}-elan-${{ hashFiles('lean-toolchain') }}
 
       - name: Install elan
         if: steps.elan-cache.outputs.cache-hit != 'true'
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+        run: curl https://raw.githubusercontent.com/leanprover/elan/464c9d28395000a2a0128e07081e4956d50eced2/elan-init.sh -sSf | sh -s -- -y
 
       - name: Add elan to PATH
         run: echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
@@ -62,7 +62,7 @@ jobs:
       # caches are its own, and a half-populated entry written from here would
       # silently degrade it.  Worst case this job pays for a cold build.
       - name: Restore Lake dependencies
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/packages
           key: ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
@@ -71,7 +71,7 @@ jobs:
             ${{ runner.os }}-lake-deps-
 
       - name: Restore compiled project
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/build
           key: ${{ runner.os }}-nonsofic-build-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean') }}
@@ -146,26 +146,24 @@ jobs:
           cat nanoda-config.json
 
       # Only the headline theorems and their transitive dependencies, not the
-      # whole environment: this is the same roster `scripts/Audit.lean` pins as
-      # `headlineTheorems`, and exporting just their closure keeps the run
-      # inside a standard runner's memory.  Streamed over a pipe so the export
-      # never has to be materialised on disk.
+      # whole environment: exporting just their closure keeps the run inside a
+      # standard runner's memory.  The roster is EXTRACTED from
+      # `scripts/Audit.lean`'s `headlineTheorems` at run time rather than
+      # duplicated here -- a hand copy of the list drifted once (14 of 23
+      # names) while the comment claimed parity.  Every entry of that list
+      # resolves inside the `NonsoficGroupsExist` namespace, so the prefix is
+      # uniform; an entry that stops resolving fails the export loudly, which
+      # is the check.  Streamed over a pipe so the export never has to be
+      # materialised on disk.
       - name: Export and re-check with nanoda
         run: |
           set -euo pipefail
+          roster="$(sed -n '/^def headlineTheorems/,/\]/p' scripts/Audit.lean \
+            | grep -oE '``[A-Za-z0-9_.]+' | sed 's/^``//' \
+            | sed 's/^/NonsoficGroupsExist./')"
+          test -n "$roster"
+          echo "roster ($(wc -l <<<"$roster") roots):"; echo "$roster"
+          # shellcheck disable=SC2086
           lake env ../lean4export/.lake/build/bin/lean4export NonsoficGroupsExist -- \
-            NonsoficGroupsExist.nonsofic_groups_exist \
-            NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group \
-            NonsoficGroupsExist.exists_infinite_finitelyPresented_nonsofic_ambient_cover \
-            NonsoficGroupsExist.universalLeavittEL4_not_isSofic \
-            NonsoficGroupsExist.universalLeavittEL3_not_isSofic \
-            NonsoficGroupsExist.universalLeavittUnits_not_isSofic \
-            NonsoficGroupsExist.universalLeavittGL_not_isSofic \
-            NonsoficGroupsExist.binaryLeavittUnits_not_isSofic \
-            NonsoficGroupsExist.binaryLeavittGL_not_isSofic \
-            NonsoficGroupsExist.BinaryLeavitt.thompsonV_not_isLEF \
-            NonsoficGroupsExist.universalLeavitt_profile \
-            NonsoficGroupsExist.binaryLeavitt_finiteField_profile \
-            NonsoficGroupsExist.ambient_profile \
-            NonsoficGroupsExist.ambient_full_profile \
+            $roster \
           | ../nanoda_lib/target/release/nanoda_bin nanoda-config.json

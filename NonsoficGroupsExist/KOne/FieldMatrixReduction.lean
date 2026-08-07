@@ -13,6 +13,10 @@ the diagonal class group and the diagonal pulls back to a central
 scalar modulo it, so the whole unit lies in `centralClassGroup A`.
 -/
 
+-- Scoped to this file only: several `simp only` lists here carry lemmas that
+-- fire on some goals of a case split and not others; splitting every list
+-- per-branch was tried and read worse than the uniform list.  The linter has
+-- no per-branch view, so it flags the branch that did not need a lemma.
 set_option linter.unusedSimpArgs false
 
 namespace NonsoficGroupsExist

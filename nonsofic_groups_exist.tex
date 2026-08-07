@@ -25,7 +25,7 @@
 %%% no other character of the document.
 %%%
 %%% Usage, placed immediately after a \label:
-%%%   \leanverified{\leanmod{decl_one,decl_two}{Module}}
+%%%   \leanverified{\leanmod{Module}{decl_one,decl_two}}
 %%%   \leanpartial{\leanmod{decl}{Module}}{what is and is not covered}
 %%%   \leanabsent{why this one is not formalized}
 %%% --------------------------------------------------------------------
@@ -40,13 +40,18 @@
 \definecolor{leangreen}{RGB}{0,102,74}
 \definecolor{leangrey}{RGB}{115,115,115}
 
+% The git ref margin links point at.  A published PDF is immutable and
+% `main` is not, so the PDF build workflow rewrites this to the exact
+% commit being built; the committed source keeps `main` for local reading.
+\newcommand{\leancommit}{main}
+
 \ifanonymous
   \newcommand{\leanrepo}{[repository link removed for anonymous review]}
 \else
   \newcommand{\leanrepo}{https://github.com/SauersML/nonsofic\_existence}
 \fi
 \newcommand{\leanfileurl}[1]{%
-  https://github.com/SauersML/nonsofic_existence/blob/main/NonsoficGroupsExist/#1.lean}
+  https://github.com/SauersML/nonsofic_existence/blob/\leancommit/NonsoficGroupsExist/#1.lean}
 
 \setlength{\marginparwidth}{1.3in}
 \setlength{\marginparsep}{8pt}
@@ -244,7 +249,7 @@ For \(r\geq2\) one has \(\GL_r(L)=\EL_r(L)\).  Hence all the groups \(\GL_r(L)\)
 
 \begin{mainthm}\label{thm:C}%
 \leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremC_first,theoremC_second,theoremC_exact,theoremC_covers_theoremB_groups}\leanmod{Endpoint/MainResults}{exists_finitelyPresented_nonsofic_group,exists_infinite_finitelyPresented_nonsofic_ambient_cover}\leanmod{Covers/KazhdanCover}{exists_kazhdan_finitelyPresented_cover_of_not_isSofic}\leannote{The final assertion is \texttt{theoremC_covers_theoremB_groups}: one $H$, surjecting onto $L^\times$ and onto every $\GL_r$ and $\EL_r$ of Theorem~\ref{thm:B}.}}%
-Every finitely generated nonsofic group is a quotient of an infinite finitely presented nonsofic group.  Every nonsofic group with property~\((T)\) is a quotient of an infinite finitely presented nonsofic group with property~\((T)\).  In particular, there is an infinite finitely presented property~\((T)\) group \(H\) that is not sofic; \(H\) may be chosen to surject onto \(L^\times\), and hence to have a quotient isomorphic to every group listed in Theorem~\ref{thm:B}.
+Every finitely generated nonsofic group is a quotient of an infinite finitely presented nonsofic group.  Every nonsofic group with property~\((T)\) is a quotient of an infinite finitely presented nonsofic group with property~\((T)\).  In particular, there is an infinite finitely presented property~\((T)\) group \(H\) that is not sofic; for each fixed finite field \(k\) of Theorem~\ref{thm:B}, \(H\) may be chosen to surject onto \(L^\times\), and hence to have a quotient isomorphic to every group listed there.
 \end{mainthm}
 
 \subsection*{Strategy}
@@ -276,7 +281,7 @@ Compression closes the gap.  A hypothetical sofic approximation of \(G\) yields 
 \begin{equation}\label{eq:median-intro}
  f(y)=\frac{s(y)}{s(y)+m}.
 \end{equation}
-The one-sided inclusions make \(f\) almost monotone along compressor arcs.  But a compressor acts by a permutation, so total increase equals total decrease \emph{exactly}.  The resulting small \(\ell^1\) edge variation, fed into an elementary co-area inequality on the ambient expanders, pins \(f\) at its median value \(1/2\).  Hence transported and target components have asymptotically equal sizes, and one-sided containment becomes almost-bijective matching.  A weighted diagonal selection extracts a single matched component on which every multiplication, faithfulness, invariance, conjugacy, and graph-edit error is negligible.  Restricting and completing the permutations yields a sofic approximation of \(K\times J\) whose \(K\)-edges form an essential expander sequence, and the Kun--Thom obstruction forces \(J\) to be LEF.  Theorem~\ref{thm:D} is proved in Section~\ref{sec:criterion} as a corollary of a local statement, Theorem~\ref{thm:local}, which isolates the exact graph-theoretic hypotheses and records precisely what property~\((T)\) is used for.  Remarks~\ref{rem:product} and~\ref{rem:JinGamma-role} test the criterion against sofic examples and show that each hypothesis earns its place.
+The one-sided inclusions make \(f\) almost monotone along compressor arcs.  But a compressor acts by a permutation, so total increase equals total decrease \emph{exactly}.  The resulting small \(\ell^1\) edge variation, fed into an elementary co-area inequality on the ambient expanders, pins \(f\) at its median value \(1/2\).  Hence transported and target components have asymptotically equal sizes, and one-sided containment becomes almost-bijective matching.  A weighted diagonal selection extracts a single matched component on which every multiplication, faithfulness, invariance, conjugacy, and graph-edit error is negligible.  Restricting and completing the permutations yields a sofic approximation of \(K\times J\) whose \(K\)-edges form an essential expander sequence, and the Kun--Thom obstruction forces \(J\) to be LEF\@.  Theorem~\ref{thm:D} is proved in Section~\ref{sec:criterion} as a corollary of a local statement, Theorem~\ref{thm:local}, which isolates the exact graph-theoretic hypotheses and records precisely what property~\((T)\) is used for.  Remarks~\ref{rem:product} and~\ref{rem:JinGamma-role} test the criterion against sofic examples and show that each hypothesis earns its place.
 
 The second layer is algebraic, and it is where the Leavitt relations enter.  Fix \(m\geq2\) and a nontrivial unital ring \(A\) carrying a binary Leavitt family---four elements satisfying the two Leavitt relations; no copy of \(L\) is assumed.  A left-comb binary partition with \(m+1\) leaves produces a compressor \(u\in\GL_{m+1}(A)\) that conjugates the block subgroup \(\Gamma\cong\EL_m(A)\) into the corner \(a\mapsto s_0at_0\) of itself.  A block involution \(z\) centralizes the compressed image \(K\), so \(v=zu\) is a second compressor with the same image, and \(vu^{-1}=z\) generates every elementary matrix involving the last coordinate; whenever \(u\) and \(z\) lie in \(\EL_{m+1}(A)\), it follows that \(G=\EL_{m+1}(A)=\langle\Gamma,u,v\rangle\).  The complementary corner \(a\mapsto p_0+s_1at_1\) carries a commuting copy of Thompson's group \(V\), and inside it the witness: the two-generator standard copy of Thompson's \(F\), which is not LEF for a finite reason---in a finite group the two \(F\)-relators force their two elements to commute, and the witness pair does not commute.  The witness is elementary over every ambient ring: its two generators are products of explicitly exhibited commutators of units---every cylinder transposition is a single commutator---and the Whitehead lemma places diagonal products of commutators of units in \(\EL_2\).  The only membership hypotheses of the general theorem therefore concern \(u\) and \(z\).  Over \(\F_2\) they are discharged by explicit four-term elementary factorizations, and an explicit rank equivalence between the elementary groups of any two ranks \(\geq2\)---block flattening along the self-similarity of the Leavitt relations---then spreads the conclusion from rank four to every rank, which gives Theorem~\ref{thm:A} with no \(K\)-theory.  Over every finite field the memberships also follow from \(K_1(L)=0\) and the GE property of purely infinite simple rings; the \(K_1\) input itself admits an elementary, effective proof, written out in full in Appendix~\ref{app:K1}.  Matrix self-similarity \(M_r(L)\cong L\) then spreads nonsoficity and property~\((T)\) to the unit group and to all \(\GL_r\), and a separate two-by-two realization shows that the scheme already closes in rank two.
 
@@ -486,7 +491,7 @@ Theorem~\ref{thm:kunthom} states the theorem of \cite{KunThom19} in its \emph{es
 \emph{Interface.}  The proof in \cite{KunThom19} is carried out for \emph{regularly labeled} graphs: each generator label has exactly one outgoing directed edge at every vertex.  An approximation normalized as in Lemma~\ref{lem:normalization} supplies this structure.  Every generator acts by a genuine permutation, and an inverse pair of generators acts by an inverse pair of permutations, so the two directed arcs of a pair combine into one undirected labeled edge; identity loops are discarded by the conventions of Section~\ref{subsec:graphs}.  Distinct labels rarely collide: for generators \(g,h\) with \(h\ne g^{\pm1}\), a collision \(\sigma_n(g)y=\sigma_n(h)y\) makes \(y\) a preimage under the permutation \(\sigma_n(h)\) of a fixed point of \(\sigma_n(h)^{-1}\sigma_n(g)\), which agrees with \(\sigma_n(h^{-1}g)\) outside a vanishing fraction of points by approximate multiplicativity and has a vanishing fraction of fixed points by asymptotic faithfulness.  These properties are verified for the localized approximation at the end of the proof of Theorem~\ref{thm:local}.
 
 \begin{remark}[Audit of the two cited proofs]\label{rem:kunaudit}%
-\leanverified{\leanmod{Kun/KunSpectralCounterexample}{switched,hasCheegerLowerBound_one,not_isBipartite,rayleigh_testVector,no_uniform_spectral_gap}\leannote{The switched family with its uniform Cheeger bound $1$, non-bipartiteness, Rayleigh quotient $-1+4/n^2$, and the packaged refutation: no spectral gap at $-1$ follows from any uniform Cheeger bound.  The reading into the numbered conditions of \cite[Theorem~3]{Kun19}, and the repetition of components, remain prose.}}%
+\leanpartial{\leanmod{Kun/KunSpectralCounterexample}{switched,hasCheegerLowerBound_one,not_isBipartite,rayleigh_testVector,no_uniform_spectral_gap}}{The switched family with its uniform Cheeger bound $1$, non-bipartiteness, Rayleigh quotient $-1+4/n^2$, and the packaged refutation: no spectral gap at $-1$ follows from any uniform Cheeger bound.  The reading into the numbered conditions of \cite[Theorem~3]{Kun19}, and the repetition of components, remain prose.}%
 Because the two theorems above carry the entire approximation-theoretic weight of this paper, their published proofs were audited line by line, with three findings; we record them here both to delimit exactly what is imported and to credit the arguments of \cite{Kun19,KunThom19}, which survive intact.
 
 First, Theorem~3 of \cite{Kun19} is stated as a four-way equivalence, and its spectral implication \((4)\Rightarrow(1)\) fails as written: it invokes the Cheeger--Alon--Milman bound, which separates the nonconstant Markov spectrum from \(+1\) but not from \(-1\).  The counterexample is explicit.  In \(K_{n,n}\) with sides \(\{l_i\}\), \(\{r_i\}\), replace the two edges \(\{l_0,r_0\}\), \(\{l_1,r_1\}\) by \(\{l_0,l_1\}\), \(\{r_0,r_1\}\); this preserves degrees, creates a triangle (so the graph is genuinely non-bipartite for \(n\geq3\)), and keeps \(h\geq1\) for \(n\geq6\): a set \(U\) with \(2\abs U\leq2n\) and \(a\), \(b\) vertices on the two sides has \(K_{n,n}\)-boundary \(n(a+b)-2ab\geq n\abs U/2\), since \(4ab\leq(a+b)^2\leq n(a+b)\), and the switch removes at most two boundary occurrences.  Meanwhile the vector equal to \(+1\) on one side and \(-1\) on the other has normalized Markov Rayleigh quotient \(-1+4/n^2\), so the least eigenvalue runs to \(-1\) while the expansion stays uniform---non-bipartiteness alone does not repair the implication.  Repeating each switched graph enough times gives a sequence satisfying (2)--(4) while violating (1).  This does not affect the present paper, nor Theorem~1 of \cite{Kun19}: the decomposition theorem needs only the forward implications, and Theorem~\ref{thm:kun} above is exactly that one-way statement---the only form used here.
@@ -650,7 +655,7 @@ Then \(J\) is LEF.
 
 \begin{corollary}[Kazhdan compression--centralizer criterion; Theorem~\ref{thm:D}]\label{cor:kazhdan}%
 \leanverified{\leanmod{Criterion/CriterionAssembly}{isLEF_of_isSofic,not_isSofic_of_not_isLEF}}%
-In the setting of \eqref{eq:gen} and \eqref{eq:cent}, suppose in addition that \(G\) and \(\Gamma\) have property~\((T)\).  If \(G\) is sofic, then \(J\) is LEF.  Equivalently: if \(J\) is not LEF, then \(G\) is not sofic.
+In the setting of \eqref{eq:gen} and \eqref{eq:cent}, suppose in addition that \(G\) and \(\Gamma\) have property~\((T)\).  If \(G\) is sofic, then \(J\) is LEF\@.  Equivalently: if \(J\) is not LEF, then \(G\) is not sofic.
 \end{corollary}
 
 \begin{proof}
@@ -1164,7 +1169,7 @@ The following two identities, valid in characteristic two, are the engine of the
 Let \(A\) be a unital ring of characteristic \(2\) carrying a binary Leavitt family.  Then, in \(M_2(A)\):
 \begin{enumerate}[label=\textup{(\alph*)}]
 \item \(\displaystyle x_{12}(s_1)\,x_{21}(t_1)\,x_{12}(s_1)=\begin{pmatrix}p_0&s_1\\ t_1&0\end{pmatrix};\)
-\item \(\displaystyle x_{21}(1+t_0)\,x_{12}(1)\,x_{21}(1+s_0)\,x_{12}(t_0)=\begin{pmatrix}s_0&s_1t_1\\ 0&t_0\end{pmatrix}.\)
+\item \(\displaystyle x_{21}(1+t_0)\,x_{12}(1)\,x_{21}(1+s_0)\,x_{12}(t_0)=\begin{pmatrix}s_0&s_1t_1\\ 0&t_0\end{pmatrix}\).
 \end{enumerate}
 \end{lemma}
 
@@ -1290,7 +1295,7 @@ Now \((C_n)\) holds for every \(n\geq1\), by strong induction with base \((C_1),
 \]
 In a finite group \(a^{\,N}=1\) for some \(N\geq1\), so \(c_N=c_0=b\), and \((C_N)\) reads \(b^{-1}bb=c_{N+1}=c_1\); that is, \(b=a^{-1}ba\), so \([a,b]=1\).
 
-Now suppose the ambient group were LEF.  Take \(F\) to consist of \(1\), \([a,b]\), and every product of at most twenty letters drawn from \(\{a^{\pm1},b^{\pm1}\}\)---a finite set containing \(a\), \(b\), and all partial products needed to evaluate both relators and \([a,b]\) letter by letter.  A local embedding \(\varphi:F\to P\) into a finite group is multiplicative on these partial products, so \(\varphi(a),\varphi(b)\) satisfy \eqref{eq:Frelators} in \(P\), whence \([\varphi(a),\varphi(b)]=1_P\) by the previous paragraph; but \(\varphi([a,b])=[\varphi(a),\varphi(b)]=1_P=\varphi(1)\) and injectivity force \([a,b]=1\), a contradiction.
+Now suppose the ambient group were LEF\@.  Take \(F\) to consist of \(1\), \([a,b]\), and every product of at most twenty letters drawn from \(\{a^{\pm1},b^{\pm1}\}\)---a finite set containing \(a\), \(b\), and all partial products needed to evaluate both relators and \([a,b]\) letter by letter.  A local embedding \(\varphi:F\to P\) into a finite group is multiplicative on these partial products, so \(\varphi(a),\varphi(b)\) satisfy \eqref{eq:Frelators} in \(P\), whence \([\varphi(a),\varphi(b)]=1_P\) by the previous paragraph; but \(\varphi([a,b])=[\varphi(a),\varphi(b)]=1_P=\varphi(1)\) and injectivity force \([a,b]=1\), a contradiction.
 \end{proof}
 
 \begin{proposition}\label{prop:vnotlef}%
@@ -1608,7 +1613,7 @@ Put \(G=\EL_n(A)\) and let \(\Gamma\), \(u\), \(z\), \(v=zu\), \(K\), \(J\) be a
 \[
  u\Gamma u^{-1}=v\Gamma v^{-1}=K\leq\Gamma,
 \]
-so both elements of \(Q\) conjugate \(\Gamma\) into itself.  Fix \(q_0=u\), so \(K=q_0\Gamma q_0^{-1}\).  By Propositions~\ref{prop:JinGamma} and~\ref{prop:KJ}, the subgroup \(J\leq\Gamma\) is generated by two elements, satisfies \([K,J]=1\) and \(K\cap J=\{1\}\), and is not LEF.  If \(G\) were sofic, Corollary~\ref{cor:kazhdan} (Theorem~\ref{thm:D}) would force \(J\) to be LEF, a contradiction.
+so both elements of \(Q\) conjugate \(\Gamma\) into itself.  Fix \(q_0=u\), so \(K=q_0\Gamma q_0^{-1}\).  By Propositions~\ref{prop:JinGamma} and~\ref{prop:KJ}, the subgroup \(J\leq\Gamma\) is generated by two elements, satisfies \([K,J]=1\) and \(K\cap J=\{1\}\), and is not LEF\@.  If \(G\) were sofic, Corollary~\ref{cor:kazhdan} (Theorem~\ref{thm:D}) would force \(J\) to be LEF, a contradiction.
 \end{proof}
 
 \begin{corollary}\label{cor:fgring}%
@@ -1800,7 +1805,7 @@ using \(p_1s_1=s_1\), \(t_1p_1=t_1\), \(t_0p_0=t_0\), \(p_0s_0=s_0\), \(t_0s_1=0
 Every ring-theoretic fact this subsection needs is proved in Appendix~\ref{app:K1}; for context we recall the theorem of Ara--Goodearl--Pardo \cite{AraGoodearlPardo02}, of which the facts below are the \(L_k(1,2)\)-instances: a purely infinite simple unital ring \(R\) is a GE-ring (every matrix in \(\GL_r(R)\) is a product of elementary matrices and one \(\diag(a,1,\dots,1)\)), and \(R^\times/[R^\times,R^\times]\cong K_1(R)\).  Neither statement is invoked in any proof of this paper.
 
 \begin{proposition}\label{prop:glel}%
-\leanverified{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,stableUnits_eq_top_holds}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary,binaryLeavittUnits_perfect}}%
+\leanpartial{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,stableUnits_eq_top_holds}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary,binaryLeavittUnits_perfect}\leanmod{KOne/WhiteheadQuotient}{BinaryLeavittWhiteheadK1,binaryLeavittWhiteheadK1_subsingleton}}{(ii) and (iii) are formalized as stated; (i) in Whitehead form: every unit is stable, the quotient $L^\times/H$ is a group proved trivial, and $\GL_r=\EL_r$ at every rank.  The classical direct-limit $K_1$ object is not constructed.}%
 Let \(k\) be any field and \(L=L_k(1,2)\).  Then:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \(K_1(L)=0\);
@@ -1826,7 +1831,7 @@ For an independent recent account of generation phenomena for unit groups and ma
 \end{remark}
 
 \begin{remark}[An elementary route to \texorpdfstring{$K_1(L)=0$}{K1(L)=0}]\label{rem:elementaryK1}%
-\leanverified{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,narrowReduction_holds,scalarReduction_holds}}%
+\leanverified{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,narrowReduction_holds,scalarReduction_holds}\leannote{In the Whitehead form the appendix states and Section~9 consumes.}}%
 The classical computation of \(K_1(L)\) goes through the localization sequence of \cite{AraBrustengaCortinas09}.  Appendix~\ref{app:K1} replaces this input by a complete elementary proof---a Gaussian elimination over the binary tree, in the spirit of a Wiener--Hopf factorization whose ``symbol'' is a matrix pencil with two shift variables.  In outline: a width reduction narrows every unit, modulo the Whitehead class group \(H\) of Definition~\ref{def:H}, to one whose value lies in the degree window \([-1,1]\); at a sufficiently deep leaf set such a narrow unit becomes a matrix pencil with scalar coefficient matrices \((A_0,A_1,C,B_0,B_1)\) over the five-dimensional space \(kt_0\oplus kt_1\oplus k\oplus ks_0\oplus ks_1\), indexed by a pair of complete leaf sets; and a single loop with two exits eliminates the pencil, splitting one column per pass (the index shift of the Wiener--Hopf analogy) until either a reshape by two tree tables lands the value in a one-sided degree window, or the stacked matrix \([B_0;B_1]\) acquires a scalar left inverse and the \emph{inverse} unit lands there instead; one-sided windows die by a block-move induction whose base is the keystone Lemma~\ref{lem:keystoneapp}.  Every step is carried out in Appendix~\ref{app:K1}, so the \(K_1\)-theoretic input of \cite{AraBrustengaCortinas09} is eliminated from the trust surface of Theorem~\ref{thm:B}; the citation is retained as an independent confirmation.
 \end{remark}
 
@@ -2380,7 +2385,7 @@ Let \(u\in L^\times\).  By width reduction (Lemma~\ref{lem:widthapp}), \([u]=[u'
 \subsection*{A.6.\ Consequences and effectivity}
 
 \begin{corollary}\label{cor:K1consequences}%
-\leanverified{\leanmod{KOne/RefineLoopDischarge}{glTwo_eq_elementary_holds,glFour_eq_elementary_holds}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary,binaryLeavittUnits_perfect}\leanmod{KOne/WhiteheadQuotient}{BinaryLeavittWhiteheadK1,binaryLeavittWhiteheadK1_subsingleton}\leannote{The quotient $L^\times/H$ is constructed as a group and proved trivial; the classical direct-limit $K_1$ object itself is not formalized, and the equalities $\GL_r=\EL_r$ at every rank are what identify the two.}}
+\leanpartial{\leanmod{KOne/RefineLoopDischarge}{glTwo_eq_elementary_holds,glFour_eq_elementary_holds}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary,binaryLeavittUnits_perfect}\leanmod{KOne/WhiteheadQuotient}{BinaryLeavittWhiteheadK1,binaryLeavittWhiteheadK1_subsingleton}}{The quotient $L^\times/H$ is constructed as a group and proved trivial, and $\GL_r=\EL_r$ at every rank; the classical direct-limit $K_1$ object itself is not formalized, and those equalities are what identify the two.}
 For every field \(k\) and \(L=L_k(1,2)\): \(K_1(L)=0\); \(\GL_r(L)=\EL_r(L)\) for every \(r\geq2\); and \(L^\times\) is perfect.
 \end{corollary}
 
