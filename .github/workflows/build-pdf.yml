@@ -51,6 +51,16 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
+      # apt dominates this job's wall clock (see the timeout note above) and
+      # the package set is fixed, so the downloaded .debs are cached: after
+      # the first run on a given package set, installs come from disk and the
+      # mirror is only consulted for index metadata.
+      - name: Cache apt package downloads
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/texdebs
+          key: ${{ runner.os }}-texdebs-${{ hashFiles('.github/workflows/build-pdf.yml') }}
+
       - name: Install TeX and PDF validation tools
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -59,8 +69,12 @@ jobs:
           # costs seconds rather than the whole job; see the note on
           # `timeout-minutes` above for the run that made this necessary.
           retry='-o Acquire::Retries=5 -o Acquire::http::Timeout=30'
+          keep='-o APT::Keep-Downloaded-Packages=true'
+          if [ -d "$HOME/texdebs" ]; then
+            sudo cp "$HOME"/texdebs/*.deb /var/cache/apt/archives/ 2>/dev/null || true
+          fi
           sudo apt-get $retry update
-          sudo apt-get $retry install --yes --no-install-recommends \
+          sudo apt-get $retry $keep install --yes --no-install-recommends \
             latexmk \
             lmodern \
             poppler-utils \
@@ -70,6 +84,9 @@ jobs:
             texlive-latex-extra \
             texlive-latex-recommended \
             texlive-science
+          mkdir -p "$HOME/texdebs"
+          sudo cp /var/cache/apt/archives/*.deb "$HOME/texdebs/" 2>/dev/null || true
+          sudo chown -R "$USER" "$HOME/texdebs"
 
       # The manuscript's margin notes name Lean modules and declarations.  A
       # rename on either side would leave the paper pointing at something that

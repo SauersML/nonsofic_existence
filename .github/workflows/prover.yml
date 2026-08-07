@@ -2,7 +2,10 @@ name: Lean Prover CI
 
 on:
   schedule:
-    - cron: '0 */3 * * *'
+    # Every six hours: pushes already run the full pipeline, so the schedule
+    # exists to catch cache eviction and environment drift, not to re-verify
+    # commits it has already seen.
+    - cron: '0 */6 * * *'
   push:
     branches: [ "main" ]
     paths:
@@ -60,7 +63,7 @@ jobs:
           latest=$(git log -1 --format=%ct)
           now=$(date +%s)
           age_min=$(( (now - latest) / 60 ))
-          window=240
+          window=420
           if [ "$age_min" -lt "$window" ]; then
             echo "Last commit ${age_min}m ago (< ${window}m); running scheduled job."
             echo "run=true" >> "$GITHUB_OUTPUT"
@@ -100,21 +103,20 @@ jobs:
 
       # WARM START, part 1: dependencies.
       #
-      # `restore`/`save` rather than the combined `cache` action, and a key that
-      # is unique per run with a prefix `restore-keys` fallback.  Cache keys are
-      # immutable in GitHub Actions: a combined `cache` step that hits on a
-      # partial entry will never update it, so a build that got 40% of the way
-      # through would restore that same 40% forever.  Unique key + prefix
-      # restore means every run starts from the best entry that exists and
-      # writes back a strictly better one.
+      # STABLE key, deliberately different from the build cache below: the
+      # dependency tree is COMPLETE the moment `lake exe cache get` finishes
+      # and is a function of the manifest alone, so the partial-entry hazard
+      # that forces the build cache onto unique keys does not exist here.  A
+      # stable key gives an exact hit on every unchanged-manifest run, which
+      # turns the ~5GB save step below into a no-op instead of a per-run
+      # upload.
       - name: Restore Lake dependencies
         id: lake-deps-restore
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/packages
-          key: ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.run_id }}
+          key: ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
           restore-keys: |
-            ${{ runner.os }}-lake-deps-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
             ${{ runner.os }}-lake-deps-
 
       # WARM START, part 2: this project's own oleans.
@@ -208,8 +210,11 @@ jobs:
       # modules it did compile.  This is the mechanism that lets a build too
       # long for one job converge over consecutive runs instead of restarting
       # from zero each time.
+      # Skipped when the restore already matched the exact source hash: the
+      # snapshot on disk is then byte-identical to the one in the cache, and
+      # re-uploading several GB per run buys nothing.
       - name: Save compiled project
-        if: always()
+        if: always() && !startsWith(steps.build-restore.outputs.cache-matched-key, format('{0}-nonsofic-build-{1}-', runner.os, hashFiles('lean-toolchain', 'lake-manifest.json', 'lakefile.toml', 'NonsoficGroupsExist.lean', 'NonsoficGroupsExist/**/*.lean')))
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .lake/build
