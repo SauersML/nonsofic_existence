@@ -144,9 +144,23 @@ restated verbatim so that a weakening stops typechecking here. -/
 
 open Manuscript
 
+example :
+    (∀ m : ℕ, 1 ≤ m →
+      Group.FG (UniversalLeavittEL m) ∧
+        Infinite (UniversalLeavittEL m) ∧
+        HasKazhdanPropertyT.{0, 0} (UniversalLeavittEL m) ∧
+        ¬ IsSofic (UniversalLeavittEL m)) ∧
+      ¬ IsSofic UniversalRankFour.Ambient ∧
+      CountableNonsoficGroupExists :=
+  theoremA_exact
+
+example :
+    ∃ (G : Type) (_ : Group G), Countable G ∧ ¬ IsSofic G :=
+  countable_nonsofic_groups_exist
+
 example (k : Type) [Field k] [Finite k] :
     ManuscriptProfile (BinaryLeavittUnits k) ∧
-      (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r))
+      (∀ (r : ℕ), 1 ≤ r → ∀ (C : BinaryPrefixCode (Fin r))
           (hC : (BinaryLeavitt.family k).IsComplete C)
           (M : BinaryLeavittGLRank k r),
           ((theoremB_Theta k C hC M : BinaryLeavittUnits k) :
@@ -224,6 +238,7 @@ def allowedAxioms : List Name :=
 that a CI log records exactly what each headline theorem rests on. -/
 def headlineTheorems : List Name :=
   [``nonsofic_groups_exist,
+   ``countable_nonsofic_groups_exist,
    ``exists_finitelyPresented_nonsofic_group,
    ``exists_infinite_finitelyPresented_nonsofic_ambient_cover,
    ``universalLeavittEL4_not_isSofic,
@@ -237,6 +252,7 @@ def headlineTheorems : List Name :=
    ``binaryLeavitt_finiteField_profile,
    ``ambient_profile,
    ``ambient_full_profile,
+   ``Manuscript.theoremA_exact,
    ``Manuscript.theoremB_exact,
    ``Manuscript.theoremC_exact,
    ``Manuscript.theoremC_covers_theoremB_groups,
