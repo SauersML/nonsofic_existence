@@ -96,6 +96,13 @@ jobs:
         shell: bash
         run: python3 scripts/check_lean_refs.py
 
+      # A text edit inside a TikZ node can silently widen it into its
+      # neighbor, and LaTeX has no opinion about that.  Recompile each
+      # figure standalone and intersect every pair of node bounding boxes.
+      - name: Check figure text boxes do not overlap
+        shell: bash
+        run: python3 scripts/check_fig_overlap.py --tex "$TEX_FILE"
+
       # The full source audit, not just reference resolution: a TeX-only edit
       # can change a margin note's status or let docs/CLAIM_MAP.md go stale,
       # and `prover.yml` does not trigger on the manuscript.  Running the
