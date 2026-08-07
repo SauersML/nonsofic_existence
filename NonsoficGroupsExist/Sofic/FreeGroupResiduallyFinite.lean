@@ -114,7 +114,7 @@ theorem fwd_mem_target (hred : FreeGroup.IsReduced L) (a : α)
         (by rwa [show (L.length - 1 - x.val) + 1 = L.length - x.val from by
           omega])
     rw [fwd, dif_neg hneg, dif_pos ⟨h1, h2⟩]
-    refine Or.inr ⟨by omega, ?_⟩
+    refine Or.inr ⟨by show x.val - 1 < L.length; omega, ?_⟩
     rwa [show L.length - 1 - (x.val - 1) = L.length - x.val from by omega]
 
 theorem bwd_mem_source (hred : FreeGroup.IsReduced L) (a : α)
@@ -122,7 +122,7 @@ theorem bwd_mem_source (hred : FreeGroup.IsReduced L) (a : α)
     IsSource L a (bwd L a y) := by
   rcases hy with ⟨h1, h2⟩ | ⟨h1, h2⟩
   · rw [bwd, dif_pos ⟨h1, h2⟩]
-    refine Or.inl ⟨by omega, ?_⟩
+    refine Or.inl ⟨by show y.val - 1 < L.length; omega, ?_⟩
     rwa [show L.length - 1 - (y.val - 1) = L.length - y.val from by omega]
   · have hneg : ¬ (0 < y.val ∧ PlusAt L a (L.length - y.val)) := by
       rintro ⟨-, hpl⟩
@@ -142,7 +142,7 @@ theorem bwd_fwd (hred : FreeGroup.IsReduced L) (a : α)
       dif_pos ⟨Nat.succ_pos _,
         by rwa [show L.length - (x.val + 1) = L.length - 1 - x.val from by
           omega]⟩]
-    exact Fin.ext (by omega)
+    exact Fin.ext (by show x.val + 1 - 1 = x.val; omega)
   · have hneg : ¬ (x.val < L.length ∧
         PlusAt L a (L.length - 1 - x.val)) := by
       rintro ⟨hc1, hc2⟩
@@ -157,20 +157,20 @@ theorem bwd_fwd (hred : FreeGroup.IsReduced L) (a : α)
         (by rwa [show L.length - (x.val - 1) =
             (L.length - x.val) + 1 from by omega] at hpl)
     rw [dif_neg hneg',
-      dif_pos ⟨by omega,
+      dif_pos ⟨by show x.val - 1 < L.length; omega,
         by rwa [show L.length - 1 - (x.val - 1) = L.length - x.val from by
           omega]⟩]
-    exact Fin.ext (by omega)
+    exact Fin.ext (by show x.val - 1 + 1 = x.val; omega)
 
 theorem fwd_bwd (hred : FreeGroup.IsReduced L) (a : α)
     {y : Fin (L.length + 1)} (hy : IsTarget L a y) :
     fwd L a (bwd L a y) = y := by
   rcases hy with ⟨h1, h2⟩ | ⟨h1, h2⟩
   · rw [bwd, dif_pos ⟨h1, h2⟩, fwd,
-      dif_pos ⟨by omega,
+      dif_pos ⟨by show y.val - 1 < L.length; omega,
         by rwa [show L.length - 1 - (y.val - 1) = L.length - y.val from by
           omega]⟩]
-    exact Fin.ext (by omega)
+    exact Fin.ext (by show y.val - 1 + 1 = y.val; omega)
   · have hneg : ¬ (0 < y.val ∧ PlusAt L a (L.length - y.val)) := by
       rintro ⟨-, hpl⟩
       exact not_minus_plus L hred h2
@@ -187,7 +187,7 @@ theorem fwd_bwd (hred : FreeGroup.IsReduced L) (a : α)
       dif_pos ⟨Nat.succ_pos _,
         by rwa [show L.length - (y.val + 1) = L.length - 1 - y.val from by
           omega]⟩]
-    exact Fin.ext (by omega)
+    exact Fin.ext (by show y.val + 1 - 1 = y.val; omega)
 
 /-- The partial injection of a generator, as an equivalence from its
 sources to its targets. -/
@@ -258,7 +258,7 @@ theorem toLetterPerm_getElem_apply (hred : FreeGroup.IsReduced L)
              exact hplus⟩
       rw [letterPerm_apply_of_isSource hred _ (Or.inl hc), fwd,
         dif_pos hc]
-      exact Fin.ext (by omega)
+      exact Fin.ext (by show x.val + 1 = y.val; omega)
   | false =>
       simp only [toLetterPerm, hb, cond_false]
       have hminus : MinusAt L (L[k]'hk).1 k := ⟨hk, by rw [← hb]⟩
@@ -277,7 +277,7 @@ theorem toLetterPerm_getElem_apply (hred : FreeGroup.IsReduced L)
           (letterPerm hred (L[k]'hk).1).symm from rfl,
         letterPerm_symm_apply_of_isTarget hred _ (Or.inr hc), bwd,
         dif_neg hneg, dif_pos hc]
-      exact Fin.ext (by omega)
+      exact Fin.ext (by show x.val + 1 = y.val; omega)
 
 /-- Telescoping along the word: the product of the letter permutations of
 the last `j` letters moves `0` to `j`. -/
@@ -298,7 +298,9 @@ theorem prod_map_drop_apply (hred : FreeGroup.IsReduced L) :
         Equiv.Perm.mul_apply,
         show L.length - (j + 1) + 1 = L.length - j from by omega,
         ih (by omega)]
-      exact toLetterPerm_getElem_apply hred hk (by omega) (by omega)
+      exact toLetterPerm_getElem_apply hred hk
+        (by show j = L.length - 1 - (L.length - (j + 1)); omega)
+        (by show j + 1 = L.length - (L.length - (j + 1)); omega)
 
 /-! ### The finite quotient detecting a nontrivial element -/
 
@@ -336,7 +338,7 @@ detected by a homomorphism to a finite symmetric group, acting on the ball
 of the element's own word length. -/
 instance freeGroup_residuallyFinite (α : Type*) :
     Group.ResiduallyFinite (FreeGroup α) := by
-  apply Group.residuallyFinite_of_forall_exists_finite_monoidHom.{0}
+  apply Group.residuallyFinite_of_forall_exists_finite_monoidHom
   intro w hw
   exact ⟨Equiv.Perm (Fin (w.toWord.length + 1)), inferInstance,
     inferInstance,
