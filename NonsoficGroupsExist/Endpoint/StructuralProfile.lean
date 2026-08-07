@@ -2,6 +2,7 @@ import NonsoficGroupsExist.Endpoint.MainResults
 import NonsoficGroupsExist.Leavitt.ElementaryNoFiniteQuotients
 import NonsoficGroupsExist.Sofic.SoficUltraproduct
 import NonsoficGroupsExist.Leavitt.LeavittSimplicity
+import NonsoficGroupsExist.Covers.TableCover
 
 /-!
 # What the witness looks like from outside
@@ -57,5 +58,18 @@ theorem universalLeavittEL4_no_soficEmbedding {ι : Type*} (𝒰 : Ultrafilter �
     (f : Ambient →* UniversalSofic 𝒰 X) :
     ¬ Function.Injective f :=
   no_soficEmbedding_of_not_isSofic 𝒰 X universalLeavittEL4_not_isSofic hX f
+
+/-- **Soficity is embeddability into a universal sofic group**, for countable
+groups: the local finite-model definition and the operator-algebraic one agree.
+Together with `isSofic_of_soficEmbedding` this closes the identification in both
+directions. -/
+theorem exists_soficEmbedding_of_isSofic {G : Type*} [Group G] [Countable G]
+    (h : IsSofic G) {𝒰 : Ultrafilter ℕ}
+    (hcof : (𝒰 : Filter ℕ) ≤ Filter.cofinite) :
+    ∃ (X : ℕ → FiniteModel) (f : G →* UniversalSofic 𝒰 X),
+      Function.Injective f := by
+  obtain ⟨S⟩ := soficApproximation_of_isSofic h
+  obtain ⟨f, hf⟩ := exists_soficEmbedding_of_soficApproximation S hcof
+  exact ⟨S.model, f, hf⟩
 
 end NonsoficGroupsExist

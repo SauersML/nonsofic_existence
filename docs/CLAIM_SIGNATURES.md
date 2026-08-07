@@ -2309,6 +2309,20 @@ CountableNonsoficGroupExists
                         Diverges fun n => size n (sel n)
 ```
 
+## `NonsoficGroupsExist.exists_soficEmbedding_of_isSofic`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] [Countable G],
+  IsSofic G → ∀ {𝒰 : Ultrafilter ℕ}, ↑𝒰 ≤ Filter.cofinite → ∃ X f, Function.Injective ⇑f
+```
+
+## `NonsoficGroupsExist.exists_soficEmbedding_of_soficApproximation`
+
+```lean
+∀ {G : Type u_3} [inst : Group G] (S : SoficApproximation G) {𝒰 : Ultrafilter ℕ},
+  ↑𝒰 ≤ Filter.cofinite → ∃ f, Function.Injective ⇑f
+```
+
 ## `NonsoficGroupsExist.exists_sofic_group_with_nonsofic_quotient`
 
 ```lean

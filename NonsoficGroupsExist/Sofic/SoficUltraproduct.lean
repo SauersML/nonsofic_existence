@@ -242,4 +242,80 @@ theorem no_soficEmbedding_of_not_isSofic (h : ¬ IsSofic G)
     ¬ Function.Injective f :=
   fun hf ↦ h (isSofic_of_soficEmbedding 𝒰 X hX f hf)
 
+/-! ## The converse
+
+`isSofic_of_soficEmbedding` is one half of the identification.  This is the
+other: a sofic approximation, read along a nonprincipal ultrafilter on `ℕ`,
+*is* an embedding into the universal sofic group over its own models.  Both
+estimates transfer the same way -- the sequential definition gives them for all
+`n` past a threshold, and a nonprincipal ultrafilter contains every cofinite
+set, so `∀ᶠ` along `atTop` becomes `∀ᶠ` along `𝒰`.
+-/
+
+section Converse
+
+variable {G : Type*} [Group G]
+
+/-- Cofinite sets belong to a nonprincipal ultrafilter, so an eventual estimate
+in the sequential sense is an eventual estimate along `𝒰`. -/
+theorem eventually_of_atTop {𝒰 : Ultrafilter ℕ}
+    (hcof : (𝒰 : Filter ℕ) ≤ Filter.cofinite) {p : ℕ → Prop} (N : ℕ)
+    (hp : ∀ n ≥ N, p n) : ∀ᶠ n in (𝒰 : Filter ℕ), p n := by
+  refine Filter.Eventually.filter_mono hcof ?_
+  rw [Nat.cofinite_eq_atTop]
+  exact Filter.eventually_atTop.mpr ⟨N, hp⟩
+
+/-- **A sofic approximation is a sofic embedding.**  The permutations of the
+approximation, read as one sequence per group element, define an injective
+homomorphism into the universal sofic group over its models. -/
+theorem exists_soficEmbedding_of_soficApproximation (S : SoficApproximation G)
+    {𝒰 : Ultrafilter ℕ} (hcof : (𝒰 : Filter ℕ) ≤ Filter.cofinite) :
+    ∃ f : G →* UniversalSofic 𝒰 S.model, Function.Injective f := by
+  classical
+  -- the defect sequence of a product is null
+  have hnull : ∀ g h : G,
+      (fun n ↦ S.map n g * S.map n h)⁻¹ * (fun n ↦ S.map n (g * h))
+        ∈ nullSubgroup 𝒰 S.model := by
+    intro g h ε hε
+    obtain ⟨N, hN⟩ := S.asymptoticallyMultiplicative g h ε hε
+    refine eventually_of_atTop hcof N (fun n hn ↦ ?_)
+    have hval : hammingLength (S.model n)
+        (((fun m ↦ S.map m g * S.map m h)⁻¹ * (fun m ↦ S.map m (g * h))) n)
+        = hammingDistance (S.model n) (S.map n (g * h))
+            (S.map n g * S.map n h) :=
+      hammingLength_inv_mul (S.model n) (S.map n (g * h))
+        (S.map n g * S.map n h)
+    rw [hval]
+    exact hN n hn
+  refine ⟨MonoidHom.mk' (fun g ↦ QuotientGroup.mk (fun n ↦ S.map n g)) ?_, ?_⟩
+  · intro g h
+    rw [← QuotientGroup.mk_mul]
+    exact (QuotientGroup.eq.mpr (hnull g h)).symm
+  · intro g h hgh
+    by_contra hne
+    -- separation says the two sequences stay far apart `𝒰`-often
+    obtain ⟨N, hN⟩ := S.pair_separated_eventually hne (1 / 2) (by norm_num)
+    have hfar : ∀ᶠ n in (𝒰 : Filter ℕ),
+        (1 : ℝ) / 2 ≤ hammingDistance (S.model n) (S.map n g) (S.map n h) := by
+      refine eventually_of_atTop hcof N (fun n hn ↦ ?_)
+      have := hN n hn
+      linarith
+    -- but equality in the quotient says they are null
+    have hgh' : (QuotientGroup.mk (fun n ↦ S.map n g) : UniversalSofic 𝒰 S.model)
+        = QuotientGroup.mk (fun n ↦ S.map n h) := hgh
+    have hmem : (fun n ↦ S.map n h)⁻¹ * (fun n ↦ S.map n g)
+        ∈ nullSubgroup 𝒰 S.model := QuotientGroup.eq.mp hgh'.symm
+    have hclose : ∀ᶠ n in (𝒰 : Filter ℕ),
+        hammingDistance (S.model n) (S.map n g) (S.map n h) < 1 / 2 := by
+      filter_upwards [hmem (1 / 2) (by norm_num)] with n hn
+      have hval : hammingLength (S.model n)
+          (((fun m ↦ S.map m h)⁻¹ * (fun m ↦ S.map m g)) n)
+          = hammingDistance (S.model n) (S.map n g) (S.map n h) :=
+        hammingLength_inv_mul (S.model n) (S.map n g) (S.map n h)
+      rwa [hval] at hn
+    obtain ⟨n, hn₁, hn₂⟩ := (hfar.and hclose).exists
+    linarith
+
+end Converse
+
 end NonsoficGroupsExist
