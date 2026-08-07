@@ -205,9 +205,12 @@ def resolve(claims: list[Claim], repo: Path | None = None
     the wrong thing exists.
     """
     base = Path(repo) if repo is not None else REPO
-    declared: dict[str, set[str]] = {}
+    # Keyed by the file itself, not by its basename: two files with the same
+    # stem in different directories must not pool their declarations, or a
+    # note could resolve against the wrong one and never know.
+    by_file: dict[Path, set[str]] = {}
     for full, path in build_index(base).items():
-        declared.setdefault(path.stem, set()).add(full)
+        by_file.setdefault(path, set()).add(full)
 
     problems: list[str] = []
     for claim in claims:
@@ -216,13 +219,14 @@ def resolve(claims: list[Claim], repo: Path | None = None
             # library.  Resolving both means moving a module into a
             # subdirectory is not, by itself, a broken reference: the paper
             # names `Whitehead`, and `Leavitt/Whitehead.lean` answers to it.
-            if not module_path(module, base):
+            path = module_path(module, base)
+            if path is None:
                 problems.append(f"{claim.label}: no such module {LIB}/{module}.lean")
                 continue
-            fulls = declared.get(module.rsplit("/", 1)[-1], set())
+            fulls = by_file.get(path, set())
             matches = sorted(f for f in fulls if _matches(f, decl))
             if not matches:
-                elsewhere = sorted(m for m, names in declared.items()
+                elsewhere = sorted(p.stem for p, names in by_file.items()
                                    if any(_matches(f, decl) for f in names))
                 hint = f" (declared in {', '.join(elsewhere)})" if elsewhere else ""
                 problems.append(f"{claim.label}: {module}.lean does not declare `{decl}`{hint}")
@@ -230,7 +234,7 @@ def resolve(claims: list[Claim], repo: Path | None = None
                 problems.append(
                     f"{claim.label}: `{decl}` is ambiguous in {module}.lean "
                     f"({', '.join(matches)}); qualify the note's name with a namespace suffix")
-    return declared, problems
+    return by_file, problems
 
 
 def resolved_declarations(claims: list[Claim], repo: Path | None = None) -> list[str]:
@@ -241,11 +245,14 @@ def resolved_declarations(claims: list[Claim], repo: Path | None = None) -> list
     pins only *names*.
     """
     base = Path(repo) if repo is not None else REPO
-    declared, _ = resolve(claims, base)
+    by_file, _ = resolve(claims, base)
     out: set[str] = set()
     for claim in claims:
         for module, decl in claim.declarations:
-            for full in declared.get(module.rsplit("/", 1)[-1], set()):
+            path = module_path(module, base)
+            if path is None:
+                continue
+            for full in by_file.get(path, set()):
                 if _matches(full, decl):
                     out.add(full)
     return sorted(out)
