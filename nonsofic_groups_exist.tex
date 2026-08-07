@@ -81,7 +81,10 @@
 \newcommand{\leangap}{%
   \ifleanfirstblock\leanfirstblockfalse\else\par\nobreak\vspace{1.7pt}\fi}
 
-\newcommand{\leandecl}[1]{\par\nobreak\texttt{\fontsize{6.3}{7.3}\selectfont #1}}
+% Declaration names break at underscores (the active `_' below) and, since
+% namespace-qualified CamelCase runs can exceed the margin width on their
+% own, anywhere else as a last resort, like module names.
+\newcommand{\leandecl}[1]{\par\nobreak\texttt{\fontsize{6.3}{7.3}\selectfont \leanbreakable{#1}}}
 \newcommand{\leanmod}[2]{%
   \leangap
   {\fontsize{6.7}{7.9}\selectfont
@@ -225,7 +228,7 @@ is infinite, finitely generated, has property~\((T)\), and is not sofic.  In par
 The proof of Theorem~\ref{thm:A} is engineered for audit.  The two auxiliary matrices of the construction are exhibited as explicit products of elementary matrices; every remaining elementary membership follows from one explicit Whitehead identity together with explicit commutator certificates---every cylinder transposition is a single commutator of units; the ranks below four are reached by an explicit isomorphism between the elementary groups of any two ranks \(\geq2\) over \(R\) (Proposition~\ref{prop:rankequiv}); and no \(K\)-theory is used.
 
 \begin{mainthm}\label{thm:B}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremB_exact,theoremB_Theta,theoremB_Theta_apply}\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}\leannote{\texttt{theoremB\_exact} is the printed statement in one type; \texttt{theoremB\_Theta} is $\Theta_{\mathcal C}$ for every complete leaf set, with \texttt{theoremB\_Theta\_apply} the displayed formula.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremB_exact,theoremB_Theta,theoremB_Theta_apply}\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}\leannote{\texttt{theoremB_exact} is the printed statement in one type; \texttt{theoremB_Theta} is $\Theta_{\mathcal C}$ for every complete leaf set, with \texttt{theoremB_Theta_apply} the displayed formula.}}%
 Let \(k\) be a finite field and let \(L=L_k(1,2)\).
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item The unit group \(L^\times\) is infinite, finitely generated, has property~\((T)\), and is not sofic.
@@ -240,7 +243,7 @@ For \(r\geq2\) one has \(\GL_r(L)=\EL_r(L)\).  Hence all the groups \(\GL_r(L)\)
 \end{mainthm}
 
 \begin{mainthm}\label{thm:C}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremC_first,theoremC_second,theoremC_exact,theoremC_covers_theoremB_groups}\leanmod{Endpoint/MainResults}{exists_finitelyPresented_nonsofic_group,exists_infinite_finitelyPresented_nonsofic_ambient_cover}\leanmod{Covers/KazhdanCover}{exists_kazhdan_finitelyPresented_cover_of_not_isSofic}\leannote{The final assertion is \texttt{theoremC\_covers\_theoremB\_groups}: one $H$, surjecting onto $L^\times$ and onto every $\GL_r$ and $\EL_r$ of Theorem~\ref{thm:B}.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremC_first,theoremC_second,theoremC_exact,theoremC_covers_theoremB_groups}\leanmod{Endpoint/MainResults}{exists_finitelyPresented_nonsofic_group,exists_infinite_finitelyPresented_nonsofic_ambient_cover}\leanmod{Covers/KazhdanCover}{exists_kazhdan_finitelyPresented_cover_of_not_isSofic}\leannote{The final assertion is \texttt{theoremC_covers_theoremB_groups}: one $H$, surjecting onto $L^\times$ and onto every $\GL_r$ and $\EL_r$ of Theorem~\ref{thm:B}.}}%
 Every finitely generated nonsofic group is a quotient of an infinite finitely presented nonsofic group.  Every nonsofic group with property~\((T)\) is a quotient of an infinite finitely presented nonsofic group with property~\((T)\).  In particular, there is an infinite finitely presented property~\((T)\) group \(H\) that is not sofic; \(H\) may be chosen to surject onto \(L^\times\), and hence to have a quotient isomorphic to every group listed in Theorem~\ref{thm:B}.
 \end{mainthm}
 
@@ -251,7 +254,7 @@ The proof has three independent layers.
 The first layer is analytic.
 
 \begin{mainthm}[Kazhdan compression--centralizer criterion]\label{thm:D}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremD_subgroups}\leanmod{Criterion/CriterionAssembly}{isLEF_of_isSofic,not_isSofic_of_not_isLEF}\leannote{\texttt{theoremD\_subgroups} is the printed subgroup form; countability of $G$, implicit in the sofic vocabulary of Section~2, is its one explicit instance argument, and finite generation of $G$ is derived rather than assumed.  The LEF conclusion is the textbook notion by \texttt{isLEF\_iff\_textbook}.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremD_subgroups}\leanmod{Criterion/CriterionAssembly}{isLEF_of_isSofic,not_isSofic_of_not_isLEF}\leannote{\texttt{theoremD_subgroups} is the printed subgroup form; countability of $G$, implicit in the sofic vocabulary of Section~2, is its one explicit instance argument, and finite generation of $G$ is derived rather than assumed.  The LEF conclusion is the textbook notion by \texttt{isLEF_iff_textbook}.}}%
 Let \(G\) be a finitely generated property-\((T)\) group, and let \(\Gamma\leq G\) be an infinite finitely generated property-\((T)\) subgroup.  Suppose there is a finite set \(Q\subseteq G\) with
 \[
  G=\langle\Gamma,Q\rangle
@@ -415,7 +418,7 @@ Let \((X_n)\) be a sequence of graphs of uniformly bounded degree on vertex sets
 \end{definition}
 
 \begin{definition}\label{def:essential}%
-\leanverified{\leanmod{Criterion/Criterion}{IsEssentialExpanderSequence,MatchingCertificate,isEssentialExpanderSequence}\leanmod{Matching/EssentialExpanderRepair}{induced_expands_eventually,repairedActualGraph_expands_eventually}\leannote{The matching certificate is proved to exhibit one, and the repair supplies its expander sequence.  The Lean predicate carries both printed degree bounds; the generator-graph side is discharged by \texttt{generatorGraph\_hasDegreeBound} with the value $2\abs{S_K}$.}}%
+\leanverified{\leanmod{Criterion/Criterion}{IsEssentialExpanderSequence,MatchingCertificate,isEssentialExpanderSequence}\leanmod{Matching/EssentialExpanderRepair}{induced_expands_eventually,repairedActualGraph_expands_eventually}\leannote{The matching certificate is proved to exhibit one, and the repair supplies its expander sequence.  The Lean predicate carries both printed degree bounds; the generator-graph side is discharged by \texttt{generatorGraph_hasDegreeBound} with the value $2\abs{S_K}$.}}%
 A sequence of bounded-degree graphs \((X_n)\) is an \emph{essential expander sequence} if it is edit-equivalent to an expander sequence.
 \end{definition}
 
@@ -1609,7 +1612,7 @@ so both elements of \(Q\) conjugate \(\Gamma\) into itself.  Fix \(q_0=u\), so \
 \end{proof}
 
 \begin{corollary}\label{cor:fgring}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{cor_fgring_exact,cor_fgring_countableFree}\leanmod{Criterion/CriterionAssembly}{not_isSofic_of_not_isLEF}\leanmod{Leavitt/FamilyRankFour}{compressionSetup,ambient_not_isSofic,elementary_not_isSofic,units_not_isSofic,gl_not_isSofic}\leannote{\texttt{FamilyRankFour} assembles the corollary over any nontrivial finite-type algebra with a binary family, discharging the memberships rather than assuming them; countability is derived from finite type over the finite field (\texttt{countable\_of\_finiteType}), not assumed.  The ranks reached are every $r\geq2$, together with $A^\times$ and every $\GL_r$.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{cor_fgring_exact,cor_fgring_countableFree}\leanmod{Criterion/CriterionAssembly}{not_isSofic_of_not_isLEF}\leanmod{Leavitt/FamilyRankFour}{compressionSetup,ambient_not_isSofic,elementary_not_isSofic,units_not_isSofic,gl_not_isSofic}\leannote{\texttt{FamilyRankFour} assembles the corollary over any nontrivial finite-type algebra with a binary family, discharging the memberships rather than assuming them; countability is derived from finite type over the finite field (\texttt{countable_of_finiteType}), not assumed.  The ranks reached are every $r\geq2$, together with $A^\times$ and every $\GL_r$.}}%
 Let \(A\) be a nontrivial finite-type algebra over a finite field carrying a binary Leavitt family, and let \(m\geq2\), \(n=m+1\).  If \(u,z\in\EL_n(A)\)---for instance, if \(\GL_n(A)=\EL_n(A)\)---then \(\EL_n(A)\) is an infinite, finitely generated, property-\((T)\) group that is not sofic.
 \end{corollary}
 
@@ -1843,7 +1846,7 @@ The ring \(L\) is finitely generated, by \(s_0,s_1,t_0,t_1\) and the finitely ma
 \end{proof}
 
 \begin{theorem}[Panorama]\label{thm:allranks}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremB_exact}\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic,universalLeavittEL3_not_isSofic}\leanmod{Leavitt/PrefixCode}{prefixRingEquiv,prefixRingEquiv_apply,prefixUnitsEquiv}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary}\leannote{The printed statement in one type is \texttt{theoremB\_exact}, shared with Theorem~\ref{thm:B}.  The profiles and isomorphisms travel by self-similarity; the equalities $\GL_r=\EL_r$ are the elementary Whitehead chain of Appendix~\ref{app:K1}, internal and free of external $K$-theory.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremB_exact}\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic,universalLeavittEL3_not_isSofic}\leanmod{Leavitt/PrefixCode}{prefixRingEquiv,prefixRingEquiv_apply,prefixUnitsEquiv}\leanmod{KOne/AllRanksElementary}{elementaryGroup_eq_top,glAll_eq_elementary}\leannote{The printed statement in one type is \texttt{theoremB_exact}, shared with Theorem~\ref{thm:B}.  The profiles and isomorphisms travel by self-similarity; the equalities $\GL_r=\EL_r$ are the elementary Whitehead chain of Appendix~\ref{app:K1}, internal and free of external $K$-theory.}}%
 Let \(k\) be a finite field and \(L=L_k(1,2)\).  Then the groups
 \[
  L^\times=\GL_1(L),\qquad \GL_r(L)\ (r\geq1),\qquad \EL_r(L)\ (r\geq2)
@@ -1999,7 +2002,7 @@ Let
 Since \(\diag(uv,1)=\diag(u,1)\diag(v,1)\), \(H\) is a subgroup of \(L^\times\).  The main theorem of this appendix is:
 
 \begin{theorem}\label{thm:K1app}%
-\leanverified{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,narrowReduction_holds,scalarReduction_holds,stableUnits_eq_top_holds}\leanmod{KOne/AllRanksElementary}{glAll_eq_elementary}\leannote{\texttt{K1\_trivial} is the rank-two form; the all-rank form of the second sentence is carried by \texttt{glAll\_eq\_elementary}.}}
+\leanverified{\leanmod{KOne/RefineLoopDischarge}{K1_trivial,narrowReduction_holds,scalarReduction_holds,stableUnits_eq_top_holds}\leanmod{KOne/AllRanksElementary}{glAll_eq_elementary}\leannote{\texttt{K1_trivial} is the rank-two form; the all-rank form of the second sentence is carried by \texttt{glAll_eq_elementary}.}}
 \(H=L^\times\).  Equivalently, for every \(u\in L^\times\) and every \(r\geq2\), the matrix \(\diag(u,1,\dots,1)\) is a product of elementary matrices in \(\EL_r(L)\).
 \end{theorem}
 

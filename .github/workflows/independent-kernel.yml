@@ -12,10 +12,11 @@ name: Independent kernel re-check
 # statement about the commit that triggered it, and it is far too slow to sit
 # in front of every push.  Weekly, plus on demand.
 #
-# NOTE: this workflow has not yet had a successful run; the first scheduled
-# execution is its first real test.  It is isolated by design (separate
-# workflow, restore-only caches) so that a failure here cannot break the
-# gating build or poison its caches.
+# First successful run: 2026-08-07, workflow_dispatch run 31151069368 on
+# main, with lean4export and nanoda pinned by commit SHA -- every step green
+# through "Export and re-check with nanoda".  It remains isolated by design
+# (separate workflow, restore-only caches) so that a failure here cannot
+# break the gating build or poison its caches.
 
 on:
   schedule:
