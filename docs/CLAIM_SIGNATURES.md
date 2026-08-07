@@ -707,10 +707,22 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
 ```
 
+## `NonsoficGroupsExist.HyperlinearModel`
+
+```lean
+(G : Type u_1) → [Group G] → Finset G → ℝ → Type (max 1 u_1)
+```
+
 ## `NonsoficGroupsExist.IsEssentialExpanderSequence`
 
 ```lean
 AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
+```
+
+## `NonsoficGroupsExist.IsHyperlinear`
+
+```lean
+(G : Type u_1) → [Group G] → Prop
 ```
 
 ## `NonsoficGroupsExist.IsNullSeq`
@@ -2494,6 +2506,13 @@ CountableNonsoficGroupExists
 {G : Type u_1} → [Group G] → G → G
 ```
 
+## `NonsoficGroupsExist.hammingDistance_inv`
+
+```lean
+∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
+  hammingDistance Y σ⁻¹ τ⁻¹ = hammingDistance Y σ τ
+```
+
 ## `NonsoficGroupsExist.hammingDistance_powerPerm`
 
 ```lean
@@ -2510,10 +2529,28 @@ CountableNonsoficGroupExists
 (Y : FiniteModel) → Equiv.Perm Y.carrier → ℝ
 ```
 
+## `NonsoficGroupsExist.hsDistSq`
+
+```lean
+(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → Matrix Y.carrier Y.carrier ℂ → ℝ
+```
+
 ## `NonsoficGroupsExist.involutionNormalize`
 
 ```lean
 {Y : Type u_1} → [DecidableEq Y] → Equiv.Perm Y → Equiv.Perm Y
+```
+
+## `NonsoficGroupsExist.isHyperlinear_of_finite`
+
+```lean
+∀ (G : Type) [inst : Group G] [Finite G], IsHyperlinear G
+```
+
+## `NonsoficGroupsExist.isHyperlinear_of_isSofic`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], IsSofic G → IsHyperlinear G
 ```
 
 ## `NonsoficGroupsExist.isLEF_of_isSofic`
@@ -2611,6 +2648,12 @@ CountableNonsoficGroupExists
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
 ```
 
+## `NonsoficGroupsExist.not_isSofic_of_not_isHyperlinear`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinear G → ¬IsSofic G
+```
+
 ## `NonsoficGroupsExist.not_isSofic_of_not_isLEF`
 
 ```lean
@@ -2632,6 +2675,20 @@ CountableNonsoficGroupExists
 ∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y),
   ∑ x, ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
     2 * ↑(hammingDisagreement σ τ).card
+```
+
+## `NonsoficGroupsExist.permMatrix_hsDistSq`
+
+```lean
+∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
+  hsDistSq Y (Equiv.Perm.permMatrix ℂ σ) (Equiv.Perm.permMatrix ℂ τ) = 2 * hammingDistance Y σ τ
+```
+
+## `NonsoficGroupsExist.permMatrix_mem_unitaryGroup`
+
+```lean
+∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
+  Equiv.Perm.permMatrix ℂ σ ∈ Matrix.unitaryGroup Y.carrier ℂ
 ```
 
 ## `NonsoficGroupsExist.permMatrix_normalized_dist_sq_eq`

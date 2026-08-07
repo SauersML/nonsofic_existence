@@ -62,6 +62,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "ElementaryNoFiniteQuotients",
     "ExactCompression",
     "FiniteQuotientBlindness",
+    "Hyperlinear",
     "HyperlinearMetric",
     "CommutantRigidity",
     "KunSpectralCounterexample",

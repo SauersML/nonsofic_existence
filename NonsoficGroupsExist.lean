@@ -249,6 +249,7 @@ import NonsoficGroupsExist.Sofic.Sofic
 import NonsoficGroupsExist.Sofic.SoficAmplification
 import NonsoficGroupsExist.Sofic.SoficUltraproduct
 import NonsoficGroupsExist.Sofic.HyperlinearMetric
+import NonsoficGroupsExist.Sofic.Hyperlinear
 import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls
