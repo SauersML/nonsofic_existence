@@ -2056,6 +2056,18 @@ Function.Injective ⇑UniversalRankFour.witnessEmbedding
   Whitehead.diagonalPair ↑a ↑a⁻¹ = Whitehead.w a * Whitehead.w (-1)
 ```
 
+## `NonsoficGroupsExist.adjointRep`
+
+```lean
+{G : Type u_1} →
+  {k : Type u_2} →
+    {V : Type u_3} →
+      [inst : Group G] →
+        [inst_1 : Field k] →
+          [inst_2 : AddCommGroup V] →
+            [inst_3 : _root_.Module k V] → (G →* V ≃ₗ[k] V) → G →* (V →ₗ[k] V) ≃ₗ[k] V →ₗ[k] V
+```
+
 ## `NonsoficGroupsExist.ambient_full_profile`
 
 ```lean
@@ -2137,6 +2149,53 @@ Group.FG ↥UniversalRankFour.Ambient ∧
         HasKazhdanPropertyT ↥(BinaryLeavittEL k m) ∧ ¬IsSofic ↥(BinaryLeavittEL k m)
 ```
 
+## `NonsoficGroupsExist.commutant_no_growth`
+
+```lean
+∀ {G : Type u_1} {k : Type u_2} {V : Type u_3} [inst : Group G] [inst_1 : Field k]
+  [inst_2 : AddCommGroup V] [inst_3 : _root_.Module k V] [FiniteDimensional k V]
+  (π : G →* V ≃ₗ[k] V) (Γ : Subgroup G) {t : G},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) →
+    ∀ (x : V →ₗ[k] V),
+      (∀ γ ∈ Γ, ((adjointRep π) (t * γ * t⁻¹)) x = x) ↔ ∀ γ ∈ Γ, ((adjointRep π) γ) x = x
+```
+
+## `NonsoficGroupsExist.compressedImage_eq`
+
+```lean
+∀ {H : Type u_1} {Q : Type u_2} [inst : Group H] [inst_1 : Group Q] [Finite Q] (φ : H →* Q)
+  (Γ : Subgroup H) {t : H},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) →
+    Subgroup.map (MulEquiv.toMonoidHom (MulAut.conj (φ t))) (Subgroup.map φ Γ) =
+      Subgroup.map φ Γ
+```
+
+## `NonsoficGroupsExist.compressedImage_le`
+
+```lean
+∀ {H : Type u_1} {Q : Type u_2} [inst : Group H] [inst_1 : Group Q] (φ : H →* Q)
+  (Γ : Subgroup H) {t : H},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) →
+    Subgroup.map (MulEquiv.toMonoidHom (MulAut.conj (φ t))) (Subgroup.map φ Γ) ≤
+      Subgroup.map φ Γ
+```
+
+## `NonsoficGroupsExist.compressorImage_normalizes`
+
+```lean
+∀ {H : Type u_1} {Q : Type u_2} [inst : Group H] [inst_1 : Group Q] [Finite Q] (φ : H →* Q)
+  (Γ : Subgroup H) {t : H},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, φ t * q * (φ t)⁻¹ ∈ Subgroup.map φ Γ
+```
+
+## `NonsoficGroupsExist.compressorImage_normalizes_inv`
+
+```lean
+∀ {H : Type u_1} {Q : Type u_2} [inst : Group H] [inst_1 : Group Q] [Finite Q] (φ : H →* Q)
+  (Γ : Subgroup H) {t : H},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, (φ t)⁻¹ * q * φ t ∈ Subgroup.map φ Γ
+```
+
 ## `NonsoficGroupsExist.countable_nonsofic_groups_exist`
 
 ```lean
@@ -2207,6 +2266,13 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {R : Type u_1} [inst : Ring R] [Algebra.FiniteType ℤ R] (n : ℕ),
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
+```
+
+## `NonsoficGroupsExist.eq_top_of_permHom_trivial`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (H : Subgroup G),
+  (∀ (g : G), (MulAction.toPermHom G (G ⧸ H)) g = 1) → H = ⊤
 ```
 
 ## `NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group`
@@ -2385,6 +2451,37 @@ CountableNonsoficGroupExists
     Subgroup.closure (↑Γ ∪ T) = ⊤ → ∀ (g : G), ⇑(φ g) '' fixedSet φ Γ = fixedSet φ Γ
 ```
 
+## `NonsoficGroupsExist.fixedSubmodule`
+
+```lean
+{G : Type u_1} →
+  [inst : Group G] →
+    {k : Type u_3} →
+      {V : Type u_4} →
+        [inst_1 : Field k] →
+          [inst_2 : AddCommGroup V] →
+            [inst_3 : _root_.Module k V] → (G →* V ≃ₗ[k] V) → Subgroup G → Submodule k V
+```
+
+## `NonsoficGroupsExist.fixedSubmodule_compressed_eq`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {k : Type u_3} {V : Type u_4} [inst_1 : Field k]
+  [inst_2 : AddCommGroup V] [inst_3 : _root_.Module k V] [FiniteDimensional k V]
+  (σ : G →* V ≃ₗ[k] V) (Γ : Subgroup G) {t : G},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) →
+    ∀ (v : V), (∀ γ ∈ Γ, (σ (t * γ * t⁻¹)) v = v) ↔ v ∈ fixedSubmodule σ Γ
+```
+
+## `NonsoficGroupsExist.fixedSubmodule_map_eq`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {k : Type u_3} {V : Type u_4} [inst_1 : Field k]
+  [inst_2 : AddCommGroup V] [inst_3 : _root_.Module k V] [FiniteDimensional k V]
+  (σ : G →* V ≃ₗ[k] V) (Γ : Subgroup G) {t : G},
+  (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → Submodule.map (↑(σ t)) (fixedSubmodule σ Γ) = fixedSubmodule σ Γ
+```
+
 ## `NonsoficGroupsExist.freeGroup_residuallyFinite`
 
 ```lean
@@ -2529,6 +2626,31 @@ CountableNonsoficGroupExists
   Ultrafilter ι → (X : ι → FiniteModel) → Subgroup ((i : ι) → Equiv.Perm (X i).carrier)
 ```
 
+## `NonsoficGroupsExist.permMatrix_dist_sq_eq`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y),
+  ∑ x, ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
+    2 * ↑(hammingDisagreement σ τ).card
+```
+
+## `NonsoficGroupsExist.permMatrix_normalized_dist_sq_eq`
+
+```lean
+∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
+  (∑ x, ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2) /
+      ↑(Fintype.card Y.carrier) =
+    2 * hammingDistance Y σ τ
+```
+
+## `NonsoficGroupsExist.permMatrix_row_sq`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y) (x : Y),
+  ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
+    if σ x = τ x then 0 else 2
+```
+
 ## `NonsoficGroupsExist.permutation_conservation_full`
 
 ```lean
@@ -2609,6 +2731,12 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {Q : Type u_1} [inst : Group Q] [Finite Q] (φ : ↥UniversalRankFour.Ambient →* Q), φ = 1
+```
+
+## `NonsoficGroupsExist.universalLeavittEL4_no_properFiniteIndex`
+
+```lean
+∀ (H : Subgroup ↥UniversalRankFour.Ambient) [Finite (↥UniversalRankFour.Ambient ⧸ H)], H = ⊤
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL4_no_soficEmbedding`
