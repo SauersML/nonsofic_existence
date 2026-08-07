@@ -1,6 +1,7 @@
 import NonsoficGroupsExist.Sofic.Sofic
 import Mathlib.Algebra.Group.Subgroup.Basic
 import Mathlib.Data.Set.Card
+import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
 /-!
 # Exact compressions normalize for free
@@ -111,5 +112,52 @@ theorem fixedSet_smul_eq_of_closure [Finite Y] (φ : G →* Equiv.Perm Y)
         rw [iha] at hid
         exact hid
   exact hmem g (hgen ▸ Subgroup.mem_top g)
+
+/-! ## The linear category
+
+The same collapse, with finite dimension in place of finiteness of the vertex
+set.  This is the form the unitary analogue uses: a one-sided compression of
+`Γ` moves the `Γ`-fixed subspace onto itself, so for genuine finite-dimensional
+representations the normalization the matching argument works for is automatic.
+-/
+
+section Linear
+
+variable {k V : Type*} [Field k] [AddCommGroup V] [Module k V]
+
+/-- The subspace fixed by every element of `Γ`. -/
+def fixedSubmodule (σ : G →* (V ≃ₗ[k] V)) (Γ : Subgroup G) : Submodule k V where
+  carrier := {v | ∀ γ ∈ Γ, σ γ v = v}
+  zero_mem' := by intro γ _; simp
+  add_mem' := by
+    intro a b ha hb γ hγ
+    rw [map_add, ha γ hγ, hb γ hγ]
+  smul_mem' := by
+    intro c a ha γ hγ
+    rw [map_smul, ha γ hγ]
+
+theorem mem_fixedSubmodule {σ : G →* (V ≃ₗ[k] V)} {Γ : Subgroup G} {v : V} :
+    v ∈ fixedSubmodule σ Γ ↔ ∀ γ ∈ Γ, σ γ v = v := Iff.rfl
+
+/-- **One-sided compression is two-sided in finite dimension.**  The `Γ`-fixed
+subspace is carried onto itself by any compressor, with no hypothesis beyond
+`tΓt⁻¹ ≤ Γ` and finite dimension. -/
+theorem fixedSubmodule_map_eq [FiniteDimensional k V] (σ : G →* (V ≃ₗ[k] V))
+    (Γ : Subgroup G) {t : G} (ht : ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) :
+    (fixedSubmodule σ Γ).map (σ t : V →ₗ[k] V) = fixedSubmodule σ Γ := by
+  have hle : fixedSubmodule σ Γ ≤ (fixedSubmodule σ Γ).map (σ t : V →ₗ[k] V) := by
+    intro v hv
+    refine ⟨(σ t).symm v, fun γ hγ ↦ ?_, by simp⟩
+    have hconj : σ (t * γ * t⁻¹) v = v := hv _ (ht γ hγ)
+    rw [map_mul, map_mul, map_inv] at hconj
+    have happ : (σ t) ((σ γ) ((σ t)⁻¹ v)) = v := hconj
+    have : (σ t).symm ((σ t) ((σ γ) ((σ t)⁻¹ v))) = (σ t).symm v := by rw [happ]
+    simpa using this
+  have hiso : (fixedSubmodule σ Γ) ≃ₗ[k]
+      ((fixedSubmodule σ Γ).map (σ t : V →ₗ[k] V)) :=
+    Submodule.equivMapOfInjective _ (σ t).injective _
+  exact (Submodule.eq_of_le_of_finrank_le hle (le_of_eq hiso.finrank_eq.symm)).symm
+
+end Linear
 
 end NonsoficGroupsExist
