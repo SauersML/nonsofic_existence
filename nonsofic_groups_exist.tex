@@ -2003,6 +2003,15 @@ The Leavitt-corner theorem (Theorem~\ref{thm:corner}) applies to an arbitrary no
 Theorem~\ref{thm:A} settles a companion closure question in the negative.  Every group is a quotient of a free group, and free groups are residually finite---hence LEF, hence sofic; presenting the nonsofic group of Theorem~\ref{thm:A} as such a quotient exhibits a residually finite group with a nonsofic quotient.  Consequently none of the three classes---residually finite, LEF, sofic---is closed under quotients.  This is also why the covers of Section~\ref{sec:fp} are proved nonsofic directly, from the forbidden table: a quotient-closure argument would have sufficed there, and none is valid.
 \end{remark}
 
+\begin{remark}[Soficity is undecidable]\label{rem:undecidable}%
+\leanverified{\leanmod{Sofic/SoficTransfer}{isSofic_of_injective,SoficApproximation.restrict}\leanmod{Endpoint/MainResults}{exists_finitelyPresented_nonsofic_group}\leanmod{Sofic/SoficPositiveControl}{isSofic_of_finite}\leannote{Markov's two conditions are formalized; Adian--Rabin is cited.}}%
+Soficity passes to subgroups, immediately from Definition~\ref{def:sofic}: a model for the ambient group, read along an injective homomorphism, is a model for the source, since multiplicativity transports along a homomorphism and separation along an injection.  So every group into which a nonsofic group embeds is nonsofic, with no finiteness or presentation hypothesis anywhere.
+
+Together with Theorem~\ref{thm:C} this makes soficity a \emph{Markov property} of finitely presented groups: the trivial group is sofic, and the finitely presented nonsofic group of Theorem~\ref{thm:C} embeds in no sofic group whatsoever, so in particular in no finitely presented one.  By the Adian--Rabin theorem \cite{Adian55,Rabin58} there is therefore no algorithm that decides, from a finite presentation, whether the group it defines is sofic.  Finite presentability of the witness is exactly what this needs, and is what Theorem~\ref{thm:A} on its own does not supply: Markov's second condition asks for a finitely presented negative witness.  The corresponding questions for hyperlinearity and for weak soficity remain open, no finitely presented negative witness being known for either.
+
+Subgroup closure also propagates the witness upward.  Every countable group embeds into a finitely generated simple group \cite{Hall74}; applying this to the group of Theorem~\ref{thm:A} produces a finitely generated infinite simple group that is not sofic.
+\end{remark}
+
 \begin{remark}[Related work]\label{rem:subsequent}
 Three preprints from the first week of August 2026 bear on the material here.
 
@@ -2439,6 +2448,11 @@ G.~Abrams and G.~Aranda Pino,
 \emph{Purely infinite simple Leavitt path algebras},
 J. Pure Appl. Algebra \textbf{207} (2006), 553--563.
 
+\bibitem{Adian55}
+S.~I. Adian,
+\emph{Algorithmic unsolvability of problems of recognition of certain properties of groups},
+Dokl. Akad. Nauk SSSR \textbf{103} (1955), 533--535.
+
 \bibitem{AlekseevThom26}
 V.~Alekseev and A.~Thom,
 \emph{Centralizers of sofic approximations of Kazhdan groups},
@@ -2493,6 +2507,11 @@ J. Eur. Math. Soc. (JEMS) \textbf{1} (1999), 109--197.
 F.~Fournier-Facio,
 \emph{A torsion-free non-sofic group},
 arXiv:2608.02025 [math.GR], August 2026.
+
+\bibitem{Hall74}
+P.~Hall,
+\emph{On the embedding of a group in a join of given groups},
+J. Austral. Math. Soc. \textbf{17} (1974), 434--495.
 
 \bibitem{Higman74}
 G.~Higman,
@@ -2550,6 +2569,11 @@ J. Algebra \textbf{344} (2011), 172--183.
 V.~G. Pestov,
 \emph{Hyperlinear and sofic groups: a brief guide},
 Bull. Symbolic Logic \textbf{14} (2008), 449--480.
+
+\bibitem{Rabin58}
+M.~O. Rabin,
+\emph{Recursive unsolvability of group theoretic problems},
+Ann. of Math. (2) \textbf{67} (1958), 172--194.
 
 \bibitem{Shalom00}
 Y.~Shalom,

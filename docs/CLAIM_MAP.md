@@ -81,6 +81,7 @@ the print.
 | `thm:table` | formalized | `Covers/TableCover`: `tableGroup_no_model`, `exists_finitelyPresented_obstruction` |  |
 | `thm:kcover` | formalized | `Kazhdan/ShalomFinitePresentation`: `exists_presented_kazhdan_cover`, `exists_finitelyPresented_kazhdan_cover`; `Covers/KazhdanCover`: `exists_kazhdan_finitelyPresented_cover_of_not_isSofic` | Shalom's theorem is proved internally, not cited. |
 | `rem:quotients` | formalized | `Endpoint/QuotientNonclosure`: `exists_sofic_group_with_nonsofic_quotient`, `exists_isLEF_group_with_non_isLEF_quotient`, `exists_residuallyFinite_group_with_non_residuallyFinite_quotient`; `Sofic/FreeGroupResiduallyFinite`: `freeGroup_residuallyFinite`, `isSofic_freeGroup` | Residual finiteness of free groups is proved from scratch. |
+| `rem:undecidable` | formalized | `Sofic/SoficTransfer`: `isSofic_of_injective`, `SoficApproximation.restrict`; `Endpoint/MainResults`: `exists_finitelyPresented_nonsofic_group`; `Sofic/SoficPositiveControl`: `isSofic_of_finite` | Markov's two conditions are formalized; Adian--Rabin is cited. |
 | `def:H` | formalized | `Leavitt/DiagonalClassGroup`: `stableUnits`, `ScalarReduction` |  |
 | `thm:K1app` | formalized | `KOne/RefineLoopDischarge`: `K1_trivial`, `narrowReduction_holds`, `scalarReduction_holds`, `stableUnits_eq_top_holds`; `KOne/AllRanksElementary`: `glAll_eq_elementary` |  |
 | `lem:division` | formalized | `Leavitt/LeavittSimplicity`: `exists_mul_mul_eq_one` |  |
