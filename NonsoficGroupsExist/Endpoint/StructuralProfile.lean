@@ -3,6 +3,7 @@ import NonsoficGroupsExist.Leavitt.ElementaryNoFiniteQuotients
 import NonsoficGroupsExist.Sofic.SoficUltraproduct
 import NonsoficGroupsExist.Leavitt.LeavittSimplicity
 import NonsoficGroupsExist.Covers.TableCover
+import Mathlib.GroupTheory.GroupAction.Quotient
 
 /-!
 # What the witness looks like from outside
@@ -71,5 +72,36 @@ theorem exists_soficEmbedding_of_isSofic {G : Type*} [Group G] [Countable G]
   obtain ⟨S⟩ := soficApproximation_of_isSofic h
   obtain ⟨f, hf⟩ := exists_soficEmbedding_of_soficApproximation S hcof
   exact ⟨S.model, f, hf⟩
+
+/-! ## No proper subgroup of finite index
+
+A proper subgroup of finite index would give a nontrivial action on its coset
+space, hence a nontrivial homomorphism to a finite group.  Since the witness
+has none, it has no such subgroup either. -/
+
+/-- If a group acts trivially on the coset space of `H`, then `H` is
+everything: the trivial action fixes the base coset, so every element lies in
+`H`. -/
+theorem eq_top_of_permHom_trivial {G : Type*} [Group G] (H : Subgroup G)
+    (h : ∀ g : G, MulAction.toPermHom G (G ⧸ H) g = 1) : H = ⊤ := by
+  ext g
+  simp only [Subgroup.mem_top, iff_true]
+  have hfix : (g : G) • (QuotientGroup.mk (1 : G) : G ⧸ H)
+      = QuotientGroup.mk (1 : G) := by
+    have hp := congrArg (fun p : Equiv.Perm (G ⧸ H) ↦ p (QuotientGroup.mk 1)) (h g)
+    simpa using hp
+  have hg : (QuotientGroup.mk g : G ⧸ H) = QuotientGroup.mk 1 := by
+    simpa using hfix
+  have hmem := QuotientGroup.eq.mp hg
+  simpa using hmem
+
+/-- **The witness has no proper subgroup of finite index.**  Its coset action
+would be a nontrivial homomorphism to a finite symmetric group, and it has
+none. -/
+theorem universalLeavittEL4_no_properFiniteIndex (H : Subgroup Ambient)
+    [Finite (Ambient ⧸ H)] : H = ⊤ :=
+  eq_top_of_permHom_trivial H fun g ↦
+    universalLeavittEL4_finite_quotient_trivial
+      (MulAction.toPermHom Ambient (Ambient ⧸ H)) g
 
 end NonsoficGroupsExist
