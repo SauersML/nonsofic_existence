@@ -719,6 +719,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 (G : Type u_1) → [Group G] → Prop
 ```
 
+## `NonsoficGroupsExist.IsSoficWeak`
+
+```lean
+(G : Type u_1) → [Group G] → ℝ → Prop
+```
+
 ## `NonsoficGroupsExist.KunDecomposition.exists_expanderDecomposition`
 
 ```lean
@@ -2281,6 +2287,16 @@ CountableNonsoficGroupExists
 {G : Type u_1} → [Group G] → G → G
 ```
 
+## `NonsoficGroupsExist.hammingDistance_powerPerm`
+
+```lean
+∀ (Y : FiniteModel) (k : ℕ),
+  0 < Fintype.card Y.carrier →
+    ∀ (p q : Equiv.Perm Y.carrier),
+      hammingDistance (powerModel Y k) (powerPerm k p) (powerPerm k q) =
+        1 - (1 - hammingDistance Y p q) ^ k
+```
+
 ## `NonsoficGroupsExist.involutionNormalize`
 
 ```lean
@@ -2313,6 +2329,18 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ (G : Type u_1) [inst : Group G] [Countable G], IsSofic G ↔ Nonempty (SoficApproximation G)
+```
+
+## `NonsoficGroupsExist.isSofic_iff_weak`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {δ : ℝ}, 0 < δ → δ < 1 → (IsSofic G ↔ IsSoficWeak G δ)
+```
+
+## `NonsoficGroupsExist.isSofic_of_isSoficWeak`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {δ : ℝ}, 0 < δ → IsSoficWeak G δ → IsSofic G
 ```
 
 ## `NonsoficGroupsExist.isSofic_of_soficApproximation`
@@ -2348,6 +2376,12 @@ CountableNonsoficGroupExists
 ∀ {Y : Type u_1} [inst : Fintype Y] (π : Y ≃ Y) (f : Y → ℝ),
   ∑ y, max (f y - f (π y)) 0 = ∑ y, max (f (π y) - f y) 0 ∧
     ∑ y, max (f (π y) - f y) 0 = 1 / 2 * ∑ y, |f (π y) - f y|
+```
+
+## `NonsoficGroupsExist.powerPerm`
+
+```lean
+{Y : Type u_1} → (k : ℕ) → Equiv.Perm Y → Equiv.Perm (Fin k → Y)
 ```
 
 ## `NonsoficGroupsExist.refineComponent`

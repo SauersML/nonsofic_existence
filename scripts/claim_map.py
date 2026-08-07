@@ -60,6 +60,7 @@ STATUS = {"verified": "formalized", "partial": "formalized in part",
 # is a deliberate edit here rather than a silent change of meaning.
 CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "KunSpectralCounterexample",
+    "SoficAmplification",
     "ThompsonVWitness",
     "Whitehead",
 })

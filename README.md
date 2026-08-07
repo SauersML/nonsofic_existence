@@ -88,7 +88,20 @@ An axiom audit says nothing about whether the statement proved is the one
 intended. The two definitions carrying most of that weight are discharged as
 theorems: `hasKazhdanPropertyT_iff_textbook` identifies the real-orthogonal
 property `(T)` used throughout with the textbook complex-unitary one, and
-`isLEF_iff_textbook` does the same for local embeddability.
+`isLEF_iff_textbook` does the same for local embeddability — `IsLEF` is the
+strong local form, requiring multiplicativity on all of `s × s`, and the
+textbook form (multiplicativity only where the product stays in the tested
+set) is recovered from it by enlarging the set.
+
+The same question arises for `IsSofic`, where it matters in the opposite
+direction: the negative results below refute soficity, so the definition
+refuted had better not be an unusually strong one. Two conventions are
+discharged. `isSofic_iff_productRestricted` drops multiplicativity to the
+pairs whose product stays in the test set. `isSofic_iff_weak` replaces the
+sharp separation `1 - ε` by any fixed constant `δ ∈ (0, 1)` — the textbook
+`1/4` or `1/2` convention — by tensor-power amplification
+(`Sofic/SoficAmplification`), so `universalLeavittEL4_not_isSofic` refutes
+all of these at once.
 
 Two further conventions, for reading endpoints. `IsSofic` is a local
 finite-model property that makes sense for arbitrary groups, while
