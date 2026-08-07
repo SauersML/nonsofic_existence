@@ -1450,6 +1450,17 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
   Manuscript.ManuscriptProfile ↥(RankFour.Ambient A)
 ```
 
+## `NonsoficGroupsExist.Manuscript.cor_fgring_printed`
+
+```lean
+∀ (k A : Type) [inst : Field k] [Finite k] [inst_2 : Ring A] [Nontrivial A]
+  [inst_4 : Algebra k A] [Algebra.FiniteType k A] (L : LeavittFamily A) (m : ℕ) (hm : 0 < m),
+  2 ≤ m →
+    GeneralScheme.uUnit L ∈ elementaryGroup (Fin (m + 1)) A →
+      GeneralScheme.zUnit L hm ∈ elementaryGroup (Fin (m + 1)) A →
+        Manuscript.ManuscriptProfile ↥(elementaryGroup (Fin (m + 1)) A)
+```
+
 ## `NonsoficGroupsExist.Manuscript.theoremB_Theta`
 
 ```lean
@@ -1478,9 +1489,13 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ```lean
 ∀ (k : Type) [inst : Field k] [Finite k],
   Manuscript.ManuscriptProfile (BinaryLeavittUnits k) ∧
-    (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)),
-        (BinaryLeavitt.family k).IsComplete C →
-          Nonempty (Manuscript.BinaryLeavittGLRank k r ≃* BinaryLeavittUnits k)) ∧
+    (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)) (hC : (BinaryLeavitt.family k).IsComplete C)
+        (M : Manuscript.BinaryLeavittGLRank k r),
+        ↑((Manuscript.theoremB_Theta k C hC) M) =
+          ∑ i,
+            ∑ j,
+              (BinaryLeavitt.family k).wordS (C.word i) * ↑M i j *
+                (BinaryLeavitt.family k).wordT (C.word j)) ∧
       (∀ (r : ℕ), 2 ≤ r → Manuscript.BinaryLeavittELRank k r = ⊤) ∧
         (∀ (r : ℕ), 1 ≤ r → Manuscript.ManuscriptProfile (Manuscript.BinaryLeavittGLRank k r)) ∧
           ∀ (r : ℕ), 2 ≤ r → Manuscript.ManuscriptProfile ↥(Manuscript.BinaryLeavittELRank k r)
@@ -1531,7 +1546,7 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ## `NonsoficGroupsExist.Manuscript.theoremD_subgroups`
 
 ```lean
-∀ {G : Type} [inst : Group G] [Countable G] (Γ J : Subgroup G) (Q : Finset G) (q₀ : G),
+∀ {G : Type} [inst : Group G] (Γ J : Subgroup G) (Q : Finset G) (q₀ : G),
   HasKazhdanPropertyT G →
     HasKazhdanPropertyT ↥Γ →
       Infinite ↥Γ →
@@ -2191,6 +2206,18 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 
 ```lean
 ∀ (α : Type u_1), IsSofic (FreeGroup α)
+```
+
+## `NonsoficGroupsExist.isSofic_iff_nonempty_soficApproximation`
+
+```lean
+∀ (G : Type u_1) [inst : Group G] [Countable G], IsSofic G ↔ Nonempty (SoficApproximation G)
+```
+
+## `NonsoficGroupsExist.isSofic_of_soficApproximation`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (A : SoficApproximation G), IsSofic G
 ```
 
 ## `NonsoficGroupsExist.matching_injective`
