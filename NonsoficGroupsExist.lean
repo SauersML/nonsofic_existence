@@ -101,6 +101,7 @@ import NonsoficGroupsExist.Kun.KunUniformRounding
 import NonsoficGroupsExist.Kun.KunUniformDecompositionStep
 import NonsoficGroupsExist.Criterion.CompressionSetup
 import NonsoficGroupsExist.Criterion.ExactCompression
+import NonsoficGroupsExist.Criterion.CommutantRigidity
 import NonsoficGroupsExist.Criterion.LocalCriterion
 import NonsoficGroupsExist.Criterion.LocalizedApproximation
 import NonsoficGroupsExist.Criterion.SelectionOutput

@@ -158,6 +158,26 @@ theorem fixedSubmodule_map_eq [FiniteDimensional k V] (σ : G →* (V ≃ₗ[k] 
     Submodule.equivMapOfInjective _ (σ t).injective _
   exact (Submodule.eq_of_le_of_finrank_le hle (le_of_eq hiso.finrank_eq.symm)).symm
 
+/-- **The fixed space does not grow under compression.**  A vector fixed by the
+compressed copy `tΓt⁻¹` is already fixed by `Γ` itself.  This is the form the
+commutant argument consumes: one-sided compression buys nothing new in finite
+dimension. -/
+theorem fixedSubmodule_compressed_eq [FiniteDimensional k V] (σ : G →* (V ≃ₗ[k] V))
+    (Γ : Subgroup G) {t : G} (ht : ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) (v : V) :
+    (∀ γ ∈ Γ, σ (t * γ * t⁻¹) v = v) ↔ v ∈ fixedSubmodule σ Γ := by
+  constructor
+  · intro hv
+    have himg : v ∈ (fixedSubmodule σ Γ).map (σ t : V →ₗ[k] V) := by
+      refine ⟨(σ t).symm v, fun γ hγ ↦ ?_, by simp⟩
+      have h := hv γ hγ
+      rw [map_mul, map_mul, map_inv] at h
+      have happ : (σ t) ((σ γ) ((σ t)⁻¹ v)) = v := h
+      have hsym := congrArg (σ t).symm happ
+      simpa using hsym
+    rwa [fixedSubmodule_map_eq σ Γ ht] at himg
+  · intro hv γ hγ
+    exact hv _ (ht γ hγ)
+
 end Linear
 
 end NonsoficGroupsExist
