@@ -102,6 +102,7 @@ import NonsoficGroupsExist.Kun.KunUniformDecompositionStep
 import NonsoficGroupsExist.Criterion.CompressionSetup
 import NonsoficGroupsExist.Criterion.ExactCompression
 import NonsoficGroupsExist.Criterion.CommutantRigidity
+import NonsoficGroupsExist.Criterion.FiniteQuotientBlindness
 import NonsoficGroupsExist.Criterion.LocalCriterion
 import NonsoficGroupsExist.Criterion.LocalizedApproximation
 import NonsoficGroupsExist.Criterion.SelectionOutput
@@ -248,6 +249,7 @@ import NonsoficGroupsExist.Sofic.Sofic
 import NonsoficGroupsExist.Sofic.SoficAmplification
 import NonsoficGroupsExist.Sofic.SoficUltraproduct
 import NonsoficGroupsExist.Sofic.HyperlinearMetric
+import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls
 import NonsoficGroupsExist.Sofic.SoficErrors
