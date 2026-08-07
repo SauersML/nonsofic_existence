@@ -4,7 +4,8 @@
     python3 scripts/reorganize.py            # plan only, changes nothing
     python3 scripts/reorganize.py --apply    # git mv + rewrite every import
 
-BLOCKED, and deliberately not run.  See `docs/REORGANIZATION.md`: the
+BLOCKED, and deliberately not run.  See the reorganization section of
+`NOTEPAD.md`: the
 manuscript names 82 modules in its margin notes and hyperlinks each to
 `NonsoficGroupsExist/<Module>.lean`.  Moving a module breaks both -- the link
 404s, and `scripts/check.py` reports a dangling reference.  Neither can be
@@ -186,8 +187,8 @@ def main() -> int:
         print(f"  UNASSIGNED  {module}")
 
     if not args.apply:
-        print("\nplan only; nothing changed.  See docs/REORGANIZATION.md for the "
-              "manuscript change this waits on.")
+        print("\nplan only; nothing changed.  See NOTEPAD.md (reorganization "
+              "section) for the manuscript change this waits on.")
         return 1 if unassigned else 0
 
     if unassigned:

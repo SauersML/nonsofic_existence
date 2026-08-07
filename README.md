@@ -245,4 +245,5 @@ equivalence true.
 
 The checklist archaeology — what was proved when, in what order, and the
 intermediate results named along the way — lives in
-[docs/HISTORY.md](docs/HISTORY.md), alongside `BUILD_ITERATION_NOTES.md`.
+[NOTEPAD.md](NOTEPAD.md), together with the build-iteration log and the
+directory-reorganization record.
