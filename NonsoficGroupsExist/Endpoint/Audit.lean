@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.Endpoint.MainResults
 import NonsoficGroupsExist.Endpoint.ManuscriptStatements
+import NonsoficGroupsExist.Sofic.SoficSequential
 import NonsoficGroupsExist.Sofic.FinitelyPresentedLEF
 import NonsoficGroupsExist.Leavitt.UnitsGLProfile
 import NonsoficGroupsExist.KOne.AllRanksElementary
@@ -55,6 +56,8 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.isSofic_of_finite
 #print axioms NonsoficGroupsExist.isSofic_multiplicative_int
 #print axioms NonsoficGroupsExist.isSofic_iff_productRestricted
+#print axioms NonsoficGroupsExist.isSofic_of_soficApproximation
+#print axioms NonsoficGroupsExist.isSofic_iff_nonempty_soficApproximation
 #print axioms NonsoficGroupsExist.isLEF_of_finite
 #print axioms NonsoficGroupsExist.isLEF_multiplicative_int
 #print axioms NonsoficGroupsExist.isLEF_iff_textbook
@@ -81,6 +84,7 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.Manuscript.theoremC_exact
 #print axioms NonsoficGroupsExist.Manuscript.theoremC_covers_theoremB_groups
 #print axioms NonsoficGroupsExist.Manuscript.theoremD_subgroups
+#print axioms NonsoficGroupsExist.Manuscript.cor_fgring_printed
 #print axioms NonsoficGroupsExist.Manuscript.cor_fgring_exact
 #print axioms NonsoficGroupsExist.Manuscript.cor_fgring_countableFree
 #print axioms NonsoficGroupsExist.binaryLeavittWhiteheadK1_subsingleton

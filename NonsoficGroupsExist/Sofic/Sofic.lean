@@ -16,8 +16,12 @@ import Mathlib.Algebra.Order.Archimedean.Real.Basic
 `IsSofic` is the standard local finite-permutation definition: every finite
 subset has an arbitrarily accurate approximately multiplicative and separated
 model.  It has no countability premise.  `SoficApproximation` is the equivalent
-sequential formulation used by the analytic part of the development; the
-conversion for countable groups is proved in `TableCover`.
+sequential formulation used by the analytic part of the development, and is the
+direct transcription of Definition `def:sofic` of the manuscript.
+
+`isSofic_of_soficApproximation` proves the sequential-to-local direction here,
+with no countability premise.  The converse needs countability and is proved in
+`TableCover`; the two are packaged as an iff in `Sofic.SoficSequential`.
 -/
 
 namespace NonsoficGroupsExist
@@ -315,6 +319,34 @@ theorem word_close (S : SoficApproximation G) (w : List G) (ε : ℝ) (hε : 0 <
           exact hword
         _ = ε := by ring
 
+/-- Distinct group elements are eventually separated to within any prescribed
+accuracy.  Sequential faithfulness is stated only at `h⁻¹ * g` against the
+identity; asymptotic multiplicativity and left invariance of the Hamming metric
+transport it to the pair `(g, h)`, at the cost of splitting the accuracy in
+two. -/
+theorem pair_separated_eventually (S : SoficApproximation G) {g h : G}
+    (hgh : g ≠ h) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ n ≥ N,
+      1 - ε ≤ hammingDistance (S.model n) (S.map n g) (S.map n h) := by
+  have hhalf : 0 < ε / 2 := half_pos hε
+  have hone : h⁻¹ * g ≠ 1 := fun hcon ↦ hgh (inv_mul_eq_one.mp hcon).symm
+  obtain ⟨N₁, hN₁⟩ := S.asymptoticallyFaithful (h⁻¹ * g) hone (ε / 2) hhalf
+  obtain ⟨N₂, hN₂⟩ := S.asymptoticallyMultiplicative h (h⁻¹ * g) (ε / 2) hhalf
+  refine ⟨max N₁ N₂, fun n hn ↦ ?_⟩
+  have hfaith := hN₁ n ((le_max_left N₁ N₂).trans hn)
+  have hmul := hN₂ n ((le_max_right N₁ N₂).trans hn)
+  rw [mul_inv_cancel_left] at hmul
+  have hleft : hammingDistance (S.model n)
+      (S.map n h * S.map n (h⁻¹ * g)) (S.map n h) =
+      hammingDistance (S.model n) (S.map n (h⁻¹ * g)) 1 := by
+    simpa using hammingDistance_left_invariant (S.model n) (S.map n h)
+      (S.map n (h⁻¹ * g)) 1
+  have htriangle := hammingDistance_triangle (S.model n)
+    (S.map n h * S.map n (h⁻¹ * g)) (S.map n g) (S.map n h)
+  rw [hleft, hammingDistance_comm (S.model n)
+    (S.map n h * S.map n (h⁻¹ * g)) (S.map n g)] at htriangle
+  linarith
+
 /-- Reindex a sofic approximation along any pointwise cofinal map.  Strict
 monotonicity is unnecessary: the inequality `n ≤ φ n` alone preserves every
 eventual estimate in the sequential definition. -/
@@ -341,5 +373,58 @@ def reindex (S : SoficApproximation G) (φ : ℕ → ℕ)
     (S.reindex φ hφ).map n = S.map (φ n) := rfl
 
 end SoficApproximation
+
+/-- A sequential sofic approximation yields the local finite-model property.
+
+This is the direction of the definitional correspondence that the manuscript
+uses implicitly: the models of Definition `def:sofic` are indexed by `ℕ` with
+errors that only vanish in the limit, while every endpoint statement consumes
+the local predicate `IsSofic`.  Given a finite test set `F` and an accuracy
+`ε > 0`, the finitely many eventual estimates attached to elements and pairs of
+`F` share a common threshold, and any single member of the sequence beyond that
+threshold is a model of `F` to accuracy `ε`.  No countability hypothesis is
+needed in this direction: the test set `F` supplies its own finite index set. -/
+theorem isSofic_of_soficApproximation {G : Type*} [Group G]
+    (A : SoficApproximation G) : IsSofic G := by
+  classical
+  intro F ε hε
+  obtain ⟨N₁, hN₁⟩ := eventually_finset F
+    (fun g n ↦ ∀ h ∈ F, hammingDistance (A.model n) (A.map n (g * h))
+      (A.map n g * A.map n h) ≤ ε) (by
+      intro g _
+      show ∃ N : ℕ, ∀ n ≥ N, ∀ h ∈ F,
+        hammingDistance (A.model n) (A.map n (g * h))
+          (A.map n g * A.map n h) ≤ ε
+      refine eventually_finset F
+        (fun h n ↦ hammingDistance (A.model n) (A.map n (g * h))
+          (A.map n g * A.map n h) ≤ ε) ?_
+      intro h _
+      obtain ⟨N, hN⟩ := A.asymptoticallyMultiplicative g h ε hε
+      exact ⟨N, fun n hn ↦ (hN n hn).le⟩)
+  obtain ⟨N₂, hN₂⟩ := eventually_finset F
+    (fun g n ↦ ∀ h ∈ F, g ≠ h →
+      1 - ε ≤ hammingDistance (A.model n) (A.map n g) (A.map n h)) (by
+      intro g _
+      show ∃ N : ℕ, ∀ n ≥ N, ∀ h ∈ F, g ≠ h →
+        1 - ε ≤ hammingDistance (A.model n) (A.map n g) (A.map n h)
+      refine eventually_finset F
+        (fun h n ↦ g ≠ h →
+          1 - ε ≤ hammingDistance (A.model n) (A.map n g) (A.map n h)) ?_
+      intro h _
+      by_cases hgh : g = h
+      · exact ⟨0, fun _ _ hne ↦ absurd hgh hne⟩
+      · obtain ⟨N, hN⟩ := A.pair_separated_eventually hgh ε hε
+        exact ⟨N, fun n hn _ ↦ hN n hn⟩)
+  obtain ⟨N₃, hN₃⟩ := A.card_tendsToInfinity 1
+  obtain ⟨n, hn₁, hn₂, hn₃⟩ : ∃ n : ℕ, N₁ ≤ n ∧ N₂ ≤ n ∧ N₃ ≤ n :=
+    ⟨max N₁ (max N₂ N₃), le_max_left _ _,
+      (le_max_left N₂ N₃).trans (le_max_right _ _),
+      (le_max_right N₂ N₃).trans (le_max_right _ _)⟩
+  exact ⟨{
+    carrier := A.model n
+    nonempty := lt_of_lt_of_le Nat.zero_lt_one (hN₃ n hn₃)
+    map := A.map n
+    multiplicative := fun g hg h hh ↦ hN₁ n hn₁ g hg h hh
+    separated := fun g hg h hh hgh ↦ hN₂ n hn₂ g hg h hh hgh }⟩
 
 end NonsoficGroupsExist

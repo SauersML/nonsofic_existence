@@ -278,6 +278,7 @@ import NonsoficGroupsExist.Monsters.Protection
 import NonsoficGroupsExist.Endpoint.Audit
 import NonsoficGroupsExist.Endpoint.Public
 import NonsoficGroupsExist.Endpoint.ManuscriptStatements
+import NonsoficGroupsExist.Sofic.SoficSequential
 import NonsoficGroupsExist.KOne.WhiteheadQuotient
 import NonsoficGroupsExist.Leavitt.FiniteTypeCountable
 

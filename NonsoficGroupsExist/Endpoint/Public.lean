@@ -42,20 +42,28 @@ which is what a referee checking the paper against the library wants.
 
 * `theoremB_exact` -- Theorem B, all clauses at once: the four-property profile
   of `Lˣ`, of every `GL_r(L)` (`r ≥ 1`) and of every `EL_r(L)` (`r ≥ 2`),
-  together with `GL_r(L) = EL_r(L)` for `r ≥ 2` and the isomorphism attached to
-  every ordered complete leaf set.  The Panorama theorem `thm:allranks` is this
-  same statement under the manuscript's other name; one declaration serves both.
+  together with `GL_r(L) = EL_r(L)` for `r ≥ 2` and, for every ordered complete
+  leaf set, the printed formula for the specific isomorphism `theoremB_Theta`.
+  Naming that map rather than asserting `Nonempty (GL_r(L) ≃* Lˣ)` is what
+  makes the one type carry equation `eq:Theta-main` as well.  The Panorama
+  theorem `thm:allranks` is this same statement under the manuscript's other
+  name; one declaration serves both.
 * `theoremB_Theta`, `theoremB_Theta_apply` -- the isomorphism `Θ_C` of equation
   `eq:Theta-main` and its printed formula `(a_ij) ↦ ∑ αᵢ a_ij αⱼ*`.
 * `theoremC_exact`, `theoremC_covers_theoremB_groups` -- Theorem C's final
   assertion: an infinite finitely presented Kazhdan nonsofic group surjecting
   onto `Lˣ`, and hence onto every group of Theorem B.
 * `theoremD_subgroups` -- Theorem D in the printed subgroup form, with actual
-  `Subgroup G` data rather than the `CompressionSetup` interface.  Two
-  deviations from the print, both documented on the declaration: `G`'s finite
-  generation is derived rather than assumed, and `[Countable G]` is explicit.
-* `cor_fgring_exact`, `cor_fgring_countableFree` -- Corollary `cor:fgring` with
-  no countability hypothesis, using `countable_of_finiteType`.
+  `Subgroup G` data rather than the `CompressionSetup` interface, and with the
+  printed hypotheses and no others: `G`'s finite generation and `G`'s
+  countability are both derived rather than assumed, the latter from property
+  `(T)` by `GeneralCornerTheorem.countable_of_hasKazhdanPropertyT`.
+* `cor_fgring_printed` -- Corollary `cor:fgring` verbatim: every `m ≥ 2`,
+  `n = m + 1`, the printed memberships `u, z ∈ EL_n(A)` as hypotheses, and all
+  four printed conclusions about `EL_n(A)`.
+* `cor_fgring_exact`, `cor_fgring_countableFree` -- the same corollary with the
+  memberships discharged instead of assumed, at rank four and then at every
+  rank `≥ 2`, and with no countability hypothesis (`countable_of_finiteType`).
 * `ManuscriptProfile` -- the four clauses "infinite, finitely generated,
   property `(T)`, not sofic" that Theorems A, B and `cor:fgring` all end in.
 
@@ -143,7 +151,8 @@ export NonsoficGroupsExist (universalLeavitt_profile binaryLeavitt_finiteField_p
 export NonsoficGroupsExist.Manuscript (ManuscriptProfile theoremB_exact
   theoremB_Theta theoremB_Theta_apply theoremC_first
   theoremC_second theoremC_exact theoremC_covers_theoremB_groups
-  theoremD_subgroups cor_fgring_exact cor_fgring_countableFree)
+  theoremD_subgroups cor_fgring_printed cor_fgring_exact
+  cor_fgring_countableFree)
 
 /-! ### `K₁` as a group, and the countability that `cor:fgring` no longer needs -/
 

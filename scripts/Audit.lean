@@ -146,9 +146,14 @@ open Manuscript
 
 example (k : Type) [Field k] [Finite k] :
     ManuscriptProfile (BinaryLeavittUnits k) ∧
-      (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r)),
-          (BinaryLeavitt.family k).IsComplete C →
-            Nonempty (BinaryLeavittGLRank k r ≃* BinaryLeavittUnits k)) ∧
+      (∀ (r : ℕ) (C : BinaryPrefixCode (Fin r))
+          (hC : (BinaryLeavitt.family k).IsComplete C)
+          (M : BinaryLeavittGLRank k r),
+          ((theoremB_Theta k C hC M : BinaryLeavittUnits k) :
+              BinaryLeavitt.BinaryLeavittAlgebra k) =
+            ∑ i, ∑ j, (BinaryLeavitt.family k).wordS (C.word i) *
+              (M : Matrix (Fin r) (Fin r) (BinaryLeavitt.BinaryLeavittAlgebra k)) i j *
+              (BinaryLeavitt.family k).wordT (C.word j)) ∧
       (∀ r : ℕ, 2 ≤ r → BinaryLeavittELRank k r = ⊤) ∧
       (∀ r : ℕ, 1 ≤ r → ManuscriptProfile (BinaryLeavittGLRank k r)) ∧
       (∀ r : ℕ, 2 ≤ r → ManuscriptProfile ↥(BinaryLeavittELRank k r)) :=
@@ -170,7 +175,7 @@ example (k : Type) [Field k] [Finite k] :
           ∃ π : H →* BinaryLeavittEL k m, Function.Surjective π) :=
   theoremC_covers_theoremB_groups k
 
-example {G : Type} [Group G] [Countable G]
+example {G : Type} [Group G]
     (Γ J : Subgroup G) (Q : Finset G) (q₀ : G)
     (hTG : HasKazhdanPropertyT.{0, 0} G)
     (hTΓ : HasKazhdanPropertyT.{0, 0} ↥Γ)
@@ -184,6 +189,14 @@ example {G : Type} [Group G] [Countable G]
     (hS : IsSofic G) : IsLEF ↥J :=
   theoremD_subgroups Γ J Q q₀ hTG hTΓ hΓinf hΓfg hJfg hJΓ hgen hcompress
     hq₀ hcent hdisj hS
+
+example (k A : Type) [Field k] [Finite k] [Ring A] [Nontrivial A]
+    [Algebra k A] [Algebra.FiniteType k A] (L : LeavittFamily A)
+    (m : ℕ) (hm : 0 < m) (hm2 : 2 ≤ m)
+    (hu : GeneralScheme.uUnit L (m := m) ∈ elementaryGroup (Fin (m + 1)) A)
+    (hz : GeneralScheme.zUnit L hm ∈ elementaryGroup (Fin (m + 1)) A) :
+    ManuscriptProfile ↥(elementaryGroup (Fin (m + 1)) A) :=
+  cor_fgring_printed k A L m hm hm2 hu hz
 
 example (k : Type) [Field k] : Subsingleton (BinaryLeavittWhiteheadK1 k) :=
   binaryLeavittWhiteheadK1_subsingleton k
@@ -228,6 +241,7 @@ def headlineTheorems : List Name :=
    ``Manuscript.theoremC_exact,
    ``Manuscript.theoremC_covers_theoremB_groups,
    ``Manuscript.theoremD_subgroups,
+   ``Manuscript.cor_fgring_printed,
    ``Manuscript.cor_fgring_exact,
    ``Manuscript.cor_fgring_countableFree,
    ``binaryLeavittWhiteheadK1_subsingleton,

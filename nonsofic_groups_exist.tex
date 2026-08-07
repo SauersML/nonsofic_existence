@@ -259,7 +259,7 @@ The proof has three independent layers.
 The first layer is analytic.
 
 \begin{mainthm}[Kazhdan compression--centralizer criterion]\label{thm:D}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremD_subgroups}\leanmod{Criterion/CriterionAssembly}{isLEF_of_isSofic,not_isSofic_of_not_isLEF}\leannote{\texttt{theoremD_subgroups} is the printed subgroup form; countability of $G$, implicit in the sofic vocabulary of Section~2, is its one explicit instance argument, and finite generation of $G$ is derived rather than assumed.  The LEF conclusion is the textbook notion by \texttt{isLEF_iff_textbook}.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{theoremD_subgroups}\leanmod{Criterion/CriterionAssembly}{isLEF_of_isSofic,not_isSofic_of_not_isLEF}\leannote{\texttt{theoremD_subgroups} is the printed subgroup form; both finite generation and countability of $G$ are derived from property $(T)$ (\texttt{countable_of_hasKazhdanPropertyT}), not assumed.  The LEF conclusion is the textbook notion by \texttt{isLEF_iff_textbook}.}}%
 Let \(G\) be a finitely generated property-\((T)\) group, and let \(\Gamma\leq G\) be an infinite finitely generated property-\((T)\) subgroup.  Suppose there is a finite set \(Q\subseteq G\) with
 \[
  G=\langle\Gamma,Q\rangle
@@ -353,7 +353,7 @@ For \(\sigma,\tau\in\Sym(Y)\), let
 denote the normalized Hamming distance.
 
 \begin{definition}\label{def:sofic}%
-\leanverified{\leanmod{Sofic/Sofic}{SoficApproximation,IsSofic}}%
+\leanverified{\leanmod{Sofic/Sofic}{SoficApproximation,IsSofic,isSofic_of_soficApproximation}\leanmod{Sofic/SoficSequential}{isSofic_iff_nonempty_soficApproximation}\leannote{\texttt{SoficApproximation} is this definition; \texttt{IsSofic} is the local finite-model form the endpoints use, and the two are proved equivalent for countable groups, with the sequential-to-local direction unconditional.}}%
 Let \(G\) be a countable discrete group.  A \emph{sofic approximation} of \(G\) is a sequence of maps \(\sigma_n:G\to\Sym(Y_n)\), with \(\abs{Y_n}\to\infty\), such that
 \begin{enumerate}[label=\textup{(\alph*)}]
 \item \(\distH\bigl(\sigma_n(g)\sigma_n(h),\sigma_n(gh)\bigr)\to0\) for all \(g,h\in G\);
@@ -1617,7 +1617,7 @@ so both elements of \(Q\) conjugate \(\Gamma\) into itself.  Fix \(q_0=u\), so \
 \end{proof}
 
 \begin{corollary}\label{cor:fgring}%
-\leanverified{\leanmod{Endpoint/ManuscriptStatements}{cor_fgring_exact,cor_fgring_countableFree}\leanmod{Criterion/CriterionAssembly}{not_isSofic_of_not_isLEF}\leanmod{Leavitt/FamilyRankFour}{compressionSetup,ambient_not_isSofic,elementary_not_isSofic,units_not_isSofic,gl_not_isSofic}\leannote{\texttt{FamilyRankFour} assembles the corollary over any nontrivial finite-type algebra with a binary family, discharging the memberships rather than assuming them; countability is derived from finite type over the finite field (\texttt{countable_of_finiteType}), not assumed.  The ranks reached are every $r\geq2$, together with $A^\times$ and every $\GL_r$.}}%
+\leanverified{\leanmod{Endpoint/ManuscriptStatements}{cor_fgring_printed,cor_fgring_exact,cor_fgring_countableFree}\leanmod{Criterion/CriterionAssembly}{not_isSofic_of_not_isLEF}\leanmod{Leavitt/FamilyRankFour}{compressionSetup,ambient_not_isSofic,elementary_not_isSofic,units_not_isSofic,gl_not_isSofic}\leannote{\texttt{FamilyRankFour} assembles the corollary over any nontrivial finite-type algebra with a binary family, discharging the memberships rather than assuming them; countability is derived from finite type over the finite field (\texttt{countable_of_finiteType}), not assumed.  The ranks reached are every $r\geq2$, together with $A^\times$ and every $\GL_r$.}}%
 Let \(A\) be a nontrivial finite-type algebra over a finite field carrying a binary Leavitt family, and let \(m\geq2\), \(n=m+1\).  If \(u,z\in\EL_n(A)\)---for instance, if \(\GL_n(A)=\EL_n(A)\)---then \(\EL_n(A)\) is an infinite, finitely generated, property-\((T)\) group that is not sofic.
 \end{corollary}
 
