@@ -83,4 +83,60 @@ theorem compressorImage_normalizes_inv [Finite Q] (φ : H →* Q) (Γ : Subgroup
   rw [this]
   exact hp
 
+/-! ## A strict compressor has no power in `Γ`
+
+The complement to the blindness theorem.  Finite models fail because the
+`Γ`-fixed set of a finite `H`-set is finite, hence equal to its own image
+(`ExactCompression.fixedSet_image_eq`).  What makes the genuine coset space
+different is that its `Γ`-fixed set is *infinite* -- and that is forced by
+strictness alone. -/
+
+/-- Iterated compression: `tʲ Γ t⁻ʲ ≤ Γ` for every `j`. -/
+theorem pow_conj_mem (Γ : Subgroup H) {t : H} (ht : ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) :
+    ∀ (j : ℕ), ∀ γ ∈ Γ, t ^ j * γ * (t ^ j)⁻¹ ∈ Γ := by
+  intro j
+  induction j with
+  | zero => intro γ hγ; simpa using hγ
+  | succ j ih =>
+      intro γ hγ
+      have hstep := ht _ (ih γ hγ)
+      have hrw : t * (t ^ j * γ * (t ^ j)⁻¹) * t⁻¹
+          = t ^ (j + 1) * γ * (t ^ (j + 1))⁻¹ := by
+        rw [pow_succ']
+        group
+      rwa [hrw] at hstep
+
+/-- **A strict compressor has no power inside `Γ`.**  If some `tᵏ` with `k ≥ 1`
+lay in `Γ`, the compression would be an equality: conjugating by `t⁻ᵏ ∈ Γ` stays
+inside `Γ`, and the outer `t^{k-1}` does too by iterated compression, so
+`t⁻¹Γt ≤ Γ` — which with the reverse inclusion forces `tΓt⁻¹ = Γ`. -/
+theorem compression_eq_of_pow_mem (Γ : Subgroup H) {t : H}
+    (ht : ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) {k : ℕ} (hk : 0 < k) (hmem : t ^ k ∈ Γ)
+    (γ : H) (hγ : γ ∈ Γ) : t⁻¹ * γ * t ∈ Γ := by
+  -- conjugating by `t⁻ᵏ ∈ Γ` keeps us inside `Γ`
+  have hinv : (t ^ k)⁻¹ ∈ Γ := Γ.inv_mem hmem
+  have hinner : (t ^ k)⁻¹ * γ * t ^ k ∈ Γ := by
+    have := Γ.mul_mem (Γ.mul_mem hinv hγ) hmem
+    simpa using this
+  -- and the outer conjugation by `t^{k-1}` does too
+  obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
+  have houter := pow_conj_mem Γ ht j _ hinner
+  have hrw : t ^ j * ((t ^ (j + 1))⁻¹ * γ * t ^ (j + 1)) * (t ^ j)⁻¹
+      = t⁻¹ * γ * t := by group
+  rwa [hrw] at houter
+
+/-- Consequently the ray `t⁻ⁿΓ` is injective in `n`: a repeat would put a power
+of `t` in `Γ`.  So the `Γ`-fixed set of the coset space is infinite, which is
+exactly what a finite model cannot reproduce. -/
+theorem ray_injective (Γ : Subgroup H) {t : H} (ht : ∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ)
+    (hstrict : ∃ γ ∈ Γ, t⁻¹ * γ * t ∉ Γ) {m n : ℕ} (hmn : m < n)
+    (heq : (t ^ m)⁻¹ * (t ^ n) ∈ Γ) : False := by
+  obtain ⟨γ, hγ, hout⟩ := hstrict
+  have hpow : t ^ (n - m) ∈ Γ := by
+    have hsplit : (t ^ m)⁻¹ * t ^ n = t ^ (n - m) := by
+      rw [← pow_sub_mul_pow t (le_of_lt hmn)]
+      group
+    rwa [hsplit] at heq
+  exact hout (compression_eq_of_pow_mem Γ ht (by omega) hpow γ hγ)
+
 end NonsoficGroupsExist
