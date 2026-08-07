@@ -88,28 +88,28 @@
 \newcommand{\leanverified}{\begingroup\leanactiveus\leanverifiedaux}
 \newcommand{\leanverifiedaux}[1]{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangreen}\leanfirstblocktrue #1}%
+    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangreen}\leanfirstblocktrue #1}%
   \fi
   \endgroup}
 
 \newcommand{\leanpartial}{\begingroup\leanactiveus\leanpartialaux}
 \newcommand{\leanpartialaux}[2]{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangreen}\leanfirstblocktrue
+    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangreen}\leanfirstblocktrue
       \leantag{formalized in part}#1\leannote{#2}}%
   \fi
   \endgroup}
 
 \newcommand{\leanabsent}[1]{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangrey}\leanfirstblocktrue
+    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangrey}\leanfirstblocktrue
       \leantag{not formalized}\leannote{#1}}%
   \fi}
 
 % The one note that explains the others, placed at the head of Section 1.
 \newcommand{\leanpreface}{%
   \ifleanlinks
-    \marginnote{\raggedright\color{leangrey}%
+    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangrey}%
       {\fontsize{6.3}{7.4}\selectfont\textit{About the green notes.}
        Each ties the statement beside it to a machine-checked Lean~4
        development, \textup{\texttt{github.com/\allowbreak SauersML/\allowbreak nonsofic\string_existence}},
@@ -124,6 +124,7 @@
 \setlist[enumerate]{leftmargin=2.35em}
 \setlist[itemize]{leftmargin=2.1em}
 \allowdisplaybreaks
+\raggedbottom
 \emergencystretch=1.5em
 
 \newtheorem{theorem}{Theorem}[section]
@@ -227,7 +228,7 @@ is infinite, finitely generated, has property~\((T)\), and is not sofic.  In par
 The proof of Theorem~\ref{thm:A} is engineered for audit.  The two auxiliary matrices of the construction are exhibited as explicit products of elementary matrices; every remaining elementary membership follows from one explicit Whitehead identity together with explicit commutator certificates---every cylinder transposition is a single commutator of units; the ranks below four are reached by an explicit isomorphism between the elementary groups of any two ranks \(\geq2\) over \(R\) (Proposition~\ref{prop:rankequiv}); and no \(K\)-theory is used.
 
 \begin{mainthm}\label{thm:B}%
-\leanverified{\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}\leanmod{Leavitt/PrefixCode}{prefixRingEquiv,prefixRingEquiv_apply,prefixUnitsEquiv}\leanmod{KOne/AllRanksElementary}{glAll_eq_elementary}\leannote{$\Theta_{\mathcal C}$ is \texttt{prefixRingEquiv}, with \texttt{prefixRingEquiv\_apply} the displayed formula.}}%
+\leanverified{\leanmod{Endpoint/MainResults}{binaryLeavitt_finiteField_profile,binaryLeavittUnits_not_isSofic,binaryLeavittGL_not_isSofic}\leanmod{Leavitt/UnitsGLProfile}{binaryLeavittUnits_profile,binaryLeavittGL_profile}\leannote{$\Theta_{\mathcal C}$ is \texttt{prefixRingEquiv} in \textit{Leavitt/PrefixCode}, cited with the panorama in Section~8.}}%
 Let \(k\) be a finite field and let \(L=L_k(1,2)\).
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item The unit group \(L^\times\) is infinite, finitely generated, has property~\((T)\), and is not sofic.
@@ -294,15 +295,15 @@ Figure~\ref{fig:architecture} charts how the three layers assemble.
 \node[box] (kt)   at (0,3.2)  {Kun--Thom obstruction\\Theorem~\ref{thm:kunthom}};
 \node[box] (tool) at (0,2.0)  {five finite lemmas\\Section~\ref{sec:toolkit}};
 \node[box] (leav) at (0,0.5)  {compressors $u$, $z$;\\corner copy of $V$; witness $J$\\Sections~\ref{sec:leavitt}--\ref{sec:scheme}};
-\node[box] (ejz)  at (0,-1.1) {property $(T)$ at rank three,\\rank equivalence\\Theorem~\ref{thm:ejz}, Prop.~\ref{prop:rankequiv}};
+\node[box] (ejz)  at (0,-1.1) {property $(T)$ at rank $3$,\\rank equivalence\\Theorem~\ref{thm:ejz}, Prop.~\ref{prop:rankequiv}};
 \node[box] (fact) at (0,-2.5) {explicit factorizations\\over $\F_2$ (Section~\ref{sec:spine})};
 \node[box] (k1)   at (0,-3.8) {$K_1(L)=0$, $\GL_r=\EL_r$,\\self-similarity\\Section~\ref{sec:panorama}, App.~\ref{app:K1}};
 \node[box] (cov)  at (0,-5.2) {finite-table and\\Kazhdan covers (Section~\ref{sec:fp})};
 \node[main] (critD)  at (5.3,3.2)  {compression--centralizer\\criterion\\Theorem~\ref{thm:D}};
 \node[main] (corner) at (5.3,-0.4) {Leavitt-corner theorem\\Theorem~\ref{thm:corner}};
-\node[main] (A) at (9.4,1.0)  {Theorem~\ref{thm:A}\\$\EL_{m+1}(L_{\F_2}(1,2))$\\is not sofic};
-\node[main] (B) at (9.4,-1.6) {Theorem~\ref{thm:B}\\all ranks, $\GL_r$,\\and $L^\times$};
-\node[main] (C) at (9.4,-4.0) {Theorem~\ref{thm:C}\\finitely presented\\nonsofic covers};
+\node[main] (A) at (9.05,1.0)  {Theorem~\ref{thm:A}\\$\EL_{m+1}(L_{\F_2}(1,2))$\\is not sofic};
+\node[main] (B) at (9.05,-1.6) {Theorem~\ref{thm:B}\\all ranks, $\GL_r$,\\and $L^\times$};
+\node[main] (C) at (9.05,-4.0) {Theorem~\ref{thm:C}\\finitely presented\\nonsofic covers};
 \draw[arr] (kun) -- (critD);
 \draw[arr] (kt) -- (critD);
 \draw[arr] (tool) -- (critD);
@@ -445,8 +446,8 @@ Then
 If \(X\) has a single vertex, the median hypotheses force \(f\equiv c\) and both sides vanish (with \(1/h(X)=0\) by convention); assume \(\abs{V(X)}\geq2\).  Replacing \(f\) by \(f-c\) we may assume \(c=0\).  Write \(f=f_+-f_-\) with \(f_\pm\geq0\).  For \(t>0\), the level set \(U_t=\set{x\suchthat f_+(x)>t}\) satisfies \(\abs{U_t}\leq\frac12\abs{V(X)}\), so \(\abs{\partial U_t}\geq h(X)\abs{U_t}\) whenever \(U_t\ne\emptyset\).  By the layer-cake formula,
 \[
  \sum_x f_+(x)=\int_0^\infty\abs{U_t}\dd t
- \leq\frac{1}{h(X)}\int_0^\infty\abs{\partial U_t}\dd t
- \leq\frac{1}{h(X)}\sum_{\{x,y\}\in E(X)}\abs{f_+(x)-f_+(y)},
+ \leq\tfrac{1}{h(X)}\int_0^\infty\abs{\partial U_t}\dd t
+ \leq\tfrac{1}{h(X)}\sum_{\{x,y\}\in E(X)}\abs{f_+(x)-f_+(y)},
 \]
 since an edge \(\{x,y\}\) lies in \(\partial U_t\) exactly for \(t\) in an interval of length \(\abs{f_+(x)-f_+(y)}\).  The same bound holds for \(f_-\), and \(\abs{f_+(x)-f_+(y)}+\abs{f_-(x)-f_-(y)}\leq\abs{f(x)-f(y)}\) pointwise on edges, because \(f_+\) and \(f_-\) have disjoint supports.  Adding the two estimates gives the claim.
 \end{proof}
@@ -476,7 +477,7 @@ Let \(\Gamma\) be an infinite finitely generated property-\((T)\) group with a f
 Kun's theorem proves Bowen's conjecture: sofic approximations of infinite Kazhdan groups are essentially disjoint unions of expanders.  Theorem~\ref{thm:kun} is deliberately a \emph{one-way} statement: the four-way equivalence of \cite[Theorem~3]{Kun19} contains a spectral implication that fails as written and is not imported anywhere in this paper; Remark~\ref{rem:kunaudit} records this precisely, together with two local repairs to the published proofs of the theorems of this subsection.  The companion result of Kun and Thom is an obstruction for centralizers.
 
 \begin{theorem}[Kun--Thom \cite{KunThom19}]\label{thm:kunthom}%
-\leanverified{\leanmod{KunThom/KunThomTheorem}{isLEF_of_exactProductExpansion}\leanmod{KunThom/KunThomEssential}{isLEF_of_matchingCertificate}\leannote{Proved internally, with the matching-core repair; not assumed.  As in Theorem~\ref{thm:kun} the generating set is normalized to contain $1$; \texttt{isLEF\_of\_exactProductExpansion} is the exactly-expanding form and \texttt{isLEF\_of\_matchingCertificate} the essential one.}}%
+\leanverified{\leanmod{KunThom/KunThomTheorem}{isLEF_of_exactProductExpansion}\leanmod{KunThom/KunThomEssential}{isLEF_of_matchingCertificate}\leannote{Proved internally, with the matching-core repair; not assumed.  As in Theorem~\ref{thm:kun} the generating set is normalized to contain $1$.}}%
 Let \(\Lambda\) be an infinite finitely generated property-\((T)\) group with finite symmetric generating set \(S_\Lambda\), and let \(\Delta\) be a finitely generated group.  Suppose \(\Lambda\times\Delta\) admits a sofic approximation \(\pi_n:\Lambda\times\Delta\to\Sym(D_n)\) such that the \(S_\Lambda\)-generator graphs \(X\bigl(D_n,\pi_n|_\Lambda,S_\Lambda\bigr)\) form an essential expander sequence.  Then \(\Delta\) is LEF.
 \end{theorem}
 
@@ -504,7 +505,7 @@ This section isolates five elementary lemmas about finite graphs, permutations, 
 \subsection{Expander refinement}
 
 \begin{lemma}[Expander refinement]\label{lem:refine}%
-\leanverified{\leanmod{Matching/Refinement}{exists_dominant_cell,le_crossing_of_cell}\leanmod{Matching/ComponentRefinement}{refineComponent}\leannote{Stated per component rather than as the displayed sum: \texttt{exists\_dominant\_cell} is the assignment $C\mapsto i(C)$ with its bound on one component, and \texttt{refineComponent} applies it componentwise, which is how Section~\ref{sec:criterion} consumes the lemma.}}%
+\leanverified{\leanmod{Matching/Refinement}{exists_dominant_cell,le_crossing_of_cell}\leanmod{Matching/ComponentRefinement}{refineComponent}\leannote{Stated per component rather than as the displayed sum: \texttt{exists_dominant_cell} is the assignment $C\mapsto i(C)$ with its bound on one component, and \texttt{refineComponent} applies it componentwise, which is how Section~\ref{sec:criterion} consumes the lemma.}}%
 Let \(X\) be a finite graph, every connected component of which has Cheeger constant at least \(h>0\).  Let \(V(X)=A_1\sqcup\dots\sqcup A_r\) be a partition, and let \(e\) be the number of edges of \(X\) whose endpoints lie in different parts.  Then there is an assignment \(C\mapsto i(C)\) of a part to each component of \(X\), with \(\abs{C\cap A_{i(C)}}\) maximal, such that
 \[
  \sum_{C}\abs[\big]{C\setminus A_{i(C)}}\;\leq\;\frac{4e}{h}.
@@ -562,7 +563,7 @@ Every edge of \(Z\) lies within a component.  Apply Lemma~\ref{lem:coarea} with 
 \subsection{Weighted selection}
 
 \begin{lemma}[Weighted selection]\label{lem:select}%
-\leanverified{\leanmod{Matching/Selection}{exists_selection,exists_selection_diverging,diagonalLevel_diverges,diagonalLevel_error}\leannote{\texttt{exists\_selection\_diverging} is the form carrying the divergence $\abs{D_{n,i(n)}}\to\infty$; \texttt{exists\_selection} is the same selection without it.}}%
+\leanverified{\leanmod{Matching/Selection}{exists_selection,exists_selection_diverging,diagonalLevel_diverges,diagonalLevel_error}\leannote{\texttt{exists_selection_diverging} is the form carrying the divergence $\abs{D_{n,i(n)}}\to\infty$; \texttt{exists_selection} is the same selection without it.}}%
 For each \(n\), let \(\{D_{n,i}\}_{i\in I_n}\) be disjoint nonempty subsets of a finite set \(Y_n\), \(\abs{Y_n}=N_n\to\infty\), with \(\sum_{i\in I_n}\abs{D_{n,i}}\geq(1-o(1))N_n\).  Suppose that for every fixed \(M\),
 \[
  \sum_{i:\,\abs{D_{n,i}}\leq M}\abs{D_{n,i}}=o(N_n).
@@ -722,7 +723,7 @@ Thus each transported \(\Gamma\)-component is almost contained in a single targe
 For \(y\in Y_n\), let \(s_n(y)=\abs{P_n(y)}\) be the size of its \(\Gamma\)-component.  For a \(G\)-component \(B\in\cB_n\), let \(m_n(B)\geq1\) be a \emph{vertex-weighted median} of \(s_n\) on \(B\): a value such that
 \[
  \abs{\set{y\in B\suchthat s_n(y)>m_n(B)}}\leq\tfrac12\abs B
- \quad\text{and}\quad
+ \;\text{and}\;
  \abs{\set{y\in B\suchthat s_n(y)<m_n(B)}}\leq\tfrac12\abs B.
 \]
 Define the \emph{median normalization}
@@ -832,7 +833,7 @@ The mechanism of this subsection is drawn in Figure~\ref{fig:matching}.
 \end{figure}
 
 \begin{proposition}[Matching]\label{prop:match}%
-\leanverified{\leanmod{Matching/MedianNormalization}{medianNormalize}\leanmod{Matching/MatchingPreparation}{acceptable_symmDiff_le}\leanmod{Criterion/Criterion}{symmDiff_le_of_pinned,matching_injective}\leannote{Stated per component rather than as one statement about the subcollections $\cG_{q,n}$: \texttt{acceptable\_symmDiff\_le} is \eqref{eq:match} for a single acceptable component, and \texttt{matching\_injective} is the injectivity clause.}}%
+\leanverified{\leanmod{Matching/MedianNormalization}{medianNormalize}\leanmod{Matching/MatchingPreparation}{acceptable_symmDiff_le}\leanmod{Criterion/Criterion}{symmDiff_le_of_pinned,matching_injective}\leannote{Stated per component rather than as one statement about the subcollections $\cG_{q,n}$: \texttt{acceptable_symmDiff_le} is \eqref{eq:match} for a single acceptable component, and \texttt{matching_injective} is the injectivity clause.}}%
 Fix \(q\in Q\).  There are subcollections \(\cG_{q,n}\subseteq\cP_n\) such that:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \(\sum_{C\in\cP_n\setminus\cG_{q,n}}\abs C=o(N_n)\);
@@ -1212,7 +1213,7 @@ since \(s_0t_0+1=p_0+1=p_1=s_1t_1\) in characteristic \(2\).
 Thompson's group \(V\) is the group of homeomorphisms of the boundary \(\{0,1\}^{\N}\) given by \emph{tree tables}: a pair of ordered complete leaf sets \((\beta_1,\dots,\beta_\ell)\), \((\alpha_1,\dots,\alpha_\ell)\) with the same number \(\ell\) of leaves, acting by the prefix substitutions \(\beta_i x\mapsto\alpha_i x\); each such map carries the cylinder of \(\beta_i\) bijectively onto the cylinder of \(\alpha_i\) and is a homeomorphism of the Cantor set.  Two tables define the same element exactly when they have a common refinement, refinement being simultaneous subdivision of a source leaf and its target leaf.
 
 \begin{proposition}[Tree-table embedding]\label{prop:vembed}%
-\leanverified{\leanmod{Leavitt/FamilyVEmbedding}{vEmbeddingOfFamily,vEmbeddingOfFamily_injective,vEmbeddingOfFamily_tableEquiv,tableSum_eq_of_mapsCylinder,tableSum_mul,wordS_injective}\leanmod{Leavitt/ThompsonVEmbedding}{vEmbedding,vEmbedding_injective,isComplete_of_covers}\leanmod{Leavitt/ThompsonV}{tableEquiv}\leannote{Over an arbitrary nontrivial ring carrying a binary family, with \texttt{vEmbeddingOfFamily\_tableEquiv} the formula \eqref{eq:Ug}, well definedness \texttt{tableSum\_eq\_of\_mapsCylinder}, and faithfulness the word calculus \texttt{wordS\_injective}.  The \texttt{ThompsonVEmbedding} declarations are the earlier version over the presented algebra $L_k(1,2)$.}}%
+\leanverified{\leanmod{Leavitt/FamilyVEmbedding}{vEmbeddingOfFamily,vEmbeddingOfFamily_injective,vEmbeddingOfFamily_tableEquiv,tableSum_eq_of_mapsCylinder,tableSum_mul,wordS_injective}\leanmod{Leavitt/ThompsonVEmbedding}{vEmbedding,vEmbedding_injective,isComplete_of_covers}\leanmod{Leavitt/ThompsonV}{tableEquiv}\leannote{Over an arbitrary nontrivial ring carrying a binary family, with \texttt{vEmbeddingOfFamily_tableEquiv} the formula \eqref{eq:Ug}, well definedness \texttt{tableSum_eq_of_mapsCylinder}, and faithfulness the word calculus \texttt{wordS_injective}.  The \texttt{ThompsonVEmbedding} declarations are the earlier version over the presented algebra $L_k(1,2)$.}}%
 Let \(A\) be a nontrivial unital ring carrying a binary Leavitt family.  For \(g\in V\) given by a table \(\bigl((\beta_i),(\alpha_i)\bigr)\), put
 \begin{equation}\label{eq:Ug}
  U_g=\sum_{i=1}^\ell\alpha_i\,\beta_i^*\;\in\;A.
@@ -1387,7 +1388,7 @@ Define the column \(b\in A^{m\times1}\), the row \(c\in A^{1\times m}\), and the
 \end{equation}
 
 \begin{lemma}\label{lem:uinv}%
-\leanverified{\leanmod{Leavitt/LeavittMatrixCompression}{matrixCompressionHom,matrixCompressionUnit,matrixCompression_recover}\leanmod{Leavitt/RankFourCompressors}{compressor,compressor_val}\leannote{The six identities are not needed in the formalization: \texttt{compressor} is built as a product of elementary transvections, so its invertibility holds by construction rather than by exhibiting $u'$, and \texttt{compressor\_val} identifies it with the matrix \eqref{eq:udef}.}}%
+\leanverified{\leanmod{Leavitt/LeavittMatrixCompression}{matrixCompressionHom,matrixCompressionUnit,matrixCompression_recover}\leanmod{Leavitt/RankFourCompressors}{compressor,compressor_val}\leannote{The six identities are not needed in the formalization: \texttt{compressor} is built as a product of elementary transvections, so its invertibility holds by construction rather than by exhibiting $u'$, and \texttt{compressor_val} identifies it with the matrix \eqref{eq:udef}.}}%
 The following identities hold in \(A\):
 \[
  bc=p_1I_m,
@@ -1452,7 +1453,7 @@ The compressed copy \(K\) sits inside \(\Gamma\) with all matrix entries confine
 Let \(z\in M_n(A)\) agree with the identity matrix outside the coordinates \(1\) and \(n\), where it is
 \begin{equation}\label{eq:zdef}
  z\bigl|_{\{1,n\}}=\begin{pmatrix}p_0&s_1\\ t_1&0\end{pmatrix};
- \qquad\text{that is,}\qquad
+ \quad\text{that is,}\quad
  z=I_n+(p_0-1)E_{11}+s_1E_{1n}+t_1E_{n1}-E_{nn}.
 \end{equation}
 
@@ -1532,7 +1533,7 @@ the \emph{cylinder transposition}: it is the table unit \(U_g\) of the element o
 
 \begin{lemma}[Transpositions are single commutators]\label{lem:swapcomm}%
 \leanverified{\leanmod{Leavitt/ThompsonWitness}{cylinderSwap_is_commutator,cylinderSwap_mem_commutator}}%
-For prefix-incomparable \(v,w\),
+Let \(v\) and \(w\) be prefix-incomparable.  Then
 \[
  T(v,w)=\bigl[\;T(v0,v1)\,T(w0,w1),\;\;T(v0,w0)\;\bigr]
 \]
@@ -1593,7 +1594,7 @@ The two computations quantify over every \(g\in V\), so they prove the claims fo
 \subsection{The Leavitt-corner theorem}\label{subsec:corner-thm}
 
 \begin{theorem}[Leavitt-corner theorem]\label{thm:corner}%
-\leanverified{\leanmod{Leavitt/GeneralCornerTheorem}{corner_not_isSofic,compressionSetup,coreEmbedding_compressorSet_generate,witnessEmbedding,corner_not_isSofic_of_charTwo}\leanmod{Leavitt/GeneralScheme}{uUnit,zUnit,uMatrix_mul_uPrimeMatrix}\leanmod{Criterion/CompressionSetup}{CompressionSetup}\leannote{Formalized at every adjacent pair $(m,m+1)$ with $m\geq2$, at exactly the printed hypotheses: nontrivial ring, binary family, $(T)$ at both ranks, and the membership hypothesis (ii); finite generation and countability of the groups are derived from $(T)$, not assumed.  The witness is the Whitehead diagonal in the plane $(0,1)$, and \texttt{corner\_not\_isSofic\_of\_charTwo} discharges (ii) in characteristic two through the elementary words of \texttt{Leavitt/GeneralRankWords}.}}%
+\leanverified{\leanmod{Leavitt/GeneralCornerTheorem}{corner_not_isSofic,compressionSetup,coreEmbedding_compressorSet_generate,witnessEmbedding,corner_not_isSofic_of_charTwo}\leanmod{Leavitt/GeneralScheme}{uUnit,zUnit,uMatrix_mul_uPrimeMatrix}\leanmod{Criterion/CompressionSetup}{CompressionSetup}\leannote{Formalized at every adjacent pair $(m,m+1)$ with $m\geq2$, at exactly the printed hypotheses: nontrivial ring, binary family, $(T)$ at both ranks, and the membership hypothesis (ii); finite generation and countability of the groups are derived from $(T)$, not assumed.  The witness is the Whitehead diagonal in the plane $(0,1)$, and \texttt{corner_not_isSofic_of_charTwo} discharges (ii) in characteristic two through the elementary words of \texttt{Leavitt/GeneralRankWords}.}}%
 Let \(A\) be a nontrivial associative unital ring carrying a binary Leavitt family, let \(m\geq2\), and put \(n=m+1\).  Let \(u,z\in\GL_n(A)\) be the matrices \eqref{eq:udef} and \eqref{eq:zdef}.  Assume:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \(\EL_m(A)\) and \(\EL_n(A)\) have property~\((T)\);
@@ -2288,7 +2289,13 @@ Take the component of degree \(d^*+1\geq1\) on both sides.  On the left only the
 \[
  \sum_j\bigl(B_{0,ij}s_0+B_{1,ij}s_1\bigr)\,y^{(d^*)}_{ji'}=0 .
 \]
-Multiplying on the left by \(t_0\) and by \(t_1\) separates the two shifts: \(\sum_jB_{0,ij}y^{(d^*)}_{ji'}=0\) and \(\sum_jB_{1,ij}y^{(d^*)}_{ji'}=0\); that is, the stack annihilates the matrix \(Y=(y^{(d^*)}_{ji'})\) on the left.  Applying the scalar left inverse, \(Y=(G_0B_0+G_1B_1)Y=0\), contradicting the choice of \(d^*\).  Hence all components have degree \(\leq-1\).
+Multiplying on the left by \(t_0\) and by \(t_1\) separates the two shifts:
+\[
+ \sum_jB_{0,ij}y^{(d^*)}_{ji'}=0
+ \qquad\text{and}\qquad
+ \sum_jB_{1,ij}y^{(d^*)}_{ji'}=0;
+\]
+that is, the stack annihilates the matrix \(Y=(y^{(d^*)}_{ji'})\) on the left.  Applying the scalar left inverse, \(Y=(G_0B_0+G_1B_1)Y=0\), contradicting the choice of \(d^*\).  Hence all components have degree \(\leq-1\).
 \end{proof}
 
 \begin{lemma}[Refinement step]\label{lem:refinestepapp}%
