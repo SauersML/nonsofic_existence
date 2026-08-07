@@ -12,6 +12,13 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   u ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
 ```
 
+## `NonsoficGroupsExist.BinaryLeavitt.Move.eval_mem_stableUnits`
+
+```lean
+∀ {k : Type} [inst : Field k] (m : BinaryLeavitt.Move k),
+  m.eval ∈ MatrixDiagonalization.stableUnits (BinaryLeavitt.BinaryLeavittAlgebra k)
+```
+
 ## `NonsoficGroupsExist.BinaryLeavitt.balanced_component_isUnit`
 
 ```lean
@@ -57,6 +64,25 @@ One entry per declaration named by a manuscript margin note, in the order of `do
                 (BinaryLeavitt.family k).wordT (C.word j) * ↑u⁻¹ *
                     (BinaryLeavitt.family k).wordS (R.word i) ∈
                   Submodule.span k ((BinaryLeavitt.family k).degreeMonomials (-↑N) (-1))
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.exists_elementaryCertificate`
+
+```lean
+∀ {k : Type} [inst : Field k] (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  ∃ c, elementaryProd c = MatrixDiagonalization.diagUnit u
+```
+
+## `NonsoficGroupsExist.BinaryLeavitt.exists_moveList`
+
+```lean
+∀ {k : Type} [inst : Field k] (u : (BinaryLeavitt.BinaryLeavittAlgebra k)ˣ),
+  ∃ c,
+    (∀ m ∈ c,
+        ∃ i j,
+          ∃ (h : i ≠ j),
+            ∃ x, m = BinaryLeavitt.Move.unipotent (atomCode.word i) (atomCode.word j) ⋯ ⋯ x) ∧
+      BinaryLeavitt.evalList c = (BinaryLeavitt.family k).kappaUnit [0] u
 ```
 
 ## `NonsoficGroupsExist.BinaryLeavitt.exists_mul_mul_eq_one`

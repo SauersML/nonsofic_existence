@@ -6,6 +6,7 @@ import NonsoficGroupsExist.Kun.KunDecomposition
 import NonsoficGroupsExist.KunThom.KunThomTheorem
 import NonsoficGroupsExist.KOne.RefineLoopDischarge
 import NonsoficGroupsExist.KOne.ClassicalKOne
+import NonsoficGroupsExist.KOne.FactorizationCertificate
 import NonsoficGroupsExist.Kazhdan.KazhdanTextbook
 
 /-!
@@ -111,6 +112,10 @@ Elementary and unconditional, replacing the localization-sequence input.
 Appendix A of the manuscript is this chain written out.
 
 * `BinaryLeavitt.K1_trivial` -- `K₁(L_k(1,2)) = 0` in Whitehead form.
+* `BinaryLeavitt.exists_elementaryCertificate` -- that statement with its
+  witness in hand: `diag(u,1)` as an explicit list of elementary matrices.
+* `BinaryLeavitt.exists_moveList` -- the corner insertion `κ_[0](u)` of every
+  unit as an explicit word of cylinder unipotents at the two atoms.
 * `BinaryLeavitt.narrowReduction_holds` -- the two-exit elimination behind it.
 * `BinaryLeavitt.glTwo_eq_elementary_holds`,
   `BinaryLeavitt.glFour_eq_elementary_holds` -- `GL = EL` at ranks two and four.
@@ -177,6 +182,7 @@ export NonsoficGroupsExist (exists_kazhdan_finitelyPresented_cover_of_not_isSofi
 /-! ### The `K₁` chain -/
 
 export NonsoficGroupsExist.BinaryLeavitt (K1_trivial narrowReduction_holds
+  exists_elementaryCertificate exists_moveList
   glTwo_eq_elementary_holds glFour_eq_elementary_holds)
 
 /-! ### The definitions are the textbook ones -/

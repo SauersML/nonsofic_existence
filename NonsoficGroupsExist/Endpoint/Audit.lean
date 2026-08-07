@@ -2,6 +2,7 @@ import NonsoficGroupsExist.Endpoint.MainResults
 import NonsoficGroupsExist.Endpoint.ManuscriptStatements
 import NonsoficGroupsExist.Sofic.SoficSequential
 import NonsoficGroupsExist.KOne.ClassicalKOne
+import NonsoficGroupsExist.KOne.FactorizationCertificate
 import NonsoficGroupsExist.Sofic.FinitelyPresentedLEF
 import NonsoficGroupsExist.Leavitt.UnitsGLProfile
 import NonsoficGroupsExist.KOne.AllRanksElementary
@@ -91,6 +92,9 @@ the entire project namespace and fails on anything beyond classical Lean.
 #print axioms NonsoficGroupsExist.binaryLeavittWhiteheadK1_subsingleton
 #print axioms NonsoficGroupsExist.binaryLeavittElementaryColim_eq_top
 #print axioms NonsoficGroupsExist.binaryLeavittClassicalK1_subsingleton
+#print axioms NonsoficGroupsExist.BinaryLeavitt.exists_elementaryCertificate
+#print axioms NonsoficGroupsExist.BinaryLeavitt.exists_moveList
+#print axioms NonsoficGroupsExist.BinaryLeavitt.Move.eval_mem_stableUnits
 #print axioms NonsoficGroupsExist.BinaryLeavitt.K1_trivial
 
 -- The unit-group and general-linear profiles (Theorem B(i) closed): finite

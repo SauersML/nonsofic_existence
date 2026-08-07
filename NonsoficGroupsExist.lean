@@ -281,6 +281,7 @@ import NonsoficGroupsExist.Endpoint.ManuscriptStatements
 import NonsoficGroupsExist.Sofic.SoficSequential
 import NonsoficGroupsExist.KOne.WhiteheadQuotient
 import NonsoficGroupsExist.KOne.ClassicalKOne
+import NonsoficGroupsExist.KOne.FactorizationCertificate
 import NonsoficGroupsExist.Leavitt.FiniteTypeCountable
 
 /-!
