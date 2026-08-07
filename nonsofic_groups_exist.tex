@@ -106,21 +106,6 @@
       \leantag{not formalized}\leannote{#1}}%
   \fi}
 
-% The one note that explains the others, placed at the head of Section 1.
-\newcommand{\leanpreface}{%
-  \ifleanlinks
-    \marginnote{\raggedright\rightskip 0pt plus 1fil\color{leangrey}%
-      {\fontsize{6.3}{7.4}\selectfont\textit{About the green notes.}
-       Each ties the statement beside it to a machine-checked Lean~4
-       development, \textup{\texttt{github.com/\allowbreak SauersML/\allowbreak nonsofic\string_existence}},
-       naming the module and declarations that formally prove it; an
-       italic line records where the formal result is stronger.  Every
-       numbered statement is covered, at its stated generality or beyond,
-       as is every theorem this paper cites.  No argument refers to these
-       notes, and \textup{\texttt{\string\leanlinksfalse}} removes them
-       all.}}%
-  \fi}
-
 \setlist[enumerate]{leftmargin=2.35em}
 \setlist[itemize]{leftmargin=2.1em}
 \allowdisplaybreaks
@@ -195,7 +180,7 @@ Self-similarity spreads the conclusion: over every finite field \(k\), the unit 
 \maketitle
 \tableofcontents
 
-\section{Introduction}\label{sec:intro}\leanpreface
+\section{Introduction}\label{sec:intro}
 
 A countable discrete group is \emph{sofic} if every finite portion of its multiplication table admits arbitrarily accurate and asymptotically faithful models by permutations of finite sets.  The notion arose in Gromov's work on symbolic dynamics \cite{Gromov99}; Weiss introduced the term and asked whether every countable group is sofic \cite{Weiss00}.  The class contains all amenable and all residually finite groups, and it is stable under a long list of standard constructions; see \cite{ElekSzabo06,Pestov08}.  Whether every group is sofic has remained a central open problem of modern group theory; for a recent account of its status, see \cite{Ersoy26}.
 
