@@ -1908,14 +1908,16 @@ Conversely, exhaust \(G\) by finite symmetric sets \(F_1\subseteq F_2\subseteq\c
 by \eqref{eq:modelsep}.  Hence \(\sigma_n\) is a sofic approximation.
 \end{proof}
 
-\begin{remark}[The separation constant is not a convention]\label{rem:amplification}%
-\leanverified{\leanmod{Sofic/SoficAmplification}{powerPerm,hammingDistance_powerPerm,IsSoficWeak,isSofic_of_isSoficWeak,isSofic_iff_weak}}%
+\begin{remark}[What nonsoficity refutes]\label{rem:amplification}%
+\leanverified{\leanmod{Sofic/SoficAmplification}{powerPerm,hammingDistance_powerPerm,IsSoficWeak,IsSoficWeakLocal,isSofic_of_isSoficWeak,isSofic_iff_weak,isSofic_iff_weakLocal}\leanmod{Sofic/SoficUltraproduct}{hammingLength,IsNullSeq,nullSubgroup,UniversalSofic,isSofic_of_soficEmbedding,no_soficEmbedding_of_not_isSofic}}%
 Condition \eqref{eq:modelsep} ties the separation \(1-\eps\) to the multiplicative accuracy \(\eps\).  A common variant instead fixes the separation at a constant \(\delta\in(0,1)\)---often \(1/4\) or \(1/2\)---and shrinks only the multiplicative error.  The two conventions define the same class, by tensor powers.  Let \(\varphi^{\otimes k}\) act on \(Y^k\) coordinatewise; two such powers disagree at a tuple exactly when their factors disagree at some coordinate, so the agreement set is a full product and
 \[
  \distH\bigl(\varphi(g)^{\otimes k},\varphi(h)^{\otimes k}\bigr)
  =1-\bigl(1-\distH(\varphi(g),\varphi(h))\bigr)^{k}.
 \]
-A power thus lifts a fixed separation \(\delta\) to \(1-(1-\delta)^k\), which exceeds any prescribed \(1-\eps\) once \(k\) is large, while it inflates a multiplicative error \(d\) only to \(1-(1-d)^k\leq kd\); asking the weak hypothesis for accuracy \(\eps/k\) at the outset restores \eqref{eq:modelmult}.  The exponent depends on \(\delta\) and \(\eps\) alone, not on \(F\).  So Theorem~\ref{thm:A} refutes soficity under every one of these conventions, not only the sharp one.
+A power thus lifts a fixed separation \(\delta\) to \(1-(1-\delta)^k\), which exceeds any prescribed \(1-\eps\) once \(k\) is large, while it inflates a multiplicative error \(d\) only to \(1-(1-d)^k\leq kd\); asking the weak hypothesis for accuracy \(\eps/k\) at the outset restores \eqref{eq:modelmult}.  The exponent depends only on \(\delta\) and \(\eps\).  With \(\delta\) allowed to vary with the test set, the two formulations agree with no side condition at all.
+
+That last freedom is what connects Definition~\ref{def:sofic} to the third standard formulation, the one used in the operator-algebraic literature: a countable group is sofic when it embeds into a \emph{universal sofic group}, the metric ultraproduct \(\prod_{\mathcal U}\Sym(Y_n)\) of finite symmetric groups along a nonprincipal ultrafilter, that is, the quotient of \(\prod_n\Sym(Y_n)\) by the sequences whose normalized Hamming length tends to \(0\) along \(\mathcal U\).  Lifting the images of a finite test set makes multiplicativity as accurate as one likes on a \(\mathcal U\)-large set, but injectivity separates two elements only by some positive amount depending on the pair---never by \(1-\eps\).  That is exactly the hypothesis amplified above, so an embedding into a universal sofic group implies Definition~\ref{def:sofic}, and Theorem~\ref{thm:A} therefore produces a group admitting no injective homomorphism into any metric ultraproduct of finite symmetric groups, over any index set and any ultrafilter.
 \end{remark}
 
 \begin{theorem}[Finite multiplication-table covers]\label{thm:table}%
@@ -2001,10 +2003,14 @@ The Leavitt-corner theorem (Theorem~\ref{thm:corner}) applies to an arbitrary no
 Theorem~\ref{thm:A} settles a companion closure question in the negative.  Every group is a quotient of a free group, and free groups are residually finite---hence LEF, hence sofic; presenting the nonsofic group of Theorem~\ref{thm:A} as such a quotient exhibits a residually finite group with a nonsofic quotient.  Consequently none of the three classes---residually finite, LEF, sofic---is closed under quotients.  This is also why the covers of Section~\ref{sec:fp} are proved nonsofic directly, from the forbidden table: a quotient-closure argument would have sufficed there, and none is valid.
 \end{remark}
 
-\begin{remark}[Subsequent work]\label{rem:subsequent}
-Two preprints applying the criterion of Theorem~\ref{thm:D} appeared in the first week of August 2026, as this revision was completed.  Fournier-Facio \cite{FournierFacio26} constructs finitely presented torsion-free nonsofic groups, and notes that, once any nonsofic group exists, the bare existence of a finitely presented one already follows from the openness of nonsoficity in the space of marked groups; Theorem~\ref{thm:C} is finer than bare existence, in that the cover retains an explicit finite obstruction and a surjection onto the original group, and admits the Kazhdan refinement.
+\begin{remark}[Related work]\label{rem:subsequent}
+Three preprints from the first week of August 2026 bear on the material here.
 
-Kun and Thom \cite{KunThom26} carry the mechanism of Section~\ref{sec:criterion} in a different direction, in ultraproduct and von Neumann language; they call \(\Gamma\leq G\) \emph{infranormal} when \(\set{g\in G\suchthat g\Gamma g^{-1}\leq\Gamma}\) generates \(G\), which is the compression hypothesis \eqref{eq:gen} read as a condition on a subgroup, and their component-matching proposition credits the argument used here for Theorem~\ref{thm:local}.  They prove: for an infranormal, non-normal Kazhdan pair the generalized wreath product \(\bigl(\bigoplus_{G/\Gamma}\Z/2\Z\bigr)\rtimes G\) is not sofic; in a sofic Kazhdan group the centralizer of an infranormal Kazhdan subgroup is normal; the \(\Gamma\)-fixed algebra of a sofic probability-measure-preserving action is \(G\)-invariant, so that generalized Bernoulli actions over \(G/\Gamma\) are not sofic---which answers a question of P\u aunescu in the negative and yields nonsofic ergodic equivalence relations generated by free actions of residually finite groups; and there are explicit residually finite Kazhdan pairs \(\EL_r(\F_q[x_1,\dots,x_d])<\EL_r(\F_q[x_1^{\pm1},\dots,x_d^{\pm1}])\rtimes\operatorname{SL}_d(\Z)\) satisfying the hypotheses.  Their permutation-centralizer theorem, which carries the first two of these, rests on a preprint of Alekseev and Thom not yet public at the time of writing; the remaining results use only \cite{Kun19} and published inputs.  Nothing in the present paper depends on either preprint.
+Fournier-Facio \cite{FournierFacio26} applies the criterion of Theorem~\ref{thm:D} to construct finitely presented torsion-free nonsofic groups, and observes that the bare existence of a finitely presented nonsofic group follows from the existence of any nonsofic group, by openness of nonsoficity in the space of marked groups.  Theorem~\ref{thm:C} gives more than existence: an explicit finite obstruction, a surjection onto the original group, and the Kazhdan refinement.
+
+Kun and Thom \cite{KunThom26} carry the mechanism of Section~\ref{sec:criterion} into ergodic theory and operator algebras.  They call \(\Gamma\leq G\) \emph{infranormal} when \(\set{g\in G\suchthat g\Gamma g^{-1}\leq\Gamma}\) generates \(G\)---the compression hypothesis \eqref{eq:gen} read as a condition on a subgroup---and prove that for an infranormal, non-normal Kazhdan pair the generalized wreath product \(\bigl(\bigoplus_{G/\Gamma}\Z/2\Z\bigr)\rtimes G\) is not sofic; that in a sofic Kazhdan group the centralizer of an infranormal Kazhdan subgroup is normal; and that the \(\Gamma\)-fixed algebra of a sofic probability-measure-preserving action is \(G\)-invariant, so that generalized Bernoulli actions over \(G/\Gamma\) are not sofic---which answers a question of P\u aunescu in the negative and yields nonsofic ergodic equivalence relations generated by free actions of residually finite groups.  They also exhibit explicit residually finite Kazhdan pairs \(\EL_r(\F_q[x_1,\dots,x_d])<\EL_r(\F_q[x_1^{\pm1},\dots,x_d^{\pm1}])\rtimes\operatorname{SL}_d(\Z)\) to which all of this applies.
+
+Alekseev and Thom \cite{AlekseevThom26}, in work independent of this paper and completed before it, reach the same phenomenon from the other side.  They show that the centralizer of a sofic embedding of a Kazhdan group into a metric ultraproduct of symmetric groups is again a metric ultraproduct of finite permutation groups, and deduce that when that centralizer acts ergodically on the Loeb space the group is LEF, hence residually finite if finitely presented.  Where Theorem~\ref{thm:D} uses compression to force a commuting subgroup to be LEF, they use ergodicity of the whole centralizer; both are readings of Kun's decomposition to the effect that a Kazhdan group cannot carry a sofic approximation whose centralizer is large.  Theorem~\ref{thm:A} is the extreme case, in which no sofic approximation exists at all.
 \end{remark}
 
 \appendix
@@ -2432,6 +2438,11 @@ The proof of Theorem~\ref{thm:K1app} is explicit throughout: the width reduction
 G.~Abrams and G.~Aranda Pino,
 \emph{Purely infinite simple Leavitt path algebras},
 J. Pure Appl. Algebra \textbf{207} (2006), 553--563.
+
+\bibitem{AlekseevThom26}
+V.~Alekseev and A.~Thom,
+\emph{Centralizers of sofic approximations of Kazhdan groups},
+arXiv:2608.05362 [math.GR], 5 August 2026.
 
 \bibitem{AraBrustengaCortinas09}
 P.~Ara, M.~Brustenga, and G.~Corti\~nas,

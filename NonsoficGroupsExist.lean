@@ -244,6 +244,7 @@ import NonsoficGroupsExist.Leavitt.MatrixSelfSimilarity
 import NonsoficGroupsExist.Matching.PermutationConservation
 import NonsoficGroupsExist.Sofic.Sofic
 import NonsoficGroupsExist.Sofic.SoficAmplification
+import NonsoficGroupsExist.Sofic.SoficUltraproduct
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls
 import NonsoficGroupsExist.Sofic.SoficErrors

@@ -31,6 +31,9 @@ Main results:
 * `hammingDistance_powerPerm` -- the exact power law for the distance.
 * `isSofic_of_isSoficWeak` -- a fixed positive separation suffices.
 * `isSofic_iff_weak` -- the two definitions agree, for every `δ ∈ (0, 1)`.
+* `isSofic_iff_weakLocal` -- and with no side condition at all once `δ` is
+  allowed to depend on the test set, which is the form
+  `Sofic.SoficUltraproduct` needs.
 
 Nothing in the proof of the main results depends on this module; it is here to
 close the last gap between the formalized `IsSofic` and the conventions in the
@@ -179,10 +182,10 @@ variable {G : Type*} [Group G]
 /-- **Amplification.**  A separation constant that does not shrink is enough:
 the sharp definition follows by passing to a tensor power whose exponent
 depends only on `δ` and the target accuracy. -/
-theorem isSofic_of_isSoficWeak {δ : ℝ} (hδ : 0 < δ) (h : IsSoficWeak G δ) :
-    IsSofic G := by
+theorem soficModel_of_weak {F : Finset G} {δ ε : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    (h : ∀ ε' : ℝ, 0 < ε' → Nonempty (WeakSoficModel G F δ ε')) :
+    Nonempty (SoficModel G F ε) := by
   classical
-  intro F ε hε
   -- the exponent, fixed by `δ` and `ε` alone
   set r : ℝ := 1 - min δ 1 with hr
   have hr0 : 0 ≤ r := by
@@ -200,7 +203,7 @@ theorem isSofic_of_isSoficWeak {δ : ℝ} (hδ : 0 < δ) (h : IsSoficWeak G δ) 
       _ = r ^ k := mul_one _
       _ < ε := hk
   -- a weak model accurate enough that its power still lands under `ε`
-  obtain ⟨M⟩ := h F (ε / K) (by positivity)
+  obtain ⟨M⟩ := h (ε / K) (by positivity)
   have hMcard : 0 < Fintype.card M.carrier := M.nonempty
   refine ⟨{
     carrier := powerModel M.carrier K
@@ -233,6 +236,22 @@ theorem isSofic_of_isSoficWeak {δ : ℝ} (hδ : 0 < δ) (h : IsSoficWeak G δ) 
     have hpow : (1 - d) ^ K ≤ r ^ K := by gcongr
     linarith [hrK]
 
+/-- **Amplification**, in the form the hypothesis usually arrives in: `δ` may
+depend on the test set.  This is what an injective homomorphism into a metric
+ultraproduct supplies, since distinct elements are separated by an amount that
+depends on the pair. -/
+def IsSoficWeakLocal (G : Type*) [Group G] : Prop :=
+  ∀ F : Finset G, ∃ δ : ℝ, 0 < δ ∧ ∀ ε : ℝ, 0 < ε → Nonempty (WeakSoficModel G F δ ε)
+
+theorem isSofic_of_isSoficWeakLocal (h : IsSoficWeakLocal G) : IsSofic G := by
+  intro F ε hε
+  obtain ⟨δ, hδ, H⟩ := h F
+  exact soficModel_of_weak hδ hε H
+
+theorem isSofic_of_isSoficWeak {δ : ℝ} (hδ : 0 < δ) (h : IsSoficWeak G δ) :
+    IsSofic G :=
+  fun _ _ hε ↦ soficModel_of_weak hδ hε (fun _ hε' ↦ h _ _ hε')
+
 /-- The sharp definition implies every weaker one. -/
 theorem isSoficWeak_of_isSofic {δ : ℝ} (hδ : δ < 1) (h : IsSofic G) :
     IsSoficWeak G δ := by
@@ -258,9 +277,20 @@ theorem isSofic_iff_weak {δ : ℝ} (hδ0 : 0 < δ) (hδ1 : δ < 1) :
     IsSofic G ↔ IsSoficWeak G δ :=
   ⟨isSoficWeak_of_isSofic hδ1, isSofic_of_isSoficWeak hδ0⟩
 
+/-- With `δ` allowed to depend on the test set, the equivalence carries no side
+condition at all. -/
+theorem isSofic_iff_weakLocal : IsSofic G ↔ IsSoficWeakLocal G := by
+  refine ⟨fun h F ↦ ⟨1 / 2, by norm_num, fun ε hε ↦ ?_⟩, isSofic_of_isSoficWeakLocal⟩
+  exact isSoficWeak_of_isSofic (by norm_num) h F ε hε
+
 /-- The quarter-separation convention, spelled out. -/
 theorem isSofic_iff_weak_quarter : IsSofic G ↔ IsSoficWeak G (1 / 4) :=
   isSofic_iff_weak (by norm_num) (by norm_num)
+
+/-- Positive control for the test-set-local form. -/
+theorem isSoficWeakLocal_of_finite (G : Type) [Group G] [Finite G] :
+    IsSoficWeakLocal G :=
+  isSofic_iff_weakLocal.mp (isSofic_of_finite G)
 
 /-- Positive control, in the shape of `isSofic_of_finite`: the weak predicate is
 satisfied, not merely refuted.  Without this, a theorem refuting `IsSoficWeak`

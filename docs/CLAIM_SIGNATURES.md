@@ -713,6 +713,13 @@ One entry per declaration named by a manuscript margin note, in the order of `do
 AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ```
 
+## `NonsoficGroupsExist.IsNullSeq`
+
+```lean
+{ι : Type u_1} →
+  Ultrafilter ι → (X : ι → FiniteModel) → ((i : ι) → Equiv.Perm (X i).carrier) → Prop
+```
+
 ## `NonsoficGroupsExist.IsSofic`
 
 ```lean
@@ -723,6 +730,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 
 ```lean
 (G : Type u_1) → [Group G] → ℝ → Prop
+```
+
+## `NonsoficGroupsExist.IsSoficWeakLocal`
+
+```lean
+(G : Type u_2) → [Group G] → Prop
 ```
 
 ## `NonsoficGroupsExist.KunDecomposition.exists_expanderDecomposition`
@@ -2014,6 +2027,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 Function.Injective ⇑UniversalRankFour.witnessEmbedding
 ```
 
+## `NonsoficGroupsExist.UniversalSofic`
+
+```lean
+{ι : Type u_1} → Ultrafilter ι → (ι → FiniteModel) → Type u_1
+```
+
 ## `NonsoficGroupsExist.Whitehead.whitehead_commutator`
 
 ```lean
@@ -2297,6 +2316,12 @@ CountableNonsoficGroupExists
         1 - (1 - hammingDistance Y p q) ^ k
 ```
 
+## `NonsoficGroupsExist.hammingLength`
+
+```lean
+(Y : FiniteModel) → Equiv.Perm Y.carrier → ℝ
+```
+
 ## `NonsoficGroupsExist.involutionNormalize`
 
 ```lean
@@ -2337,6 +2362,12 @@ CountableNonsoficGroupExists
 ∀ {G : Type u_1} [inst : Group G] {δ : ℝ}, 0 < δ → δ < 1 → (IsSofic G ↔ IsSoficWeak G δ)
 ```
 
+## `NonsoficGroupsExist.isSofic_iff_weakLocal`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], IsSofic G ↔ IsSoficWeakLocal G
+```
+
 ## `NonsoficGroupsExist.isSofic_of_isSoficWeak`
 
 ```lean
@@ -2347,6 +2378,14 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {G : Type u_1} [inst : Group G] (A : SoficApproximation G), IsSofic G
+```
+
+## `NonsoficGroupsExist.isSofic_of_soficEmbedding`
+
+```lean
+∀ {ι : Type u_1} (𝒰 : Ultrafilter ι) (X : ι → FiniteModel) {G : Type u_2} [inst : Group G],
+  (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
+    ∀ (f : G →* UniversalSofic 𝒰 X), Function.Injective ⇑f → IsSofic G
 ```
 
 ## `NonsoficGroupsExist.matching_injective`
@@ -2362,12 +2401,28 @@ CountableNonsoficGroupExists
 ℝ → ℝ → ℝ
 ```
 
+## `NonsoficGroupsExist.no_soficEmbedding_of_not_isSofic`
+
+```lean
+∀ {ι : Type u_1} (𝒰 : Ultrafilter ι) (X : ι → FiniteModel) {G : Type u_2} [inst : Group G],
+  ¬IsSofic G →
+    (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
+      ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
+```
+
 ## `NonsoficGroupsExist.not_isSofic_of_not_isLEF`
 
 ```lean
 ∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable G]
   [Countable Γ] [Countable J] (C : CompressionSetup G Γ J),
   HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ¬IsLEF J → ¬IsSofic G
+```
+
+## `NonsoficGroupsExist.nullSubgroup`
+
+```lean
+{ι : Type u_1} →
+  Ultrafilter ι → (X : ι → FiniteModel) → Subgroup ((i : ι) → Equiv.Perm (X i).carrier)
 ```
 
 ## `NonsoficGroupsExist.permutation_conservation_full`

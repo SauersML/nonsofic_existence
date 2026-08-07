@@ -548,10 +548,16 @@ def rootRotation : Aˣ :=
 /-- The same rotation inserted into the cylinder `[1]`. -/
 def rightRotation : Aˣ := L.prefixInsertion [1] L.rootRotation
 
-/-- The first generator of the witness. -/
+/-- The first generator of the witness.  Orientation note: this is the
+*inverse* of the rotation printed in the manuscript.  Nothing depends on the
+choice -- the two relators are proved for this pair directly
+(`relator_one`), noncommutation is symmetric in inversion, and membership in
+the commutator subgroup is preserved by it -- but the reader comparing the
+formal pair against the printed one should expect the inverses. -/
 def generatorA : Aˣ := (L.rootRotation)⁻¹
 
-/-- The second generator of the witness. -/
+/-- The second generator of the witness, again the inverse of the printed
+rotation; see `generatorA`. -/
 def generatorB : Aˣ := (L.rightRotation)⁻¹
 
 theorem rootRotation_mem_commutator : L.rootRotation ∈ commutator Aˣ := by

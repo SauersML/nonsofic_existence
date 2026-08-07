@@ -61,6 +61,7 @@ STATUS = {"verified": "formalized", "partial": "formalized in part",
 CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "KunSpectralCounterexample",
     "SoficAmplification",
+    "SoficUltraproduct",
     "ThompsonVWitness",
     "Whitehead",
 })
