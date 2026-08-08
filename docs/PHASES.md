@@ -436,6 +436,17 @@ nothing — although the element has order two and the involution bound would
 predict a half.  The gcd is what the phase sees; the two part company exactly
 when the modulus is chosen incompatibly with the torsion.
 
+The `gcd ≥ 4` side is an infinite family, not one accident at `4`.  At any even
+modulus, if `ζ^{m/2} = -1` then `ζ¹ + ζ^{1+m/2} = ζ(1 + ζ^{m/2}) = 0`
+(`phase_pair_cancels`), so two classes with equal weights cancel while *neither*
+is trivial; the two-point model with the identity permutation and phases `ζ, −ζ`
+has trace `0` and untwists fixed-point free, for every even `m ≥ 4`
+(`untwist_full_separation_witness_even`).  The `±i` witness is the case `m = 4`.
+The same idea covers composite `m` generally — take the classes `1 + (m/d)j` for
+`j < d` — and only prime `m ≥ 5` needs irrational weights (at `m = 5` they are
+the golden ratio, the constant from §3).  Those generalizations are not
+formalized; the even family is.
+
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
 machinery bears on this half: the difficulty is not that phases are hard to make

@@ -741,4 +741,78 @@ theorem phase_eq_zero_of_gcd_eq_one (Y : FiniteModel) (m n : ℕ) [NeZero m]
   rw [ha, Finset.mem_singleton] at hmem hzero_mem
   rw [hmem, ← hzero_mem]
 
+
+/-! ## The `gcd ≥ 4` side is an infinite family, not one example
+
+The `±i` witness settles `gcd = 4`.  The same construction runs at every even
+modulus, and needs no root-of-unity analysis: if `ζ^{m/2} = -1` then
+
+    ζ^1 + ζ^{1 + m/2} = ζ(1 + ζ^{m/2}) = 0,
+
+so two phase classes with equal weights cancel while *neither* is the trivial
+class.  Untwisting is then fixed point free by
+`untwist_hamming_eq_one_of_phase_ne_zero`, and the trace vanishes, on a model of
+two points with the identity permutation.
+
+The same idea covers composite `m` generally -- take the classes
+`1 + (m/d)j` for `j < d`, whose phases sum to `ζ(1 + ω + ... + ω^{d-1}) = 0` for
+`ω = ζ^{m/d}` a primitive `d`-th root -- and the exponents miss `0` exactly when
+`d < m`.  Only prime `m ≥ 5` needs genuinely irrational weights; at `m = 5` they
+are the golden ratio, which is the same constant that appears in
+`re_pow_max_sharp`.  Neither of those generalizations is formalized here; what
+is formalized is the even family below.
+-/
+
+/-- **A vanishing pair of nontrivial phases at every even modulus.**  Two classes
+with equal weights cancel, and neither is the trivial class. -/
+theorem phase_pair_cancels (m : ℕ) (ζ : ℂ) (hζ : ζ ^ (m / 2) = -1) :
+    ζ ^ 1 + ζ ^ (1 + m / 2) = 0 := by
+  rw [pow_add, hζ, pow_one]
+  ring
+
+/-- **The order-four witness generalizes to every even modulus.**  Two points,
+the identity permutation, phases `ζ` and `-ζ`: the trace is zero and the
+untwisted permutation is fixed point free, so the untwisted model is maximally
+separated although the permutation part moves nothing.
+
+So `gcd ≥ 4` failing to force anything is an infinite family of witnesses, not a
+single accident at `4`. -/
+theorem untwist_full_separation_witness_even (m : ℕ) [NeZero m] (hm : 4 ≤ m)
+    (hev : 2 ∣ m) (ζ : ℂ) (hnorm : Complex.normSq ζ = 1) :
+    ∃ (Y : FiniteModel) (d : Y → ℂ) (e : Y → ZMod m),
+      (∀ i, Complex.normSq (d i) = 1) ∧
+      normTrace Y (monomialMatrix Y d 1) = 0 ∧
+      hammingDistance (wreathModel Y m) (wreathPerm Y m e 1) 1 = 1 := by
+  classical
+  have hhalf : 0 < m / 2 := by omega
+  have hlt : 1 + m / 2 < m := by omega
+  -- neither class is the trivial one
+  have hne1 : (1 : ZMod m) ≠ 0 := by
+    haveI : Fact (1 < m) := ⟨by omega⟩
+    exact one_ne_zero
+  have hne2 : ((1 + m / 2 : ℕ) : ZMod m) ≠ 0 := by
+    intro hcon
+    have hval : ((1 + m / 2 : ℕ) : ZMod m).val = 0 := by rw [hcon]; simp
+    rw [ZMod.val_natCast, Nat.mod_eq_of_lt hlt] at hval
+    omega
+  refine ⟨(⟨Bool, inferInstance, inferInstance⟩ : FiniteModel),
+    fun b : Bool ↦ if b = true then ζ else -ζ,
+    fun b : Bool ↦ if b = true then (1 : ZMod m) else ((1 + m / 2 : ℕ) : ZMod m),
+    ?_, ?_, ?_⟩
+  · intro i
+    by_cases h : i = true <;> simp [h, hnorm]
+  · have htr : Matrix.trace
+        (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+          (fun b : Bool ↦ if b = true then ζ else -ζ) 1) = 0 := by
+      show (∑ i : Bool, (if (1 : Equiv.Perm Bool) i = i then
+        (if i = true then ζ else -ζ) else 0)) = 0
+      rw [Fintype.sum_bool]
+      simp
+    rw [normTrace, htr, zero_div]
+  · refine untwist_hamming_eq_one_of_phase_ne_zero _ m _ 1 ?_ (by decide)
+    intro y _
+    by_cases h : y = true
+    · simpa [h] using hne1
+    · simpa [h] using hne2
+
 end NonsoficGroupsExist
