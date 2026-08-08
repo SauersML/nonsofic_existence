@@ -2367,6 +2367,13 @@ CountableNonsoficGroupExists
               ¬IsSofic (tableGroup F h₁) ∧ Function.Surjective ⇑(tableEvaluation F h₁)
 ```
 
+## `NonsoficGroupsExist.exists_hyperlinearEmbedding_of_approximation`
+
+```lean
+∀ {G : Type u_2} [inst : Group G] (S : HyperlinearApproximation G) {𝒰 : Ultrafilter ℕ},
+  ↑𝒰 ≤ Filter.cofinite → ∃ f, Function.Injective ⇑f
+```
+
 ## `NonsoficGroupsExist.exists_infinite_finitelyPresented_nonsofic_ambient_cover`
 
 ```lean
@@ -2914,16 +2921,6 @@ CountableNonsoficGroupExists
 ```lean
 {ι : Type u_1} →
   Ultrafilter ι → (X : ι → FiniteModel) → Subgroup ((i : ι) → Equiv.Perm (X i).carrier)
-```
-
-## `NonsoficGroupsExist.nullUnitarySubgroup`
-
-```lean
-{ι : Type u_1} →
-  Ultrafilter ι →
-    (X : ι → FiniteModel) →
-      (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
-        Subgroup ((i : ι) → ↥(Matrix.unitaryGroup (X i).carrier ℂ))
 ```
 
 ## `NonsoficGroupsExist.ofReal_hsNormSq`

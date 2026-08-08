@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Sofic.PhasePropagation
+import NonsoficGroupsExist.Sofic.SoficUltraproduct
 import Mathlib.Order.Filter.Ultrafilter.Defs
 import Mathlib.GroupTheory.QuotientGroup.Defs
 
@@ -219,5 +220,109 @@ theorem hsLengthSq_ge_of_separated {G : Type*} [Group G] {F : Finset G} {ε : �
       = hsDistSq M.carrier (M.map g) 1 := rfl
   rw [hrw, hdist]
   linarith
+
+/-! ## From an approximation to an embedding -/
+
+section Converse
+
+variable {G : Type*} [Group G]
+
+/-- A sequence of unitary models of growing accuracy, in the shape the
+ultraproduct consumes. -/
+structure HyperlinearApproximation (G : Type*) [Group G] where
+  model : ℕ → FiniteModel
+  modelNonempty : ∀ n, 0 < Fintype.card (model n)
+  map : ∀ n, G → Matrix.unitaryGroup (model n) ℂ
+  asymptoticallyMultiplicative : ∀ g h : G, ∀ ε : ℝ, 0 < ε → ∃ N, ∀ n ≥ N,
+    hsDistSq (model n) (map n (g * h)) ((map n g : Matrix (model n) (model n) ℂ)
+      * map n h) ≤ ε
+  separatedEventually : ∀ g h : G, g ≠ h → ∃ N, ∀ n ≥ N,
+    1 ≤ hsDistSq (model n) (map n g) (map n h)
+
+/-- A closed inhabitant: the one-point models of the trivial group. -/
+noncomputable def trivialHyperlinearApproximation :
+    HyperlinearApproximation PUnit where
+  model := fun _ ↦ ⟨PUnit, inferInstance, inferInstance⟩
+  modelNonempty := fun _ ↦ by simp
+  map := fun _ _ ↦ 1
+  asymptoticallyMultiplicative := by
+    intro g h ε hε
+    refine ⟨0, fun n _ ↦ ?_⟩
+    show hsDistSq _ (1 : Matrix _ _ ℂ) ((1 : Matrix _ _ ℂ) * 1) ≤ ε
+    rw [Matrix.mul_one, hsDistSq_self]
+    exact hε.le
+  separatedEventually := by
+    intro g h hne
+    exact absurd (Subsingleton.elim g h) hne
+
+/-- Coercion of an inverse-times-element in the unitary group. -/
+theorem coe_inv_mul (Y : FiniteModel) (a b : Matrix.unitaryGroup Y ℂ) :
+    ((a⁻¹ * b : Matrix.unitaryGroup Y ℂ) : Matrix Y Y ℂ)
+      = (a : Matrix Y Y ℂ)ᴴ * b := by
+  rw [← Matrix.star_eq_conjTranspose]
+  rfl
+
+/-- **A hyperlinear approximation is a hyperlinear embedding.**  The unitaries,
+read as one sequence per group element, define an injective homomorphism into
+the universal hyperlinear group over its models.  This is the direction that
+does not need amplification, and it is therefore the direction that survives
+the phase collapse. -/
+theorem exists_hyperlinearEmbedding_of_approximation
+    (S : HyperlinearApproximation G) {𝒰 : Ultrafilter ℕ}
+    (hcof : (𝒰 : Filter ℕ) ≤ Filter.cofinite) :
+    ∃ f : G →* UniversalHyperlinear 𝒰 S.model S.modelNonempty,
+      Function.Injective f := by
+  classical
+  have hlen : ∀ (n : ℕ) (a b : Matrix.unitaryGroup (S.model n) ℂ),
+      hsLengthSq (S.model n) ((a⁻¹ * b : Matrix.unitaryGroup (S.model n) ℂ))
+        = hsDistSq (S.model n) b a := by
+    intro n a b
+    rw [coe_inv_mul]
+    exact hsLengthSq_conjTranspose_mul (S.model n) a.2 (S.modelNonempty n)
+  have hnull : ∀ g h : G,
+      (fun n ↦ S.map n g * S.map n h)⁻¹ * (fun n ↦ S.map n (g * h))
+        ∈ nullUnitarySubgroup 𝒰 S.model S.modelNonempty := by
+    intro g h ε hε
+    obtain ⟨N, hN⟩ := S.asymptoticallyMultiplicative g h (ε / 2) (by linarith)
+    refine eventually_of_atTop hcof N (fun n hn ↦ ?_)
+    show hsLengthSq (S.model n)
+      (((S.map n g * S.map n h)⁻¹ * S.map n (g * h) :
+        Matrix.unitaryGroup (S.model n) ℂ)) < ε
+    rw [hlen n (S.map n g * S.map n h) (S.map n (g * h))]
+    have hcoe : ((S.map n g * S.map n h : Matrix.unitaryGroup (S.model n) ℂ) :
+        Matrix (S.model n) (S.model n) ℂ)
+        = (S.map n g : Matrix (S.model n) (S.model n) ℂ) * S.map n h := rfl
+    rw [hcoe]
+    have := hN n hn
+    linarith
+  refine ⟨MonoidHom.mk' (fun g ↦ QuotientGroup.mk (fun n ↦ S.map n g)) ?_, ?_⟩
+  · intro g h
+    rw [← QuotientGroup.mk_mul]
+    exact (QuotientGroup.eq.mpr (hnull g h)).symm
+  · intro g h hgh
+    by_contra hne
+    obtain ⟨N, hN⟩ := S.separatedEventually g h hne
+    have hfar : ∀ᶠ n in (𝒰 : Filter ℕ),
+        (1 : ℝ) ≤ hsDistSq (S.model n) (S.map n g) (S.map n h) :=
+      eventually_of_atTop hcof N hN
+    have hgh' : (QuotientGroup.mk (fun n ↦ S.map n g) :
+        UniversalHyperlinear 𝒰 S.model S.modelNonempty)
+        = QuotientGroup.mk (fun n ↦ S.map n h) := hgh
+    have hmem : (fun n ↦ S.map n h)⁻¹ * (fun n ↦ S.map n g)
+        ∈ nullUnitarySubgroup 𝒰 S.model S.modelNonempty :=
+      QuotientGroup.eq.mp hgh'.symm
+    have hclose : ∀ᶠ n in (𝒰 : Filter ℕ),
+        hsDistSq (S.model n) (S.map n g) (S.map n h) < 1 := by
+      filter_upwards [hmem 1 (by norm_num)] with n hn
+      rw [show hsLengthSq (S.model n)
+          (((fun m ↦ S.map m h)⁻¹ * (fun m ↦ S.map m g) : ∀ m,
+            Matrix.unitaryGroup (S.model m) ℂ) n)
+          = hsDistSq (S.model n) (S.map n g) (S.map n h) from
+        hlen n (S.map n h) (S.map n g)] at hn
+      exact hn
+    obtain ⟨n, hn₁, hn₂⟩ := (hfar.and hclose).exists
+    linarith
+
+end Converse
 
 end NonsoficGroupsExist
