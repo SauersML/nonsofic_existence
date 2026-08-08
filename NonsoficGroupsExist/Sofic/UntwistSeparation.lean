@@ -1328,4 +1328,61 @@ theorem untwist_retains_commutator_offBad {G : Type*} [Group G] (Y : FiniteModel
     linarith [hcount]
   linarith [hcap, hdiv]
 
+
+/-! ## A phase-free constraint among fixed point densities
+
+The commutator argument gives a *lower* bound on the trivially phased fixed
+points of `[a,b]`, and `card_trivially_phased_le` gives an *upper* bound on the
+same set from the trace.  They can be chained, and the result mentions no phases
+at all:
+
+    2(F_a + F_b - 1 - |B|/|Y|)  ≤  F_{[a,b]} + ε.
+
+No separation of the untwisted model is assumed anywhere -- unlike
+`untwist_retains_commutator`, which concluded about untwisting.  This is a
+constraint on the permutation parts of *any* monomial model whose trace at
+`[a,b]` is small, which is what hyperlinearity supplies directly.
+
+Since `F_{[a,b]} ≤ 1` it gives `F_a + F_b ≤ 3/2 + ε/2 + |B|/|Y|` outright.  The
+`±i` witness saturates the inequality rather than violating it: there every
+permutation part is the identity, so `[a,b] = 1`, its trace is `1`, and
+`2(1 + 1 - 1) = 2 = 1 + 1` on the nose.
+-/
+
+/-- **The two bounds on the trivially phased fixed points of a commutator,
+chained.**  A constraint among the fixed point densities of `a`, `b` and
+`[a,b]`, with the phases eliminated and no assumption about untwisting. -/
+theorem card_fixed_commutator_constraint {G : Type*} [Group G] (Y : FiniteModel)
+    (m : ℕ) (act : G → Equiv.Perm Y) (e : G → Y → ZMod m)
+    (D : Y → ℂ) (hD : ∀ y, Complex.normSq (D y) = 1)
+    (B : Finset Y) (a b : G)
+    (hcompat : ∀ y : Y, e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1)
+    (hgood : ∀ y : Y, y ∉ B → act a y = y → act b y = y →
+      act (a * b * a⁻¹ * b⁻¹) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0)
+    {ε : ℝ}
+    (htr : (normTrace Y
+      (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re ≤ ε)
+    (hY : 0 < Fintype.card Y) :
+    2 * (((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+        + ((univ.filter fun y : Y ↦ act b y = y).card : ℝ)
+        - Fintype.card Y - B.card)
+      ≤ ((univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y).card : ℝ)
+        + ε * Fintype.card Y := by
+  classical
+  set c : G := a * b * a⁻¹ * b⁻¹ with hc
+  -- the good points are trivially phased fixed points of the commutator
+  have hsub : ((univ.filter fun y : Y ↦ act a y = y ∧ act b y = y) \ B)
+      ⊆ univ.filter fun y : Y ↦ act c y = y ∧ D y = 1 := by
+    intro y hy
+    rw [Finset.mem_sdiff, Finset.mem_filter] at hy
+    obtain ⟨hfix, hphase⟩ := hgood y hy.2 hy.1.2.1 hy.1.2.2
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨hfix, hcompat y hphase⟩
+  have hmono : ((((univ.filter fun y : Y ↦ act a y = y ∧ act b y = y) \ B)).card : ℝ)
+      ≤ ((univ.filter fun y : Y ↦ act c y = y ∧ D y = 1).card : ℝ) := by
+    exact_mod_cast Finset.card_le_card hsub
+  have hlow := card_inter_sdiff_ge Y (act a) (act b) B
+  have hhigh := card_trivially_phased_le Y D hD (act c) hY htr
+  linarith [hlow, hmono, hhigh]
+
 end NonsoficGroupsExist

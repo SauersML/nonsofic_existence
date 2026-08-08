@@ -414,6 +414,22 @@ density (`untwist_hamming_le_of_good_set`), and Bonferroni with an exceptional
 set counts them (`card_inter_sdiff_ge`).  So the argument does not degrade badly
 under approximation — the exceptional density enters once, undamped.
 
+The two bounds can now be chained, and the result assumes nothing about
+untwisting.  The commutator argument bounds the trivially phased fixed points of
+`[a,b]` from *below*; `card_trivially_phased_le` bounds the same set from
+*above*.  Together (`card_fixed_commutator_constraint`):
+
+    2(F_a + F_b − 1 − |B|/|Y|)  ≤  F_[a,b] + ε
+
+with `ε` bounding the trace at `[a,b]`.  This constrains the permutation parts
+of **any** monomial model whose trace at `[a,b]` is small — exactly what
+hyperlinearity supplies — with the phases eliminated and no separation assumed.
+Since `F_[a,b] ≤ 1` it gives `F_a + F_b ≤ 3/2 + ε/2 + |B|/|Y|` outright.
+
+The witnesses do not violate it; they saturate it.  There every permutation part
+is the identity, so `[a,b] = 1`, its trace is `1`, and the inequality reads
+`2(1 + 1 − 1) = 2 = 1 + 1` exactly.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a
