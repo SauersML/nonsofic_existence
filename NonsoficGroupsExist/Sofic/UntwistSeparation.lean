@@ -1486,4 +1486,67 @@ theorem fixedDensity_sum_le_of_commutator {G : Type*} [Group G] (Y : FiniteModel
   apply div_nonneg _ (le_of_lt hYR)
   linarith [hbase, hle]
 
+
+/-! ## The sharp form: near-scalar elements have near-trivial commutators
+
+The constraint is better read as a *lower* bound on the commutator's trace than
+as an upper bound on a sum.  Instantiating the trace bound at its own value and
+using `F_{[a,b]} ≤ 1`,
+
+    Re τ(A_{[a,b]})  ≥  2 F_a + 2 F_b - 3 - 2|B|/|Y| ,
+
+and since `|τ(A_g)| ≤ F_g` this says: if two elements are both near the scalars,
+their commutator is near the identity.  For `|τ_a|, |τ_b| ≈ 1` the right side is
+`≈ 1`, so `A_{[a,b]}` is as close to `1` as the Hilbert--Schmidt metric can
+report.
+
+The near-scalar elements of a monomial model therefore form an approximately
+abelian set.  That is the structural reason the scalars in a construction like
+Thom's live in the *centre*: it is not a design choice but the only place a
+model can put them.
+-/
+
+/-- **Near-scalar elements have near-trivial commutators.**  A lower bound on
+the commutator's trace in terms of the two fixed point densities, hence -- via
+`sqrt_normSq_normTrace_le` -- in terms of how nearly scalar the two elements
+are. -/
+theorem re_normTrace_commutator_ge {G : Type*} [Group G] (Y : FiniteModel)
+    (m : ℕ) (act : G → Equiv.Perm Y) (e : G → Y → ZMod m)
+    (D : Y → ℂ) (hD : ∀ y, Complex.normSq (D y) = 1)
+    (B : Finset Y) (a b : G)
+    (hcompat : ∀ y : Y, e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1)
+    (hgood : ∀ y : Y, y ∉ B → act a y = y → act b y = y →
+      act (a * b * a⁻¹ * b⁻¹) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0)
+    (hY : 0 < Fintype.card Y) :
+    2 * fixedDensity Y (act a) + 2 * fixedDensity Y (act b) - 3
+        - 2 * (B.card : ℝ) / Fintype.card Y
+      ≤ (normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  have hbase := card_fixed_commutator_constraint Y m act e D hD B a b hcompat
+    hgood (le_refl (normTrace Y
+      (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re) hY
+  have hle : ((univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y).card : ℝ)
+      ≤ Fintype.card Y := by
+    have : (univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y).card
+        ≤ Fintype.card Y := by
+      calc _ ≤ (univ : Finset Y).card := Finset.card_filter_le _ _
+        _ = Fintype.card Y := Finset.card_univ
+    exact_mod_cast this
+  rw [fixedDensity, fixedDensity, ← sub_nonneg]
+  have hrw : (normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re
+      - (2 * (((univ.filter fun y : Y ↦ act a y = y).card : ℝ) / Fintype.card Y)
+        + 2 * (((univ.filter fun y : Y ↦ act b y = y).card : ℝ) / Fintype.card Y)
+        - 3 - 2 * (B.card : ℝ) / Fintype.card Y)
+      = ((normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re
+            * Fintype.card Y
+          - 2 * ((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+          - 2 * ((univ.filter fun y : Y ↦ act b y = y).card : ℝ)
+          + 3 * Fintype.card Y + 2 * B.card) / Fintype.card Y := by
+    field_simp
+    ring
+  rw [hrw]
+  apply div_nonneg _ (le_of_lt hYR)
+  linarith [hbase, hle]
+
 end NonsoficGroupsExist

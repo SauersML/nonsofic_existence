@@ -443,6 +443,21 @@ so **two elements cannot both lie within `3/4` of the scalars unless their
 commutator fails to separate**.  That is the general form of the two-involution
 statement of §3: what obstructs is not the order two but the non-commuting.
 
+The inequality reads better the other way round, as a lower bound on the
+commutator's trace (`re_normTrace_commutator_ge`):
+
+    Re τ(A_[a,b]) ≥ 2 F_a + 2 F_b − 3 − 2|B|/|Y|
+
+If two elements are both near the scalars — `|τ_a|, |τ_b| ≈ 1`, hence
+`F_a, F_b ≈ 1` — the right side is `≈ 1`, so `A_[a,b]` is as close to the
+identity as Hilbert–Schmidt can report.  **Near-scalar elements have
+near-trivial commutators.**
+
+So the near-scalar elements of a monomial model form an approximately abelian
+set.  That is the structural reason the scalars in a construction like Thom's
+live in the *centre*: not a design choice but the only place a model can put
+them.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a
