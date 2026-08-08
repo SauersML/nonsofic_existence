@@ -1995,6 +1995,28 @@ The heuristic offered in \cite{Pestov08} for a positive answer runs through Malc
 Consequently the witness has no proper subgroup of finite index, no nontrivial action on a finite set, and trivial profinite completion; and by Malcev's theorem again, no nontrivial finite-dimensional linear representation over any field, since the image would be a finitely generated linear group inheriting the absence of finite quotients.  Nonsoficity here is therefore not the shadow of some coarser failure of residual structure---there is no residual structure at all.  Whatever settles Question~3.4 for this group, a linear model will not be what does it.
 \end{remark}
 
+\begin{remark}[The separation constant is a convention on one side only]\label{rem:phasecollapse}%
+\leanverified{\leanmod{Sofic/HyperlinearAmplification}{tensorPow,tensorPow_mul,tensorPow_smul,trace_tensorPow,normTrace,normTrace_tensorPow,hsDistSq_of_unitary,hsDistSq_tensorPow,tensorPow_phase_collapse,conjDouble,conjDouble_mul,trace_conjDouble,normTrace_conjDouble,hsDistSq_conjDoubleTensorPow,normSq_normTrace_le_one,exists_conjDouble_separation}}%
+Remark~\ref{rem:amplification} made the sofic separation constant a convention by taking tensor powers.  The unitary computation is the same computation and is if anything cleaner.  Write \(\tau\) for the trace normalized by \(\abs Y\).  For unitaries \(A,B\) the squared normalized Hilbert--Schmidt distance is a single trace,
+\[
+ \norm{A-B}^2_{\mathrm{HS}}=2-2\Re\tau(AB^*),
+\]
+because each of \(\tau(AA^*)\) and \(\tau(BB^*)\) is \(1\); and the \(k\)-fold tensor power multiplies traces, \(\tau\bigl(A^{\otimes k}(B^{\otimes k})^*\bigr)=\tau(AB^*)^k\), so
+\begin{equation}\label{eq:hsamplify}
+ \norm{A^{\otimes k}-B^{\otimes k}}^2_{\mathrm{HS}}=2-2\Re\bigl(\tau(AB^*)^k\bigr).
+\end{equation}
+And yet the amplification fails.  A scalar enters the tensor power as its \(k\)-th power, so the \(k\)-th power identifies any two unitaries differing by a \(k\)-th root of unity.  Take \(A=1\) and \(B=i\cdot1\) on any nonempty model: both are unitary, \(\tau(AB^*)=-i\), and \eqref{eq:hsamplify} gives the maximal separation \(2\) at \(k=1\) and the value \(0\) at \(k=4\), where the two tensor powers are literally equal.  Permutation models cannot exhibit this, because \(P_\sigma P_\tau^{-1}\) is again a permutation matrix and its normalized trace is the proportion of fixed points---a real number in \([0,1]\).  In Hamming a small trace means few agreements; over the unitaries a trace can be small because the agreements \emph{cancel}, and tensoring recombines the phases.
+
+The repair is to tensor with the conjugate rather than with a further copy.  The map \(A\mapsto A\otimes\bar A\) is again multiplicative and unitary, and \(\tau(A\otimes\bar A)=\abs{\tau(A)}^2\) is nonnegative, so
+\[
+ \norm{(A\otimes\bar A)^{\otimes k}-(B\otimes\bar B)^{\otimes k}}^2_{\mathrm{HS}}
+ =2-2\abs{\tau(AB^*)}^{2k},
+\]
+which runs to the maximum \(2\) as soon as \(\abs{\tau(AB^*)}<1\).  That hypothesis is not removable: \(\abs{\tau(U)}\leq1\) for every unitary, with equality exactly for scalars, which is the collapse again.  In model terms the bad case is explicit---\(A B^*\) is a scalar precisely when the model sends some element of \(F\!\cdot\!F^{-1}\) to a scalar.
+
+So the separation constant of Definition~\ref{def:sofic} is a convention outright, while its unitary counterpart is a convention relative to a scalar-freeness hypothesis on the model.  Nothing here decides whether the unitary conventions agree; what it does is remove the standard proof from the table and name what a replacement must supply.  The definition used in Remark~\ref{rem:hyperlinear} is the strong one, which is the one soficity implies, so the implication recorded there and the reading \(\neg\text{hyperlinear}\Rightarrow\neg\text{sofic}\) are unaffected.
+\end{remark}
+
 \begin{remark}[Two compressors, one image]\label{rem:twocompressors}
 The pair \(Q=\{u,v\}\) resolves a genuine tension: generation of \(G\) requires elements that move \(\Gamma\), while compression requires elements that map \(\Gamma\) into itself.  The present realization divides the two roles.  The compressor \(u\) seats \(K=u\Gamma u^{-1}\); the involution \(z=vu^{-1}\) generates the missing last row and column of \(\EL_n\) (Proposition~\ref{prop:gen}); and the two compressors share the single image \(K\), so the criterion sees one coherent compression while \(z\) carries the generation.  The criterion itself is indifferent to the size of \(Q\); the algebra here simply supplies two natural compressors rather than one.
 \end{remark}
