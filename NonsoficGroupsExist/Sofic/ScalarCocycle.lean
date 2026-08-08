@@ -229,4 +229,32 @@ theorem hammingDistance_wreathPerm_const (Y : FiniteModel) (m : ℕ) [NeZero m]
   rw [hall, Finset.card_univ]
   field_simp
 
+/-- **Maximal metric separation with zero combinatorial separation.**  On any
+nonempty model the monomial matrices with the same permutation part and phases
+`1` and `-1` sit at the *maximal* Hilbert--Schmidt distance `4`, while their
+permutation parts are equal, so their untwisted permutations coincide and no
+model derived from them separates the pair at all.
+
+This is the obstruction in one line.  Hilbert--Schmidt separation, which is
+what hyperlinearity supplies, gives no Hamming separation whatever, which is
+what soficity demands: by `isSofic_iff_monomial` the passage from hyperlinear
+to sofic is exactly the passage from metric to combinatorial agreement of
+phases, and here a pair is metrically as far apart as a pair can be while
+combinatorially identical. -/
+theorem hsDistSq_max_of_equal_perm (Y : FiniteModel) (hY : 0 < Fintype.card Y)
+    (σ : Equiv.Perm Y) :
+    hsDistSq Y (monomialMatrix Y (fun _ ↦ 1) σ)
+        (monomialMatrix Y (fun _ ↦ -1) σ) = 4
+      ∧ hammingDistance Y σ σ = 0 := by
+  constructor
+  · have hd : ∀ i : Y, Complex.normSq ((fun _ : Y ↦ (1 : ℂ)) i) = 1 := by
+      intro i; simp
+    have hrw : (fun _ : Y ↦ (-1 : ℂ))
+        = fun y : Y ↦ (-1 : ℂ) * (fun _ : Y ↦ (1 : ℂ)) y := by
+      funext y; ring
+    rw [hrw, hsDistSq_monomial_const Y hd σ (-1) hY]
+    simp [Complex.normSq_apply]
+    norm_num
+  · exact hammingDistance_self Y σ
+
 end NonsoficGroupsExist

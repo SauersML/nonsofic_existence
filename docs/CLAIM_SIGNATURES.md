@@ -2676,6 +2676,16 @@ CountableNonsoficGroupExists
             2 - 2 * Complex.normSq (normTrace Y (A * B.conjTranspose)) ^ k
 ```
 
+## `NonsoficGroupsExist.hsDistSq_max_of_equal_perm`
+
+```lean
+∀ (Y : FiniteModel),
+  0 < Fintype.card Y.carrier →
+    ∀ (σ : Equiv.Perm Y.carrier),
+      hsDistSq Y (monomialMatrix Y (fun x => 1) σ) (monomialMatrix Y (fun x => -1) σ) = 4 ∧
+        hammingDistance Y σ σ = 0
+```
+
 ## `NonsoficGroupsExist.hsDistSq_monomial_const`
 
 ```lean
