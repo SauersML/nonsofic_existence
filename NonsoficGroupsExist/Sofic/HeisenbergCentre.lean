@@ -110,6 +110,63 @@ theorem not_mem_center_of_a_ne_zero (x : Heis R) (hx : x.a ≠ 0) :
   intro hmem
   exact hx ((mem_center_iff x).mp hmem).1
 
+
+/-! ## The centre is the ring, and survives a central quotient
+
+Two further steps are what `rem:thomK` uses.  First, the centre is not merely
+described by the third coordinate but *is* the additive group of `R`: the map
+`c ↦ (0,0,c)` is injective, turns addition into multiplication, and has the
+centre as its exact range.  Second, central elements stay central in a quotient
+by a central subgroup, so the centre of `Heis R / Z` contains `(R,+)/Z`.
+
+With `R = ℤ[1/p]` and `Z` the copy of `ℤ`, that is the Prüfer group, which
+`prufer_map_eq_zero` shows every finite quotient kills.  The identification of
+`(R,+)/Z` with `pruferSubgroup p` is not carried out here; what is, is that the
+centre is the ring and that centrality survives the quotient.
+-/
+
+/-- The coordinate embedding of the ring into the Heisenberg group is
+injective. -/
+theorem mk_zero_zero_injective :
+    Function.Injective (fun c : R ↦ (⟨0, 0, c⟩ : Heis R)) := by
+  intro c d h
+  exact congrArg Heis.c h
+
+/-- **The centre is exactly the range of the ring.**  Together with
+`mk_zero_zero_mul` and `mk_zero_zero_injective`, the centre of `Heis R` is
+`(R,+)`. -/
+theorem center_eq_range :
+    (Subgroup.center (Heis R) : Set (Heis R))
+      = Set.range (fun c : R ↦ (⟨0, 0, c⟩ : Heis R)) := by
+  ext x
+  constructor
+  · intro hx
+    obtain ⟨ha, hb⟩ := (mem_center_iff x).mp hx
+    exact ⟨x.c, by ext <;> simp [ha, hb]⟩
+  · rintro ⟨c, rfl⟩
+    exact mk_zero_zero_mem_center c
+
 end Heis
+
+/-- **Central elements stay central in a central quotient.**  Nothing about the
+Heisenberg group is used; this is the step that carries a centre through
+`G ⧸ Z`. -/
+theorem mk_mem_center_of_mem_center {G : Type*} [Group G] (Z : Subgroup G)
+    [Z.Normal] (x : G) (hx : x ∈ Subgroup.center G) :
+    (QuotientGroup.mk' Z x) ∈ Subgroup.center (G ⧸ Z) := by
+  rw [Subgroup.mem_center_iff]
+  intro y
+  refine QuotientGroup.induction_on y fun g ↦ ?_
+  rw [Subgroup.mem_center_iff] at hx
+  show (QuotientGroup.mk' Z g) * (QuotientGroup.mk' Z x)
+    = (QuotientGroup.mk' Z x) * (QuotientGroup.mk' Z g)
+  rw [← map_mul, ← map_mul, hx g]
+
+/-- So the centre of a Heisenberg quotient by a central subgroup contains the
+image of the ring: `Heis R ⧸ Z` has `(R,+)/Z` inside its centre. -/
+theorem Heis.mk_zero_zero_mem_center_quotient {R : Type*} [CommRing R]
+    (Z : Subgroup (Heis R)) [Z.Normal] (c : R) :
+    (QuotientGroup.mk' Z (⟨0, 0, c⟩ : Heis R)) ∈ Subgroup.center (Heis R ⧸ Z) :=
+  mk_mem_center_of_mem_center Z _ (Heis.mk_zero_zero_mem_center c)
 
 end NonsoficGroupsExist

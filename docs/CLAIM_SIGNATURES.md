@@ -707,10 +707,11 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
 ```
 
-## `NonsoficGroupsExist.Heis`
+## `NonsoficGroupsExist.Heis.center_eq_range`
 
 ```lean
-(R : Type u_1) → [CommRing R] → Type u_1
+∀ {R : Type u_1} [inst : CommRing R],
+  ↑(Subgroup.center (Heis R)) = Set.range fun c => { a := 0, b := 0, c := c }
 ```
 
 ## `NonsoficGroupsExist.Heis.mem_center_iff`
@@ -3037,6 +3038,13 @@ CountableNonsoficGroupExists
 
 ```lean
 ℝ → ℝ → ℝ
+```
+
+## `NonsoficGroupsExist.mk_mem_center_of_mem_center`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (Z : Subgroup G) [inst_1 : Z.Normal],
+  ∀ x ∈ Subgroup.center G, (QuotientGroup.mk' Z) x ∈ Subgroup.center (G ⧸ Z)
 ```
 
 ## `NonsoficGroupsExist.monomialMatrix`
