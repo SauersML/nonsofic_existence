@@ -1,38 +1,49 @@
-# Displacement-coherence feasibility: results (2026-08-08)
+# Displacement-coherence: CORRECTED record (2026-08-08, supersedes earlier)
 
-Heisenberg surrogate Q = Heis(Z/N); frames: flip thA(a,b,c) = (-a,b,-c) and
-shear thS(a,b,c) = (a-b,b,c-b(b-1)/2); two-path invisible element
-g = thA(xy) = thS(yz^-1) = (-1,1,-1); Z on the commutant of <y,z>;
-absorption = Fourier mass of D_A lam(x) D_A* on the group algebra
-(liftable control Z = 1: absorption = 1.000000 exactly, verified).
+## The no-go (analytic, then confirmed numerically)
 
-1. Naive alternating projection (project E to lam(g)-commutant, back-solve,
-   re-project to U(C)): STALLS at the random floor. Coherence defect frozen
-   at 1.3964 (N=5) / 1.4168 (N=7) ~ sqrt(2) over 40 iterations - the
-   predicted random-Z failure, and the projected fixed-point step cannot
-   leave it.
+On the Heisenberg surrogate with H = <y,z> and the flip/shear frame pair:
+tau(y) y^-1 z = x, so <H, tau(H)> = Q.  Hence any Z satisfying BOTH ansatz
+constraints -- Z in C = lambda(H)' (exact web transport) and tau(Z) = Z
+(exact coherence, E = 1) -- lies in lambda(Q)', so D_A = Z thA(Z)* commutes
+with lambda(x) and the absorption of the invisible letter is EXACTLY 1:
 
-2. THE EXACT STRATUM: tau := thA^-1 . thS satisfies tau^2 = id, so
-   tau-invariant Z in U(C) gives thS(Z) = thA(Z), hence E = 1 identically:
-   EVERY displacement-coherence equation of the frame pair holds at once
-   (the XCIX coboundary collapse, realized). Measured:
+    exact web transport + exact coherence  ==>  total absorption.
 
-   | N | dim | coherence residual | absorption (3 samples)   |
-   |---|-----|--------------------|--------------------------|
-   | 5 | 125 | ~4e-15             | 0.2085, 0.2177, 0.2102   |
-   | 7 | 343 | ~7e-15             | 0.1461, 0.1401, 0.1381   |
-   | 9 | 729 | ~8e-15             | 0.1144, 0.1140, 0.1114   |
+Measured (alternating projections onto C and Fix(tau), 300 rounds):
+transport 0.0000, coherence ~1e-15, absorption 1.000000 at N = 5 and 7.
 
-   Exact coherence costs the mixing nothing: absorption on the exact
-   stratum (0.21 -> 0.14 -> 0.11) matches the unconstrained decay and sits
-   an order of magnitude below the liftable value 1.0, tightly concentrated
-   across samples.
+## Retraction
 
-Reading: for this frame pair the displacement-coherence system is solved
-EXACTLY with the mixing intact and decaying with congruence depth. What
-remains open on the true Kun-Thom pair: the full Steinberg web has
-non-involutive multi-frame syzygies; the analog of the tau-invariant
-stratum is invariance under the whole substitution action, and whether
-Haar freedom survives on THAT joint fixed subalgebra with mixing intact is
-exactly the (beta)-assembly - the genuinely open certificate. Numerics are
-evidence, not proof.
+The earlier "exact stratum solves the surrogate" claim is WITHDRAWN.  Its
+sampling applied the tau-average after proj_C; the average leaves C
+(tau(H) != H), and run_exact never rechecked transport.  Measured
+violation: transport_err = 1.3179 / 1.3184 (order one) behind the
+apparent absorption 0.20 / 0.15.  The daylight was an artifact of broken
+transport, exactly as the counter-audit diagnosed.
+
+## Standing repairs accepted
+
+1. XCIX cocycle convention: D_AB = D_A thA(D_B) corresponds to
+   rho(A) = D_A pi(A) = Z pi(A) Z^-1, not pi(A) D_A.
+2. XCVI's |tau(rho_n g)| <= 1/2 step needs non-scalar / trace-normalized
+   microstates as an explicit hypothesis: u = iI has full HS-separation
+   with |tau| = 1 and collapsing tensor powers -- the obstruction
+   kernel-checked in Sofic/HyperlinearAmplification
+   (tensorPow_phase_collapse) and Sofic/NormTraceGap
+   (phase_deviation_no_amplification).
+3. One-percent mixing at ONE invisible letter does not imply XCV's
+   hypothesis, which needs relative mixing for every non-Gamma interior
+   word of each growing window; the one-letter-to-cone propagation
+   theorem is missing.
+
+## The sharpened next target
+
+For the actual Steinberg web with constraint subgroup H_W and frame-change
+tau: compute the constraint closure <H_W, tau(H_W)>.  If it contains the
+witness root subgroup (or the relevant finite quotient), the
+global-coboundary ansatz is sterile there by the same argument; if not,
+the commutant of the closure identifies exactly where mixing can survive.
+Exact strata are sterile in the surrogate; any daylight must be sought at
+epsilon-level (approximate transport/coherence within the N19 budget
+epsilon = o(rho)), or in a web whose constraint closure is proper.

@@ -177,11 +177,19 @@ for N, iters in [(5, 40), (7, 40)]:
 
 
 # ---------------------------------------------------------------------------
-# Exact-coherence stratum: tau := thA^-1 . thS is an involution
-# (tau(a,b,c) = (b-a, b, b(b-1)/2 - c), tau^2 = id), so Z in the
-# tau-invariant part of U(C) gives thS(Z) = thA(Z), hence E = 1 exactly:
-# EVERY displacement-coherence equation for the frame pair holds at once.
-# The question is whether the mixing at the invisible letter survives.
+# Exact-coherence stratum: tau := thA^-1 . thS is an involution.
+#
+# There is an important compatibility condition: Z must be both tau-invariant
+# and in C = lambda(<y,z>)'.  Since tau(y)y^-1 z = x, the subgroups <y,z>
+# and tau(<y,z>) generate Q.  Thus
+#
+#   C ∩ Fix(tau) ⊆ lambda(Q)'.
+#
+# In particular every genuinely admissible exact-coherence Z commutes with
+# lambda(x), and the absorption is forced to be 1.  Averaging a C-element
+# with its tau-image only, without projecting to the intersection, leaves C
+# because tau(C) != C; that was the source of the former false-positive
+# low-absorption samples.
 # ---------------------------------------------------------------------------
 
 def run_exact(N, samples=3):
@@ -246,6 +254,13 @@ def run_exact(N, samples=3):
             acc += T[np.ix_(L, L)]
         return acc / len(web)
 
+    def proj_full_commutant(T):
+        """Conditional expectation onto lambda(Q)'."""
+        acc = np.zeros_like(T)
+        for L in Lall:
+            acc += T[np.ix_(L, L)]
+        return acc / len(Lall)
+
     def absorption(M):
         s = 0.0
         for L in Lall:
@@ -258,21 +273,136 @@ def run_exact(N, samples=3):
     out = []
     for _ in range(samples):
         Zr = rng.standard_normal((d, d)) + 1j * rng.standard_normal((d, d))
-        Zr = proj_C(Zr)
-        Zr = (Zr + conj(Zr, pT)) / 2  # tau-average: exact-coherence stratum
+        # Because <y,z> and tau(<y,z>) generate Q, projecting to the full
+        # commutant is the exact joint transport constraint.  This algebra is
+        # tau-stable, so tau-averaging and polar projection stay inside it.
+        Zr = proj_full_commutant(Zr)
+        Zr = (Zr + conj(Zr, pT)) / 2
         Z = upolar(Zr)
         tA = conj(Z, pA)
         E = thS_conj(Z) @ tA.conj().T
         cohere = hs(E - np.eye(d))
         DA = Z @ tA.conj().T
+        transport = hs(DA[np.ix_(left_perm((0, 1, 0)),
+                                     left_perm((0, 1, 0)))] - DA)
+        full_comm = max(hs(Z[np.ix_(L, L)] - Z) for L in Lall)
         alpha = absorption(DA @ (DA.conj().T[Lx, :]))
-        out.append((cohere, alpha))
+        out.append((cohere, transport, full_comm, alpha))
     return d, out
 
 
-print("\n=== exact-coherence stratum (tau-invariant Z): E = 1 identically ===")
+print("\n=== admissible exact-coherence stratum: absorption is forced to 1 ===")
 for N in (5, 7, 9):
     d, out = run_exact(N)
-    cs = ", ".join(f"{c:.2e}" for c, _ in out)
-    as_ = ", ".join(f"{a:.4f}" for _, a in out)
-    print(f"N={N} dim={d}: coherence residuals [{cs}]  absorption [{as_}]")
+    cs = ", ".join(f"{c:.2e}" for c, _, _, _ in out)
+    ts = ", ".join(f"{t:.2e}" for _, t, _, _ in out)
+    fs = ", ".join(f"{f:.2e}" for _, _, f, _ in out)
+    as_ = ", ".join(f"{a:.6f}" for _, _, _, a in out)
+    print(f"N={N} dim={d}: coherence [{cs}] transport [{ts}]")
+    print(f"  full-commutant residuals [{fs}] absorption [{as_}]")
+
+
+# ---------------------------------------------------------------------------
+# NO-GO confirmation (correction of the run above): genuine membership in
+# C  cap  Fix(tau) forces Z into lambda(Q)' (since <H, tau(H)> = Q), hence
+# D_A commutes with lambda(x) and absorption is exactly 1.  The run_exact
+# sampling above applied the tau-average AFTER proj_C, leaving C, so its
+# low absorption came from VIOLATED web transport.  Both facts measured.
+# ---------------------------------------------------------------------------
+
+def run_nogo(N):
+    d = N * N * N
+    inv2 = pow(2, -1, N)
+
+    def idx(q):
+        return ((q[0] % N) * N + (q[1] % N)) * N + (q[2] % N)
+
+    def unidx(i):
+        return (i // (N * N), (i // N) % N, i % N)
+
+    def mul(p, q):
+        return ((p[0] + q[0]) % N, (p[1] + q[1]) % N,
+                (p[2] + q[2] + p[0] * q[1]) % N)
+
+    def inv(p):
+        a, b, c = p
+        return ((-a) % N, (-b) % N, (-c + a * b) % N)
+
+    def thA(p):
+        return ((-p[0]) % N, p[1], (-p[2]) % N)
+
+    def tau(p):
+        a, b, c = p
+        return ((b - a) % N, b, (b * (b - 1) * inv2 - c) % N)
+
+    elems = [unidx(i) for i in range(d)]
+
+    def left_perm(q):
+        qi = inv(q)
+        L = np.empty(d, dtype=np.int64)
+        for i, r in enumerate(elems):
+            L[i] = idx(mul(qi, r))
+        return L
+
+    def aut_perm(f):
+        P = np.empty(d, dtype=np.int64)
+        for i, r in enumerate(elems):
+            P[idx(f(r))] = i
+        return P
+
+    pA, pT = aut_perm(thA), aut_perm(tau)
+
+    def conj(T, P):
+        return T[np.ix_(P, P)]
+
+    Lx = left_perm((1, 0, 0))
+    Ly = left_perm((0, 1, 0))
+    web = [(0, b, c) for b in range(N) for c in range(N)]
+    Lweb = [left_perm(h) for h in web]
+    Lall = [left_perm(q) for q in elems]
+    ar = np.arange(d)
+
+    def proj_C(T):
+        acc = np.zeros_like(T)
+        for L in Lweb:
+            acc += T[np.ix_(L, L)]
+        return acc / len(web)
+
+    def proj_F(T):
+        return (T + conj(T, pT)) / 2
+
+    def absorption(M):
+        s = 0.0
+        for L in Lall:
+            s += abs(M[L, ar].sum() / d) ** 2
+        return np.sqrt(s)
+
+    def hs(T):
+        return np.sqrt(max((np.vdot(T, T) / d).real, 0.0))
+
+    def report(Z, label):
+        tA = conj(Z, pA)
+        E = conj(conj(Z, pT), pA) @ tA.conj().T
+        cohere = hs(E - np.eye(d))
+        DA = Z @ tA.conj().T
+        alpha = absorption(DA @ (DA.conj().T[Lx, :]))
+        terr = hs(DA[np.ix_(Ly, Ly)] - DA)     # web-transport violation
+        print(f"  {label}: coherence={cohere:.2e}  transport_err={terr:.4f}"
+              f"  absorption={alpha:.6f}")
+
+    Zr = rng.standard_normal((d, d)) + 1j * rng.standard_normal((d, d))
+    # (i) the flawed sampling of run_exact: proj_C then ONE tau-average
+    Zbad = upolar(proj_F(proj_C(Zr.copy())))
+    report(Zbad, "flawed sampling (tau-avg leaves C) ")
+    # (ii) the true intersection: alternate the two orthogonal projections
+    T = Zr.copy()
+    for _ in range(300):
+        T = proj_F(proj_C(T))
+    Ztrue = upolar(T)
+    report(Ztrue, "true C cap Fix(tau) (300 alt-proj)")
+
+
+print("\n=== no-go confirmation: exact transport + exact coherence ===")
+for N in (5, 7):
+    print(f"N={N}:")
+    run_nogo(N)
