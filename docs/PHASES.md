@@ -489,10 +489,22 @@ The genuine question is whether a whole *family* `{U_g}` can be simultaneously
 monomialized, and that is open here.  The seed of an obstruction:
 `monomialMatrix_one_comm` — monomial matrices with trivial permutation part are
 diagonal and commute, so two non-commuting unitaries are never simultaneously
-diagonal.  Permutation parts give the monomial group more room, and the real
-obstruction (that `T^n ⋊ S_n` is virtually abelian, so a family generating a
-non-virtually-abelian group cannot be simultaneously monomialized) is not
-formalized.
+diagonal.  Permutation parts give the monomial group more room, but the real
+obstruction is available and is **basis-free**.
+
+The permutation part of a monomial matrix is multiplicative
+(`monomialMatrix_mul`), so a monomial matrix raised to `|Sym(Y)| = n!` has
+trivial permutation part and is *diagonal*
+(`monomialMatrix_pow_card_diagonal`); diagonal matrices commute, whence
+
+    U, V monomial in a common basis  ⟹  U^{n!} V^{n!} = V^{n!} U^{n!}
+
+(`monomialMatrix_pow_card_comm`).  Both hypothesis and conclusion are
+conjugation-invariant, so two unitaries whose `n!`-th powers fail to commute
+cannot be simultaneously monomialized in *any* basis.  That is what the
+single-matrix witness could not supply, a lone unitary being diagonal in its own
+eigenbasis.  The exponent `n!` is the crude bound `|Sym(Y)|`; the exponent of
+`Sym(Y)` would serve.
 
 So a group could be hyperlinear through models nowhere near monomial, and none
 of these results would apply.  What justifies the restriction in the one case

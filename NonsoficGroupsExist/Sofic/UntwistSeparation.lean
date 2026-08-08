@@ -1756,4 +1756,88 @@ theorem monomialMatrix_one_comm (Y : FiniteModel) (d e : Y → ℂ) :
   funext i
   exact mul_comm _ _
 
+
+/-! ### The obstruction to simultaneous monomialization
+
+The permutation part of a monomial matrix is multiplicative, so a monomial
+matrix raised to the order of `Sym(Y)` has trivial permutation part and is
+diagonal.  Diagonal matrices commute, so:
+
+    U, V monomial in a common basis  ⟹  U^{n!} and V^{n!} commute.
+
+Both hypotheses and conclusion are conjugation-invariant, so this is a
+*basis-free* obstruction: two unitaries whose `n!`-th powers fail to commute
+cannot be simultaneously monomialized in any basis.  That is what the scope
+paragraph wanted and the single-matrix witness could not give, since a lone
+unitary is diagonal in its own eigenbasis.
+
+`n!` is the crude bound `|Sym(Y)|`; the exponent of `Sym(Y)` would do.
+-/
+
+/-- **Monomial matrices multiply monomially**, and the permutation part is
+multiplicative (contravariantly, in this indexing convention). -/
+theorem monomialMatrix_mul (Y : FiniteModel) (d e : Y → ℂ) (σ τ : Equiv.Perm Y) :
+    monomialMatrix Y d σ * monomialMatrix Y e τ
+      = monomialMatrix Y (fun i ↦ d i * e (σ i)) (τ * σ) := by
+  classical
+  ext i j
+  rw [Matrix.mul_apply]
+  rw [Finset.sum_eq_single (σ i)]
+  · simp only [monomialMatrix_apply, Equiv.Perm.mul_apply, if_true]
+    by_cases h : τ (σ i) = j <;> simp [h]
+  · intro k _ hk
+    simp only [monomialMatrix_apply]
+    rw [if_neg (fun h ↦ hk h.symm)]
+    ring
+  · intro h
+    exact absurd (Finset.mem_univ (σ i)) h
+
+/-- **Powers stay monomial**, with permutation part the corresponding power. -/
+theorem monomialMatrix_pow (Y : FiniteModel) (d : Y → ℂ) (σ : Equiv.Perm Y) :
+    ∀ k : ℕ, ∃ f : Y → ℂ, monomialMatrix Y d σ ^ k = monomialMatrix Y f (σ ^ k) := by
+  intro k
+  induction k with
+  | zero =>
+      refine ⟨fun _ ↦ 1, ?_⟩
+      rw [pow_zero, pow_zero, monomialMatrix_one_eq_diagonal]
+      simp
+  | succ k ih =>
+      obtain ⟨f, hf⟩ := ih
+      refine ⟨fun i ↦ f i * d ((σ ^ k) i), ?_⟩
+      rw [pow_succ, hf, monomialMatrix_mul]
+      congr 1
+      rw [← pow_succ']
+
+/-- **A monomial matrix raised to `|Sym(Y)|` is diagonal.** -/
+theorem monomialMatrix_pow_card_diagonal (Y : FiniteModel) (d : Y → ℂ)
+    (σ : Equiv.Perm Y) :
+    ∃ f : Y → ℂ, monomialMatrix Y d σ ^ (Nat.factorial (Fintype.card Y))
+      = Matrix.diagonal f := by
+  obtain ⟨f, hf⟩ := monomialMatrix_pow Y d σ (Nat.factorial (Fintype.card Y))
+  refine ⟨f, ?_⟩
+  rw [hf]
+  have hcard : Fintype.card (Equiv.Perm Y) = Nat.factorial (Fintype.card Y) :=
+    Fintype.card_perm
+  have : σ ^ (Nat.factorial (Fintype.card Y)) = 1 := by
+    rw [← hcard]
+    exact pow_card_eq_one
+  rw [this, monomialMatrix_one_eq_diagonal]
+
+/-- **The basis-free obstruction.**  If two unitaries are monomial in a common
+basis then their `|Sym(Y)|`-th powers commute.  Both sides are
+conjugation-invariant, so two unitaries whose `n!`-th powers fail to commute are
+not simultaneously monomializable in any basis. -/
+theorem monomialMatrix_pow_card_comm (Y : FiniteModel) (d e : Y → ℂ)
+    (σ τ : Equiv.Perm Y) :
+    monomialMatrix Y d σ ^ (Nat.factorial (Fintype.card Y))
+        * monomialMatrix Y e τ ^ (Nat.factorial (Fintype.card Y))
+      = monomialMatrix Y e τ ^ (Nat.factorial (Fintype.card Y))
+        * monomialMatrix Y d σ ^ (Nat.factorial (Fintype.card Y)) := by
+  obtain ⟨f, hf⟩ := monomialMatrix_pow_card_diagonal Y d σ
+  obtain ⟨g, hg⟩ := monomialMatrix_pow_card_diagonal Y e τ
+  rw [hf, hg, Matrix.diagonal_mul_diagonal, Matrix.diagonal_mul_diagonal]
+  congr 1
+  funext i
+  exact mul_comm _ _
+
 end NonsoficGroupsExist
