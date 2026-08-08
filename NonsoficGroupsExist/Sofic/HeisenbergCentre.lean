@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Sofic.DivisibleInvisible
+import Mathlib.Algebra.Ring.Subring.Defs
 
 /-!
 # The Heisenberg group over a ring, and its centre
@@ -168,5 +169,115 @@ theorem Heis.mk_zero_zero_mem_center_quotient {R : Type*} [CommRing R]
     (Z : Subgroup (Heis R)) [Z.Normal] (c : R) :
     (QuotientGroup.mk' Z (⟨0, 0, c⟩ : Heis R)) ∈ Subgroup.center (Heis R ⧸ Z) :=
   mk_mem_center_of_mem_center Z _ (Heis.mk_zero_zero_mem_center c)
+
+
+/-! ## The Prüfer centre, realized in a group
+
+Putting the pieces together needs `ℤ[1/p]` as a *ring*, since `Heis` takes a
+commutative ring; `invPowSubgroup` was only an additive subgroup.  It is closed
+under multiplication -- `p^N q = c` and `p^M r = d` give `p^{N+M}(qr) = cd` --
+so it is a subring, and `Heis` of it makes sense.
+
+Then the point of the construction appears.  The centre is `ℤ[1/p]`, which is
+*not* divisible; quotienting by the copy of `ℤ` inside it makes it divisible,
+because dividing by `p` stays inside and dividing by anything prime to `p` works
+modulo `ℤ` (`invPowSubgroup_divisible_mod_int`).  So every homomorphism from the
+quotient to a finite group kills the image of the centre -- by Lagrange, exactly
+as in `map_eq_one_of_divisible`, and with no representation theory anywhere.
+
+This is the mechanism of `rem:thomK` in a genuine group, end to end.  The group
+is not Thom's: `Heis ℤ[1/p]` is residually finite and neither finitely
+presented nor Kazhdan, so it is no candidate for Question 3.4.  What it shows is
+that the mechanism is real and needs nothing quoted.
+-/
+
+/-- `ℤ[1/p]` as a subring of `ℚ`, so that `Heis` can take it as coefficients. -/
+def invPowSubring (p : ℕ) : Subring ℚ where
+  __ := invPowSubgroup p
+  one_mem' := ⟨1, 0, by norm_num⟩
+  mul_mem' := by
+    rintro a b ⟨c, N, hc⟩ ⟨d, M, hd⟩
+    refine ⟨c * d, N + M, ?_⟩
+    have : (p : ℚ) ^ (N + M) * (a * b)
+        = ((p : ℚ) ^ N * a) * ((p : ℚ) ^ M * b) := by
+      rw [pow_add]; ring
+    rw [this, hc, hd]
+    push_cast
+    ring
+
+namespace Heis
+
+/-- The copy of `ℤ` sitting inside the centre of `Heis R`. -/
+def intCentre (R : Type*) [CommRing R] : Subgroup (Heis R) where
+  carrier := {x | x.a = 0 ∧ x.b = 0 ∧ ∃ n : ℤ, x.c = (n : R)}
+  one_mem' := ⟨rfl, rfl, 0, by simp⟩
+  mul_mem' := by
+    rintro x y ⟨hxa, hxb, n, hn⟩ ⟨hya, hyb, k, hk⟩
+    refine ⟨by simp [hxa, hya], by simp [hxb, hyb], n + k, ?_⟩
+    simp [hn, hk, hxa]
+  inv_mem' := by
+    rintro x ⟨hxa, hxb, n, hn⟩
+    refine ⟨by simp [hxa], by simp [hxb], -n, ?_⟩
+    simp [hn, hxa, hxb]
+
+/-- It is central, hence normal. -/
+instance intCentre_normal (R : Type*) [CommRing R] : (intCentre R).Normal where
+  conj_mem := by
+    rintro x ⟨hxa, hxb, n, hn⟩ g
+    have hcen : x ∈ Subgroup.center (Heis R) := (mem_center_iff x).mpr ⟨hxa, hxb⟩
+    rw [Subgroup.mem_center_iff] at hcen
+    have : g * x * g⁻¹ = x := by
+      rw [hcen g, mul_assoc, mul_inv_cancel, mul_one]
+    rw [this]
+    exact ⟨hxa, hxb, n, hn⟩
+
+end Heis
+
+/-- Powers of a central element multiply the coordinate. -/
+theorem Heis.mk_zero_zero_pow {R : Type*} [CommRing R] (c : R) (n : ℕ) :
+    (⟨0, 0, c⟩ : Heis R) ^ n = ⟨0, 0, (n : R) * c⟩ := by
+  induction n with
+  | zero => ext <;> simp
+  | succ k ih =>
+      rw [pow_succ, ih]
+      ext
+      · simp
+      · simp
+      · simp
+        ring
+
+/-- **The centre of `Heis ℤ[1/p]` modulo `ℤ` is killed by every homomorphism to
+a finite group.**  This is `rem:thomK`'s mechanism in a group built here: the
+centre is `ℤ[1/p]`, not divisible; the quotient by `ℤ` makes it divisible; and
+Lagrange finishes.  No representation theory anywhere. -/
+theorem heis_centre_map_eq_one {p : ℕ} (hp : p.Prime) {B : Type*} [Group B]
+    [Finite B]
+    (f : (Heis (invPowSubring p) ⧸ Heis.intCentre (invPowSubring p)) →* B)
+    (q : invPowSubring p) :
+    f (QuotientGroup.mk' _ (⟨0, 0, q⟩ : Heis (invPowSubring p))) = 1 := by
+  classical
+  haveI := Fintype.ofFinite B
+  obtain ⟨y, hy, hdiff⟩ :=
+    invPowSubgroup_divisible_mod_int hp (Fintype.card B) Fintype.card_pos
+      (q : ℚ) q.2
+  obtain ⟨k, hk⟩ := hdiff
+  -- the two central elements differ by an integer, so agree in the quotient
+  have hsame : QuotientGroup.mk' (Heis.intCentre (invPowSubring p))
+      (⟨0, 0, q⟩ : Heis (invPowSubring p))
+      = QuotientGroup.mk' _ (⟨0, 0, ⟨y, hy⟩⟩ : Heis (invPowSubring p))
+        ^ Fintype.card B := by
+    rw [← map_pow, Heis.mk_zero_zero_pow]
+    refine (QuotientGroup.mk'_eq_mk' _).mpr ⟨⟨0, 0, ⟨(k : ℚ), ?_⟩⟩, ⟨rfl, rfl, k, ?_⟩, ?_⟩
+    · exact ⟨k, 0, by norm_num⟩
+    · rfl
+    · ext
+      · simp
+      · simp
+      · have hq : (k : ℚ) = ((Fintype.card B : ℕ) : ℚ) * y - (q : ℚ) := by
+          simpa [zsmul_eq_mul] using hk
+        simp only [Heis.mul_c, zero_mul, add_zero]
+        push_cast
+        linarith [hq]
+  rw [hsame, map_pow, pow_card_eq_one]
 
 end NonsoficGroupsExist

@@ -2784,6 +2784,17 @@ CountableNonsoficGroupExists
 (Y : FiniteModel) → Equiv.Perm Y.carrier → ℝ
 ```
 
+## `NonsoficGroupsExist.heis_centre_map_eq_one`
+
+```lean
+∀ {p : ℕ},
+  Nat.Prime p →
+    ∀ {B : Type u_1} [inst : Group B] [Finite B]
+      (f : Heis ↥(invPowSubring p) ⧸ Heis.intCentre ↥(invPowSubring p) →* B)
+      (q : ↥(invPowSubring p)),
+      f ((QuotientGroup.mk' (Heis.intCentre ↥(invPowSubring p))) { a := 0, b := 0, c := q }) = 1
+```
+
 ## `NonsoficGroupsExist.hsDistSq`
 
 ```lean
@@ -2895,6 +2906,12 @@ CountableNonsoficGroupExists
 
 ```lean
 ℕ → AddSubgroup ℚ
+```
+
+## `NonsoficGroupsExist.invPowSubring`
+
+```lean
+ℕ → Subring ℚ
 ```
 
 ## `NonsoficGroupsExist.involutionNormalize`
@@ -3038,13 +3055,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ℝ → ℝ → ℝ
-```
-
-## `NonsoficGroupsExist.mk_mem_center_of_mem_center`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] (Z : Subgroup G) [inst_1 : Z.Normal],
-  ∀ x ∈ Subgroup.center G, (QuotientGroup.mk' Z) x ∈ Subgroup.center (G ⧸ Z)
 ```
 
 ## `NonsoficGroupsExist.monomialMatrix`
