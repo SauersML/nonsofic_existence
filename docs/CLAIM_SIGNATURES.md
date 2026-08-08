@@ -4,6 +4,12 @@
 
 One entry per declaration named by a manuscript margin note, in the order of `docs/CLAIM_DECLS.txt`.  The types are printed by Lean from the elaborated environment, so this file records what each mapped declaration actually states -- the layer of the correspondence that name resolution alone cannot check.
 
+## `NonsoficGroupsExist.AdmitsEssentiallyFreeNearAction`
+
+```lean
+(G : Type u) → [Group G] → Prop
+```
+
 ## `NonsoficGroupsExist.BinaryLeavitt.K1_trivial`
 
 ```lean
@@ -412,6 +418,12 @@ One entry per declaration named by a manuscript margin note, in the order of `do
         (EssentialExpanderRepair.expansionConstant C)
 ```
 
+## `NonsoficGroupsExist.EssentiallyFreeNearAction`
+
+```lean
+(G : Type u) → [Group G] → Type u_1 → Type (max u u_1)
+```
+
 ## `NonsoficGroupsExist.ExpanderDecomposition`
 
 ```lean
@@ -554,6 +566,12 @@ One entry per declaration named by a manuscript margin note, in the order of `do
 
 ```lean
 (G : Type) → [inst : Group G] → Subgroup G → (K : Type) → [Group K] → Type
+```
+
+## `NonsoficGroupsExist.FullFinitelyAdditiveProbability`
+
+```lean
+Type u_1 → Type u_1
 ```
 
 ## `NonsoficGroupsExist.GeneralCornerTheorem.compressionSetup`
@@ -1814,6 +1832,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ∀ {R : Type u_1} [inst : Ring R], (MatrixDiagonalization.stableUnits R).Normal
 ```
 
+## `NonsoficGroupsExist.MeasurePreservingNearAction`
+
+```lean
+(G : Type u) → [Group G] → Type u_1 → Type (max u u_1)
+```
+
 ## `NonsoficGroupsExist.NonScalarModel`
 
 ```lean
@@ -2229,6 +2253,18 @@ Function.Injective ⇑UniversalRankFour.witnessEmbedding
         [inst_1 : Field k] →
           [inst_2 : AddCommGroup V] →
             [inst_3 : _root_.Module k V] → (G →* V ≃ₗ[k] V) → G →* (V →ₗ[k] V) ≃ₗ[k] V →ₗ[k] V
+```
+
+## `NonsoficGroupsExist.admitsEssentiallyFreeNearAction_of_isSofic`
+
+```lean
+∀ (G : Type u_1) [inst : Group G] [Countable G], IsSofic G → AdmitsEssentiallyFreeNearAction G
+```
+
+## `NonsoficGroupsExist.admitsEssentiallyFreeNearAction_trivial`
+
+```lean
+AdmitsEssentiallyFreeNearAction Unit
 ```
 
 ## `NonsoficGroupsExist.ambient_full_profile`
