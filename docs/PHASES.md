@@ -113,6 +113,17 @@ not shapeless: Thom's microstates for `K = K₀(ℤ[1/p])/ℤ` lie in the monomi
 group `T_Y ⋊ Sym Y`, and they are *forced* there, since every finite-dimensional
 unitary representation of `K` kills its divisible centre.
 
+That last clause is no longer prose.  `DivisibleInvisible.lean` builds `ℤ[1/p]`
+as an additive subgroup of `ℚ` (in the multiplicative form `p^N q ∈ ℤ`, so no
+division appears), proves the Prüfer group `ℤ(p^∞) = ℤ[1/p]/ℤ` divisible, and
+concludes that every homomorphism from it to a finite group is zero
+(`prufer_map_eq_zero`) — with `pruferSubgroup_nontrivial` so the conclusion is
+not vacuous.  `ℤ[1/p]` itself is *not* divisible; the divisibility is a property
+of the quotient, and it needs exactly two moves: division by `p` is exact and
+stays inside (`invPowSubgroup_div_p`), division by anything prime to `p` works
+only modulo `ℤ` and is Bézout (`invPowSubgroup_div_coprime`).  Strong induction
+on `n`, peeling `p`-factors, assembles them.
+
 Two inequalities measure the distance to soficity, pulling opposite ways:
 
     2 d_Hamm(σ, τ) ≤ ‖A(d,σ) − A(e,τ)‖²      the permutation part inherits
