@@ -70,7 +70,6 @@ NonsoficGroupsExist.GeneralScheme.uMatrix_mul_uPrimeMatrix
 NonsoficGroupsExist.GeneralScheme.uUnit
 NonsoficGroupsExist.GeneralScheme.zUnit
 NonsoficGroupsExist.Heis.commutator_mem_center
-NonsoficGroupsExist.Heis.mem_center_iff
 NonsoficGroupsExist.HyperlinearModel
 NonsoficGroupsExist.IsEssentialExpanderSequence
 NonsoficGroupsExist.IsHyperlinear
@@ -336,6 +335,7 @@ NonsoficGroupsExist.isSofic_of_isSoficWeak
 NonsoficGroupsExist.isSofic_of_soficApproximation
 NonsoficGroupsExist.isSofic_of_soficEmbedding
 NonsoficGroupsExist.lampEmbedding_injective
+NonsoficGroupsExist.map_eq_one_of_mem_divisible_subgroup
 NonsoficGroupsExist.matching_injective
 NonsoficGroupsExist.medianNormalize
 NonsoficGroupsExist.monomialMatrix

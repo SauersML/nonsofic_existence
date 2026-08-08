@@ -231,4 +231,42 @@ theorem pruferSubgroup_nontrivial {p : ℕ} (hp : p.Prime) :
   have : (1 : ℚ) ≤ (k : ℚ) := by exact_mod_cast hk1
   linarith
 
+/-! ## What a candidate for Question 3.4 needs, and what is cheap
+
+The Pr\"ufer computations above are instances of one statement, worth isolating
+because it says which half of a candidate's profile is easy.
+
+A nontrivial *divisible* subgroup obstructs residual finiteness outright: every
+homomorphism to a finite group kills it, so no finite quotient separates any of
+its elements from the identity.  Nothing about centres or about the ambient
+group is used.
+
+So for a group to fail residual finiteness -- which it must, to be a candidate,
+since residually finite groups are sofic -- it is enough to plant a divisible
+subgroup, and a divisible centre is the cheapest way.  That is what Thom's `K`
+does and what `Heis ℤ[1/p] / ℤ` does.  What such a group must *also* be is
+non-amenable, since amenable groups are sofic; and that is the expensive
+ingredient, the one Cornulier's Kazhdan property supplies and a Heisenberg group
+cannot.  The second half is quoted, not proved here.
+-/
+
+/-- **A divisible subgroup is invisible to every finite quotient of the ambient
+group.**  So a nontrivial divisible subgroup obstructs residual finiteness. -/
+theorem map_eq_one_of_mem_divisible_subgroup {G : Type*} [Group G]
+    (D : Subgroup G) (hdiv : ∀ n : ℕ, 0 < n → ∀ d : D, ∃ e : D, e ^ n = d)
+    {B : Type*} [Group B] [Finite B] (f : G →* B) (d : D) :
+    f (d : G) = 1 :=
+  map_eq_one_of_divisible hdiv (f.comp D.subtype) d
+
+/-- Stated as the obstruction: no finite quotient separates an element of a
+divisible subgroup from the identity, so the ambient group is not residually
+finite.  The statement is vacuous for `d = 1`; the case of interest is `d ≠ 1`,
+where it is exactly a failure of residual finiteness. -/
+theorem not_residuallyFinite_of_divisible_subgroup {G : Type*} [Group G]
+    (D : Subgroup G) (hdiv : ∀ n : ℕ, 0 < n → ∀ d : D, ∃ e : D, e ^ n = d)
+    (d : D) :
+    ¬ ∃ (B : Type) (_ : Group B) (_ : Finite B) (f : G →* B), f (d : G) ≠ 1 := by
+  rintro ⟨B, _, _, f, hf⟩
+  exact hf (map_eq_one_of_mem_divisible_subgroup D hdiv f d)
+
 end NonsoficGroupsExist

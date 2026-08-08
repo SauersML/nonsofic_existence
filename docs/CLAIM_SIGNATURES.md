@@ -714,13 +714,6 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   x * y * x⁻¹ * y⁻¹ ∈ Subgroup.center (Heis R)
 ```
 
-## `NonsoficGroupsExist.Heis.mem_center_iff`
-
-```lean
-∀ {R : Type u_1} [inst : CommRing R] (x : Heis R),
-  x ∈ Subgroup.center (Heis R) ↔ x.a = 0 ∧ x.b = 0
-```
-
 ## `NonsoficGroupsExist.HyperlinearModel`
 
 ```lean
@@ -3042,6 +3035,14 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {X : Type u_2} {A : Type u_3} [inst : AddCommGroup A] {a : A},
   a ≠ 0 → Function.Injective (lampEmbedding a)
+```
+
+## `NonsoficGroupsExist.map_eq_one_of_mem_divisible_subgroup`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (D : Subgroup G),
+  (∀ (n : ℕ), 0 < n → ∀ (d : ↥D), ∃ e, e ^ n = d) →
+    ∀ {B : Type u_2} [inst_1 : Group B] [Finite B] (f : G →* B) (d : ↥D), f ↑d = 1
 ```
 
 ## `NonsoficGroupsExist.matching_injective`
