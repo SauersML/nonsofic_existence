@@ -2120,7 +2120,7 @@ A pointwise rule either respects the group law or it does not, so the two horns 
 
 \clearpage
 \begin{remark}[The non-pointwise correction, and where it stops]\label{rem:phasecorrection}%
-\leanverified{\leanmod{Sofic/PhaseCorrection}{isPhaseCocycle_phaseCob,phaseCorrection_eq,isPhaseCocycle_of_mod,phase_correctable_of_small}}%
+\leanverified{\leanmod{Sofic/PhaseCorrection}{phaseCorrection_eq,phase_correctable_of_small,window_defect_eq,abs_window_defect_le}}%
 Remark~\ref{rem:norounding} closes every pointwise rule, and leaves exactly one thing open: a correction chosen with the whole group in view.  Carry it out.  The defect of a phase system \(d\) is the twisted \(2\)-cocycle \(c(g,h)=g\cdot d_h+d_g-d_{gh}\), and replacing \(d\) by \(d+b\) moves \(c\) by the coboundary of \(b\).  So the question is whether a cocycle with values uniformly near \(0\) is the coboundary of something near \(0\), and it is---by averaging over the group:
 \[
  b_g\ =\ \frac{1}{\abs G}\sum_{k\in G}c(g,k),
@@ -2133,7 +2133,14 @@ Summing the cocycle identity over \(k\) and reindexing \(k\mapsto hk\) is the wh
 
 The conclusion is a dichotomy, and it is what the remark is for.  \emph{No obstruction to soficity can come from a phase defect that is uniformly small.}  Such a defect is correctable outright, by a correction no larger than itself, and the corrected phases are exactly multiplicative.  An obstruction therefore has to be a defect that is small \emph{on average over the model} and large somewhere---which is precisely the regime the Hilbert--Schmidt metric permits and the Hamming metric does not, and precisely the gap priced in Remark~\ref{rem:scalarcocycle}.  The scalar witness there is the extreme instance: uniformly \emph{maximal} rather than uniformly small, invisible on average and fatal in Hamming.
 
-Read together with Remark~\ref{rem:norounding} this locates the difficulty exactly.  Pointwise rules cannot work at all; the group-averaged rule works whenever the defect is uniform; so whatever separates hyperlinear from sofic, if anything does, lives in the failure of uniformity---in defects concentrated on a small part of the model.  That is a sharper statement of the open problem than ``permutations versus unitaries'', and it is where a resolution would have to begin.
+There is a second place the argument can fail, and it is worth separating from the first.  The average above runs over all of \(G\), so it is available only for a finite group; for an infinite group one may average only over a finite window \(F\), and then the reindexing \(k\mapsto hk\)---the single step that made the proof work---no longer maps the window to itself.  What that costs is \emph{exactly} the boundary:
+\[
+ c(g,h)-\delta b(g,h)
+ \ =\ \frac{1}{\abs F}\Bigl(\sum_{k\in hF\setminus F}c(g,k)\ -\sum_{k\in F\setminus hF}c(g,k)\Bigr),
+\]
+so \(\norm{c-\delta b}_\infty\leq\norm c_\infty\cdot\abs{hF\symdiff F}/\abs F\).  The group-averaged correction therefore survives to an infinite group exactly when almost invariant windows are available---that is, exactly for amenable groups, which are sofic already.  The route recovers what is known and stalls precisely at non-amenability, and the stalling is a named quantity rather than a vague difficulty.
+
+Read together with Remark~\ref{rem:norounding} this locates the difficulty exactly, and along two independent axes.  Pointwise rules cannot work at all.  The group-averaged rule works whenever the defect is uniform \emph{and} the window is almost invariant.  So whatever separates hyperlinear from sofic, if anything does, lives in the failure of one of those two---in defects concentrated on a small part of the model, or in the non-amenability of the group.  That is a sharper statement of the open problem than ``permutations versus unitaries'', and it is where a resolution would have to begin.
 \end{remark}
 
 \clearpage

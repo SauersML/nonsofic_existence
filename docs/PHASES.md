@@ -242,10 +242,25 @@ permits and the Hamming metric does not, and exactly the gap of section 6.  The
 scalar witness there is the extreme instance: uniformly maximal rather than
 uniformly small.
 
-Read with 6a this locates the difficulty.  Pointwise rules cannot work at all;
-the group-averaged rule works whenever the defect is uniform; so whatever
-separates the two classes, if anything does, lives in the failure of uniformity
-— in defects concentrated on a small part of the model.
+There is a second failure mode, independent of the first.  The average runs over
+all of `G`, so for an infinite group one can only average over a finite window
+`F` — and then the reindexing `k ↦ hk`, the single step that made the proof
+work, no longer maps the window to itself.  What that costs is *exactly* the
+boundary:
+
+    c(g,h) − δb(g,h) = (1/|F|) ( Σ_{hF \ F} c(g,·) − Σ_{F \ hF} c(g,·) )
+
+(`window_defect_eq`), so `‖c − δb‖ ≤ ‖c‖ · |hF △ F| / |F|`
+(`abs_window_defect_le`).  The correction therefore survives to an infinite
+group exactly when almost invariant windows exist — exactly for amenable
+groups, which are sofic already.  The route recovers what is known and stalls
+precisely at non-amenability, and the stalling is a named quantity.
+
+Read with 6a this locates the difficulty along two independent axes.  Pointwise rules cannot work at all;
+the group-averaged rule works whenever the defect is uniform *and* the window is
+almost invariant; so whatever separates the two classes, if anything does, lives
+in the failure of one of those — in defects concentrated on a small part of the
+model, or in the non-amenability of the group.
 
 ## 7. Contributed by an external audit, formalized here
 
