@@ -173,6 +173,11 @@
 \DeclareMathOperator{\diag}{diag}
 \DeclareMathOperator{\ed}{ed}
 
+% The margin notes are floats, and the concluding section added enough of them
+% that LaTeX's default sixteen float slots run out before the appendix places
+% them.  `\extrafloats' is kernel since 2015 and simply widens the pool.
+\extrafloats{200}
+
 \title{Nonsofic Groups Exist}
 \author{Anonymous}
 % For a non-blinded submission, replace the line above with:
