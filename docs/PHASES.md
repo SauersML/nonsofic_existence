@@ -476,9 +476,23 @@ monomial matrices are a proper subgroup of `U(n)`, and not merely proper: the
 two-point Hadamard matrix is unitary and sits at normalized Hilbert–Schmidt
 distance at least `1/4` from *every* monomial matrix
 (`exists_unitary_far_from_monomial`), so it cannot be approximated by monomial
-data either.  That is the form the claim has to take, since a hyperlinear model
-is only ever approximate — such a model stays a definite distance from the
-monomial world however small its own defect.
+data either.  
+That statement is in a **fixed basis**, and the qualification matters: by the
+spectral theorem every single unitary is diagonal in some basis, hence monomial
+there.  So the witness does *not* show a model resists being conjugated into
+monomial form.  What it shows is that the monomial matrices are metrically
+isolated inside `U(n)` for a fixed indexing — which is what the phase results
+assume, and so the right statement for bounding them, but not an obstruction to
+monomialization.
+
+The genuine question is whether a whole *family* `{U_g}` can be simultaneously
+monomialized, and that is open here.  The seed of an obstruction:
+`monomialMatrix_one_comm` — monomial matrices with trivial permutation part are
+diagonal and commute, so two non-commuting unitaries are never simultaneously
+diagonal.  Permutation parts give the monomial group more room, and the real
+obstruction (that `T^n ⋊ S_n` is virtually abelian, so a family generating a
+non-virtually-abelian group cannot be simultaneously monomialized) is not
+formalized.
 
 So a group could be hyperlinear through models nowhere near monomial, and none
 of these results would apply.  What justifies the restriction in the one case

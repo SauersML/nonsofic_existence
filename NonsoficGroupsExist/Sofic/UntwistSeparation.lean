@@ -1717,4 +1717,43 @@ theorem exists_unitary_far_from_monomial :
       le_div_iff₀ (by norm_num : (0:ℝ) < 2)]
     linarith [hsum]
 
+
+/-! ### What the witness does and does not show
+
+`exists_unitary_far_from_monomial` is stated in a *fixed* basis, and that limits
+it more than is comfortable: by the spectral theorem every single unitary is
+diagonal in some basis, hence monomial there.  So the witness does **not** show
+that a hyperlinear model resists being conjugated into monomial form.  What it
+shows is that the monomial matrices are metrically isolated inside `U(n)` for a
+fixed indexing of the model, which is what the phase results actually assume.
+
+The genuine question is whether a whole *family* `{U_g}` can be simultaneously
+monomialized, and that is not addressed here.  The seed of an obstruction is
+below: monomial matrices with trivial permutation part are diagonal and commute,
+so two non-commuting unitaries are never simultaneously diagonal.  Permutation
+parts give the monomial group more room than that, and the real obstruction --
+that the monomial group `T^n ⋊ S_n` is virtually abelian, so a family generating
+a non-virtually-abelian group cannot be simultaneously monomialized -- is not
+formalized here.
+-/
+
+/-- A monomial matrix with trivial permutation part is diagonal. -/
+theorem monomialMatrix_one_eq_diagonal (Y : FiniteModel) (d : Y → ℂ) :
+    monomialMatrix Y d 1 = Matrix.diagonal d := by
+  ext i j
+  simp [monomialMatrix_apply, Matrix.diagonal_apply]
+
+/-- Monomial matrices with trivial permutation part commute.  So two
+non-commuting unitaries are never simultaneously diagonal; simultaneous
+*monomialization* is the harder question, since permutation parts need not
+commute. -/
+theorem monomialMatrix_one_comm (Y : FiniteModel) (d e : Y → ℂ) :
+    monomialMatrix Y d 1 * monomialMatrix Y e 1
+      = monomialMatrix Y e 1 * monomialMatrix Y d 1 := by
+  rw [monomialMatrix_one_eq_diagonal, monomialMatrix_one_eq_diagonal,
+    Matrix.diagonal_mul_diagonal, Matrix.diagonal_mul_diagonal]
+  congr 1
+  funext i
+  exact mul_comm _ _
+
 end NonsoficGroupsExist
