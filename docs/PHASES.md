@@ -519,6 +519,31 @@ commute for free.  The criterion separates monomial from general unitary
 matrices — which is what the scope claim needs — and says nothing about whether a
 group is sofic.
 
+## 6f. Where hyperlinearity does force soficity
+
+Every separation result in §6e is negative for one reason: the trace bounds
+`|τ| ≤ F` the wrong way round, so a small trace never forces the fixed-point
+density down.  There is one situation where it does, available since the coprime
+vanishing without being assembled.
+
+If the phase is *trivial on the fixed points* — which `gcd(n,m) = 1` forces —
+no cancellation is available there, and the trace is not merely bounded by the
+fixed-point density but **equal** to it:
+
+    τ(A(d,σ)) = F_σ
+
+a nonnegative real (`normTrace_monomial_of_phase_trivial`).  Hyperlinear
+separation says `Re τ ≤ ε`, and that is now a bound on `F` itself
+(`fixedDensity_le_of_trace_le`).  Untwisting returns a model separated to within
+`ε` (`untwist_separated_of_phase_trivial`).
+
+So on a window where every element's order is prime to the modulus, a monomial
+hyperlinear model **is** a sofic model, with no loss.  The hypothesis is strong —
+it is exactly the regime where the phases were shown powerless, so the model was
+never projective in any useful sense — but it is the one place in this
+development where the implication runs in the direction Question 3.4 asks
+about.
+
 So a group could be hyperlinear through models nowhere near monomial, and none
 of these results would apply.  What justifies the restriction in the one case
 where it is justified is external — Thom's microstates are monomial because

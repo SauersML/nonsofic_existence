@@ -1887,4 +1887,71 @@ theorem permMonomial_pow_card (Y : FiniteModel) (σ : Equiv.Perm Y) :
   rw [hone, monomialMatrix_one_eq_diagonal]
   simp
 
+
+/-! ## A case where hyperlinearity does force soficity
+
+Every separation result so far has been negative, and for one reason: the trace
+bounds `|τ| ≤ F` the wrong way round, so a small trace never forces the fixed
+point density down.  There is one situation where it does, and it has been
+available since `phase_eq_zero_of_coprime` without being assembled.
+
+If the phase is *trivial on the fixed points* -- which `gcd(n,m) = 1` forces --
+then no cancellation is possible there and the trace is not merely bounded by
+the fixed point density but **equal** to it:
+
+    τ(A(d,σ)) = F_σ ,
+
+a nonnegative real (`normTrace_monomial_of_phase_trivial`).  Hyperlinear
+separation says `Re τ ≤ ε`, and now that is a bound on `F` itself
+(`fixedDensity_le_of_trace_le`).  Untwisting then returns a model separated to
+within `ε` (`untwist_separated_of_phase_trivial`).
+
+So on a window where every element's order is prime to the modulus, a monomial
+hyperlinear model *is* a sofic model, with no loss.  The hypothesis is strong --
+it is exactly the regime where the phases were shown to be powerless, so the
+model was never projective in any useful sense -- but it is the one place in this
+development where the implication runs in the direction Question 3.4 asks about.
+-/
+
+/-- **A phase trivial on the fixed points makes the trace equal the fixed point
+density**, rather than merely bounding it.  No cancellation is available. -/
+theorem normTrace_monomial_of_phase_trivial (Y : FiniteModel) (d : Y → ℂ)
+    (σ : Equiv.Perm Y) (hd : ∀ y, σ y = y → d y = 1) :
+    normTrace Y (monomialMatrix Y d σ) = ((fixedDensity Y σ : ℝ) : ℂ) := by
+  classical
+  have htr : Matrix.trace (monomialMatrix Y d σ)
+      = ((univ.filter fun y : Y ↦ σ y = y).card : ℂ) := by
+    rw [Matrix.trace]
+    simp only [Matrix.diag_apply, monomialMatrix_apply]
+    rw [← Finset.sum_filter]
+    rw [Finset.sum_congr rfl (fun y hy ↦ ?_)]
+    · rw [Finset.sum_const, nsmul_eq_mul, mul_one]
+    · rw [Finset.mem_filter] at hy
+      exact hd y hy.2
+  rw [normTrace, htr, fixedDensity]
+  push_cast
+  ring
+
+/-- **Then hyperlinear separation bounds the fixed point density.**  This is the
+one place the trace runs in the useful direction. -/
+theorem fixedDensity_le_of_trace_le (Y : FiniteModel) (d : Y → ℂ)
+    (σ : Equiv.Perm Y) (hd : ∀ y, σ y = y → d y = 1) {ε : ℝ}
+    (htr : (normTrace Y (monomialMatrix Y d σ)).re ≤ ε) :
+    fixedDensity Y σ ≤ ε := by
+  rw [normTrace_monomial_of_phase_trivial Y d σ hd, Complex.ofReal_re] at htr
+  exact htr
+
+/-- **Untwisting returns a separated model.**  With the phase trivial on the
+fixed points, a hyperlinear model separated to within `ε` untwists to a model
+separated to within `ε`: on such a window, monomial hyperlinear *is* sofic. -/
+theorem untwist_separated_of_phase_trivial (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (D : Y → ℂ) (e : Y → ZMod m) (σ : Equiv.Perm Y)
+    (hD : ∀ y, σ y = y → D y = 1) (he : ∀ y, σ y = y → e y = 0) {ε : ℝ}
+    (htr : (normTrace Y (monomialMatrix Y D σ)).re ≤ ε)
+    (hY : 0 < Fintype.card Y) :
+    1 - ε ≤ hammingDistance (wreathModel Y m) (wreathPerm Y m e σ) 1 := by
+  have hF := fixedDensity_le_of_trace_le Y D σ hD htr
+  rw [coprime_untwist_hamming Y m e σ he hY]
+  linarith [hF]
+
 end NonsoficGroupsExist
