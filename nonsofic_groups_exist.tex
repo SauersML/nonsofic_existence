@@ -2176,7 +2176,7 @@ So the \(\R/\Z\) versus \(\mu_m\) distinction is not where the difficulty lives,
 
 \clearpage
 \begin{remark}[Untwisting cannot manufacture separation]\label{rem:untwistsep}%
-\leanverified{\leanmod{Sofic/UntwistSeparation}{exists_shift_hamming_le,untwist_separation_undetermined,phase_two_torsion,involution_untwist_hamming_le}}%
+\leanverified{\leanmod{Sofic/UntwistSeparation}{exists_shift_hamming_le,untwist_separation_undetermined,involution_untwist_hamming_le,phase_eq_zero_of_coprime}\leanmod{Sofic/UntwistSeparation}{coprime_untwist_hamming}}%
 Remarks~\ref{rem:phasecorrection},~\ref{rem:scalarclass} and~\ref{rem:ratchar} are all about \emph{multiplicativity}: obtaining phases that compose exactly.  None of them touches the other half of a sofic model, which is \emph{separation}---that a nontrivial element move almost every point.  This remark addresses that half, and the news is negative and quantitative.
 
 The fixed points of the untwisted permutation of \((d,\sigma)\) are the pairs \((y,j)\) with \(\sigma y=y\) and \(d(y)=0\), so untwisting separates only to the extent that the phase avoids \(0\) on \(\Fix(\sigma)\).  But \(\Fix(\sigma)\) is partitioned by the \(m\) classes of \(d\), so some class carries at least an average share:
@@ -2196,6 +2196,10 @@ For a \emph{torsion} element the scalar freedom disappears, and what is left is 
  \distH\bigl(\widetilde{(d_g,\sigma_g)},1\bigr)\ \leq\ 1-\tfrac12\Bigl(F-\tfrac{E}{\abs Y}\Bigr).
 \]
 No normalization is chosen anywhere in that statement.  Untwisting an involution inherits its separation and halves it; it cannot create it.  This is the sharp form of the phenomenon, and it is the reason the involutions of Remark~\ref{rem:phasecollapse} keep reappearing as the obstruction.
+
+The involution is the case \(n=2\) of something general, and the general case says when phases can help at all.  Iterating the stabilizer homomorphism gives \(d_{g^k}(y)=k\,d_g(y)\) at a point fixed by \(g\), so if \(g\) has order \(n\) then \(n\,d_g(y)=0\) and \(d_g(y)\) lies in the \(n\)-torsion of \(\Z/m\), a subgroup of \(\gcd(n,m)\) elements.  When \(\gcd(n,m)=1\) that subgroup is trivial, so the phase is \emph{forced to vanish} on the entire fixed point set: cancellation is not merely unhelpful but unavailable.  The trace of the model is then exactly the fixed point density, the untwisted separation is exactly \(1-F\), and a trace bound \emph{is} a separation bound.
+
+So phases can help only when the modulus shares a factor with the torsion.  That is precisely what a construction like Thom's arranges---\(p\)-power phases set against a \(p\)-power centre, as in Remark~\ref{rem:thomK}---and it explains why the character count of Remark~\ref{rem:scalarcocycle} is indexed by the \(p\)-power torsion rather than by anything one is free to choose.  A monomial model whose phase modulus is prime to the orders occurring in the window carries no cancellation at all, and is a sofic model on the nose.
 \end{remark}
 
 \clearpage

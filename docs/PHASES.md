@@ -362,6 +362,22 @@ balanced rather than merely permitting it, giving
 Untwisting an involution inherits its separation and halves it; it cannot create
 it.  That is why involutions keep reappearing as the obstruction.
 
+The involution is the case `n = 2` of something general, and the general case
+says **when phases can help at all**.  Iterating the stabilizer homomorphism
+gives `d_{g^k}(y) = k · d_g(y)` at a point fixed by `g`
+(`phase_iterate_at_fixed`), so an element of order `n` has `n · d_g(y) = 0`:
+the phase lies in the `n`-torsion of `ℤ/m`, a subgroup of `gcd(n,m)` elements.
+When `gcd(n,m) = 1` that subgroup is trivial and the phase is *forced to vanish*
+on the whole fixed-point set (`phase_eq_zero_of_coprime`).  Cancellation is then
+not merely unhelpful but unavailable: the trace is exactly `F`, the untwisted
+separation is exactly `1 − F` (`coprime_untwist_hamming`), and a trace bound
+*is* a separation bound.
+
+So phases can help only when the modulus shares a factor with the torsion —
+which is exactly what a construction like Thom's arranges, `p`-power phases
+against a `p`-power centre, and it explains why the character count of section 6
+is indexed by the `p`-power torsion rather than by anything freely chosen.
+
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
 machinery bears on this half: the difficulty is not that phases are hard to make

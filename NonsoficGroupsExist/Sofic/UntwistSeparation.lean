@@ -308,4 +308,93 @@ theorem involution_untwist_hamming_le (Y : FiniteModel) (m : ℕ) [NeZero m]
   rw [hexpand]
   linarith [hkey]
 
+
+/-! ## Coprime modulus: the phases cannot cancel at all
+
+The involution bound is the case `n = 2` of something general.  At a fixed point
+the phases restrict to a homomorphism on the stabilizer, so iterating gives
+`d_{g^k}(y) = k · d_g(y)`; if `g` has order `n` then `n · d_g(y) = 0`, and
+`d_g(y)` lies in the `n`-torsion of `ℤ/m`, which has `gcd(n,m)` elements.
+
+When `gcd(n,m) = 1` that subgroup is trivial: the phase is *forced to be zero*
+on the whole fixed point set.  Cancellation is then impossible, the trace of the
+model equals the fixed point density on the nose, and a trace bound is a
+separation bound.  So phases can help only when the modulus shares a factor with
+the torsion -- which is exactly what a construction like Thom's arranges, by
+taking `p`-power phases against a `p`-power centre.
+-/
+
+/-- **Iterating the stabilizer homomorphism.**  If `φ k` is the phase of `g^k`,
+then at a point fixed by `g` the phases are multiples: `φ k y = k · φ 1 y`. -/
+theorem phase_iterate_at_fixed (Y : FiniteModel) (m : ℕ) (φ : ℕ → Y → ZMod m)
+    (σ : Equiv.Perm Y) (hzero : ∀ y, φ 0 y = 0)
+    (hstep : ∀ (k : ℕ) (y : Y), φ (k + 1) y = φ k (σ y) + φ 1 y)
+    (y : Y) (hy : σ y = y) : ∀ k : ℕ, φ k y = k * φ 1 y := by
+  intro k
+  induction k with
+  | zero => rw [hzero y]; simp
+  | succ k ih =>
+      rw [hstep k y, hy, ih]
+      push_cast
+      ring
+
+/-- **A coprime modulus kills the phase.**  If `n · x = 0` in `ℤ/m` and `n` is
+prime to `m`, then `x = 0`: `n` is invertible, by Bézout. -/
+theorem eq_zero_of_coprime_nsmul (m n : ℕ) (hcop : Nat.Coprime n m) (x : ZMod m)
+    (hnx : (n : ZMod m) * x = 0) : x = 0 := by
+  have hbez : (1 : ℤ) = (n : ℤ) * Nat.gcdA n m + (m : ℤ) * Nat.gcdB n m := by
+    have h := Nat.gcd_eq_gcd_ab n m
+    rw [hcop] at h
+    push_cast at h ⊢
+    linarith [h]
+  have hcast : (1 : ZMod m) = (n : ZMod m) * ((Nat.gcdA n m : ℤ) : ZMod m) := by
+    have := congrArg (fun z : ℤ ↦ ((z : ZMod m))) hbez
+    push_cast at this
+    rw [ZMod.natCast_self] at this
+    simpa using this
+  calc x = (1 : ZMod m) * x := (one_mul x).symm
+    _ = ((Nat.gcdA n m : ℤ) : ZMod m) * ((n : ZMod m) * x) := by rw [hcast]; ring
+    _ = 0 := by rw [hnx, mul_zero]
+
+/-- **The phase of a torsion element vanishes on its fixed points, when the
+modulus is prime to its order.**  So no cancellation is available there. -/
+theorem phase_eq_zero_of_coprime (Y : FiniteModel) (m n : ℕ)
+    (hcop : Nat.Coprime n m) (φ : ℕ → Y → ZMod m) (σ : Equiv.Perm Y)
+    (hzero : ∀ y, φ 0 y = 0)
+    (hstep : ∀ (k : ℕ) (y : Y), φ (k + 1) y = φ k (σ y) + φ 1 y)
+    (htriv : ∀ y, φ n y = 0) (y : Y) (hy : σ y = y) : φ 1 y = 0 := by
+  refine eq_zero_of_coprime_nsmul m n hcop (φ 1 y) ?_
+  rw [← phase_iterate_at_fixed Y m φ σ hzero hstep y hy n]
+  exact htriv y
+
+/-- **With a coprime modulus, untwisting changes nothing.**  The untwisted model
+has exactly the fixed points of the permutation part, so its separation is
+exactly `1 - F` and the trace of the model is exactly `F`.  A trace bound is
+then a separation bound, and the model is sofic on the nose. -/
+theorem coprime_untwist_hamming (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) (hd : ∀ y, σ y = y → d y = 0)
+    (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1
+      = 1 - fixedDensity Y σ := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  rw [hammingDistance_wreathPerm_one]
+  have hsame : (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0)
+      = univ.filter fun y : Y ↦ σ y = y := by
+    ext y
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨fun h ↦ h.1, fun h ↦ ⟨h, hd y h⟩⟩
+  have hcompl : (univ.filter fun y : Y ↦ ¬ (σ y = y ∧ d y = 0)).card
+      = Fintype.card Y - (univ.filter fun y : Y ↦ σ y = y).card := by
+    have := Finset.card_filter_add_card_filter_not
+      (s := (univ : Finset Y)) (fun y : Y ↦ σ y = y ∧ d y = 0)
+    rw [hsame, Finset.card_univ] at this
+    omega
+  have hle : (univ.filter fun y : Y ↦ σ y = y).card ≤ Fintype.card Y := by
+    calc (univ.filter fun y : Y ↦ σ y = y).card
+        ≤ (univ : Finset Y).card := Finset.card_filter_le _ _
+      _ = Fintype.card Y := Finset.card_univ
+  rw [hcompl, Nat.cast_sub hle, fixedDensity]
+  field_simp
+
 end NonsoficGroupsExist
