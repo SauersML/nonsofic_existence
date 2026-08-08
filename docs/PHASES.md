@@ -430,6 +430,19 @@ The witnesses do not violate it; they saturate it.  There every permutation part
 is the identity, so `[a,b] = 1`, its trace is `1`, and the inequality reads
 `2(1 + 1 − 1) = 2 = 1 + 1` exactly.
 
+It is not obvious that hyperlinearity ever makes `F_a`, `F_b` large — separation
+bounds `Re τ`, not `F`.  But `normSq_normTrace_monomial_le` bounds the trace by
+the fixed-point fraction, `|τ(A_g)| ≤ F_g` (`sqrt_normSq_normTrace_le`), and a
+trace can have large *modulus* while its real part is small: exactly the
+near-scalar case `τ ≈ −1` or `τ ≈ ±i` that maximises Hilbert–Schmidt separation.
+Chaining (`fixedDensity_sum_le_of_commutator`):
+
+    |τ(A_a)| + |τ(A_b)| ≤ 3/2 + ε/2 + |B|/|Y|
+
+so **two elements cannot both lie within `3/4` of the scalars unless their
+commutator fails to separate**.  That is the general form of the two-involution
+statement of §3: what obstructs is not the order two but the non-commuting.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a

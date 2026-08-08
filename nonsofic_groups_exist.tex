@@ -2178,7 +2178,7 @@ So the \(\R/\Z\) versus \(\mu_m\) distinction is not where the difficulty lives,
 
 \clearpage
 \begin{remark}[Untwisting cannot manufacture separation]\label{rem:untwistsep}%
-\leanpartial{\leanmod{Sofic/UntwistSeparation}{involution_untwist_hamming_le,card_trivially_phased_le,card_torsion_subgroup,renormalization_isHom}\leanmod{Sofic/UntwistSeparation}{phase_commutator_local,untwist_retains_commutator_offBad,card_trivially_phased_le,card_fixed_commutator_constraint}\leanmod{Sofic/UntwistSeparation}{phase_eq_zero_of_gcd_eq_one,untwist_full_separation_witness_even,phase_weights_cancel}}{Formalized: every bound and witness stated here, including the order two, three and four cases and the coprime vanishing.  Not formalized: that Thom's construction is the compatible-modulus case, quoted from the literature.}%
+\leanpartial{\leanmod{Sofic/UntwistSeparation}{involution_untwist_hamming_le,card_trivially_phased_le,card_torsion_subgroup,renormalization_isHom}\leanmod{Sofic/UntwistSeparation}{phase_commutator_local,untwist_retains_commutator_offBad,card_fixed_commutator_constraint}\leanmod{Sofic/UntwistSeparation}{sqrt_normSq_normTrace_le,fixedDensity_sum_le_of_commutator}\leanmod{Sofic/UntwistSeparation}{phase_eq_zero_of_gcd_eq_one,untwist_full_separation_witness_even,phase_weights_cancel}}{Formalized: every bound and witness stated here, including the order two, three and four cases and the coprime vanishing.  Not formalized: that Thom's construction is the compatible-modulus case, quoted from the literature.}%
 Remarks~\ref{rem:phasecorrection},~\ref{rem:scalarclass} and~\ref{rem:ratchar} are all about \emph{multiplicativity}: obtaining phases that compose exactly.  None of them touches the other half of a sofic model, which is \emph{separation}---that a nontrivial element move almost every point.  This remark addresses that half, and the news is negative and quantitative.
 
 The fixed points of the untwisted permutation of \((d,\sigma)\) are the pairs \((y,j)\) with \(\sigma y=y\) and \(d(y)=0\), so untwisting separates only to the extent that the phase avoids \(0\) on \(\Fix(\sigma)\).  But \(\Fix(\sigma)\) is partitioned by the \(m\) classes of \(d\), so some class carries at least an average share:
@@ -2226,6 +2226,12 @@ The two bounds can now be chained, and the result assumes nothing about untwisti
 where \(\eps\) bounds the trace at \([a,b]\).  This is a constraint on the permutation parts of \emph{any} monomial model whose trace at \([a,b]\) is small---which is exactly what hyperlinearity supplies---with the phases eliminated and no separation of anything assumed.  Since \(F_{[a,b]}\leq1\) it yields \(F_a+F_b\leq\tfrac32+\tfrac\eps2+\abs B/\abs Y\) outright.
 
 The witnesses do not violate it; they saturate it.  There every permutation part is the identity, so \([a,b]=1\), its trace is \(1\), and the inequality reads \(2(1+1-1)=2=1+1\) on the nose.
+
+It is not obvious that hyperlinearity ever makes \(F_a\) and \(F_b\) large, since separation bounds \(\operatorname{Re}\tau\) and not \(F\).  But the inequality of Remark~\ref{rem:thomK} bounds the trace by the fixed-point fraction, \(\abs{\tau(A_g)}\leq F_g\), and a trace can have large \emph{modulus} while its real part is small---which is exactly the near-scalar case \(\tau\approx-1\) or \(\tau\approx\pm i\) that maximises Hilbert--Schmidt separation.  Chaining,
+\[
+ \abs{\tau(A_a)}+\abs{\tau(A_b)}\ \leq\ \tfrac32+\tfrac\eps2+\frac{\abs B}{\abs Y},
+\]
+so two elements cannot both lie within \(3/4\) of the scalars unless their commutator fails to separate.  That is the general form of the two-involution statement of Remark~\ref{rem:phasecollapse}: what obstructs is not the order two but the non-commuting.
 
 The extreme case needs no pigeonhole.  On the \emph{same} permutation \(\sigma\), the constant phase \(1\) untwists to a model of separation exactly \(1\), and the constant phase \(0\) untwists to one of separation exactly \(1-F\); and the two monomial matrices differ by a scalar, so they sit at Hilbert--Schmidt distance \(\abs{1-\zeta}^2\), which tends to \(0\) as \(m\) grows.  Two models arbitrarily close in the metric that hyperlinearity uses therefore have untwisted separations \(1\) and \(1-F\) for whatever \(F\) one likes.
 

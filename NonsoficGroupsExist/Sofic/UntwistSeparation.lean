@@ -1385,4 +1385,105 @@ theorem card_fixed_commutator_constraint {G : Type*} [Group G] (Y : FiniteModel)
   have hhigh := card_trivially_phased_le Y D hD (act c) hY htr
   linarith [hlow, hmono, hhigh]
 
+
+/-! ## Two elements cannot both be near-scalar
+
+The constraint above wants `F_a` and `F_b` large, and it is not obvious that
+hyperlinearity ever supplies that: separation bounds `Re τ`, not `F`.  But
+`normSq_normTrace_monomial_le` bounds the trace by the fixed point fraction,
+
+    |τ(A_g)| ≤ F_g ,
+
+so a trace of large *modulus* forces `F` large -- and a trace can have large
+modulus while its real part is small, which is exactly the near-scalar case
+`τ ≈ -1` or `τ ≈ ±i` that maximises Hilbert--Schmidt separation.
+
+Chaining, in any monomial model,
+
+    |τ(A_a)| + |τ(A_b)| ≤ 3/2 + ε/2 + |B|/|Y| ,
+
+whenever the commutator's trace has small real part.  So two elements cannot
+both be within `3/4` of the scalars unless their commutator fails to separate.
+This is the general form of `not_both_normSq_normTrace_ge`, which said the same
+for two involutions.
+-/
+
+/-- `1 - d_Hamm(σ, 1)` is the fixed point density. -/
+theorem one_sub_hammingDistance_eq_fixedDensity (Y : FiniteModel)
+    (σ : Equiv.Perm Y) (hY : 0 < Fintype.card Y) :
+    1 - hammingDistance Y σ 1 = fixedDensity Y σ := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  have hsplit := Finset.card_filter_add_card_filter_not (s := (univ : Finset Y))
+    (fun y : Y ↦ σ y = y)
+  rw [Finset.card_univ] at hsplit
+  have hdis : hammingDistance Y σ 1
+      = ((univ.filter fun y : Y ↦ ¬ (σ y = y)).card : ℝ) / Fintype.card Y := by
+    rw [hammingDistance]
+    congr 2
+  have hcast : ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+      + ((univ.filter fun y : Y ↦ ¬ (σ y = y)).card : ℝ) = Fintype.card Y := by
+    exact_mod_cast congrArg (fun n : ℕ ↦ (n : ℝ)) hsplit
+  rw [hdis, fixedDensity, eq_div_iff (ne_of_gt hYR), sub_mul, one_mul,
+    div_mul_cancel₀ _ (ne_of_gt hYR)]
+  linarith [hcast]
+
+/-- **The trace is bounded by the fixed point density.**  So a trace of large
+modulus forces many fixed points, even when its real part is small. -/
+theorem sqrt_normSq_normTrace_le (Y : FiniteModel) {d : Y → ℂ}
+    (hd : ∀ i, Complex.normSq (d i) = 1) (σ : Equiv.Perm Y)
+    (hY : 0 < Fintype.card Y) :
+    Real.sqrt (Complex.normSq (normTrace Y (monomialMatrix Y d σ)))
+      ≤ fixedDensity Y σ := by
+  have hbase := normSq_normTrace_monomial_le Y hd σ
+  rw [one_sub_hammingDistance_eq_fixedDensity Y σ hY] at hbase
+  have hnn : 0 ≤ fixedDensity Y σ := by
+    rw [fixedDensity]
+    positivity
+  calc Real.sqrt (Complex.normSq (normTrace Y (monomialMatrix Y d σ)))
+      ≤ Real.sqrt ((fixedDensity Y σ) ^ 2) := Real.sqrt_le_sqrt hbase
+    _ = fixedDensity Y σ := Real.sqrt_sq hnn
+
+/-- **Two elements cannot both be near-scalar.**  From the commutator constraint
+and `F ≤ 1` at `[a,b]`, the fixed point densities obey
+`F_a + F_b ≤ 3/2 + ε/2 + |B|/|Y|`; with the trace bound this says two elements
+are not both within `3/4` of the scalars unless their commutator fails to
+separate. -/
+theorem fixedDensity_sum_le_of_commutator {G : Type*} [Group G] (Y : FiniteModel)
+    (m : ℕ) (act : G → Equiv.Perm Y) (e : G → Y → ZMod m)
+    (D : Y → ℂ) (hD : ∀ y, Complex.normSq (D y) = 1)
+    (B : Finset Y) (a b : G)
+    (hcompat : ∀ y : Y, e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1)
+    (hgood : ∀ y : Y, y ∉ B → act a y = y → act b y = y →
+      act (a * b * a⁻¹ * b⁻¹) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0)
+    {ε : ℝ}
+    (htr : (normTrace Y
+      (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re ≤ ε)
+    (hY : 0 < Fintype.card Y) :
+    fixedDensity Y (act a) + fixedDensity Y (act b)
+      ≤ 3 / 2 + ε / 2 + (B.card : ℝ) / Fintype.card Y := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  have hbase := card_fixed_commutator_constraint Y m act e D hD B a b hcompat
+    hgood htr hY
+  have hle : ((univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y).card : ℝ)
+      ≤ Fintype.card Y := by
+    have : (univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y).card
+        ≤ Fintype.card Y := by
+      calc _ ≤ (univ : Finset Y).card := Finset.card_filter_le _ _
+        _ = Fintype.card Y := Finset.card_univ
+    exact_mod_cast this
+  rw [fixedDensity, fixedDensity, ← sub_nonneg]
+  have hrw : 3 / 2 + ε / 2 + (B.card : ℝ) / Fintype.card Y
+      - (((univ.filter fun y : Y ↦ act a y = y).card : ℝ) / Fintype.card Y
+        + ((univ.filter fun y : Y ↦ act b y = y).card : ℝ) / Fintype.card Y)
+      = ((3 / 2 + ε / 2) * Fintype.card Y + B.card
+        - ((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+        - ((univ.filter fun y : Y ↦ act b y = y).card : ℝ)) / Fintype.card Y := by
+    field_simp
+    ring
+  rw [hrw]
+  apply div_nonneg _ (le_of_lt hYR)
+  linarith [hbase, hle]
+
 end NonsoficGroupsExist
