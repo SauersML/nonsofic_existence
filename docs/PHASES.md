@@ -86,7 +86,11 @@ No point of the unit circle keeps its first four powers in the left half plane:
 
 (`re_pow_max_ge`), the four real parts being the Chebyshev polynomials of
 `Re ζ`.  Four powers are needed and no fewer, and the exceptions are exactly the
-roots of unity of order at most four.
+roots of unity of order at most four.  The bound is near-optimal: the true
+minimum is `(√5 − 1)/4 ≈ 0.30902`, attained where the second and third
+Chebyshev polynomials cross at `Re ζ = -φ/2` for `φ` the golden ratio, the
+crossing being exact because `4x³ - 2x² - 3x + 1 = 0` follows from
+`φ² = φ + 1` (`re_pow_max_sharp`).
 
 Propagation makes this bite.  From `U^{l+1} − τ^{l+1} = U^l(U − τ) + τ(U^l − τ^l)`
 one gets `‖U⁴ − τ⁴·1‖² ≤ 22(1 − |τ(U)|²)`, so a unitary whose trace is within
@@ -158,6 +162,30 @@ exact locus is empty at every dimension — one line, no rigidity — while the
 relation is exactly solvable at every root-of-unity dimension by the clock-and-
 shift pair, which is itself monomial.  Emptiness of every exact locus carries no
 dimension-free gap.
+
+## 7. Contributed by an external audit, formalized here
+
+`ImplementerCocycle.lean`, `CoordinateTransfer.lean`.  Three statements arrived
+from a referee audit of this development as prose; they are formalized because
+that is the form in which they should travel.
+
+*Implementer coherence is a cocycle problem.*  Implementing an action
+elementwise is not the same as having a representation: the defect
+`c(g,h) = v_g v_h v_{gh}⁻¹` satisfies a twisted `2`-cocycle identity, and
+correcting the implementers moves `c` by a coboundary.  Both are group
+identities and are stated at that level.
+
+*Normalized rank blindness.*  Two orthogonal rank-one projections on a model of
+size `n` are at normalized squared distance `2/n`.  Any argument tracking a
+distinguished vector must first bound the relative trace of its support.
+
+*Coordinate reverse transfer.*  Encoding a coordinate `x` as the lamp
+`δ_x(k₀)` is injective and equivariant, so chart data for the lamp action pulls
+back to chart data for the coordinate action — with nothing used about where
+the charts take their values.  The two hypotheses are isolated as hypotheses
+(`lampEmbedding_injective`, `lampEmbedding_equivariant`); the transfer itself
+(`OrbitChartData.comap`) is a pullback.  The reading is the audit's: if the
+coordinate action admits no chart system, neither does the lamp action.
 
 ## What is not here
 
