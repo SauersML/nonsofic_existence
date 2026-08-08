@@ -93,4 +93,47 @@ theorem isSofic_of_isHyperlinear_of_fg_case
     exact ⟨⟨g, Subgroup.subset_closure hg⟩, rfl⟩
 
 
+/-! ## The two useful forms of the reduction
+
+The reduction is worth stating twice more, because the forms one reaches for are
+different from the form one proves.
+
+As an *equivalence*: Question 3.4 holds in general exactly when it holds for
+finitely generated groups.  One direction is the reduction; the other is
+immediate, a finitely generated group being a group.
+
+As a statement about *counterexamples*: a counterexample exists exactly when a
+finitely generated one does.  This is the contrapositive, and it is the form a
+search would use -- it says a hunt may restrict to finitely generated groups
+without loss, which is not obvious from the definitions since neither property is
+visibly inherited upward.
+-/
+
+/-- **Question 3.4 is equivalent to its finitely generated case.** -/
+theorem isHyperlinear_imp_isSofic_iff_fg :
+    (∀ (H : Type) (_ : Group H), Group.FG H → IsHyperlinear H → IsSofic H)
+      ↔ (∀ (H : Type) (_ : Group H), IsHyperlinear H → IsSofic H) := by
+  constructor
+  · intro hfg H _ hH
+    exact isSofic_of_isHyperlinear_of_fg_case hfg hH
+  · intro hall H _ _ hH
+    exact hall H inferInstance hH
+
+/-- **A counterexample exists exactly when a finitely generated one does.**  The
+contrapositive of the reduction: a search for a hyperlinear nonsofic group may
+restrict to finitely generated groups without loss. -/
+theorem exists_counterexample_iff_exists_fg :
+    (∃ (H : Type) (_ : Group H), IsHyperlinear H ∧ ¬ IsSofic H)
+      ↔ (∃ (H : Type) (_ : Group H), Group.FG H ∧ IsHyperlinear H
+          ∧ ¬ IsSofic H) := by
+  constructor
+  · rintro ⟨G, hG, hhyp, hnsofic⟩
+    by_contra hcon
+    refine hnsofic (isSofic_of_isHyperlinear_of_fg_case ?_ hhyp)
+    intro H hH hfg hhypH
+    by_contra hns
+    exact hcon ⟨H, hH, hfg, hhypH, hns⟩
+  · rintro ⟨H, hH, _, hhyp, hns⟩
+    exact ⟨H, hH, hhyp, hns⟩
+
 end NonsoficGroupsExist
