@@ -2638,20 +2638,21 @@ CountableNonsoficGroupExists
   a ≠ b → hsDistSq Y (coordProjection Y a) (coordProjection Y b) = 2 / ↑(Fintype.card Y.carrier)
 ```
 
-## `NonsoficGroupsExist.hsLengthSq_conj`
-
-```lean
-∀ (Y : FiniteModel) {t u : Matrix Y.carrier Y.carrier ℂ},
-  t ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier → hsLengthSq Y (t * u * t.conjTranspose) = hsLengthSq Y u
-```
-
 ## `NonsoficGroupsExist.hsLengthSq_conjTranspose_mul`
 
 ```lean
 ∀ (Y : FiniteModel) {v w : Matrix Y.carrier Y.carrier ℂ},
   w ∈ Matrix.unitaryGroup Y.carrier ℂ →
     0 < Fintype.card Y.carrier → hsLengthSq Y (w.conjTranspose * v) = hsDistSq Y v w
+```
+
+## `NonsoficGroupsExist.hsLengthSq_ge_of_separated`
+
+```lean
+∀ {G : Type u_2} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
+  0 < ε →
+    ε ≤ 1 / 10000 →
+      ∀ {g : G}, g ∈ F → 1 ∈ F → g ≠ 1 → 2 - ε - 1 / 50 ≤ hsLengthSq M.carrier (M.map g)
 ```
 
 ## `NonsoficGroupsExist.hsNormSq`

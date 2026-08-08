@@ -1,4 +1,4 @@
-import NonsoficGroupsExist.Sofic.HyperlinearScalar
+import NonsoficGroupsExist.Sofic.PhasePropagation
 import Mathlib.Order.Filter.Ultrafilter.Defs
 import Mathlib.GroupTheory.QuotientGroup.Defs
 
@@ -193,5 +193,31 @@ instance nullUnitarySubgroup_normal (hX : ∀ i, 0 < Fintype.card (X i)) :
 ultraproduct of the finite unitary groups. -/
 abbrev UniversalHyperlinear (hX : ∀ i, 0 < Fintype.card (X i)) : Type _ :=
   (∀ i, Matrix.unitaryGroup (X i) ℂ) ⧸ nullUnitarySubgroup 𝒰 X hX
+
+/-! ## What injectivity of the induced map would need -/
+
+/-- **In a separated model every nontrivial test element is uniformly far from
+the identity.**  This is the estimate an embedding's injectivity consumes: the
+sequence attached to `g ≠ 1` has length bounded below, so it is not null and its
+class in the ultraproduct is not trivial. -/
+theorem hsLengthSq_ge_of_separated {G : Type*} [Group G] {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) (hε : 0 < ε) (hεle : ε ≤ 1 / 10000)
+    {g : G} (hg : g ∈ F) (h1F : (1 : G) ∈ F) (hgne : g ≠ 1) :
+    2 - ε - 1 / 50 ≤ hsLengthSq M.carrier (M.map g) := by
+  have hre := re_normTrace_le_of_separated M hε hεle hg h1F hgne
+  have hone : (1 : Matrix M.carrier M.carrier ℂ)
+      ∈ Matrix.unitaryGroup M.carrier ℂ := Submonoid.one_mem _
+  have hdist : hsDistSq M.carrier (M.map g) 1
+      = 2 - 2 * (normTrace M.carrier (M.map g * (1 : Matrix M.carrier
+        M.carrier ℂ)ᴴ)).re :=
+    hsDistSq_of_unitary M.carrier (M.isUnitary g) hone M.nonempty
+  have hsimp : M.map g * (1 : Matrix M.carrier M.carrier ℂ)ᴴ = M.map g := by
+    rw [Matrix.conjTranspose_one, Matrix.mul_one]
+  rw [hsimp] at hdist
+  show 2 - ε - 1 / 50 ≤ hsNormSq M.carrier (M.map g - 1)
+  have hrw : hsNormSq M.carrier (M.map g - 1)
+      = hsDistSq M.carrier (M.map g) 1 := rfl
+  rw [hrw, hdist]
+  linarith
 
 end NonsoficGroupsExist
