@@ -3124,6 +3124,18 @@ CountableNonsoficGroupExists
   IsPhaseCocycle act c → ∀ (g h : G) (y : Y), c g h y = phaseCob act (phaseCorrection c) g h y
 ```
 
+## `NonsoficGroupsExist.phase_commutator_local`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} {m : ℕ} (act : G → Equiv.Perm Y)
+  (d : G → Y → ZMod m),
+  (∀ (g h : G) (z : Y), d (g * h) z = d g ((act h) z) + d h z) →
+    ∀ (y : Y),
+      (act 1) y = y →
+        ∀ (a b : G),
+          (act b) y = y → (act a⁻¹) y = y → (act b⁻¹) y = y → d (a * b * a⁻¹ * b⁻¹) y = 0
+```
+
 ## `NonsoficGroupsExist.phase_correctable_of_small`
 
 ```lean
@@ -3446,12 +3458,4 @@ CountableNonsoficGroupExists
             (∑ k ∈ Finset.image (fun k => h * k) F \ F, c g k y -
                 ∑ k ∈ F \ Finset.image (fun k => h * k) F, c g k y) /
               ↑F.card
-```
-
-## `NonsoficGroupsExist.wreathPerm_fixes`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier) (y : Y.carrier),
-  σ y = y → d y = 0 → ∀ (j : ZMod m), (wreathPerm Y m d σ) (y, j) = (y, j)
 ```
