@@ -321,6 +321,38 @@ separation of the untwisted model, which no rounding addresses.  The pair 6a/6d
 is sharp: rounding fails on the circle because the circle is divisible, and
 succeeds on a lattice because a lattice is free.
 
+## 6e. The other half: untwisting cannot manufacture separation
+
+`UntwistSeparation.lean`.  Everything in 6b–6d is about *multiplicativity*.
+None of it touches the other half of a sofic model — **separation**, that a
+nontrivial element move almost every point.  Here the news is negative and
+quantitative.
+
+The fixed points of the untwisted permutation of `(d,σ)` are the `(y,j)` with
+`σy = y` and `d y = 0`, so untwisting separates only insofar as the phase avoids
+`0` on `Fix(σ)`.  But `Fix(σ)` is partitioned by the `m` classes of `d`, so some
+class carries at least an average share (`exists_shift_fixed_ge`).  Renormalizing
+by that `c` is a *scalar* change — invisible to Hilbert–Schmidt by section 6 —
+and leaves an untwisted model of separation at most `1 − F/m`, where `F` is the
+fixed-point density of `σ` (`exists_shift_hamming_le`).
+
+So untwisting can only inherit separation, up to a factor `m`.  If the
+permutation parts are not already almost fixed-point free, no choice of phases
+repairs it and no renormalization hides it from every scalar.
+
+The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
+the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
+phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a
+scalar, so they sit at Hilbert–Schmidt distance `|1 − ζ|² → 0`.  Two models
+arbitrarily close in the metric hyperlinearity uses have untwisted separations
+`1` and `1 − F` for any `F`.
+
+**The metric data does not determine the untwisted separation.**  That is the
+separation-side counterpart of section 6, and it says why none of the correction
+machinery bears on this half: the difficulty is not that phases are hard to make
+multiplicative — they are not — but that multiplicativity and separation are
+controlled by different data, and the metric supplies only the first.
+
 ## 7. Contributed by an external audit, formalized here
 
 `ImplementerCocycle.lean`, `CoordinateTransfer.lean`.  Three statements arrived
