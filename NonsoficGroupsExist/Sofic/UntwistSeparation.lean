@@ -199,4 +199,113 @@ theorem untwist_separation_undetermined (Y : FiniteModel) (m : ℕ) [NeZero m]
     rw [hcompl, Nat.cast_sub hle, fixedDensity]
     field_simp
 
+
+/-! ## Torsion pins the phase, and an involution keeps half its fixed points
+
+The results above depend on a choice of scalar normalization.  For a torsion
+element there is no such freedom, because the phases restrict to a
+*homomorphism* on the stabilizer of a point: if `σ_g y = y` and `σ_h y = y` then
+`d_{gh}(y) = d_g(y) + d_h(y)`.  For an involution this pins `d_g(y)` to the
+`2`-torsion of `ℤ/m`, so it takes at most two values on `Fix(σ_g)`, and a small
+trace then *forces* the two classes to be balanced rather than merely permitting
+it.  The untwisted model keeps half the fixed points, unconditionally.
+-/
+
+/-- **At a fixed point the phase of a square is twice the phase.**  This is the
+statement that the phases restrict to a homomorphism on the stabilizer of a
+point, in the case that is needed below. -/
+theorem phase_double_at_fixed (Y : FiniteModel) (m : ℕ)
+    (d e : Y → ZMod m) (σ : Equiv.Perm Y)
+    (hsq : ∀ y, e y = d (σ y) + d y) (y : Y) (hy : σ y = y) :
+    e y = 2 * d y := by
+  rw [hsq y, hy]
+  ring
+
+/-- **The phase of an involution at a fixed point is `2`-torsion.**  So it takes
+at most `gcd(2,m)` values there, rather than the `m` values a general phase may
+take. -/
+theorem phase_two_torsion (Y : FiniteModel) (m : ℕ)
+    (d e : Y → ZMod m) (σ : Equiv.Perm Y)
+    (hsq : ∀ y, e y = d (σ y) + d y) (htriv : ∀ y, e y = 0)
+    (y : Y) (hy : σ y = y) : 2 * d y = 0 := by
+  rw [← phase_double_at_fixed Y m d e σ hsq y hy, htriv y]
+
+/-- **A balanced two-class count keeps half.**  If the fixed points carry only
+two phase values and the two classes differ in size by at most `E` -- which is
+what a trace bound says, since the two values contribute opposite signs -- then
+the `0` class holds at least half the fixed points, less `E/2`. -/
+theorem card_zero_class_ge (Y : FiniteModel) (m : ℕ)
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) {c : ZMod m} (hc : c ≠ 0)
+    (htwo : ∀ y, σ y = y → d y = 0 ∨ d y = c) {E : ℝ}
+    (hbal : ((univ.filter fun y : Y ↦ σ y = y ∧ d y = c).card : ℝ)
+              - ((univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card : ℝ) ≤ E) :
+    ((univ.filter fun y : Y ↦ σ y = y).card : ℝ) - E
+      ≤ 2 * ((univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card : ℝ) := by
+  classical
+  have hdisj : Disjoint (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0)
+      (univ.filter fun y : Y ↦ σ y = y ∧ d y = c) := by
+    rw [Finset.disjoint_left]
+    intro y hy0 hyc
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy0 hyc
+    exact hc (hyc.2 ▸ hy0.2 ▸ rfl)
+  have hpart : (univ.filter fun y : Y ↦ σ y = y).card
+      = (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card
+        + (univ.filter fun y : Y ↦ σ y = y ∧ d y = c).card := by
+    rw [← Finset.card_union_of_disjoint hdisj]
+    congr 1
+    ext y
+    simp only [Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and]
+    constructor
+    · intro hy
+      rcases htwo y hy with h | h
+      · exact Or.inl ⟨hy, h⟩
+      · exact Or.inr ⟨hy, h⟩
+    · rintro (⟨hy, _⟩ | ⟨hy, _⟩) <;> exact hy
+  have hpartR : ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+      = ((univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card : ℝ)
+        + ((univ.filter fun y : Y ↦ σ y = y ∧ d y = c).card : ℝ) := by
+    exact_mod_cast congrArg (fun n : ℕ ↦ (n : ℝ)) hpart
+  linarith [hpartR, hbal]
+
+/-- **An involution's untwisted model keeps half its fixed points.**  No scalar
+normalization enters: the phase is pinned to two values by torsion, and a trace
+bound `E` forces those two classes to be balanced.  So
+
+    separation of the untwisted model  ≤  1 - (F - E/|Y|)/2,
+
+where `F` is the fixed point density of the permutation part.  Untwisting an
+involution therefore inherits its separation and halves it -- it cannot create
+it. -/
+theorem involution_untwist_hamming_le (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) {c : ZMod m} (hc : c ≠ 0)
+    (htwo : ∀ y, σ y = y → d y = 0 ∨ d y = c) {E : ℝ}
+    (hbal : ((univ.filter fun y : Y ↦ σ y = y ∧ d y = c).card : ℝ)
+              - ((univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card : ℝ) ≤ E)
+    (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1
+      ≤ 1 - (fixedDensity Y σ - E / Fintype.card Y) / 2 := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  have hkey := card_zero_class_ge Y m d σ hc htwo hbal
+  rw [hammingDistance_wreathPerm_one]
+  have hcompl : (univ.filter fun y : Y ↦ ¬ (σ y = y ∧ d y = 0)).card
+      = Fintype.card Y - (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card := by
+    have := Finset.card_filter_add_card_filter_not
+      (s := (univ : Finset Y)) (fun y : Y ↦ σ y = y ∧ d y = 0)
+    rw [Finset.card_univ] at this
+    omega
+  have hle : (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card ≤ Fintype.card Y := by
+    calc (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card
+        ≤ (univ : Finset Y).card := Finset.card_filter_le _ _
+      _ = Fintype.card Y := Finset.card_univ
+  rw [hcompl, Nat.cast_sub hle, fixedDensity]
+  rw [div_le_iff₀ hYR, sub_mul, one_mul]
+  have hexpand : (((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+        / (Fintype.card Y : ℝ) - E / (Fintype.card Y : ℝ)) / 2
+        * (Fintype.card Y : ℝ)
+      = (((univ.filter fun y : Y ↦ σ y = y).card : ℝ) - E) / 2 := by
+    field_simp
+  rw [hexpand]
+  linarith [hkey]
+
 end NonsoficGroupsExist

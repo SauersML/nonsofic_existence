@@ -347,6 +347,21 @@ scalar, so they sit at Hilbert–Schmidt distance `|1 − ζ|² → 0`.  Two mod
 arbitrarily close in the metric hyperlinearity uses have untwisted separations
 `1` and `1 − F` for any `F`.
 
+For a **torsion** element the scalar freedom disappears and what is left is
+stronger.  The phases restrict to a homomorphism on the stabilizer of a point —
+if `σ_g y = y` and `σ_h y = y` then `d_gh(y) = d_g(y) + d_h(y)`, since `σ_h`
+does not move `y` (`phase_double_at_fixed`).  So for an involution the value
+`d_g(y)` is pinned to the 2-torsion of `ℤ/m` at every fixed point
+(`phase_two_torsion`), takes at most two values there, and the two contribute
+opposite signs to the trace.  A trace bound `E` then *forces* the classes to be
+balanced rather than merely permitting it, giving
+
+    d_Hamm(untwist(d_g, σ_g), 1) ≤ 1 − (F − E/|Y|)/2
+
+(`involution_untwist_hamming_le`) with no normalization chosen anywhere.
+Untwisting an involution inherits its separation and halves it; it cannot create
+it.  That is why involutions keep reappearing as the obstruction.
+
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
 machinery bears on this half: the difficulty is not that phases are hard to make
