@@ -3053,6 +3053,14 @@ CountableNonsoficGroupExists
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
 ```
 
+## `NonsoficGroupsExist.normTrace_monomial_of_phase_trivial`
+
+```lean
+∀ (Y : FiniteModel) (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier),
+  (∀ (y : Y.carrier), σ y = y → d y = 1) →
+    normTrace Y (monomialMatrix Y d σ) = ↑(fixedDensity Y σ)
+```
+
 ## `NonsoficGroupsExist.normTrace_permMatrix`
 
 ```lean
@@ -3163,13 +3171,6 @@ CountableNonsoficGroupExists
 ∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y) (x : Y),
   ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
     if σ x = τ x then 0 else 2
-```
-
-## `NonsoficGroupsExist.permMonomial_pow_card`
-
-```lean
-∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
-  monomialMatrix Y (fun x => 1) σ ^ (Fintype.card Y.carrier).factorial = 1
 ```
 
 ## `NonsoficGroupsExist.permutation_conservation_full`
@@ -3521,6 +3522,19 @@ CountableNonsoficGroupExists
           (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1 ≤
         2 - fixedDensity Y (act a) - fixedDensity Y (act b) +
           ↑B.card / ↑(Fintype.card Y.carrier)
+```
+
+## `NonsoficGroupsExist.untwist_separated_of_phase_trivial`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (D : Y.carrier → ℂ) (e : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier),
+  (∀ (y : Y.carrier), σ y = y → D y = 1) →
+    (∀ (y : Y.carrier), σ y = y → e y = 0) →
+      ∀ {ε : ℝ},
+        (normTrace Y (monomialMatrix Y D σ)).re ≤ ε →
+          0 < Fintype.card Y.carrier →
+            1 - ε ≤ hammingDistance (wreathModel Y m) (wreathPerm Y m e σ) 1
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
