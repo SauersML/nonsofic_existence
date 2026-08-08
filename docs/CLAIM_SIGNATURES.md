@@ -2609,24 +2609,6 @@ CountableNonsoficGroupExists
   IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
 ```
 
-## `NonsoficGroupsExist.fixedDensity_sum_le_of_commutator`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] (Y : FiniteModel) (m : ℕ) (act : G → Equiv.Perm Y.carrier)
-  (e : G → Y.carrier → ZMod m) (D : Y.carrier → ℂ),
-  (∀ (y : Y.carrier), Complex.normSq (D y) = 1) →
-    ∀ (B : Finset Y.carrier) (a b : G),
-      (∀ (y : Y.carrier), e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1) →
-        (∀ y ∉ B,
-            (act a) y = y →
-              (act b) y = y → (act (a * b * a⁻¹ * b⁻¹)) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0) →
-          ∀ {ε : ℝ},
-            (normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re ≤ ε →
-              0 < Fintype.card Y.carrier →
-                fixedDensity Y (act a) + fixedDensity Y (act b) ≤
-                  3 / 2 + ε / 2 + ↑B.card / ↑(Fintype.card Y.carrier)
-```
-
 ## `NonsoficGroupsExist.fixedSet`
 
 ```lean
@@ -3277,6 +3259,23 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {z : ℂ}, z ^ 3 = 1 → z ≠ 1 → z.re ≤ 0
+```
+
+## `NonsoficGroupsExist.re_normTrace_commutator_ge`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (Y : FiniteModel) (m : ℕ) (act : G → Equiv.Perm Y.carrier)
+  (e : G → Y.carrier → ZMod m) (D : Y.carrier → ℂ),
+  (∀ (y : Y.carrier), Complex.normSq (D y) = 1) →
+    ∀ (B : Finset Y.carrier) (a b : G),
+      (∀ (y : Y.carrier), e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1) →
+        (∀ y ∉ B,
+            (act a) y = y →
+              (act b) y = y → (act (a * b * a⁻¹ * b⁻¹)) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0) →
+          0 < Fintype.card Y.carrier →
+            2 * fixedDensity Y (act a) + 2 * fixedDensity Y (act b) - 3 -
+                2 * ↑B.card / ↑(Fintype.card Y.carrier) ≤
+              (normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re
 ```
 
 ## `NonsoficGroupsExist.re_pow_max_ge`
