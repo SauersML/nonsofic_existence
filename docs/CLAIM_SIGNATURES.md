@@ -2802,6 +2802,24 @@ CountableNonsoficGroupExists
   HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ∀ (A : SoficApproximation G), IsLEF J
 ```
 
+## `NonsoficGroupsExist.isPhaseCocycle_of_mod`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} (act : G → Equiv.Perm Y) (c : G → G → Y → ℝ),
+  (∀ (g h : G) (y : Y), |c g h y| ≤ 1 / 6) →
+    (∀ (g h k : G) (y : Y),
+        ∃ n, c g h y + c (g * h) k y - c h k ((act g)⁻¹ y) - c g (h * k) y = ↑n) →
+      IsPhaseCocycle act c
+```
+
+## `NonsoficGroupsExist.isPhaseCocycle_phaseCob`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} (act : G → Equiv.Perm Y),
+  (∀ (g h : G), act (g * h) = act g * act h) →
+    ∀ (b : G → Y → ℝ), IsPhaseCocycle act (phaseCob act b)
+```
+
 ## `NonsoficGroupsExist.isSofic_freeGroup`
 
 ```lean
@@ -3028,6 +3046,27 @@ CountableNonsoficGroupExists
 ∀ {Y : Type u_1} [inst : Fintype Y] (π : Y ≃ Y) (f : Y → ℝ),
   ∑ y, max (f y - f (π y)) 0 = ∑ y, max (f (π y) - f y) 0 ∧
     ∑ y, max (f (π y) - f y) 0 = 1 / 2 * ∑ y, |f (π y) - f y|
+```
+
+## `NonsoficGroupsExist.phaseCorrection_eq`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] [inst_1 : Fintype G] {Y : Type u_2} (act : G → Equiv.Perm Y)
+  (c : G → G → Y → ℝ),
+  IsPhaseCocycle act c → ∀ (g h : G) (y : Y), c g h y = phaseCob act (phaseCorrection c) g h y
+```
+
+## `NonsoficGroupsExist.phase_correctable_of_small`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] [Fintype G] {Y : Type u_2} (act : G → Equiv.Perm Y)
+  (c : G → G → Y → ℝ),
+  (∀ (g h : G) (y : Y), |c g h y| ≤ 1 / 6) →
+    (∀ (g h k : G) (y : Y),
+        ∃ n, c g h y + c (g * h) k y - c h k ((act g)⁻¹ y) - c g (h * k) y = ↑n) →
+      ∃ b,
+        (∀ (g : G) (y : Y), |b g y| ≤ 1 / 6) ∧
+          ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
 ```
 
 ## `NonsoficGroupsExist.pow_card_eq_one_of_scalarCommute`
