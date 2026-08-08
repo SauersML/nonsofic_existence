@@ -559,6 +559,15 @@ stops seeing `F` at all: the `±i` witness sits precisely there, with `c = 0`,
 trace zero and `F = 1`.  So the positive direction holds exactly as far as the
 phases stay off the imaginary axis, and fails immediately after.
 
+The two halves were proved far apart and were not aimed at each other, so
+`hyperlinear_forces_sofic_iff_phases_off_axis` records them as one object.  The
+trace is linked to the fixed-point density only through `|τ| ≤ F`, which runs
+the wrong way; a trace bound can constrain `F` at all only when the phases fail
+to cancel, and the condition for that is a positive lower bound on their real
+parts.  Above the threshold hyperlinearity forces soficity, with `F ≤ ε/c`; at
+it, it does not, and the failure is realized by a model of trace zero in which
+*every* point is fixed.
+
 So a group could be hyperlinear through models nowhere near monomial, and none
 of these results would apply.  What justifies the restriction in the one case
 where it is justified is external — Thom's microstates are monomial because

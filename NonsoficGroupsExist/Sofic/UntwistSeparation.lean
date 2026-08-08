@@ -2011,4 +2011,53 @@ theorem fixedDensity_le_of_re_pos (Y : FiniteModel) (d : Y → ℂ)
   rw [fixedDensity, div_le_div_iff₀ hYR hc]
   linarith [hlow, htr]
 
+
+/-! ## The dichotomy, in one statement
+
+The two halves are proved far apart and were not aimed at each other, so it is
+worth recording them as a single object.  The trace is linked to the fixed point
+density only through `|τ| ≤ F`, which runs the wrong way; so a trace bound can
+constrain `F` at all only when the phases fail to cancel, and the condition for
+that is a positive lower bound on their real parts.  Above that threshold
+hyperlinearity forces soficity; at it, it does not.
+-/
+
+/-- **The dichotomy.**  Phases bounded off the imaginary axis at the fixed
+points make hyperlinear separation a bound on the fixed point density; phases
+reaching the axis do not, and the failure is realized -- trace zero with *every*
+point fixed. -/
+theorem hyperlinear_forces_sofic_iff_phases_off_axis :
+    (∀ (Y : FiniteModel) (d : Y → ℂ) (σ : Equiv.Perm Y) (c ε : ℝ), 0 < c →
+        (∀ y, σ y = y → c ≤ (d y).re) →
+        (normTrace Y (monomialMatrix Y d σ)).re ≤ ε → 0 < Fintype.card Y →
+        fixedDensity Y σ ≤ ε / c)
+      ∧ (∃ (Y : FiniteModel) (d : Y → ℂ) (σ : Equiv.Perm Y),
+          (∀ i, Complex.normSq (d i) = 1)
+          ∧ (∀ y, σ y = y → (d y).re = 0)
+          ∧ normTrace Y (monomialMatrix Y d σ) = 0
+          ∧ fixedDensity Y σ = 1) := by
+  classical
+  refine ⟨fun Y d σ c ε hc hd htr hY ↦
+    fixedDensity_le_of_re_pos Y d σ hc hd htr hY, ?_⟩
+  refine ⟨(⟨Bool, inferInstance, inferInstance⟩ : FiniteModel),
+    (fun b : Bool ↦ if b = true then Complex.I else -Complex.I), 1, ?_, ?_, ?_, ?_⟩
+  · intro i
+    by_cases h : i = true <;> simp [h]
+  · intro y _
+    by_cases h : y = true <;> simp [h]
+  · have htr : Matrix.trace
+        (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+          (fun b : Bool ↦ if b = true then Complex.I else -Complex.I) 1) = 0 := by
+      show (∑ i : Bool, (if (1 : Equiv.Perm Bool) i = i then
+        (if i = true then Complex.I else -Complex.I) else 0)) = 0
+      rw [Fintype.sum_bool]
+      norm_num
+    rw [normTrace, htr, zero_div]
+  · have hall : (univ.filter fun y : Bool ↦ (1 : Equiv.Perm Bool) y = y)
+        = (univ : Finset Bool) := by decide
+    rw [fixedDensity, hall, Finset.card_univ,
+      show Fintype.card (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel).carrier
+        = 2 from rfl]
+    norm_num
+
 end NonsoficGroupsExist
