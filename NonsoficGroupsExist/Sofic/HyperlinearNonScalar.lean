@@ -1,7 +1,7 @@
 import NonsoficGroupsExist.Sofic.HyperlinearAmplification
 
 /-!
-# A class between sofic and hyperlinear
+# The unitary separation constant, and why it is not elementary
 
 `Sofic.HyperlinearAmplification` shows that the tensor-power argument which
 makes the sofic separation constant a convention does not transport to unitary
@@ -10,15 +10,15 @@ maximally separated with equal fourth tensor powers.  What survives is the
 conjugate double `A \otimes \bar A`, whose normalized trace is `|\tau(A)|^2`,
 and it amplifies exactly when the trace is bounded off the unit circle.
 
-That bound is a property a model may or may not have, so it names a class.
-Call a unitary model **non-scalar** when
+That bound is a property a model may or may not have.  Call a unitary model
+**non-scalar** when
 
   `|\tau(u_g u_h^*)|^2 \le 1 - \delta`   for distinct `g, h` in the test set,
 
 with `\delta` depending on the test set alone.  This is strictly more than the
 separation `2 - \eps` of `HyperlinearModel`, which controls only the *real
-part* of the trace and so tolerates `u_g u_h^* \approx \pm i`.  The two main
-theorems here place the resulting class:
+part* of the trace and so tolerates `u_g u_h^* \approx \pm i`.  Two theorems
+place the resulting condition:
 
 * `isHyperlinearNonScalar_of_isSofic` -- soficity gives non-scalar models,
   because the trace of a permutation matrix is the proportion of its fixed
@@ -31,14 +31,24 @@ So
 
   sofic  ==>  non-scalar hyperlinear  ==>  hyperlinear,
 
-and Pestov's Question 3.4 splits along the middle class: does hyperlinearity
-imply the non-scalar form, and does the non-scalar form imply soficity?  The
-phase collapse is exactly the obstruction to answering the first by the
-argument that answers the sofic analogue.
+and both inclusions are elementary.  The two classes in fact **coincide**, by
+Radulescu's theorem (Theorem 8.5 of Pestov's survey): a countable group is
+hyperlinear exactly when its group von Neumann algebra embeds into `R^omega`,
+and restricting a trace-preserving embedding to the group unitaries makes
+`tau(u_g) = 0` for `g` non-trivial, on the nose.
 
-The endpoint reading is `not_isSofic_of_not_isHyperlinearNonScalar`, which is a
-*weaker* hypothesis than refuting hyperlinearity outright and therefore an
-easier target: refuting the middle class already refutes soficity.
+What the two inclusions record is the proof-theoretic asymmetry that hides.
+On the permutation side the separation constant is made arbitrary by tensor
+amplification (`Sofic.SoficAmplification`).  Pestov's Remark 3.7 asserts the
+same refinement for the unitary characterization without proof, and
+`Sofic.HyperlinearAmplification` shows the amplification cannot supply it: the
+tensor power identifies unitaries differing by a root of unity.  The unitary
+refinement rests on the von Neumann algebra theorem; the elementary route
+available on the permutation side provably does not exist here.  What is
+elementary is exactly the two implications above.
+
+The endpoint reading `not_isSofic_of_not_isHyperlinearNonScalar` is recorded in
+the same form as the one in `Sofic.Hyperlinear`.
 -/
 
 namespace NonsoficGroupsExist

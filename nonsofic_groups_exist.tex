@@ -2023,8 +2023,8 @@ The trace defect \emph{is} the squared distance to the scalars.  Hence \(\abs{\t
 So the separation constant of Definition~\ref{def:sofic} is a convention outright, while its unitary counterpart is a convention relative to a scalar-freeness hypothesis on the model.  Nothing here decides whether the unitary conventions agree; what it does is remove the standard proof from the table and name what a replacement must supply.  The definition used in Remark~\ref{rem:hyperlinear} is the strong one, which is the one soficity implies, so the implication recorded there and the reading \(\neg\text{hyperlinear}\Rightarrow\neg\text{sofic}\) are unaffected.
 \end{remark}
 
-\begin{remark}[A class between the two]\label{rem:nonscalar}%
-\leanverified{\leanmod{Sofic/HyperlinearNonScalar}{permMatrixC_conjTranspose,normTrace_permMatrix,NonScalarModel,IsHyperlinearNonScalar,trivialNonScalarModel,isHyperlinearNonScalar_of_isSofic,isHyperlinearNonScalar_of_finite,isHyperlinear_of_isHyperlinearNonScalar,not_isSofic_of_not_isHyperlinearNonScalar,not_isHyperlinearNonScalar_of_not_isHyperlinear}\leanmod{Sofic/PhaseOrder}{re_pow_two,re_pow_three,re_pow_four,re_pow_max_ge,re_nonpos_of_pow_four_eq_one,re_nonpos_of_pow_three_eq_one}}%
+\begin{remark}[Why the unitary separation constant is harder than the permutation one]\label{rem:nonscalar}%
+\leanpartial{\leanmod{Sofic/HyperlinearNonScalar}{permMatrixC_conjTranspose,normTrace_permMatrix,NonScalarModel,IsHyperlinearNonScalar,trivialNonScalarModel,isHyperlinearNonScalar_of_isSofic,isHyperlinearNonScalar_of_finite,isHyperlinear_of_isHyperlinearNonScalar,not_isSofic_of_not_isHyperlinearNonScalar,not_isHyperlinearNonScalar_of_not_isHyperlinear}\leanmod{Sofic/PhaseOrder}{re_pow_two,re_pow_three,re_pow_four,re_pow_max_ge,re_nonpos_of_pow_four_eq_one,re_nonpos_of_pow_three_eq_one}}{Formalized: both inclusions, and the arithmetic on the unit circle.  Not formalized: Radulescu's theorem, quoted from the literature, which is what makes the two classes coincide.}%
 The hypothesis isolated in Remark~\ref{rem:phasecollapse} is a property a model either has or lacks, so it names a class.  Call a unitary model \emph{non-scalar} with constant \(\delta\) when \(\abs{\tau(u_gu_h^*)}^2\leq1-\delta\) for distinct \(g,h\) in the test set, and call a group non-scalar hyperlinear when every finite test set admits such models of every multiplicative accuracy, with \(\delta\) depending on the test set alone.  This asks more than Definition~\ref{def:sofic}'s unitary counterpart, which bounds only \(\Re\tau\) and so tolerates \(u_gu_h^*\approx\pm i\).  Both inclusions hold:
 \[
  \text{sofic}\ \Longrightarrow\ \text{non-scalar hyperlinear}\ \Longrightarrow\ \text{hyperlinear}.
@@ -2037,7 +2037,7 @@ Which scalars a strong model can produce is settled by arithmetic on the unit ci
 \]
 Writing \(x=\Re\zeta\), the four real parts are the Chebyshev polynomials \(x\), \(2x^2-1\), \(4x^3-3x\), \(8x^4-8x^2+1\), and the minimum of their maximum is \(\approx0.3106\), where the second and third cross at \(x\approx-0.8095\).  Four powers are needed and no fewer, and the exceptions are exactly the roots of unity of order at most four: if \(\zeta^3=1\) or \(\zeta^4=1\) with \(\zeta\neq1\) then \(\Re\zeta\leq0\), so \(-1\), \(\pm i\) and the primitive cube roots keep all their nontrivial powers in the closed left half plane.  Whether the propagation can be made uniform is open; what the arithmetic settles is that if it can, the surviving phases have order at most four, and the obstruction of Remark~\ref{rem:phasecollapse} is confined to small torsion.
 
-Question~3.4 therefore splits.  Does hyperlinearity imply the non-scalar form?  Does the non-scalar form imply soficity?  A positive answer to both is the positive answer to Question~3.4, and Remark~\ref{rem:phasecollapse} says the first half cannot be settled by the argument that settles its sofic analogue.  The split also sharpens the endpoint: refuting the middle class already refutes soficity, and is a weaker demand than refuting hyperlinearity.
+The two classes in fact coincide, but not for an elementary reason.  By Radulescu's theorem---Theorem~8.5 of \cite{Pestov08}, from \cite{Radulescu08}---a countable group is hyperlinear exactly when its group von Neumann algebra embeds into \(R^\omega\), and restricting a trace-preserving embedding to the group unitaries gives \(\tau(u_g)=\delta_{g,e}\) on the nose, hence non-scalar models with \(\delta\) as close to \(1\) as one likes.  What the two inclusions above record is the proof-theoretic asymmetry this hides.  On the permutation side the corresponding normalization is Theorem~3.5 of \cite{Pestov08}, whose separation constant \(1/4\) is made arbitrary by the amplification of Remark~\ref{rem:amplification}.  Remark~3.7 of \cite{Pestov08} asserts the same refinement for the unitary characterization of its Theorem~3.6, without proof---and Remark~\ref{rem:phasecollapse} shows that the amplification cannot supply it, since the tensor power identifies unitaries differing by a root of unity.  The unitary refinement rests on the von Neumann algebra theorem; the elementary route available on the permutation side provably does not exist on the unitary side.  What is elementary is exactly the two inclusions: soficity gives the trace normalization directly, because a permutation matrix cannot hide a phase, and the normalization amplifies back to full separation.
 \end{remark}
 
 \begin{remark}[Two compressors, one image]\label{rem:twocompressors}
@@ -2649,6 +2649,13 @@ J. Algebra \textbf{344} (2011), 172--183.
 V.~G. Pestov,
 \emph{Hyperlinear and sofic groups: a brief guide},
 Bull. Symbolic Logic \textbf{14} (2008), 449--480.
+
+\bibitem{Radulescu08}
+F.~R\u{a}dulescu,
+\emph{The von Neumann algebra of the non-residually finite Baumslag group
+\(\langle a,b\mid ab^3a^{-1}=b^2\rangle\) embeds into \(R^\omega\)},
+in: Hot topics in operator theory, Theta Ser. Adv. Math. \textbf{9},
+Theta, Bucharest, 2008, 173--185.
 
 \bibitem{Rabin58}
 M.~O. Rabin,
