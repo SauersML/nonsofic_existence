@@ -59,6 +59,7 @@ STATUS = {"verified": "formalized", "partial": "formalized in part",
 # reality in either direction, so wiring one of these into the endpoint chain
 # is a deliberate edit here rather than a silent change of meaning.
 CITED_OUTSIDE_AXIOM_REPORT = frozenset({
+    "CharacterCount",
     "ElementaryNoFiniteQuotients",
     "ExactCompression",
     "FiniteQuotientBlindness",

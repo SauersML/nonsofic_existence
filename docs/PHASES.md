@@ -167,6 +167,21 @@ model, the monomial matrices with the same permutation part and phases `1` and
 `−1` sit at the *maximal* Hilbert–Schmidt distance `4` while their permutation
 parts are equal (`hsDistSq_max_of_equal_perm`).
 
+`CharacterCount.lean` makes the graded version exact.  A projective model
+assembled from *all* the characters of `ℤ/n` untwists with defect
+
+    1 − gcd(n, α)/n
+
+(`hammingDistance_characterUntwist`), because `β_l` kills `α` exactly when
+`lα = 0`, and the annihilator of `α` has exactly `gcd(n, α)` elements
+(`card_annihilator` — the map `l ↦ lα` has image of order `n/gcd`, so Lagrange
+gives the kernel).  The two ends of that formula are the two readings: a datum
+invisible to almost every character costs almost nothing, and a datum that
+*generates* costs `1 − 1/n` (`hammingDistance_characterUntwist_generator`).
+Thom's microstates at level `p^k` are the generating case, so untwisting them
+destroys the model as `k` grows.  The obvious passage from his projective
+microstates to a sofic approximation fails, with a computed defect.
+
 The same file records why exact infeasibility proves nothing about robustness.
 `UV = c(VU)` forces `c^n = 1` by determinants, so for `c` not a root of unity the
 exact locus is empty at every dimension — one line, no rigidity — while the
