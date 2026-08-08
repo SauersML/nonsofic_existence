@@ -128,4 +128,48 @@ theorem re_nonpos_of_pow_three_eq_one {z : ℂ} (h3 : z ^ 3 = 1) (hne : z ≠ 1)
       nlinarith [sq_nonneg (z.re + 1 / 2)]
     · linarith
 
+/-! ## The constant is essentially optimal -/
+
+/-- **Sharpness.**  The bound `3/10` of `re_pow_max_ge` cannot be improved past
+`(√5 - 1)/4 ≈ 0.30902`: at the point where the second and third Chebyshev
+polynomials cross, `Re z = -(1+√5)/4`, the maximum of the first four real parts
+equals exactly that value.  The crossing is exact -- with `φ` the golden ratio
+and `x = -φ/2`, the identity `4x³ - 2x² - 3x + 1 = 0` follows from
+`φ² = φ + 1` -- which is why the extremum has a closed form.  (Observed by an
+external referee audit, August 2026.) -/
+theorem re_pow_max_sharp :
+    ∃ z : ℂ, Complex.normSq z = 1 ∧
+      max (max z.re ((z ^ 2).re)) (max ((z ^ 3).re) ((z ^ 4).re))
+        = (Real.sqrt 5 - 1) / 4 := by
+  set s : ℝ := Real.sqrt 5 with hsdef
+  have hs2 : s ^ 2 = 5 := Real.sq_sqrt (by norm_num)
+  have hs0 : (2 : ℝ) < s := by nlinarith [hs2, Real.sqrt_nonneg 5]
+  have hs3 : s < 3 := by nlinarith [hs2, Real.sqrt_nonneg 5]
+  set x : ℝ := -(1 + s) / 4 with hxdef
+  have hx2 : x ^ 2 = (3 + s) / 8 := by rw [hxdef]; nlinarith [hs2]
+  have hy0 : (0 : ℝ) ≤ (5 - s) / 8 := by linarith
+  set y : ℝ := Real.sqrt ((5 - s) / 8) with hydef
+  have hy2 : y ^ 2 = (5 - s) / 8 := Real.sq_sqrt hy0
+  refine ⟨⟨x, y⟩, ?_, ?_⟩
+  · rw [Complex.normSq_apply]
+    show x * x + y * y = 1
+    nlinarith [hx2, hy2]
+  · have hzre : (⟨x, y⟩ : ℂ).re = x := rfl
+    have hns : Complex.normSq (⟨x, y⟩ : ℂ) = 1 := by
+      rw [Complex.normSq_apply]
+      show x * x + y * y = 1
+      nlinarith [hx2, hy2]
+    have h2 : ((⟨x, y⟩ : ℂ) ^ 2).re = (s - 1) / 4 := by
+      rw [re_pow_two _ hns, hzre]
+      nlinarith [hx2]
+    have h3 : ((⟨x, y⟩ : ℂ) ^ 3).re = (s - 1) / 4 := by
+      rw [re_pow_three _ hns, hzre, hxdef]
+      nlinarith [hs2]
+    have h4 : ((⟨x, y⟩ : ℂ) ^ 4).re = -(1 + s) / 4 := by
+      rw [re_pow_four _ hns, hzre]
+      nlinarith [hx2, hs2]
+    rw [hzre, h2, h3, h4]
+    have hlt : -(1 + s) / 4 < (s - 1) / 4 := by linarith
+    rw [max_eq_right hlt.le, max_eq_left hlt.le, max_self]
+
 end NonsoficGroupsExist
