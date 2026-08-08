@@ -2208,6 +2208,19 @@ Group.FG ↥UniversalRankFour.Ambient ∧
   (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, (φ t)⁻¹ * q * φ t ∈ Subgroup.map φ Γ
 ```
 
+## `NonsoficGroupsExist.conjDouble`
+
+```lean
+{Y : Type u_1} → Matrix Y Y ℂ → Matrix (Y × Y) (Y × Y) ℂ
+```
+
+## `NonsoficGroupsExist.conjDouble_mul`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] (A B : Matrix Y Y ℂ),
+  conjDouble (A * B) = conjDouble A * conjDouble B
+```
+
 ## `NonsoficGroupsExist.countable_nonsofic_groups_exist`
 
 ```lean
@@ -2285,6 +2298,23 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {G : Type u_1} [inst : Group G] (H : Subgroup G),
   (∀ (g : G), (MulAction.toPermHom G (G ⧸ H)) g = 1) → H = ⊤
+```
+
+## `NonsoficGroupsExist.exists_conjDouble_separation`
+
+```lean
+∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
+  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
+      0 < Fintype.card Y.carrier →
+        ∀ {δ ε : ℝ},
+          0 < δ →
+            0 < ε →
+              Complex.normSq (normTrace Y (A * B.conjTranspose)) ≤ 1 - δ →
+                ∃ k,
+                  2 - ε ≤
+                    hsDistSq (tensorModel (doubleModel Y) k) (tensorPow (conjDouble A) k)
+                      (tensorPow (conjDouble B) k)
 ```
 
 ## `NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group`
@@ -2535,6 +2565,41 @@ CountableNonsoficGroupExists
 (Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → Matrix Y.carrier Y.carrier ℂ → ℝ
 ```
 
+## `NonsoficGroupsExist.hsDistSq_conjDoubleTensorPow`
+
+```lean
+∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
+  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
+      0 < Fintype.card Y.carrier →
+        ∀ (k : ℕ),
+          hsDistSq (tensorModel (doubleModel Y) k) (tensorPow (conjDouble A) k)
+              (tensorPow (conjDouble B) k) =
+            2 - 2 * Complex.normSq (normTrace Y (A * B.conjTranspose)) ^ k
+```
+
+## `NonsoficGroupsExist.hsDistSq_of_unitary`
+
+```lean
+∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
+  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
+      0 < Fintype.card Y.carrier →
+        hsDistSq Y A B = 2 - 2 * (normTrace Y (A * B.conjTranspose)).re
+```
+
+## `NonsoficGroupsExist.hsDistSq_tensorPow`
+
+```lean
+∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
+  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
+      0 < Fintype.card Y.carrier →
+        ∀ (k : ℕ),
+          hsDistSq (tensorModel Y k) (tensorPow A k) (tensorPow B k) =
+            2 - 2 * (normTrace Y (A * B.conjTranspose) ^ k).re
+```
+
 ## `NonsoficGroupsExist.involutionNormalize`
 
 ```lean
@@ -2655,6 +2720,34 @@ CountableNonsoficGroupExists
   ¬IsSofic G →
     (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
+```
+
+## `NonsoficGroupsExist.normSq_normTrace_le_one`
+
+```lean
+∀ (Y : FiniteModel) {A : Matrix Y.carrier Y.carrier ℂ},
+  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → Complex.normSq (normTrace Y A) ≤ 1
+```
+
+## `NonsoficGroupsExist.normTrace`
+
+```lean
+(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → ℂ
+```
+
+## `NonsoficGroupsExist.normTrace_conjDouble`
+
+```lean
+∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
+  normTrace (doubleModel Y) (conjDouble A) = ↑(Complex.normSq (normTrace Y A))
+```
+
+## `NonsoficGroupsExist.normTrace_tensorPow`
+
+```lean
+∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ) (k : ℕ),
+  normTrace (tensorModel Y k) (tensorPow A k) = normTrace Y A ^ k
 ```
 
 ## `NonsoficGroupsExist.not_isSofic_of_ambientDecomposition`
@@ -2788,6 +2881,48 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {G : Type u} [inst : Group G],
   IsSofic G → ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (TableModel G F ε)
+```
+
+## `NonsoficGroupsExist.tensorPow`
+
+```lean
+{Y : Type u_1} → Matrix Y Y ℂ → (k : ℕ) → Matrix (Fin k → Y) (Fin k → Y) ℂ
+```
+
+## `NonsoficGroupsExist.tensorPow_mul`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] (A B : Matrix Y Y ℂ) (k : ℕ),
+  tensorPow (A * B) k = tensorPow A k * tensorPow B k
+```
+
+## `NonsoficGroupsExist.tensorPow_phase_collapse`
+
+```lean
+∀ (Y : FiniteModel),
+  0 < Fintype.card Y.carrier →
+    Complex.I • 1 ∈ Matrix.unitaryGroup Y.carrier ℂ ∧
+      hsDistSq Y 1 (Complex.I • 1) = 2 ∧ tensorPow (Complex.I • 1) 4 = tensorPow 1 4
+```
+
+## `NonsoficGroupsExist.tensorPow_smul`
+
+```lean
+∀ {Y : Type u_1} (c : ℂ) (A : Matrix Y Y ℂ) (k : ℕ), tensorPow (c • A) k = c ^ k • tensorPow A k
+```
+
+## `NonsoficGroupsExist.trace_conjDouble`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] (A : Matrix Y Y ℂ),
+  (conjDouble A).trace = A.trace * (starRingEnd ℂ) A.trace
+```
+
+## `NonsoficGroupsExist.trace_tensorPow`
+
+```lean
+∀ {Y : Type u_1} [inst : Fintype Y] (A : Matrix Y Y ℂ) (k : ℕ),
+  (tensorPow A k).trace = A.trace ^ k
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL3_not_isSofic`
