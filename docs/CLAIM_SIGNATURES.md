@@ -2263,6 +2263,15 @@ Group.FG ↥UniversalRankFour.Ambient ∧
               ↑{y | σ y = y}.card + ε * ↑(Fintype.card Y.carrier)
 ```
 
+## `NonsoficGroupsExist.card_zero_class_ge_three`
+
+```lean
+∀ (n₀ n₁ n₂ E : ℝ),
+  0 ≤ E →
+    Complex.normSq (↑n₀ + ↑n₁ * cubeRoot + ↑n₂ * cubeRoot ^ 2) ≤ E ^ 2 →
+      n₀ + n₁ + n₂ ≤ 3 * n₀ + 3 * √2 * E
+```
+
 ## `NonsoficGroupsExist.charEval_add`
 
 ```lean
@@ -3385,15 +3394,6 @@ CountableNonsoficGroupExists
   (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
     normTrace Y (monomialMatrix Y d 1) = 0 ∧
       hammingDistance (wreathModel Y 2) (wreathPerm Y 2 e 1) 1 = 1 / 2
-```
-
-## `NonsoficGroupsExist.untwist_hamming_eq_one_of_phase_ne_zero`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier),
-  (∀ (y : Y.carrier), σ y = y → d y ≠ 0) →
-    0 < Fintype.card Y.carrier → hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 = 1
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
