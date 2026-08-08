@@ -68,6 +68,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "HyperlinearMetric",
     "HyperlinearNonScalar",
     "HyperlinearScalar",
+    "HyperlinearUltraproduct",
     "MonomialModel",
     "PhaseOrder",
     "PhasePropagation",

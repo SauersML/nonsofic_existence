@@ -2631,6 +2631,28 @@ CountableNonsoficGroupExists
   a ≠ b → hsDistSq Y (coordProjection Y a) (coordProjection Y b) = 2 / ↑(Fintype.card Y.carrier)
 ```
 
+## `NonsoficGroupsExist.hsLengthSq`
+
+```lean
+(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → ℝ
+```
+
+## `NonsoficGroupsExist.hsLengthSq_conjTranspose`
+
+```lean
+∀ (Y : FiniteModel) {u : Matrix Y.carrier Y.carrier ℂ},
+  u ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → hsLengthSq Y u.conjTranspose = hsLengthSq Y u
+```
+
+## `NonsoficGroupsExist.hsLengthSq_mul_le`
+
+```lean
+∀ (Y : FiniteModel) {u v : Matrix Y.carrier Y.carrier ℂ},
+  u ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → hsLengthSq Y (u * v) ≤ 2 * hsLengthSq Y u + 2 * hsLengthSq Y v
+```
+
 ## `NonsoficGroupsExist.hsNormSq`
 
 ```lean
@@ -2890,6 +2912,16 @@ CountableNonsoficGroupExists
 ```lean
 {ι : Type u_1} →
   Ultrafilter ι → (X : ι → FiniteModel) → Subgroup ((i : ι) → Equiv.Perm (X i).carrier)
+```
+
+## `NonsoficGroupsExist.nullUnitarySubgroup`
+
+```lean
+{ι : Type u_1} →
+  Ultrafilter ι →
+    (X : ι → FiniteModel) →
+      (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
+        Subgroup ((i : ι) → ↥(Matrix.unitaryGroup (X i).carrier ℂ))
 ```
 
 ## `NonsoficGroupsExist.ofReal_hsNormSq`
