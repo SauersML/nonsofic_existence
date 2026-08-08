@@ -35,9 +35,9 @@ recombine.  `hsDistSq_conjDoubleTensorPow` gives the exact law
   `hsDistSq ((A ⊗ Ā)^{⊗k}) ((B ⊗ B̄)^{⊗k}) = 2 - 2 |τ(A B*)|^{2k}`,
 
 and `exists_conjDouble_separation` turns any bound `|τ(A B*)|² ≤ 1 - δ` into
-separation `2 - ε`.  That hypothesis is not removable: `|τ(U)|² ≤ 1` always
-(`normSq_normTrace_le_one`), with equality for scalars, which is the phase
-collapse again.  So for unitary models the separation constant is a convention
+separation `2 - ε`.  That hypothesis is not removable: `|τ(U)|² ≤ 1` always, with equality exactly
+for scalars -- the phase collapse again.  `Sofic.HyperlinearScalar` proves both
+facts from one identity, `‖U - τ(U)·1‖² = 1 - |τ(U)|²`.  So for unitary models the separation constant is a convention
 *relative to a scalar-freeness hypothesis*, and not otherwise -- an asymmetry
 between the two sides of Pestov's Question 3.4 that the permutation picture
 hides.
@@ -410,41 +410,6 @@ theorem hsDistSq_conjDoubleTensorPow (Y : FiniteModel) {A B : Matrix Y Y ℂ}
   rw [hsDistSq_tensorPow (doubleModel Y) (conjDouble_mem_unitaryGroup hA)
     (conjDouble_mem_unitaryGroup hB) hYd k, hprod, normTrace_conjDouble,
     ← Complex.ofReal_pow, Complex.ofReal_re]
-
-/-! ## What the repair costs: the trace must be off the unit circle -/
-
-/-- `|z|² = ‖z‖ · ‖z‖`, in the form the estimates below want. -/
-theorem normSq_eq_norm_mul_norm (z : ℂ) : Complex.normSq z = ‖z‖ * ‖z‖ := by
-  have h : ‖z * (starRingEnd ℂ) z‖ = ‖z‖ * ‖z‖ := by
-    rw [norm_mul, Complex.norm_conj]
-  rw [Complex.mul_conj] at h
-  rw [← h, Complex.norm_real, Real.norm_eq_abs,
-    abs_of_nonneg (Complex.normSq_nonneg z)]
-
-/-- **The normalized trace of a unitary lies in the closed unit disc.**  So the
-hypothesis of `exists_conjDouble_separation` is the only strengthening
-available, and it fails exactly for scalars: the phase collapse again. -/
-theorem normSq_normTrace_le_one (Y : FiniteModel) {A : Matrix Y Y ℂ}
-    (hA : A ∈ Matrix.unitaryGroup Y ℂ) (hY : 0 < Fintype.card Y) :
-    Complex.normSq (normTrace Y A) ≤ 1 := by
-  have hcpos : (0 : ℝ) < (Fintype.card Y : ℝ) := by exact_mod_cast hY
-  have hdiag : ∀ i : Y, ‖A i i‖ ≤ 1 := by
-    intro i
-    have h := Finset.single_le_sum (f := fun j ↦ Complex.normSq (A i j))
-      (fun j _ ↦ Complex.normSq_nonneg _) (Finset.mem_univ i)
-    rw [row_normSq_of_unitary Y hA i] at h
-    rw [normSq_eq_norm_mul_norm] at h
-    nlinarith [norm_nonneg (A i i)]
-  have htr : ‖Matrix.trace A‖ ≤ (Fintype.card Y : ℝ) := by
-    calc ‖Matrix.trace A‖ = ‖∑ i : Y, A i i‖ := rfl
-      _ ≤ ∑ i : Y, ‖A i i‖ := norm_sum_le _ _
-      _ ≤ ∑ _i : Y, (1 : ℝ) := Finset.sum_le_sum fun i _ ↦ hdiag i
-      _ = (Fintype.card Y : ℝ) := by simp
-  have hnt : ‖normTrace Y A‖ ≤ 1 := by
-    rw [normTrace, norm_div, div_le_one (by simpa using hcpos)]
-    simpa using htr
-  rw [normSq_eq_norm_mul_norm]
-  nlinarith [norm_nonneg (normTrace Y A)]
 
 /-- **Conditional amplification.**  A trace bounded off the unit circle can be
 amplified to full separation `2 - ε`, by tensoring enough copies of the

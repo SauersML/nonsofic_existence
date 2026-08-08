@@ -2305,6 +2305,14 @@ CountableNonsoficGroupExists
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
 ```
 
+## `NonsoficGroupsExist.eq_smul_one_iff_normSq_normTrace_eq_one`
+
+```lean
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → (U = normTrace Y U • 1 ↔ Complex.normSq (normTrace Y U) = 1)
+```
+
 ## `NonsoficGroupsExist.eq_top_of_permHom_trivial`
 
 ```lean
@@ -2612,6 +2620,48 @@ CountableNonsoficGroupExists
             2 - 2 * (normTrace Y (A * B.conjTranspose) ^ k).re
 ```
 
+## `NonsoficGroupsExist.hsNormSq`
+
+```lean
+(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → ℝ
+```
+
+## `NonsoficGroupsExist.hsNormSq_add_le`
+
+```lean
+∀ (Y : FiniteModel) (A B : Matrix Y.carrier Y.carrier ℂ),
+  hsNormSq Y (A + B) ≤ 2 * hsNormSq Y A + 2 * hsNormSq Y B
+```
+
+## `NonsoficGroupsExist.hsNormSq_mul_left`
+
+```lean
+∀ (Y : FiniteModel) {V : Matrix Y.carrier Y.carrier ℂ},
+  V ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (V * A) = hsNormSq Y A
+```
+
+## `NonsoficGroupsExist.hsNormSq_sub_normTrace_smul`
+
+```lean
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      hsNormSq Y (U - normTrace Y U • 1) = 1 - Complex.normSq (normTrace Y U)
+```
+
+## `NonsoficGroupsExist.hsNormSq_sub_smul_one`
+
+```lean
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      ∀ (c : ℂ),
+        hsNormSq Y (U - c • 1) =
+          1 - 2 * ((starRingEnd ℂ) c * normTrace Y U).re + Complex.normSq c
+```
+
 ## `NonsoficGroupsExist.involutionNormalize`
 
 ```lean
@@ -2755,9 +2805,9 @@ CountableNonsoficGroupExists
 ## `NonsoficGroupsExist.normSq_normTrace_le_one`
 
 ```lean
-∀ (Y : FiniteModel) {A : Matrix Y.carrier Y.carrier ℂ},
-  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier → Complex.normSq (normTrace Y A) ≤ 1
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → Complex.normSq (normTrace Y U) ≤ 1
 ```
 
 ## `NonsoficGroupsExist.normTrace`
@@ -2829,6 +2879,20 @@ CountableNonsoficGroupExists
 ```lean
 {ι : Type u_1} →
   Ultrafilter ι → (X : ι → FiniteModel) → Subgroup ((i : ι) → Equiv.Perm (X i).carrier)
+```
+
+## `NonsoficGroupsExist.ofReal_hsNormSq`
+
+```lean
+∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
+  ↑(hsNormSq Y A) = normTrace Y (A * A.conjTranspose)
+```
+
+## `NonsoficGroupsExist.ofReal_sum_normSq`
+
+```lean
+∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
+  ↑(∑ i, ∑ j, Complex.normSq (A i j)) = (A * A.conjTranspose).trace
 ```
 
 ## `NonsoficGroupsExist.permMatrixC_conjTranspose`
