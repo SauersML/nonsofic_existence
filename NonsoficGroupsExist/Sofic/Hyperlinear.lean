@@ -222,4 +222,48 @@ converse of `isHyperlinear_of_isSofic` is Pestov's Question 3.4 and is open. -/
 theorem not_isSofic_of_not_isHyperlinear (h : ¬ IsHyperlinear G) : ¬ IsSofic G :=
   fun hs ↦ h (isHyperlinear_of_isSofic hs)
 
+/-! ## Hyperlinearity passes to subgroups
+
+Remark `rem:hyperlinear` argues that the nonsofic witness of Theorem~A is not a
+neutral test object for Question 3.4: it contains a copy of Thompson's `F`, and
+hyperlinearity passes to subgroups, so proving the witness hyperlinear would
+prove `F` hyperlinear -- a long-standing open problem.  That argument turns on
+the monotonicity, which is proved here.
+
+The proof is a restriction and nothing more.  An injective homomorphism carries
+a finite subset of the subgroup to a finite subset of the ambient group; a model
+there restricts along the map; multiplicativity transports because the map is a
+homomorphism, and separation transports because it is injective.
+-/
+
+/-- **A model restricts along an injective homomorphism.** -/
+noncomputable def HyperlinearModel.comap {H : Type*} [Group H] (ι : H →* G)
+    (hι : Function.Injective ι) (F : Finset H) {ε : ℝ} [DecidableEq G]
+    (M : HyperlinearModel G (F.image ι) ε) : HyperlinearModel H F ε where
+  carrier := M.carrier
+  nonempty := M.nonempty
+  map := fun h ↦ M.map (ι h)
+  isUnitary := fun h ↦ M.isUnitary (ι h)
+  multiplicative := by
+    intro g hg h hh
+    show hsDistSq M.carrier (M.map (ι (g * h))) (M.map (ι g) * M.map (ι h)) ≤ ε
+    rw [map_mul]
+    exact M.multiplicative (ι g) (Finset.mem_image_of_mem ι hg)
+      (ι h) (Finset.mem_image_of_mem ι hh)
+  separated := by
+    intro g hg h hh hne
+    exact M.separated (ι g) (Finset.mem_image_of_mem ι hg)
+      (ι h) (Finset.mem_image_of_mem ι hh) (fun hcon ↦ hne (hι hcon))
+
+/-- **Hyperlinearity passes to subgroups**, and more generally along any
+injective homomorphism.  This is the step Remark `rem:hyperlinear` uses to say
+that proving the nonsofic witness hyperlinear would prove Thompson's `F`
+hyperlinear. -/
+theorem isHyperlinear_of_injective {H : Type*} [Group H] (ι : H →* G)
+    (hι : Function.Injective ι) (hG : IsHyperlinear G) : IsHyperlinear H := by
+  classical
+  intro F ε hε
+  obtain ⟨M⟩ := hG (F.image ι) ε hε
+  exact ⟨HyperlinearModel.comap ι hι F M⟩
+
 end NonsoficGroupsExist

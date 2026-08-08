@@ -2936,10 +2936,11 @@ CountableNonsoficGroupExists
               1 - (fixedDensity Y σ - E / ↑(Fintype.card Y.carrier)) / 2
 ```
 
-## `NonsoficGroupsExist.isHyperlinear_of_finite`
+## `NonsoficGroupsExist.isHyperlinear_of_injective`
 
 ```lean
-∀ (G : Type) [inst : Group G] [Finite G], IsHyperlinear G
+∀ {G : Type u_1} [inst : Group G] {H : Type u_2} [inst_1 : Group H] (ι : H →* G),
+  Function.Injective ⇑ι → IsHyperlinear G → IsHyperlinear H
 ```
 
 ## `NonsoficGroupsExist.isHyperlinear_of_isSofic`
@@ -3187,13 +3188,6 @@ CountableNonsoficGroupExists
 ```lean
 ∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
   hsDistSq Y (Equiv.Perm.permMatrix ℂ σ) (Equiv.Perm.permMatrix ℂ τ) = 2 * hammingDistance Y σ τ
-```
-
-## `NonsoficGroupsExist.permMatrix_mem_unitaryGroup`
-
-```lean
-∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
-  Equiv.Perm.permMatrix ℂ σ ∈ Matrix.unitaryGroup Y.carrier ℂ
 ```
 
 ## `NonsoficGroupsExist.permMatrix_normalized_dist_sq_eq`
