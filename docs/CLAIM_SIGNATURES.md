@@ -707,6 +707,15 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
 ```
 
+## `NonsoficGroupsExist.Heis.commutator_generators`
+
+```lean
+∀ {R : Type u_1} [inst : CommRing R],
+  { a := 1, b := 0, c := 0 } * { a := 0, b := 1, c := 0 } * { a := 1, b := 0, c := 0 }⁻¹ *
+      { a := 0, b := 1, c := 0 }⁻¹ =
+    { a := 0, b := 0, c := 1 }
+```
+
 ## `NonsoficGroupsExist.Heis.commutator_mem_center`
 
 ```lean
