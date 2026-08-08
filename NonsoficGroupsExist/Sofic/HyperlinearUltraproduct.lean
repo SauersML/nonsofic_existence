@@ -441,4 +441,40 @@ theorem not_isNullUnitarySeq_negOne (hX : ∀ i, 0 < Fintype.card (X i)) :
   obtain ⟨_, hfalse⟩ := hev.exists
   exact hfalse
 
+/-- The constant sequence `-1` is central in the product of the unitary groups:
+a scalar commutes with every matrix, factorwise. -/
+theorem negOne_central (u : ∀ i, Matrix.unitaryGroup (X i) ℂ) :
+    (fun i ↦ (-1 : Matrix.unitaryGroup (X i) ℂ)) * u
+      = u * fun i ↦ (-1 : Matrix.unitaryGroup (X i) ℂ) := by
+  funext i
+  apply Subtype.ext
+  show (-1 : Matrix (X i) (X i) ℂ) * (u i : Matrix (X i) (X i) ℂ)
+    = (u i : Matrix (X i) (X i) ℂ) * (-1 : Matrix (X i) (X i) ℂ)
+  rw [neg_mul, mul_neg, one_mul, mul_one]
+
+/-- **The universal hyperlinear group has a nontrivial central element.**  The
+class of the constant sequence `-1` is central, because `-1` is scalar in every
+factor, and nontrivial, because that sequence is not null.  The corresponding
+statement for an ultraproduct of symmetric groups fails, by
+`eq_one_of_central_perm`: that is the root asymmetry of this development, stated
+in the vocabulary Question 3.4 is posed in. -/
+theorem exists_nontrivial_center_universalHyperlinear
+    (hX : ∀ i, 0 < Fintype.card (X i)) :
+    ∃ z : UniversalHyperlinear 𝒰 X hX,
+      z ∈ Subgroup.center (UniversalHyperlinear 𝒰 X hX) ∧ z ≠ 1 := by
+  classical
+  refine ⟨QuotientGroup.mk' (nullUnitarySubgroup 𝒰 X hX)
+    (fun i ↦ (-1 : Matrix.unitaryGroup (X i) ℂ)), ?_, ?_⟩
+  · rw [Subgroup.mem_center_iff]
+    intro y
+    refine QuotientGroup.induction_on y fun u ↦ ?_
+    show (QuotientGroup.mk' _ u) * (QuotientGroup.mk' _ _)
+      = (QuotientGroup.mk' _ _) * (QuotientGroup.mk' _ u)
+    rw [← map_mul, ← map_mul]
+    exact congrArg (QuotientGroup.mk' (nullUnitarySubgroup 𝒰 X hX))
+      (negOne_central (X := X) u).symm
+  · intro hone
+    rw [QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff] at hone
+    exact not_isNullUnitarySeq_negOne 𝒰 X hX hone
+
 end NonsoficGroupsExist

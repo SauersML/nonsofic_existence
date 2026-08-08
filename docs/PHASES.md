@@ -748,9 +748,10 @@ open rather than easy in either direction.
 Stated where the question actually lives — soficity and hyperlinearity are
 embeddability into `∏_𝒰 Sym` and `∏_𝒰 U` — the asymmetry says the universal
 hyperlinear group has a nontrivial central element.  The constant sequence `−1`
-is unitary, central in each factor, and not null, since `hsLengthSq(−1) = 4` at
-every index (`not_isNullUnitarySeq_negOne`); so its class is central and
-nontrivial.  The corresponding statement for `∏_𝒰 Sym` fails, by
+is unitary, central in each factor (`negOne_central`), and not null, since
+`hsLengthSq(−1) = 4` at every index (`not_isNullUnitarySeq_negOne`); so its class
+is central and nontrivial — both halves proved, in
+`exists_nontrivial_center_universalHyperlinear`.  The corresponding statement for `∏_𝒰 Sym` fails, by
 `eq_one_of_central_perm`.  That is the reason the two ultraproducts are not
 obviously the same object — and, by the semiregularity above, not a reason they
 differ.
