@@ -2563,6 +2563,16 @@ CountableNonsoficGroupExists
   hammingDistance Y σ⁻¹ τ⁻¹ = hammingDistance Y σ τ
 ```
 
+## `NonsoficGroupsExist.hammingDistance_le_hsDistSq_monomial`
+
+```lean
+∀ (Y : FiniteModel) {d e : Y.carrier → ℂ},
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
+    (∀ (i : Y.carrier), Complex.normSq (e i) = 1) →
+      ∀ (σ τ : Equiv.Perm Y.carrier),
+        2 * hammingDistance Y σ τ ≤ hsDistSq Y (monomialMatrix Y d σ) (monomialMatrix Y e τ)
+```
+
 ## `NonsoficGroupsExist.hammingDistance_powerPerm`
 
 ```lean
@@ -2815,6 +2825,35 @@ CountableNonsoficGroupExists
 ℝ → ℝ → ℝ
 ```
 
+## `NonsoficGroupsExist.monomialMatrix`
+
+```lean
+(Y : FiniteModel) → (Y.carrier → ℂ) → Equiv.Perm Y.carrier → Matrix Y.carrier Y.carrier ℂ
+```
+
+## `NonsoficGroupsExist.monomialMatrix_mem_unitaryGroup`
+
+```lean
+∀ (Y : FiniteModel) {d : Y.carrier → ℂ},
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
+    ∀ (σ : Equiv.Perm Y.carrier), monomialMatrix Y d σ ∈ Matrix.unitaryGroup Y.carrier ℂ
+```
+
+## `NonsoficGroupsExist.monomialMatrix_one`
+
+```lean
+∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
+  monomialMatrix Y (fun x => 1) σ = Equiv.Perm.permMatrix ℂ σ
+```
+
+## `NonsoficGroupsExist.monomial_normTrace_zero_of_identity`
+
+```lean
+∃ Y d,
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
+    hammingDistance Y 1 1 = 0 ∧ normTrace Y (monomialMatrix Y d 1) = 0
+```
+
 ## `NonsoficGroupsExist.no_soficEmbedding_of_not_isSofic`
 
 ```lean
@@ -2837,6 +2876,15 @@ CountableNonsoficGroupExists
 ∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
   U ∈ Matrix.unitaryGroup Y.carrier ℂ →
     0 < Fintype.card Y.carrier → Complex.normSq (normTrace Y U) ≤ 1
+```
+
+## `NonsoficGroupsExist.normSq_normTrace_monomial_le`
+
+```lean
+∀ (Y : FiniteModel) {d : Y.carrier → ℂ},
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
+    ∀ (σ : Equiv.Perm Y.carrier),
+      Complex.normSq (normTrace Y (monomialMatrix Y d σ)) ≤ (1 - hammingDistance Y σ 1) ^ 2
 ```
 
 ## `NonsoficGroupsExist.normTrace`

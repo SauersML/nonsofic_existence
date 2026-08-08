@@ -67,6 +67,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "HyperlinearMetric",
     "HyperlinearNonScalar",
     "HyperlinearScalar",
+    "MonomialModel",
     "PhaseOrder",
     "CommutantRigidity",
     "KunSpectralCounterexample",

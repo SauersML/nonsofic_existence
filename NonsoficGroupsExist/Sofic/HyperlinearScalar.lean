@@ -351,4 +351,21 @@ theorem normSq_normTrace_le_hsNormSq (Y : FiniteModel) (C : Matrix Y Y ℂ) :
     _ = (∑ i : Y, ∑ j : Y, Complex.normSq (C i j)) / (Fintype.card Y : ℝ) := by
         field_simp
 
+
+/-- Cauchy--Schwarz for a complex sum: `|∑ f|² ≤ |s| · ∑ |f|²`. -/
+theorem normSq_sum_le_card_mul_sum_normSq {ι : Type*} (s : Finset ι)
+    (f : ι → ℂ) :
+    Complex.normSq (∑ i ∈ s, f i)
+      ≤ (s.card : ℝ) * ∑ i ∈ s, Complex.normSq (f i) := by
+  have hre := sq_sum_le_card_mul_sum_sq s fun i ↦ (f i).re
+  have him := sq_sum_le_card_mul_sum_sq s fun i ↦ (f i).im
+  have hsre : (∑ i ∈ s, f i).re = ∑ i ∈ s, (f i).re := Complex.re_sum _ _
+  have hsim : (∑ i ∈ s, f i).im = ∑ i ∈ s, (f i).im := Complex.im_sum _ _
+  have hsplit : (∑ i ∈ s, Complex.normSq (f i))
+      = (∑ i ∈ s, (f i).re ^ 2) + ∑ i ∈ s, (f i).im ^ 2 := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun i _ ↦ by rw [Complex.normSq_apply]; ring
+  rw [Complex.normSq_apply, hsre, hsim, hsplit]
+  nlinarith [hre, him]
+
 end NonsoficGroupsExist
