@@ -15,6 +15,7 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
 
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\N}{\mathbb{N}}
@@ -876,13 +877,98 @@ belong to the six-leaf groups just obtained. Interchanging $a$ and $b$ also give
 Proposition~3.2 shows that $\Gamma\leq G$, $J=V_{1000}$, $t_1=u$, and $t_2=v$ satisfy the hypotheses of Proposition~2.3. If $G$ were sofic, Proposition~2.3 would make $J$ LEF, which it is not. Therefore $G$ is not sofic. Since $G\leq R^\times$ and soficity passes to subgroups, $R^\times$ is not sofic either.
 \end{proof}
 
+\section{Consequences}
+
+The group $G$ of Theorem~1.1 is finitely generated, and $R^\times$ is countable. This section records what follows: a finitely presented nonsofic group, negative answers to two further questions from Pestov's survey \cite{Pes08}, undecidability of soficity, and a combination with subsequent work.
+
+For a countable group $H$, a finite subset $F\subseteq H$ with $1\in F$, and $\varepsilon>0$, an \emph{$(F,\varepsilon)$-model} of $H$ is a map $\varphi:F\cup F\!\cdot\!F\to\Sym(Y)$, with $Y$ finite and nonempty, such that
+\[
+d_H\bigl(\varphi(g)\varphi(h),\varphi(gh)\bigr)\leq\varepsilon\quad(g,h\in F),
+\qquad
+d_H\bigl(\varphi(g),\varphi(h)\bigr)\geq1-\varepsilon\quad(g\neq h\text{ in }F).
+\]
+A sofic approximation restricts to $(F,\varepsilon)$-models for every $F$ and $\varepsilon$. The converse assembles models into an approximation:
+
+\begin{lemma}
+Let $H$ be a countable group. If $H$ admits an $(F,\varepsilon)$-model for every finite $F\ni1$ and every $\varepsilon>0$, then $H$ is sofic.
+\end{lemma}
+
+\begin{proof}
+Enumerate $H=\{h_1,h_2,\dots\}$ and set $F_n=\{1,h_1,\dots,h_n\}$. Choose an $(F_n,1/n)$-model $\varphi_n$ on $Y_n$, and define $p_n(g)=\varphi_n(1)^{-1}\varphi_n(g)$ for $g\in F_n\cup F_n\!\cdot\!F_n$ and $p_n(g)=1$ otherwise. Then $p_n(1)=1$. Fix $g,h\in H$. For $n$ large enough that $g,h\in F_n$, left invariance of $d_H$ gives
+\[
+d_H\bigl(p_n(g)p_n(h),p_n(gh)\bigr)
+\leq d_H\bigl(\varphi_n(g)\varphi_n(1)^{-1}\varphi_n(h),\varphi_n(g)\varphi_n(h)\bigr)
++d_H\bigl(\varphi_n(g)\varphi_n(h),\varphi_n(gh)\bigr)\leq\frac2n,
+\]
+where the first summand equals $d_H(\varphi_n(1)\varphi_n(h),\varphi_n(h))\leq1/n$ by the model inequality for the pair $(1,h)$, and the second is the model inequality for $(g,h)$. For $g\neq1$ and $n$ large, $d_H(p_n(g),1)=d_H(\varphi_n(g),\varphi_n(1))\geq1-1/n$. Thus the maps $p_n$ form a sofic approximation of $H$.
+\end{proof}
+
+\begin{proposition}
+Let $G_0$ be a finitely generated group that is not sofic. Then there are an infinite finitely presented group $H$ that is not sofic and a surjection $H\twoheadrightarrow G_0$.
+\end{proposition}
+
+\begin{proof}
+Finite groups are sofic, so $G_0$ is infinite. By Lemma~4.1 there are a finite $F\ni1$ and an $\varepsilon_0>0$ such that $G_0$ admits no $(F,\varepsilon_0)$-model. A model for a larger set restricts to a model for a smaller one, so we may enlarge $F$ and assume that $F$ is symmetric and generates $G_0$. Define the finitely presented group
+\[
+H=\bigl\langle\,x_g\ (g\in F\cup F\!\cdot\!F)\ \big|\ x_1=1,\ x_gx_h=x_{gh}\ (g,h\in F)\,\bigr\rangle.
+\]
+The assignments $x_g\mapsto g$ satisfy the relations in $G_0$, and $F$ generates $G_0$, so there is a surjection $\pi:H\twoheadrightarrow G_0$ with $\pi(x_g)=g$. In particular $H$ is infinite, and $x_g\neq x_h$ in $H$ for distinct $g,h\in F\cup F\!\cdot\!F$.
+
+Suppose $H$ were sofic, with sofic approximation $\sigma_n:H\to\Sym(Y_n)$, and set $\varphi_n(g)=\sigma_n(x_g)$. For $g,h\in F$, the relation $x_gx_h=x_{gh}$ holds in $H$, so $d_H(\varphi_n(g)\varphi_n(h),\varphi_n(gh))\to0$. For distinct $g,h\in F$, the element $x_gx_h^{-1}\neq1$ of $H$ gives, by right invariance of $d_H$ and asymptotic multiplicativity,
+\[
+d_H\bigl(\varphi_n(g),\varphi_n(h)\bigr)\geq d_H\bigl(\sigma_n(x_gx_h^{-1}),1\bigr)-o(1)\to1.
+\]
+Hence for $n$ large, $\varphi_n$ is an $(F,\varepsilon_0)$-model of $G_0$: both conditions refer only to the multiplication table of $F$, which is copied faithfully by the generators of $H$. This contradicts the choice of $(F,\varepsilon_0)$. Therefore $H$ is not sofic.
+\end{proof}
+
+\begin{corollary}
+There is an infinite finitely presented group that is not sofic. In particular the sofic half of \cite[Open Question~4.11]{Pes08}, which asks whether every finitely presented group is hyperlinear (sofic), has a negative answer. The hyperlinear half remains open.
+\end{corollary}
+
+\begin{proof}
+Apply Proposition~4.2 to the finitely generated nonsofic group $G$ of Theorem~1.1.
+\end{proof}
+
+The obstruction $(F,\varepsilon_0)$, and with it the presentation of $H$, is obtained existentially; the argument does not compute either.
+
+\begin{corollary}
+There is a countable group that admits no essentially free near action on a set equipped with a finitely additive probability measure defined on all of its subsets. This answers \cite[Open Question~5.3]{Pes08} in the negative.
+\end{corollary}
+
+\begin{proof}
+By the Elek--Szab\'o characterization \cite{ES05}, stated as \cite[Theorem~5.2]{Pes08}, a group admits such a near action if and only if it is sofic. The countable group $R^\times$ of Theorem~1.1 is not sofic.
+\end{proof}
+
+The statement rules out essentially free near actions carrying finitely additive probability measures defined on every subset; it makes no assertion about ordinary free probability-measure-preserving actions on standard probability spaces.
+
+\begin{corollary}
+No algorithm decides, from a finite presentation, whether the presented group is sofic.
+\end{corollary}
+
+\begin{proof}
+Soficity is a Markov property of finitely presented groups: the trivial group is sofic, and the finitely presented nonsofic group of Corollary~4.3 embeds into no sofic group, because soficity passes to subgroups. The Adian--Rabin theorem \cite{Adi55,Rab58} concludes.
+\end{proof}
+
+The same deduction is available from any finitely presented nonsofic group, in particular from the torsion-free groups of Fournier-Facio \cite{FF26}, though it is not recorded there; we are not aware of the statement appearing elsewhere.
+
+\subhead{Combinations with subsequent work}
+Alekseev and Thom prove that if a nonsofic group exists, then some hyperbolic group admits a nonsofic probability-measure-preserving action \cite[Corollary~E]{AT25}: the Belegradek--Osin variation of the Rips construction embeds a finitely presented witness into a suitable extension of a hyperbolic group, and a quasi-regular Bernoulli action carries the obstruction. Theorem~1.1 and Corollary~4.3 discharge the hypothesis: \emph{there is a hyperbolic group admitting a nonsofic p.m.p.\ action}. The conditional implication is entirely theirs; this paper supplies the previously missing nonsofic group.
+
+Separately, Kun and Thom prove that generalized Bernoulli actions over compressed coset spaces of suitable residually finite Kazhdan pairs are nonsofic \cite{KuT26}---nonsofic actions of \emph{sofic} groups, answering a question of P\u{a}unescu in the negative. That result is independent of the hyperbolic corollary above, and neither subsumes the other.
+
 \subhead{Acknowledgments.}
 We thank Henry Bradford, Michael Chapman, Alon Dogon, and Francesco Fournier-Facio for helpful comments on the manuscript.
 
 \begin{thebibliography}{BCLV24}
 
+\bibitem[Adi55]{Adi55}
+S. I. Adian, \emph{Algorithmic unsolvability of problems of recognition of certain properties of groups}, Dokl. Akad. Nauk SSSR 103 (1955), 533--535.
+
 \bibitem[AL07]{AL07}
 D. Aldous and R. Lyons, \emph{Processes on unimodular random networks}, Electron. J. Probab. 12 (2007), 1454--1508, \url{arXiv:math/0603062}.
+
+\bibitem[AT25]{AT25}
+V. Alekseev and A. Thom, \emph{Remarks on approximability and stability for groups}, preprint, 2025, \url{arXiv:2512.15494}.
 
 \bibitem[BQ17]{BQ17}
 C. Bleak and M. Quick, \emph{The infinite simple group $V$ of Richard J. Thompson: presentations by permutations}, Groups Geom. Dyn. 11 (2017), 1401--1436, \url{arXiv:1511.02123}.
@@ -929,6 +1015,9 @@ G. Elek and E. Szabó, \emph{On sofic groups}, J. Group Theory 9 (2006), 161--17
 \bibitem[EJ10]{EJ10}
 M. Ershov and A. Jaikin-Zapirain, \emph{Property (T) for noncommutative universal lattices}, Invent. Math. 179 (2010), 303--347, \url{arXiv:0809.4095}.
 
+\bibitem[FF26]{FF26}
+F. Fournier-Facio, \emph{A torsion-free non-sofic group}, preprint, 2026, \url{arXiv:2608.02025}.
+
 \bibitem[Gel18]{Gel18}
 T. Gelander, \emph{A view on invariant random subgroups and lattices}, in \emph{Proceedings of the International Congress of Mathematicians---Rio de Janeiro 2018}, vol. II, World Scientific, 2018, 1339--1362, \url{arXiv:1807.06979}.
 
@@ -953,6 +1042,9 @@ G. Kun, \emph{On sofic approximations of property (T) groups}, preprint, 2019, \
 \bibitem[KT19]{KT19}
 G. Kun and A. Thom, \emph{Inapproximability of actions and Kazhdan's property (T)}, preprint, 2019, \url{arXiv:1901.03963}.
 
+\bibitem[KuT26]{KuT26}
+G. Kun and A. Thom, \emph{Nonsofic wreath products of residually finite groups}, preprint, 2026, \url{arXiv:2608.06222}.
+
 \bibitem[Lea62]{Lea62}
 W. G. Leavitt, \emph{The module type of a ring}, Trans. Amer. Math. Soc. 103 (1962), 113--130, \url{doi:10.1090/S0002-9947-1962-0132764-X}.
 
@@ -964,6 +1056,9 @@ M. Nitsche and A. Thom, \emph{Universal solvability of group equations}, J. Grou
 
 \bibitem[Pes08]{Pes08}
 V. G. Pestov, \emph{Hyperlinear and sofic groups: A brief guide}, Bull. Symbolic Logic 14 (2008), 449--480, \url{arXiv:0804.3968}.
+
+\bibitem[Rab58]{Rab58}
+M. O. Rabin, \emph{Recursive unsolvability of group theoretic problems}, Ann. of Math. (2) 67 (1958), 172--194.
 
 \bibitem[Tho08]{Tho08}
 A. Thom, \emph{Sofic groups and diophantine approximation}, Comm. Pure Appl. Math. 61 (2008), 1155--1171, \url{arXiv:math/0701294}.
