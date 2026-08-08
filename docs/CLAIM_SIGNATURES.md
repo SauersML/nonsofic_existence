@@ -2522,13 +2522,6 @@ CountableNonsoficGroupExists
                         Diverges fun n => size n (sel n)
 ```
 
-## `NonsoficGroupsExist.exists_shift_fixed_ge`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [NeZero m] (d : Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
-  ∃ c, ↑{y | σ y = y}.card ≤ ↑m * ↑{y | σ y = y ∧ d y = c}.card
-```
-
 ## `NonsoficGroupsExist.exists_shift_hamming_le`
 
 ```lean
@@ -2585,12 +2578,6 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {α : Type u_1} (rels : Finset (FreeGroup α)),
   IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
-```
-
-## `NonsoficGroupsExist.fixedDensity`
-
-```lean
-(Y : FiniteModel) → Equiv.Perm Y.carrier → ℝ
 ```
 
 ## `NonsoficGroupsExist.fixedSet`
@@ -2831,6 +2818,20 @@ CountableNonsoficGroupExists
 
 ```lean
 {Y : Type u_1} → [DecidableEq Y] → Equiv.Perm Y → Equiv.Perm Y
+```
+
+## `NonsoficGroupsExist.involution_untwist_hamming_le`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier) {c : ZMod m},
+  c ≠ 0 →
+    (∀ (y : Y.carrier), σ y = y → d y = 0 ∨ d y = c) →
+      ∀ {E : ℝ},
+        ↑{y | σ y = y ∧ d y = c}.card - ↑{y | σ y = y ∧ d y = 0}.card ≤ E →
+          0 < Fintype.card Y.carrier →
+            hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 ≤
+              1 - (fixedDensity Y σ - E / ↑(Fintype.card Y.carrier)) / 2
 ```
 
 ## `NonsoficGroupsExist.isHyperlinear_of_finite`
@@ -3126,6 +3127,14 @@ CountableNonsoficGroupExists
       ∃ b,
         (∀ (g : G) (y : Y), |b g y| ≤ 1 / 6) ∧
           ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
+```
+
+## `NonsoficGroupsExist.phase_two_torsion`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) (d e : Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
+  (∀ (y : Y.carrier), e y = d (σ y) + d y) →
+    (∀ (y : Y.carrier), e y = 0) → ∀ (y : Y.carrier), σ y = y → 2 * d y = 0
 ```
 
 ## `NonsoficGroupsExist.pow_card_eq_one_of_scalarCommute`
