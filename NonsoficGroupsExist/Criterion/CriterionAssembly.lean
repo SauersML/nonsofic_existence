@@ -51,7 +51,19 @@ below asks for the ambient decomposition directly and never mentions ambient
 theorem supplies it.  This matters because the ambient hypothesis is exactly
 the one the follow-up literature asks about: whether a compression obstruction
 needs the ambient group to be Kazhdan, or only needs its approximations to
-decompose.  The answer here is the second. -/
+decompose.  The answer here is the second.
+
+Two honest caveats about how much that buys.  First, the per-approximation
+form `isLEF_of_ambientDecomposition` is genuinely weaker: it asks for a
+decomposition of the *one* approximation at hand.  Second, the nonsoficity
+endpoint quantifies over *all* approximations of `G`, and whether that
+quantified property is strictly weaker than `(T)` is **not settled here**.
+Kun's theorem gives `(T)` implies it; the converse is not proved in this
+development and, as far as the sources cited go, is not known -- Kun's
+four-way equivalence is a statement about sequences of graphs, not about
+groups.  What is established is the direction of dependence: the proof
+consumes the decomposition and nothing else about the ambient group, so any
+future sufficient condition for the decomposition slots in unchanged. -/
 
 /-- **The criterion without ambient `(T)`.**  Only the ambient *decomposition*
 is required; the ambient group itself need not be Kazhdan.  Property `(T)` of
