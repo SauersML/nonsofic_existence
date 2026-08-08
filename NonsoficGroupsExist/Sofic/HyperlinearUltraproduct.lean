@@ -90,6 +90,27 @@ theorem hsLengthSq_conjTranspose (Y : FiniteModel) {u : Matrix Y Y ℂ}
     hsLengthSq]
   norm_num
 
+/-- **The identity that makes the quotient metric the model metric**, the exact
+counterpart of `hammingLength_inv_mul` on the permutation side: for unitary `w`,
+the length of `w* v` is the squared distance from `v` to `w`.  So the metric the
+ultraproduct carries is the one the models are measured in, and the null
+subgroup is exactly the sequences that converge to the identity in it. -/
+theorem hsLengthSq_conjTranspose_mul (Y : FiniteModel) {v w : Matrix Y Y ℂ}
+    (hw : w ∈ Matrix.unitaryGroup Y ℂ) (hY : 0 < Fintype.card Y) :
+    hsLengthSq Y (wᴴ * v) = hsDistSq Y v w := by
+  have hww : wᴴ * w = 1 := by
+    have h := hw
+    rw [Matrix.mem_unitaryGroup_iff', Matrix.star_eq_conjTranspose] at h
+    exact h
+  have hwmem : wᴴ ∈ Matrix.unitaryGroup Y ℂ := by
+    rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose,
+      Matrix.conjTranspose_conjTranspose]
+    exact hww
+  have hsplit : wᴴ * v - 1 = wᴴ * (v - w) := by
+    rw [Matrix.mul_sub, hww]
+  rw [hsLengthSq, hsplit, hsNormSq_mul_left Y hwmem hY]
+  rfl
+
 /-! ## The null subgroup -/
 
 variable {ι : Type*} (𝒰 : Ultrafilter ι) (X : ι → FiniteModel)

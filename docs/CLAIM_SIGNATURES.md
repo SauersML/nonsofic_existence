@@ -2646,12 +2646,12 @@ CountableNonsoficGroupExists
     0 < Fintype.card Y.carrier → hsLengthSq Y (t * u * t.conjTranspose) = hsLengthSq Y u
 ```
 
-## `NonsoficGroupsExist.hsLengthSq_mul_le`
+## `NonsoficGroupsExist.hsLengthSq_conjTranspose_mul`
 
 ```lean
-∀ (Y : FiniteModel) {u v : Matrix Y.carrier Y.carrier ℂ},
-  u ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier → hsLengthSq Y (u * v) ≤ 2 * hsLengthSq Y u + 2 * hsLengthSq Y v
+∀ (Y : FiniteModel) {v w : Matrix Y.carrier Y.carrier ℂ},
+  w ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → hsLengthSq Y (w.conjTranspose * v) = hsDistSq Y v w
 ```
 
 ## `NonsoficGroupsExist.hsNormSq`
