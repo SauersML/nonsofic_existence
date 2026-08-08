@@ -2075,13 +2075,12 @@ So a small trace is \emph{permitted} by many fixed points and never \emph{caused
 Requiring the phases to be multiplicative \emph{combinatorially}, agreeing as elements of \(\Z/m\) outside a small set, therefore adds nothing at all to soficity.  What the open question is about is the \emph{metric} alternative, in which nearby phases count as equal; and the two prices of a scalar below say exactly how far apart those two demands are.
 
 Removal is always available as a \emph{construction}, and its price is exact.  Phases valued in \(\Z/m\) are absorbed by a second coordinate: \((y,j)\mapsto(\sigma y,\,j+d(y))\) is an honest permutation of \(Y\times\Z/m\), the standard embedding of \((\Z/m)^Y\rtimes\Sym(Y)\) into \(\Sym(Y\times\Z/m)\).  Under it,
-\[
+\begin{align*}
  \distH\bigl(\widetilde{(d,\sigma)},\widetilde{(e,\tau)}\bigr)
- =\frac{\abs{\set{y\suchthat\sigma y\ne\tau y\ \text{or}\ d(y)\ne e(y)}}}{\abs Y},
- \qquad
+ &=\frac{\abs{\set{y\suchthat\sigma y\ne\tau y\ \text{or}\ d(y)\ne e(y)}}}{\abs Y},\\
  \distH\bigl(\widetilde{(d,\sigma)},1\bigr)
- =1-\frac{\abs{\set{y\suchthat\sigma y=y\ \text{and}\ d(y)=0}}}{\abs Y}.
-\]
+ &=1-\frac{\abs{\set{y\suchthat\sigma y=y\ \text{and}\ d(y)=0}}}{\abs Y}.
+\end{align*}
 The second identity is what a sofic model needs, and it says the separation is scarcity of \emph{trivially phased} fixed points: cancellation among the phases, which is what makes a monomial trace small while moving nothing, buys exactly nothing after untwisting.  The first is the price: a phase difference invisible to the Hilbert--Schmidt metric---two nearby roots of unity---is fully visible in Hamming.  So untwisting trades a metric defect for a combinatorial one, and the two identities say precisely what must be traded.  A scalar factor is the extreme case: it leaves the permutation part untouched and changes every phase, so it costs the whole of \(Y\)---which is Remark~\ref{rem:phasecollapse} again, in the monomial category.
 \end{remark}
 
