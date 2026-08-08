@@ -88,6 +88,7 @@ the print.
 | `rem:norounding` | formalized | `Sofic/NoRounding` †: `circle_map_eq_zero`, `additiveRounding_no_separation`, `roundMod_not_additive`, `no_pointwise_rounding` |  |
 | `rem:phasecorrection` | formalized | `Sofic/PhaseCorrection` †: `phaseCorrection_eq`, `phase_correctable_of_small`, `window_defect_eq`, `abs_window_defect_le` |  |
 | `rem:scalarclass` | formalized | `Sofic/ScalarClass` †: `isScalarCocycle_scalarPart`, `abs_scalarPart_le`, `scalarPart_phaseCob`, `scalarClass_obstructs` |  |
+| `rem:ratchar` | formalized | `Sofic/RationalCharacter` †: `charEval_add`, `ratChar_add`, `ratChar_eq_div`, `exists_ratChar_close` |  |
 | `rem:coordtransfer` | formalized | `Sofic/CoordinateTransfer` †: `OrbitChartData`, `trivialOrbitChartData`, `OrbitChartData.comap`, `lampEmbedding_injective` |  |
 | `rem:implementer` | formalized | `Sofic/ImplementerCocycle` †: `implementerCocycle`, `implementerCocycle_twisted`, `correctedImplementer_defect`, `hsDistSq_orthogonal_rankOne` |  |
 | `rem:finiteblind` | formalized | `Criterion/FiniteQuotientBlindness` †: `compressedImage_le`, `compressedImage_eq`, `compressorImage_normalizes`, `compressorImage_normalizes_inv` |  |

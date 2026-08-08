@@ -2160,6 +2160,21 @@ What this does not supply is a group whose class is non-vanishing \emph{and} for
 \end{remark}
 
 \clearpage
+\begin{remark}[Rounding a character, where rounding a circle failed]\label{rem:ratchar}%
+\leanverified{\leanmod{Sofic/RationalCharacter}{charEval_add,ratChar_add,ratChar_eq_div,exists_ratChar_close}}%
+Remark~\ref{rem:norounding} invites a misreading, and it should be corrected here rather than left standing.  That no pointwise rule turns circle-valued phases into \(\mu_m\)-valued ones does \emph{not} mean the restriction to \(m\)-th roots of unity in the criterion above is itself an obstacle.  The failure there is a failure of \emph{freeness}, not of fineness.  A homomorphism out of the circle is pinned down everywhere by divisibility; a homomorphism out of a free abelian group is pinned down by nothing at all, since its values on a basis may be chosen arbitrarily and any choice extends.
+
+Once the phases are exactly multiplicative---which is what a correction buys---their values on a finite window form a character of a finitely generated free abelian group, and such a character \emph{can} be rounded, multiplicatively and to finite order.  A real character of \(\Z^r\) is \(n\mapsto\sum_i n_ia_i\); replacing each \(a_i\) by \(\operatorname{round}(qa_i)/q\) gives a character with values in \(\tfrac1q\Z\), still a homomorphism on the nose, and
+\[
+ \Bigl|\,\textstyle\sum_i n_i\tfrac{\operatorname{round}(qa_i)}{q}-\sum_i n_ia_i\Bigr|
+ \ \leq\ \frac{\sum_i\abs{n_i}}{2q}.
+\]
+On coefficients bounded by \(N\)---and a finite window over a finite model supplies exactly such a bound---taking \(q\) large makes the agreement as tight as one likes.
+
+So the \(\R/\Z\) versus \(\mu_m\) distinction is not where the difficulty lives, and the criterion loses nothing by demanding finite order.  What remains hard is what Remarks~\ref{rem:phasecorrection} and~\ref{rem:scalarclass} isolate---obtaining exact multiplicativity at all---and the separation of the untwisted model, which no amount of rounding addresses.  Read with Remark~\ref{rem:norounding} the pair is sharp: rounding fails on the circle because the circle is divisible, and succeeds on a lattice because a lattice is free.
+\end{remark}
+
+\clearpage
 \begin{remark}[A lamp chart is a coordinate chart]\label{rem:coordtransfer}%
 \leanverified{\leanmod{Sofic/CoordinateTransfer}{OrbitChartData,trivialOrbitChartData,OrbitChartData.comap,lampEmbedding_injective}}%
 A referee audit of this development observed that the action-level route to hyperlinearity of a generalized wreath product cannot help a candidate whose coordinate action is not already sofic, because the lamp data \emph{contains} the coordinate data.  The observation is written there against two papers' definitions, but its content depends on neither.  Encode a coordinate \(x\) as the lamp \(\delta_x(k_0)\) for a fixed \(k_0\neq1\).  That encoding is injective, and it is equivariant; consequently charts for the lamp action restrict along it to charts for the coordinate action, with the covariance identity transporting verbatim and nothing used about where the charts take their values.

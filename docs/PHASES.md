@@ -296,6 +296,31 @@ single window can be corrected by extending the correction arbitrarily.  An
 obstruction would have to be uniform over windows — the same dimension-free gap
 section 6 shows exact infeasibility does not supply.
 
+## 6d. Rounding a character, where rounding a circle failed
+
+`RationalCharacter.lean`.  Section 6a invites a misreading worth correcting.
+That no pointwise rule turns circle-valued phases into `μ_m`-valued ones does
+*not* mean the `μ_m` restriction in the criterion of section 5 is an obstacle.
+The failure in 6a is a failure of **freeness**, not of fineness.  A homomorphism
+out of the circle is pinned down everywhere by divisibility; a homomorphism out
+of a free abelian group is pinned down by nothing — its values on a basis are
+arbitrary and any choice extends.
+
+Once the phases are exactly multiplicative — which is what a correction buys —
+their values on a finite window form a character of a finitely generated free
+abelian group, and that *can* be rounded multiplicatively and to finite order.
+Replacing each `aᵢ` by `round(q aᵢ)/q` gives a character with values in
+`(1/q)ℤ`, still a homomorphism on the nose (`ratChar_add`, `ratChar_eq_div`),
+agreeing with the original to within `(Σ|nᵢ|)/(2q)`.  On coefficients bounded by
+`N` — which a finite window over a finite model supplies — taking `q` large
+makes this as tight as one likes (`exists_ratChar_close`).
+
+So the `ℝ/ℤ` versus `μ_m` distinction is not where the difficulty lives.  What
+remains hard is 6b–6c, obtaining exact multiplicativity at all, and the
+separation of the untwisted model, which no rounding addresses.  The pair 6a/6d
+is sharp: rounding fails on the circle because the circle is divisible, and
+succeeds on a lattice because a lattice is free.
+
 ## 7. Contributed by an external audit, formalized here
 
 `ImplementerCocycle.lean`, `CoordinateTransfer.lean`.  Three statements arrived
