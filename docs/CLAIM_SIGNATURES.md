@@ -2250,6 +2250,12 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
 ```
 
+## `NonsoficGroupsExist.card_torsion_subgroup`
+
+```lean
+∀ (m n : ℕ) [inst : NeZero m], {x | ↑n * x = 0}.card = m.gcd n
+```
+
 ## `NonsoficGroupsExist.card_trivially_phased_le`
 
 ```lean
@@ -3140,11 +3146,11 @@ CountableNonsoficGroupExists
           ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
 ```
 
-## `NonsoficGroupsExist.phase_eq_zero_of_coprime`
+## `NonsoficGroupsExist.phase_eq_zero_of_gcd_eq_one`
 
 ```lean
-∀ (Y : FiniteModel) (m n : ℕ),
-  n.Coprime m →
+∀ (Y : FiniteModel) (m n : ℕ) [NeZero m],
+  m.gcd n = 1 →
     ∀ (φ : ℕ → Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
       (∀ (y : Y.carrier), φ 0 y = 0) →
         (∀ (k : ℕ) (y : Y.carrier), φ (k + 1) y = φ k (σ y) + φ 1 y) →
