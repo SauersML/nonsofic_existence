@@ -2633,6 +2633,13 @@ CountableNonsoficGroupExists
   hsNormSq Y (A + B) ≤ 2 * hsNormSq Y A + 2 * hsNormSq Y B
 ```
 
+## `NonsoficGroupsExist.hsNormSq_conjTranspose`
+
+```lean
+∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
+  hsNormSq Y A.conjTranspose = hsNormSq Y A
+```
+
 ## `NonsoficGroupsExist.hsNormSq_mul_left`
 
 ```lean
@@ -2640,6 +2647,21 @@ CountableNonsoficGroupExists
   V ∈ Matrix.unitaryGroup Y.carrier ℂ →
     0 < Fintype.card Y.carrier →
       ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (V * A) = hsNormSq Y A
+```
+
+## `NonsoficGroupsExist.hsNormSq_mul_right`
+
+```lean
+∀ (Y : FiniteModel) {V : Matrix Y.carrier Y.carrier ℂ},
+  V ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (A * V) = hsNormSq Y A
+```
+
+## `NonsoficGroupsExist.hsNormSq_smul`
+
+```lean
+∀ (Y : FiniteModel) (c : ℂ) (A : Matrix Y.carrier Y.carrier ℂ),
+  hsNormSq Y (c • A) = Complex.normSq c * hsNormSq Y A
 ```
 
 ## `NonsoficGroupsExist.hsNormSq_sub_normTrace_smul`
@@ -2800,6 +2822,13 @@ CountableNonsoficGroupExists
   ¬IsSofic G →
     (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
+```
+
+## `NonsoficGroupsExist.normSq_normTrace_le_hsNormSq`
+
+```lean
+∀ (Y : FiniteModel) (C : Matrix Y.carrier Y.carrier ℂ),
+  Complex.normSq (normTrace Y C) ≤ hsNormSq Y C
 ```
 
 ## `NonsoficGroupsExist.normSq_normTrace_le_one`
@@ -3009,6 +3038,12 @@ CountableNonsoficGroupExists
             {h : ℝ} →
               (X.transport (blockModel P y) e).HasCheegerLowerBound h →
                 ComponentRefinement X P Q q y
+```
+
+## `NonsoficGroupsExist.sq_sum_le_card_mul_sum_sq`
+
+```lean
+∀ {ι : Type u_1} (s : Finset ι) (f : ι → ℝ), (∑ i ∈ s, f i) ^ 2 ≤ ↑s.card * ∑ i ∈ s, f i ^ 2
 ```
 
 ## `NonsoficGroupsExist.symmDiff_le_of_pinned`

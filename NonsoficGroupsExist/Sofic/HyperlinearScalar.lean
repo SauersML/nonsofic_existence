@@ -235,4 +235,120 @@ theorem hsNormSq_add_le (Y : FiniteModel) (A B : Matrix Y Y ℂ) :
   rw [← mul_div_assoc, ← mul_div_assoc, ← add_div]
   gcongr
 
+
+/-- Multiplying by a unitary on the right does not move the norm either. -/
+theorem hsNormSq_mul_right (Y : FiniteModel) {V : Matrix Y Y ℂ}
+    (hV : V ∈ Matrix.unitaryGroup Y ℂ) (A : Matrix Y Y ℂ) :
+    hsNormSq Y (A * V) = hsNormSq Y A := by
+  have hVV : V * Vᴴ = 1 := by
+    have h := hV
+    rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose] at h
+    exact h
+  have htr : Matrix.trace ((A * V) * (A * V)ᴴ) = Matrix.trace (A * Aᴴ) := by
+    rw [Matrix.conjTranspose_mul]
+    have hassoc : A * V * (Vᴴ * Aᴴ) = A * (V * Vᴴ) * Aᴴ := by
+      simp [Matrix.mul_assoc]
+    rw [hassoc, hVV, Matrix.mul_one]
+  have h := congrArg Complex.re
+    (by rw [ofReal_hsNormSq, ofReal_hsNormSq, normTrace, normTrace, htr] :
+      ((hsNormSq Y (A * V) : ℝ) : ℂ) = ((hsNormSq Y A : ℝ) : ℂ))
+  simpa using h
+
+/-- Conjugate transposition does not move the norm. -/
+theorem hsNormSq_conjTranspose (Y : FiniteModel) (A : Matrix Y Y ℂ) :
+    hsNormSq Y Aᴴ = hsNormSq Y A := by
+  have hsum : (∑ i : Y, ∑ j : Y, Complex.normSq (Aᴴ i j))
+      = ∑ i : Y, ∑ j : Y, Complex.normSq (A i j) := by
+    have hstep : ∀ i j : Y, Complex.normSq (Aᴴ i j) = Complex.normSq (A j i) := by
+      intro i j
+      rw [Matrix.conjTranspose_apply]
+      exact Complex.normSq_conj _
+    calc (∑ i : Y, ∑ j : Y, Complex.normSq (Aᴴ i j))
+        = ∑ i : Y, ∑ j : Y, Complex.normSq (A j i) := by
+          exact Finset.sum_congr rfl fun i _ ↦
+            Finset.sum_congr rfl fun j _ ↦ hstep i j
+      _ = ∑ j : Y, ∑ i : Y, Complex.normSq (A j i) := Finset.sum_comm
+  rw [hsNormSq, hsNormSq, hsum]
+
+/-- Scaling multiplies the norm by the squared modulus. -/
+theorem hsNormSq_smul (Y : FiniteModel) (c : ℂ) (A : Matrix Y Y ℂ) :
+    hsNormSq Y (c • A) = Complex.normSq c * hsNormSq Y A := by
+  have hsum : (∑ i : Y, ∑ j : Y, Complex.normSq ((c • A) i j))
+      = Complex.normSq c * ∑ i : Y, ∑ j : Y, Complex.normSq (A i j) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
+    show Complex.normSq (c * A i j) = _
+    rw [Complex.normSq_mul]
+  rw [hsNormSq, hsNormSq, hsum, mul_div_assoc]
+
+/-! ## Cauchy--Schwarz: the trace is dominated by the norm -/
+
+/-- `(∑ f)² ≤ |s| · ∑ f²`, by induction: the step is `(n·f a - ∑ f)² ≥ 0`. -/
+theorem sq_sum_le_card_mul_sum_sq {ι : Type*} (s : Finset ι) (f : ι → ℝ) :
+    (∑ i ∈ s, f i) ^ 2 ≤ (s.card : ℝ) * ∑ i ∈ s, f i ^ 2 := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert a s ha ih =>
+      rcases Finset.eq_empty_or_nonempty s with rfl | hne
+      · simp
+      · have hpos : (0 : ℝ) < (s.card : ℝ) := by
+          exact_mod_cast Finset.card_pos.mpr hne
+        have hQ : (0 : ℝ) ≤ ∑ i ∈ s, f i ^ 2 :=
+          Finset.sum_nonneg fun _ _ ↦ sq_nonneg _
+        rw [Finset.sum_insert ha, Finset.sum_insert ha,
+          Finset.card_insert_of_notMem ha]
+        push_cast
+        nlinarith [ih, hpos, hQ,
+          sq_nonneg ((s.card : ℝ) * f a - ∑ i ∈ s, f i)]
+
+/-- **The normalized trace is dominated by the normalized norm.**  This is
+Cauchy--Schwarz against the identity, and it is what lets a bound on a matrix
+difference be read off as a bound on the difference of traces. -/
+theorem normSq_normTrace_le_hsNormSq (Y : FiniteModel) (C : Matrix Y Y ℂ) :
+    Complex.normSq (normTrace Y C) ≤ hsNormSq Y C := by
+  rcases Nat.eq_zero_or_pos (Fintype.card Y) with h0 | hpos
+  · haveI : IsEmpty Y := Fintype.card_eq_zero_iff.mp h0
+    simp [normTrace, hsNormSq]
+  have hn : (0 : ℝ) < (Fintype.card Y : ℝ) := by exact_mod_cast hpos
+  have hne : (Fintype.card Y : ℝ) ≠ 0 := ne_of_gt hn
+  have hdiag : (Complex.normSq (∑ i : Y, C i i))
+      ≤ (Fintype.card Y : ℝ) * ∑ i : Y, Complex.normSq (C i i) := by
+    have hre := sq_sum_le_card_mul_sum_sq Finset.univ fun i : Y ↦ (C i i).re
+    have him := sq_sum_le_card_mul_sum_sq Finset.univ fun i : Y ↦ (C i i).im
+    rw [Finset.card_univ] at hre him
+    have hsre : (∑ i : Y, C i i).re = ∑ i : Y, (C i i).re := Complex.re_sum _ _
+    have hsim : (∑ i : Y, C i i).im = ∑ i : Y, (C i i).im := Complex.im_sum _ _
+    have hsplit : (∑ i : Y, Complex.normSq (C i i))
+        = (∑ i : Y, (C i i).re ^ 2) + ∑ i : Y, (C i i).im ^ 2 := by
+      rw [← Finset.sum_add_distrib]
+      exact Finset.sum_congr rfl fun i _ ↦ by
+        rw [Complex.normSq_apply]; ring
+    rw [Complex.normSq_apply, hsre, hsim, hsplit]
+    nlinarith [hre, him]
+  have hrow : (∑ i : Y, Complex.normSq (C i i))
+      ≤ ∑ i : Y, ∑ j : Y, Complex.normSq (C i j) := by
+    refine Finset.sum_le_sum fun i _ ↦ ?_
+    exact Finset.single_le_sum (f := fun j ↦ Complex.normSq (C i j))
+      (fun j _ ↦ Complex.normSq_nonneg _) (Finset.mem_univ i)
+  have hnt : Complex.normSq (normTrace Y C)
+      = Complex.normSq (∑ i : Y, C i i) / (Fintype.card Y : ℝ) ^ 2 := by
+    show Complex.normSq (Matrix.trace C / ((Fintype.card Y : ℕ) : ℂ)) = _
+    rw [Complex.normSq_div]
+    have h2 : Complex.normSq (((Fintype.card Y : ℕ) : ℂ))
+        = (Fintype.card Y : ℝ) ^ 2 := by
+      simp [Complex.normSq_apply, sq]
+    rw [h2]
+    rfl
+  rw [hnt, hsNormSq]
+  calc Complex.normSq (∑ i : Y, C i i) / (Fintype.card Y : ℝ) ^ 2
+      ≤ ((∑ i : Y, ∑ j : Y, Complex.normSq (C i j)) * (Fintype.card Y : ℝ))
+          / (Fintype.card Y : ℝ) ^ 2 := by
+        gcongr
+        nlinarith [hdiag, hrow, hn]
+    _ = (∑ i : Y, ∑ j : Y, Complex.normSq (C i j)) / (Fintype.card Y : ℝ) := by
+        field_simp
+
 end NonsoficGroupsExist
