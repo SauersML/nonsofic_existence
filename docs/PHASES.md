@@ -745,6 +745,16 @@ asymmetry between the centres is real and drives everything above, and it is
 still not by itself an obstruction — which is consistent with Question 3.4 being
 open rather than easy in either direction.
 
+Stated where the question actually lives — soficity and hyperlinearity are
+embeddability into `∏_𝒰 Sym` and `∏_𝒰 U` — the asymmetry says the universal
+hyperlinear group has a nontrivial central element.  The constant sequence `−1`
+is unitary, central in each factor, and not null, since `hsLengthSq(−1) = 4` at
+every index (`not_isNullUnitarySeq_negOne`); so its class is central and
+nontrivial.  The corresponding statement for `∏_𝒰 Sym` fails, by
+`eq_one_of_central_perm`.  That is the reason the two ultraproducts are not
+obviously the same object — and, by the semiregularity above, not a reason they
+differ.
+
 ## Where this ends
 
 No resolution of Question 3.4, and no claim toward one.  What follows is the

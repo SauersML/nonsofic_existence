@@ -386,4 +386,59 @@ theorem exists_hyperlinearApproximation_of_isHyperlinear [Countable G]
 
 end Converse
 
+/-! ## The centre, where the root asymmetry lives
+
+`UntwistSeparation` records the asymmetry that drives every phase phenomenon in
+this development: `U(Y)` has a central element at maximal distance from the
+identity while `Sym(Y)` has none.  Stated at the level of the ultraproduct --
+which is where Question 3.4 actually lives, soficity and hyperlinearity being
+embeddability into `∏_𝒰 Sym` and `∏_𝒰 U` -- it says that the universal
+hyperlinear group has a **nontrivial central element**.
+
+The constant sequence `-1` is unitary, central in each factor and so in the
+product, and not null: `hsLengthSq(-1) = 4` at every index, so it stays a
+positive distance from the identity along any ultrafilter.  Its class is
+therefore a nontrivial central element of `UniversalHyperlinear`.
+
+The corresponding statement for `∏_𝒰 Sym` fails, by `eq_one_of_central_perm`.
+That is the asymmetry in the form the question sees it.  It is not an
+obstruction -- `eq_one_of_fixed_of_commutes_transitive` explains why -- but it is
+the reason the two ultraproducts are not obviously the same object.
+-/
+
+/-- The constant sequence `-1` is not null: its squared length is `4` at every
+index. -/
+theorem not_isNullUnitarySeq_negOne (hX : ∀ i, 0 < Fintype.card (X i)) :
+    ¬ IsNullUnitarySeq 𝒰 X (fun i ↦ (-1 : Matrix.unitaryGroup (X i) ℂ)) := by
+  intro hnull
+  have h1 := hnull 1 (by norm_num)
+  have hev : ∀ᶠ i in (𝒰 : Filter ι), False := by
+    filter_upwards [h1] with i hi
+    have hcoe : ((-1 : Matrix.unitaryGroup (X i) ℂ) : Matrix (X i) (X i) ℂ)
+        = -1 := rfl
+    rw [hcoe] at hi
+    have hfour : hsLengthSq (X i) (-1 : Matrix (X i) (X i) ℂ) = 4 := by
+      rw [hsLengthSq]
+      have hsub : (-1 : Matrix (X i) (X i) ℂ) - 1 = (-2 : ℂ) • 1 := by
+        ext a b
+        simp [Matrix.one_apply]
+        by_cases h : a = b
+        · simp [h]; norm_num
+        · simp [h]
+      have hcard : (0 : ℝ) < Fintype.card (X i) := by exact_mod_cast hX i
+      have hone : hsNormSq (X i) (1 : Matrix (X i) (X i) ℂ) = 1 := by
+        rw [hsNormSq]
+        have hrow : ∀ a : (X i),
+            (∑ b, Complex.normSq ((1 : Matrix (X i) (X i) ℂ) a b)) = 1 := by
+          intro a; simp [Matrix.one_apply]
+        rw [Finset.sum_congr rfl (fun a _ ↦ hrow a), Finset.sum_const,
+          Finset.card_univ, nsmul_eq_mul, mul_one, div_self (ne_of_gt hcard)]
+      rw [hsub, hsNormSq_smul, hone]
+      simp [Complex.normSq_apply]
+      norm_num
+    rw [hfour] at hi
+    linarith
+  obtain ⟨_, hfalse⟩ := hev.exists
+  exact hfalse
+
 end NonsoficGroupsExist
