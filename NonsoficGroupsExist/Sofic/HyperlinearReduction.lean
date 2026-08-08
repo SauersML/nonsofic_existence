@@ -1,0 +1,96 @@
+import NonsoficGroupsExist.Sofic.Hyperlinear
+import NonsoficGroupsExist.Sofic.SoficTransfer
+
+/-!
+# Question 3.4 reduces to finitely generated groups
+
+Both soficity and hyperlinearity are defined by quantifying over finite subsets,
+so neither can see beyond the subgroup a finite subset generates.  Made precise
+that is a reduction of Pestov's Question 3.4 itself: *if every finitely
+generated hyperlinear group is sofic, then every hyperlinear group is sofic*.
+
+Two ingredients, both restrictions and nothing more.  Soficity passes along an
+injective homomorphism -- that is `isSofic_of_injective` of `SoficTransfer` --
+and it is *local*: a model of a subgroup extends to the ambient group by sending
+everything outside the image to the identity.  The guard has to be membership in
+the image rather than in the finite test set, since the multiplicativity
+condition names `g * h`, which need not lie in the test set but does lie in the
+image.
+
+Given a finite `F ⊆ G`, the subgroup it generates is finitely generated, and
+hyperlinear by `isHyperlinear_of_injective`; the hypothesis makes it sofic; and
+locality carries a model back to `G`.  So nothing is lost by restricting
+Question 3.4 to finitely generated groups, which is where its known candidates
+live in any case.
+
+This does not decide the question.  It says the general case follows from the
+finitely generated one.
+-/
+
+namespace NonsoficGroupsExist
+
+variable {G : Type} [Group G]
+
+/-- **Soficity is local**, by the same extension as for hyperlinearity. -/
+theorem isSofic_of_local
+    (h : ∀ F : Finset G, ∃ (H : Type) (_ : Group H) (ι : H →* G),
+      Function.Injective ι ∧ IsSofic H ∧ ∀ g ∈ F, g ∈ Set.range ι) :
+    IsSofic G := by
+  classical
+  intro F ε hε
+  obtain ⟨H, _, ι, hinj, hH, hcov⟩ := h F
+  set ψ : G → H := Function.invFun ι with hψ
+  have hψι : ∀ x : H, ψ (ι x) = x := fun x ↦ Function.leftInverse_invFun hinj x
+  have hιψ : ∀ g ∈ Set.range ι, ι (ψ g) = g := by
+    rintro g ⟨x, rfl⟩
+    rw [hψι]
+  set F' : Finset H := F.image ψ with hF'
+  obtain ⟨M⟩ := hH F' ε hε
+  have hmemF' : ∀ g ∈ F, ψ g ∈ F' := fun g hg ↦ Finset.mem_image_of_mem ψ hg
+  refine ⟨{
+    carrier := M.carrier
+    nonempty := M.nonempty
+    map := fun g ↦ if g ∈ Set.range ι then M.map (ψ g) else 1
+    multiplicative := ?_
+    separated := ?_ }⟩
+  · intro g hg h hh
+    have hgr : g ∈ Set.range ι := hcov g hg
+    have hhr : h ∈ Set.range ι := hcov h hh
+    have hghr : g * h ∈ Set.range ι := by
+      obtain ⟨a, rfl⟩ := hgr
+      obtain ⟨b, rfl⟩ := hhr
+      exact ⟨a * b, by rw [map_mul]⟩
+    have hpsi : ψ (g * h) = ψ g * ψ h := by
+      apply hinj
+      rw [hιψ _ hghr, map_mul, hιψ _ hgr, hιψ _ hhr]
+    simp only [if_pos hgr, if_pos hhr, if_pos hghr, hpsi]
+    exact M.multiplicative _ (hmemF' g hg) _ (hmemF' h hh)
+  · intro g hg h hh hne
+    have hgr : g ∈ Set.range ι := hcov g hg
+    have hhr : h ∈ Set.range ι := hcov h hh
+    simp only [if_pos hgr, if_pos hhr]
+    refine M.separated _ (hmemF' g hg) _ (hmemF' h hh) ?_
+    intro hcon
+    exact hne (by rw [← hιψ _ hgr, ← hιψ _ hhr, hcon])
+
+/-- **Question 3.4 reduces to finitely generated groups.**  If every finitely
+generated hyperlinear group is sofic, then every hyperlinear group is sofic. -/
+theorem isSofic_of_isHyperlinear_of_fg_case
+    (hfg : ∀ (H : Type) (_ : Group H), Group.FG H → IsHyperlinear H → IsSofic H)
+    (hG : IsHyperlinear G) : IsSofic G := by
+  classical
+  refine isSofic_of_local (fun F ↦ ?_)
+  refine ⟨↥(Subgroup.closure (F : Set G)), inferInstance,
+    (Subgroup.closure (F : Set G)).subtype, Subgroup.subtype_injective _, ?_, ?_⟩
+  · refine hfg _ _ ?_ (isHyperlinear_of_injective _
+      (Subgroup.subtype_injective _) hG)
+    rw [Group.fg_iff]
+    refine ⟨((↑) : Subgroup.closure (F : Set G) → G) ⁻¹' (F : Set G), ?_, ?_⟩
+    · exact Subgroup.closure_closure_coe_preimage
+    · exact Set.Finite.preimage
+        (Set.injOn_of_injective (Subgroup.subtype_injective _)) F.finite_toSet
+  · intro g hg
+    exact ⟨⟨g, Subgroup.subset_closure hg⟩, rfl⟩
+
+
+end NonsoficGroupsExist

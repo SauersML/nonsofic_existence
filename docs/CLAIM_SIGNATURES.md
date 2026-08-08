@@ -723,12 +723,6 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   x * y * x⁻¹ * y⁻¹ ∈ Subgroup.center (Heis R)
 ```
 
-## `NonsoficGroupsExist.HyperlinearModel`
-
-```lean
-(G : Type u_1) → [Group G] → Finset G → ℝ → Type (max 1 u_1)
-```
-
 ## `NonsoficGroupsExist.IsEssentialExpanderSequence`
 
 ```lean
@@ -2414,22 +2408,6 @@ CountableNonsoficGroupExists
     (∀ (k : ℕ), Vanishing fun n => e n k) → Vanishing fun n => e n (diagonalLevel e n)
 ```
 
-## `NonsoficGroupsExist.elGen_commutator`
-
-```lean
-∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
-  (i j k : ι) (hij : i ≠ j) (hjk : j ≠ k) (hik : i ≠ k) (a b : R),
-  elGen i j hij a * elGen j k hjk b * (elGen i j hij a)⁻¹ * (elGen j k hjk b)⁻¹ =
-    elGen i k hik (a * b)
-```
-
-## `NonsoficGroupsExist.elGen_mul`
-
-```lean
-∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
-  (i j : ι) (h : i ≠ j) (a b : R), elGen i j h a * elGen i j h b = elGen i j h (a + b)
-```
-
 ## `NonsoficGroupsExist.elementaryGroup_eq_closure_of_adjoin_int`
 
 ```lean
@@ -2462,13 +2440,6 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {R : Type u_1} [inst : Ring R] [Algebra.FiniteType ℤ R] (n : ℕ),
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
-```
-
-## `NonsoficGroupsExist.eq_top_of_permHom_trivial`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] (H : Subgroup G),
-  (∀ (g : G), (MulAction.toPermHom G (G ⧸ H)) g = 1) → H = ⊤
 ```
 
 ## `NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group`
@@ -2532,14 +2503,6 @@ CountableNonsoficGroupExists
       ∃ Γ x φ,
         Function.Surjective ⇑φ ∧
           Infinite Γ ∧ Group.IsFinitelyPresented Γ ∧ HasKazhdanPropertyT Γ ∧ ¬IsSofic Γ
-```
-
-## `NonsoficGroupsExist.exists_ne_zero_mem_elementaryKernel`
-
-```lean
-∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
-  {Q : Type u_3} [inst_3 : Group Q] [Infinite R] [Finite Q] (φ : ↥(elementaryGroup ι R) →* Q)
-  (i j : ι) (h : i ≠ j), ∃ a, a ≠ 0 ∧ φ (elGen i j h a) = 1
 ```
 
 ## `NonsoficGroupsExist.exists_ratChar_close`
@@ -2619,13 +2582,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {G : Type u} [inst : Group G], ¬IsSofic G → ∃ F ε, 1 ∈ F ∧ 0 < ε ∧ IsEmpty (TableModel G F ε)
-```
-
-## `NonsoficGroupsExist.exists_third_index`
-
-```lean
-∀ {ι : Type u_1} [inst : Fintype ι] [DecidableEq ι],
-  3 ≤ Fintype.card ι → ∀ (l k : ι), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
 ## `NonsoficGroupsExist.exists_unitary_far_from_monomial`
@@ -2743,13 +2699,6 @@ CountableNonsoficGroupExists
         1 - 1 / ↑m
 ```
 
-## `NonsoficGroupsExist.hammingDistance_inv`
-
-```lean
-∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
-  hammingDistance Y σ⁻¹ τ⁻¹ = hammingDistance Y σ τ
-```
-
 ## `NonsoficGroupsExist.hammingDistance_le_hsDistSq_monomial`
 
 ```lean
@@ -2795,12 +2744,6 @@ CountableNonsoficGroupExists
       (f : Heis ↥(invPowSubring p) ⧸ Heis.intCentre ↥(invPowSubring p) →* B)
       (q : ↥(invPowSubring p)),
       f ((QuotientGroup.mk' (Heis.intCentre ↥(invPowSubring p))) { a := 0, b := 0, c := q }) = 1
-```
-
-## `NonsoficGroupsExist.hsDistSq`
-
-```lean
-(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → Matrix Y.carrier Y.carrier ℂ → ℝ
 ```
 
 ## `NonsoficGroupsExist.hsDistSq_monomial_const`
@@ -3023,6 +2966,14 @@ CountableNonsoficGroupExists
   Function.Injective ⇑f → IsSofic G → IsSofic H
 ```
 
+## `NonsoficGroupsExist.isSofic_of_isHyperlinear_of_fg_case`
+
+```lean
+∀ {G : Type} [inst : Group G],
+  (∀ (H : Type) (x : Group H), Group.FG H → IsHyperlinear H → IsSofic H) →
+    IsHyperlinear G → IsSofic G
+```
+
 ## `NonsoficGroupsExist.isSofic_of_isSoficWeak`
 
 ```lean
@@ -3179,21 +3130,6 @@ CountableNonsoficGroupExists
   (Equiv.Perm.permMatrix ℂ σ).conjTranspose = Equiv.Perm.permMatrix ℂ σ⁻¹
 ```
 
-## `NonsoficGroupsExist.permMatrix_dist_sq_eq`
-
-```lean
-∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y),
-  ∑ x, ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
-    2 * ↑(hammingDisagreement σ τ).card
-```
-
-## `NonsoficGroupsExist.permMatrix_hsDistSq`
-
-```lean
-∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
-  hsDistSq Y (Equiv.Perm.permMatrix ℂ σ) (Equiv.Perm.permMatrix ℂ τ) = 2 * hammingDistance Y σ τ
-```
-
 ## `NonsoficGroupsExist.permMatrix_normalized_dist_sq_eq`
 
 ```lean
@@ -3201,14 +3137,6 @@ CountableNonsoficGroupExists
   (∑ x, ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2) /
       ↑(Fintype.card Y.carrier) =
     2 * hammingDistance Y σ τ
-```
-
-## `NonsoficGroupsExist.permMatrix_row_sq`
-
-```lean
-∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y) (x : Y),
-  ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
-    if σ x = τ x then 0 else 2
 ```
 
 ## `NonsoficGroupsExist.permutation_conservation_full`
@@ -3310,12 +3238,6 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {B : Type u_1} [inst : AddGroup B] [Finite B] {p : ℕ},
   Nat.Prime p → ∀ (f : ↥(pruferSubgroup p) →+ B) (a : ↥(pruferSubgroup p)), f a = 0
-```
-
-## `NonsoficGroupsExist.rankFour_exists_third_index`
-
-```lean
-∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
 ## `NonsoficGroupsExist.ratChar_add`
@@ -3487,13 +3409,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ¬IsSofic ↥UniversalRankFour.Core
-```
-
-## `NonsoficGroupsExist.universalLeavittEL4_finite_quotient_trivial`
-
-```lean
-∀ {Q : Type u_1} [inst : Group Q] [Finite Q] (φ : ↥UniversalRankFour.Ambient →* Q)
-  (g : ↥UniversalRankFour.Ambient), φ g = 1
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL4_no_finite_quotient`

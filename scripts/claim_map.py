@@ -62,6 +62,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "CharacterCount",
     "ElementaryNoFiniteQuotients",
     "HeisenbergCentre",
+    "HyperlinearReduction",
     "NoRounding",
     "PhaseCorrection",
     "RationalCharacter",
