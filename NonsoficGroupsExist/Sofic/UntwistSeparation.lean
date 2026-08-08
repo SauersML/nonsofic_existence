@@ -1083,4 +1083,135 @@ theorem wreathPerm_fixes (Y : FiniteModel) (m : ℕ) [NeZero m] (d : Y → ZMod 
   rw [hy, hd, add_zero]
 
 
+
+/-! ## The counting step: how many points fix both
+
+`phase_commutator_local` needs a point fixed by `b`, `a⁻¹` and `b⁻¹`.  Since a
+permutation and its inverse have the same fixed points, that is a point fixed by
+`a` and by `b`, and Bonferroni bounds those from below by `F_a + F_b - 1`.
+
+So the untwisted model retains at least `F_a + F_b - 1` of its points as fixed
+points of `[a,b]`, and its separation there is at most `2 - F_a - F_b`.  Read the
+other way: if the untwisted model separates `[a,b]` to within `ε`, then
+`F_a + F_b ≤ 1 + ε`, so at most one element of the window can fix more than half
+the model.  This is the quantitative form of "untwisting only inherits
+separation", now in terms of the permutation parts alone.
+
+The one thing here that a genuinely approximate model does not supply for free
+is that `act` is a homomorphism; that is where such a model pays its defect.
+-/
+
+/-- Fixed points of a permutation and of its inverse coincide. -/
+theorem fixed_inv_iff (Y : FiniteModel) (σ : Equiv.Perm Y) (y : Y) :
+    σ⁻¹ y = y ↔ σ y = y := by
+  rw [Equiv.Perm.inv_eq_iff_eq, eq_comm]
+
+/-- **Bonferroni.**  Two large fixed sets must meet. -/
+theorem card_inter_fixed_ge (Y : FiniteModel) (σ τ : Equiv.Perm Y) :
+    ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+        + ((univ.filter fun y : Y ↦ τ y = y).card : ℝ) - Fintype.card Y
+      ≤ ((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y).card : ℝ) := by
+  classical
+  have hunion := Finset.card_union_add_card_inter
+    (univ.filter fun y : Y ↦ σ y = y) (univ.filter fun y : Y ↦ τ y = y)
+  have hle : ((univ.filter fun y : Y ↦ σ y = y)
+      ∪ (univ.filter fun y : Y ↦ τ y = y)).card ≤ Fintype.card Y := by
+    calc ((univ.filter fun y : Y ↦ σ y = y)
+        ∪ (univ.filter fun y : Y ↦ τ y = y)).card
+        ≤ (univ : Finset Y).card := Finset.card_le_card (Finset.subset_univ _)
+      _ = Fintype.card Y := Finset.card_univ
+  have hinter : ((univ.filter fun y : Y ↦ σ y = y)
+      ∩ (univ.filter fun y : Y ↦ τ y = y))
+      = univ.filter fun y : Y ↦ σ y = y ∧ τ y = y := by
+    ext y
+    simp only [Finset.mem_inter, Finset.mem_filter, Finset.mem_univ, true_and]
+  rw [hinter] at hunion
+  have hleR : (((univ.filter fun y : Y ↦ σ y = y)
+      ∪ (univ.filter fun y : Y ↦ τ y = y)).card : ℝ) ≤ Fintype.card Y := by
+    exact_mod_cast hle
+  have hunionR : (((univ.filter fun y : Y ↦ σ y = y)
+        ∪ (univ.filter fun y : Y ↦ τ y = y)).card : ℝ)
+      + ((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y).card : ℝ)
+      = ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+        + ((univ.filter fun y : Y ↦ τ y = y).card : ℝ) := by
+    exact_mod_cast congrArg (fun n : ℕ ↦ (n : ℝ)) hunion
+  linarith [hleR, hunionR]
+
+/-- **The untwisted model retains the commutator's fixed points.**  Every point
+fixed by `a` and by `b` is fixed by `[a,b]` and trivially phased there, so it
+survives untwisting; Bonferroni counts them.  Hence
+
+    separation of the untwisted `[a,b]`  ≤  2 - F_a - F_b,
+
+and if that separation is within `ε` then `F_a + F_b ≤ 1 + ε`: at most one
+element of the window fixes more than half the model. -/
+theorem untwist_retains_commutator {G : Type*} [Group G] (Y : FiniteModel)
+    (m : ℕ) [NeZero m] (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (hact : ∀ g h : G, act (g * h) = act g * act h)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (a b : G) (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m)
+        (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1
+      ≤ 2 - fixedDensity Y (act a) - fixedDensity Y (act b) := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  have hone : act 1 = 1 := by
+    have h := hact 1 1
+    rw [mul_one] at h
+    have h2 : act 1 * 1 = act 1 * act 1 := by rw [mul_one]; exact h
+    exact (mul_left_cancel h2).symm
+  have hinv : ∀ g : G, act g⁻¹ = (act g)⁻¹ := by
+    intro g
+    have h := hact g g⁻¹
+    rw [mul_inv_cancel, hone] at h
+    exact (inv_eq_of_mul_eq_one_right h.symm).symm
+  -- the common fixed points are trivially phased fixed points of the commutator
+  have hkey : ∀ y : Y, act a y = y → act b y = y →
+      act (a * b * a⁻¹ * b⁻¹) y = y ∧ d (a * b * a⁻¹ * b⁻¹) y = 0 := by
+    intro y hay hby
+    have hai : act a⁻¹ y = y := by
+      rw [hinv]; exact (fixed_inv_iff Y (act a) y).mpr hay
+    have hbi : act b⁻¹ y = y := by
+      rw [hinv]; exact (fixed_inv_iff Y (act b) y).mpr hby
+    constructor
+    · rw [hact, hact, hact]
+      show act a (act b (act a⁻¹ (act b⁻¹ y))) = y
+      rw [hbi, hai, hby, hay]
+    · exact phase_commutator_local act d hd y (by rw [hone]; rfl) a b hby hai hbi
+  -- so the untwisted permutation fixes them in every fibre
+  rw [hammingDistance_wreathPerm_one]
+  have hsub : (univ.filter fun y : Y ↦ act a y = y ∧ act b y = y)
+      ⊆ univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y
+        ∧ d (a * b * a⁻¹ * b⁻¹) y = 0 := by
+    intro y hy
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy ⊢
+    exact hkey y hy.1 hy.2
+  have hcount := card_inter_fixed_ge Y (act a) (act b)
+  have hmono : ((univ.filter fun y : Y ↦ act a y = y ∧ act b y = y).card : ℝ)
+      ≤ ((univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y
+          ∧ d (a * b * a⁻¹ * b⁻¹) y = 0).card : ℝ) := by
+    exact_mod_cast Finset.card_le_card hsub
+  have hcompl : (univ.filter fun y : Y ↦
+      ¬ (act (a * b * a⁻¹ * b⁻¹) y = y ∧ d (a * b * a⁻¹ * b⁻¹) y = 0)).card
+      = Fintype.card Y - (univ.filter fun y : Y ↦
+          act (a * b * a⁻¹ * b⁻¹) y = y ∧ d (a * b * a⁻¹ * b⁻¹) y = 0).card := by
+    have := Finset.card_filter_add_card_filter_not (s := (univ : Finset Y))
+      (fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y ∧ d (a * b * a⁻¹ * b⁻¹) y = 0)
+    rw [Finset.card_univ] at this
+    omega
+  have hle : (univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y
+      ∧ d (a * b * a⁻¹ * b⁻¹) y = 0).card ≤ Fintype.card Y := by
+    calc _ ≤ (univ : Finset Y).card := Finset.card_filter_le _ _
+      _ = Fintype.card Y := Finset.card_univ
+  rw [hcompl, Nat.cast_sub hle, fixedDensity, fixedDensity, div_le_iff₀ hYR]
+  have hexpand : (2 - ((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+        / Fintype.card Y
+      - ((univ.filter fun y : Y ↦ act b y = y).card : ℝ) / Fintype.card Y)
+      * Fintype.card Y
+      = 2 * Fintype.card Y - ((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+        - ((univ.filter fun y : Y ↦ act b y = y).card : ℝ) := by
+    field_simp
+  rw [hexpand]
+  linarith [hcount, hmono, hYR]
+
 end NonsoficGroupsExist

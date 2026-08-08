@@ -387,6 +387,23 @@ fixed by `b`, `a⁻¹`, `b⁻¹`, the commutator `[a,b]` is trivially phased and
 point survives untwisting.  On a group whose elements are commutators, that is
 about exactly the elements one has to separate.
 
+The counting it needs is Bonferroni, and it simplifies: a permutation and its
+inverse have the same fixed points (`fixed_inv_iff`), so a point fixed by
+`b, a⁻¹, b⁻¹` is just a point fixed by `a` and by `b`, and there are at least
+`F_a + F_b − 1` of them (`card_inter_fixed_ge`).  Every such point is fixed by
+`[a,b]` and trivially phased there, hence survives untwisting in every fibre:
+
+    d_Hamm(untwist(d_[a,b], σ_[a,b]), 1) ≤ 2 − F_a − F_b
+
+(`untwist_retains_commutator`).  Read the other way: if the untwisted model
+separates `[a,b]` to within `ε`, then `F_a + F_b ≤ 1 + ε` — **at most one
+element of the window can fix more than half the model**.
+
+That is the quantitative form of "untwisting only inherits separation", stated
+in the permutation parts alone with the phases eliminated.  The one hypothesis a
+genuinely approximate model does not supply for free is that `σ` is a
+homomorphism; that is where it pays its defect.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a
