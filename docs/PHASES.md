@@ -458,6 +458,15 @@ set.  That is the structural reason the scalars in a construction like Thom's
 live in the *centre*: not a design choice but the only place a model can put
 them.
 
+One caution.  The chain now carries a compatibility hypothesis, a goodness
+hypothesis and a trace hypothesis at once, and a theorem whose hypotheses cannot
+all hold is vacuously true and caught by nothing — `UNWITNESSED` guards
+`Prop`-valued *definitions* nothing satisfies, not hypothesis sets nothing
+satisfies.  So `card_fixed_commutator_constraint_tight` exhibits an instance
+where all three hold simultaneously — two points, trivial action, trivial
+phases — and there the inequality is an **equality**, both sides `4`.  The chain
+is neither vacuous nor lossy at its extreme.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a

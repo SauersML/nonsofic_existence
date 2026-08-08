@@ -1549,4 +1549,64 @@ theorem re_normTrace_commutator_ge {G : Type*} [Group G] (Y : FiniteModel)
   apply div_nonneg _ (le_of_lt hYR)
   linarith [hbase, hle]
 
+
+/-! ## The hypothesis chain is satisfiable, and the bound is attained
+
+`card_fixed_commutator_constraint` carries a compatibility hypothesis, a
+goodness hypothesis and a trace hypothesis at once.  A theorem whose hypotheses
+cannot all hold is vacuously true and passes every detector in this
+development -- `UNWITNESSED` guards `Prop`-valued definitions, not hypothesis
+sets -- so it is worth exhibiting an instance where they hold simultaneously.
+
+The two-point model with the trivial action and trivial phases does it, and it
+attains the bound with equality: both sides are `4`.  So the chain is neither
+vacuous nor lossy at its extreme.
+-/
+
+/-- **The hypotheses hold simultaneously, and the bound is sharp.**  On two
+points with the trivial action and trivial phases, both sides of
+`card_fixed_commutator_constraint` equal `4`. -/
+theorem card_fixed_commutator_constraint_tight :
+    ∃ (Y : FiniteModel) (act : Equiv.Perm Bool → Equiv.Perm Y)
+      (e : Equiv.Perm Bool → Y → ZMod 2) (D : Y → ℂ) (a b : Equiv.Perm Bool),
+      (∀ y, Complex.normSq (D y) = 1)
+      ∧ (∀ y : Y, e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1)
+      ∧ (∀ y : Y, y ∉ (∅ : Finset Y) → act a y = y → act b y = y →
+          act (a * b * a⁻¹ * b⁻¹) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0)
+      ∧ 2 * (((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+            + ((univ.filter fun y : Y ↦ act b y = y).card : ℝ)
+            - Fintype.card Y - ((∅ : Finset Y).card : ℝ))
+          = ((univ.filter fun y : Y ↦ act (a * b * a⁻¹ * b⁻¹) y = y).card : ℝ)
+            + (normTrace Y (monomialMatrix Y D
+                (act (a * b * a⁻¹ * b⁻¹)))).re * Fintype.card Y := by
+  classical
+  refine ⟨(⟨Bool, inferInstance, inferInstance⟩ : FiniteModel),
+    fun _ ↦ 1, fun _ _ ↦ 0, fun _ ↦ 1, 1, 1, ?_, ?_, ?_, ?_⟩
+  · intro y; simp
+  · intro y _; rfl
+  · intro y _ _ _; exact ⟨rfl, rfl⟩
+  · have hfix : (univ.filter fun y : Bool ↦ (1 : Equiv.Perm Bool) y = y)
+        = (univ : Finset Bool) := by decide
+    have htr : (normTrace (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+        (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+          (fun _ : Bool ↦ (1 : ℂ)) 1)).re = 1 := by
+      have hsum : Matrix.trace
+          (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+            (fun _ : Bool ↦ (1 : ℂ)) 1) = 2 := by
+        show (∑ i : Bool, (if (1 : Equiv.Perm Bool) i = i then (1 : ℂ) else 0)) = 2
+        rw [Fintype.sum_bool]
+        norm_num
+      rw [normTrace, hsum, show Fintype.card
+        (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel).carrier = 2 from rfl]
+      norm_num
+    show 2 * (((univ.filter fun y : Bool ↦ (1 : Equiv.Perm Bool) y = y).card : ℝ)
+        + ((univ.filter fun y : Bool ↦ (1 : Equiv.Perm Bool) y = y).card : ℝ)
+        - Fintype.card Bool - ((∅ : Finset Bool).card : ℝ))
+      = ((univ.filter fun y : Bool ↦ (1 : Equiv.Perm Bool) y = y).card : ℝ)
+        + (normTrace (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+            (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+              (fun _ : Bool ↦ (1 : ℂ)) 1)).re * Fintype.card Bool
+    rw [hfix, htr, Finset.card_univ]
+    norm_num
+
 end NonsoficGroupsExist
