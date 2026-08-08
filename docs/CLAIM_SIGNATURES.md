@@ -2250,6 +2250,27 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
 ```
 
+## `NonsoficGroupsExist.card_fixed_commutator_constraint`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (Y : FiniteModel) (m : ℕ) (act : G → Equiv.Perm Y.carrier)
+  (e : G → Y.carrier → ZMod m) (D : Y.carrier → ℂ),
+  (∀ (y : Y.carrier), Complex.normSq (D y) = 1) →
+    ∀ (B : Finset Y.carrier) (a b : G),
+      (∀ (y : Y.carrier), e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1) →
+        (∀ y ∉ B,
+            (act a) y = y →
+              (act b) y = y → (act (a * b * a⁻¹ * b⁻¹)) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0) →
+          ∀ {ε : ℝ},
+            (normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re ≤ ε →
+              0 < Fintype.card Y.carrier →
+                2 *
+                    (↑{y | (act a) y = y}.card + ↑{y | (act b) y = y}.card -
+                        ↑(Fintype.card Y.carrier) -
+                      ↑B.card) ≤
+                  ↑{y | (act (a * b * a⁻¹ * b⁻¹)) y = y}.card + ε * ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.card_torsion_subgroup`
 
 ```lean
@@ -3424,31 +3445,6 @@ CountableNonsoficGroupExists
             (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
               normTrace Y (monomialMatrix Y d 1) = 0 ∧
                 hammingDistance (wreathModel Y m) (wreathPerm Y m e 1) 1 = 1
-```
-
-## `NonsoficGroupsExist.untwist_hamming_le_of_good_set`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier) (S : Finset Y.carrier),
-  (∀ y ∈ S, σ y = y ∧ d y = 0) →
-    0 < Fintype.card Y.carrier →
-      hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 ≤
-        1 - ↑S.card / ↑(Fintype.card Y.carrier)
-```
-
-## `NonsoficGroupsExist.untwist_retains_commutator`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] (Y : FiniteModel) (m : ℕ) [inst_1 : NeZero m]
-  (act : G → Equiv.Perm Y.carrier) (d : G → Y.carrier → ZMod m),
-  (∀ (g h : G), act (g * h) = act g * act h) →
-    (∀ (g h : G) (z : Y.carrier), d (g * h) z = d g ((act h) z) + d h z) →
-      ∀ (a b : G),
-        0 < Fintype.card Y.carrier →
-          hammingDistance (wreathModel Y m)
-              (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1 ≤
-            2 - fixedDensity Y (act a) - fixedDensity Y (act b)
 ```
 
 ## `NonsoficGroupsExist.untwist_retains_commutator_offBad`
