@@ -2943,6 +2943,15 @@ CountableNonsoficGroupExists
   Function.Injective ⇑ι → IsHyperlinear G → IsHyperlinear H
 ```
 
+## `NonsoficGroupsExist.isHyperlinear_of_local`
+
+```lean
+∀ {G : Type u_1} [inst : Group G],
+  (∀ (F : Finset G),
+      ∃ H x ι, Function.Injective ⇑ι ∧ IsHyperlinear H ∧ ∀ g ∈ F, g ∈ Set.range ⇑ι) →
+    IsHyperlinear G
+```
+
 ## `NonsoficGroupsExist.isLEF_of_ambientDecomposition`
 
 ```lean
