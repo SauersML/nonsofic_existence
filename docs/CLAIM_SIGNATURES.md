@@ -2269,15 +2269,6 @@ Group.FG ↥UniversalRankFour.Ambient ∧
               ↑{y | σ y = y}.card + ε * ↑(Fintype.card Y.carrier)
 ```
 
-## `NonsoficGroupsExist.card_zero_class_ge_three`
-
-```lean
-∀ (n₀ n₁ n₂ E : ℝ),
-  0 ≤ E →
-    Complex.normSq (↑n₀ + ↑n₁ * cubeRoot + ↑n₂ * cubeRoot ^ 2) ≤ E ^ 2 →
-      n₀ + n₁ + n₂ ≤ 3 * n₀ + 3 * √2 * E
-```
-
 ## `NonsoficGroupsExist.charEval_add`
 
 ```lean
@@ -3261,6 +3252,24 @@ CountableNonsoficGroupExists
             {h : ℝ} →
               (X.transport (blockModel P y) e).HasCheegerLowerBound h →
                 ComponentRefinement X P Q q y
+```
+
+## `NonsoficGroupsExist.renormalization_eq_zero_of_commutators`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {m : ℕ} (β : G → ZMod m),
+  (∀ (g h : G), β (g * h) = β g + β h) →
+    (∀ (g : G), ∃ a b, g = a * b * a⁻¹ * b⁻¹) → ∀ (g : G), β g = 0
+```
+
+## `NonsoficGroupsExist.renormalization_isHom`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} {m : ℕ} (act : G → Equiv.Perm Y)
+  (d : G → Y → ZMod m) (β : G → ZMod m) (y : Y),
+  (∀ (g h : G) (z : Y), d (g * h) z = d g ((act h) z) + d h z) →
+    (∀ (g h : G) (z : Y), d (g * h) z + β (g * h) = d g ((act h) z) + β g + (d h z + β h)) →
+      ∀ (g h : G), β (g * h) = β g + β h
 ```
 
 ## `NonsoficGroupsExist.roundMod_not_additive`
