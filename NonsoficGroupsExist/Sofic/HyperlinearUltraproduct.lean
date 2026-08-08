@@ -323,6 +323,67 @@ theorem exists_hyperlinearEmbedding_of_approximation
     obtain ⟨n, hn₁, hn₂⟩ := (hfar.and hclose).exists
     linarith
 
+/-- **Hyperlinearity supplies an approximation.**  For a countable group,
+exhausting by finite test sets and shrinking the accuracy turns the local
+definition into the sequential one the ultraproduct consumes. -/
+theorem exists_hyperlinearApproximation_of_isHyperlinear [Countable G]
+    (h : IsHyperlinear G) : Nonempty (HyperlinearApproximation G) := by
+  classical
+  obtain ⟨e, he⟩ := exists_surjective_nat G
+  set F : ℕ → Finset G := fun n ↦ insert 1 ((Finset.range (n + 1)).image e)
+    with hFdef
+  have hFmono : ∀ {m n : ℕ}, m ≤ n → F m ⊆ F n := by
+    intro m n hmn
+    refine Finset.insert_subset_insert _ (Finset.image_subset_image ?_)
+    intro x hx
+    simp only [Finset.mem_range] at hx ⊢
+    omega
+  have hFmem : ∀ g : G, ∃ N, ∀ n ≥ N, g ∈ F n := by
+    intro g
+    obtain ⟨i, hi⟩ := he g
+    refine ⟨i, fun n hn ↦ hFmono hn ?_⟩
+    exact Finset.mem_insert_of_mem (Finset.mem_image.mpr
+      ⟨i, Finset.self_mem_range_succ i, hi⟩)
+  have heps : ∀ n : ℕ, (0 : ℝ) < 1 / (n + 1) := by
+    intro n; positivity
+  set M : ∀ n : ℕ, HyperlinearModel G (F n) (1 / (n + 1)) :=
+    fun n ↦ (h (F n) (1 / (n + 1)) (heps n)).some with hMdef
+  refine ⟨{
+    model := fun n ↦ (M n).carrier
+    modelNonempty := fun n ↦ (M n).nonempty
+    map := fun n g ↦ ⟨(M n).map g, (M n).isUnitary g⟩
+    asymptoticallyMultiplicative := ?_
+    separatedEventually := ?_ }⟩
+  · intro g h' ε hε
+    obtain ⟨Ng, hNg⟩ := hFmem g
+    obtain ⟨Nh, hNh⟩ := hFmem h'
+    obtain ⟨Ne, hNe⟩ := exists_nat_gt (1 / ε)
+    refine ⟨max (max Ng Nh) Ne, fun n hn ↦ ?_⟩
+    have h1 : g ∈ F n := hNg n (le_trans (le_trans (le_max_left _ _)
+      (le_max_left _ _)) hn)
+    have h2 : h' ∈ F n := hNh n (le_trans (le_trans (le_max_right _ _)
+      (le_max_left _ _)) hn)
+    have hsmall : 1 / ((n : ℝ) + 1) ≤ ε := by
+      have hNen : (Ne : ℝ) ≤ (n : ℝ) := by
+        exact_mod_cast le_trans (le_max_right _ _) hn
+      have : (1 : ℝ) / ε < (n : ℝ) + 1 := by linarith
+      rw [div_le_iff₀ (by positivity)]
+      rw [div_lt_iff₀ hε] at this
+      linarith
+    exact le_trans ((M n).multiplicative g h1 h' h2) hsmall
+  · intro g h' hne
+    obtain ⟨Ng, hNg⟩ := hFmem g
+    obtain ⟨Nh, hNh⟩ := hFmem h'
+    refine ⟨max Ng Nh, fun n hn ↦ ?_⟩
+    have h1 : g ∈ F n := hNg n (le_trans (le_max_left _ _) hn)
+    have h2 : h' ∈ F n := hNh n (le_trans (le_max_right _ _) hn)
+    have hsep := (M n).separated g h1 h' h2 hne
+    have hle : 1 / ((n : ℝ) + 1) ≤ 1 := by
+      rw [div_le_one (by positivity)]
+      have : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+      linarith
+    linarith
+
 end Converse
 
 end NonsoficGroupsExist

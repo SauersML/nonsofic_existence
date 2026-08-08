@@ -2367,6 +2367,13 @@ CountableNonsoficGroupExists
               ¬IsSofic (tableGroup F h₁) ∧ Function.Surjective ⇑(tableEvaluation F h₁)
 ```
 
+## `NonsoficGroupsExist.exists_hyperlinearApproximation_of_isHyperlinear`
+
+```lean
+∀ {G : Type u_2} [inst : Group G] [Countable G],
+  IsHyperlinear G → Nonempty (HyperlinearApproximation G)
+```
+
 ## `NonsoficGroupsExist.exists_hyperlinearEmbedding_of_approximation`
 
 ```lean
