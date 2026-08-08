@@ -24,13 +24,16 @@ central base — kernel-checked `no_escape_of_central`).  Next: hunt the
 mechanism; every failure is information about the central-quotient
 question.
 
-## 2. Defect-localized commutant pinning  [NEXT FORMALIZATION]
+## 2. Defect-localized commutant pinning  [LEMMAS LANDED]
 
 The (T)-analog of the kernel-checked f.d. collapse (N20), avoiding the
-HS-stability wall.  Two elementary lemmas to formalize: (L1) a subspace
-δ-contained in an equal-dimensional subspace is δ′-equal to it (principal
-angles); (L2) the Ad-averaging operator moves by O(ε) under ε-perturbation
-of the generators, so spectral gaps of exact sub-actions transfer.
+HS-stability wall.  The interface is now kernel-checked in
+`Sofic/CommutantPinning`: (L1) `exists_mem_close_of_almost_le` — a
+subspace δ-almost contained in an equal-dimensional subspace is
+δ/(1-δ)-almost equal to it; (L2) `dist_le_defect_div_gap` and
+`dist_le_perturbed_defect_div_gap` — gap pinning against exact and
+ε-perturbed operators, with `sum_apply_dist_le` transferring closeness
+through averaging.
 Conjecture: for the Kun–Thom pairs, the model defect can be localized off
 a relative-(T) core whose exact commutant then pins the almost-commutant;
 one pinned compressor conjugate kills the free-lamp witness — T4 on the

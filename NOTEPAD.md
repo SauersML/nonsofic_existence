@@ -6,6 +6,54 @@ Each part is kept verbatim under its own banner.
 
 ---
 
+# An explicit weak-MF nonsofic group (2026-08-08)
+
+Let `Γ < G` be any of the residually finite Kazhdan infranormal pairs in
+Kun--Thom, arXiv:2608.06222, Theorem E, and put
+
+`H := G *_Γ (Γ × ℤ)`.
+
+Then `H` is nonsofic by the kernel-checked free-lamp reduction together with
+Kun--Thom Theorem 4.1.  It is also weak-MF in Shulman's operator-norm-injective
+sense.  (This is weaker than Schafhauser's trace-MF terminology, which includes
+approximation of the canonical regular trace and therefore implies
+hyperlinearity.)  Indeed, the
+factor maps
+
+`G → G × ℤ`, `g ↦ (g,0)`, and `Γ × ℤ → G × ℤ`
+
+into the first and second factors of
+
+`D := (G × ℤ) *_Γ (G × ℤ)`
+
+agree on `Γ`; the normal-form theorem for amalgams makes the induced map
+`H → D` injective.  The group `G × ℤ` is weak-MF because `G` is residually finite.
+Shulman, arXiv:2603.13564v2, Theorem 10 and its group corollary, proves that a
+double `A *_C A` of an arbitrary weak-MF group `A` over an arbitrary subgroup
+`C` is weak-MF.  Hence `D`, and therefore its subgroup `H`, is weak-MF.
+
+This separates weak-MF from sofic.  It does **not** separate Schafhauser-MF or
+hyperlinear from sofic: operator-norm separation can be supported on a subspace of vanishing
+normalized rank (`Sofic/NormTraceGap`).  Shulman's construction supplies no
+control of the canonical group trace.  Property-(T) corner extraction cannot
+be recovered merely by passing to a property-(T) subgroup: every property-(T)
+subgroup of the amalgam fixes a vertex of its Bass--Serre tree and is conjugate
+into a factor.  Thus the remaining problem for this witness is exactly a
+trace-visible version of Shulman's commutant-unitary lift, equivalently
+Connes-embeddability of
+
+`L(G) *_{L(Γ)} (L(Γ) ̅⊗ L(ℤ))`.
+
+The same theorem does not automatically settle the Dogon--Vigdorovich
+finite-central-extension candidate.  The decomposition of
+`SL₂(ℤ[1/p])` uses the two Iwahori embeddings related by a commensuration that
+does not extend to an automorphism of `SL₂(ℤ)`; it is a twisted amalgam, not
+the identical symmetric double in Shulman's automatic theorem.  Shulman's
+general compatibility criterion sends the problem back to the Iwahori
+compatibility question rather than removing it.
+
+---
+
 <!-- ======== formerly BUILD_ITERATION_NOTES.md ======== -->
 
 # Profinite closure LANDED (2026-08-08, final)
