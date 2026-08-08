@@ -2207,6 +2207,12 @@ Group.FG ↥UniversalRankFour.Ambient ∧
         HasKazhdanPropertyT ↥(BinaryLeavittEL k m) ∧ ¬IsSofic ↥(BinaryLeavittEL k m)
 ```
 
+## `NonsoficGroupsExist.card_annihilator`
+
+```lean
+∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
+```
+
 ## `NonsoficGroupsExist.commutant_no_growth`
 
 ```lean
@@ -2284,14 +2290,6 @@ CountableNonsoficGroupExists
     (∀ (k : ℕ), Vanishing fun n => e n k) → Vanishing fun n => e n (diagonalLevel e n)
 ```
 
-## `NonsoficGroupsExist.divisible_quotient`
-
-```lean
-∀ {A : Type u_1} [inst : AddCommGroup A] (B : AddSubgroup A),
-  (∀ (n : ℕ), 0 < n → ∀ (a : A), ∃ b, n • b = a) →
-    ∀ (n : ℕ), 0 < n → ∀ (a : A ⧸ B), ∃ b, n • b = a
-```
-
 ## `NonsoficGroupsExist.elGen_commutator`
 
 ```lean
@@ -2340,13 +2338,6 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {R : Type u_1} [inst : Ring R] [Algebra.FiniteType ℤ R] (n : ℕ),
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
-```
-
-## `NonsoficGroupsExist.eq_one_of_finite_divisible`
-
-```lean
-∀ {D : Type u_1} [inst : Group D] [Finite D],
-  (∀ (n : ℕ), 0 < n → ∀ (d : D), ∃ e, e ^ n = d) → ∀ (d : D), d = 1
 ```
 
 ## `NonsoficGroupsExist.eq_top_of_permHom_trivial`
@@ -2431,20 +2422,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ∃ H x N, ∃ (x_1 : N.Normal), Group.ResiduallyFinite H ∧ ¬Group.ResiduallyFinite (H ⧸ N)
-```
-
-## `NonsoficGroupsExist.exists_scalarCommute_of_pow_eq_one`
-
-```lean
-∀ (q : ℕ),
-  1 < q →
-    ∀ {ζ : ℂ},
-      ζ ^ q = 1 →
-        Complex.normSq ζ = 1 →
-          ∃ Y U V,
-            Fintype.card Y.carrier = q ∧
-              U ∈ Matrix.unitaryGroup Y.carrier ℂ ∧
-                V ∈ Matrix.unitaryGroup Y.carrier ℂ ∧ U * V = ζ • (V * U)
 ```
 
 ## `NonsoficGroupsExist.exists_selection`
@@ -2603,6 +2580,26 @@ CountableNonsoficGroupExists
 {G : Type u_1} → [Group G] → G → G
 ```
 
+## `NonsoficGroupsExist.hammingDistance_characterUntwist`
+
+```lean
+∀ (m : ℕ) [inst : NeZero m] (α : ZMod m) (d : ZMod m → ZMod m) (σ : Equiv.Perm (ZMod m)),
+  hammingDistance (wreathModel (characterModel m) m) (wreathPerm (characterModel m) m d σ)
+      (wreathPerm (characterModel m) m (fun l => d l + l * α) σ) =
+    1 - ↑(m.gcd α.val) / ↑m
+```
+
+## `NonsoficGroupsExist.hammingDistance_characterUntwist_generator`
+
+```lean
+∀ (m : ℕ) [inst : NeZero m] (α : ZMod m),
+  m.gcd α.val = 1 →
+    ∀ (d : ZMod m → ZMod m) (σ : Equiv.Perm (ZMod m)),
+      hammingDistance (wreathModel (characterModel m) m) (wreathPerm (characterModel m) m d σ)
+          (wreathPerm (characterModel m) m (fun l => d l + l * α) σ) =
+        1 - 1 / ↑m
+```
+
 ## `NonsoficGroupsExist.hammingDistance_inv`
 
 ```lean
@@ -2739,6 +2736,12 @@ CountableNonsoficGroupExists
     v g * implementerCocycle v h k * (v g)⁻¹ * implementerCocycle v g (h * k)
 ```
 
+## `NonsoficGroupsExist.invPowSubgroup`
+
+```lean
+ℕ → AddSubgroup ℚ
+```
+
 ## `NonsoficGroupsExist.involutionNormalize`
 
 ```lean
@@ -2846,13 +2849,6 @@ CountableNonsoficGroupExists
   a ≠ 0 → Function.Injective (lampEmbedding a)
 ```
 
-## `NonsoficGroupsExist.map_eq_one_of_divisible`
-
-```lean
-∀ {D : Type u_1} {B : Type u_2} [inst : Group D] [inst_1 : Group B] [Finite B],
-  (∀ (n : ℕ), 0 < n → ∀ (d : D), ∃ e, e ^ n = d) → ∀ (f : D →* B) (d : D), f d = 1
-```
-
 ## `NonsoficGroupsExist.matching_injective`
 
 ```lean
@@ -2870,14 +2866,6 @@ CountableNonsoficGroupExists
 
 ```lean
 (Y : FiniteModel) → (Y.carrier → ℂ) → Equiv.Perm Y.carrier → Matrix Y.carrier Y.carrier ℂ
-```
-
-## `NonsoficGroupsExist.monomialMatrix_mem_unitaryGroup`
-
-```lean
-∀ (Y : FiniteModel) {d : Y.carrier → ℂ},
-  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
-    ∀ (σ : Equiv.Perm Y.carrier), monomialMatrix Y d σ ∈ Matrix.unitaryGroup Y.carrier ℂ
 ```
 
 ## `NonsoficGroupsExist.monomialMatrix_one`
@@ -3031,17 +3019,29 @@ CountableNonsoficGroupExists
 {Y : Type u_1} → (k : ℕ) → Equiv.Perm Y → Equiv.Perm (Fin k → Y)
 ```
 
+## `NonsoficGroupsExist.pruferSubgroup_divisible`
+
+```lean
+∀ {p : ℕ}, Nat.Prime p → ∀ (n : ℕ), 0 < n → ∀ (a : ↥(pruferSubgroup p)), ∃ b, n • b = a
+```
+
+## `NonsoficGroupsExist.pruferSubgroup_nontrivial`
+
+```lean
+∀ {p : ℕ}, Nat.Prime p → ∃ a, a ≠ 0
+```
+
+## `NonsoficGroupsExist.prufer_map_eq_zero`
+
+```lean
+∀ {B : Type u_1} [inst : AddGroup B] [Finite B] {p : ℕ},
+  Nat.Prime p → ∀ (f : ↥(pruferSubgroup p) →+ B) (a : ↥(pruferSubgroup p)), f a = 0
+```
+
 ## `NonsoficGroupsExist.rankFour_exists_third_index`
 
 ```lean
 ∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
-```
-
-## `NonsoficGroupsExist.ratCircle_map_eq_zero`
-
-```lean
-∀ {B : Type u_1} [inst : AddGroup B] [Finite B] (f : ℚ ⧸ AddSubgroup.zmultiples 1 →+ B)
-  (a : ℚ ⧸ AddSubgroup.zmultiples 1), f a = 0
 ```
 
 ## `NonsoficGroupsExist.re_nonpos_of_pow_four_eq_one`
