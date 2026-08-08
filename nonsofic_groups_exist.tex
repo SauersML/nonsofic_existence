@@ -2104,6 +2104,18 @@ The extreme case is worth stating on its own, because it is the obstruction in a
 \end{remark}
 
 \clearpage
+\begin{remark}[No pointwise rounding of phases]\label{rem:norounding}%
+\leanverified{\leanmod{Sofic/NoRounding}{circle_map_eq_zero,additiveRounding_no_separation,roundMod_not_additive,no_pointwise_rounding}}%
+The characterization of Remark~\ref{rem:thomK} says that soficity is \emph{combinatorial} monomial approximability, while hyperlinearity supplies only \emph{metric} agreement of phases.  The obvious way to close that gap is to round: replace each phase, which lives in the circle, by a nearby \(m\)-th root of unity, and hope that multiplicativity survives.  It cannot, and the obstruction is a fork whose two horns exhaust the pointwise rules.
+
+If the rounding is \emph{multiplicative}, it is trivial.  The circle is divisible and \(\Z/m\) is finite, so every homomorphism between them is zero---the two lines of Remark~\ref{rem:thomK}, applied one level up, to the group the phases live in rather than to the group being modelled.  A multiplicative rounding therefore sends every phase to \(1\); two monomial data differing only in their phases untwist to the \emph{same} permutation, and the separation such a rounding provides is exactly \(0\), for every pair of phase systems and every permutation part.
+
+If the rounding is \emph{nearest-point}, it is not multiplicative, at every \(m\) and however fine.  The witness is uniform in \(m\): \(3/10m\) rounds down to \(0\) while its double rounds up to \(1/m\).  Refining does not help, because the failure is scale-invariant---it is the statement that the sawtooth \(x\mapsto\operatorname{round}(x)-x\) is not additive, and rounding to \(\mu_m\) is that sawtooth read at scale \(1/m\).
+
+A pointwise rule either respects the group law or it does not, so the two horns are exhaustive.  The passage from a metric phase system to a combinatorial one, if it exists at all, therefore cannot be pointwise: it has to use the group being modelled and the model itself.  This is the shape of Remark~\ref{rem:phasecollapse} again---not a difficulty in carrying out a strategy, but a proof that the strategy does not exist---and it is why the gap priced in Remark~\ref{rem:scalarcocycle} is not an artifact of a bad choice of \(m\).
+\end{remark}
+
+\clearpage
 \begin{remark}[A lamp chart is a coordinate chart]\label{rem:coordtransfer}%
 \leanverified{\leanmod{Sofic/CoordinateTransfer}{OrbitChartData,trivialOrbitChartData,OrbitChartData.comap,lampEmbedding_injective}}%
 A referee audit of this development observed that the action-level route to hyperlinearity of a generalized wreath product cannot help a candidate whose coordinate action is not already sofic, because the lamp data \emph{contains} the coordinate data.  The observation is written there against two papers' definitions, but its content depends on neither.  Encode a coordinate \(x\) as the lamp \(\delta_x(k_0)\) for a fixed \(k_0\neq1\).  That encoding is injective, and it is equivariant; consequently charts for the lamp action restrict along it to charts for the coordinate action, with the covariance identity transporting verbatim and nothing used about where the charts take their values.

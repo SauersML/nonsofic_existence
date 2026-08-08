@@ -189,6 +189,32 @@ relation is exactly solvable at every root-of-unity dimension by the clock-and-
 shift pair, which is itself monomial.  Emptiness of every exact locus carries no
 dimension-free gap.
 
+## 6a. Why refining the rounding does not help
+
+`NoRounding.lean`.  Section 5 leaves the gap as "combinatorial agreement versus
+metric agreement."  The obvious way to cross it is to round each phase to a
+nearby `m`-th root of unity.  That strategy does not exist, and the two horns
+are exhaustive because a pointwise rule either respects the group law or does
+not.
+
+*Multiplicative rounding is trivial.*  The circle is divisible and `ℤ/m` is
+finite, so every homomorphism between them is zero (`circle_map_eq_zero`) — the
+argument of section 4 applied one level up, to the group the phases live in
+rather than the group being modelled.  So a multiplicative rounding sends every
+phase to `1`, and its separation is exactly `0` for every pair of phase systems
+and every permutation part (`additiveRounding_no_separation`).
+
+*Nearest-point rounding is not multiplicative*, at every `m` and however fine
+(`roundMod_not_additive`).  The witness is uniform in `m`: `3/10m` rounds down
+to `0` while its double rounds up to `1/m`.  Refining does not help because the
+failure is scale-invariant — it is the non-additivity of the sawtooth
+`x ↦ round(x) − x`, and rounding to `μ_m` is that sawtooth at scale `1/m`.
+
+So the passage from a metric phase system to a combinatorial one, if it exists,
+must use the group being modelled and the model itself.  Same shape as section
+1: not a difficulty in carrying out a strategy, but a proof that the strategy
+does not exist.
+
 ## 7. Contributed by an external audit, formalized here
 
 `ImplementerCocycle.lean`, `CoordinateTransfer.lean`.  Three statements arrived
