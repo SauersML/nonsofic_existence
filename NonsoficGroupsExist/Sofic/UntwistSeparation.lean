@@ -583,4 +583,87 @@ theorem card_trivially_phased_le (Y : FiniteModel) (d : Y → ℂ)
   rw [hcard] at hrest
   linarith [hRe, hrest]
 
+
+/-! ## Order three also forces retention, so the trichotomy is complete
+
+Order two forces the untwisted model to keep half its fixed points, and order
+four allows it to keep none.  Order three is the remaining case, and it forces
+retention too -- of a third rather than a half.  The reason is that the three
+cube roots of unity are *positively* dependent: `1 + ω + ω² = 0` is their only
+relation over `ℝ`, so a nonnegative combination can be small only if all three
+coefficients are nearly equal.  At order four the relation `1 + i + (-1) + (-i)`
+splits into two independent ones, `1 + (-1)` and `i + (-i)`, and a nonnegative
+combination can vanish while missing `1` entirely -- which is exactly the
+witness above.
+
+So the trichotomy is: orders two and three force retention of `1/2` and `1/3`;
+order four and beyond force nothing.
+-/
+
+/-- A primitive cube root of unity, written out so the arithmetic below is
+elementary. -/
+noncomputable def cubeRoot : ℂ := ⟨-1/2, Real.sqrt 3 / 2⟩
+
+theorem cubeRoot_relation : 1 + cubeRoot + cubeRoot ^ 2 = 0 := by
+  have h3 : Real.sqrt 3 * Real.sqrt 3 = 3 := Real.mul_self_sqrt (by norm_num)
+  apply Complex.ext <;>
+    simp [cubeRoot, pow_two, Complex.add_re, Complex.add_im, Complex.mul_re,
+      Complex.mul_im, Complex.one_re, Complex.one_im] <;>
+    nlinarith [h3]
+
+/-- **The modulus of a real combination of `1` and `ω`.**  This is where the
+positive dependence of the cube roots enters: the quadratic form `a² - ab + b²`
+is positive definite, so it can be small only if both coefficients are. -/
+theorem normSq_cubeRoot_comb (a b : ℝ) :
+    Complex.normSq ((a : ℂ) + (b : ℂ) * cubeRoot) = a ^ 2 - a * b + b ^ 2 := by
+  have h3 : Real.sqrt 3 * Real.sqrt 3 = 3 := Real.mul_self_sqrt (by norm_num)
+  simp [cubeRoot, Complex.normSq_apply, Complex.add_re, Complex.add_im,
+    Complex.mul_re, Complex.mul_im]
+  nlinarith [h3]
+
+/-- **Order three forces retention of a third.**  If the fixed points carry only
+the three cube-root phases, with counts `n₀, n₁, n₂`, and the character sum has
+modulus at most `E`, then
+
+    n₀ + n₁ + n₂  ≤  3 n₀ + 3√2 · E,
+
+so the trivially phased class holds at least a third of the fixed points, less
+an error proportional to the trace bound. -/
+theorem card_zero_class_ge_three (n₀ n₁ n₂ E : ℝ) (hE : 0 ≤ E)
+    (htr : Complex.normSq ((n₀ : ℂ) + (n₁ : ℂ) * cubeRoot
+        + (n₂ : ℂ) * cubeRoot ^ 2) ≤ E ^ 2) :
+    n₀ + n₁ + n₂ ≤ 3 * n₀ + 3 * Real.sqrt 2 * E := by
+  -- eliminate `ω²` by the relation
+  have hsub : (n₀ : ℂ) + (n₁ : ℂ) * cubeRoot + (n₂ : ℂ) * cubeRoot ^ 2
+      = ((n₀ - n₂ : ℝ) : ℂ) + ((n₁ - n₂ : ℝ) : ℂ) * cubeRoot := by
+    have hw : cubeRoot ^ 2 = -1 - cubeRoot := by
+      have := cubeRoot_relation
+      linear_combination this
+    rw [hw]
+    push_cast
+    ring
+  rw [hsub, normSq_cubeRoot_comb] at htr
+  set a : ℝ := n₀ - n₂ with ha
+  set b : ℝ := n₁ - n₂ with hb
+  -- the form dominates half the square norm
+  have hhalf : (a ^ 2 + b ^ 2) / 2 ≤ a ^ 2 - a * b + b ^ 2 := by nlinarith [sq_nonneg (a - b)]
+  have hsum : a ^ 2 + b ^ 2 ≤ 2 * E ^ 2 := by linarith [hhalf, htr]
+  have hc : (Real.sqrt 2 * E) ^ 2 = 2 * E ^ 2 := by
+    have h2 : Real.sqrt 2 * Real.sqrt 2 = 2 := Real.mul_self_sqrt (by norm_num)
+    nlinarith [h2]
+  have hcpos : 0 ≤ Real.sqrt 2 * E := by positivity
+  have hA : |a| ≤ Real.sqrt 2 * E := by
+    have : a ^ 2 ≤ (Real.sqrt 2 * E) ^ 2 := by rw [hc]; nlinarith [sq_nonneg b]
+    nlinarith [abs_nonneg a, sq_abs a, this, hcpos]
+  have hB : |b| ≤ Real.sqrt 2 * E := by
+    have : b ^ 2 ≤ (Real.sqrt 2 * E) ^ 2 := by rw [hc]; nlinarith [sq_nonneg a]
+    nlinarith [abs_nonneg b, sq_abs b, this, hcpos]
+  have hale : -a ≤ |a| := neg_le_abs a
+  have hble : b ≤ |b| := le_abs_self b
+  -- `n₀ + n₁ + n₂ = 3n₀ - 2a + b`
+  have hid : n₀ + n₁ + n₂ = 3 * n₀ - 2 * a + b := by
+    rw [ha, hb]; ring
+  rw [hid]
+  linarith [hA, hB, hale, hble]
+
 end NonsoficGroupsExist

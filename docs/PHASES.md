@@ -407,6 +407,21 @@ attaining the involution bound (`untwist_half_separation_witness`).
 Cancellation buys nothing at order two and everything at order four, and the two
 witnesses differ in nothing else.
 
+Order three forces retention too — of a third rather than a half
+(`card_zero_class_ge_three`).  The cube roots of unity are *positively*
+dependent: `1 + ω + ω² = 0` is their only relation over `ℝ`, so a nonnegative
+combination is small only when all three coefficients are nearly equal.  Writing
+`a = n₀ − n₂`, `b = n₁ − n₂`, the relation gives `n₀ + n₁ω + n₂ω² = a + bω`,
+whose squared modulus is the positive definite form `a² − ab + b² ≥ (a²+b²)/2`
+(`normSq_cubeRoot_comb`); a trace bound `E` forces `|a|,|b| ≤ √2·E` and hence
+`n₀ + n₁ + n₂ ≤ 3n₀ + 3√2·E`.
+
+At order four that single relation splits into two independent ones,
+`1 + (−1) = 0` and `i + (−i) = 0`, and a nonnegative combination can vanish while
+missing the class of `1` entirely — which is the witness above.  **The
+trichotomy is complete**: orders two and three force retention of `1/2` and
+`1/3`; order four and beyond force nothing.
+
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
 machinery bears on this half: the difficulty is not that phases are hard to make
