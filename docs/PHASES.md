@@ -385,6 +385,18 @@ which is exactly what a construction like Thom's arranges, `p`-power phases
 against a `p`-power centre, and it explains why the character count of section 6
 is indexed by the `p`-power torsion rather than by anything freely chosen.
 
+There is also a bound the other way, at every order, and it is what makes the
+involution extremal.  A trivially phased fixed point contributes `+1` to the
+trace and every other fixed point at least `-1`, since the phases are
+unimodular, so a trace bound `ε` is a *counting* bound:
+
+    #{y : σy = y, d y = 1} ≤ (#Fix(σ) + ε|Y|)/2
+
+(`card_trivially_phased_le`), with no hypothesis on the torsion at all.
+Untwisting always removes at least half the fixed points; an involution removes
+exactly half; the two bounds meet, so the involution is the worst case rather
+than merely a bad one.
+
 The order-four case shows this is about torsion, not about how much the
 permutation moves.  Take the same two-point model with the identity permutation
 — the *least* separated permutation part possible — and phases `±i` rather than

@@ -494,4 +494,93 @@ theorem untwist_half_separation_witness :
       (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel).carrier = 2 from rfl]
     norm_num
 
+
+/-! ## Untwisting always at least halves the fixed points
+
+The witnesses above bracket the question from both sides at particular orders.
+There is a general bound, and it is the reason the involution is extremal.
+
+A trivially phased fixed point contributes `+1` to the trace, and every other
+fixed point contributes at least `-1`, since the phases are unimodular.  So a
+trace bound `ε` forces
+
+    #{ y : σy = y and d y = 1 }  ≤  (#Fix(σ) + ε|Y|) / 2
+
+(`card_trivially_phased_le`) with no hypothesis on the torsion whatever.
+Untwisting therefore always removes at least half the fixed points, and by
+`involution_untwist_hamming_le` an involution removes exactly half.  The
+involution is the worst case, and the two bounds meet there.
+-/
+
+/-- **At most half the fixed points of a small-trace monomial matrix are
+trivially phased.**  A trivially phased fixed point contributes `+1` to the
+trace and every other fixed point at least `-1`, so the trace bound is a
+counting bound.  No assumption on the torsion of the phases is used. -/
+theorem card_trivially_phased_le (Y : FiniteModel) (d : Y → ℂ)
+    (hd : ∀ y, Complex.normSq (d y) = 1) (σ : Equiv.Perm Y)
+    (hY : 0 < Fintype.card Y) {ε : ℝ}
+    (htr : (normTrace Y (monomialMatrix Y d σ)).re ≤ ε) :
+    2 * ((univ.filter fun y : Y ↦ σ y = y ∧ d y = 1).card : ℝ)
+      ≤ ((univ.filter fun y : Y ↦ σ y = y).card : ℝ) + ε * Fintype.card Y := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  -- the trace is the sum of the phases over the fixed points
+  have htrace : Matrix.trace (monomialMatrix Y d σ)
+      = ∑ y ∈ univ.filter fun y : Y ↦ σ y = y, d y := by
+    rw [Matrix.trace]
+    simp only [Matrix.diag_apply, monomialMatrix_apply]
+    rw [Finset.sum_filter]
+  -- every phase has real part at least -1
+  have hre_ge : ∀ y : Y, (-1 : ℝ) ≤ (d y).re := by
+    intro y
+    have h := hd y
+    rw [Complex.normSq_apply] at h
+    nlinarith [sq_nonneg ((d y).im), sq_nonneg ((d y).re + 1)]
+  -- split the fixed points into the trivially phased ones and the rest
+  set S : Finset Y := univ.filter fun y : Y ↦ σ y = y with hS
+  set T : Finset Y := univ.filter fun y : Y ↦ σ y = y ∧ d y = 1 with hT
+  have hTS : T ⊆ S := by
+    intro y hy
+    rw [hT, Finset.mem_filter] at hy
+    rw [hS, Finset.mem_filter]
+    exact ⟨hy.1, hy.2.1⟩
+  have hsplit : ∑ y ∈ S, (d y).re
+      = ∑ y ∈ T, (d y).re + ∑ y ∈ S \ T, (d y).re := by
+    rw [← Finset.sum_union (Finset.disjoint_sdiff)]
+    congr 1
+    rw [Finset.union_sdiff_of_subset hTS]
+  have hTone : ∑ y ∈ T, (d y).re = (T.card : ℝ) := by
+    rw [Finset.sum_congr rfl (fun y hy ↦ ?_), Finset.sum_const, nsmul_eq_mul,
+      mul_one]
+    rw [hT, Finset.mem_filter] at hy
+    rw [hy.2.2]
+    rfl
+  have hrest : ((S \ T).card : ℝ) * (-1) ≤ ∑ y ∈ S \ T, (d y).re := by
+    calc ((S \ T).card : ℝ) * (-1) = ∑ _y ∈ S \ T, (-1 : ℝ) := by
+          rw [Finset.sum_const, nsmul_eq_mul]
+      _ ≤ ∑ y ∈ S \ T, (d y).re := Finset.sum_le_sum fun y _ ↦ hre_ge y
+  have hcard : ((S \ T).card : ℝ) = (S.card : ℝ) - (T.card : ℝ) := by
+    have hadd : (S \ T).card + T.card = S.card :=
+      Finset.card_sdiff_add_card_eq_card hTS
+    have : ((S \ T).card : ℝ) + (T.card : ℝ) = (S.card : ℝ) := by
+      exact_mod_cast congrArg (fun n : ℕ ↦ (n : ℝ)) hadd
+    linarith [this]
+  -- the trace bound
+  have hRe : ∑ y ∈ S, (d y).re ≤ ε * Fintype.card Y := by
+    have hnt : (normTrace Y (monomialMatrix Y d σ)).re
+        = (∑ y ∈ S, (d y).re) / Fintype.card Y := by
+      rw [normTrace, htrace, Complex.div_re]
+      simp only [Complex.natCast_re, Complex.natCast_im, Complex.normSq_natCast,
+        Complex.re_sum]
+      by_cases hz : (Fintype.card Y : ℝ) = 0
+      · exact absurd hz hYR.ne'
+      · field_simp
+        ring
+    rw [hnt, div_le_iff₀ hYR] at htr
+    linarith [htr]
+  rw [hsplit] at hRe
+  rw [hTone] at hRe
+  rw [hcard] at hrest
+  linarith [hRe, hrest]
+
 end NonsoficGroupsExist

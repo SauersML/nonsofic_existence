@@ -2178,7 +2178,7 @@ So the \(\R/\Z\) versus \(\mu_m\) distinction is not where the difficulty lives,
 
 \clearpage
 \begin{remark}[Untwisting cannot manufacture separation]\label{rem:untwistsep}%
-\leanverified{\leanmod{Sofic/UntwistSeparation}{exists_shift_hamming_le,involution_untwist_hamming_le,phase_eq_zero_of_coprime,untwist_hamming_eq_one_of_phase_ne_zero}\leanmod{Sofic/UntwistSeparation}{untwist_full_separation_witness,untwist_half_separation_witness}}%
+\leanverified{\leanmod{Sofic/UntwistSeparation}{involution_untwist_hamming_le,phase_eq_zero_of_coprime,card_trivially_phased_le,untwist_hamming_eq_one_of_phase_ne_zero}\leanmod{Sofic/UntwistSeparation}{untwist_full_separation_witness,untwist_half_separation_witness}}%
 Remarks~\ref{rem:phasecorrection},~\ref{rem:scalarclass} and~\ref{rem:ratchar} are all about \emph{multiplicativity}: obtaining phases that compose exactly.  None of them touches the other half of a sofic model, which is \emph{separation}---that a nontrivial element move almost every point.  This remark addresses that half, and the news is negative and quantitative.
 
 The fixed points of the untwisted permutation of \((d,\sigma)\) are the pairs \((y,j)\) with \(\sigma y=y\) and \(d(y)=0\), so untwisting separates only to the extent that the phase avoids \(0\) on \(\Fix(\sigma)\).  But \(\Fix(\sigma)\) is partitioned by the \(m\) classes of \(d\), so some class carries at least an average share:
@@ -2198,6 +2198,12 @@ For a \emph{torsion} element the scalar freedom disappears, and what is left is 
  \distH\bigl(\widetilde{(d_g,\sigma_g)},1\bigr)\ \leq\ 1-\tfrac12\Bigl(F-\tfrac{E}{\abs Y}\Bigr).
 \]
 No normalization is chosen anywhere in that statement.  Untwisting an involution inherits its separation and halves it; it cannot create it.  This is the sharp form of the phenomenon, and it is the reason the involutions of Remark~\ref{rem:phasecollapse} keep reappearing as the obstruction.
+
+There is also a bound in the other direction, holding at every order, and it is what makes the involution extremal.  A trivially phased fixed point contributes \(+1\) to the trace, and every other fixed point contributes at least \(-1\), since the phases are unimodular.  A trace bound \(\eps\) is therefore a \emph{counting} bound:
+\[
+ \abs{\set{y\suchthat\sigma y=y,\ d(y)=1}}\ \leq\ \tfrac12\bigl(\abs{\Fix(\sigma)}+\eps\abs Y\bigr),
+\]
+with no hypothesis on the torsion whatever.  Untwisting always removes at least half the fixed points; an involution removes exactly half; so the two bounds meet, and the involution is the worst case rather than merely a bad one.
 
 The order-four case shows that this is genuinely about torsion and not about how much the permutation moves.  Take the same two-point model with the identity permutation---the \emph{least} separated permutation part possible---and phases \(\pm i\) rather than \(\pm1\).  The trace is again \(0\), but now the phase never vanishes, so the untwisted permutation is fixed-point free and the untwisted model is maximally separated.  With \(\pm1\) it keeps half its points fixed, attaining the involution bound.  Cancellation buys nothing at order two and everything at order four, and the two witnesses differ in nothing else.
 
