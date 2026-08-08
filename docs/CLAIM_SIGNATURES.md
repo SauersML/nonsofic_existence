@@ -3025,6 +3025,13 @@ CountableNonsoficGroupExists
   monomialMatrix Y (fun x => 1) σ = Equiv.Perm.permMatrix ℂ σ
 ```
 
+## `NonsoficGroupsExist.monomialMatrix_one_comm`
+
+```lean
+∀ (Y : FiniteModel) (d e : Y.carrier → ℂ),
+  monomialMatrix Y d 1 * monomialMatrix Y e 1 = monomialMatrix Y e 1 * monomialMatrix Y d 1
+```
+
 ## `NonsoficGroupsExist.no_pointwise_rounding`
 
 ```lean
