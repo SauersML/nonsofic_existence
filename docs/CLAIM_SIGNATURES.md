@@ -2624,6 +2624,18 @@ CountableNonsoficGroupExists
     ↑{y | ¬(σ y = τ y ∧ d y = e y)}.card / ↑(Fintype.card Y.carrier)
 ```
 
+## `NonsoficGroupsExist.hammingDistance_wreathPerm_const`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier) {c : ZMod m},
+  c ≠ 0 →
+    0 < Fintype.card Y.carrier →
+      hammingDistance (wreathModel Y m) (wreathPerm Y m d σ)
+          (wreathPerm Y m (fun y => d y + c) σ) =
+        1
+```
+
 ## `NonsoficGroupsExist.hammingDistance_wreathPerm_one`
 
 ```lean
@@ -2656,6 +2668,17 @@ CountableNonsoficGroupExists
           hsDistSq (tensorModel (doubleModel Y) k) (tensorPow (conjDouble A) k)
               (tensorPow (conjDouble B) k) =
             2 - 2 * Complex.normSq (normTrace Y (A * B.conjTranspose)) ^ k
+```
+
+## `NonsoficGroupsExist.hsDistSq_monomial_const`
+
+```lean
+∀ (Y : FiniteModel) {d : Y.carrier → ℂ},
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
+    ∀ (σ : Equiv.Perm Y.carrier) (ζ : ℂ),
+      0 < Fintype.card Y.carrier →
+        hsDistSq Y (monomialMatrix Y d σ) (monomialMatrix Y (fun y => ζ * d y) σ) =
+          Complex.normSq (1 - ζ)
 ```
 
 ## `NonsoficGroupsExist.hsDistSq_of_unitary`

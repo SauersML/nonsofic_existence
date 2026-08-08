@@ -169,4 +169,64 @@ theorem exists_scalarCommute_of_pow_eq_one (q : ℕ) (hq : 1 < q) {ζ : ℂ}
     · rw [if_pos hk, if_pos hk, pow_val_add_one hq hζ i]
     · rw [if_neg hk, if_neg hk, mul_zero]
 
+/-! ## The two prices of a scalar -/
+
+/-- **A scalar costs Hilbert--Schmidt only `|1 - ζ|²`.**  Multiplying every
+phase of a monomial matrix by `ζ` moves it by exactly that much, which is
+arbitrarily small for `ζ` near one. -/
+theorem hsDistSq_monomial_const (Y : FiniteModel) {d : Y → ℂ}
+    (hd : ∀ i, Complex.normSq (d i) = 1) (σ : Equiv.Perm Y) (ζ : ℂ)
+    (hY : 0 < Fintype.card Y) :
+    hsDistSq Y (monomialMatrix Y d σ) (monomialMatrix Y (fun y ↦ ζ * d y) σ)
+      = Complex.normSq (1 - ζ) := by
+  classical
+  have hc : (Fintype.card Y : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hY.ne'
+  have hrow : ∀ i : Y, (∑ j : Y, Complex.normSq (monomialMatrix Y d σ i j
+      - monomialMatrix Y (fun y ↦ ζ * d y) σ i j))
+      = Complex.normSq (1 - ζ) := by
+    intro i
+    have hterm : ∀ j : Y, Complex.normSq (monomialMatrix Y d σ i j
+        - monomialMatrix Y (fun y ↦ ζ * d y) σ i j)
+        = if σ i = j then Complex.normSq (1 - ζ) else 0 := by
+      intro j
+      rw [monomialMatrix_apply, monomialMatrix_apply]
+      by_cases h : σ i = j
+      · rw [if_pos h, if_pos h, if_pos h]
+        have : d i - ζ * d i = (1 - ζ) * d i := by ring
+        rw [this, Complex.normSq_mul, hd i, mul_one]
+      · rw [if_neg h, if_neg h, if_neg h, sub_zero]
+        simp
+    rw [Finset.sum_congr rfl fun j _ ↦ hterm j,
+      Finset.sum_ite_eq Finset.univ (σ i)]
+    simp
+  rw [hsDistSq, Finset.sum_congr rfl fun i _ ↦ hrow i, Finset.sum_const,
+    Finset.card_univ, nsmul_eq_mul, mul_comm, mul_div_assoc, div_self hc,
+    mul_one]
+
+/-- **A scalar costs untwisting the whole model.**  Shifting every phase by a
+nonzero constant leaves the permutation part untouched and changes the second
+coordinate everywhere, so the untwisted permutations disagree at every point.
+This is why the scalar cocycle of a projective model cannot be untwisted: it is
+invisible to the Hilbert--Schmidt metric and maximal in Hamming. -/
+theorem hammingDistance_wreathPerm_const (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) {c : ZMod m} (hc : c ≠ 0)
+    (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ)
+      (wreathPerm Y m (fun y ↦ d y + c) σ) = 1 := by
+  classical
+  rw [hammingDistance_wreathPerm]
+  have hall : (Finset.univ.filter fun y : Y ↦ ¬ (σ y = σ y ∧ d y = d y + c))
+      = Finset.univ := by
+    ext y
+    constructor
+    · intro _
+      exact Finset.mem_univ y
+    · intro _
+      rw [Finset.mem_filter]
+      refine ⟨Finset.mem_univ y, ?_⟩
+      intro hcon
+      exact hc (by linear_combination -hcon.2)
+  rw [hall, Finset.card_univ]
+  field_simp
+
 end NonsoficGroupsExist
