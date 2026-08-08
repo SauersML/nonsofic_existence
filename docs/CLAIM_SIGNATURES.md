@@ -725,6 +725,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 (G : Type u_1) → [Group G] → Prop
 ```
 
+## `NonsoficGroupsExist.IsHyperlinearNonScalar`
+
+```lean
+(G : Type u_2) → [Group G] → Prop
+```
+
 ## `NonsoficGroupsExist.IsNullSeq`
 
 ```lean
@@ -1772,6 +1778,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ∀ {R : Type u_1} [inst : Ring R], (MatrixDiagonalization.stableUnits R).Normal
 ```
 
+## `NonsoficGroupsExist.NonScalarModel`
+
+```lean
+(G : Type u_2) → [Group G] → Finset G → ℝ → ℝ → Type (max 1 u_2)
+```
+
 ## `NonsoficGroupsExist.RankFour.compressionEnd_injective`
 
 ```lean
@@ -2606,10 +2618,28 @@ CountableNonsoficGroupExists
 {Y : Type u_1} → [DecidableEq Y] → Equiv.Perm Y → Equiv.Perm Y
 ```
 
+## `NonsoficGroupsExist.isHyperlinearNonScalar_of_finite`
+
+```lean
+∀ (G : Type) [inst : Group G] [Finite G], IsHyperlinearNonScalar G
+```
+
+## `NonsoficGroupsExist.isHyperlinearNonScalar_of_isSofic`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], IsSofic G → IsHyperlinearNonScalar G
+```
+
 ## `NonsoficGroupsExist.isHyperlinear_of_finite`
 
 ```lean
 ∀ (G : Type) [inst : Group G] [Finite G], IsHyperlinear G
+```
+
+## `NonsoficGroupsExist.isHyperlinear_of_isHyperlinearNonScalar`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], IsHyperlinearNonScalar G → IsHyperlinear G
 ```
 
 ## `NonsoficGroupsExist.isHyperlinear_of_isSofic`
@@ -2743,11 +2773,25 @@ CountableNonsoficGroupExists
   normTrace (doubleModel Y) (conjDouble A) = ↑(Complex.normSq (normTrace Y A))
 ```
 
+## `NonsoficGroupsExist.normTrace_permMatrix`
+
+```lean
+∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
+  0 < Fintype.card Y.carrier →
+    normTrace Y (Equiv.Perm.permMatrix ℂ σ) = ↑(1 - hammingDistance Y σ 1)
+```
+
 ## `NonsoficGroupsExist.normTrace_tensorPow`
 
 ```lean
 ∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ) (k : ℕ),
   normTrace (tensorModel Y k) (tensorPow A k) = normTrace Y A ^ k
+```
+
+## `NonsoficGroupsExist.not_isHyperlinearNonScalar_of_not_isHyperlinear`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinear G → ¬IsHyperlinearNonScalar G
 ```
 
 ## `NonsoficGroupsExist.not_isSofic_of_ambientDecomposition`
@@ -2766,6 +2810,12 @@ CountableNonsoficGroupExists
 ∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinear G → ¬IsSofic G
 ```
 
+## `NonsoficGroupsExist.not_isSofic_of_not_isHyperlinearNonScalar`
+
+```lean
+∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinearNonScalar G → ¬IsSofic G
+```
+
 ## `NonsoficGroupsExist.not_isSofic_of_not_isLEF`
 
 ```lean
@@ -2779,6 +2829,13 @@ CountableNonsoficGroupExists
 ```lean
 {ι : Type u_1} →
   Ultrafilter ι → (X : ι → FiniteModel) → Subgroup ((i : ι) → Equiv.Perm (X i).carrier)
+```
+
+## `NonsoficGroupsExist.permMatrixC_conjTranspose`
+
+```lean
+∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
+  (Equiv.Perm.permMatrix ℂ σ).conjTranspose = Equiv.Perm.permMatrix ℂ σ⁻¹
 ```
 
 ## `NonsoficGroupsExist.permMatrix_dist_sq_eq`
@@ -2923,6 +2980,12 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {Y : Type u_1} [inst : Fintype Y] (A : Matrix Y Y ℂ) (k : ℕ),
   (tensorPow A k).trace = A.trace ^ k
+```
+
+## `NonsoficGroupsExist.trivialNonScalarModel`
+
+```lean
+(F : Finset PUnit.{u_2 + 1}) → (δ : ℝ) → NonScalarModel PUnit.{u_2 + 1} F 0 δ
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL3_not_isSofic`

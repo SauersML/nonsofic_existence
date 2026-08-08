@@ -65,6 +65,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "Hyperlinear",
     "HyperlinearAmplification",
     "HyperlinearMetric",
+    "HyperlinearNonScalar",
     "CommutantRigidity",
     "KunSpectralCounterexample",
     "SoficAmplification",
