@@ -271,6 +271,7 @@ import NonsoficGroupsExist.Sofic.DivisibleInvisible
 import NonsoficGroupsExist.Sofic.HyperlinearUltraproduct
 import NonsoficGroupsExist.Sofic.NormTraceGap
 import NonsoficGroupsExist.Sofic.FreeLampReduction
+import NonsoficGroupsExist.Sofic.FreeLampRigidity
 import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls

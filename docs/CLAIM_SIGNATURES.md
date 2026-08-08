@@ -335,6 +335,12 @@ One entry per declaration named by a manuscript margin note, in the order of `do
 (k : Type) → [Field k] → Type
 ```
 
+## `NonsoficGroupsExist.CentralizerNormalization`
+
+```lean
+(G : Type) → [inst : Group G] → Subgroup G → Prop
+```
+
 ## `NonsoficGroupsExist.CompleteMatrixFamily.matrixAlgEquiv`
 
 ```lean
@@ -544,6 +550,12 @@ One entry per declaration named by a manuscript margin note, in the order of `do
       (FreeElementaryPropertyT.controlSet X) epsilon
 ```
 
+## `NonsoficGroupsExist.FreeLamp`
+
+```lean
+(G : Type) → [inst : Group G] → Subgroup G → (K : Type) → [Group K] → Type
+```
+
 ## `NonsoficGroupsExist.GeneralCornerTheorem.compressionSetup`
 
 ```lean
@@ -739,6 +751,14 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 
 ```lean
 (G : Type u_2) → [Group G] → Prop
+```
+
+## `NonsoficGroupsExist.IsMetricallyFaithful`
+
+```lean
+{ι : Type u_1} →
+  (𝒰 : Ultrafilter ι) →
+    (X : ι → FiniteModel) → {H : Type u_2} → [inst : Group H] → (H →* UniversalSofic 𝒰 X) → Prop
 ```
 
 ## `NonsoficGroupsExist.IsNormApproximable`
@@ -2051,6 +2071,15 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
         ↑(smallBlockVertices (P n) M).card
 ```
 
+## `NonsoficGroupsExist.SoficApproximation.toUniversal`
+
+```lean
+{H : Type u_2} →
+  [inst : Group H] →
+    (S : SoficApproximation H) →
+      (𝒰 : Ultrafilter ℕ) → ↑𝒰 ≤ Filter.cofinite → H →* UniversalSofic 𝒰 S.model
+```
+
 ## `NonsoficGroupsExist.SoficApproximation.wordDisagreement_negligible`
 
 ```lean
@@ -2346,6 +2375,12 @@ Group.FG ↥UniversalRankFour.Ambient ∧
               ↑{y | σ y = y}.card + ε * ↑(Fintype.card Y.carrier)
 ```
 
+## `NonsoficGroupsExist.centralizerNormalization_top`
+
+```lean
+∀ (G : Type) [inst : Group G], CentralizerNormalization G ⊤
+```
+
 ## `NonsoficGroupsExist.charEval_add`
 
 ```lean
@@ -2358,6 +2393,27 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ```lean
 ∀ {B : Type u_1} [inst : AddGroup B] [Finite B] (f : CircleGroup →+ B) (a : CircleGroup),
   f a = 0
+```
+
+## `NonsoficGroupsExist.commutantStabilizer`
+
+```lean
+{G : Type} →
+  {k : Type u_1} →
+    {V : Type u_2} →
+      [inst : Group G] →
+        [inst_1 : Field k] →
+          [inst_2 : AddCommGroup V] →
+            [inst_3 : _root_.Module k V] → (G →* V ≃ₗ[k] V) → Subgroup G → Subgroup G
+```
+
+## `NonsoficGroupsExist.commutantStabilizer_eq_top`
+
+```lean
+∀ {G : Type} {k : Type u_1} {V : Type u_2} [inst : Group G] [inst_1 : Field k]
+  [inst_2 : AddCommGroup V] [inst_3 : _root_.Module k V] [FiniteDimensional k V]
+  (ρ : G →* V ≃ₗ[k] V) (Γ : Subgroup G) (S : Set G),
+  (∀ s ∈ S, ∀ δ ∈ Γ, s * δ * s⁻¹ ∈ Γ) → Subgroup.closure S = ⊤ → commutantStabilizer ρ Γ = ⊤
 ```
 
 ## `NonsoficGroupsExist.commutant_no_growth`
@@ -2715,6 +2771,39 @@ CountableNonsoficGroupExists
 ∀ (α : Type u_1), Group.ResiduallyFinite (FreeGroup α)
 ```
 
+## `NonsoficGroupsExist.freeLampRep_kills_witness`
+
+```lean
+∀ (G : Type) {k : Type u_1} {V : Type u_2} [inst : Group G] [inst_1 : Field k]
+  [inst_2 : AddCommGroup V] [inst_3 : _root_.Module k V] (Γ' : Subgroup G) (K : Type)
+  [inst_4 : Group K] [FiniteDimensional k V] (S : Set G),
+  (∀ s ∈ S, ∀ δ ∈ Γ', s * δ * s⁻¹ ∈ Γ') →
+    Subgroup.closure S = ⊤ →
+      ∀ (π : FreeLamp G Γ' K →* V ≃ₗ[k] V) (t γ : G),
+        γ ∈ Γ' → ∀ (k' : K), π (lampWitness G Γ' K t γ k') = 1
+```
+
+## `NonsoficGroupsExist.freeLampRep_not_injective`
+
+```lean
+∀ (G : Type) {k : Type u_1} {V : Type u_2} [inst : Group G] [inst_1 : Field k]
+  [inst_2 : AddCommGroup V] [inst_3 : _root_.Module k V] (Γ' : Subgroup G) (K : Type)
+  [inst_4 : Group K] [FiniteDimensional k V] (S : Set G),
+  (∀ s ∈ S, ∀ δ ∈ Γ', s * δ * s⁻¹ ∈ Γ') →
+    Subgroup.closure S = ⊤ →
+      ∀ (π : FreeLamp G Γ' K →* V ≃ₗ[k] V) {t γ : G},
+        γ ∈ Γ' → t⁻¹ * γ * t ∉ Γ' → ∀ {k' : K}, k' ≠ 1 → ¬Function.Injective ⇑π
+```
+
+## `NonsoficGroupsExist.freeLamp_not_isSofic`
+
+```lean
+∀ (G : Type) [inst : Group G] (Γ : Subgroup G) (K : Type) [inst_1 : Group K] [Countable G]
+  [Countable K],
+  CentralizerNormalization G Γ →
+    ∀ {t γ : G}, γ ∈ Γ → t⁻¹ * γ * t ∉ Γ → ∀ {k : K}, k ≠ 1 → ¬IsSofic (FreeLamp G Γ K)
+```
+
 ## `NonsoficGroupsExist.halfOrbit`
 
 ```lean
@@ -2895,6 +2984,13 @@ CountableNonsoficGroupExists
     v g * implementerCocycle v h k * (v g)⁻¹ * implementerCocycle v g (h * k)
 ```
 
+## `NonsoficGroupsExist.inLamp_commute_inAmbient`
+
+```lean
+∀ (G : Type) [inst : Group G] (Γ : Subgroup G) (K : Type) [inst_1 : Group K] (k : K) {g : G},
+  g ∈ Γ → Commute ((inLamp G Γ K) k) ((inAmbient G Γ K) g)
+```
+
 ## `NonsoficGroupsExist.invPowSubgroup`
 
 ```lean
@@ -3066,6 +3162,13 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {X : Type u_2} {A : Type u_3} [inst : AddCommGroup A] {a : A},
   a ≠ 0 → Function.Injective (lampEmbedding a)
+```
+
+## `NonsoficGroupsExist.lampWitness_ne_one`
+
+```lean
+∀ (G : Type) [inst : Group G] (Γ : Subgroup G) (K : Type) [inst_1 : Group K] {t γ : G},
+  t⁻¹ * γ * t ∉ Γ → ∀ {k : K}, k ≠ 1 → lampWitness G Γ K t γ k ≠ 1
 ```
 
 ## `NonsoficGroupsExist.map_eq_one_of_mem_divisible_subgroup`

@@ -8,6 +8,26 @@ Each part is kept verbatim under its own banner.
 
 <!-- ======== formerly BUILD_ITERATION_NOTES.md ======== -->
 
+# Free-lamp rigidity LANDED (2026-08-08, latest)
+
+`Sofic/FreeLampRigidity` green (3850 jobs, audit exit 0): N20 kernel-checked
+— for infranormal pairs (compressor set S generating G), EVERY
+finite-dimensional representation of FreeLamp G Γ K over ANY field by ANY
+invertibles kills `lampWitness` (`freeLampRep_kills_witness`), hence H_K has
+no faithful f.d. representation (`freeLampRep_not_injective`, not MAP).
+Mechanism: `commutantStabilizer` subgroup + `commutant_no_growth` (the
+existing co-Hopfian rigidity) + generation.  Gotchas: `set`-vars are OPAQUE
+fvars (not let-bindings) — simp only [hρ, hx, MonoidHom.comp_apply] before
+any defeq matching; universe: FreeLamp needs G : Type 0; `e⁻¹ = e.symm` in
+the automorphism group via `eq_inv_of_mul_eq_one_left` +
+`LinearEquiv.mul_eq_trans` + `self_trans_symm`.  Adjudication note: Theorem
+B's "t ∈ Γ*" parenthetical is an UNVERIFIED pin (finite-quotient
+normalization does not imply t ∈ Γ*); flag before grading B/amalgamated-Popa
+[proved].  Preusser 1912.11386 verified from abstract (sandwich over
+exchange rings n ≥ 3).
+
+---
+
 # Free-lamp reduction LANDED (2026-08-08, latest)
 
 `Sofic/FreeLampReduction` green (full build 3849 jobs, audit 10030 decls,
