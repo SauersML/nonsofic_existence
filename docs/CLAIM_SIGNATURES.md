@@ -1778,12 +1778,6 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ∀ {R : Type u_1} [inst : Ring R], (MatrixDiagonalization.stableUnits R).Normal
 ```
 
-## `NonsoficGroupsExist.MonomialSoficData`
-
-```lean
-(G : Type u_1) → [Group G] → Finset G → ℝ → ℕ → Type (max 1 u_1)
-```
-
 ## `NonsoficGroupsExist.NonScalarModel`
 
 ```lean
@@ -2226,19 +2220,6 @@ Group.FG ↥UniversalRankFour.Ambient ∧
   (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, (φ t)⁻¹ * q * φ t ∈ Subgroup.map φ Γ
 ```
 
-## `NonsoficGroupsExist.conjDouble`
-
-```lean
-{Y : Type u_1} → Matrix Y Y ℂ → Matrix (Y × Y) (Y × Y) ℂ
-```
-
-## `NonsoficGroupsExist.conjDouble_mul`
-
-```lean
-∀ {Y : Type u_1} [inst : Fintype Y] (A B : Matrix Y Y ℂ),
-  conjDouble (A * B) = conjDouble A * conjDouble B
-```
-
 ## `NonsoficGroupsExist.countable_nonsofic_groups_exist`
 
 ```lean
@@ -2311,36 +2292,11 @@ CountableNonsoficGroupExists
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
 ```
 
-## `NonsoficGroupsExist.eq_smul_one_iff_normSq_normTrace_eq_one`
-
-```lean
-∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
-  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier → (U = normTrace Y U • 1 ↔ Complex.normSq (normTrace Y U) = 1)
-```
-
 ## `NonsoficGroupsExist.eq_top_of_permHom_trivial`
 
 ```lean
 ∀ {G : Type u_1} [inst : Group G] (H : Subgroup G),
   (∀ (g : G), (MulAction.toPermHom G (G ⧸ H)) g = 1) → H = ⊤
-```
-
-## `NonsoficGroupsExist.exists_conjDouble_separation`
-
-```lean
-∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
-  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
-      0 < Fintype.card Y.carrier →
-        ∀ {δ ε : ℝ},
-          0 < δ →
-            0 < ε →
-              Complex.normSq (normTrace Y (A * B.conjTranspose)) ≤ 1 - δ →
-                ∃ k,
-                  2 - ε ≤
-                    hsDistSq (tensorModel (doubleModel Y) k) (tensorPow (conjDouble A) k)
-                      (tensorPow (conjDouble B) k)
 ```
 
 ## `NonsoficGroupsExist.exists_finitelyPresented_nonsofic_group`
@@ -2398,24 +2354,6 @@ CountableNonsoficGroupExists
 ∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
   {Q : Type u_3} [inst_3 : Group Q] [Infinite R] [Finite Q] (φ : ↥(elementaryGroup ι R) →* Q)
   (i j : ι) (h : i ≠ j), ∃ a, a ≠ 0 ∧ φ (elGen i j h a) = 1
-```
-
-## `NonsoficGroupsExist.exists_re_normTrace_pow_ge`
-
-```lean
-∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
-  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier →
-      1 - 1 / 1000000 ≤ Complex.normSq (normTrace Y U) →
-        ∃ l, 1 ≤ l ∧ l ≤ 4 ∧ 1 / 4 ≤ (normTrace Y (U ^ l)).re
-```
-
-## `NonsoficGroupsExist.exists_re_pow_ge_of_normSq_near_one`
-
-```lean
-∀ {z : ℂ},
-  Complex.normSq z ≤ 1 →
-    1 - 1 / 1000 ≤ Complex.normSq z → ∃ l, 1 ≤ l ∧ l ≤ 4 ∧ 299 / 1000 ≤ (z ^ l).re
 ```
 
 ## `NonsoficGroupsExist.exists_residuallyFinite_group_with_non_residuallyFinite_quotient`
@@ -2621,36 +2559,6 @@ CountableNonsoficGroupExists
         1 - (1 - hammingDistance Y p q) ^ k
 ```
 
-## `NonsoficGroupsExist.hammingDistance_wreathPerm`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d e : Y.carrier → ZMod m)
-  (σ τ : Equiv.Perm Y.carrier),
-  hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) (wreathPerm Y m e τ) =
-    ↑{y | ¬(σ y = τ y ∧ d y = e y)}.card / ↑(Fintype.card Y.carrier)
-```
-
-## `NonsoficGroupsExist.hammingDistance_wreathPerm_const`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier) {c : ZMod m},
-  c ≠ 0 →
-    0 < Fintype.card Y.carrier →
-      hammingDistance (wreathModel Y m) (wreathPerm Y m d σ)
-          (wreathPerm Y m (fun y => d y + c) σ) =
-        1
-```
-
-## `NonsoficGroupsExist.hammingDistance_wreathPerm_one`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier),
-  hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 =
-    ↑{y | ¬(σ y = y ∧ d y = 0)}.card / ↑(Fintype.card Y.carrier)
-```
-
 ## `NonsoficGroupsExist.hammingLength`
 
 ```lean
@@ -2661,29 +2569,6 @@ CountableNonsoficGroupExists
 
 ```lean
 (Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → Matrix Y.carrier Y.carrier ℂ → ℝ
-```
-
-## `NonsoficGroupsExist.hsDistSq_conjDoubleTensorPow`
-
-```lean
-∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
-  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
-      0 < Fintype.card Y.carrier →
-        ∀ (k : ℕ),
-          hsDistSq (tensorModel (doubleModel Y) k) (tensorPow (conjDouble A) k)
-              (tensorPow (conjDouble B) k) =
-            2 - 2 * Complex.normSq (normTrace Y (A * B.conjTranspose)) ^ k
-```
-
-## `NonsoficGroupsExist.hsDistSq_max_of_equal_perm`
-
-```lean
-∀ (Y : FiniteModel),
-  0 < Fintype.card Y.carrier →
-    ∀ (σ : Equiv.Perm Y.carrier),
-      hsDistSq Y (monomialMatrix Y (fun x => 1) σ) (monomialMatrix Y (fun x => -1) σ) = 4 ∧
-        hammingDistance Y σ σ = 0
 ```
 
 ## `NonsoficGroupsExist.hsDistSq_monomial_const`
@@ -2697,81 +2582,10 @@ CountableNonsoficGroupExists
           Complex.normSq (1 - ζ)
 ```
 
-## `NonsoficGroupsExist.hsDistSq_of_unitary`
-
-```lean
-∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
-  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
-      0 < Fintype.card Y.carrier →
-        hsDistSq Y A B = 2 - 2 * (normTrace Y (A * B.conjTranspose)).re
-```
-
-## `NonsoficGroupsExist.hsDistSq_tensorPow`
-
-```lean
-∀ (Y : FiniteModel) {A B : Matrix Y.carrier Y.carrier ℂ},
-  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    B ∈ Matrix.unitaryGroup Y.carrier ℂ →
-      0 < Fintype.card Y.carrier →
-        ∀ (k : ℕ),
-          hsDistSq (tensorModel Y k) (tensorPow A k) (tensorPow B k) =
-            2 - 2 * (normTrace Y (A * B.conjTranspose) ^ k).re
-```
-
 ## `NonsoficGroupsExist.hsNormSq`
 
 ```lean
 (Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → ℝ
-```
-
-## `NonsoficGroupsExist.hsNormSq_add_le`
-
-```lean
-∀ (Y : FiniteModel) (A B : Matrix Y.carrier Y.carrier ℂ),
-  hsNormSq Y (A + B) ≤ 2 * hsNormSq Y A + 2 * hsNormSq Y B
-```
-
-## `NonsoficGroupsExist.hsNormSq_conjTranspose`
-
-```lean
-∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
-  hsNormSq Y A.conjTranspose = hsNormSq Y A
-```
-
-## `NonsoficGroupsExist.hsNormSq_map_pow_step`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε) {w : G},
-  w ∈ F →
-    ∀ (l : ℕ),
-      w ^ l ∈ F →
-        hsNormSq M.carrier (M.map (w ^ (l + 1)) - M.map w ^ (l + 1)) ≤
-          2 * ε + 2 * hsNormSq M.carrier (M.map (w ^ l) - M.map w ^ l)
-```
-
-## `NonsoficGroupsExist.hsNormSq_mul_left`
-
-```lean
-∀ (Y : FiniteModel) {V : Matrix Y.carrier Y.carrier ℂ},
-  V ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier →
-      ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (V * A) = hsNormSq Y A
-```
-
-## `NonsoficGroupsExist.hsNormSq_mul_right`
-
-```lean
-∀ (Y : FiniteModel) {V : Matrix Y.carrier Y.carrier ℂ},
-  V ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (A * V) = hsNormSq Y A
-```
-
-## `NonsoficGroupsExist.hsNormSq_one_sub_map_one`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
-  1 ∈ F → hsNormSq M.carrier (1 - M.map 1) ≤ ε
 ```
 
 ## `NonsoficGroupsExist.hsNormSq_pow_four_sub_le`
@@ -2795,22 +2609,6 @@ CountableNonsoficGroupExists
             2 * hsNormSq Y (U ^ l - normTrace Y U ^ l • 1)
 ```
 
-## `NonsoficGroupsExist.hsNormSq_smul`
-
-```lean
-∀ (Y : FiniteModel) (c : ℂ) (A : Matrix Y.carrier Y.carrier ℂ),
-  hsNormSq Y (c • A) = Complex.normSq c * hsNormSq Y A
-```
-
-## `NonsoficGroupsExist.hsNormSq_sub_normTrace_smul`
-
-```lean
-∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
-  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier →
-      hsNormSq Y (U - normTrace Y U • 1) = 1 - Complex.normSq (normTrace Y U)
-```
-
 ## `NonsoficGroupsExist.hsNormSq_sub_smul_one`
 
 ```lean
@@ -2828,28 +2626,10 @@ CountableNonsoficGroupExists
 {Y : Type u_1} → [DecidableEq Y] → Equiv.Perm Y → Equiv.Perm Y
 ```
 
-## `NonsoficGroupsExist.isHyperlinearNonScalar_of_finite`
-
-```lean
-∀ (G : Type) [inst : Group G] [Finite G], IsHyperlinearNonScalar G
-```
-
-## `NonsoficGroupsExist.isHyperlinearNonScalar_of_isSofic`
-
-```lean
-∀ {G : Type u_1} [inst : Group G], IsSofic G → IsHyperlinearNonScalar G
-```
-
 ## `NonsoficGroupsExist.isHyperlinear_of_finite`
 
 ```lean
 ∀ (G : Type) [inst : Group G] [Finite G], IsHyperlinear G
-```
-
-## `NonsoficGroupsExist.isHyperlinear_of_isHyperlinearNonScalar`
-
-```lean
-∀ {G : Type u_1} [inst : Group G], IsHyperlinearNonScalar G → IsHyperlinear G
 ```
 
 ## `NonsoficGroupsExist.isHyperlinear_of_isSofic`
@@ -2887,13 +2667,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ (α : Type u_1), IsSofic (FreeGroup α)
-```
-
-## `NonsoficGroupsExist.isSofic_iff_monomial`
-
-```lean
-∀ (G : Type u_1) [inst : Group G],
-  IsSofic G ↔ ∀ (F : Finset G) (ε : ℝ), 0 < ε → ∃ m, Nonempty (MonomialSoficData G F ε (m + 1))
 ```
 
 ## `NonsoficGroupsExist.isSofic_iff_nonempty_soficApproximation`
@@ -2981,21 +2754,6 @@ CountableNonsoficGroupExists
   monomialMatrix Y (fun x => 1) σ = Equiv.Perm.permMatrix ℂ σ
 ```
 
-## `NonsoficGroupsExist.monomialSoficData_of_soficModel`
-
-```lean
-{G : Type u_1} →
-  [inst : Group G] → {F : Finset G} → {ε : ℝ} → SoficModel G F ε → MonomialSoficData G F ε 1
-```
-
-## `NonsoficGroupsExist.monomial_normTrace_zero_of_identity`
-
-```lean
-∃ Y d,
-  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
-    hammingDistance Y 1 1 = 0 ∧ normTrace Y (monomialMatrix Y d 1) = 0
-```
-
 ## `NonsoficGroupsExist.no_soficEmbedding_of_not_isSofic`
 
 ```lean
@@ -3003,81 +2761,6 @@ CountableNonsoficGroupExists
   ¬IsSofic G →
     (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
-```
-
-## `NonsoficGroupsExist.normSq_add_le`
-
-```lean
-∀ (a b : ℂ), Complex.normSq (a + b) ≤ 2 * Complex.normSq a + 2 * Complex.normSq b
-```
-
-## `NonsoficGroupsExist.normSq_normTrace_le_hsNormSq`
-
-```lean
-∀ (Y : FiniteModel) (C : Matrix Y.carrier Y.carrier ℂ),
-  Complex.normSq (normTrace Y C) ≤ hsNormSq Y C
-```
-
-## `NonsoficGroupsExist.normSq_normTrace_le_one`
-
-```lean
-∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
-  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier → Complex.normSq (normTrace Y U) ≤ 1
-```
-
-## `NonsoficGroupsExist.normSq_normTrace_lt_of_separated`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
-  0 < ε →
-    ε ≤ 1 / 10000 →
-      ∀ {w : G},
-        (∀ (l : ℕ), 1 ≤ l → l ≤ 4 → w ^ l ∈ F) →
-          1 ∈ F →
-            (∀ (l : ℕ), 1 ≤ l → l ≤ 4 → w ^ l ≠ 1) →
-              Complex.normSq (normTrace M.carrier (M.map w)) < 1 - 1 / 1000000
-```
-
-## `NonsoficGroupsExist.normSq_normTrace_monomial_le`
-
-```lean
-∀ (Y : FiniteModel) {d : Y.carrier → ℂ},
-  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
-    ∀ (σ : Equiv.Perm Y.carrier),
-      Complex.normSq (normTrace Y (monomialMatrix Y d σ)) ≤ (1 - hammingDistance Y σ 1) ^ 2
-```
-
-## `NonsoficGroupsExist.normSq_normTrace_mul_sub`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε) {g h : G},
-  g ∈ F →
-    h ∈ F →
-      Complex.normSq
-          (normTrace M.carrier (M.map (g * h)) -
-            normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)) ≤
-        2 * ε + 4 * (1 - Complex.normSq (normTrace M.carrier (M.map g))) +
-          4 * (1 - Complex.normSq (normTrace M.carrier (M.map h)))
-```
-
-## `NonsoficGroupsExist.normTrace`
-
-```lean
-(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → ℂ
-```
-
-## `NonsoficGroupsExist.normTrace_conjDouble`
-
-```lean
-∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
-  normTrace (doubleModel Y) (conjDouble A) = ↑(Complex.normSq (normTrace Y A))
-```
-
-## `NonsoficGroupsExist.normTrace_one'`
-
-```lean
-∀ (Y : FiniteModel), 0 < Fintype.card Y.carrier → normTrace Y 1 = 1
 ```
 
 ## `NonsoficGroupsExist.normTrace_permMatrix`
@@ -3101,39 +2784,6 @@ CountableNonsoficGroupExists
   normTrace Y (A - B) = normTrace Y A - normTrace Y B
 ```
 
-## `NonsoficGroupsExist.normTrace_tensorPow`
-
-```lean
-∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ) (k : ℕ),
-  normTrace (tensorModel Y k) (tensorPow A k) = normTrace Y A ^ k
-```
-
-## `NonsoficGroupsExist.not_both_normSq_normTrace_ge`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
-  0 < ε →
-    ε ≤ 1 / 10000 →
-      ∀ {g h : G},
-        g ∈ F →
-          h ∈ F →
-            g * h ∈ F →
-              1 ∈ F →
-                g * g = 1 →
-                  h * h = 1 →
-                    g ≠ 1 →
-                      h ≠ 1 →
-                        g * h ≠ 1 →
-                          ¬(1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map g)) ∧
-                              1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map h)))
-```
-
-## `NonsoficGroupsExist.not_isHyperlinearNonScalar_of_not_isHyperlinear`
-
-```lean
-∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinear G → ¬IsHyperlinearNonScalar G
-```
-
 ## `NonsoficGroupsExist.not_isSofic_of_ambientDecomposition`
 
 ```lean
@@ -3148,12 +2798,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinear G → ¬IsSofic G
-```
-
-## `NonsoficGroupsExist.not_isSofic_of_not_isHyperlinearNonScalar`
-
-```lean
-∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinearNonScalar G → ¬IsSofic G
 ```
 
 ## `NonsoficGroupsExist.not_isSofic_of_not_isLEF`
@@ -3266,27 +2910,6 @@ CountableNonsoficGroupExists
 ∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
-## `NonsoficGroupsExist.re_nonpos_of_pow_four_eq_one`
-
-```lean
-∀ {z : ℂ}, z ^ 4 = 1 → z ≠ 1 → z.re ≤ 0
-```
-
-## `NonsoficGroupsExist.re_nonpos_of_pow_three_eq_one`
-
-```lean
-∀ {z : ℂ}, z ^ 3 = 1 → z ≠ 1 → z.re ≤ 0
-```
-
-## `NonsoficGroupsExist.re_normTrace_le_of_separated`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
-  0 < ε →
-    ε ≤ 1 / 10000 →
-      ∀ {g : G}, g ∈ F → 1 ∈ F → g ≠ 1 → (normTrace M.carrier (M.map g)).re ≤ ε / 2 + 1 / 100
-```
-
 ## `NonsoficGroupsExist.re_pow_four`
 
 ```lean
@@ -3323,19 +2946,6 @@ CountableNonsoficGroupExists
             {h : ℝ} →
               (X.transport (blockModel P y) e).HasCheegerLowerBound h →
                 ComponentRefinement X P Q q y
-```
-
-## `NonsoficGroupsExist.soficModel_of_monomial`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} {m : ℕ} [NeZero m]
-  (D : MonomialSoficData G F ε m), Nonempty (SoficModel G F ε)
-```
-
-## `NonsoficGroupsExist.sq_sum_le_card_mul_sum_sq`
-
-```lean
-∀ {ι : Type u_1} (s : Finset ι) (f : ι → ℝ), (∑ i ∈ s, f i) ^ 2 ≤ ↑s.card * ∑ i ∈ s, f i ^ 2
 ```
 
 ## `NonsoficGroupsExist.symmDiff_le_of_pinned`
@@ -3380,26 +2990,10 @@ CountableNonsoficGroupExists
   tensorPow (A * B) k = tensorPow A k * tensorPow B k
 ```
 
-## `NonsoficGroupsExist.tensorPow_phase_collapse`
-
-```lean
-∀ (Y : FiniteModel),
-  0 < Fintype.card Y.carrier →
-    Complex.I • 1 ∈ Matrix.unitaryGroup Y.carrier ℂ ∧
-      hsDistSq Y 1 (Complex.I • 1) = 2 ∧ tensorPow (Complex.I • 1) 4 = tensorPow 1 4
-```
-
 ## `NonsoficGroupsExist.tensorPow_smul`
 
 ```lean
 ∀ {Y : Type u_1} (c : ℂ) (A : Matrix Y Y ℂ) (k : ℕ), tensorPow (c • A) k = c ^ k • tensorPow A k
-```
-
-## `NonsoficGroupsExist.trace_conjDouble`
-
-```lean
-∀ {Y : Type u_1} [inst : Fintype Y] (A : Matrix Y Y ℂ),
-  (conjDouble A).trace = A.trace * (starRingEnd ℂ) A.trace
 ```
 
 ## `NonsoficGroupsExist.trace_tensorPow`
@@ -3407,18 +3001,6 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {Y : Type u_1} [inst : Fintype Y] (A : Matrix Y Y ℂ) (k : ℕ),
   (tensorPow A k).trace = A.trace ^ k
-```
-
-## `NonsoficGroupsExist.trivialMonomialSoficData`
-
-```lean
-(F : Finset PUnit.{u_1 + 1}) → MonomialSoficData PUnit.{u_1 + 1} F 0 1
-```
-
-## `NonsoficGroupsExist.trivialNonScalarModel`
-
-```lean
-(F : Finset PUnit.{u_2 + 1}) → (δ : ℝ) → NonScalarModel PUnit.{u_2 + 1} F 0 δ
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL3_not_isSofic`
@@ -3468,26 +3050,4 @@ CountableNonsoficGroupExists
     Group.FG ↥(UniversalLeavittEL m) ∧
       Infinite ↥(UniversalLeavittEL m) ∧
         HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
-```
-
-## `NonsoficGroupsExist.wreathPerm`
-
-```lean
-(Y : FiniteModel) →
-  (m : ℕ) →
-    [NeZero m] → (Y.carrier → ZMod m) → Equiv.Perm Y.carrier → Equiv.Perm (Y.carrier × ZMod m)
-```
-
-## `NonsoficGroupsExist.wreathPerm_mul`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d e : Y.carrier → ZMod m)
-  (σ τ : Equiv.Perm Y.carrier),
-  wreathPerm Y m (fun y => e y + d (τ y)) (σ * τ) = wreathPerm Y m d σ * wreathPerm Y m e τ
-```
-
-## `NonsoficGroupsExist.wreathPerm_one`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m], wreathPerm Y m (fun x => 0) 1 = 1
 ```
