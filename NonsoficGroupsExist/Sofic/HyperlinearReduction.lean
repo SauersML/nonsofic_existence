@@ -30,6 +30,8 @@ finitely generated one.
 
 namespace NonsoficGroupsExist
 
+open scoped Pointwise
+
 variable {G : Type} [Group G]
 
 /-- **Soficity is local**, by the same extension as for hyperlinearity. -/
@@ -231,5 +233,75 @@ theorem isHyperlinear_of_forall_small (h : ∀ (F : Finset G) (n : ℕ),
   rw [div_le_iff₀ hn0]
   rw [div_lt_iff₀ hε] at hn
   nlinarith [hn, hε]
+
+/-! ## The textbook convention for hyperlinearity
+
+`isSofic_iff_productRestricted` records that requiring multiplicativity for all
+pairs in the test set is the same as requiring it only when the product remains
+in the set -- the textbook convention -- because one may enlarge `F` by `F * F`.
+The hyperlinear side had no such statement, and it should, since the manuscript's
+results are stated against the unrestricted convention while the literature uses
+the restricted one.
+
+The argument is the sofic one verbatim: nothing about the metric enters, only
+that enlarging the test set makes the hypothesis stronger and the products
+available.
+-/
+
+/-- The textbook local hyperlinear model, with multiplicativity required only
+when the tested product remains in the finite test set. -/
+structure ProductRestrictedHyperlinearModel (G : Type*) [Group G]
+    (F : Finset G) (ε : ℝ) where
+  carrier : FiniteModel
+  nonempty : 0 < Fintype.card carrier
+  map : G → Matrix carrier carrier ℂ
+  isUnitary : ∀ g, map g ∈ Matrix.unitaryGroup carrier ℂ
+  multiplicative : ∀ g ∈ F, ∀ h ∈ F, g * h ∈ F →
+    hsDistSq carrier (map (g * h)) (map g * map h) ≤ ε
+  separated : ∀ g ∈ F, ∀ h ∈ F, g ≠ h →
+    2 - ε ≤ hsDistSq carrier (map g) (map h)
+
+/-- Hyperlinearity in the product-restricted textbook convention. -/
+def IsHyperlinearProductRestricted (G : Type*) [Group G] : Prop :=
+  ∀ (F : Finset G) (ε : ℝ), 0 < ε →
+    Nonempty (ProductRestrictedHyperlinearModel G F ε)
+
+/-- **The two conventions agree**, by the same enlargement that settles the
+sofic case. -/
+theorem isHyperlinear_iff_productRestricted (G : Type*) [Group G] :
+    IsHyperlinear G ↔ IsHyperlinearProductRestricted G := by
+  classical
+  constructor
+  · intro h F ε hε
+    obtain ⟨M⟩ := h F ε hε
+    exact ⟨{
+      carrier := M.carrier
+      nonempty := M.nonempty
+      map := M.map
+      isUnitary := M.isUnitary
+      multiplicative := fun g hg h hh _ ↦ M.multiplicative g hg h hh
+      separated := M.separated }⟩
+  · intro h F ε hε
+    let T : Finset G := F ∪ F * F
+    obtain ⟨M⟩ := h T ε hε
+    refine ⟨{
+      carrier := M.carrier
+      nonempty := M.nonempty
+      map := M.map
+      isUnitary := M.isUnitary
+      multiplicative := ?_
+      separated := ?_ }⟩
+    · intro g hg h hh
+      exact M.multiplicative g (by simp [T, hg]) h (by simp [T, hh])
+        (Finset.mem_union_right F (Finset.mul_mem_mul hg hh))
+    · intro g hg h hh hgh
+      exact M.separated g (by simp [T, hg]) h (by simp [T, hh]) hgh
+
+/-- A closed witness, so `IsHyperlinearProductRestricted` is not a certificate
+nothing satisfies: the trivial group. -/
+theorem isHyperlinearProductRestricted_trivial :
+    IsHyperlinearProductRestricted (PUnit : Type) :=
+  (isHyperlinear_iff_productRestricted (PUnit : Type)).mp
+    (isHyperlinear_of_finite (PUnit : Type))
 
 end NonsoficGroupsExist

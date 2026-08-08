@@ -2886,6 +2886,12 @@ CountableNonsoficGroupExists
               1 - (fixedDensity Y σ - E / ↑(Fintype.card Y.carrier)) / 2
 ```
 
+## `NonsoficGroupsExist.isHyperlinear_iff_productRestricted`
+
+```lean
+∀ (G : Type u_1) [inst : Group G], IsHyperlinear G ↔ IsHyperlinearProductRestricted G
+```
+
 ## `NonsoficGroupsExist.isHyperlinear_of_injective`
 
 ```lean
@@ -2964,13 +2970,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ (G : Type) [inst : Group G] [Finite G], IsSofic G
-```
-
-## `NonsoficGroupsExist.isSofic_of_forall_small`
-
-```lean
-∀ {G : Type} [inst : Group G],
-  (∀ (F : Finset G) (n : ℕ), Nonempty (SoficModel G F (1 / (↑n + 1)))) → IsSofic G
 ```
 
 ## `NonsoficGroupsExist.isSofic_of_injective`
