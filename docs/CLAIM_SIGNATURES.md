@@ -2114,6 +2114,24 @@ Function.Injective ⇑UniversalRankFour.witnessEmbedding
   Whitehead.diagonalPair ↑a ↑a⁻¹ = Whitehead.w a * Whitehead.w (-1)
 ```
 
+## `NonsoficGroupsExist.abs_window_defect_le`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} [inst_1 : DecidableEq G]
+  (act : G → Equiv.Perm Y) (F : Finset G),
+  F.Nonempty →
+    ∀ (c : G → G → Y → ℝ),
+      IsPhaseCocycle act c →
+        ∀ {B : ℝ},
+          (∀ (g h : G) (y : Y), |c g h y| ≤ B) →
+            ∀ (g h : G) (y : Y),
+              |c g h y - phaseCob act (windowCorrection F c) g h y| ≤
+                B *
+                    ↑((Finset.image (fun k => h * k) F \ F).card +
+                        (F \ Finset.image (fun k => h * k) F).card) /
+                  ↑F.card
+```
+
 ## `NonsoficGroupsExist.additiveRounding_no_separation`
 
 ```lean
@@ -2802,24 +2820,6 @@ CountableNonsoficGroupExists
   HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ∀ (A : SoficApproximation G), IsLEF J
 ```
 
-## `NonsoficGroupsExist.isPhaseCocycle_of_mod`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} (act : G → Equiv.Perm Y) (c : G → G → Y → ℝ),
-  (∀ (g h : G) (y : Y), |c g h y| ≤ 1 / 6) →
-    (∀ (g h k : G) (y : Y),
-        ∃ n, c g h y + c (g * h) k y - c h k ((act g)⁻¹ y) - c g (h * k) y = ↑n) →
-      IsPhaseCocycle act c
-```
-
-## `NonsoficGroupsExist.isPhaseCocycle_phaseCob`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} (act : G → Equiv.Perm Y),
-  (∀ (g h : G), act (g * h) = act g * act h) →
-    ∀ (b : G → Y → ℝ), IsPhaseCocycle act (phaseCob act b)
-```
-
 ## `NonsoficGroupsExist.isSofic_freeGroup`
 
 ```lean
@@ -3262,4 +3262,19 @@ CountableNonsoficGroupExists
     Group.FG ↥(UniversalLeavittEL m) ∧
       Infinite ↥(UniversalLeavittEL m) ∧
         HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
+```
+
+## `NonsoficGroupsExist.window_defect_eq`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} [inst_1 : DecidableEq G]
+  (act : G → Equiv.Perm Y) (F : Finset G),
+  F.Nonempty →
+    ∀ (c : G → G → Y → ℝ),
+      IsPhaseCocycle act c →
+        ∀ (g h : G) (y : Y),
+          c g h y - phaseCob act (windowCorrection F c) g h y =
+            (∑ k ∈ Finset.image (fun k => h * k) F \ F, c g k y -
+                ∑ k ∈ F \ Finset.image (fun k => h * k) F, c g k y) /
+              ↑F.card
 ```
