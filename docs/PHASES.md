@@ -731,6 +731,20 @@ cannot.  That is why a hyperlinear model may place a central group element at a
 scalar — and be maximally separated there — while a sofic model has nowhere to
 put it.  Every phase phenomenon in §§1–6f is downstream of this one asymmetry.
 
+**But it is not itself an obstruction**, and seeing why matters — otherwise the
+asymmetry looks like it should settle the question.  A model's image need not be
+all of `Sym(Y)`, and a permutation commuting with a *transitive* set is
+semiregular: if it fixes one point it fixes all
+(`eq_one_of_fixed_of_commutes_transitive`).  So in a transitive model a
+nontrivial element commuting with the image moves *every* point and is
+maximally separated (`hammingDistance_eq_one_of_commutes_transitive`).
+
+That is the resolution.  A hyperlinear model separates a central element by
+putting it at a scalar; a sofic model separates it by making it act freely.  The
+asymmetry between the centres is real and drives everything above, and it is
+still not by itself an obstruction — which is consistent with Question 3.4 being
+open rather than easy in either direction.
+
 ## Where this ends
 
 No resolution of Question 3.4, and no claim toward one.  What follows is the

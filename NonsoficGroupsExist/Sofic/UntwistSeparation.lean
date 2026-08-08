@@ -2132,4 +2132,59 @@ theorem eq_one_of_central_perm (Y : FiniteModel) (h3 : 3 ≤ Fintype.card Y)
     Equiv.swap_apply_left] at hcomm
   exact hzy hcomm.symm
 
+
+/-! ### Why the asymmetry does not obstruct soficity by itself
+
+`Sym(Y)` having no separated central element does not stop a sofic model from
+separating a central element of `G`, and it is worth seeing why, since otherwise
+the asymmetry looks like an obstruction it is not.
+
+The model's image need not be all of `Sym(Y)`, and a permutation commuting with
+a *transitive* set is semiregular: if it fixes one point it fixes all of them
+(`eq_one_of_fixed_of_commutes_transitive`).  So in a transitive model a
+nontrivial element commuting with the image moves *every* point, and is
+maximally separated (`hammingDistance_eq_one_of_commutes_transitive`).
+
+That is the resolution.  A hyperlinear model separates a central element by
+putting it at a scalar; a sofic model separates it by making it act freely.  The
+asymmetry between the centres is real, and it drives every phase phenomenon
+above, but it is not by itself an obstruction to soficity -- which is consistent
+with Question 3.4 being open rather than easy in either direction.
+-/
+
+/-- **A permutation commuting with a transitive set and fixing a point is the
+identity.**  Transport the fixed point along the transitive action. -/
+theorem eq_one_of_fixed_of_commutes_transitive (Y : FiniteModel)
+    (H : Set (Equiv.Perm Y)) (htrans : ∀ x y : Y, ∃ τ ∈ H, τ x = y)
+    (σ : Equiv.Perm Y) (hcomm : ∀ τ ∈ H, σ * τ = τ * σ)
+    (x : Y) (hx : σ x = x) : σ = 1 := by
+  ext y
+  obtain ⟨τ, hτH, hτ⟩ := htrans x y
+  have h := congrArg (fun f : Equiv.Perm Y ↦ f x) (hcomm τ hτH)
+  simp only [Equiv.Perm.mul_apply] at h
+  rw [hx, hτ] at h
+  show σ y = y
+  exact h
+
+/-- **So it is maximally separated unless trivial.**  A nontrivial permutation
+commuting with a transitive set moves every point. -/
+theorem hammingDistance_eq_one_of_commutes_transitive (Y : FiniteModel)
+    (hY : 0 < Fintype.card Y) (H : Set (Equiv.Perm Y))
+    (htrans : ∀ x y : Y, ∃ τ ∈ H, τ x = y) (σ : Equiv.Perm Y)
+    (hcomm : ∀ τ ∈ H, σ * τ = τ * σ) (hne : σ ≠ 1) :
+    hammingDistance Y σ 1 = 1 := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  have hnofix : ∀ x : Y, σ x ≠ x := by
+    intro x hx
+    exact hne (eq_one_of_fixed_of_commutes_transitive Y H htrans σ hcomm x hx)
+  rw [hammingDistance]
+  have hall : hammingDisagreement σ (1 : Equiv.Perm Y) = (univ : Finset Y) := by
+    ext y
+    simp only [hammingDisagreement, Finset.mem_filter, Finset.mem_univ, true_and,
+      iff_true]
+    exact hnofix y
+  rw [hall, Finset.card_univ]
+  field_simp
+
 end NonsoficGroupsExist
