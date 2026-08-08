@@ -2966,6 +2966,13 @@ CountableNonsoficGroupExists
 ∀ (G : Type) [inst : Group G] [Finite G], IsSofic G
 ```
 
+## `NonsoficGroupsExist.isSofic_of_forall_small`
+
+```lean
+∀ {G : Type} [inst : Group G],
+  (∀ (F : Finset G) (n : ℕ), Nonempty (SoficModel G F (1 / (↑n + 1)))) → IsSofic G
+```
+
 ## `NonsoficGroupsExist.isSofic_of_injective`
 
 ```lean

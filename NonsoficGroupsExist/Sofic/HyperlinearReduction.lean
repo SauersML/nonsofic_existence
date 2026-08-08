@@ -174,4 +174,62 @@ theorem exists_counterexample_iff_exists_fg_not_residuallyFinite :
   · rintro ⟨H, hH, hfg, hhyp, hns, _⟩
     exact ⟨H, hH, hfg, hhyp, hns⟩
 
+/-! ## Monotonicity in the accuracy
+
+Both local definitions quantify over all positive `ε`, and both model types get
+weaker as `ε` grows -- multiplicativity is an upper bound on the defect and
+separation a lower bound of the form `1 - ε` or `2 - ε`.  So a model at one
+accuracy is a model at every worse accuracy, and it is enough to test the
+definitions on any set of accuracies accumulating at `0`.
+
+Cheap, but worth having: without it the definitions look as though they might
+depend on which `ε` are tested, and several arguments below quietly need that
+they do not.
+-/
+
+/-- A sofic model is a model at any worse accuracy. -/
+def SoficModel.mono {F : Finset G} {ε ε' : ℝ} (h : ε ≤ ε')
+    (M : SoficModel G F ε) : SoficModel G F ε' where
+  carrier := M.carrier
+  nonempty := M.nonempty
+  map := M.map
+  multiplicative := fun g hg h' hh ↦ le_trans (M.multiplicative g hg h' hh) h
+  separated := fun g hg h' hh hne ↦
+    le_trans (by linarith) (M.separated g hg h' hh hne)
+
+/-- A hyperlinear model is a model at any worse accuracy. -/
+def HyperlinearModel.mono {F : Finset G} {ε ε' : ℝ} (h : ε ≤ ε')
+    (M : HyperlinearModel G F ε) : HyperlinearModel G F ε' where
+  carrier := M.carrier
+  nonempty := M.nonempty
+  map := M.map
+  isUnitary := M.isUnitary
+  multiplicative := fun g hg h' hh ↦ le_trans (M.multiplicative g hg h' hh) h
+  separated := fun g hg h' hh hne ↦
+    le_trans (by linarith) (M.separated g hg h' hh hne)
+
+/-- **Soficity may be tested on any accuracies accumulating at `0`.** -/
+theorem isSofic_of_forall_small (h : ∀ (F : Finset G) (n : ℕ),
+    Nonempty (SoficModel G F (1 / (n + 1 : ℝ)))) : IsSofic G := by
+  intro F ε hε
+  obtain ⟨n, hn⟩ := exists_nat_gt (1 / ε)
+  obtain ⟨M⟩ := h F n
+  refine ⟨M.mono ?_⟩
+  have hn0 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  rw [div_le_iff₀ hn0]
+  rw [div_lt_iff₀ hε] at hn
+  nlinarith [hn, hε]
+
+/-- **Hyperlinearity may be tested on any accuracies accumulating at `0`.** -/
+theorem isHyperlinear_of_forall_small (h : ∀ (F : Finset G) (n : ℕ),
+    Nonempty (HyperlinearModel G F (1 / (n + 1 : ℝ)))) : IsHyperlinear G := by
+  intro F ε hε
+  obtain ⟨n, hn⟩ := exists_nat_gt (1 / ε)
+  obtain ⟨M⟩ := h F n
+  refine ⟨M.mono ?_⟩
+  have hn0 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  rw [div_le_iff₀ hn0]
+  rw [div_lt_iff₀ hε] at hn
+  nlinarith [hn, hε]
+
 end NonsoficGroupsExist
