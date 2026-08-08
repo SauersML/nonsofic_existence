@@ -73,6 +73,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "PhasePropagation",
     "ScalarCocycle",
     "CommutantRigidity",
+    "CoordinateTransfer",
     "KunSpectralCounterexample",
     "SoficAmplification",
     "SoficUltraproduct",

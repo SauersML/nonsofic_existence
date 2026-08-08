@@ -1784,6 +1784,33 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 (G : Type u_2) → [Group G] → Finset G → ℝ → ℝ → Type (max 1 u_2)
 ```
 
+## `NonsoficGroupsExist.OrbitChartData`
+
+```lean
+(H : Type u_1) →
+  [inst : Group H] →
+    (X : Type u_2) → [MulAction H X] → Finset H → Finset X → ℝ → Type (max (max 1 u_1) u_2)
+```
+
+## `NonsoficGroupsExist.OrbitChartData.comap`
+
+```lean
+{H : Type u_1} →
+  [inst : Group H] →
+    {X : Type u_2} →
+      {D : Type u_3} →
+        [inst_1 : MulAction H X] →
+          [inst_2 : MulAction H D] →
+            {F : Finset H} →
+              {E : Finset X} →
+                {ε : ℝ} →
+                  (emb : X → D) →
+                    Function.Injective emb →
+                      (∀ (g : H) (x : X), emb (g • x) = g • emb x) →
+                        [inst_3 : DecidableEq D] →
+                          OrbitChartData H D F (Finset.image emb E) ε → OrbitChartData H X F E ε
+```
+
 ## `NonsoficGroupsExist.RankFour.compressionEnd_injective`
 
 ```lean
@@ -2749,6 +2776,13 @@ CountableNonsoficGroupExists
     ∀ (f : G →* UniversalSofic 𝒰 X), Function.Injective ⇑f → IsSofic G
 ```
 
+## `NonsoficGroupsExist.lampEmbedding_injective`
+
+```lean
+∀ {X : Type u_2} {A : Type u_3} [inst : AddCommGroup A] {a : A},
+  a ≠ 0 → Function.Injective (lampEmbedding a)
+```
+
 ## `NonsoficGroupsExist.matching_injective`
 
 ```lean
@@ -3030,6 +3064,13 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {Y : Type u_1} [inst : Fintype Y] (A : Matrix Y Y ℂ) (k : ℕ),
   (tensorPow A k).trace = A.trace ^ k
+```
+
+## `NonsoficGroupsExist.trivialOrbitChartData`
+
+```lean
+(H : Type) →
+  [inst : Group H] → (F : Finset H) → (E : Finset PUnit.{1}) → OrbitChartData H PUnit.{1} F E 1
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL3_not_isSofic`

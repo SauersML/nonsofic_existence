@@ -2097,6 +2097,14 @@ The extreme case is worth stating on its own, because it is the obstruction in a
 \end{remark}
 
 \clearpage
+\begin{remark}[A lamp chart is a coordinate chart]\label{rem:coordtransfer}%
+\leanverified{\leanmod{Sofic/CoordinateTransfer}{OrbitChartData,trivialOrbitChartData,OrbitChartData.comap,lampEmbedding_injective}}%
+A referee audit of this development observed that the action-level route to hyperlinearity of a generalized wreath product cannot help a candidate whose coordinate action is not already sofic, because the lamp data \emph{contains} the coordinate data.  The observation is written there against two papers' definitions, but its content depends on neither.  Encode a coordinate \(x\) as the lamp \(\delta_x(k_0)\) for a fixed \(k_0\neq1\).  That encoding is injective, and it is equivariant; consequently charts for the lamp action restrict along it to charts for the coordinate action, with the covariance identity transporting verbatim and nothing used about where the charts take their values.
+
+Both hypotheses are isolated as such here: \(x\mapsto\delta_x(k_0)\) is injective for every nonzero lamp value, and it intertwines the coordinate action with the site action.  The transfer is then a pullback of chart data along an injective equivariant map, valid for charts into any class whatever.  The reading is the audit's: if the coordinate action admits no chart system, neither does the lamp action.  This closes a route to hyperlinearity; it says nothing about whether such a wreath product is hyperlinear by other means, and nothing here says it is.
+\end{remark}
+
+\clearpage
 \begin{remark}[Two obstructions beyond elementwise approximation]\label{rem:implementer}%
 \leanverified{\leanmod{Sofic/ImplementerCocycle}{implementerCocycle,implementerCocycle_twisted,correctedImplementer_defect,hsDistSq_orthogonal_rankOne}}%
 Two cautions, both due to an external referee audit of this development and formalized here because they are exactly the kind of statement that should not travel as prose.  Neither bears on Theorem~\ref{thm:A}; both bear on how a unitary model of a wreath-type candidate could be built.
