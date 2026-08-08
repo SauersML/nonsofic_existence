@@ -2879,6 +2879,13 @@ CountableNonsoficGroupExists
 ∀ (α : Type u_1), IsSofic (FreeGroup α)
 ```
 
+## `NonsoficGroupsExist.isSofic_iff_monomial`
+
+```lean
+∀ (G : Type u_1) [inst : Group G],
+  IsSofic G ↔ ∀ (F : Finset G) (ε : ℝ), 0 < ε → ∃ m, Nonempty (MonomialSoficData G F ε (m + 1))
+```
+
 ## `NonsoficGroupsExist.isSofic_iff_nonempty_soficApproximation`
 
 ```lean
@@ -2962,6 +2969,13 @@ CountableNonsoficGroupExists
 ```lean
 ∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
   monomialMatrix Y (fun x => 1) σ = Equiv.Perm.permMatrix ℂ σ
+```
+
+## `NonsoficGroupsExist.monomialSoficData_of_soficModel`
+
+```lean
+{G : Type u_1} →
+  [inst : Group G] → {F : Finset G} → {ε : ℝ} → SoficModel G F ε → MonomialSoficData G F ε 1
 ```
 
 ## `NonsoficGroupsExist.monomial_normTrace_zero_of_identity`

@@ -392,4 +392,70 @@ theorem soficModel_of_monomial {G : Type*} [Group G] {F : Finset G} {ε : ℝ}
     push_cast at hcast
     linarith
 
+/-- Conversely a permutation model *is* monomial data, with a single phase. -/
+def monomialSoficData_of_soficModel {G : Type*} [Group G] {F : Finset G}
+    {ε : ℝ} (M : SoficModel G F ε) : MonomialSoficData G F ε 1 where
+  carrier := M.carrier
+  nonempty := M.nonempty
+  perm := M.map
+  phase := fun _ _ ↦ 0
+  multiplicative := by
+    classical
+    intro g hg h hh
+    have hfilter : (Finset.univ.filter fun y : M.carrier ↦
+        ¬ (M.map (g * h) y = (M.map g * M.map h) y ∧
+           (0 : ZMod 1) = 0 + 0))
+        = hammingDisagreement (M.map (g * h)) (M.map g * M.map h) := by
+      ext y
+      have hz : ((0 : ZMod 1) = 0 + 0) := Subsingleton.elim _ _
+      rw [Finset.mem_filter, mem_hammingDisagreement]
+      constructor
+      · rintro ⟨-, hne⟩ hcon
+        exact hne ⟨hcon, hz⟩
+      · intro hne
+        exact ⟨Finset.mem_univ y, fun hcon ↦ hne hcon.1⟩
+    rw [hfilter]
+    exact M.multiplicative g hg h hh
+  separated := by
+    classical
+    intro g hg h hh hne
+    have hc : (0 : ℝ) < (Fintype.card M.carrier : ℝ) := by
+      exact_mod_cast M.nonempty
+    have hfilter : (Finset.univ.filter fun y : M.carrier ↦
+        M.map g y = M.map h y ∧ (0 : ZMod 1) = 0).card
+        + (hammingDisagreement (M.map g) (M.map h)).card
+        = Fintype.card M.carrier := by
+      have hrw : (Finset.univ.filter fun y : M.carrier ↦
+          M.map g y = M.map h y ∧ (0 : ZMod 1) = 0)
+          = Finset.univ.filter fun y : M.carrier ↦ M.map g y = M.map h y := by
+        ext y; simp
+      have hdis : hammingDisagreement (M.map g) (M.map h)
+          = Finset.univ.filter fun y : M.carrier ↦
+            ¬ (M.map g y = M.map h y) := by
+        ext y; simp [hammingDisagreement]
+      rw [hrw, hdis, Finset.card_filter_add_card_filter_not, Finset.card_univ]
+    have hsep := M.separated g hg h hh hne
+    rw [hammingDistance, le_div_iff₀ hc] at hsep
+    rw [div_le_iff₀ hc]
+    have hcast := congrArg (fun n : ℕ ↦ (n : ℝ)) hfilter
+    push_cast at hcast
+    linarith
+
+/-- **Soficity is exactly combinatorial monomial approximability.**  The
+untwisting criterion and its converse together say that requiring the phases to
+be multiplicative *combinatorially* -- agreeing as elements of `ℤ/m` outside a
+small set -- adds nothing to soficity.  What the open question is about is the
+*metric* alternative, where nearby phases are treated as equal; and the two
+prices of a scalar say exactly how far apart those two demands are. -/
+theorem isSofic_iff_monomial (G : Type*) [Group G] :
+    IsSofic G ↔ ∀ (F : Finset G) (ε : ℝ), 0 < ε →
+      ∃ m : ℕ, Nonempty (MonomialSoficData G F ε (m + 1)) := by
+  constructor
+  · intro hS F ε hε
+    obtain ⟨M⟩ := hS F ε hε
+    exact ⟨0, ⟨monomialSoficData_of_soficModel M⟩⟩
+  · intro hM F ε hε
+    obtain ⟨m, ⟨D⟩⟩ := hM F ε hε
+    exact soficModel_of_monomial D
+
 end NonsoficGroupsExist
