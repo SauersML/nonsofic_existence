@@ -2612,12 +2612,13 @@ CountableNonsoficGroupExists
   3 ≤ Fintype.card ι → ∀ (l k : ι), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
-## `NonsoficGroupsExist.exists_unitary_not_monomial`
+## `NonsoficGroupsExist.exists_unitary_far_from_monomial`
 
 ```lean
 ∃ Y,
   ∃ U ∈ Matrix.unitaryGroup Y.carrier ℂ,
-    ∀ (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier), U ≠ monomialMatrix Y d σ
+    ∀ (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier),
+      1 / 4 ≤ hsDistSq Y U (monomialMatrix Y d σ)
 ```
 
 ## `NonsoficGroupsExist.finiteFieldElementaryThree_hasKazhdanPropertyT`
