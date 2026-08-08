@@ -2635,17 +2635,6 @@ CountableNonsoficGroupExists
   IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
 ```
 
-## `NonsoficGroupsExist.fixedDensity_le_of_re_pos`
-
-```lean
-∀ (Y : FiniteModel) (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier) {c : ℝ},
-  0 < c →
-    (∀ (y : Y.carrier), σ y = y → c ≤ (d y).re) →
-      ∀ {ε : ℝ},
-        (normTrace Y (monomialMatrix Y d σ)).re ≤ ε →
-          0 < Fintype.card Y.carrier → fixedDensity Y σ ≤ ε / c
-```
-
 ## `NonsoficGroupsExist.fixedSet`
 
 ```lean
@@ -2858,6 +2847,20 @@ CountableNonsoficGroupExists
       ∀ (c : ℂ),
         hsNormSq Y (U - c • 1) =
           1 - 2 * ((starRingEnd ℂ) c * normTrace Y U).re + Complex.normSq c
+```
+
+## `NonsoficGroupsExist.hyperlinear_forces_sofic_iff_phases_off_axis`
+
+```lean
+(∀ (Y : FiniteModel) (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier) (c ε : ℝ),
+    0 < c →
+      (∀ (y : Y.carrier), σ y = y → c ≤ (d y).re) →
+        (normTrace Y (monomialMatrix Y d σ)).re ≤ ε →
+          0 < Fintype.card Y.carrier → fixedDensity Y σ ≤ ε / c) ∧
+  ∃ Y d σ,
+    (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
+      (∀ (y : Y.carrier), σ y = y → (d y).re = 0) ∧
+        normTrace Y (monomialMatrix Y d σ) = 0 ∧ fixedDensity Y σ = 1
 ```
 
 ## `NonsoficGroupsExist.implementerCocycle`
