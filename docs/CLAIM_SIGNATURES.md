@@ -2250,6 +2250,19 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
 ```
 
+## `NonsoficGroupsExist.card_trivially_phased_le`
+
+```lean
+∀ (Y : FiniteModel) (d : Y.carrier → ℂ),
+  (∀ (y : Y.carrier), Complex.normSq (d y) = 1) →
+    ∀ (σ : Equiv.Perm Y.carrier),
+      0 < Fintype.card Y.carrier →
+        ∀ {ε : ℝ},
+          (normTrace Y (monomialMatrix Y d σ)).re ≤ ε →
+            2 * ↑{y | σ y = y ∧ d y = 1}.card ≤
+              ↑{y | σ y = y}.card + ε * ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.charEval_add`
 
 ```lean
@@ -2520,17 +2533,6 @@ CountableNonsoficGroupExists
                     (∀ (n : ℕ), sel n ∈ I n) ∧
                       (∀ (r : ℕ), Vanishing fun n => E r n (sel n) / size n (sel n)) ∧
                         Diverges fun n => size n (sel n)
-```
-
-## `NonsoficGroupsExist.exists_shift_hamming_le`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier),
-  0 < Fintype.card Y.carrier →
-    ∃ c,
-      hammingDistance (wreathModel Y m) (wreathPerm Y m (fun y => d y - c) σ) 1 ≤
-        1 - fixedDensity Y σ / ↑m
 ```
 
 ## `NonsoficGroupsExist.exists_soficEmbedding_of_isSofic`
