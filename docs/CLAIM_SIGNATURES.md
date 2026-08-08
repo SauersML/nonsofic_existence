@@ -2686,6 +2686,17 @@ CountableNonsoficGroupExists
   hsNormSq Y A.conjTranspose = hsNormSq Y A
 ```
 
+## `NonsoficGroupsExist.hsNormSq_map_pow_step`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε) {w : G},
+  w ∈ F →
+    ∀ (l : ℕ),
+      w ^ l ∈ F →
+        hsNormSq M.carrier (M.map (w ^ (l + 1)) - M.map w ^ (l + 1)) ≤
+          2 * ε + 2 * hsNormSq M.carrier (M.map (w ^ l) - M.map w ^ l)
+```
+
 ## `NonsoficGroupsExist.hsNormSq_mul_left`
 
 ```lean
@@ -2701,6 +2712,13 @@ CountableNonsoficGroupExists
 ∀ (Y : FiniteModel) {V : Matrix Y.carrier Y.carrier ℂ},
   V ∈ Matrix.unitaryGroup Y.carrier ℂ →
     ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (A * V) = hsNormSq Y A
+```
+
+## `NonsoficGroupsExist.hsNormSq_one_sub_map_one`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
+  1 ∈ F → hsNormSq M.carrier (1 - M.map 1) ≤ ε
 ```
 
 ## `NonsoficGroupsExist.hsNormSq_pow_four_sub_le`
@@ -2933,6 +2951,19 @@ CountableNonsoficGroupExists
 ∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
   U ∈ Matrix.unitaryGroup Y.carrier ℂ →
     0 < Fintype.card Y.carrier → Complex.normSq (normTrace Y U) ≤ 1
+```
+
+## `NonsoficGroupsExist.normSq_normTrace_lt_of_separated`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
+  0 < ε →
+    ε ≤ 1 / 10000 →
+      ∀ {w : G},
+        (∀ (l : ℕ), 1 ≤ l → l ≤ 4 → w ^ l ∈ F) →
+          1 ∈ F →
+            (∀ (l : ℕ), 1 ≤ l → l ≤ 4 → w ^ l ≠ 1) →
+              Complex.normSq (normTrace M.carrier (M.map w)) < 1 - 1 / 1000000
 ```
 
 ## `NonsoficGroupsExist.normSq_normTrace_monomial_le`

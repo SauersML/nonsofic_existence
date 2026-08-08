@@ -202,4 +202,122 @@ theorem exists_re_normTrace_pow_ge (Y : FiniteModel) {U : Matrix Y Y ℂ}
     nlinarith [this]
   linarith [hzl, hgap]
 
+/-! ## The model-level statement -/
+
+variable {G : Type*} [Group G]
+
+/-- One step of the comparison between `u_{w^{l+1}}` and `u_w^{l+1}`: the model's
+own multiplicative defect, plus the previous step transported by a unitary. -/
+theorem hsNormSq_map_pow_step {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) {w : G} (hw : w ∈ F) (l : ℕ)
+    (hl : w ^ l ∈ F) :
+    hsNormSq M.carrier (M.map (w ^ (l + 1)) - (M.map w) ^ (l + 1))
+      ≤ 2 * ε + 2 * hsNormSq M.carrier (M.map (w ^ l) - (M.map w) ^ l) := by
+  have hsplit : M.map (w ^ (l + 1)) - (M.map w) ^ (l + 1)
+      = (M.map (w ^ l * w) - M.map (w ^ l) * M.map w)
+        + (M.map (w ^ l) - (M.map w) ^ l) * M.map w := by
+    rw [Matrix.sub_mul, pow_succ, pow_succ]
+    abel
+  have hmul : hsNormSq M.carrier
+      (M.map (w ^ l * w) - M.map (w ^ l) * M.map w) ≤ ε :=
+    M.multiplicative (w ^ l) hl w hw
+  have hright : hsNormSq M.carrier
+      ((M.map (w ^ l) - (M.map w) ^ l) * M.map w)
+      = hsNormSq M.carrier (M.map (w ^ l) - (M.map w) ^ l) :=
+    hsNormSq_mul_right M.carrier (M.isUnitary w) _
+  calc hsNormSq M.carrier (M.map (w ^ (l + 1)) - (M.map w) ^ (l + 1))
+      = hsNormSq M.carrier ((M.map (w ^ l * w) - M.map (w ^ l) * M.map w)
+          + (M.map (w ^ l) - (M.map w) ^ l) * M.map w) := by rw [hsplit]
+    _ ≤ 2 * hsNormSq M.carrier (M.map (w ^ l * w) - M.map (w ^ l) * M.map w)
+        + 2 * hsNormSq M.carrier
+          ((M.map (w ^ l) - (M.map w) ^ l) * M.map w) := hsNormSq_add_le _ _ _
+    _ ≤ 2 * ε + 2 * hsNormSq M.carrier (M.map (w ^ l) - (M.map w) ^ l) := by
+        rw [hright]; linarith
+
+/-- The model sends `1` close to `1`: unitarity turns the multiplicative defect
+at `(1, 1)` into a bound on the distance to the identity. -/
+theorem hsNormSq_one_sub_map_one {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) (h1F : (1 : G) ∈ F) :
+    hsNormSq M.carrier (1 - M.map 1) ≤ ε := by
+  have hdef : hsNormSq M.carrier (M.map (1 * 1) - M.map 1 * M.map 1) ≤ ε :=
+    M.multiplicative 1 h1F 1 h1F
+  have hfact : M.map (1 * 1) - M.map 1 * M.map 1
+      = M.map 1 * (1 - M.map 1) := by
+    rw [Matrix.mul_sub, Matrix.mul_one, one_mul]
+  rw [hfact, hsNormSq_mul_left M.carrier (M.isUnitary 1) M.nonempty] at hdef
+  exact hdef
+
+/-- **No phase on an element of order at least five.**  In a model separated in
+the sense of `HyperlinearModel`, if `w, w², w³, w⁴` are all in the test set and
+all nontrivial, then `u_w` is not within `10⁻⁶` of a scalar. -/
+theorem normSq_normTrace_lt_of_separated {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) (hε : 0 < ε) (hεle : ε ≤ 1 / 10000)
+    {w : G} (hwF : ∀ l : ℕ, 1 ≤ l → l ≤ 4 → w ^ l ∈ F)
+    (h1F : (1 : G) ∈ F) (hwne : ∀ l : ℕ, 1 ≤ l → l ≤ 4 → w ^ l ≠ 1) :
+    Complex.normSq (normTrace M.carrier (M.map w)) < 1 - 1 / 1000000 := by
+  by_contra hcon
+  rw [not_lt] at hcon
+  have hw1 : w ∈ F := by simpa using hwF 1 (le_refl 1) (by norm_num)
+  have hz : hsNormSq M.carrier (0 : Matrix M.carrier M.carrier ℂ) = 0 := by
+    simp [hsNormSq]
+  obtain ⟨l, hl1, hl4, hpow⟩ :=
+    exists_re_normTrace_pow_ge M.carrier (M.isUnitary w) M.nonempty hcon
+  have hlF : w ^ l ∈ F := hwF l hl1 hl4
+  have hlne : w ^ l ≠ 1 := hwne l hl1 hl4
+  have e1 : hsNormSq M.carrier (M.map (w ^ 1) - (M.map w) ^ 1) = 0 := by
+    rw [pow_one, pow_one, sub_self, hz]
+  have s1 := hsNormSq_map_pow_step M hw1 1 (by rwa [pow_one])
+  have s2 := hsNormSq_map_pow_step M hw1 2 (hwF 2 (by norm_num) (by norm_num))
+  have s3 := hsNormSq_map_pow_step M hw1 3 (hwF 3 (by norm_num) (by norm_num))
+  rw [show (1 : ℕ) + 1 = 2 from rfl, e1] at s1
+  rw [show (2 : ℕ) + 1 = 3 from rfl] at s2
+  rw [show (3 : ℕ) + 1 = 4 from rfl] at s3
+  have hb : hsNormSq M.carrier (M.map (w ^ l) - (M.map w) ^ l) ≤ 14 * ε := by
+    interval_cases l
+    · rw [e1]; linarith
+    · linarith
+    · linarith
+    · linarith
+  have htr : Complex.normSq (normTrace M.carrier (M.map (w ^ l))
+      - normTrace M.carrier ((M.map w) ^ l)) ≤ 14 * ε := by
+    rw [← normTrace_sub]
+    exact le_trans (normSq_normTrace_le_hsNormSq M.carrier _) hb
+  have hlow : (21 : ℝ) / 100 ≤ (normTrace M.carrier (M.map (w ^ l))).re := by
+    have hre : ((normTrace M.carrier (M.map (w ^ l))
+        - normTrace M.carrier ((M.map w) ^ l)).re) ^ 2 ≤ 14 * ε := by
+      refine le_trans ?_ htr
+      rw [Complex.normSq_apply]
+      nlinarith [sq_nonneg (normTrace M.carrier (M.map (w ^ l))
+        - normTrace M.carrier ((M.map w) ^ l)).im]
+    rw [Complex.sub_re] at hre
+    nlinarith [hre, hpow, hεle]
+  have hsep := M.separated (w ^ l) hlF 1 h1F hlne
+  rw [hsDistSq_of_unitary M.carrier (M.isUnitary (w ^ l)) (M.isUnitary 1)
+    M.nonempty] at hsep
+  have hM1 : hsNormSq M.carrier (1 - M.map 1) ≤ ε :=
+    hsNormSq_one_sub_map_one M h1F
+  have hcmp : Complex.normSq (normTrace M.carrier (M.map (w ^ l))
+      - normTrace M.carrier (M.map (w ^ l) * (M.map 1)ᴴ)) ≤ ε := by
+    have hfact : M.map (w ^ l) - M.map (w ^ l) * (M.map 1)ᴴ
+        = M.map (w ^ l) * (1 - (M.map 1)ᴴ) := by
+      rw [Matrix.mul_sub, Matrix.mul_one]
+    rw [← normTrace_sub, hfact]
+    refine le_trans (normSq_normTrace_le_hsNormSq M.carrier _) ?_
+    rw [hsNormSq_mul_left M.carrier (M.isUnitary (w ^ l)) M.nonempty]
+    have hct : (1 : Matrix M.carrier M.carrier ℂ) - (M.map 1)ᴴ
+        = ((1 : Matrix M.carrier M.carrier ℂ) - M.map 1)ᴴ := by
+      rw [Matrix.conjTranspose_sub, Matrix.conjTranspose_one]
+    rw [hct, hsNormSq_conjTranspose]
+    exact hM1
+  have hhigh : (normTrace M.carrier (M.map (w ^ l))).re ≤ ε / 2 + 1 / 100 := by
+    have hre : ((normTrace M.carrier (M.map (w ^ l))
+        - normTrace M.carrier (M.map (w ^ l) * (M.map 1)ᴴ)).re) ^ 2 ≤ ε := by
+      refine le_trans ?_ hcmp
+      rw [Complex.normSq_apply]
+      nlinarith [sq_nonneg (normTrace M.carrier (M.map (w ^ l))
+        - normTrace M.carrier (M.map (w ^ l) * (M.map 1)ᴴ)).im]
+    rw [Complex.sub_re] at hre
+    nlinarith [hre, hsep, hεle]
+  linarith [hlow, hhigh, hεle]
+
 end NonsoficGroupsExist
