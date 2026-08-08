@@ -224,4 +224,81 @@ theorem monomial_normTrace_zero_of_identity :
       norm_num
     rw [normTrace, htr, zero_div]
 
+/-! ## Untwisting: a discrete torus can always be turned into more points -/
+
+/-- The model on `Y × ℤ/m`, on which a monomial matrix with `m`-th root of
+unity phases acts by an honest permutation. -/
+abbrev wreathModel (Y : FiniteModel) (m : ℕ) [NeZero m] : FiniteModel :=
+  ⟨Y × ZMod m, inferInstance, inferInstance⟩
+
+/-- **The untwisting permutation.**  Phases valued in `ℤ/m` are absorbed as a
+shift of a second coordinate: `(y, j) ↦ (σ y, j + d y)`.  This is the standard
+embedding of the monomial group `(ℤ/m)^Y ⋊ Sym Y` into `Sym (Y × ℤ/m)`. -/
+def wreathPerm (Y : FiniteModel) (m : ℕ) [NeZero m] (d : Y → ZMod m)
+    (σ : Equiv.Perm Y) : Equiv.Perm (Y × ZMod m) where
+  toFun p := (σ p.1, p.2 + d p.1)
+  invFun p := (σ⁻¹ p.1, p.2 - d (σ⁻¹ p.1))
+  left_inv p := by simp
+  right_inv p := by simp
+
+@[simp] theorem wreathPerm_apply (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) (p : Y × ZMod m) :
+    wreathPerm Y m d σ p = (σ p.1, p.2 + d p.1) := rfl
+
+theorem wreathPerm_one (Y : FiniteModel) (m : ℕ) [NeZero m] :
+    wreathPerm Y m (fun _ ↦ 0) 1 = 1 := by
+  ext p <;> simp
+
+/-- **What untwisting costs, exactly.**  The Hamming distance between two
+untwisted permutations is the density of the set where the monomial data
+differ -- in the *permutation part or the phase*.  Fine phase differences that
+are invisible to the Hilbert--Schmidt metric are fully visible here; that is
+the whole price. -/
+theorem hammingDistance_wreathPerm (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d e : Y → ZMod m) (σ τ : Equiv.Perm Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) (wreathPerm Y m e τ)
+      = ((Finset.univ.filter fun y : Y ↦ ¬ (σ y = τ y ∧ d y = e y)).card : ℝ)
+        / Fintype.card Y := by
+  classical
+  set D : Finset Y := Finset.univ.filter fun y : Y ↦ ¬ (σ y = τ y ∧ d y = e y)
+    with hDdef
+  have hdis : hammingDisagreement (wreathPerm Y m d σ) (wreathPerm Y m e τ)
+      = D ×ˢ (Finset.univ : Finset (ZMod m)) := by
+    ext p
+    rw [mem_hammingDisagreement, Finset.mem_product, hDdef, Finset.mem_filter]
+    constructor
+    · intro h
+      refine ⟨⟨Finset.mem_univ _, ?_⟩, Finset.mem_univ _⟩
+      intro hcon
+      apply h
+      rw [wreathPerm_apply, wreathPerm_apply, hcon.1, hcon.2]
+    · rintro ⟨⟨-, h⟩, -⟩ hcon
+      apply h
+      rw [wreathPerm_apply, wreathPerm_apply, Prod.mk.injEq] at hcon
+      exact ⟨hcon.1, add_left_cancel hcon.2⟩
+  have hcard : (hammingDisagreement (wreathPerm Y m d σ)
+      (wreathPerm Y m e τ)).card = D.card * m := by
+    rw [hdis, Finset.card_product, Finset.card_univ, ZMod.card]
+  have hmodel : Fintype.card (wreathModel Y m) = Fintype.card Y * m := by
+    show Fintype.card (Y × ZMod m) = _
+    rw [Fintype.card_prod, ZMod.card]
+  have hm : (m : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne m)
+  rw [hammingDistance, hcard, hmodel]
+  push_cast
+  rw [mul_div_mul_right _ _ hm]
+
+/-- **What untwisting buys, exactly.**  The untwisted permutation moves
+everything except the points where `σ` fixes and the phase is trivial.  So the
+separation a sofic model needs is exactly scarcity of *trivially phased* fixed
+points, and phase cancellation -- which is what makes a monomial trace small
+without moving anything -- buys nothing here. -/
+theorem hammingDistance_wreathPerm_one (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1
+      = ((Finset.univ.filter fun y : Y ↦ ¬ (σ y = y ∧ d y = 0)).card : ℝ)
+        / Fintype.card Y := by
+  classical
+  rw [← wreathPerm_one Y m, hammingDistance_wreathPerm]
+  rfl
+
 end NonsoficGroupsExist

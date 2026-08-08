@@ -2583,6 +2583,24 @@ CountableNonsoficGroupExists
         1 - (1 - hammingDistance Y p q) ^ k
 ```
 
+## `NonsoficGroupsExist.hammingDistance_wreathPerm`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d e : Y.carrier → ZMod m)
+  (σ τ : Equiv.Perm Y.carrier),
+  hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) (wreathPerm Y m e τ) =
+    ↑{y | ¬(σ y = τ y ∧ d y = e y)}.card / ↑(Fintype.card Y.carrier)
+```
+
+## `NonsoficGroupsExist.hammingDistance_wreathPerm_one`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier),
+  hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 =
+    ↑{y | ¬(σ y = y ∧ d y = 0)}.card / ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.hammingLength`
 
 ```lean
@@ -3218,4 +3236,18 @@ CountableNonsoficGroupExists
     Group.FG ↥(UniversalLeavittEL m) ∧
       Infinite ↥(UniversalLeavittEL m) ∧
         HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
+```
+
+## `NonsoficGroupsExist.wreathPerm`
+
+```lean
+(Y : FiniteModel) →
+  (m : ℕ) →
+    [NeZero m] → (Y.carrier → ZMod m) → Equiv.Perm Y.carrier → Equiv.Perm (Y.carrier × ZMod m)
+```
+
+## `NonsoficGroupsExist.wreathPerm_one`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m], wreathPerm Y m (fun x => 0) 1 = 1
 ```
