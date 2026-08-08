@@ -273,6 +273,7 @@ import NonsoficGroupsExist.Sofic.NormTraceGap
 import NonsoficGroupsExist.Sofic.FreeLampReduction
 import NonsoficGroupsExist.Sofic.FreeLampRigidity
 import NonsoficGroupsExist.Sofic.ProfiniteClosure
+import NonsoficGroupsExist.Sofic.CentralFreeLampCover
 import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls

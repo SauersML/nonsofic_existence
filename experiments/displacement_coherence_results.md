@@ -47,3 +47,66 @@ the commutant of the closure identifies exactly where mixing can survive.
 Exact strata are sterile in the surrogate; any daylight must be sought at
 epsilon-level (approximate transport/coherence within the N19 budget
 epsilon = o(rho)), or in a web whose constraint closure is proper.
+
+## Constraint closure for the actual Kun--Thom pair
+
+For Theorem E, put
+
+    R_+ = F_q[N^d],  R = F_q[Z^d],
+    Gamma = EL_r(R_+),  K = EL_r(R).
+
+Then
+
+    < A Gamma A^-1 : A in SL_d(Z) > = K.
+
+Indeed, for nonzero `v in Z^d`, write `v = k u` with `u` primitive and
+choose `A in SL_d(Z)` with `A(k e_1) = v`.  The elementary Laurent
+generator `e_ab(c x^v)` is the `A`-conjugate of
+`e_ab(c x_1^k) in Gamma`.  The case `v = 0` lies in `Gamma`, and
+`e_ab(s)e_ab(t) = e_ab(s+t)` handles arbitrary Laurent polynomials.
+
+Thus a coboundary parameter chosen from the joint commutant/fixed algebra
+of the full substitution web lies in `lambda(K)'`; its frame coboundaries
+commute with every invisible Laurent elementary letter.  The exact joint-
+fixed-subalgebra version of the global-coboundary ansatz is sterile on the
+actual pair as well.  This does not classify general cocycles whose
+individual frame displacements satisfy transport without coming from one
+jointly fixed parameter.
+
+## Correct surviving cocycle system
+
+A surviving ansatz must deform the Laurent elementary sector and the
+substitution sector together.  Start from
+
+    rho_0(k) = lambda(k),       rho_0(A) = pi_A,
+    theta_A = Ad(pi_A),
+
+and write a deformation, with a consistent left-cocycle convention, as
+
+    rho(k) = X_k lambda(k),     rho(A) = D_A pi_A.
+
+The exact equations are
+
+    X_{kh} = X_k Ad(lambda(k))(X_h),
+    D_{AB} = D_A theta_A(D_B),
+
+and semidirect covariance is
+
+    X_{alpha_A(k)}
+      = D_A theta_A(X_k) Ad(lambda(alpha_A(k)))(D_A^-1).
+
+If the positive sector is fixed, `X_gamma = 1` for `gamma in Gamma`, and
+the covariance equation reduces to
+
+    X_{alpha_A(gamma)}
+      = D_A Ad(lambda(alpha_A(gamma)))(D_A^-1).
+
+Multiple-path coherence is exactly the demand that these formulas assign
+the same `X_k` to every transported-positive presentation of `k`.  The
+former global-coboundary construction imposed enough joint invariance to
+make every such displacement trivial.  A live construction must produce a
+genuinely non-coboundary solution of this coupled system, asymptotically on
+growing windows, with `X_gamma -> 1` on the positive sector but order-one
+displacement on all invisible elements required by the relative-mixing
+criterion.  Ordinary Hilbert-space property-(T) cocycle vanishing does not
+directly decide this nonlinear, order-one relative problem.
