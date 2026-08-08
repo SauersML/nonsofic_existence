@@ -2943,12 +2943,6 @@ CountableNonsoficGroupExists
   Function.Injective ⇑ι → IsHyperlinear G → IsHyperlinear H
 ```
 
-## `NonsoficGroupsExist.isHyperlinear_of_isSofic`
-
-```lean
-∀ {G : Type u_1} [inst : Group G], IsSofic G → IsHyperlinear G
-```
-
 ## `NonsoficGroupsExist.isLEF_of_ambientDecomposition`
 
 ```lean
@@ -3133,18 +3127,19 @@ CountableNonsoficGroupExists
       ¬IsLEF J → ¬IsSofic G
 ```
 
-## `NonsoficGroupsExist.not_isSofic_of_not_isHyperlinear`
-
-```lean
-∀ {G : Type u_1} [inst : Group G], ¬IsHyperlinear G → ¬IsSofic G
-```
-
 ## `NonsoficGroupsExist.not_isSofic_of_not_isLEF`
 
 ```lean
 ∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable G]
   [Countable Γ] [Countable J] (C : CompressionSetup G Γ J),
   HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ¬IsLEF J → ¬IsSofic G
+```
+
+## `NonsoficGroupsExist.not_isSofic_of_subgroup_not_isHyperlinear`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {H : Type u_2} [inst_1 : Group H] (ι : H →* G),
+  Function.Injective ⇑ι → ¬IsHyperlinear H → ¬IsSofic G
 ```
 
 ## `NonsoficGroupsExist.nullSubgroup`

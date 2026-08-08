@@ -266,4 +266,17 @@ theorem isHyperlinear_of_injective {H : Type*} [Group H] (ι : H →* G)
   obtain ⟨M⟩ := hG (F.image ι) ε hε
   exact ⟨HyperlinearModel.comap ι hι F M⟩
 
+/-- **Non-hyperlinearity of a subgroup defeats soficity of the whole group.**
+Composing the monotonicity with `not_isSofic_of_not_isHyperlinear`: if any
+subgroup fails to be hyperlinear then the ambient group is not sofic.  This is
+the direction in which a single hard subgroup propagates outward, and it is why
+the witness of Theorem~A containing Thompson's `F` cuts both ways -- it makes
+the witness's hyperlinearity hard to prove, and it would make `F`'s failure, if
+ever established, decide the witness. -/
+theorem not_isSofic_of_subgroup_not_isHyperlinear {H : Type*} [Group H]
+    (ι : H →* G) (hι : Function.Injective ι) (hH : ¬ IsHyperlinear H) :
+    ¬ IsSofic G :=
+  not_isSofic_of_not_isHyperlinear
+    (fun hG ↦ hH (isHyperlinear_of_injective ι hι hG))
+
 end NonsoficGroupsExist
