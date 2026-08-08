@@ -2250,6 +2250,13 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
 ```
 
+## `NonsoficGroupsExist.charEval_add`
+
+```lean
+∀ (r : ℕ) (a : Fin r → ℝ) (n n' : Fin r → ℤ),
+  charEval r a (n + n') = charEval r a n + charEval r a n'
+```
+
 ## `NonsoficGroupsExist.circle_map_eq_zero`
 
 ```lean
@@ -2460,6 +2467,16 @@ CountableNonsoficGroupExists
 ∀ {ι : Type u_1} {R : Type u_2} [inst : Fintype ι] [inst_1 : DecidableEq ι] [inst_2 : Ring R]
   {Q : Type u_3} [inst_3 : Group Q] [Infinite R] [Finite Q] (φ : ↥(elementaryGroup ι R) →* Q)
   (i j : ι) (h : i ≠ j), ∃ a, a ≠ 0 ∧ φ (elGen i j h a) = 1
+```
+
+## `NonsoficGroupsExist.exists_ratChar_close`
+
+```lean
+∀ (r : ℕ) (a : Fin r → ℝ) (N : ℕ) {δ : ℝ},
+  0 < δ →
+    ∃ q,
+      0 < q ∧
+        ∀ (n : Fin r → ℤ), (∀ (i : Fin r), |n i| ≤ ↑N) → |ratChar r a q n - charEval r a n| ≤ δ
 ```
 
 ## `NonsoficGroupsExist.exists_residuallyFinite_group_with_non_residuallyFinite_quotient`
@@ -3125,6 +3142,19 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
+```
+
+## `NonsoficGroupsExist.ratChar_add`
+
+```lean
+∀ (r : ℕ) (a : Fin r → ℝ) (q : ℕ) (n n' : Fin r → ℤ),
+  ratChar r a q (n + n') = ratChar r a q n + ratChar r a q n'
+```
+
+## `NonsoficGroupsExist.ratChar_eq_div`
+
+```lean
+∀ (r : ℕ) (a : Fin r → ℝ) (q : ℕ) (n : Fin r → ℤ), ∃ k, ratChar r a q n = ↑k / ↑q
 ```
 
 ## `NonsoficGroupsExist.re_nonpos_of_pow_four_eq_one`
