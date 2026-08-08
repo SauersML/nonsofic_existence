@@ -1840,4 +1840,51 @@ theorem monomialMatrix_pow_card_comm (Y : FiniteModel) (d e : Y → ℂ)
   funext i
   exact mul_comm _ _
 
+
+/-! ### What the obstruction does not give
+
+It is tempting to lift `monomialMatrix_pow_card_comm` to a statement about
+groups: if `[g^N, h^N] ≠ 1` in `G` for every `N`, surely a monomial model must
+fail?  It does not follow, and the reason is the recurring one.  The exponent
+`n!` is the size of `Sym(Y)`, so it grows with the *model*, while a window is
+fixed before the model is chosen.  Reaching `U_{g^{n!}}` from `U_g` needs `n!`
+multiplications inside the window, and no fixed window supports that.
+
+Worse for the hope, the criterion is *vacuous* on the side one would want it to
+decide.  A sofic model is a permutation model, and a permutation matrix raised
+to `|Sym(Y)|` is the identity (`permMonomial_pow_card`), so its `n!`-th powers
+commute for free.  The criterion therefore separates monomial from general
+unitary matrices, which is what the scope claim needs, and says nothing about
+whether a group is sofic.
+-/
+
+/-- Powers of a phase-free monomial matrix stay phase-free. -/
+theorem permMonomial_pow (Y : FiniteModel) (σ : Equiv.Perm Y) :
+    ∀ k : ℕ, monomialMatrix Y (fun _ ↦ (1 : ℂ)) σ ^ k
+      = monomialMatrix Y (fun _ ↦ (1 : ℂ)) (σ ^ k) := by
+  intro k
+  induction k with
+  | zero =>
+      rw [pow_zero, pow_zero, monomialMatrix_one_eq_diagonal]
+      simp
+  | succ k ih =>
+      rw [pow_succ, ih, monomialMatrix_mul]
+      simp only [mul_one]
+      congr 1
+      rw [← pow_succ']
+
+/-- **A permutation matrix raised to `|Sym(Y)|` is the identity.**  So the
+obstruction of `monomialMatrix_pow_card_comm` is vacuous for permutation models:
+it bounds where the phase story applies, and gives no purchase on soficity. -/
+theorem permMonomial_pow_card (Y : FiniteModel) (σ : Equiv.Perm Y) :
+    monomialMatrix Y (fun _ ↦ (1 : ℂ)) σ ^ (Nat.factorial (Fintype.card Y)) = 1 := by
+  rw [permMonomial_pow]
+  have hcard : Fintype.card (Equiv.Perm Y) = Nat.factorial (Fintype.card Y) :=
+    Fintype.card_perm
+  have hone : σ ^ (Nat.factorial (Fintype.card Y)) = 1 := by
+    rw [← hcard]
+    exact pow_card_eq_one
+  rw [hone, monomialMatrix_one_eq_diagonal]
+  simp
+
 end NonsoficGroupsExist

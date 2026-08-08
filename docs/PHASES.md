@@ -506,6 +506,19 @@ single-matrix witness could not supply, a lone unitary being diagonal in its own
 eigenbasis.  The exponent `n!` is the crude bound `|Sym(Y)|`; the exponent of
 `Sym(Y)` would serve.
 
+**What it does not give.**  One would like to lift this to groups: if
+`[g^N, h^N] ≠ 1` for every `N`, must a monomial model fail?  It does not follow.
+`n!` is the size of `Sym(Y)`, so it grows with the *model*, while a window is
+fixed before the model is chosen — reaching `U_{g^{n!}}` from `U_g` would need
+`n!` multiplications inside the window.
+
+Worse for the hope, the criterion is **vacuous** on the side one would want it to
+decide: a sofic model is a permutation model, and a permutation matrix raised to
+`|Sym(Y)|` is the identity (`permMonomial_pow_card`), so its `n!`-th powers
+commute for free.  The criterion separates monomial from general unitary
+matrices — which is what the scope claim needs — and says nothing about whether a
+group is sofic.
+
 So a group could be hyperlinear through models nowhere near monomial, and none
 of these results would apply.  What justifies the restriction in the one case
 where it is justified is external — Thom's microstates are monomial because
