@@ -741,6 +741,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 (G : Type u_2) → [Group G] → Prop
 ```
 
+## `NonsoficGroupsExist.IsNormApproximable`
+
+```lean
+(G : Type u_1) → [Group G] → ℝ → Prop
+```
+
 ## `NonsoficGroupsExist.IsNullSeq`
 
 ```lean
@@ -1794,6 +1800,29 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 (G : Type u_2) → [Group G] → Finset G → ℝ → ℝ → Type (max 1 u_2)
 ```
 
+## `NonsoficGroupsExist.NormModel.exists_hs_collapse`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {δ ε : ℝ} (M : NormModel G F δ ε) {η : ℝ},
+  0 < η → ∃ M', ∀ g ∈ F, ∀ h ∈ F, hsDistSq M'.carrier (M'.map g) (M'.map h) ≤ η
+```
+
+## `NonsoficGroupsExist.NormModel.toHyperlinearModel`
+
+```lean
+{G : Type u_1} →
+  [inst : Group G] →
+    {F : Finset G} →
+      {δ η ε : ℝ} →
+        (M : NormModel G F δ η) →
+          η ^ 2 ≤ ε →
+            (∀ g ∈ F,
+                ∀ h ∈ F,
+                  g ≠ h →
+                    (normTrace M.carrier (M.map g * (M.map h).conjTranspose)).re ≤ ε / 2) →
+              HyperlinearModel G F ε
+```
+
 ## `NonsoficGroupsExist.OrbitChartData`
 
 ```lean
@@ -2759,6 +2788,12 @@ CountableNonsoficGroupExists
       f ((QuotientGroup.mk' (Heis.intCentre ↥(invPowSubring p))) { a := 0, b := 0, c := q }) = 1
 ```
 
+## `NonsoficGroupsExist.hsDistSq_le_sq_l2_opNorm`
+
+```lean
+∀ (Y : FiniteModel) (A B : Matrix Y.carrier Y.carrier ℂ), hsDistSq Y A B ≤ ‖A - B‖ ^ 2
+```
+
 ## `NonsoficGroupsExist.hsDistSq_monomial_const`
 
 ```lean
@@ -2939,6 +2974,12 @@ CountableNonsoficGroupExists
   HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ∀ (A : SoficApproximation G), IsLEF J
 ```
 
+## `NonsoficGroupsExist.isNormApproximable_of_finite`
+
+```lean
+∀ (G : Type) [inst : Group G] [Finite G], IsNormApproximable G 1
+```
+
 ## `NonsoficGroupsExist.isScalarCocycle_scalarPart`
 
 ```lean
@@ -3011,6 +3052,13 @@ CountableNonsoficGroupExists
 ∀ {ι : Type u_1} (𝒰 : Ultrafilter ι) (X : ι → FiniteModel) {G : Type u_2} [inst : Group G],
   (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
     ∀ (f : G →* UniversalSofic 𝒰 X), Function.Injective ⇑f → IsSofic G
+```
+
+## `NonsoficGroupsExist.l2_opNorm_cornerPad`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) (C : Matrix Y.carrier Y.carrier ℂ),
+  ‖Matrix.fromBlocks C 0 0 0‖ = ‖C‖
 ```
 
 ## `NonsoficGroupsExist.lampEmbedding_injective`
@@ -3094,6 +3142,23 @@ CountableNonsoficGroupExists
 ```lean
 ∀ (Y : FiniteModel) (A B : Matrix Y.carrier Y.carrier ℂ),
   normTrace Y (A - B) = normTrace Y A - normTrace Y B
+```
+
+## `NonsoficGroupsExist.norm_normTrace_sub_one_le`
+
+```lean
+∀ (Y : FiniteModel) {A : Matrix Y.carrier Y.carrier ℂ},
+  A ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      ∀ (S : Finset Y.carrier),
+        (∀ i ∉ S, A i i = 1) → ‖normTrace Y A - 1‖ ≤ 2 * ↑S.card / ↑(Fintype.card Y.carrier)
+```
+
+## `NonsoficGroupsExist.norm_normTrace_tensorPow`
+
+```lean
+∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ) (k : ℕ),
+  ‖normTrace (tensorModel Y k) (tensorPow A k)‖ = ‖normTrace Y A‖ ^ k
 ```
 
 ## `NonsoficGroupsExist.not_isSofic_of_ambientDecomposition`
@@ -3197,6 +3262,15 @@ CountableNonsoficGroupExists
       ∃ b,
         (∀ (g : G) (y : Y), |b g y| ≤ 1 / 6) ∧
           ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
+```
+
+## `NonsoficGroupsExist.phase_deviation_no_amplification`
+
+```lean
+∀ (Y : FiniteModel),
+  0 < Fintype.card Y.carrier →
+    IsUnit (Complex.I • 1 - 1) ∧
+      ∀ (k : ℕ), ‖normTrace (tensorModel Y k) (tensorPow (Complex.I • 1) k)‖ = 1
 ```
 
 ## `NonsoficGroupsExist.phase_eq_zero_of_gcd_eq_one`
