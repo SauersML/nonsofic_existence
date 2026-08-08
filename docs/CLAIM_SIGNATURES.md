@@ -2553,6 +2553,15 @@ CountableNonsoficGroupExists
 ∀ {G : Type u_1} [inst : Group G], IsSofic G → IsHyperlinear G
 ```
 
+## `NonsoficGroupsExist.isLEF_of_ambientDecomposition`
+
+```lean
+∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable Γ]
+  [Countable J] (C : CompressionSetup G Γ J),
+  HasKazhdanPropertyT Γ →
+    ∀ (A : SoficApproximation G) (DG : ExpanderDecomposition A C.ambientGenerators), IsLEF J
+```
+
 ## `NonsoficGroupsExist.isLEF_of_isSofic`
 
 ```lean
@@ -2646,6 +2655,16 @@ CountableNonsoficGroupExists
   ¬IsSofic G →
     (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
+```
+
+## `NonsoficGroupsExist.not_isSofic_of_ambientDecomposition`
+
+```lean
+∀ {G Γ J : Type} [inst : Group G] [inst_1 : Group Γ] [inst_2 : Group J] [Countable G]
+  [Countable Γ] [Countable J] (C : CompressionSetup G Γ J),
+  HasKazhdanPropertyT Γ →
+    (∀ (A : SoficApproximation G), Nonempty (ExpanderDecomposition A C.ambientGenerators)) →
+      ¬IsLEF J → ¬IsSofic G
 ```
 
 ## `NonsoficGroupsExist.not_isSofic_of_not_isHyperlinear`
