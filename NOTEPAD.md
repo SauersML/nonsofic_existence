@@ -8,6 +8,46 @@ Each part is kept verbatim under its own banner.
 
 <!-- ======== formerly BUILD_ITERATION_NOTES.md ======== -->
 
+# Free-lamp reduction LANDED (2026-08-08, latest)
+
+`Sofic/FreeLampReduction` green (full build 3849 jobs, audit 10030 decls,
+rem:freelamp in manuscript).  Formalized: `FreeLamp G Γ K` :=
+`PushoutI (lampMap)` over Bool (factors `G`, `↥Γ × K`; base `↥Γ` via
+subtype/inl); `inLamp_commute_inAmbient` (base-crossing through
+`of_apply_eq_base`); `lampWitness_ne_one` — the four-letter reduced word
+`[(1,k), s, (1,k⁻¹), s⁻¹]` through `Reduced.eq_empty_of_mem_range`, needing
+only `s = t⁻¹γt ∉ Γ` and `k ≠ 1`; `SoficApproximation.toUniversal` +
+`IsMetricallyFaithful` (KT's sofic-representation normalization; survives
+null perturbation and restriction; forces injectivity);
+`CentralizerNormalization G Γ` = NAMED transcription of KT 2608.06222v1
+Thm 4.1 (verified verbatim from source), positive control at Γ = ⊤;
+endpoint `freeLamp_not_isSofic`.  So H_K nonsoficity is now a
+machine-checked reduction to exactly one cited theorem.
+
+Lean gotchas (new, all instance-transparency): NEVER add a bespoke
+`instance : Group (DefWrapper)` over a Mathlib type — make the wrapper an
+`abbrev` or every `map_mul`-generated `*` differs from the statement's `*`
+by instance constants and `simp only [mul_assoc]` leaves `X = X` open.
+Pattern-match instances over `bif`-indexed factor families make
+`rw [Prod.inv_mk]`/`map_inv` fail in application position: cross with
+`exact`/`congrArg` + `show`-reascription to the Prod-typed statement, never
+`rw`.  `decide` rejects goals with free variables (chain conditions on
+words: use `.cons_cons (by simp) …`).  `List.IsChain` ctor is `cons_cons`.
+Word-letter elaboration (`⟨false, (1,k)⟩`) is expected-type-driven and
+consistent across `have`s stated the same way — state letter equations
+verbatim and they rw cleanly.
+
+Next candidates: (i) instantiate `CentralizerNormalization` consequences
+further (e.g. formalize the H_K ≅ (*_{G/Γ}K) ⋊ G normal form, or the
+non-MAP dimension-rigidity argument for H_K — the repo's ExactCompression
+co-Hopfian mechanism does the (T)-free part); (ii) EL₄(L) simplicity now
+has a verified citation path: Preusser arXiv:1912.11386 (sandwich over
+exchange rings, n ≥ 3 — verified from abstract 2026-08-08) + purely
+infinite simple ⟹ exchange (Ara–Goodearl–Pardo) + kernel-checked GL₄ = E₄;
+formalizing the sandwich over exchange rings is a real but bounded project.
+
+---
+
 # Q3.4 norm–trace session (2026-08-08, later)
 
 LANDED at 068e27e: `Sofic/NormTraceGap` (green, audited, rem:normtrace in
