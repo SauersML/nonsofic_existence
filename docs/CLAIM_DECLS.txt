@@ -69,6 +69,8 @@ NonsoficGroupsExist.GeneralRank.piece_val
 NonsoficGroupsExist.GeneralScheme.uMatrix_mul_uPrimeMatrix
 NonsoficGroupsExist.GeneralScheme.uUnit
 NonsoficGroupsExist.GeneralScheme.zUnit
+NonsoficGroupsExist.Heis
+NonsoficGroupsExist.Heis.mem_center_iff
 NonsoficGroupsExist.HyperlinearModel
 NonsoficGroupsExist.IsEssentialExpanderSequence
 NonsoficGroupsExist.IsHyperlinear
@@ -335,7 +337,6 @@ NonsoficGroupsExist.lampEmbedding_injective
 NonsoficGroupsExist.matching_injective
 NonsoficGroupsExist.medianNormalize
 NonsoficGroupsExist.monomialMatrix
-NonsoficGroupsExist.monomialMatrix_one
 NonsoficGroupsExist.monomialMatrix_pow_card_comm
 NonsoficGroupsExist.no_pointwise_rounding
 NonsoficGroupsExist.no_soficEmbedding_of_not_isSofic

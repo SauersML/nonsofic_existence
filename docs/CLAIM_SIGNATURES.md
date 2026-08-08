@@ -707,6 +707,19 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
 ```
 
+## `NonsoficGroupsExist.Heis`
+
+```lean
+(R : Type u_1) → [CommRing R] → Type u_1
+```
+
+## `NonsoficGroupsExist.Heis.mem_center_iff`
+
+```lean
+∀ {R : Type u_1} [inst : CommRing R] (x : Heis R),
+  x ∈ Subgroup.center (Heis R) ↔ x.a = 0 ∧ x.b = 0
+```
+
 ## `NonsoficGroupsExist.HyperlinearModel`
 
 ```lean
@@ -3030,13 +3043,6 @@ CountableNonsoficGroupExists
 
 ```lean
 (Y : FiniteModel) → (Y.carrier → ℂ) → Equiv.Perm Y.carrier → Matrix Y.carrier Y.carrier ℂ
-```
-
-## `NonsoficGroupsExist.monomialMatrix_one`
-
-```lean
-∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
-  monomialMatrix Y (fun x => 1) σ = Equiv.Perm.permMatrix ℂ σ
 ```
 
 ## `NonsoficGroupsExist.monomialMatrix_pow_card_comm`

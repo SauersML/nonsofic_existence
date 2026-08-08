@@ -263,6 +263,7 @@ import NonsoficGroupsExist.Sofic.PhaseCorrection
 import NonsoficGroupsExist.Sofic.ScalarClass
 import NonsoficGroupsExist.Sofic.RationalCharacter
 import NonsoficGroupsExist.Sofic.UntwistSeparation
+import NonsoficGroupsExist.Sofic.HeisenbergCentre
 import NonsoficGroupsExist.Sofic.ImplementerCocycle
 import NonsoficGroupsExist.Sofic.CoordinateTransfer
 import NonsoficGroupsExist.Sofic.DivisibleInvisible
