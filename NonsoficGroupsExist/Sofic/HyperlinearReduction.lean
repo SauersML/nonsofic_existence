@@ -304,4 +304,84 @@ theorem isHyperlinearProductRestricted_trivial :
   (isHyperlinear_iff_productRestricted (PUnit : Type)).mp
     (isHyperlinear_of_finite (PUnit : Type))
 
+/-! ## The separation constant: where the two sides part
+
+The other convention is the separation constant.  On the sofic side it is
+immaterial: `isSofic_iff_weak` shows that pinning separation at any fixed
+`δ ∈ (0,1)` gives the same class, tensor powers driving a fixed separation to the
+maximum while multiplying the defect only by the number of factors.
+
+On the unitary side only one direction is available here, and that is not an
+omission.  The easy direction is below.  Its converse is exactly what
+amplification would supply, and `tensorPow_phase_collapse` shows amplification
+cannot: `1` and `i·1` are unitary, maximally separated, and have equal fourth
+tensor powers, so the tensor power does not preserve separation of unitaries at
+all.  The converse does hold -- by Rădulescu's theorem, via the embedding of the
+group von Neumann algebra into `R^ω` -- but that is a von Neumann algebra
+theorem, quoted and not proved here.
+
+So the definitional API is asymmetric, and the asymmetry is the one this
+development is about: the multiplicativity convention is immaterial on both
+sides, the separation constant is immaterial on the sofic side, and on the
+unitary side it is immaterial only by a theorem no elementary argument replaces.
+-/
+
+/-- A hyperlinear model with separation pinned at a constant `δ` rather than
+driven to the maximum. -/
+structure WeakHyperlinearModel (G : Type*) [Group G] (F : Finset G) (δ ε : ℝ) where
+  carrier : FiniteModel
+  nonempty : 0 < Fintype.card carrier
+  map : G → Matrix carrier carrier ℂ
+  isUnitary : ∀ g, map g ∈ Matrix.unitaryGroup carrier ℂ
+  multiplicative : ∀ g ∈ F, ∀ h ∈ F,
+    hsDistSq carrier (map (g * h)) (map g * map h) ≤ ε
+  separated : ∀ g ∈ F, ∀ h ∈ F, g ≠ h →
+    δ ≤ hsDistSq carrier (map g) (map h)
+
+/-- Hyperlinearity with the separation pinned at a constant `δ`. -/
+def IsHyperlinearWeak (G : Type*) [Group G] (δ : ℝ) : Prop :=
+  ∀ (F : Finset G) (ε : ℝ), 0 < ε → Nonempty (WeakHyperlinearModel G F δ ε)
+
+/-- **The easy direction.**  A model separated to `2 - ε` is separated to any
+fixed `δ < 2`, once `ε` is small enough -- and `ε` is ours to shrink. -/
+theorem isHyperlinearWeak_of_isHyperlinear {δ : ℝ} (hδ : δ < 2)
+    (h : IsHyperlinear G) : IsHyperlinearWeak G δ := by
+  intro F ε hε
+  obtain ⟨M⟩ := h F (min ε (2 - δ)) (lt_min hε (by linarith))
+  refine ⟨{
+    carrier := M.carrier
+    nonempty := M.nonempty
+    map := M.map
+    isUnitary := M.isUnitary
+    multiplicative := fun g hg h' hh ↦
+      le_trans (M.multiplicative g hg h' hh) (min_le_left _ _)
+    separated := ?_ }⟩
+  intro g hg h' hh hne
+  refine le_trans ?_ (M.separated g hg h' hh hne)
+  have := min_le_right ε (2 - δ)
+  linarith
+
+/-- A closed weak model, so `WeakHyperlinearModel` is not a certificate nothing
+satisfies: the one-point model of the trivial group, exact on both counts, with
+separation vacuous because the test set is a subsingleton. -/
+def trivialWeakHyperlinearModel (F : Finset PUnit) (δ : ℝ) :
+    WeakHyperlinearModel PUnit F δ 0 where
+  carrier := ⟨PUnit, inferInstance, inferInstance⟩
+  nonempty := by simp
+  map := fun _ ↦ 1
+  isUnitary := fun _ ↦ Submonoid.one_mem _
+  multiplicative := by
+    intro g _ h _
+    simp [hsDistSq]
+  separated := by
+    intro g _ h _ hne
+    exact absurd (Subsingleton.elim g h) hne
+
+/-- A closed witness, so `IsHyperlinearWeak` is not a certificate nothing
+satisfies. -/
+theorem isHyperlinearWeak_trivial_one :
+    IsHyperlinearWeak (PUnit : Type) 1 :=
+  isHyperlinearWeak_of_isHyperlinear (by norm_num)
+    (isHyperlinear_of_finite (PUnit : Type))
+
 end NonsoficGroupsExist

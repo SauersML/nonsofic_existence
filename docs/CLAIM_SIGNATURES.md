@@ -2886,6 +2886,12 @@ CountableNonsoficGroupExists
               1 - (fixedDensity Y σ - E / ↑(Fintype.card Y.carrier)) / 2
 ```
 
+## `NonsoficGroupsExist.isHyperlinearWeak_of_isHyperlinear`
+
+```lean
+∀ {G : Type} [inst : Group G] {δ : ℝ}, δ < 2 → IsHyperlinear G → IsHyperlinearWeak G δ
+```
+
 ## `NonsoficGroupsExist.isHyperlinear_iff_productRestricted`
 
 ```lean
