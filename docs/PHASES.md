@@ -634,6 +634,17 @@ attaining the involution bound (`untwist_half_separation_witness`).
 Cancellation buys nothing at order two and everything at order four, and the two
 witnesses differ in nothing else.
 
+**This does not contradict §6**, though read together they look as though they
+might.  There the untwisting of Thom's character-assembled microstates has defect
+`1 − 1/p^k`, which sounds like untwisting failing at `gcd = p^k ≥ 4`; here
+untwisting at order four gives *full* separation.  The two measure different
+things.  §6e is about **separation** — the distance of the untwisted permutation
+from the identity — and untwisting can achieve that at order four.  §6 is about
+the **multiplicative defect** between two twisted data, which untwisting
+destroys.  So untwisting Thom's microstates keeps what separation they have and
+loses their multiplicativity, and it is the second that makes them useless as a
+sofic model.  The two halves of a sofic model fail at different steps.
+
 Order three forces retention too — of a third rather than a half
 (`card_zero_class_ge_three`).  The cube roots of unity are *positively*
 dependent: `1 + ω + ω² = 0` is their only relation over `ℝ`, so a nonnegative
