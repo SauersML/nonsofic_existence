@@ -2271,6 +2271,23 @@ Group.FG ↥UniversalRankFour.Ambient ∧
                   ↑{y | (act (a * b * a⁻¹ * b⁻¹)) y = y}.card + ε * ↑(Fintype.card Y.carrier)
 ```
 
+## `NonsoficGroupsExist.card_fixed_commutator_constraint_tight`
+
+```lean
+∃ Y act e D a b,
+  (∀ (y : Y.carrier), Complex.normSq (D y) = 1) ∧
+    (∀ (y : Y.carrier), e (a * b * a⁻¹ * b⁻¹) y = 0 → D y = 1) ∧
+      (∀ y ∉ ∅,
+          (act a) y = y →
+            (act b) y = y → (act (a * b * a⁻¹ * b⁻¹)) y = y ∧ e (a * b * a⁻¹ * b⁻¹) y = 0) ∧
+        2 *
+            (↑{y | (act a) y = y}.card + ↑{y | (act b) y = y}.card - ↑(Fintype.card Y.carrier) -
+              ↑∅.card) =
+          ↑{y | (act (a * b * a⁻¹ * b⁻¹)) y = y}.card +
+            (normTrace Y (monomialMatrix Y D (act (a * b * a⁻¹ * b⁻¹)))).re *
+              ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.card_torsion_subgroup`
 
 ```lean
