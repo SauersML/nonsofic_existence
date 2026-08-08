@@ -2612,6 +2612,14 @@ CountableNonsoficGroupExists
   3 ≤ Fintype.card ι → ∀ (l k : ι), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
+## `NonsoficGroupsExist.exists_unitary_not_monomial`
+
+```lean
+∃ Y,
+  ∃ U ∈ Matrix.unitaryGroup Y.carrier ℂ,
+    ∀ (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier), U ≠ monomialMatrix Y d σ
+```
+
 ## `NonsoficGroupsExist.finiteFieldElementaryThree_hasKazhdanPropertyT`
 
 ```lean
@@ -3354,16 +3362,6 @@ CountableNonsoficGroupExists
 ∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} [inst_1 : Fintype Y] (act : G → Equiv.Perm Y)
   (b : G → Y → ℝ) (g h : G),
   scalarPart (phaseCob act b) g h = scalarCob (fun g => modelMean (b g)) g h
-```
-
-## `NonsoficGroupsExist.sqrt_normSq_normTrace_le`
-
-```lean
-∀ (Y : FiniteModel) {d : Y.carrier → ℂ},
-  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) →
-    ∀ (σ : Equiv.Perm Y.carrier),
-      0 < Fintype.card Y.carrier →
-        √(Complex.normSq (normTrace Y (monomialMatrix Y d σ))) ≤ fixedDensity Y σ
 ```
 
 ## `NonsoficGroupsExist.symmDiff_le_of_pinned`
