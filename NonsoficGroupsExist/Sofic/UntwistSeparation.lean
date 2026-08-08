@@ -815,4 +815,106 @@ theorem untwist_full_separation_witness_even (m : ℕ) [NeZero m] (hm : 4 ≤ m)
     · simpa [h] using hne1
     · simpa [h] using hne2
 
+
+/-! ## The odd moduli too, so `gcd ≥ 4` is settled in general
+
+The even family above is trig-free because `1 + (-1) = 0` does all the work.  At
+an odd modulus no two nontrivial classes cancel on their own, and the weights
+have to be unequal.  That is not an artifact: for *prime* `m` the numbers
+`1, ζ, …, ζ^{m-1}` satisfy only the one rational relation `Σ ζ^k = 0`, which
+involves the trivial class, so no rational nonnegative combination of the
+nontrivial classes can vanish and irrational weights are forced.
+
+They are easy to write down.  Weight the two classes adjacent to the trivial one
+by `1 + 1/(2 Re ζ)` and every other nontrivial class by `1`; since
+`Σ_{k=1}^{m-1} ζ^k = -1` and `ζ + ζ^{m-1} = 2 Re ζ`, the total is
+`-1 + 2 Re ζ /(2 Re ζ) = 0`.  All weights are positive exactly when `Re ζ > 0`,
+which for `ζ = e^{2πi/m}` says `m ≥ 5`.
+-/
+
+/-- The nontrivial classes sum to `-1`. -/
+theorem geom_nontrivial_sum (m : ℕ) (hm : 1 ≤ m) (ζ : ℂ) (hpow : ζ ^ m = 1)
+    (hne : ζ ≠ 1) : ∑ k ∈ Finset.Ico 1 m, ζ ^ k = -1 := by
+  have hgeom : ∑ k ∈ Finset.range m, ζ ^ k = 0 := by
+    rw [geom_sum_eq hne m, hpow]
+    simp
+  rw [Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (by omega)] at hgeom
+  simp only [pow_zero, zero_add] at hgeom
+  linear_combination hgeom
+
+/-- `ζ^{m-1}` is the conjugate of `ζ`, so the two classes adjacent to the trivial
+one sum to `2 Re ζ`. -/
+theorem adjacent_pair_sum (m : ℕ) (hm : 1 ≤ m) (ζ : ℂ) (hpow : ζ ^ m = 1)
+    (hnorm : Complex.normSq ζ = 1) :
+    ζ ^ 1 + ζ ^ (m - 1) = 2 * (ζ.re : ℂ) := by
+  have hz : ζ ≠ 0 := by
+    intro h
+    rw [h] at hnorm
+    simp at hnorm
+  have hsplit : ζ ^ (m - 1) * ζ = 1 := by
+    rw [← pow_succ]
+    rw [Nat.sub_add_cancel hm]
+    exact hpow
+  have hconj : ζ ^ (m - 1) = (starRingEnd ℂ) ζ := by
+    have hinv : ζ ^ (m - 1) = ζ⁻¹ := eq_inv_of_mul_eq_one_left hsplit
+    rw [hinv, Complex.inv_def, hnorm]
+    simp
+  rw [pow_one, hconj, Complex.add_conj]
+  push_cast
+  ring
+
+/-- **A vanishing nonnegative combination of the nontrivial classes, at every
+modulus with `Re ζ > 0`.**  For `ζ = e^{2πi/m}` that condition is `m ≥ 5`, so
+together with the even family it settles `gcd ≥ 4` in general: the trivial class
+can always be missed. -/
+theorem phase_weights_cancel (m : ℕ) (hm : 2 ≤ m) (ζ : ℂ) (hpow : ζ ^ m = 1)
+    (hne : ζ ≠ 1) (hnorm : Complex.normSq ζ = 1) (hre : 0 < ζ.re) :
+    ∑ k ∈ Finset.Ico 1 m,
+        ((1 : ℝ) + (if k = 1 ∨ k = m - 1 then 1 / (2 * ζ.re) else 0) : ℝ) * ζ ^ k
+      = 0 := by
+  classical
+  have hone : (1 : ℕ) ∈ Finset.Ico 1 m := by simp; omega
+  have hlast : (m - 1) ∈ Finset.Ico 1 m := by simp; omega
+  have hbase := geom_nontrivial_sum m (by omega) ζ hpow hne
+  have hpair := adjacent_pair_sum m (by omega) ζ hpow hnorm
+  have hsplit : ∑ k ∈ Finset.Ico 1 m,
+      ((1 : ℝ) + (if k = 1 ∨ k = m - 1 then 1 / (2 * ζ.re) else 0) : ℝ) * ζ ^ k
+      = (∑ k ∈ Finset.Ico 1 m, ζ ^ k)
+        + ∑ k ∈ Finset.Ico 1 m,
+            ((if k = 1 ∨ k = m - 1 then (1 : ℝ) / (2 * ζ.re) else 0) : ℝ) * ζ ^ k := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun k _ ↦ ?_
+    push_cast
+    ring
+  rw [hsplit, hbase]
+  by_cases hm2 : m = 2
+  · exfalso
+    subst hm2
+    have hz : ζ = -1 := by
+      have : (ζ - 1) * (ζ + 1) = 0 := by
+        have : ζ ^ 2 = 1 := hpow
+        linear_combination this
+      rcases mul_eq_zero.mp this with h | h
+      · exact absurd (by linear_combination h) hne
+      · linear_combination h
+    rw [hz] at hre
+    norm_num at hre
+  · have hdistinct : (1 : ℕ) ≠ m - 1 := by omega
+    have hfilter : ∑ k ∈ Finset.Ico 1 m,
+        ((if k = 1 ∨ k = m - 1 then (1 : ℝ) / (2 * ζ.re) else 0) : ℝ) * ζ ^ k
+        = ((1 : ℝ) / (2 * ζ.re) : ℝ) * (ζ ^ 1 + ζ ^ (m - 1)) := by
+      rw [Finset.sum_eq_add_of_mem 1 (m - 1) hone hlast hdistinct (by
+        intro k _ hk
+        simp [hk.1, hk.2])]
+      simp only [true_or, or_true, if_true]
+      push_cast
+      ring
+    rw [hfilter, hpair]
+    have hre' : (ζ.re : ℂ) ≠ 0 := by
+      simpa using (ne_of_gt hre)
+    have hcancel : ((1 / (2 * ζ.re) : ℝ) : ℂ) * (2 * (ζ.re : ℂ)) = 1 := by
+      push_cast
+      field_simp
+    linear_combination hcancel
+
 end NonsoficGroupsExist

@@ -442,10 +442,19 @@ modulus, if `ζ^{m/2} = -1` then `ζ¹ + ζ^{1+m/2} = ζ(1 + ζ^{m/2}) = 0`
 is trivial; the two-point model with the identity permutation and phases `ζ, −ζ`
 has trace `0` and untwists fixed-point free, for every even `m ≥ 4`
 (`untwist_full_separation_witness_even`).  The `±i` witness is the case `m = 4`.
-The same idea covers composite `m` generally — take the classes `1 + (m/d)j` for
-`j < d` — and only prime `m ≥ 5` needs irrational weights (at `m = 5` they are
-the golden ratio, the constant from §3).  Those generalizations are not
-formalized; the even family is.
+The odd moduli need unequal weights, and that is not an artifact: for **prime**
+`m` the numbers `1, ζ, …, ζ^{m-1}` satisfy only the rational relation
+`Σ ζ^k = 0`, which involves the trivial class, so no rational nonnegative
+combination of the nontrivial classes can vanish.  The irrational weights are
+easy to write down (`phase_weights_cancel`): weight the two classes adjacent to
+the trivial one by `1 + 1/(2 Re ζ)` and every other nontrivial class by `1`.
+Since `Σ_{k=1}^{m-1} ζ^k = -1` (`geom_nontrivial_sum`) and
+`ζ + ζ^{m-1} = 2 Re ζ` (`adjacent_pair_sum`), the total is `-1 + 1 = 0`, and all
+weights are positive exactly when `Re ζ > 0` — for `ζ = e^{2πi/m}`, when
+`m ≥ 5`.
+
+With the even family this settles `gcd ≥ 4` at every modulus: the trivial class
+can always be missed.
 
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
