@@ -422,6 +422,20 @@ missing the class of `1` entirely — which is the witness above.  **The
 trichotomy is complete**: orders two and three force retention of `1/2` and
 `1/3`; order four and beyond force nothing.
 
+The order is not quite the right invariant.  What the phase of an order-`n`
+element can do at a point it fixes is decided by the subgroup of `ℤ/m` it is
+pinned to — the `n`-torsion — and that subgroup has exactly `gcd(m,n)` elements
+(`card_torsion_subgroup`, the annihilator count of §6 with its arguments
+exchanged).  So the classification is really in `gcd(n,m)`: `1` forces the phase
+to vanish, `2` retains a half, `3` retains a third, `≥ 4` forces nothing.
+
+That is not a relabelling.  An involution against an **odd** modulus has
+`gcd(2,m) = 1`, so its phase is forced to vanish on its fixed points exactly as
+a coprime element's is (`phase_eq_zero_of_gcd_eq_one`), and untwisting gains
+nothing — although the element has order two and the involution bound would
+predict a half.  The gcd is what the phase sees; the two part company exactly
+when the modulus is chosen incompatibly with the torsion.
+
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
 machinery bears on this half: the difficulty is not that phases are hard to make

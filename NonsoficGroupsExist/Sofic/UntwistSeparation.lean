@@ -1,4 +1,5 @@
 import NonsoficGroupsExist.Sofic.ScalarCocycle
+import NonsoficGroupsExist.Sofic.CharacterCount
 
 /-!
 # Untwisting cannot manufacture separation
@@ -665,5 +666,79 @@ theorem card_zero_class_ge_three (n₀ n₁ n₂ E : ℝ) (hE : 0 ≤ E)
     rw [ha, hb]; ring
   rw [hid]
   linarith [hA, hB, hale, hble]
+
+
+/-! ## What actually controls the trichotomy is `gcd(n, m)`
+
+The bounds above were stated by the order `n` of the element, but that is not
+quite the invariant.  What the phase of an order-`n` element can do at a fixed
+point is decided by the subgroup of `ℤ/m` it is pinned to, namely the
+`n`-torsion, and that subgroup has exactly `gcd(m,n)` elements -- a count
+already available as `card_annihilator`.
+
+So the trichotomy is really in `gcd(n,m)`:
+
+* `gcd = 1` — the phase is forced to `0`, untwisting gains nothing;
+* `gcd = 2` — two values, and the trace forces balance: half is retained;
+* `gcd = 3` — three values, positively dependent: a third is retained;
+* `gcd ≥ 4` — the relation among the roots is no longer unique, and nothing is
+  forced.
+
+This is why an involution against an odd modulus behaves like a coprime element
+rather than like an involution: `gcd(2,m) = 1` there, and it is the gcd, not the
+order, that the phase sees.
+-/
+
+/-- **The `n`-torsion of `ℤ/m` has exactly `gcd(m,n)` elements.**  This is the
+annihilator count of `CharacterCount` read with the roles of the two arguments
+exchanged, and it is the subgroup the phase of an order-`n` element is pinned
+to at any point it fixes. -/
+theorem card_torsion_subgroup (m n : ℕ) [NeZero m] :
+    (univ.filter fun x : ZMod m ↦ (n : ZMod m) * x = 0).card = Nat.gcd m n := by
+  classical
+  have hset : (univ.filter fun x : ZMod m ↦ (n : ZMod m) * x = 0)
+      = univ.filter fun x : ZMod m ↦ x * (n : ZMod m) = 0 := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, mul_comm]
+  rw [hset, card_annihilator m ((n : ZMod m)), ZMod.val_natCast,
+    Nat.gcd_rec m n]
+  exact Nat.gcd_comm _ _
+
+/-- **The phase of an order-`n` element lies in a set of `gcd(m,n)` values.**
+With `gcd = 1` this is `phase_eq_zero_of_coprime`; with `gcd = 2` it supplies
+the two-value hypothesis of `involution_untwist_hamming_le` rather than assuming
+it; with `gcd ≥ 4` it is the room the `±i` witness exploits. -/
+theorem phase_mem_torsion (Y : FiniteModel) (m n : ℕ) [NeZero m]
+    (φ : ℕ → Y → ZMod m) (σ : Equiv.Perm Y)
+    (hzero : ∀ y, φ 0 y = 0)
+    (hstep : ∀ (k : ℕ) (y : Y), φ (k + 1) y = φ k (σ y) + φ 1 y)
+    (htriv : ∀ y, φ n y = 0) (y : Y) (hy : σ y = y) :
+    φ 1 y ∈ univ.filter fun x : ZMod m ↦ (n : ZMod m) * x = 0 := by
+  classical
+  rw [Finset.mem_filter]
+  refine ⟨Finset.mem_univ _, ?_⟩
+  have hiter := phase_iterate_at_fixed Y m φ σ hzero hstep y hy n
+  rw [← hiter]
+  exact htriv y
+
+/-- **The gcd is what the phase sees, not the order.**  An involution against an
+odd modulus has `gcd(2,m) = 1`, so its phase is forced to vanish on its fixed
+points exactly as a coprime element's is, and untwisting gains nothing at all --
+even though the element has order two. -/
+theorem phase_eq_zero_of_gcd_eq_one (Y : FiniteModel) (m n : ℕ) [NeZero m]
+    (hgcd : Nat.gcd m n = 1) (φ : ℕ → Y → ZMod m) (σ : Equiv.Perm Y)
+    (hzero : ∀ y, φ 0 y = 0)
+    (hstep : ∀ (k : ℕ) (y : Y), φ (k + 1) y = φ k (σ y) + φ 1 y)
+    (htriv : ∀ y, φ n y = 0) (y : Y) (hy : σ y = y) : φ 1 y = 0 := by
+  classical
+  have hmem := phase_mem_torsion Y m n φ σ hzero hstep htriv y hy
+  have hcard := card_torsion_subgroup m n
+  rw [hgcd] at hcard
+  have hzero_mem : (0 : ZMod m) ∈ univ.filter fun x : ZMod m ↦ (n : ZMod m) * x = 0 := by
+    simp
+  have := Finset.card_eq_one.mp hcard
+  obtain ⟨a, ha⟩ := this
+  rw [ha, Finset.mem_singleton] at hmem hzero_mem
+  rw [hmem, ← hzero_mem]
 
 end NonsoficGroupsExist
