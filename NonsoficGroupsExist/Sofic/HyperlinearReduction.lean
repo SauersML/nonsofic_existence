@@ -1,5 +1,6 @@
 import NonsoficGroupsExist.Sofic.Hyperlinear
 import NonsoficGroupsExist.Sofic.SoficTransfer
+import NonsoficGroupsExist.Sofic.LEFSofic
 
 /-!
 # Question 3.4 reduces to finitely generated groups
@@ -135,5 +136,42 @@ theorem exists_counterexample_iff_exists_fg :
     exact hcon ⟨H, hH, hfg, hhypH, hns⟩
   · rintro ⟨H, hH, _, hhyp, hns⟩
     exact ⟨H, hH, hhyp, hns⟩
+
+/-! ## The profile of a counterexample
+
+Assembling what is already proved, a hyperlinear nonsofic group -- if one exists
+-- is constrained on several sides at once, and the constraints are worth having
+in one place.
+
+It may be taken finitely generated, by the reduction above.  It is not locally
+embeddable into finite groups, since `isSofic_of_isLEF` would make it sofic; a
+fortiori it is not residually finite, by `isLEF_of_residuallyFinite`; and it is
+infinite, a finite group being residually finite.  What it must *also* be is
+non-amenable, since amenable groups are sofic -- that step is quoted, not proved
+here, and it is the one that puts the known candidate constructions out of reach.
+-/
+
+/-- Residual finiteness implies soficity, through local embeddability. -/
+theorem isSofic_of_residuallyFinite [Group.ResiduallyFinite G] : IsSofic G :=
+  isSofic_of_isLEF isLEF_of_residuallyFinite
+
+/-- **A counterexample is not locally embeddable into finite groups**, hence not
+residually finite. -/
+theorem not_isLEF_of_hyperlinear_not_isSofic (hns : ¬ IsSofic G) : ¬ IsLEF G :=
+  fun hlef ↦ hns (isSofic_of_isLEF hlef)
+
+/-- **A counterexample may be taken finitely generated and non-residually-finite.**
+The full profile in one statement: the reduction supplies the generation
+hypothesis, and residual finiteness would supply soficity. -/
+theorem exists_counterexample_iff_exists_fg_not_residuallyFinite :
+    (∃ (H : Type) (_ : Group H), IsHyperlinear H ∧ ¬ IsSofic H)
+      ↔ (∃ (H : Type) (_ : Group H), Group.FG H ∧ IsHyperlinear H
+          ∧ ¬ IsSofic H ∧ ¬ IsLEF H) := by
+  rw [exists_counterexample_iff_exists_fg]
+  constructor
+  · rintro ⟨H, hH, hfg, hhyp, hns⟩
+    exact ⟨H, hH, hfg, hhyp, hns, not_isLEF_of_hyperlinear_not_isSofic hns⟩
+  · rintro ⟨H, hH, hfg, hhyp, hns, _⟩
+    exact ⟨H, hH, hfg, hhyp, hns⟩
 
 end NonsoficGroupsExist
