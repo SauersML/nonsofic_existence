@@ -63,4 +63,29 @@ theorem rat_map_eq_zero {B : Type*} [AddGroup B] [Finite B] (f : ℚ →+ B)
     (q : ℚ) : f q = 0 :=
   map_eq_zero_of_divisible rat_divisible f q
 
+/-! ## The concrete centre -/
+
+/-- Divisibility passes to quotients. -/
+theorem divisible_quotient {A : Type*} [AddCommGroup A] (B : AddSubgroup A)
+    (hdiv : ∀ n : ℕ, 0 < n → ∀ a : A, ∃ b : A, n • b = a) (n : ℕ) (hn : 0 < n)
+    (a : A ⧸ B) : ∃ b : A ⧸ B, n • b = a := by
+  refine QuotientAddGroup.induction_on a fun x ↦ ?_
+  obtain ⟨y, hy⟩ := hdiv n hn x
+  exact ⟨QuotientAddGroup.mk y, by rw [← QuotientAddGroup.mk_nsmul, hy]⟩
+
+/-- `ℚ/ℤ` is divisible.  The centre of Thom's group is the Prüfer group
+`ℤ[1/p]/ℤ`, a subgroup of this one and divisible for the same reason. -/
+theorem ratCircle_divisible (n : ℕ) (hn : 0 < n)
+    (a : ℚ ⧸ AddSubgroup.zmultiples (1 : ℚ)) :
+    ∃ b : ℚ ⧸ AddSubgroup.zmultiples (1 : ℚ), n • b = a :=
+  divisible_quotient _ rat_divisible n hn a
+
+/-- **The circle group of rationals is invisible to every finite quotient.**
+This is the shape of the obstruction in Remark `rem:thomK`: a divisible centre
+that no finite quotient, hence no finite-dimensional representation, can see. -/
+theorem ratCircle_map_eq_zero {B : Type*} [AddGroup B] [Finite B]
+    (f : (ℚ ⧸ AddSubgroup.zmultiples (1 : ℚ)) →+ B)
+    (a : ℚ ⧸ AddSubgroup.zmultiples (1 : ℚ)) : f a = 0 :=
+  map_eq_zero_of_divisible ratCircle_divisible f a
+
 end NonsoficGroupsExist

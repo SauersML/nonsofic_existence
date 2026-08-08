@@ -2284,6 +2284,14 @@ CountableNonsoficGroupExists
     (∀ (k : ℕ), Vanishing fun n => e n k) → Vanishing fun n => e n (diagonalLevel e n)
 ```
 
+## `NonsoficGroupsExist.divisible_quotient`
+
+```lean
+∀ {A : Type u_1} [inst : AddCommGroup A] (B : AddSubgroup A),
+  (∀ (n : ℕ), 0 < n → ∀ (a : A), ∃ b, n • b = a) →
+    ∀ (n : ℕ), 0 < n → ∀ (a : A ⧸ B), ∃ b, n • b = a
+```
+
 ## `NonsoficGroupsExist.elGen_commutator`
 
 ```lean
@@ -3029,16 +3037,11 @@ CountableNonsoficGroupExists
 ∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
-## `NonsoficGroupsExist.rat_divisible`
+## `NonsoficGroupsExist.ratCircle_map_eq_zero`
 
 ```lean
-∀ (n : ℕ), 0 < n → ∀ (q : ℚ), ∃ r, n • r = q
-```
-
-## `NonsoficGroupsExist.rat_map_eq_zero`
-
-```lean
-∀ {B : Type u_1} [inst : AddGroup B] [Finite B] (f : ℚ →+ B) (q : ℚ), f q = 0
+∀ {B : Type u_1} [inst : AddGroup B] [Finite B] (f : ℚ ⧸ AddSubgroup.zmultiples 1 →+ B)
+  (a : ℚ ⧸ AddSubgroup.zmultiples 1), f a = 0
 ```
 
 ## `NonsoficGroupsExist.re_nonpos_of_pow_four_eq_one`
