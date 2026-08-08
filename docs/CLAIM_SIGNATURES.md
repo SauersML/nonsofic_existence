@@ -2522,6 +2522,24 @@ CountableNonsoficGroupExists
                         Diverges fun n => size n (sel n)
 ```
 
+## `NonsoficGroupsExist.exists_shift_fixed_ge`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [NeZero m] (d : Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
+  ∃ c, ↑{y | σ y = y}.card ≤ ↑m * ↑{y | σ y = y ∧ d y = c}.card
+```
+
+## `NonsoficGroupsExist.exists_shift_hamming_le`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier),
+  0 < Fintype.card Y.carrier →
+    ∃ c,
+      hammingDistance (wreathModel Y m) (wreathPerm Y m (fun y => d y - c) σ) 1 ≤
+        1 - fixedDensity Y σ / ↑m
+```
+
 ## `NonsoficGroupsExist.exists_soficEmbedding_of_isSofic`
 
 ```lean
@@ -2567,6 +2585,12 @@ CountableNonsoficGroupExists
 ```lean
 ∀ {α : Type u_1} (rels : Finset (FreeGroup α)),
   IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
+```
+
+## `NonsoficGroupsExist.fixedDensity`
+
+```lean
+(Y : FiniteModel) → Equiv.Perm Y.carrier → ℝ
 ```
 
 ## `NonsoficGroupsExist.fixedSet`
@@ -3329,6 +3353,18 @@ CountableNonsoficGroupExists
     Group.FG ↥(UniversalLeavittEL m) ∧
       Infinite ↥(UniversalLeavittEL m) ∧
         HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
+```
+
+## `NonsoficGroupsExist.untwist_separation_undetermined`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m],
+  2 ≤ m →
+    ∀ (σ : Equiv.Perm Y.carrier),
+      0 < Fintype.card Y.carrier →
+        hammingDistance (wreathModel Y m) (wreathPerm Y m (fun x => 1) σ) 1 = 1 ∧
+          hammingDistance (wreathModel Y m) (wreathPerm Y m (fun x => 0) σ) 1 =
+            1 - fixedDensity Y σ
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
