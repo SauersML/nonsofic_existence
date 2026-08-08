@@ -20,9 +20,10 @@ coordinate (`mem_center_iff`), so `Heis R` has centre `(R,+)`: the coefficient
 ring appears as the centre on the nose.
 
 Two things this is not.  It is not de Cornulier's `K₀(ℤ[1/p])`, which is more
-elaborate because it must also be finitely presented and Kazhdan; `Heis ℤ[1/p]`
-is neither, and is residually finite, so it is no candidate for Question 3.4.
-And nothing here computes the quotient by `ℤ`.  What it does supply is the
+elaborate because it must also be finitely presented and Kazhdan.  And nothing
+in the first half computes the quotient by `ℤ`.  Why the group here is no
+candidate for Question 3.4 is taken up at the end, and the reason is not the
+obvious one.  What it does supply is the
 centre computation itself, which is the part `rem:thomK` uses structurally and
 which no longer has to be taken on trust.
 -/
@@ -279,5 +280,35 @@ theorem heis_centre_map_eq_one {p : ℕ} (hp : p.Prime) {B : Type*} [Group B]
         push_cast
         linarith [hq]
   rw [hsame, map_pow, pow_card_eq_one]
+
+
+/-! ## Why this group is not a candidate, and what the right reason is
+
+It would be easy to write that `Heis ℤ[1/p] / ℤ` is not a candidate for
+Question 3.4 because it is residually finite.  That is false, and
+`heis_centre_map_eq_one` is the proof: every homomorphism to a finite group
+kills the image of the centre, which is nontrivial, so the group is *not*
+residually finite.  It has exactly the failure of residual finiteness that makes
+Thom's `K` interesting.
+
+The real reason is different and simpler.  `Heis R` is `2`-step nilpotent -- the
+commutator of any two elements is central (`commutator_mem_center`) -- and
+nilpotent groups are amenable, hence sofic.  So the group is sofic for reasons
+having nothing to do with its centre, and is no test of anything.
+
+That is also what distinguishes Cornulier's `K₀(ℤ[1/p])`: being Kazhdan, it is
+as far from amenable as a group can be, which is precisely why its central
+quotient can be a candidate when this one cannot.  The obstruction to using a
+Heisenberg group here is nilpotence, not residual finiteness.
+-/
+
+/-- **`Heis R` is `2`-step nilpotent**: every commutator is central.  The first
+two coordinates are additive, so they cancel in `xyx⁻¹y⁻¹`, leaving an element
+of the centre by `mem_center_iff`. -/
+theorem Heis.commutator_mem_center {R : Type*} [CommRing R] (x y : Heis R) :
+    x * y * x⁻¹ * y⁻¹ ∈ Subgroup.center (Heis R) := by
+  refine (Heis.mem_center_iff _).mpr ⟨?_, ?_⟩
+  · simp
+  · simp
 
 end NonsoficGroupsExist

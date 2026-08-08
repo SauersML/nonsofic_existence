@@ -707,11 +707,11 @@ One entry per declaration named by a manuscript margin note, in the order of `do
   [inst : Ring R] → LeavittFamily R → {m : ℕ} → 0 < m → (Matrix (Fin (m + 1)) (Fin (m + 1)) R)ˣ
 ```
 
-## `NonsoficGroupsExist.Heis.center_eq_range`
+## `NonsoficGroupsExist.Heis.commutator_mem_center`
 
 ```lean
-∀ {R : Type u_1} [inst : CommRing R],
-  ↑(Subgroup.center (Heis R)) = Set.range fun c => { a := 0, b := 0, c := c }
+∀ {R : Type u_1} [inst : CommRing R] (x y : Heis R),
+  x * y * x⁻¹ * y⁻¹ ∈ Subgroup.center (Heis R)
 ```
 
 ## `NonsoficGroupsExist.Heis.mem_center_iff`

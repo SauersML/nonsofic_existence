@@ -69,7 +69,7 @@ NonsoficGroupsExist.GeneralRank.piece_val
 NonsoficGroupsExist.GeneralScheme.uMatrix_mul_uPrimeMatrix
 NonsoficGroupsExist.GeneralScheme.uUnit
 NonsoficGroupsExist.GeneralScheme.zUnit
-NonsoficGroupsExist.Heis.center_eq_range
+NonsoficGroupsExist.Heis.commutator_mem_center
 NonsoficGroupsExist.Heis.mem_center_iff
 NonsoficGroupsExist.HyperlinearModel
 NonsoficGroupsExist.IsEssentialExpanderSequence
