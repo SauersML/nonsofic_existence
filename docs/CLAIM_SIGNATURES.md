@@ -2114,6 +2114,16 @@ Function.Injective ⇑UniversalRankFour.witnessEmbedding
   Whitehead.diagonalPair ↑a ↑a⁻¹ = Whitehead.w a * Whitehead.w (-1)
 ```
 
+## `NonsoficGroupsExist.additiveRounding_no_separation`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (f : CircleGroup →+ ZMod m)
+  (D E : Y.carrier → CircleGroup) (σ : Equiv.Perm Y.carrier),
+  hammingDistance (wreathModel Y m) (wreathPerm Y m (fun y => f (D y)) σ)
+      (wreathPerm Y m (fun y => f (E y)) σ) =
+    0
+```
+
 ## `NonsoficGroupsExist.adjointRep`
 
 ```lean
@@ -2211,6 +2221,13 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 
 ```lean
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
+```
+
+## `NonsoficGroupsExist.circle_map_eq_zero`
+
+```lean
+∀ {B : Type u_1} [inst : AddGroup B] [Finite B] (f : CircleGroup →+ B) (a : CircleGroup),
+  f a = 0
 ```
 
 ## `NonsoficGroupsExist.commutant_no_growth`
@@ -2875,6 +2892,15 @@ CountableNonsoficGroupExists
   monomialMatrix Y (fun x => 1) σ = Equiv.Perm.permMatrix ℂ σ
 ```
 
+## `NonsoficGroupsExist.no_pointwise_rounding`
+
+```lean
+∀ (m : ℕ) [NeZero m],
+  2 ≤ m →
+    (∀ (f : CircleGroup →+ ZMod m) (a : CircleGroup), f a = 0) ∧
+      ∃ x y, roundMod m (x + y) ≠ roundMod m x + roundMod m y
+```
+
 ## `NonsoficGroupsExist.no_soficEmbedding_of_not_isSofic`
 
 ```lean
@@ -3080,6 +3106,12 @@ CountableNonsoficGroupExists
             {h : ℝ} →
               (X.transport (blockModel P y) e).HasCheegerLowerBound h →
                 ComponentRefinement X P Q q y
+```
+
+## `NonsoficGroupsExist.roundMod_not_additive`
+
+```lean
+∀ (m : ℕ), 2 ≤ m → ∃ x y, roundMod m (x + y) ≠ roundMod m x + roundMod m y
 ```
 
 ## `NonsoficGroupsExist.symmDiff_le_of_pinned`
