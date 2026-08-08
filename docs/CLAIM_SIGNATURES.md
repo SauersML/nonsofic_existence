@@ -2311,6 +2311,16 @@ Group.FG ↥UniversalRankFour.Ambient ∧
   (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, (φ t)⁻¹ * q * φ t ∈ Subgroup.map φ Γ
 ```
 
+## `NonsoficGroupsExist.coprime_untwist_hamming`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier),
+  (∀ (y : Y.carrier), σ y = y → d y = 0) →
+    0 < Fintype.card Y.carrier →
+      hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 = 1 - fixedDensity Y σ
+```
+
 ## `NonsoficGroupsExist.correctedImplementer_defect`
 
 ```lean
@@ -3129,12 +3139,15 @@ CountableNonsoficGroupExists
           ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
 ```
 
-## `NonsoficGroupsExist.phase_two_torsion`
+## `NonsoficGroupsExist.phase_eq_zero_of_coprime`
 
 ```lean
-∀ (Y : FiniteModel) (m : ℕ) (d e : Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
-  (∀ (y : Y.carrier), e y = d (σ y) + d y) →
-    (∀ (y : Y.carrier), e y = 0) → ∀ (y : Y.carrier), σ y = y → 2 * d y = 0
+∀ (Y : FiniteModel) (m n : ℕ),
+  n.Coprime m →
+    ∀ (φ : ℕ → Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
+      (∀ (y : Y.carrier), φ 0 y = 0) →
+        (∀ (k : ℕ) (y : Y.carrier), φ (k + 1) y = φ k (σ y) + φ 1 y) →
+          (∀ (y : Y.carrier), φ n y = 0) → ∀ (y : Y.carrier), σ y = y → φ 1 y = 0
 ```
 
 ## `NonsoficGroupsExist.pow_card_eq_one_of_scalarCommute`
