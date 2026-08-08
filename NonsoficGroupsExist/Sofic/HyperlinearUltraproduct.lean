@@ -135,4 +135,42 @@ def nullUnitarySubgroup (hX : ∀ i, 0 < Fintype.card (X i)) :
     rw [hcoe, hsLengthSq_conjTranspose (X i) (u i).2 (hX i)]
     exact hi
 
+/-- Conjugation does not move the length. -/
+theorem hsLengthSq_conj (Y : FiniteModel) {t u : Matrix Y Y ℂ}
+    (ht : t ∈ Matrix.unitaryGroup Y ℂ) (hY : 0 < Fintype.card Y) :
+    hsLengthSq Y (t * u * tᴴ) = hsLengthSq Y u := by
+  have htt : t * tᴴ = 1 := by
+    have h := ht
+    rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose] at h
+    exact h
+  have htmem : tᴴ ∈ Matrix.unitaryGroup Y ℂ := by
+    rw [Matrix.mem_unitaryGroup_iff', Matrix.star_eq_conjTranspose,
+      Matrix.conjTranspose_conjTranspose]
+    exact htt
+  have hsplit : t * u * tᴴ - 1 = t * (u - 1) * tᴴ := by
+    rw [Matrix.mul_sub, Matrix.mul_one, Matrix.sub_mul, htt]
+  rw [hsLengthSq, hsplit, hsNormSq_mul_right Y htmem,
+    hsNormSq_mul_left Y ht hY, hsLengthSq]
+
+instance nullUnitarySubgroup_normal (hX : ∀ i, 0 < Fintype.card (X i)) :
+    (nullUnitarySubgroup 𝒰 X hX).Normal where
+  conj_mem := by
+    intro u hu t ε hε
+    filter_upwards [hu ε hε] with i hi
+    show hsLengthSq (X i) ((t i * u i * (t i)⁻¹ :
+      Matrix.unitaryGroup (X i) ℂ)) < ε
+    have hcoe : ((t i * u i * (t i)⁻¹ : Matrix.unitaryGroup (X i) ℂ) :
+        Matrix (X i) (X i) ℂ)
+        = (t i : Matrix (X i) (X i) ℂ) * (u i : Matrix (X i) (X i) ℂ)
+          * (t i : Matrix (X i) (X i) ℂ)ᴴ := by
+      rw [← Matrix.star_eq_conjTranspose]
+      rfl
+    rw [hcoe, hsLengthSq_conj (X i) (t i).2 (hX i)]
+    exact hi
+
+/-- **The universal hyperlinear group** over `X` along `𝒰`: the metric
+ultraproduct of the finite unitary groups. -/
+abbrev UniversalHyperlinear (hX : ∀ i, 0 < Fintype.card (X i)) : Type _ :=
+  (∀ i, Matrix.unitaryGroup (X i) ℂ) ⧸ nullUnitarySubgroup 𝒰 X hX
+
 end NonsoficGroupsExist

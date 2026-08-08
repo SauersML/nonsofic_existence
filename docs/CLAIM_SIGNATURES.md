@@ -2073,6 +2073,13 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
     ThompsonV.Covers E → ThompsonV.Covers B → Equiv.Perm ThompsonV.Boundary
 ```
 
+## `NonsoficGroupsExist.UniversalHyperlinear`
+
+```lean
+{ι : Type u_1} →
+  Ultrafilter ι → (X : ι → FiniteModel) → (∀ (i : ι), 0 < Fintype.card (X i).carrier) → Type u_1
+```
+
 ## `NonsoficGroupsExist.UniversalRankFour.witnessEmbedding`
 
 ```lean
@@ -2631,18 +2638,12 @@ CountableNonsoficGroupExists
   a ≠ b → hsDistSq Y (coordProjection Y a) (coordProjection Y b) = 2 / ↑(Fintype.card Y.carrier)
 ```
 
-## `NonsoficGroupsExist.hsLengthSq`
+## `NonsoficGroupsExist.hsLengthSq_conj`
 
 ```lean
-(Y : FiniteModel) → Matrix Y.carrier Y.carrier ℂ → ℝ
-```
-
-## `NonsoficGroupsExist.hsLengthSq_conjTranspose`
-
-```lean
-∀ (Y : FiniteModel) {u : Matrix Y.carrier Y.carrier ℂ},
-  u ∈ Matrix.unitaryGroup Y.carrier ℂ →
-    0 < Fintype.card Y.carrier → hsLengthSq Y u.conjTranspose = hsLengthSq Y u
+∀ (Y : FiniteModel) {t u : Matrix Y.carrier Y.carrier ℂ},
+  t ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier → hsLengthSq Y (t * u * t.conjTranspose) = hsLengthSq Y u
 ```
 
 ## `NonsoficGroupsExist.hsLengthSq_mul_le`
