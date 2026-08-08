@@ -397,4 +397,101 @@ theorem coprime_untwist_hamming (Y : FiniteModel) (m : ℕ) [NeZero m]
   rw [hcompl, Nat.cast_sub hle, fixedDensity]
   field_simp
 
+
+/-! ## Cancellation can buy everything, if the torsion allows
+
+`monomial_normTrace_zero_of_identity` exhibits a monomial matrix of trace zero
+whose permutation part is the identity: the phases `1` and `-1` on two points.
+It is tempting to conclude that a trace which vanishes by *cancellation* is
+worthless for soficity, since nothing is moved.  That conclusion is false, and
+the identity `hammingDistance_wreathPerm_one` says why: the untwisted model is
+separated by the scarcity of points that are fixed **and trivially phased**, so
+a phase which never vanishes on the fixed points untwists to a fixed point free
+permutation, however little the permutation part moves.
+
+The two witnesses below are the same configuration -- identity permutation,
+trace zero, two points -- distinguished only by the torsion of the phase.  With
+`2`-torsion phases `±1` the untwisted model keeps half its points fixed, exactly
+as `involution_untwist_hamming_le` requires.  With `4`-torsion phases `±i` it
+keeps none, and untwisting is perfect.  Cancellation buys nothing at order two
+and everything at order four.
+-/
+
+/-- **A phase that never vanishes on the fixed points untwists to a fixed point
+free permutation.**  Separation of the untwisted model is scarcity of
+*trivially phased* fixed points, not scarcity of fixed points. -/
+theorem untwist_hamming_eq_one_of_phase_ne_zero (Y : FiniteModel) (m : ℕ)
+    [NeZero m] (d : Y → ZMod m) (σ : Equiv.Perm Y)
+    (hd : ∀ y, σ y = y → d y ≠ 0) (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 = 1 := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  rw [hammingDistance_wreathPerm_one]
+  have hall : (univ.filter fun y : Y ↦ ¬ (σ y = y ∧ d y = 0)) = (univ : Finset Y) := by
+    ext y
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, iff_true]
+    rintro ⟨hfix, hzero⟩
+    exact hd y hfix hzero
+  rw [hall, Finset.card_univ]
+  field_simp
+
+/-- **Cancellation buys everything at order four.**  Two points, the identity
+permutation, phases `±i`: the trace is zero and the untwisted permutation is
+fixed point free, so the untwisted model is maximally separated even though the
+permutation part moves nothing at all. -/
+theorem untwist_full_separation_witness :
+    ∃ (Y : FiniteModel) (d : Y → ℂ) (e : Y → ZMod 4),
+      (∀ i, Complex.normSq (d i) = 1) ∧
+      normTrace Y (monomialMatrix Y d 1) = 0 ∧
+      hammingDistance (wreathModel Y 4) (wreathPerm Y 4 e 1) 1 = 1 := by
+  classical
+  refine ⟨(⟨Bool, inferInstance, inferInstance⟩ : FiniteModel),
+    fun b : Bool ↦ if b = true then Complex.I else -Complex.I,
+    fun b : Bool ↦ if b = true then (1 : ZMod 4) else 3, ?_, ?_, ?_⟩
+  · intro i
+    by_cases h : i = true <;> simp [h]
+  · have htr : Matrix.trace
+        (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+          (fun b : Bool ↦ if b = true then Complex.I else -Complex.I) 1) = 0 := by
+      show (∑ i : Bool, (if (1 : Equiv.Perm Bool) i = i then
+        (if i = true then Complex.I else -Complex.I) else 0)) = 0
+      rw [Fintype.sum_bool]
+      norm_num
+    rw [normTrace, htr, zero_div]
+  · refine untwist_hamming_eq_one_of_phase_ne_zero _ 4 _ 1 ?_ (by decide)
+    intro y _
+    by_cases h : y = true <;> simp [h] <;> decide
+
+/-- **Cancellation buys nothing at order two.**  The same configuration with
+`2`-torsion phases keeps half its points fixed after untwisting, which is the
+bound of `involution_untwist_hamming_le` attained. -/
+theorem untwist_half_separation_witness :
+    ∃ (Y : FiniteModel) (d : Y → ℂ) (e : Y → ZMod 2),
+      (∀ i, Complex.normSq (d i) = 1) ∧
+      normTrace Y (monomialMatrix Y d 1) = 0 ∧
+      hammingDistance (wreathModel Y 2) (wreathPerm Y 2 e 1) 1 = 1 / 2 := by
+  classical
+  refine ⟨(⟨Bool, inferInstance, inferInstance⟩ : FiniteModel),
+    fun b : Bool ↦ if b = true then (1 : ℂ) else -1,
+    fun b : Bool ↦ if b = true then (0 : ZMod 2) else 1, ?_, ?_, ?_⟩
+  · intro i
+    by_cases h : i = true <;> simp [h]
+  · have htr : Matrix.trace
+        (monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel)
+          (fun b : Bool ↦ if b = true then (1 : ℂ) else -1) 1) = 0 := by
+      show (∑ i : Bool, (if (1 : Equiv.Perm Bool) i = i then
+        (if i = true then (1 : ℂ) else -1) else 0)) = 0
+      rw [Fintype.sum_bool]
+      norm_num
+    rw [normTrace, htr, zero_div]
+  · rw [hammingDistance_wreathPerm_one]
+    have hfil : (univ.filter fun b : Bool ↦
+        ¬ ((1 : Equiv.Perm Bool) b = b ∧ (if b = true then (0 : ZMod 2) else 1) = 0))
+        = {false} := by decide
+    rw [hfil]
+    norm_num
+    rw [show Fintype.card
+      (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel).carrier = 2 from rfl]
+    norm_num
+
 end NonsoficGroupsExist

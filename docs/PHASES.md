@@ -131,9 +131,14 @@ Two inequalities measure the distance to soficity, pulling opposite ways:
     |τ(A(d,σ))|² ≤ (1 − d_Hamm(σ, 1))²        the trace is bounded by the
                                               fixed-point fraction
 
-So a monomial model is a sofic model exactly when its underlying permutations
-are already almost fixed-point free; what it may do instead is let the phases
-cancel over the fixed points (`monomial_normTrace_zero_of_identity`).
+It is tempting to conclude that a monomial model is a sofic model exactly when
+its permutations are already almost fixed-point free, so that cancellation is
+worthless.  **That is false** — see §6e.  What the untwisted model needs is
+scarcity of points that are fixed *and trivially phased*, so a phase that never
+vanishes on `Fix(σ)` untwists to a fixed-point-free permutation however little
+`σ` moves.  What decides the matter is the torsion of the phase, not how much
+the permutation moves (`monomial_normTrace_zero_of_identity` is the order-two
+case, where cancellation is indeed worthless).
 
 Untwisting is always available as a construction — `(y,j) ↦ (σy, j + d y)` is an
 honest permutation of `Y × ℤ/m` — and its price and yield are exact:
@@ -336,9 +341,11 @@ by that `c` is a *scalar* change — invisible to Hilbert–Schmidt by section 6
 and leaves an untwisted model of separation at most `1 − F/m`, where `F` is the
 fixed-point density of `σ` (`exists_shift_hamming_le`).
 
-So untwisting can only inherit separation, up to a factor `m`.  If the
-permutation parts are not already almost fixed-point free, no choice of phases
-repairs it and no renormalization hides it from every scalar.
+So untwisting cannot manufacture separation *robustly*: whatever the phases,
+some scalar renormalization retains a `1/m` share, and since scalar
+renormalizations are invisible to Hilbert–Schmidt, nothing in the metric data
+rules that normalization out.  This does not say every choice of phase is bad —
+see the witnesses below — only that the metric cannot certify a good one.
 
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
@@ -377,6 +384,16 @@ So phases can help only when the modulus shares a factor with the torsion —
 which is exactly what a construction like Thom's arranges, `p`-power phases
 against a `p`-power centre, and it explains why the character count of section 6
 is indexed by the `p`-power torsion rather than by anything freely chosen.
+
+The order-four case shows this is about torsion, not about how much the
+permutation moves.  Take the same two-point model with the identity permutation
+— the *least* separated permutation part possible — and phases `±i` rather than
+`±1`.  The trace is again `0`, but the phase never vanishes, so the untwisted
+permutation is fixed-point free and the model is maximally separated
+(`untwist_full_separation_witness`).  With `±1` it keeps half its points fixed,
+attaining the involution bound (`untwist_half_separation_witness`).
+Cancellation buys nothing at order two and everything at order four, and the two
+witnesses differ in nothing else.
 
 **The metric data does not determine the untwisted separation.**  That is the
 separation-side counterpart of section 6, and it says why none of the correction
