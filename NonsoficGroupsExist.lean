@@ -253,6 +253,7 @@ import NonsoficGroupsExist.Sofic.Hyperlinear
 import NonsoficGroupsExist.Sofic.HyperlinearAmplification
 import NonsoficGroupsExist.Sofic.HyperlinearNonScalar
 import NonsoficGroupsExist.Sofic.HyperlinearScalar
+import NonsoficGroupsExist.Sofic.PhaseOrder
 import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls
