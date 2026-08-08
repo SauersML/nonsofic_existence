@@ -8,6 +8,21 @@ Each part is kept verbatim under its own banner.
 
 <!-- ======== formerly BUILD_ITERATION_NOTES.md ======== -->
 
+# Profinite closure LANDED (2026-08-08, final)
+
+`Sofic/ProfiniteClosure` green (3851 jobs, audit 0): `profiniteClosure`,
+`normalClosure_le_profiniteClosure` (blindness ⟹ Γ* ⊇ ⟨⟨Γ⟩⟩ under
+compressor generation — N18's group half as a theorem), and
+`not_mem_profiniteClosure_of_kills` (one finite quotient killing Γ but not
+t certifies t ∉ Γ*).  This decides the audited dispute: for KT Theorem-E
+pairs the SL_d(ℤ/N)-quotients kill Γ and keep compressors alive, so
+compressors ∉ Γ* — the "t ∈ Γ*" step of the external Theorem B is REFUTED
+(as the FALSE-side counter-audit claimed and my flag anticipated);
+Γ* is confined to the Laurent factor.  Pin note: normalizer at this pin
+takes a Set (`Subgroup.normalizer (S : Set G)`, `mem_set_normalizer_iff`).
+
+---
+
 # Free-lamp rigidity LANDED (2026-08-08, latest)
 
 `Sofic/FreeLampRigidity` green (3850 jobs, audit exit 0): N20 kernel-checked
