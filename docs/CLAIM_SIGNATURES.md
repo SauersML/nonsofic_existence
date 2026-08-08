@@ -2250,14 +2250,6 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
 ```
 
-## `NonsoficGroupsExist.card_inter_fixed_ge`
-
-```lean
-∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
-  ↑{y | σ y = y}.card + ↑{y | τ y = y}.card - ↑(Fintype.card Y.carrier) ≤
-    ↑{y | σ y = y ∧ τ y = y}.card
-```
-
 ## `NonsoficGroupsExist.card_torsion_subgroup`
 
 ```lean
@@ -3157,17 +3149,6 @@ CountableNonsoficGroupExists
           ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
 ```
 
-## `NonsoficGroupsExist.phase_eq_zero_at_global_fixed`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} {m : ℕ} (act : G → Equiv.Perm Y)
-  (d : G → Y → ZMod m),
-  (∀ (g h : G) (z : Y), d (g * h) z = d g ((act h) z) + d h z) →
-    ∀ (y : Y),
-      (∀ (g : G), (act g) y = y) →
-        (∀ (g : G), ∃ a b, g = a * b * a⁻¹ * b⁻¹) → ∀ (g : G), d g y = 0
-```
-
 ## `NonsoficGroupsExist.phase_eq_zero_of_gcd_eq_one`
 
 ```lean
@@ -3445,6 +3426,17 @@ CountableNonsoficGroupExists
                 hammingDistance (wreathModel Y m) (wreathPerm Y m e 1) 1 = 1
 ```
 
+## `NonsoficGroupsExist.untwist_hamming_le_of_good_set`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier) (S : Finset Y.carrier),
+  (∀ y ∈ S, σ y = y ∧ d y = 0) →
+    0 < Fintype.card Y.carrier →
+      hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 ≤
+        1 - ↑S.card / ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.untwist_retains_commutator`
 
 ```lean
@@ -3457,6 +3449,22 @@ CountableNonsoficGroupExists
           hammingDistance (wreathModel Y m)
               (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1 ≤
             2 - fixedDensity Y (act a) - fixedDensity Y (act b)
+```
+
+## `NonsoficGroupsExist.untwist_retains_commutator_offBad`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (Y : FiniteModel) (m : ℕ) [inst_1 : NeZero m]
+  (act : G → Equiv.Perm Y.carrier) (d : G → Y.carrier → ZMod m) (B : Finset Y.carrier)
+  (a b : G),
+  (∀ y ∉ B,
+      (act a) y = y →
+        (act b) y = y → (act (a * b * a⁻¹ * b⁻¹)) y = y ∧ d (a * b * a⁻¹ * b⁻¹) y = 0) →
+    0 < Fintype.card Y.carrier →
+      hammingDistance (wreathModel Y m)
+          (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1 ≤
+        2 - fixedDensity Y (act a) - fixedDensity Y (act b) +
+          ↑B.card / ↑(Fintype.card Y.carrier)
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
