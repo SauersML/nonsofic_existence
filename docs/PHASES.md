@@ -341,11 +341,21 @@ by that `c` is a *scalar* change — invisible to Hilbert–Schmidt by section 6
 and leaves an untwisted model of separation at most `1 − F/m`, where `F` is the
 fixed-point density of `σ` (`exists_shift_hamming_le`).
 
-So untwisting cannot manufacture separation *robustly*: whatever the phases,
-some scalar renormalization retains a `1/m` share, and since scalar
-renormalizations are invisible to Hilbert–Schmidt, nothing in the metric data
-rules that normalization out.  This does not say every choice of phase is bad —
-see the witnesses below — only that the metric cannot certify a good one.
+So for any single element, some scalar shift retains a `1/m` share of its fixed
+points.  That is a statement about one element's phase function, and it must not
+be over-read.  A shift is invisible to Hilbert–Schmidt, which suggests the metric
+cannot rule out a bad normalization; but a renormalization of a whole *model*,
+`d_g ↦ d_g + β(g)`, has to preserve multiplicativity, and subtracting the two
+multiplicativity identities gives `β(gh) = β(g) + β(h)`
+(`renormalization_isHom`).
+
+The renormalization freedom is therefore `Hom(G, ℤ/m)`, not one free constant per
+element.  Being a homomorphism to an abelian group, `β` kills commutators
+(`renormalization_commutator`), so on a group in which every element is a
+commutator the only renormalization is trivial
+(`renormalization_eq_zero_of_commutators`) and the phase system *does* determine
+the untwisted separation.  The `c` from the pigeonhole is a genuine scalar for
+its element but is not in general available as a renormalization of the model.
 
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant

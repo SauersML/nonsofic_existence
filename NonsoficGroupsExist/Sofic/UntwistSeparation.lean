@@ -917,4 +917,82 @@ theorem phase_weights_cancel (m : ℕ) (hm : 2 ≤ m) (ζ : ℂ) (hpow : ζ ^ m 
       field_simp
     linear_combination hcancel
 
+
+/-! ## The renormalization freedom is a homomorphism, not a free choice
+
+`exists_shift_hamming_le` produces, for a single element, a scalar `c` whose
+class retains a `1/m` share of the fixed points, and scalar changes are
+invisible to the Hilbert--Schmidt metric.  It is tempting to read that as *the
+metric cannot rule out a bad normalization*.  That reading is too generous to
+the adversary, and this section says why.
+
+A renormalization of a whole phase system, `d_g ↦ d_g + β(g)`, has to preserve
+multiplicativity, or the renormalized data is not a model at all.  Subtracting
+the two multiplicativity identities leaves
+
+    β(gh) = β(g) + β(h),
+
+so `β` is a *homomorphism* `G → ℤ/m` (`renormalization_isHom`), not a free
+choice of one constant per element.  Being a homomorphism into an abelian group
+it kills commutators (`renormalization_commutator`), so on a group in which
+every element is a commutator the only renormalization is the trivial one
+(`renormalization_eq_zero_of_commutators`).
+
+For such a group the phase system therefore *does* determine the untwisted
+separation: there is no metrically invisible reshuffling to hide behind, and the
+`c` supplied by the pigeonhole, while a genuine scalar for that one element, is
+not available as a renormalization of the model.
+-/
+
+section Renormalization
+
+variable {G : Type*} [Group G] {Y : Type*} {m : ℕ}
+
+/-- **A renormalization preserving multiplicativity is a homomorphism.**
+Subtract the two multiplicativity identities at any point of the model. -/
+theorem renormalization_isHom (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (β : G → ZMod m) (y : Y)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (hd' : ∀ (g h : G) (z : Y),
+      d (g * h) z + β (g * h) = (d g (act h z) + β g) + (d h z + β h))
+    (g h : G) : β (g * h) = β g + β h := by
+  have h1 := hd g h y
+  have h2 := hd' g h y
+  rw [h1] at h2
+  linear_combination h2
+
+variable (β : G → ZMod m)
+
+/-- A homomorphism sends the identity to zero. -/
+theorem renormalization_one (hβ : ∀ g h : G, β (g * h) = β g + β h) : β 1 = 0 := by
+  have h := hβ 1 1
+  rw [mul_one] at h
+  have h2 : (0 : ZMod m) = β 1 := by linear_combination h
+  exact h2.symm
+
+/-- and inverses to negatives. -/
+theorem renormalization_inv (hβ : ∀ g h : G, β (g * h) = β g + β h) (g : G) :
+    β g⁻¹ = - β g := by
+  have h := hβ g g⁻¹
+  rw [mul_inv_cancel, renormalization_one β hβ] at h
+  linear_combination -h
+
+/-- **A renormalization kills commutators**, being a homomorphism into an
+abelian group. -/
+theorem renormalization_commutator (hβ : ∀ g h : G, β (g * h) = β g + β h)
+    (a b : G) : β (a * b * a⁻¹ * b⁻¹) = 0 := by
+  rw [hβ, hβ, hβ, renormalization_inv β hβ, renormalization_inv β hβ]
+  ring
+
+/-- **On a group in which every element is a commutator, the only
+renormalization is trivial.**  The phase system then determines the untwisted
+separation outright: there is no metrically invisible reshuffling available. -/
+theorem renormalization_eq_zero_of_commutators
+    (hβ : ∀ g h : G, β (g * h) = β g + β h)
+    (hcomm : ∀ g : G, ∃ a b : G, g = a * b * a⁻¹ * b⁻¹) (g : G) : β g = 0 := by
+  obtain ⟨a, b, rfl⟩ := hcomm g
+  exact renormalization_commutator β hβ a b
+
+end Renormalization
+
 end NonsoficGroupsExist
