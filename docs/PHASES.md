@@ -357,6 +357,21 @@ commutator the only renormalization is trivial
 the untwisted separation.  The `c` from the pigeonhole is a genuine scalar for
 its element but is not in general available as a renormalization of the model.
 
+The same argument says something sharper about the phases themselves.  Nothing
+in it used that `β` came from a renormalization — only that it turned products
+into sums.  At a point `y` fixed by *every* element, the phase function
+`g ↦ d_g(y)` is exactly that, since the action never moves `y` out of the way
+(`phase_isHom_at_global_fixed`).  So on a group where every element is a
+commutator the phase vanishes identically there
+(`phase_eq_zero_at_global_fixed`); the point is trivially phased for every
+element, survives untwisting in every fibre (`wreathPerm_fixes`), and the
+untwisted model retains it whatever the phases are.
+
+**Phases are powerless at a globally fixed point of a perfect group.**  That is
+the reverse of what the witnesses suggest — there a well-chosen phase removed
+every fixed point, but that model lived on a group with no perfection to
+exploit.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a

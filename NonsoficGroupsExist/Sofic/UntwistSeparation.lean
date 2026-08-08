@@ -993,6 +993,43 @@ theorem renormalization_eq_zero_of_commutators
   obtain ⟨a, b, rfl⟩ := hcomm g
   exact renormalization_commutator β hβ a b
 
+/-! ### The same argument applies to the phases themselves
+
+Nothing above used that `β` came from a renormalization; only that it was a
+`ℤ/m`-valued function turning products into sums.  At a point fixed by *every*
+element the phase function `g ↦ d_g(y)` is exactly that, because the action
+never moves `y` out of the way.  So on a group in which every element is a
+commutator the phase vanishes there identically -- phases are powerless at a
+globally fixed point.
+-/
+
+/-- **At a globally fixed point the phase is a homomorphism.** -/
+theorem phase_isHom_at_global_fixed (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (y : Y) (hfix : ∀ g : G, act g y = y) (g h : G) :
+    d (g * h) y = d g y + d h y := by
+  rw [hd g h y, hfix h]
+
+/-- **On a perfect group the phase vanishes at a globally fixed point.**  A
+point the model never moves carries no phase at all, so it survives untwisting
+as a fixed point: phases cannot rescue it. -/
+theorem phase_eq_zero_at_global_fixed (act : G → Equiv.Perm Y)
+    (d : G → Y → ZMod m)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (y : Y) (hfix : ∀ g : G, act g y = y)
+    (hcomm : ∀ g : G, ∃ a b : G, g = a * b * a⁻¹ * b⁻¹) (g : G) : d g y = 0 :=
+  renormalization_eq_zero_of_commutators (fun g ↦ d g y)
+    (phase_isHom_at_global_fixed act d hd y hfix) hcomm g
+
 end Renormalization
+
+/-- A point the permutation fixes and the phase does not see stays fixed after
+untwisting, in every fibre. -/
+theorem wreathPerm_fixes (Y : FiniteModel) (m : ℕ) [NeZero m] (d : Y → ZMod m)
+    (σ : Equiv.Perm Y) (y : Y) (hy : σ y = y) (hd : d y = 0) (j : ZMod m) :
+    wreathPerm Y m d σ (y, j) = (y, j) := by
+  show (σ y, j + d y) = (y, j)
+  rw [hy, hd, add_zero]
+
 
 end NonsoficGroupsExist
