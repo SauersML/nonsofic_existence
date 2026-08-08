@@ -713,9 +713,42 @@ the charts take their values.  The two hypotheses are isolated as hypotheses
 (`OrbitChartData.comap`) is a pullback.  The reading is the audit's: if the
 coordinate action admits no chart system, neither does the lamp action.
 
-## What is not here
+## Where this ends
 
-No resolution of Question 3.4, and no claim toward one.  The development shows
-where the two classes part company and prices the gap; it does not close it.
-The two live alternatives are the ones everybody has: a fixed finite window with
-a dimension-free gap, or arbitrarily accurate models on every window.
+No resolution of Question 3.4, and no claim toward one.  What follows is the
+position the sections above actually reach, and the routes they close, so that
+neither has to be reconstructed.
+
+**The central finding** (§6f, `hyperlinear_forces_sofic_iff_phases_off_axis`).
+Hyperlinearity forces soficity *exactly* as far as the model's phases stay off
+the imaginary axis at fixed points.  Above the threshold, `F ≤ ε/c`; at it, a
+model with trace zero and every point fixed.  The reason there is no third
+option: the trace sees the fixed-point density only through `|τ| ≤ F`, which
+runs the wrong way, so a trace bound constrains `F` only when the phases cannot
+cancel — and that condition *is* the threshold.
+
+**The scope** (§6e).  All of §§6a–6f is about monomial models.  That is exactly
+right for the sofic side (§5) and a proper restriction on the hyperlinear side:
+monomial matrices are a subgroup of `U(n)`, and a family escapes it whenever its
+`n!`-th powers fail to commute (`monomialMatrix_pow_card_comm`, basis-free).
+Thom's microstates are monomial for an external reason (§4), not one proved
+here.
+
+**Routes closed, with the reason:**
+
+| route | why it fails |
+|---|---|
+| tensor amplification | a scalar enters as its `k`-th power (§1) |
+| pointwise rounding of phases | multiplicative ⇒ trivial; nearest-point ⇒ not multiplicative (§6a) |
+| group-averaged correction | needs almost invariant windows, i.e. amenability (§6b) |
+| untwisting Thom's microstates | defect `1 − p^{-k}`, computed (§6) |
+| `ℝ/ℤ` vs `μ_m` | not an obstacle; freeness makes rounding work on a lattice (§6d) |
+| untwisting to gain separation | can only inherit it; halves at best (§6e) |
+| `n!`-power criterion → group statement | exponent grows with the model, window is fixed; and vacuous on permutation models (§6e) |
+
+**What is missing, precisely.**  Every result here constrains models.  Deciding
+Question 3.4 negatively requires showing some particular hyperlinear group
+admits *no* sofic model — a statement about the non-existence of models, which
+nothing above supplies and which no refinement of this framework will.  The two
+live alternatives remain the ones everybody has: a fixed finite window with a
+dimension-free gap, or arbitrarily accurate models on every window.
