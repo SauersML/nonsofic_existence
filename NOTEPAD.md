@@ -8,6 +8,58 @@ Each part is kept verbatim under its own banner.
 
 <!-- ======== formerly BUILD_ITERATION_NOTES.md ======== -->
 
+# Q3.4 norm–trace session (2026-08-08, later)
+
+LANDED at 068e27e: `Sofic/NormTraceGap` (green, audited, rem:normtrace in
+the manuscript).  Domination hsDistSq ≤ ‖·‖_op² via a three-lemma
+Euclidean toolkit (only place `EuclideanSpace` appears); `NormModel`
+(op-norm unitary models, δ separation / ε multiplicativity) with positive
+control `isNormApproximable_of_finite` (regular representation, exact,
+entry-separated); bridge `NormModel.toHyperlinearModel` (trace clause =
+the entire active hypothesis); corner padding `padMatrix` with
+`l2_opNorm_cornerPad` (‖fromBlocks C 0 0 0‖ = ‖C‖, both directions
+through `l2_opNorm_le_of_sum_normSq`) and `NormModel.exists_hs_collapse`
+(norm data intact, all HS distances < η — weak-MF is trace-blind);
+`norm_normTrace_sub_one_le` (vanishing-density diagonal deviation ⟹
+trace → 1); `phase_deviation_no_amplification` (i·1: invertible
+deviation, |tr| = 1 at every tensor power — deviation RANK is the wrong
+amplification invariant; the right one is 1 − |tr|, distance to scalars).
+Lean gotchas hit: `Pi.single j (1:ℂ) k` under a FiniteModel carrier
+needs the ascription `(Pi.single j (1:ℂ) : Y → ℂ) k`; `positivity`
+cannot see `Complex.normSq` (use `Complex.normSq_nonneg` sums) ;
+namespace is `Unitary.star_mem`; `pow_le_pow_left₀`; never `rw` a
+`set`-abbreviation into Matrix-application position (instances
+transparency) — state the entry equation directly and rw the
+`permMatrixC_entry Y …` instance into it.
+
+ADJUDICATION (verified from source, arXiv:2608.06222v1 fetched
+2026-08-08): Kun–Thom Theorem 4.1 reads "Γ infranormal ≤ G, both Γ and G
+Kazhdan; σ : G → S_U ANY sofic representation ⟹ C_{S_U}(σ(Γ)) is
+normalized by σ(G)."  It quantifies over all sofic representations of G.
+Consequently the free-lamp argument — H_K := G *_Γ (Γ×K) sofic ⟹
+restrict ρ to G, ρ(k) centralizes σ(Γ), normalization puts ρ(tkt⁻¹) in
+the centralizer, so ρ kills λ := [tkt⁻¹, γ] ≠ 1 (Bass–Serre) — is SOUND
+at paper level; the "H_K is not Kazhdan so KT doesn't apply" objection is
+wrong (the theorem is applied to G, not H_K).  So modulo KT 4.1 + amalgam
+normal form, H_free = F_{G/Γ} ⋊ G is a nonsofic group whose
+hyperlinearity ⟺ Connes-embeddability of L(G) *_{L(Γ)} (L(Γ) ⊗̄ L(ℤ)) —
+the sharpest known negative-resolution target for Q3.4.
+
+NEXT FORMALIZATION TARGET (feasible now): Mathlib `PushoutI` has
+normal-form machinery for amalgamated products.  Formalize (a) the
+free-lamp normal form H_K ≅ (*_{G/Γ}K) ⋊ G, or at least λ ≠ 1; (b) the
+conditional reduction "KT-4.1-shaped hypothesis (as a named Prop on the
+repo's UniversalSofic ultraproduct) ⟹ ¬IsSofic H_K" — all other
+ingredients (SoficUltraproduct, exists_soficEmbedding) are already green.
+That would be doctrine-compliant (named-hypothesis style, cf.
+StuckReduction) and would machine-check the reduction of the new family
+to one cited theorem.  NOT to attempt: the Kazhdan-corner theorem
+(needs C*_max + Kazhdan projections; its metric hinge is now formalized,
+the scaffolding is not), and simplicity of EL₄(L) (sandwich-theorem
+scope over general rings unverified; major separate project).
+
+---
+
 # Cluster build iteration — exact pending fixes (2026-08-05)
 
 CURRENT STATE (2026-08-05, later session): **the build is fully green.**
