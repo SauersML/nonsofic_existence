@@ -36,6 +36,15 @@ example : ∃ (G : Type) (_ : Group G), ¬ IsSofic G :=
 example : ∃ (G : Type) (_ : Group G), Group.IsFinitelyPresented G ∧ ¬ IsSofic G :=
   exists_finitelyPresented_nonsofic_group
 
+example (G : Type) [Group G] [Countable G] :
+    IsSofic G ↔ AdmitsEssentiallyFreeNearAction G :=
+  isSofic_iff_admitsEssentiallyFreeNearAction G
+
+example :
+    ∃ (G : Type) (_ : Group G),
+      Countable G ∧ ¬ AdmitsEssentiallyFreeNearAction G :=
+  countable_group_without_essentiallyFreeNearAction_exists
+
 example : ¬ IsSofic UniversalRankFour.Ambient :=
   universalLeavittEL4_not_isSofic
 
@@ -239,6 +248,9 @@ that a CI log records exactly what each headline theorem rests on. -/
 def headlineTheorems : List Name :=
   [``nonsofic_groups_exist,
    ``countable_nonsofic_groups_exist,
+   ``isSofic_iff_admitsEssentiallyFreeNearAction,
+   ``universalLeavittEL4_not_admitsEssentiallyFreeNearAction,
+   ``countable_group_without_essentiallyFreeNearAction_exists,
    ``exists_finitelyPresented_nonsofic_group,
    ``exists_infinite_finitelyPresented_nonsofic_ambient_cover,
    ``universalLeavittEL4_not_isSofic,

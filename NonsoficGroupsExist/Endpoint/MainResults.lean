@@ -6,6 +6,7 @@ import NonsoficGroupsExist.Sofic.FreeGroupResiduallyFinite
 import NonsoficGroupsExist.Leavitt.UniversalLeavittOver
 import NonsoficGroupsExist.PropertyT.FiniteTypeCharacteristicTwoPropertyT
 import NonsoficGroupsExist.Leavitt.FiniteFieldLeavitt
+import NonsoficGroupsExist.Sofic.NearActionModel
 
 /-!
 # Unconditional existence theorems
@@ -222,6 +223,37 @@ Theorem A, whose countability is the first conjunct of
 theorem countable_nonsofic_groups_exist : CountableNonsoficGroupExists :=
   ⟨UniversalRankFour.Ambient, inferInstance, ambient_full_profile.1,
     ambient_full_profile.2.2.2.2⟩
+
+/-! ## Pestov's near-action question
+
+The Elek--Szabó characterization is prior mathematics.  The declarations
+below record its now-formalized consequence from the nonsofic group constructed
+above; they are not presented as a new proof of that characterization in the
+mathematical literature.
+-/
+
+/-- The explicit countable nonsofic group admits no essentially free,
+measure-preserving near action on a set carrying a finitely additive
+probability measure on its full power set. -/
+theorem universalLeavittEL4_not_admitsEssentiallyFreeNearAction :
+    ¬ AdmitsEssentiallyFreeNearAction UniversalRankFour.Ambient := by
+  intro hnear
+  exact universalLeavittEL4_not_isSofic
+    (isSofic_of_admitsEssentiallyFreeNearAction _ hnear)
+
+/-- The precise negative-existence statement corresponding to Pestov's Open
+Question 5.3. -/
+def CountableGroupWithoutEssentiallyFreeNearActionExists : Prop :=
+  ∃ (G : Type) (_ : Group G),
+    Countable G ∧ ¬ AdmitsEssentiallyFreeNearAction G
+
+/-- **Negative answer to Pestov's Question 5.3, as a formal corollary of
+Elek--Szabó and nonsofic-group existence.**  There is a countable group which
+admits no near action of the specified kind. -/
+theorem countable_group_without_essentiallyFreeNearAction_exists :
+    CountableGroupWithoutEssentiallyFreeNearActionExists :=
+  ⟨UniversalRankFour.Ambient, inferInstance, ambient_full_profile.1,
+    universalLeavittEL4_not_admitsEssentiallyFreeNearAction⟩
 
 /-- An unconditional, kernel-checked finitely presented nonsofic-group
 existence theorem. -/

@@ -2129,6 +2129,34 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 (G : Type u_1) → [Group G] → Finset G → ℝ → Type (max 1 u_1)
 ```
 
+## `NonsoficGroupsExist.TarskiHall.exists_finite_small_boundary_avoiding_null`
+
+```lean
+∀ {X : Type u} (m : FullFinitelyAdditiveProbability X) (P : Finset (Equiv.Perm X)),
+  (∀ p ∈ P, PreservesFullMeasure m p) →
+    ∀ {N : Set X},
+      m.measure N = 0 →
+        ∀ {δ : ℝ},
+          0 < δ →
+            ∃ F,
+              F.Nonempty ∧
+                Disjoint (↑F) N ∧ ∀ p ∈ P, ↑(TarskiHall.escape p F).card < δ * ↑F.card
+```
+
+## `NonsoficGroupsExist.TarskiHall.no_piecewise_double_embedding`
+
+```lean
+∀ {X : Type u} (m : FullFinitelyAdditiveProbability X) (A : Set X),
+  m.measure A = 1 →
+    ∀ (W : Finset (Equiv.Perm X)),
+      (∀ q ∈ W, PreservesFullMeasure m q) →
+        ∀ (f : { x // x ∈ A } × Bool → X),
+          Function.Injective f →
+            ∀ (label : { x // x ∈ A } → Bool → Equiv.Perm X),
+              (∀ (a : { x // x ∈ A }) (b : Bool), label a b ∈ W) →
+                (∀ (a : { x // x ∈ A }) (b : Bool), (label a b) ↑a = f (a, b)) → False
+```
+
 ## `NonsoficGroupsExist.ThompsonFObstruction.conjugacy_relation_all`
 
 ```lean
@@ -2505,6 +2533,12 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ {G : Type u_1} {M : Type u_2} [inst : Group G] [inst_1 : Group M] (v b : G → M) (g h : G),
   b g * v g * (b h * v h) * (b (g * h) * v (g * h))⁻¹ =
     b g * (v g * b h * (v g)⁻¹) * implementerCocycle v g h * (b (g * h))⁻¹
+```
+
+## `NonsoficGroupsExist.countable_group_without_essentiallyFreeNearAction_exists`
+
+```lean
+CountableGroupWithoutEssentiallyFreeNearActionExists
 ```
 
 ## `NonsoficGroupsExist.countable_nonsofic_groups_exist`
@@ -3127,6 +3161,12 @@ CountableNonsoficGroupExists
 ∀ (α : Type u_1), IsSofic (FreeGroup α)
 ```
 
+## `NonsoficGroupsExist.isSofic_iff_admitsEssentiallyFreeNearAction`
+
+```lean
+∀ (G : Type u) [inst : Group G] [Countable G], IsSofic G ↔ AdmitsEssentiallyFreeNearAction G
+```
+
 ## `NonsoficGroupsExist.isSofic_iff_nonempty_soficApproximation`
 
 ```lean
@@ -3143,6 +3183,12 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {G : Type u_1} [inst : Group G], IsSofic G ↔ IsSoficWeakLocal G
+```
+
+## `NonsoficGroupsExist.isSofic_of_admitsEssentiallyFreeNearAction`
+
+```lean
+∀ (G : Type u) [inst : Group G], AdmitsEssentiallyFreeNearAction G → IsSofic G
 ```
 
 ## `NonsoficGroupsExist.isSofic_of_finite`
@@ -3661,6 +3707,12 @@ CountableNonsoficGroupExists
 ∀ {ι : Type u_1} (𝒰 : Ultrafilter ι) (X : ι → FiniteModel),
   (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
     ∀ (f : ↥UniversalRankFour.Ambient →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
+```
+
+## `NonsoficGroupsExist.universalLeavittEL4_not_admitsEssentiallyFreeNearAction`
+
+```lean
+¬AdmitsEssentiallyFreeNearAction ↥UniversalRankFour.Ambient
 ```
 
 ## `NonsoficGroupsExist.universalLeavittEL4_not_isSofic`

@@ -80,7 +80,6 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "FreeLampReduction",
     "FreeLampRigidity",
     "MonomialModel",
-    "NearAction",
     "NormTraceGap",
     "PhaseOrder",
     "PhasePropagation",

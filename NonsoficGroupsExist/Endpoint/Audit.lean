@@ -40,6 +40,9 @@ the entire project namespace and fails on anything beyond classical Lean.
 
 #print axioms NonsoficGroupsExist.nonsofic_groups_exist
 #print axioms NonsoficGroupsExist.countable_nonsofic_groups_exist
+#print axioms NonsoficGroupsExist.isSofic_iff_admitsEssentiallyFreeNearAction
+#print axioms NonsoficGroupsExist.universalLeavittEL4_not_admitsEssentiallyFreeNearAction
+#print axioms NonsoficGroupsExist.countable_group_without_essentiallyFreeNearAction_exists
 #print axioms NonsoficGroupsExist.universalLeavittEL4_not_isSofic
 #print axioms NonsoficGroupsExist.universalLeavittEL3_not_isSofic
 #print axioms NonsoficGroupsExist.universalLeavittUnits_not_isSofic

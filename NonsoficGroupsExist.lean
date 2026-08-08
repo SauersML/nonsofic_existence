@@ -276,6 +276,7 @@ import NonsoficGroupsExist.Sofic.ProfiniteClosure
 import NonsoficGroupsExist.Sofic.CentralFreeLampCover
 import NonsoficGroupsExist.Sofic.CommutantPinning
 import NonsoficGroupsExist.Sofic.NearAction
+import NonsoficGroupsExist.Sofic.NearActionModel
 import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls

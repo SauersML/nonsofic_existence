@@ -29,6 +29,9 @@ generated from the manuscript's margin notes; this module is the short list.
 * `nonsofic_groups_exist` -- a nonsofic group exists.  Theorem A.
 * `countable_nonsofic_groups_exist` -- a countable nonsofic group exists: the
   historical headline, with the same witness.
+* `countable_group_without_essentiallyFreeNearAction_exists` -- the negative
+  answer to Pestov's Question 5.3, as the formal corollary of the previously
+  known Elek--Szabó characterization and the countable nonsofic witness.
 * `universalLeavittEL4_not_isSofic` -- the explicit witness: `EL₄` over the
   universal binary Leavitt algebra `L_{𝔽₂}(1,2)`.
 * `ambient_full_profile` -- that group is countable, finitely generated,
@@ -148,6 +151,9 @@ open NonsoficGroupsExist
 /-! ### The headline -/
 
 export NonsoficGroupsExist (nonsofic_groups_exist countable_nonsofic_groups_exist
+  countable_group_without_essentiallyFreeNearAction_exists
+  universalLeavittEL4_not_admitsEssentiallyFreeNearAction
+  isSofic_iff_admitsEssentiallyFreeNearAction
   universalLeavittEL4_not_isSofic
   ambient_full_profile exists_finitelyPresented_nonsofic_group
   exists_infinite_finitelyPresented_nonsofic_ambient_cover)
