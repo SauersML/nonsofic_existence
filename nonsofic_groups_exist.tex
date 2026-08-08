@@ -2091,7 +2091,7 @@ The second identity is what a sofic model needs, and it says the separation is s
 
 \clearpage
 \begin{remark}[Exact infeasibility is a determinant, not a gap]\label{rem:scalarcocycle}%
-\leanverified{\leanmod{Sofic/ScalarCocycle}{pow_card_eq_one_of_scalarCommute,hsDistSq_monomial_const,hammingDistance_wreathPerm_blockConst}\leanmod{Sofic/CharacterCount}{card_annihilator,hammingDistance_characterUntwist,hammingDistance_characterUntwist_generator}}%
+\leanpartial{\leanmod{Sofic/ScalarCocycle}{pow_card_eq_one_of_scalarCommute,hsDistSq_monomial_const,hammingDistance_wreathPerm_blockConst}\leanmod{Sofic/CharacterCount}{card_annihilator,hammingDistance_characterUntwist,hammingDistance_characterUntwist_generator}}{Formalized: the determinant obstruction, the clock--shift solution, the annihilator count and the untwisting defect \(1-\gcd(n,\alpha)/n\).  Not formalized: that Thom's microstates realize the generating case, which is read off his construction and quoted from the literature.}%
 It is tempting to read emptiness of an \emph{exact} finite-dimensional solution locus, at every dimension, as half of a non-closure profile, with only robustness left to establish.  The scalar commutation relation shows that reading is unsound, and shows it with the cheapest witness available.  For unitaries \(U,V\) on a model of size \(n\), the relation \(UV=c\,(VU)\) forces \(c^{\,n}=1\): take determinants, \(\det U\det V=c^{\,n}\det V\det U\), and the determinants are nonzero.  So for \(c\) not a root of unity the exact locus is empty at every dimension---one line, no rigidity.  Yet the relation is exactly solvable whenever \(c\) is a \(q\)-th root of unity, on a model of size \(q\): the shift \(U_{ij}=[j=i+1]\) and the clock \(V_{ij}=[j=i]\,\zeta^{\,i}\) on \(\Z/q\) satisfy \(UV=\zeta\,(VU)\) on the nose.  Since the roots of unity are dense in the circle, every \(c\) is a limit of exactly solvable instances.  Emptiness of every exact locus therefore carries no dimension-free gap for the relaxed loci.
 
 Two features of the witness are worth recording.  It is a \emph{monomial} pair---a permutation carrying a diagonal of phases---so the entire phenomenon lives in the group of Remark~\ref{rem:thomK}; and what it evades is a \emph{scalar} cocycle, which is exactly the configuration Remark~\ref{rem:phasecollapse} shows tensor amplification cannot remove and Remark~\ref{rem:thomK} prices at the whole of the model when one tries to untwist it.  The same object appears in all three places, which is some evidence that it is the right object.
@@ -2122,7 +2122,7 @@ A pointwise rule either respects the group law or it does not, so the two horns 
 
 \clearpage
 \begin{remark}[The non-pointwise correction, and where it stops]\label{rem:phasecorrection}%
-\leanverified{\leanmod{Sofic/PhaseCorrection}{phaseCorrection_eq,phase_correctable_of_small,window_defect_eq,abs_window_defect_le}}%
+\leanpartial{\leanmod{Sofic/PhaseCorrection}{phaseCorrection_eq,phase_correctable_of_small,window_defect_eq,abs_window_defect_le}}{Formalized: the averaging identity, the lifting, the correction bound, and the windowed identity with its boundary term.  Not formalized: that almost invariant windows characterize amenability, or that amenable groups are sofic; both are quoted.}%
 Remark~\ref{rem:norounding} closes every pointwise rule, and leaves exactly one thing open: a correction chosen with the whole group in view.  Carry it out.  The defect of a phase system \(d\) is the twisted \(2\)-cocycle \(c(g,h)=g\cdot d_h+d_g-d_{gh}\), and replacing \(d\) by \(d+b\) moves \(c\) by the coboundary of \(b\).  So the question is whether a cocycle with values uniformly near \(0\) is the coboundary of something near \(0\), and it is---by averaging over the group:
 \[
  b_g\ =\ \frac{1}{\abs G}\sum_{k\in G}c(g,k),
@@ -2147,7 +2147,7 @@ Read together with Remark~\ref{rem:norounding} this locates the difficulty exact
 
 \clearpage
 \begin{remark}[The scalar class lives in bounded cohomology]\label{rem:scalarclass}%
-\leanverified{\leanmod{Sofic/ScalarClass}{isScalarCocycle_scalarPart,abs_scalarPart_le,scalarPart_phaseCob,scalarClass_obstructs}}%
+\leanpartial{\leanmod{Sofic/ScalarClass}{isScalarCocycle_scalarPart,abs_scalarPart_le,scalarPart_phaseCob,scalarClass_obstructs}}{Formalized: that the model average untwists the cocycle identity, keeps the bound, commutes with correcting, and hence obstructs.  Not formalized: Johnson's vanishing of bounded cohomology for amenable groups, which is quoted.}%
 Remark~\ref{rem:phasecorrection} fences the problem but does not say what the correction has to kill.  Averaging in the other direction says it.  Average the defect over the \emph{model} rather than the group,
 \[
  \hat c(g,h)\ =\ \frac{1}{\abs Y}\sum_{y\in Y}c(g,h)(y),
@@ -2178,7 +2178,7 @@ So the \(\R/\Z\) versus \(\mu_m\) distinction is not where the difficulty lives,
 
 \clearpage
 \begin{remark}[Untwisting cannot manufacture separation]\label{rem:untwistsep}%
-\leanverified{\leanmod{Sofic/UntwistSeparation}{involution_untwist_hamming_le,card_trivially_phased_le,card_zero_class_ge_three,phase_eq_zero_of_coprime}\leanmod{Sofic/UntwistSeparation}{untwist_full_separation_witness,untwist_half_separation_witness}}%
+\leanpartial{\leanmod{Sofic/UntwistSeparation}{involution_untwist_hamming_le,card_trivially_phased_le,card_zero_class_ge_three,phase_eq_zero_of_coprime}\leanmod{Sofic/UntwistSeparation}{untwist_full_separation_witness,untwist_half_separation_witness}}{Formalized: every bound and witness stated here, including the order two, three and four cases and the coprime vanishing.  Not formalized: that Thom's construction is the compatible-modulus case, quoted from the literature.}%
 Remarks~\ref{rem:phasecorrection},~\ref{rem:scalarclass} and~\ref{rem:ratchar} are all about \emph{multiplicativity}: obtaining phases that compose exactly.  None of them touches the other half of a sofic model, which is \emph{separation}---that a nontrivial element move almost every point.  This remark addresses that half, and the news is negative and quantitative.
 
 The fixed points of the untwisted permutation of \((d,\sigma)\) are the pairs \((y,j)\) with \(\sigma y=y\) and \(d(y)=0\), so untwisting separates only to the extent that the phase avoids \(0\) on \(\Fix(\sigma)\).  But \(\Fix(\sigma)\) is partitioned by the \(m\) classes of \(d\), so some class carries at least an average share:
