@@ -3018,14 +3018,6 @@ CountableNonsoficGroupExists
 (Y : FiniteModel) → (Y.carrier → ℂ) → Equiv.Perm Y.carrier → Matrix Y.carrier Y.carrier ℂ
 ```
 
-## `NonsoficGroupsExist.monomialMatrix_mul`
-
-```lean
-∀ (Y : FiniteModel) (d e : Y.carrier → ℂ) (σ τ : Equiv.Perm Y.carrier),
-  monomialMatrix Y d σ * monomialMatrix Y e τ =
-    monomialMatrix Y (fun i => d i * e (σ i)) (τ * σ)
-```
-
 ## `NonsoficGroupsExist.monomialMatrix_one`
 
 ```lean
@@ -3171,6 +3163,13 @@ CountableNonsoficGroupExists
 ∀ {Y : Type u_1} [inst : Fintype Y] [inst_1 : DecidableEq Y] (σ τ : Equiv.Perm Y) (x : Y),
   ∑ y, (Equiv.Perm.permMatrix ℝ σ - Equiv.Perm.permMatrix ℝ τ) x y ^ 2 =
     if σ x = τ x then 0 else 2
+```
+
+## `NonsoficGroupsExist.permMonomial_pow_card`
+
+```lean
+∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
+  monomialMatrix Y (fun x => 1) σ ^ (Fintype.card Y.carrier).factorial = 1
 ```
 
 ## `NonsoficGroupsExist.permutation_conservation_full`
