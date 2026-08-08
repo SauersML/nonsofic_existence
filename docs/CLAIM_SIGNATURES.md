@@ -3137,6 +3137,17 @@ CountableNonsoficGroupExists
           ∀ (g h : G) (y : Y), c g h y = phaseCob act b g h y
 ```
 
+## `NonsoficGroupsExist.phase_eq_zero_at_global_fixed`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} {m : ℕ} (act : G → Equiv.Perm Y)
+  (d : G → Y → ZMod m),
+  (∀ (g h : G) (z : Y), d (g * h) z = d g ((act h) z) + d h z) →
+    ∀ (y : Y),
+      (∀ (g : G), (act g) y = y) →
+        (∀ (g : G), ∃ a b, g = a * b * a⁻¹ * b⁻¹) → ∀ (g : G), d g y = 0
+```
+
 ## `NonsoficGroupsExist.phase_eq_zero_of_gcd_eq_one`
 
 ```lean
@@ -3435,4 +3446,12 @@ CountableNonsoficGroupExists
             (∑ k ∈ Finset.image (fun k => h * k) F \ F, c g k y -
                 ∑ k ∈ F \ Finset.image (fun k => h * k) F, c g k y) /
               ↑F.card
+```
+
+## `NonsoficGroupsExist.wreathPerm_fixes`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier) (y : Y.carrier),
+  σ y = y → d y = 0 → ∀ (j : ZMod m), (wreathPerm Y m d σ) (y, j) = (y, j)
 ```
