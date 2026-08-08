@@ -2097,6 +2097,20 @@ The two prices of a scalar can be stated exactly, and their mismatch is the whol
 The extreme case is worth stating on its own, because it is the obstruction in a single line.  On any nonempty model take the monomial matrices with the same permutation part \(\sigma\) and constant phases \(1\) and \(-1\).  They sit at the \emph{maximal} Hilbert--Schmidt distance \(4\), while their permutation parts are equal, so their untwisted permutations coincide and no model derived from them separates the pair at all.  Metric separation, which is what hyperlinearity supplies, therefore gives no combinatorial separation whatever, which is what soficity demands---and by the characterization above that passage is the whole of the difference between the two classes.
 \end{remark}
 
+\clearpage
+\begin{remark}[Two obstructions beyond elementwise approximation]\label{rem:implementer}%
+\leanverified{\leanmod{Sofic/ImplementerCocycle}{implementerCocycle,implementerCocycle_twisted,correctedImplementer_defect,hsDistSq_orthogonal_rankOne}}%
+Two cautions, both due to an external referee audit of this development and formalized here because they are exactly the kind of statement that should not travel as prose.  Neither bears on Theorem~\ref{thm:A}; both bear on how a unitary model of a wreath-type candidate could be built.
+
+\emph{Implementer coherence is a cocycle problem.}  Suppose an action is implemented elementwise: for each \(g\) a unitary \(v_g\) with \(\operatorname{Ad}(v_g)\) the required automorphism.  Doing this for every \(g\) separately is not the same as having a representation, and the failure is measured by \(c(g,h)=v_gv_hv_{gh}^{-1}\), which satisfies the twisted identity
+\[
+ c(g,h)\,c(gh,k)=\bigl(v_g\,c(h,k)\,v_g^{-1}\bigr)\,c(g,hk),
+\]
+while correcting the implementers by \(b_g\) replaces \(c\) by a coboundary: \(g\mapsto b_gv_g\) is multiplicative at \((g,h)\) exactly when \(b_g\,(v_gb_hv_g^{-1})\,c(g,h)\,b_{gh}^{-1}=1\).  So ``each automorphism is approximately inner'' is incomplete data: a construction choosing implementers one element at a time still owes the trivialization of a class.  The calibration is the Pauli pair, where \(\operatorname{Ad}X\) and \(\operatorname{Ad}Z\) commute on \(M_2(\mathbb{C})\) because \(XZ=-ZX\), both are inner, and no commuting implementers exist.  Everything above is a group identity and is stated at that level.
+
+\emph{Normalized rank blindness.}  Two \emph{orthogonal} rank-one projections on a model of size \(n\) sit at normalized squared Hilbert--Schmidt distance \(2/n\), which tends to zero although the projections are as different as two projections can be.  Any argument that tracks a distinguished vector, transports a Kazhdan fixed vector, or preserves an orbit chart must therefore first bound the \emph{relative trace} of the support it tracks; normalized-rank information alone will not do it.
+\end{remark}
+
 \begin{remark}[Two compressors, one image]\label{rem:twocompressors}
 The pair \(Q=\{u,v\}\) resolves a genuine tension: generation of \(G\) requires elements that move \(\Gamma\), while compression requires elements that map \(\Gamma\) into itself.  The present realization divides the two roles.  The compressor \(u\) seats \(K=u\Gamma u^{-1}\); the involution \(z=vu^{-1}\) generates the missing last row and column of \(\EL_n\) (Proposition~\ref{prop:gen}); and the two compressors share the single image \(K\), so the criterion sees one coherent compression while \(z\) carries the generation.  The criterion itself is indifferent to the size of \(Q\); the algebra here simply supplies two natural compressors rather than one.
 \end{remark}

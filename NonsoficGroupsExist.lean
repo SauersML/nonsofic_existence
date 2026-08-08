@@ -257,6 +257,7 @@ import NonsoficGroupsExist.Sofic.PhaseOrder
 import NonsoficGroupsExist.Sofic.MonomialModel
 import NonsoficGroupsExist.Sofic.PhasePropagation
 import NonsoficGroupsExist.Sofic.ScalarCocycle
+import NonsoficGroupsExist.Sofic.ImplementerCocycle
 import NonsoficGroupsExist.Sofic.LevelShiftObstruction
 import NonsoficGroupsExist.Sofic.SoficPositiveControl
 import NonsoficGroupsExist.Sofic.SemanticPositiveControls

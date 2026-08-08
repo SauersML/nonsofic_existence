@@ -2220,6 +2220,14 @@ Group.FG ↥UniversalRankFour.Ambient ∧
   (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, (φ t)⁻¹ * q * φ t ∈ Subgroup.map φ Γ
 ```
 
+## `NonsoficGroupsExist.correctedImplementer_defect`
+
+```lean
+∀ {G : Type u_1} {M : Type u_2} [inst : Group G] [inst_1 : Group M] (v b : G → M) (g h : G),
+  b g * v g * (b h * v h) * (b (g * h) * v (g * h))⁻¹ =
+    b g * (v g * b h * (v g)⁻¹) * implementerCocycle v g h * (b (g * h))⁻¹
+```
+
 ## `NonsoficGroupsExist.countable_nonsofic_groups_exist`
 
 ```lean
@@ -2582,6 +2590,13 @@ CountableNonsoficGroupExists
           Complex.normSq (1 - ζ)
 ```
 
+## `NonsoficGroupsExist.hsDistSq_orthogonal_rankOne`
+
+```lean
+∀ (Y : FiniteModel) {a b : Y.carrier},
+  a ≠ b → hsDistSq Y (coordProjection Y a) (coordProjection Y b) = 2 / ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.hsNormSq`
 
 ```lean
@@ -2618,6 +2633,20 @@ CountableNonsoficGroupExists
       ∀ (c : ℂ),
         hsNormSq Y (U - c • 1) =
           1 - 2 * ((starRingEnd ℂ) c * normTrace Y U).re + Complex.normSq c
+```
+
+## `NonsoficGroupsExist.implementerCocycle`
+
+```lean
+{G : Type u_1} → {M : Type u_2} → [Group G] → [Group M] → (G → M) → G → G → M
+```
+
+## `NonsoficGroupsExist.implementerCocycle_twisted`
+
+```lean
+∀ {G : Type u_1} {M : Type u_2} [inst : Group G] [inst_1 : Group M] (v : G → M) (g h k : G),
+  implementerCocycle v g h * implementerCocycle v (g * h) k =
+    v g * implementerCocycle v h k * (v g)⁻¹ * implementerCocycle v g (h * k)
 ```
 
 ## `NonsoficGroupsExist.involutionNormalize`

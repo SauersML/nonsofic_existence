@@ -64,6 +64,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "FiniteQuotientBlindness",
     "Hyperlinear",
     "HyperlinearAmplification",
+    "ImplementerCocycle",
     "HyperlinearMetric",
     "HyperlinearNonScalar",
     "HyperlinearScalar",
