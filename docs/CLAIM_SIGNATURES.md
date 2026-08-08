@@ -2418,6 +2418,20 @@ CountableNonsoficGroupExists
 ∃ H x N, ∃ (x_1 : N.Normal), Group.ResiduallyFinite H ∧ ¬Group.ResiduallyFinite (H ⧸ N)
 ```
 
+## `NonsoficGroupsExist.exists_scalarCommute_of_pow_eq_one`
+
+```lean
+∀ (q : ℕ),
+  1 < q →
+    ∀ {ζ : ℂ},
+      ζ ^ q = 1 →
+        Complex.normSq ζ = 1 →
+          ∃ Y U V,
+            Fintype.card Y.carrier = q ∧
+              U ∈ Matrix.unitaryGroup Y.carrier ℂ ∧
+                V ∈ Matrix.unitaryGroup Y.carrier ℂ ∧ U * V = ζ • (V * U)
+```
+
 ## `NonsoficGroupsExist.exists_selection`
 
 ```lean
@@ -3170,6 +3184,21 @@ CountableNonsoficGroupExists
 ∀ {Y : Type u_1} [inst : Fintype Y] (π : Y ≃ Y) (f : Y → ℝ),
   ∑ y, max (f y - f (π y)) 0 = ∑ y, max (f (π y) - f y) 0 ∧
     ∑ y, max (f (π y) - f y) 0 = 1 / 2 * ∑ y, |f (π y) - f y|
+```
+
+## `NonsoficGroupsExist.pow_card_eq_one_of_scalarCommute`
+
+```lean
+∀ (Y : FiniteModel) {U V : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    V ∈ Matrix.unitaryGroup Y.carrier ℂ →
+      ∀ {c : ℂ}, U * V = c • (V * U) → c ^ Fintype.card Y.carrier = 1
+```
+
+## `NonsoficGroupsExist.pow_val_add_one`
+
+```lean
+∀ {q : ℕ}, 1 < q → ∀ {ζ : ℂ}, ζ ^ q = 1 → ∀ (i : ZMod q), ζ ^ (i + 1).val = ζ * ζ ^ i.val
 ```
 
 ## `NonsoficGroupsExist.powerPerm`
