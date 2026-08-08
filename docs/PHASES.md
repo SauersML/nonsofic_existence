@@ -372,6 +372,21 @@ the reverse of what the witnesses suggest — there a well-chosen phase removed
 every fixed point, but that model lived on a group with no perfection to
 exploit.
 
+That statement quantifies over the whole group, and a model has no whole group —
+only a finite window and an approximate action, hence no genuine stabilizer
+subgroup.  The argument survives anyway, because it is **local**.  To kill the
+phase of `[a,b]` at `y` one needs only `σ_b y = y`, `σ_{a⁻¹} y = y`,
+`σ_{b⁻¹} y = y`; then `d_ab(y) = d_a(y) + d_b(y)`, `d_{a⁻¹}(y) = −d_a(y)`,
+`d_{b⁻¹}(y) = −d_b(y)` cancel in pairs (`phase_commutator_local`, with
+`phase_one_eq_zero` and `phase_inv`).
+
+Perfection of `G` is not used, no closure of the window beyond naming the
+elements is used, and — slightly surprisingly — `σ_a` need not fix `y` at all:
+three of the four constituents suffice.  So in *any* monomial model, at any point
+fixed by `b`, `a⁻¹`, `b⁻¹`, the commutator `[a,b]` is trivially phased and the
+point survives untwisting.  On a group whose elements are commutators, that is
+about exactly the elements one has to separate.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a

@@ -1021,6 +1021,57 @@ theorem phase_eq_zero_at_global_fixed (act : G → Equiv.Perm Y)
   renormalization_eq_zero_of_commutators (fun g ↦ d g y)
     (phase_isHom_at_global_fixed act d hd y hfix) hcomm g
 
+/-! ### The local form, which is what a model can supply
+
+The statement above quantifies over the whole group, and a model does not have a
+whole group -- it has a finite window and an approximate action, so no genuine
+stabilizer subgroup.  The argument survives anyway, because it is local: to kill
+the phase of a commutator `[a,b]` at a point `y` one needs only that `a`, `b`
+and their inverses fix `y`.  Perfection of `G` is not used, and neither is any
+closure property of the window beyond naming the four elements involved.
+
+So in *any* monomial model, at any point fixed by `a`, `b`, `a⁻¹`, `b⁻¹`, the
+commutator `[a,b]` is trivially phased.  On a group whose elements are
+commutators, that is a statement about the elements one actually has to separate.
+-/
+
+/-- The phase of the identity vanishes. -/
+theorem phase_one_eq_zero (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (y : Y) (h1 : act 1 y = y) : d 1 y = 0 := by
+  have h := hd 1 1 y
+  rw [mul_one, h1] at h
+  have h2 : (0 : ZMod m) = d 1 y := by linear_combination h
+  exact h2.symm
+
+/-- The phase of an inverse is the negative, at a point both fix. -/
+theorem phase_inv (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (y : Y) (h1 : act 1 y = y) (g : G) (hgi : act g⁻¹ y = y) :
+    d g⁻¹ y = - d g y := by
+  have h := hd g g⁻¹ y
+  rw [mul_inv_cancel, hgi, phase_one_eq_zero act d hd y h1] at h
+  linear_combination -h
+
+/-- **A commutator is trivially phased at any point fixing its constituents.**
+Entirely local: only `a`, `b`, `a⁻¹`, `b⁻¹` need fix `y`, and nothing is assumed
+about the group or about the rest of the window. -/
+theorem phase_commutator_local (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (hd : ∀ (g h : G) (z : Y), d (g * h) z = d g (act h z) + d h z)
+    (y : Y) (h1 : act 1 y = y) (a b : G)
+    (hb : act b y = y) (hai : act a⁻¹ y = y) (hbi : act b⁻¹ y = y) :
+    d (a * b * a⁻¹ * b⁻¹) y = 0 := by
+  have e1 : d (a * b * a⁻¹ * b⁻¹) y = d (a * b * a⁻¹) y + d b⁻¹ y := by
+    rw [hd (a * b * a⁻¹) b⁻¹ y, hbi]
+  have e2 : d (a * b * a⁻¹) y = d (a * b) y + d a⁻¹ y := by
+    rw [hd (a * b) a⁻¹ y, hai]
+  have e3 : d (a * b) y = d a y + d b y := by
+    rw [hd a b y, hb]
+  have ea : d a⁻¹ y = - d a y := phase_inv act d hd y h1 a hai
+  have eb : d b⁻¹ y = - d b y := phase_inv act d hd y h1 b hbi
+  rw [e1, e2, e3, ea, eb]
+  ring
+
 end Renormalization
 
 /-- A point the permutation fixes and the phase does not see stays fixed after
