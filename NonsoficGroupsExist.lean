@@ -259,6 +259,7 @@ import NonsoficGroupsExist.Sofic.PhasePropagation
 import NonsoficGroupsExist.Sofic.ScalarCocycle
 import NonsoficGroupsExist.Sofic.CharacterCount
 import NonsoficGroupsExist.Sofic.NoRounding
+import NonsoficGroupsExist.Sofic.PhaseCorrection
 import NonsoficGroupsExist.Sofic.ImplementerCocycle
 import NonsoficGroupsExist.Sofic.CoordinateTransfer
 import NonsoficGroupsExist.Sofic.DivisibleInvisible

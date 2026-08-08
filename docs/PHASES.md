@@ -215,6 +215,38 @@ must use the group being modelled and the model itself.  Same shape as section
 1: not a difficulty in carrying out a strategy, but a proof that the strategy
 does not exist.
 
+## 6b. The non-pointwise correction, and where it stops
+
+`PhaseCorrection.lean`.  Section 6a leaves exactly one thing open: a correction
+chosen with the whole group in view.  Carrying it out gives a sharp dichotomy.
+
+The defect of a phase system `d` is the twisted 2-cocycle
+`c(g,h) = g·d_h + d_g − d_gh`, and replacing `d` by `d + b` moves `c` by the
+coboundary of `b`.  A cocycle with values uniformly near `0` *is* the coboundary
+of something near `0`, and the correction is an average over the group:
+
+    b_g = (1/|G|) Σ_{k ∈ G} c(g,k),   c = δb,   ‖b‖ ≤ ‖c‖
+
+(`phaseCorrection_eq`, `abs_phaseCorrection_le`).  Summing the cocycle identity
+over `k` and reindexing `k ↦ hk` is the whole proof.  Two steps make it work and
+neither is pointwise: the average is over `G`, and the passage from the circle
+to `ℝ` is a lifting — a cochain satisfying the identity only *modulo* `ℤ`, with
+values within `1/6` of `0`, satisfies it exactly, because the identity has four
+terms and `4/6 < 1` (`isPhaseCocycle_of_mod`).
+
+So (`phase_correctable_of_small`): **no obstruction to soficity can come from a
+uniformly small phase defect.**  It is correctable outright, by a correction no
+larger than itself.  An obstruction has to be a defect that is small *on average
+over the model* and large somewhere — exactly what the Hilbert–Schmidt metric
+permits and the Hamming metric does not, and exactly the gap of section 6.  The
+scalar witness there is the extreme instance: uniformly maximal rather than
+uniformly small.
+
+Read with 6a this locates the difficulty.  Pointwise rules cannot work at all;
+the group-averaged rule works whenever the defect is uniform; so whatever
+separates the two classes, if anything does, lives in the failure of uniformity
+— in defects concentrated on a small part of the model.
+
 ## 7. Contributed by an external audit, formalized here
 
 `ImplementerCocycle.lean`, `CoordinateTransfer.lean`.  Three statements arrived
