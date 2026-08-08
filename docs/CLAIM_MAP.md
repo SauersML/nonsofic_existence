@@ -87,6 +87,7 @@ the print.
 | `rem:scalarcocycle` | formalized | `Sofic/ScalarCocycle` †: `pow_card_eq_one_of_scalarCommute`, `hsDistSq_monomial_const`, `hammingDistance_wreathPerm_blockConst`; `Sofic/CharacterCount` †: `card_annihilator`, `hammingDistance_characterUntwist`, `hammingDistance_characterUntwist_generator` |  |
 | `rem:norounding` | formalized | `Sofic/NoRounding` †: `circle_map_eq_zero`, `additiveRounding_no_separation`, `roundMod_not_additive`, `no_pointwise_rounding` |  |
 | `rem:phasecorrection` | formalized | `Sofic/PhaseCorrection` †: `phaseCorrection_eq`, `phase_correctable_of_small`, `window_defect_eq`, `abs_window_defect_le` |  |
+| `rem:scalarclass` | formalized | `Sofic/ScalarClass` †: `isScalarCocycle_scalarPart`, `abs_scalarPart_le`, `scalarPart_phaseCob`, `scalarClass_obstructs` |  |
 | `rem:coordtransfer` | formalized | `Sofic/CoordinateTransfer` †: `OrbitChartData`, `trivialOrbitChartData`, `OrbitChartData.comap`, `lampEmbedding_injective` |  |
 | `rem:implementer` | formalized | `Sofic/ImplementerCocycle` †: `implementerCocycle`, `implementerCocycle_twisted`, `correctedImplementer_defect`, `hsDistSq_orthogonal_rankOne` |  |
 | `rem:finiteblind` | formalized | `Criterion/FiniteQuotientBlindness` †: `compressedImage_le`, `compressedImage_eq`, `compressorImage_normalizes`, `compressorImage_normalizes_inv` |  |

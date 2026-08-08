@@ -262,6 +262,40 @@ almost invariant; so whatever separates the two classes, if anything does, lives
 in the failure of one of those — in defects concentrated on a small part of the
 model, or in the non-amenability of the group.
 
+## 6c. Where the obstruction lives: bounded cohomology
+
+`ScalarClass.lean`.  Sections 6a–6b fence the problem but do not say what the
+correction has to kill.  Averaging in the *other* direction says it.  Average
+the defect over the model rather than the group:
+
+    ĉ(g,h) = (1/|Y|) Σ_{y ∈ Y} c(g,h)(y)
+
+Two things happen at once.  The action disappears — it enters the cocycle
+identity only as a relabelling of `Y`, and an average over `Y` cannot see a
+relabelling — so the *twisted* identity becomes the *untwisted* one
+(`isScalarCocycle_scalarPart`).  And the bound survives, `‖ĉ‖ ≤ ‖c‖`
+(`abs_scalarPart_le`).  So the average of a small twisted defect is a **bounded
+2-cocycle on `G` with trivial coefficients**.
+
+Averaging commutes with correcting (`scalarPart_phaseCob`): the scalar part of a
+coboundary is the coboundary of the scalar part, with `‖β‖ ≤ ‖b‖`.  Contraposed
+(`scalarClass_obstructs`): *if the bounded class of `ĉ` does not vanish, no
+bounded correction of `c` exists at all.*  The scalar obstruction lives in
+`H²_b(G, ℝ)`.
+
+This names the difficulty rather than adding one.  Bounded cohomology vanishes
+for amenable groups and not in general; the correction of 6b succeeds exactly
+when the window is almost invariant; the two are the same fact, and the Følner
+boundary is the averaging that computes the class.  It also explains why the
+scalar witness of section 6 is extreme: a constant defect *is* its own scalar
+part, with no mean-zero component at all.
+
+What is missing is a group whose class is non-vanishing *and* forced on every
+model.  Soficity quantifies over finite windows; a bounded class is global; any
+single window can be corrected by extending the correction arbitrarily.  An
+obstruction would have to be uniform over windows — the same dimension-free gap
+section 6 shows exact infeasibility does not supply.
+
 ## 7. Contributed by an external audit, formalized here
 
 `ImplementerCocycle.lean`, `CoordinateTransfer.lean`.  Three statements arrived

@@ -2144,6 +2144,22 @@ Read together with Remark~\ref{rem:norounding} this locates the difficulty exact
 \end{remark}
 
 \clearpage
+\begin{remark}[The scalar class lives in bounded cohomology]\label{rem:scalarclass}%
+\leanverified{\leanmod{Sofic/ScalarClass}{isScalarCocycle_scalarPart,abs_scalarPart_le,scalarPart_phaseCob,scalarClass_obstructs}}%
+Remark~\ref{rem:phasecorrection} fences the problem but does not say what the correction has to kill.  Averaging in the other direction says it.  Average the defect over the \emph{model} rather than the group,
+\[
+ \hat c(g,h)\ =\ \frac{1}{\abs Y}\sum_{y\in Y}c(g,h)(y),
+\]
+and two things happen at once.  The action disappears---it enters the cocycle identity only as a relabelling of \(Y\), and an average over \(Y\) cannot see a relabelling---so the \emph{twisted} identity becomes the \emph{untwisted} one.  And the bound survives, \(\norm{\hat c}_\infty\leq\norm c_\infty\).  So the average of a small twisted defect is a \emph{bounded \(2\)-cocycle on \(G\) with trivial coefficients}: exactly the object bounded cohomology is about.
+
+The identification closes because averaging commutes with correcting.  The scalar part of a coboundary is the coboundary of the scalar part, with \(\norm\beta_\infty\leq\norm b_\infty\); contraposing, \emph{if the bounded class of \(\hat c\) does not vanish then no bounded correction of \(c\) exists at all}.  The scalar obstruction therefore lives in \(H^2_b(G,\R)\).
+
+That is not a new difficulty but the old one named.  Bounded cohomology vanishes for amenable groups and does not in general; the correction of Remark~\ref{rem:phasecorrection} succeeds exactly when the window is almost invariant; the two facts are the same fact, and the Følner boundary there is the averaging that computes the class.  It also explains why the scalar witness of Remark~\ref{rem:scalarcocycle} is the extreme case: a constant defect \emph{is} its own scalar part, carrying no mean-zero component whatever, and it is precisely the component the Hilbert--Schmidt metric cannot see.
+
+What this does not supply is a group whose class is non-vanishing \emph{and} forced on every model.  Soficity quantifies over finite windows and a bounded class is a statement about the whole group; any single window can be corrected by extending the correction arbitrarily, so an obstruction would have to be uniform over windows.  That is the same dimension-free gap that Remark~\ref{rem:scalarcocycle} shows exact infeasibility does not supply, and it is not closed here.
+\end{remark}
+
+\clearpage
 \begin{remark}[A lamp chart is a coordinate chart]\label{rem:coordtransfer}%
 \leanverified{\leanmod{Sofic/CoordinateTransfer}{OrbitChartData,trivialOrbitChartData,OrbitChartData.comap,lampEmbedding_injective}}%
 A referee audit of this development observed that the action-level route to hyperlinearity of a generalized wreath product cannot help a candidate whose coordinate action is not already sofic, because the lamp data \emph{contains} the coordinate data.  The observation is written there against two papers' definitions, but its content depends on neither.  Encode a coordinate \(x\) as the lamp \(\delta_x(k_0)\) for a fixed \(k_0\neq1\).  That encoding is injective, and it is equivariant; consequently charts for the lamp action restrict along it to charts for the coordinate action, with the covariance identity transporting verbatim and nothing used about where the charts take their values.

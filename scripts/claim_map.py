@@ -63,6 +63,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "ElementaryNoFiniteQuotients",
     "NoRounding",
     "PhaseCorrection",
+    "ScalarClass",
     "ExactCompression",
     "FiniteQuotientBlindness",
     "Hyperlinear",
