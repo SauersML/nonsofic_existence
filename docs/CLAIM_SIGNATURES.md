@@ -2114,6 +2114,15 @@ Function.Injective ⇑UniversalRankFour.witnessEmbedding
   Whitehead.diagonalPair ↑a ↑a⁻¹ = Whitehead.w a * Whitehead.w (-1)
 ```
 
+## `NonsoficGroupsExist.abs_scalarPart_le`
+
+```lean
+∀ {G : Type u_1} {Y : Type u_2} [inst : Fintype Y],
+  0 < Fintype.card Y →
+    ∀ (c : G → G → Y → ℝ) {B : ℝ},
+      (∀ (g h : G) (y : Y), |c g h y| ≤ B) → ∀ (g h : G), |scalarPart c g h| ≤ B
+```
+
 ## `NonsoficGroupsExist.abs_window_defect_le`
 
 ```lean
@@ -2820,6 +2829,15 @@ CountableNonsoficGroupExists
   HasKazhdanPropertyT G → HasKazhdanPropertyT Γ → ∀ (A : SoficApproximation G), IsLEF J
 ```
 
+## `NonsoficGroupsExist.isScalarCocycle_scalarPart`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} [inst_1 : Fintype Y],
+  0 < Fintype.card Y →
+    ∀ (act : G → Equiv.Perm Y) (c : G → G → Y → ℝ),
+      IsPhaseCocycle act c → IsScalarCocycle (scalarPart c)
+```
+
 ## `NonsoficGroupsExist.isSofic_freeGroup`
 
 ```lean
@@ -3151,6 +3169,25 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ (m : ℕ), 2 ≤ m → ∃ x y, roundMod m (x + y) ≠ roundMod m x + roundMod m y
+```
+
+## `NonsoficGroupsExist.scalarClass_obstructs`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} [inst_1 : Fintype Y],
+  0 < Fintype.card Y →
+    ∀ (act : G → Equiv.Perm Y) (c : G → G → Y → ℝ) {B : ℝ},
+      (∀ (β : G → ℝ), (∀ (g : G), |β g| ≤ B) → ∃ g h, scalarPart c g h ≠ scalarCob β g h) →
+        ∀ (b : G → Y → ℝ),
+          (∀ (g : G) (y : Y), |b g y| ≤ B) → ∃ g h y, c g h y ≠ phaseCob act b g h y
+```
+
+## `NonsoficGroupsExist.scalarPart_phaseCob`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {Y : Type u_2} [inst_1 : Fintype Y] (act : G → Equiv.Perm Y)
+  (b : G → Y → ℝ) (g h : G),
+  scalarPart (phaseCob act b) g h = scalarCob (fun g => modelMean (b g)) g h
 ```
 
 ## `NonsoficGroupsExist.symmDiff_le_of_pinned`
