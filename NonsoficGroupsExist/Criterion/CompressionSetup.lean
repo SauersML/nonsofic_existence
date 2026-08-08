@@ -32,7 +32,6 @@ structure CompressionSetup (G Γ J : Type*) [Group G] [Group Γ] [Group J] where
   generatorsΓ_symmetric : ∀ g ∈ generatorsΓ, g⁻¹ ∈ generatorsΓ
   generatorsΓ_generate : Subgroup.closure (generatorsΓ : Set Γ) = ⊤
   generatorsJ : Finset J
-  generatorsJ_symmetric : ∀ g ∈ generatorsJ, g⁻¹ ∈ generatorsJ
   generatorsJ_generate : Subgroup.closure (generatorsJ : Set J) = ⊤
   infiniteΓ : Infinite Γ
   compressors : Finset G

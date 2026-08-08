@@ -225,7 +225,6 @@ def compressionSetup :
         (Classical.choose_spec
           (exists_symmetric_generators (RankFour.Core A))).2.2
       generatorsJ := L.cornerWitnessGenerators
-      generatorsJ_symmetric := L.cornerWitnessGenerators_symmetric
       generatorsJ_generate := L.cornerWitnessGenerators_generate
       infiniteΓ := coreInfinite L
       compressors := RankFour.compressorSet L

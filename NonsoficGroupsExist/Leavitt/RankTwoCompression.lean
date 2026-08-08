@@ -377,7 +377,6 @@ theorem rankTwo_not_isSofic
       generatorsΓ_symmetric := hSsym
       generatorsΓ_generate := hSgen
       generatorsJ := L.cornerWitnessGenerators
-      generatorsJ_symmetric := L.cornerWitnessGenerators_symmetric
       generatorsJ_generate := L.cornerWitnessGenerators_generate
       infiniteΓ := inferInstance
       compressors :=

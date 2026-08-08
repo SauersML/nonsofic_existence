@@ -62,7 +62,6 @@ noncomputable def compressionSetup : CompressionSetup Ambient Core Witness := by
       generatorsΓ_symmetric := coreGenerators_symmetric
       generatorsΓ_generate := coreGenerators_generate
       generatorsJ := family.cornerWitnessGenerators
-      generatorsJ_symmetric := family.cornerWitnessGenerators_symmetric
       generatorsJ_generate := family.cornerWitnessGenerators_generate
       infiniteΓ := inferInstance
       compressors := compressors

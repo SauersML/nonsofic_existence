@@ -814,7 +814,6 @@ noncomputable def compressionSetup [Nontrivial R]
           (KazhdanFiniteGeneration.exists_symmetric_generating_finset
             _ hTΓ)).2.2
       generatorsJ := L.cornerWitnessGenerators
-      generatorsJ_symmetric := L.cornerWitnessGenerators_symmetric
       generatorsJ_generate := L.cornerWitnessGenerators_generate
       infiniteΓ := by
         haveI := L.infinite

@@ -171,7 +171,6 @@ def compressionSetup [Algebra.FiniteType ℤ A] [Nontrivial A] :
         (Classical.choose_spec
           (FamilyRankFour.exists_symmetric_generators (RankFour.Core A))).2.2
       generatorsJ := L.cornerWitnessGenerators
-      generatorsJ_symmetric := L.cornerWitnessGenerators_symmetric
       generatorsJ_generate := L.cornerWitnessGenerators_generate
       infiniteΓ := FamilyRankFour.coreInfinite L
       compressors := RankFour.rawCompressorSet L

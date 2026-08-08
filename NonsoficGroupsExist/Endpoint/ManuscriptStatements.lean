@@ -357,7 +357,7 @@ theorem theoremD_subgroups {G : Type} [Group G]
   haveI : Countable ↥J := Subtype.countable
   obtain ⟨SΓ, hSΓone, hSΓsym, hSΓgen⟩ :=
     FamilyRankFour.exists_symmetric_generators ↥Γ
-  obtain ⟨SJ, -, hSJsym, hSJgen⟩ :=
+  obtain ⟨SJ, -, -, hSJgen⟩ :=
     FamilyRankFour.exists_symmetric_generators ↥J
   have C : CompressionSetup G ↥Γ ↥J :=
     { embedΓ := Γ.subtype
@@ -369,7 +369,6 @@ theorem theoremD_subgroups {G : Type} [Group G]
       generatorsΓ_symmetric := hSΓsym
       generatorsΓ_generate := hSΓgen
       generatorsJ := SJ
-      generatorsJ_symmetric := hSJsym
       generatorsJ_generate := hSJgen
       infiniteΓ := hΓinf
       compressors := Q

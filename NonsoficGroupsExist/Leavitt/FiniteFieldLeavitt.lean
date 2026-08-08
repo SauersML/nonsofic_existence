@@ -232,7 +232,6 @@ def compressionSetup : CompressionSetup (Ambient k) (Core k) (Witness k) := by
       generatorsΓ_generate :=
         (Classical.choose_spec (exists_core_generators k)).2.2
       generatorsJ := (family k).cornerWitnessGenerators
-      generatorsJ_symmetric := (family k).cornerWitnessGenerators_symmetric
       generatorsJ_generate := (family k).cornerWitnessGenerators_generate
       infiniteΓ := inferInstance
       compressors := compressors k
