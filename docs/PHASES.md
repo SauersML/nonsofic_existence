@@ -402,7 +402,17 @@ element of the window can fix more than half the model**.
 That is the quantitative form of "untwisting only inherits separation", stated
 in the permutation parts alone with the phases eliminated.  The one hypothesis a
 genuinely approximate model does not supply for free is that `σ` is a
-homomorphism; that is where it pays its defect.
+homomorphism, and it is worth saying what that costs.  Linearly, with constant
+one: if the identities used hold off a set `B`, then
+
+    d_Hamm(untwist(d_[a,b], σ_[a,b]), 1) ≤ 2 − F_a − F_b + |B|/|Y|
+
+(`untwist_retains_commutator_offBad`), and `B = ∅` is the exact statement.  The
+two ingredients separate cleanly and each is useful alone: a set of points that
+are fixed and trivially phased caps the untwisted separation at `1` minus its
+density (`untwist_hamming_le_of_good_set`), and Bonferroni with an exceptional
+set counts them (`card_inter_sdiff_ge`).  So the argument does not degrade badly
+under approximation — the exceptional density enters once, undamped.
 
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant

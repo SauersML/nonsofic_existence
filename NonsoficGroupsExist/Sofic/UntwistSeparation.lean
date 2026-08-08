@@ -1214,4 +1214,118 @@ theorem untwist_retains_commutator {G : Type*} [Group G] (Y : FiniteModel)
   rw [hexpand]
   linarith [hcount, hmono, hYR]
 
+
+/-! ## What an approximate model pays
+
+`untwist_retains_commutator` assumes the action is a homomorphism on the nose.
+A model supplies that only off a set where its identities fail, so the honest
+question is how the bound degrades with the size of that set.  Linearly, and
+with constant one: if the identities used hold off a set `B`, the conclusion
+weakens by exactly the density of `B`.
+
+The two ingredients are separated below, because each is useful alone: a good
+set of density `γ` caps the untwisted separation at `1 - γ`, and Bonferroni with
+an exceptional set counts the good points.  Taking `B = ∅` recovers the exact
+statement.
+-/
+
+/-- **A good set caps the separation.**  Points that are fixed and trivially
+phased survive untwisting in every fibre, so they bound the Hamming distance to
+the identity from above. -/
+theorem untwist_hamming_le_of_good_set (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) (S : Finset Y)
+    (hS : ∀ y ∈ S, σ y = y ∧ d y = 0) (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1
+      ≤ 1 - (S.card : ℝ) / Fintype.card Y := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  rw [hammingDistance_wreathPerm_one]
+  have hsub : S ⊆ univ.filter fun y : Y ↦ σ y = y ∧ d y = 0 := by
+    intro y hy
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact hS y hy
+  have hmono : (S.card : ℝ) ≤ ((univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card : ℝ) := by
+    exact_mod_cast Finset.card_le_card hsub
+  have hcompl : (univ.filter fun y : Y ↦ ¬ (σ y = y ∧ d y = 0)).card
+      = Fintype.card Y - (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card := by
+    have := Finset.card_filter_add_card_filter_not (s := (univ : Finset Y))
+      (fun y : Y ↦ σ y = y ∧ d y = 0)
+    rw [Finset.card_univ] at this
+    omega
+  have hle : (univ.filter fun y : Y ↦ σ y = y ∧ d y = 0).card ≤ Fintype.card Y := by
+    calc _ ≤ (univ : Finset Y).card := Finset.card_filter_le _ _
+      _ = Fintype.card Y := Finset.card_univ
+  rw [hcompl, Nat.cast_sub hle, div_le_iff₀ hYR, sub_mul, one_mul,
+    div_mul_cancel₀ _ (ne_of_gt hYR)]
+  linarith [hmono]
+
+/-- **Bonferroni with an exceptional set.**  Removing `B` costs exactly its
+size. -/
+theorem card_inter_sdiff_ge (Y : FiniteModel) (σ τ : Equiv.Perm Y) (B : Finset Y) :
+    ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+        + ((univ.filter fun y : Y ↦ τ y = y).card : ℝ)
+        - Fintype.card Y - B.card
+      ≤ (((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y) \ B).card : ℝ) := by
+  classical
+  have hbase := card_inter_fixed_ge Y σ τ
+  have hsdiff : ((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y).card : ℝ) - B.card
+      ≤ (((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y) \ B).card : ℝ) := by
+    have := Finset.card_le_card_sdiff_add_card
+      (s := (univ.filter fun y : Y ↦ σ y = y ∧ τ y = y)) (t := B)
+    have hR : ((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y).card : ℝ)
+        ≤ (((univ.filter fun y : Y ↦ σ y = y ∧ τ y = y) \ B).card : ℝ) + B.card := by
+      exact_mod_cast this
+    linarith [hR]
+  linarith [hbase, hsdiff]
+
+/-- **The commutator bound, with the model's exceptional set carried through.**
+If the identities the argument uses hold off `B`, the conclusion weakens by
+exactly the density of `B`:
+
+    separation of the untwisted `[a,b]`  ≤  2 - F_a - F_b + |B|/|Y|.
+
+`B = ∅` is `untwist_retains_commutator`.  For an approximate model `B` is the
+set where its multiplicativity fails, at the points the commutator computation
+evaluates; the cost is linear in that density, with constant one. -/
+theorem untwist_retains_commutator_offBad {G : Type*} [Group G] (Y : FiniteModel)
+    (m : ℕ) [NeZero m] (act : G → Equiv.Perm Y) (d : G → Y → ZMod m)
+    (B : Finset Y) (a b : G)
+    (hgood : ∀ y : Y, y ∉ B → act a y = y → act b y = y →
+      act (a * b * a⁻¹ * b⁻¹) y = y ∧ d (a * b * a⁻¹ * b⁻¹) y = 0)
+    (hY : 0 < Fintype.card Y) :
+    hammingDistance (wreathModel Y m)
+        (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1
+      ≤ 2 - fixedDensity Y (act a) - fixedDensity Y (act b)
+        + (B.card : ℝ) / Fintype.card Y := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  set S : Finset Y :=
+    (univ.filter fun y : Y ↦ act a y = y ∧ act b y = y) \ B with hSdef
+  have hS : ∀ y ∈ S, act (a * b * a⁻¹ * b⁻¹) y = y
+      ∧ d (a * b * a⁻¹ * b⁻¹) y = 0 := by
+    intro y hy
+    rw [hSdef, Finset.mem_sdiff, Finset.mem_filter] at hy
+    exact hgood y hy.2 hy.1.2.1 hy.1.2.2
+  have hcap := untwist_hamming_le_of_good_set Y m _ _ S hS hY
+  have hcount := card_inter_sdiff_ge Y (act a) (act b) B
+  rw [fixedDensity, fixedDensity]
+  have hdiv : (S.card : ℝ) / Fintype.card Y
+      ≥ ((univ.filter fun y : Y ↦ act a y = y).card : ℝ) / Fintype.card Y
+        + ((univ.filter fun y : Y ↦ act b y = y).card : ℝ) / Fintype.card Y
+        - 1 - (B.card : ℝ) / Fintype.card Y := by
+    rw [ge_iff_le, ← sub_nonneg]
+    have hrewrite : (S.card : ℝ) / Fintype.card Y
+        - (((univ.filter fun y : Y ↦ act a y = y).card : ℝ) / Fintype.card Y
+          + ((univ.filter fun y : Y ↦ act b y = y).card : ℝ) / Fintype.card Y
+          - 1 - (B.card : ℝ) / Fintype.card Y)
+        = ((S.card : ℝ)
+            - (((univ.filter fun y : Y ↦ act a y = y).card : ℝ)
+              + ((univ.filter fun y : Y ↦ act b y = y).card : ℝ)
+              - Fintype.card Y - B.card)) / Fintype.card Y := by
+      field_simp
+    rw [hrewrite]
+    apply div_nonneg _ (le_of_lt hYR)
+    linarith [hcount]
+  linarith [hcap, hdiv]
+
 end NonsoficGroupsExist
