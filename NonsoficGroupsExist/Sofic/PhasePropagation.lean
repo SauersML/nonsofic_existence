@@ -320,4 +320,216 @@ theorem normSq_normTrace_lt_of_separated {F : Finset G} {ε : ℝ}
     nlinarith [hre, hsep, hεle]
   linarith [hlow, hhigh, hεle]
 
+/-! ## The order-two case: two involutions cannot both carry a phase -/
+
+theorem normSq_add_le (a b : ℂ) :
+    Complex.normSq (a + b) ≤ 2 * Complex.normSq a + 2 * Complex.normSq b := by
+  simp only [Complex.normSq_apply, Complex.add_re, Complex.add_im]
+  nlinarith [sq_nonneg (a.re - b.re), sq_nonneg (a.im - b.im)]
+
+theorem normTrace_one' (Y : FiniteModel) (hY : 0 < Fintype.card Y) :
+    normTrace Y (1 : Matrix Y Y ℂ) = 1 := by
+  have h := normTrace_smul_one Y hY 1
+  rwa [one_smul] at h
+
+/-- The real part of a separated element's trace is small. -/
+theorem re_normTrace_le_of_separated {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) (hε : 0 < ε) (hεle : ε ≤ 1 / 10000)
+    {g : G} (hg : g ∈ F) (h1F : (1 : G) ∈ F) (hgne : g ≠ 1) :
+    (normTrace M.carrier (M.map g)).re ≤ ε / 2 + 1 / 100 := by
+  have hsep := M.separated g hg 1 h1F hgne
+  rw [hsDistSq_of_unitary M.carrier (M.isUnitary g) (M.isUnitary 1)
+    M.nonempty] at hsep
+  have hM1 : hsNormSq M.carrier (1 - M.map 1) ≤ ε :=
+    hsNormSq_one_sub_map_one M h1F
+  have hcmp : Complex.normSq (normTrace M.carrier (M.map g)
+      - normTrace M.carrier (M.map g * (M.map 1)ᴴ)) ≤ ε := by
+    have hfact : M.map g - M.map g * (M.map 1)ᴴ
+        = M.map g * (1 - (M.map 1)ᴴ) := by
+      rw [Matrix.mul_sub, Matrix.mul_one]
+    rw [← normTrace_sub, hfact]
+    refine le_trans (normSq_normTrace_le_hsNormSq M.carrier _) ?_
+    rw [hsNormSq_mul_left M.carrier (M.isUnitary g) M.nonempty]
+    have hct : (1 : Matrix M.carrier M.carrier ℂ) - (M.map 1)ᴴ
+        = ((1 : Matrix M.carrier M.carrier ℂ) - M.map 1)ᴴ := by
+      rw [Matrix.conjTranspose_sub, Matrix.conjTranspose_one]
+    rw [hct, hsNormSq_conjTranspose]
+    exact hM1
+  have hre : ((normTrace M.carrier (M.map g)
+      - normTrace M.carrier (M.map g * (M.map 1)ᴴ)).re) ^ 2 ≤ ε := by
+    refine le_trans ?_ hcmp
+    rw [Complex.normSq_apply]
+    nlinarith [sq_nonneg (normTrace M.carrier (M.map g)
+      - normTrace M.carrier (M.map g * (M.map 1)ᴴ)).im]
+  rw [Complex.sub_re] at hre
+  nlinarith [hre, hsep, hεle]
+
+/-- A product's trace is close to the product of two near-scalar traces. -/
+theorem normSq_normTrace_mul_sub {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) {g h : G} (hg : g ∈ F) (hh : h ∈ F) :
+    Complex.normSq (normTrace M.carrier (M.map (g * h))
+        - normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h))
+      ≤ 2 * ε + 4 * (1 - Complex.normSq (normTrace M.carrier (M.map g)))
+        + 4 * (1 - Complex.normSq (normTrace M.carrier (M.map h))) := by
+  have hzle : Complex.normSq (normTrace M.carrier (M.map g)) ≤ 1 :=
+    normSq_normTrace_le_one M.carrier (M.isUnitary g) M.nonempty
+  have hdg : hsNormSq M.carrier
+      (M.map g - (normTrace M.carrier (M.map g)) • 1)
+      = 1 - Complex.normSq (normTrace M.carrier (M.map g)) :=
+    hsNormSq_sub_normTrace_smul M.carrier (M.isUnitary g) M.nonempty
+  have hdh : hsNormSq M.carrier
+      (M.map h - (normTrace M.carrier (M.map h)) • 1)
+      = 1 - Complex.normSq (normTrace M.carrier (M.map h)) :=
+    hsNormSq_sub_normTrace_smul M.carrier (M.isUnitary h) M.nonempty
+  have hsplit : M.map (g * h)
+      - (normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)) • 1
+      = (M.map (g * h) - M.map g * M.map h)
+        + ((M.map g - (normTrace M.carrier (M.map g)) • 1) * M.map h
+          + (normTrace M.carrier (M.map g))
+            • (M.map h - (normTrace M.carrier (M.map h)) • 1)) := by
+    rw [Matrix.sub_mul, smul_sub, smul_smul, Matrix.smul_mul, Matrix.one_mul]
+    abel
+  have hbound : hsNormSq M.carrier (M.map (g * h)
+      - (normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)) • 1)
+      ≤ 2 * ε + 4 * (1 - Complex.normSq (normTrace M.carrier (M.map g)))
+        + 4 * (1 - Complex.normSq (normTrace M.carrier (M.map h))) := by
+    rw [hsplit]
+    have h1 := hsNormSq_add_le M.carrier (M.map (g * h) - M.map g * M.map h)
+      ((M.map g - (normTrace M.carrier (M.map g)) • 1) * M.map h
+        + (normTrace M.carrier (M.map g))
+          • (M.map h - (normTrace M.carrier (M.map h)) • 1))
+    have h2 := hsNormSq_add_le M.carrier
+      ((M.map g - (normTrace M.carrier (M.map g)) • 1) * M.map h)
+      ((normTrace M.carrier (M.map g))
+        • (M.map h - (normTrace M.carrier (M.map h)) • 1))
+    have h3 : hsNormSq M.carrier
+        ((M.map g - (normTrace M.carrier (M.map g)) • 1) * M.map h)
+        = 1 - Complex.normSq (normTrace M.carrier (M.map g)) := by
+      rw [hsNormSq_mul_right M.carrier (M.isUnitary h), hdg]
+    have h4 : hsNormSq M.carrier ((normTrace M.carrier (M.map g))
+        • (M.map h - (normTrace M.carrier (M.map h)) • 1))
+        = Complex.normSq (normTrace M.carrier (M.map g))
+          * (1 - Complex.normSq (normTrace M.carrier (M.map h))) := by
+      rw [hsNormSq_smul, hdh]
+    have h5 : hsNormSq M.carrier (M.map (g * h) - M.map g * M.map h) ≤ ε :=
+      M.multiplicative g hg h hh
+    have hnn : 0 ≤ 1 - Complex.normSq (normTrace M.carrier (M.map h)) := by
+      have := normSq_normTrace_le_one M.carrier (M.isUnitary h) M.nonempty
+      linarith
+    rw [h3, h4] at h2
+    nlinarith [h1, h2, h5, hzle, hnn]
+  have hsub : normTrace M.carrier (M.map (g * h))
+      - normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)
+      = normTrace M.carrier (M.map (g * h)
+        - (normTrace M.carrier (M.map g)
+          * normTrace M.carrier (M.map h)) • 1) := by
+    rw [normTrace_sub, normTrace_smul_one M.carrier M.nonempty]
+  rw [hsub]
+  exact le_trans (normSq_normTrace_le_hsNormSq M.carrier _) hbound
+
+/-- **Two involutions cannot both carry a phase.**  If `g` and `h` are distinct
+nontrivial involutions with `gh` also nontrivial, a separated model cannot send
+both within `10⁻⁶` of a scalar: each would have to be near `-1`, and then their
+product would be near `1`, which separation forbids.  So the escape hatch left
+open by `normSq_normTrace_lt_of_separated` at order two is closed as soon as
+two involutions are present -- as they are in every elementary abelian lamp
+group. -/
+theorem not_both_normSq_normTrace_ge {F : Finset G} {ε : ℝ}
+    (M : HyperlinearModel G F ε) (hε : 0 < ε) (hεle : ε ≤ 1 / 10000)
+    {g h : G} (hg : g ∈ F) (hh : h ∈ F) (hgh : g * h ∈ F)
+    (h1F : (1 : G) ∈ F) (hgsq : g * g = 1) (hhsq : h * h = 1)
+    (hgne : g ≠ 1) (hhne : h ≠ 1) (hghne : g * h ≠ 1) :
+    ¬ (1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map g)) ∧
+       1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map h))) := by
+  rintro ⟨hgd, hhd⟩
+  -- each involution's trace is forced near `-1`
+  have key : ∀ x : G, x ∈ F → x * x = 1 → x ≠ 1 →
+      1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map x)) →
+      (normTrace M.carrier (M.map x)).re ≤ -(99 : ℝ) / 100 ∧
+        (normTrace M.carrier (M.map x)).im ^ 2 ≤ 1 / 50 := by
+    intro x hx hxsq hxne hxd
+    have hsq := normSq_normTrace_mul_sub M hx hx
+    rw [hxsq] at hsq
+    have hone : Complex.normSq (normTrace M.carrier (M.map 1) - 1) ≤ ε := by
+      have hfac : normTrace M.carrier (M.map 1) - 1
+          = normTrace M.carrier (M.map 1 - 1) := by
+        rw [normTrace_sub, normTrace_one' M.carrier M.nonempty]
+      rw [hfac]
+      refine le_trans (normSq_normTrace_le_hsNormSq M.carrier _) ?_
+      have hneg : M.map 1 - (1 : Matrix M.carrier M.carrier ℂ)
+          = (-1 : ℂ) • (1 - M.map 1) := by
+        rw [smul_sub, neg_smul, neg_smul, one_smul, one_smul]
+        abel
+      rw [hneg, hsNormSq_smul]
+      have := hsNormSq_one_sub_map_one M h1F
+      simp only [Complex.normSq_neg, Complex.normSq_one, one_mul]
+      exact this
+    -- so `τ(u_x)² ` is near `1`
+    have hfar : Complex.normSq
+        ((normTrace M.carrier (M.map x)) * (normTrace M.carrier (M.map x)) - 1)
+        ≤ 2 * (2 * ε + 8 * (1 / 1000000)) + 2 * ε := by
+      have hsplit : (normTrace M.carrier (M.map x))
+            * (normTrace M.carrier (M.map x)) - 1
+          = -(normTrace M.carrier (M.map 1)
+              - (normTrace M.carrier (M.map x))
+                * (normTrace M.carrier (M.map x)))
+            + (normTrace M.carrier (M.map 1) - 1) := by ring
+      rw [hsplit]
+      refine le_trans (normSq_add_le _ _) ?_
+      rw [Complex.normSq_neg]
+      have hle : Complex.normSq (normTrace M.carrier (M.map 1)
+          - normTrace M.carrier (M.map x) * normTrace M.carrier (M.map x))
+          ≤ 2 * ε + 8 * (1 / 1000000) := by
+        refine le_trans hsq ?_
+        linarith
+      linarith [hone, hle]
+    have hxre := re_normTrace_le_of_separated M hε hεle hx h1F hxne
+    have hxle : Complex.normSq (normTrace M.carrier (M.map x)) ≤ 1 :=
+      normSq_normTrace_le_one M.carrier (M.isUnitary x) M.nonempty
+    rw [Complex.normSq_apply] at hxle hxd
+    have hre2 : ((normTrace M.carrier (M.map x)
+        * normTrace M.carrier (M.map x) - 1).re) ^ 2
+        ≤ 2 * (2 * ε + 8 * (1 / 1000000)) + 2 * ε := by
+      refine le_trans ?_ hfar
+      rw [Complex.normSq_apply]
+      nlinarith [sq_nonneg (normTrace M.carrier (M.map x)
+        * normTrace M.carrier (M.map x) - 1).im]
+    rw [Complex.sub_re, Complex.mul_re, Complex.one_re] at hre2
+    have hC : ((normTrace M.carrier (M.map x)).re
+          * (normTrace M.carrier (M.map x)).re
+        - (normTrace M.carrier (M.map x)).im
+          * (normTrace M.carrier (M.map x)).im - 1) ^ 2
+        ≤ 616 / 1000000 := by nlinarith [hre2, hεle, hε]
+    have hlow : (975 : ℝ) / 1000 ≤ (normTrace M.carrier (M.map x)).re
+        * (normTrace M.carrier (M.map x)).re
+      - (normTrace M.carrier (M.map x)).im
+        * (normTrace M.carrier (M.map x)).im := by nlinarith [hC]
+    have ha2 : (9875 : ℝ) / 10000 ≤ (normTrace M.carrier (M.map x)).re
+        * (normTrace M.carrier (M.map x)).re := by nlinarith [hlow, hxle]
+    constructor
+    · nlinarith [ha2, hxre, hεle, hε]
+    · nlinarith [ha2, hxle]
+  obtain ⟨hgre, hgim⟩ := key g hg hgsq hgne hgd
+  obtain ⟨hhre, hhim⟩ := key h hh hhsq hhne hhd
+  -- but then the product's trace is near `1`, contradicting separation
+  have hprod := normSq_normTrace_mul_sub M hg hh
+  have hghre := re_normTrace_le_of_separated M hε hεle hgh h1F hghne
+  have hre2 : ((normTrace M.carrier (M.map (g * h))
+      - normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)).re) ^ 2
+      ≤ 2 * ε + 4 * (1 / 1000000) + 4 * (1 / 1000000) := by
+    refine le_trans ?_ (le_trans hprod ?_)
+    · rw [Complex.normSq_apply]
+      nlinarith [sq_nonneg (normTrace M.carrier (M.map (g * h))
+        - normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)).im]
+    · linarith
+  rw [Complex.sub_re, Complex.mul_re] at hre2
+  have hbb : (normTrace M.carrier (M.map g)).im
+      * (normTrace M.carrier (M.map h)).im ≤ 1 / 50 := by
+    nlinarith [hgim, hhim,
+      sq_nonneg ((normTrace M.carrier (M.map g)).im
+        - (normTrace M.carrier (M.map h)).im)]
+  have haa : (9801 : ℝ) / 10000 ≤ (normTrace M.carrier (M.map g)).re
+      * (normTrace M.carrier (M.map h)).re := by nlinarith [hgre, hhre]
+  nlinarith [hre2, hghre, hbb, haa, hεle, hε]
+
 end NonsoficGroupsExist

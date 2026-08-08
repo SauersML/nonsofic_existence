@@ -2938,6 +2938,12 @@ CountableNonsoficGroupExists
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
 ```
 
+## `NonsoficGroupsExist.normSq_add_le`
+
+```lean
+∀ (a b : ℂ), Complex.normSq (a + b) ≤ 2 * Complex.normSq a + 2 * Complex.normSq b
+```
+
 ## `NonsoficGroupsExist.normSq_normTrace_le_hsNormSq`
 
 ```lean
@@ -2975,6 +2981,19 @@ CountableNonsoficGroupExists
       Complex.normSq (normTrace Y (monomialMatrix Y d σ)) ≤ (1 - hammingDistance Y σ 1) ^ 2
 ```
 
+## `NonsoficGroupsExist.normSq_normTrace_mul_sub`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε) {g h : G},
+  g ∈ F →
+    h ∈ F →
+      Complex.normSq
+          (normTrace M.carrier (M.map (g * h)) -
+            normTrace M.carrier (M.map g) * normTrace M.carrier (M.map h)) ≤
+        2 * ε + 4 * (1 - Complex.normSq (normTrace M.carrier (M.map g))) +
+          4 * (1 - Complex.normSq (normTrace M.carrier (M.map h)))
+```
+
 ## `NonsoficGroupsExist.normTrace`
 
 ```lean
@@ -2986,6 +3005,12 @@ CountableNonsoficGroupExists
 ```lean
 ∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ),
   normTrace (doubleModel Y) (conjDouble A) = ↑(Complex.normSq (normTrace Y A))
+```
+
+## `NonsoficGroupsExist.normTrace_one'`
+
+```lean
+∀ (Y : FiniteModel), 0 < Fintype.card Y.carrier → normTrace Y 1 = 1
 ```
 
 ## `NonsoficGroupsExist.normTrace_permMatrix`
@@ -3014,6 +3039,26 @@ CountableNonsoficGroupExists
 ```lean
 ∀ (Y : FiniteModel) (A : Matrix Y.carrier Y.carrier ℂ) (k : ℕ),
   normTrace (tensorModel Y k) (tensorPow A k) = normTrace Y A ^ k
+```
+
+## `NonsoficGroupsExist.not_both_normSq_normTrace_ge`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
+  0 < ε →
+    ε ≤ 1 / 10000 →
+      ∀ {g h : G},
+        g ∈ F →
+          h ∈ F →
+            g * h ∈ F →
+              1 ∈ F →
+                g * g = 1 →
+                  h * h = 1 →
+                    g ≠ 1 →
+                      h ≠ 1 →
+                        g * h ≠ 1 →
+                          ¬(1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map g)) ∧
+                              1 - 1 / 1000000 ≤ Complex.normSq (normTrace M.carrier (M.map h)))
 ```
 
 ## `NonsoficGroupsExist.not_isHyperlinearNonScalar_of_not_isHyperlinear`
@@ -3149,6 +3194,15 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {z : ℂ}, z ^ 3 = 1 → z ≠ 1 → z.re ≤ 0
+```
+
+## `NonsoficGroupsExist.re_normTrace_le_of_separated`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} (M : HyperlinearModel G F ε),
+  0 < ε →
+    ε ≤ 1 / 10000 →
+      ∀ {g : G}, g ∈ F → 1 ∈ F → g ≠ 1 → (normTrace M.carrier (M.map g)).re ≤ ε / 2 + 1 / 100
 ```
 
 ## `NonsoficGroupsExist.re_pow_four`
