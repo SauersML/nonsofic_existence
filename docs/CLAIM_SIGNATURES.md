@@ -2250,6 +2250,14 @@ Group.FG ↥UniversalRankFour.Ambient ∧
 ∀ (n : ℕ) [inst : NeZero n] (a : ZMod n), {l | l * a = 0}.card = n.gcd a.val
 ```
 
+## `NonsoficGroupsExist.card_inter_fixed_ge`
+
+```lean
+∀ (Y : FiniteModel) (σ τ : Equiv.Perm Y.carrier),
+  ↑{y | σ y = y}.card + ↑{y | τ y = y}.card - ↑(Fintype.card Y.carrier) ≤
+    ↑{y | σ y = y ∧ τ y = y}.card
+```
+
 ## `NonsoficGroupsExist.card_torsion_subgroup`
 
 ```lean
@@ -3277,14 +3285,6 @@ CountableNonsoficGroupExists
                 ComponentRefinement X P Q q y
 ```
 
-## `NonsoficGroupsExist.renormalization_eq_zero_of_commutators`
-
-```lean
-∀ {G : Type u_1} [inst : Group G] {m : ℕ} (β : G → ZMod m),
-  (∀ (g h : G), β (g * h) = β g + β h) →
-    (∀ (g : G), ∃ a b, g = a * b * a⁻¹ * b⁻¹) → ∀ (g : G), β g = 0
-```
-
 ## `NonsoficGroupsExist.renormalization_isHom`
 
 ```lean
@@ -3443,6 +3443,20 @@ CountableNonsoficGroupExists
             (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
               normTrace Y (monomialMatrix Y d 1) = 0 ∧
                 hammingDistance (wreathModel Y m) (wreathPerm Y m e 1) 1 = 1
+```
+
+## `NonsoficGroupsExist.untwist_retains_commutator`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] (Y : FiniteModel) (m : ℕ) [inst_1 : NeZero m]
+  (act : G → Equiv.Perm Y.carrier) (d : G → Y.carrier → ZMod m),
+  (∀ (g h : G), act (g * h) = act g * act h) →
+    (∀ (g h : G) (z : Y.carrier), d (g * h) z = d g ((act h) z) + d h z) →
+      ∀ (a b : G),
+        0 < Fintype.card Y.carrier →
+          hammingDistance (wreathModel Y m)
+              (wreathPerm Y m (d (a * b * a⁻¹ * b⁻¹)) (act (a * b * a⁻¹ * b⁻¹))) 1 ≤
+            2 - fixedDensity Y (act a) - fixedDensity Y (act b)
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
