@@ -3157,6 +3157,21 @@ CountableNonsoficGroupExists
           (∀ (y : Y.carrier), φ n y = 0) → ∀ (y : Y.carrier), σ y = y → φ 1 y = 0
 ```
 
+## `NonsoficGroupsExist.phase_weights_cancel`
+
+```lean
+∀ (m : ℕ),
+  2 ≤ m →
+    ∀ (ζ : ℂ),
+      ζ ^ m = 1 →
+        ζ ≠ 1 →
+          Complex.normSq ζ = 1 →
+            0 < ζ.re →
+              ∑ k ∈ Finset.Ico 1 m,
+                  ↑(1 + if k = 1 ∨ k = m - 1 then 1 / (2 * ζ.re) else 0) * ζ ^ k =
+                0
+```
+
 ## `NonsoficGroupsExist.pow_card_eq_one_of_scalarCommute`
 
 ```lean
@@ -3396,15 +3411,6 @@ CountableNonsoficGroupExists
             (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
               normTrace Y (monomialMatrix Y d 1) = 0 ∧
                 hammingDistance (wreathModel Y m) (wreathPerm Y m e 1) 1 = 1
-```
-
-## `NonsoficGroupsExist.untwist_half_separation_witness`
-
-```lean
-∃ Y d e,
-  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
-    normTrace Y (monomialMatrix Y d 1) = 0 ∧
-      hammingDistance (wreathModel Y 2) (wreathPerm Y 2 e 1) 1 = 1 / 2
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
