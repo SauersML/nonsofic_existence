@@ -1628,13 +1628,17 @@ because every finite-dimensional unitary representation of `K` kills its
 divisible centre, which is `DivisibleInvisible`, not anything proved here.
 -/
 
-/-- **A unitary need not be monomial.**  The two-point Hadamard matrix is
-unitary and has two nonzero entries in a row, which no monomial matrix has.  So
-the monomial group is a proper subgroup of the unitaries, and the phase results
-constrain a restricted class of models. -/
-theorem exists_unitary_not_monomial :
+/-- **A unitary uniformly far from every monomial matrix.**  The two-point
+Hadamard matrix is unitary and sits at normalized Hilbert--Schmidt distance at
+least `1/4` from every monomial matrix -- not merely unequal to them, but
+unapproximable by them.  That is what the scope claim needs, since a hyperlinear
+model is only ever approximate: a model built from such unitaries stays a
+definite distance from the monomial world however small its own defect, so the
+phase results cannot reach it. -/
+theorem exists_unitary_far_from_monomial :
     ∃ (Y : FiniteModel) (U : Matrix Y Y ℂ), U ∈ Matrix.unitaryGroup Y ℂ
-      ∧ ∀ (d : Y → ℂ) (σ : Equiv.Perm Y), U ≠ monomialMatrix Y d σ := by
+      ∧ ∀ (d : Y → ℂ) (σ : Equiv.Perm Y),
+          1 / 4 ≤ hsDistSq Y U (monomialMatrix Y d σ) := by
   classical
   have h2 : Real.sqrt 2 * Real.sqrt 2 = 2 := Real.mul_self_sqrt (by norm_num)
   have hs : Real.sqrt 2 ≠ 0 := by
@@ -1672,20 +1676,45 @@ theorem exists_unitary_not_monomial :
     · simp only [Fintype.sum_bool, Matrix.star_apply]
       norm_num [hconj]
       linear_combination 2 * hcc
-  · intro d σ hcon
-    have h1 := congrFun (congrFun hcon false) false
-    have h3 := congrFun (congrFun hcon false) true
-    rw [monomialMatrix_apply] at h1 h3
-    have hzero : c = 0 := by
-      by_cases hsig : σ false = false
-      · rw [hsig] at h3
-        simpa using h3
-      · have hsig' : σ false = true := by
-          cases hb : σ false
-          · exact absurd hb hsig
-          · rfl
-        rw [hsig'] at h1
-        simpa using h1
-    exact hcne hzero
+  · intro d σ
+    have hnormc : Complex.normSq c = 1 / 2 := by
+      rw [hc, Complex.normSq_ofReal]
+      field_simp
+      linarith [h2]
+    set U : Matrix Bool Bool ℂ :=
+      fun i j ↦ if i = true ∧ j = true then -c else c with hUdef
+    set M : Matrix Bool Bool ℂ :=
+      monomialMatrix (⟨Bool, inferInstance, inferInstance⟩ : FiniteModel) d σ
+      with hMdef
+    set k : Bool := !(σ false) with hk
+    have hkne : σ false ≠ k := by
+      rw [hk]
+      cases hb : σ false <;> simp
+    have hentry : Complex.normSq (U false k - M false k) = 1 / 2 := by
+      have hM : M false k = 0 := by
+        rw [hMdef, monomialMatrix_apply, if_neg hkne]
+      have hU' : U false k = c := by
+        rw [hUdef]; simp
+      rw [hM, hU', sub_zero, hnormc]
+    have hinner : Complex.normSq (U false k - M false k)
+        ≤ ∑ j : Bool, Complex.normSq (U false j - M false j) :=
+      Finset.single_le_sum
+        (f := fun j : Bool ↦ Complex.normSq (U false j - M false j))
+        (fun j _ ↦ Complex.normSq_nonneg _) (Finset.mem_univ k)
+    have houter : ∑ j : Bool, Complex.normSq (U false j - M false j)
+        ≤ ∑ i : Bool, ∑ j : Bool, Complex.normSq (U i j - M i j) :=
+      Finset.single_le_sum
+        (f := fun i : Bool ↦ ∑ j : Bool, Complex.normSq (U i j - M i j))
+        (fun i _ ↦ Finset.sum_nonneg fun j _ ↦ Complex.normSq_nonneg _)
+        (Finset.mem_univ false)
+    have hsum : (1 : ℝ) / 2 ≤ ∑ i : Bool, ∑ j : Bool,
+        Complex.normSq (U i j - M i j) := by
+      rw [← hentry]
+      exact le_trans hinner houter
+    show (1 : ℝ) / 4 ≤ (∑ i : Bool, ∑ j : Bool,
+      Complex.normSq (U i j - M i j)) / (Fintype.card Bool : ℝ)
+    rw [show ((Fintype.card Bool : ℕ) : ℝ) = 2 by norm_num,
+      le_div_iff₀ (by norm_num : (0:ℝ) < 2)]
+    linarith [hsum]
 
 end NonsoficGroupsExist
