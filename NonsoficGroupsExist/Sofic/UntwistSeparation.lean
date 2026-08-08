@@ -1954,4 +1954,61 @@ theorem untwist_separated_of_phase_trivial (Y : FiniteModel) (m : ℕ) [NeZero m
   rw [coprime_untwist_hamming Y m e σ he hY]
   linarith [hF]
 
+
+/-! ### The quantitative form: phases confined to a half-plane
+
+The trivial-phase hypothesis is more than the argument needs.  What it used is
+only that the phases on the fixed points cannot cancel, and that is a condition
+on their real parts.  If every phase at a fixed point has real part at least
+`c > 0` -- equivalently, the phases lie in the open arc of half-angle `< π/2`
+around `1` -- then
+
+    Re τ(A(d,σ))  ≥  c · F_σ ,
+
+so hyperlinear separation gives `F_σ ≤ ε / c` outright.  Trivial phases are the
+case `c = 1`.
+
+This is the exact boundary of the positive direction.  Once the phases reach the
+imaginary axis, cancellation begins and the trace stops seeing `F` at all; the
+`±i` witness sits precisely there, with `c = 0`, trace zero and `F = 1`.
+-/
+
+/-- **Phases confined to a half-plane make the trace see the fixed point
+density.**  With `c = 1` this is `fixedDensity_le_of_trace_le`; the `±i` witness
+shows the conclusion fails at `c = 0`. -/
+theorem fixedDensity_le_of_re_pos (Y : FiniteModel) (d : Y → ℂ)
+    (σ : Equiv.Perm Y) {c : ℝ} (hc : 0 < c)
+    (hd : ∀ y, σ y = y → c ≤ (d y).re) {ε : ℝ}
+    (htr : (normTrace Y (monomialMatrix Y d σ)).re ≤ ε)
+    (hY : 0 < Fintype.card Y) :
+    fixedDensity Y σ ≤ ε / c := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  -- the trace is the sum of the phases over the fixed points
+  have htrace : Matrix.trace (monomialMatrix Y d σ)
+      = ∑ y ∈ univ.filter fun y : Y ↦ σ y = y, d y := by
+    rw [Matrix.trace]
+    simp only [Matrix.diag_apply, monomialMatrix_apply]
+    rw [Finset.sum_filter]
+  have hre : (normTrace Y (monomialMatrix Y d σ)).re
+      = (∑ y ∈ univ.filter fun y : Y ↦ σ y = y, (d y).re) / Fintype.card Y := by
+    rw [normTrace, htrace, Complex.div_re]
+    simp only [Complex.natCast_re, Complex.natCast_im, Complex.normSq_natCast,
+      Complex.re_sum]
+    field_simp
+    ring
+  -- each fixed point contributes at least `c`
+  have hlow : (c : ℝ) * ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+      ≤ ∑ y ∈ univ.filter fun y : Y ↦ σ y = y, (d y).re := by
+    calc (c : ℝ) * ((univ.filter fun y : Y ↦ σ y = y).card : ℝ)
+        = ∑ _y ∈ univ.filter fun y : Y ↦ σ y = y, c := by
+          rw [Finset.sum_const, nsmul_eq_mul]; ring
+      _ ≤ ∑ y ∈ univ.filter fun y : Y ↦ σ y = y, (d y).re := by
+          refine Finset.sum_le_sum fun y hy ↦ ?_
+          rw [Finset.mem_filter] at hy
+          exact hd y hy.2
+  rw [hre, div_le_iff₀ hYR] at htr
+  rw [fixedDensity, div_le_div_iff₀ hYR hc]
+  linarith [hlow, htr]
+
 end NonsoficGroupsExist

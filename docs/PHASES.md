@@ -544,6 +544,21 @@ never projective in any useful sense — but it is the one place in this
 development where the implication runs in the direction Question 3.4 asks
 about.
 
+**The exact boundary.**  The trivial-phase hypothesis is more than the argument
+needs.  What it used is only that the phases at fixed points cannot cancel — a
+condition on their real parts.  If every such phase has real part at least
+`c > 0` (the phases lie in the open arc of half-angle `< π/2` about `1`), then
+`Re τ ≥ c · F_σ`, so hyperlinear separation gives
+
+    F_σ ≤ ε / c
+
+outright (`fixedDensity_le_of_re_pos`).  Trivial phases are `c = 1`.
+
+Once the phases reach the imaginary axis, cancellation begins and the trace
+stops seeing `F` at all: the `±i` witness sits precisely there, with `c = 0`,
+trace zero and `F = 1`.  So the positive direction holds exactly as far as the
+phases stay off the imaginary axis, and fails immediately after.
+
 So a group could be hyperlinear through models nowhere near monomial, and none
 of these results would apply.  What justifies the restriction in the one case
 where it is justified is external — Thom's microstates are monomial because
