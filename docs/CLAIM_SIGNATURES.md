@@ -2311,16 +2311,6 @@ Group.FG ↥UniversalRankFour.Ambient ∧
   (∀ γ ∈ Γ, t * γ * t⁻¹ ∈ Γ) → ∀ q ∈ Subgroup.map φ Γ, (φ t)⁻¹ * q * φ t ∈ Subgroup.map φ Γ
 ```
 
-## `NonsoficGroupsExist.coprime_untwist_hamming`
-
-```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
-  (σ : Equiv.Perm Y.carrier),
-  (∀ (y : Y.carrier), σ y = y → d y = 0) →
-    0 < Fintype.card Y.carrier →
-      hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 = 1 - fixedDensity Y σ
-```
-
 ## `NonsoficGroupsExist.correctedImplementer_defect`
 
 ```lean
@@ -3377,16 +3367,31 @@ CountableNonsoficGroupExists
         HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
 ```
 
-## `NonsoficGroupsExist.untwist_separation_undetermined`
+## `NonsoficGroupsExist.untwist_full_separation_witness`
 
 ```lean
-∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m],
-  2 ≤ m →
-    ∀ (σ : Equiv.Perm Y.carrier),
-      0 < Fintype.card Y.carrier →
-        hammingDistance (wreathModel Y m) (wreathPerm Y m (fun x => 1) σ) 1 = 1 ∧
-          hammingDistance (wreathModel Y m) (wreathPerm Y m (fun x => 0) σ) 1 =
-            1 - fixedDensity Y σ
+∃ Y d e,
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
+    normTrace Y (monomialMatrix Y d 1) = 0 ∧
+      hammingDistance (wreathModel Y 4) (wreathPerm Y 4 e 1) 1 = 1
+```
+
+## `NonsoficGroupsExist.untwist_half_separation_witness`
+
+```lean
+∃ Y d e,
+  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
+    normTrace Y (monomialMatrix Y d 1) = 0 ∧
+      hammingDistance (wreathModel Y 2) (wreathPerm Y 2 e 1) 1 = 1 / 2
+```
+
+## `NonsoficGroupsExist.untwist_hamming_eq_one_of_phase_ne_zero`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d : Y.carrier → ZMod m)
+  (σ : Equiv.Perm Y.carrier),
+  (∀ (y : Y.carrier), σ y = y → d y ≠ 0) →
+    0 < Fintype.card Y.carrier → hammingDistance (wreathModel Y m) (wreathPerm Y m d σ) 1 = 1
 ```
 
 ## `NonsoficGroupsExist.window_defect_eq`
