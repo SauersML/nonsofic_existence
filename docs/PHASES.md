@@ -713,6 +713,24 @@ the charts take their values.  The two hypotheses are isolated as hypotheses
 (`OrbitChartData.comap`) is a pullback.  The reading is the audit's: if the
 coordinate action admits no chart system, neither does the lamp action.
 
+## 6g. The root: centres
+
+`UntwistSeparation.lean`.  Everything above about phases traces back to one
+contrast between the two groups the two notions approximate.
+
+`U(Y)` has a central element at **maximal** distance from the identity: `−1` is
+scalar, commutes with every unitary, and `hsDistSq(−1, 1) = 4`
+(`exists_central_unitary_separated`).  `Sym(Y)` has no nontrivial central
+element at all once `|Y| ≥ 3` — a permutation commuting with every other is the
+identity, at Hamming distance `0` (`eq_one_of_central_perm`; Mathlib has no
+`Perm` centre lemma, so this is the transposition argument: if `σx = y ≠ x`,
+compare `σ` with `swap y z` at `x` for a third point `z`).
+
+So the unitary group can separate a central element and the symmetric group
+cannot.  That is why a hyperlinear model may place a central group element at a
+scalar — and be maximally separated there — while a sofic model has nowhere to
+put it.  Every phase phenomenon in §§1–6f is downstream of this one asymmetry.
+
 ## Where this ends
 
 No resolution of Question 3.4, and no claim toward one.  What follows is the

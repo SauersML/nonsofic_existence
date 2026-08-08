@@ -2060,4 +2060,76 @@ theorem hyperlinear_forces_sofic_iff_phases_off_axis :
         = 2 from rfl]
     norm_num
 
+
+/-! ## The root of the difference: centres
+
+Everything in this development about phases traces back to one contrast between
+the two groups the two notions approximate, and it is worth stating on its own.
+
+`U(Y)` has a central element at *maximal* distance from the identity: `-1` is
+scalar, commutes with every unitary, and `hsDistSq(-1, 1) = 4`.  `Sym(Y)` has no
+nontrivial central element at all once `|Y| ≥ 3`, so every central permutation
+is the identity and sits at Hamming distance `0`.
+
+So the unitary group can separate a central element and the symmetric group
+cannot.  That is why a hyperlinear model may place a central group element at a
+scalar -- and be maximally separated there -- while a sofic model has nowhere to
+put it.  Every phase phenomenon above is a consequence of this one asymmetry.
+-/
+
+/-- **The unitary group has a central element at maximal distance from `1`.** -/
+theorem exists_central_unitary_separated (Y : FiniteModel) (hY : 0 < Fintype.card Y) :
+    ∃ U : Matrix Y Y ℂ, U ∈ Matrix.unitaryGroup Y ℂ
+      ∧ (∀ V : Matrix Y Y ℂ, U * V = V * U)
+      ∧ hsDistSq Y U 1 = 4 := by
+  classical
+  have hYR : (0 : ℝ) < Fintype.card Y := by exact_mod_cast hY
+  refine ⟨-1, ?_, ?_, ?_⟩
+  · rw [Matrix.mem_unitaryGroup_iff, star_neg, star_one, neg_mul_neg, one_mul]
+  · intro V
+    rw [neg_mul, mul_neg, one_mul, mul_one]
+  · rw [hsDistSq]
+    have hentry : ∀ i j : Y, Complex.normSq ((-1 : Matrix Y Y ℂ) i j - (1 : Matrix Y Y ℂ) i j)
+        = if i = j then 4 else 0 := by
+      intro i j
+      by_cases h : i = j <;> simp [Matrix.one_apply, h, Complex.normSq_apply]
+      · norm_num
+    have hrow : ∀ i : Y, (∑ j : Y, (if i = j then (4 : ℝ) else 0)) = 4 := by
+      intro i; simp
+    rw [Finset.sum_congr rfl (fun i _ ↦
+      (Finset.sum_congr rfl (fun j _ ↦ hentry i j)).trans (hrow i))]
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    field_simp
+
+/-- **The symmetric group has none.**  A permutation commuting with every other
+is the identity: if `σ x = y ≠ x`, pick a third point `z` and compare `σ` with
+`swap y z` at `x`. -/
+theorem eq_one_of_central_perm (Y : FiniteModel) (h3 : 3 ≤ Fintype.card Y)
+    (σ : Equiv.Perm Y) (hσ : ∀ τ : Equiv.Perm Y, σ * τ = τ * σ) : σ = 1 := by
+  classical
+  ext x
+  by_contra hx
+  have hxy : σ x ≠ x := hx
+  -- a point outside `{x, σ x}`
+  have hlt : ({x, σ x} : Finset Y).card < Fintype.card Y := by
+    have : ({x, σ x} : Finset Y).card ≤ 2 := by
+      apply (Finset.card_insert_le _ _).trans
+      simp
+    omega
+  obtain ⟨z, hz⟩ : ∃ z : Y, z ∉ ({x, σ x} : Finset Y) := by
+    by_contra hcon
+    simp only [not_exists, not_not] at hcon
+    have : (Finset.univ : Finset Y) ⊆ ({x, σ x} : Finset Y) := fun w _ ↦ hcon w
+    have := Finset.card_le_card this
+    rw [Finset.card_univ] at this
+    omega
+  simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hz
+  obtain ⟨hzx, hzy⟩ := hz
+  -- compare at `x`
+  have hcomm := congrArg (fun f : Equiv.Perm Y ↦ f x) (hσ (Equiv.swap (σ x) z))
+  simp only [Equiv.Perm.mul_apply] at hcomm
+  rw [Equiv.swap_apply_of_ne_of_ne (Ne.symm hxy) (Ne.symm hzx),
+    Equiv.swap_apply_left] at hcomm
+  exact hzy hcomm.symm
+
 end NonsoficGroupsExist
