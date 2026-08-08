@@ -257,4 +257,35 @@ theorem hsDistSq_max_of_equal_perm (Y : FiniteModel) (hY : 0 < Fintype.card Y)
     norm_num
   · exact hammingDistance_self Y σ
 
+/-- **A block-scalar cocycle costs the density of its nontrivial blocks.**  If
+the phase difference is constant on each block of a partition, the untwisted
+permutations disagree exactly on the blocks where that constant is nonzero.
+The global scalar of `hammingDistance_wreathPerm_const` is the one-block case,
+costing everything; a cocycle that is trivial on most blocks costs little.
+
+This is the form the criterion takes on a projective model assembled from a
+family of characters: the multiplicative defect after untwisting is the
+*proportion of characters that see the cocycle*, so a construction survives
+untwisting only if its cocycle is invisible to almost all of them. -/
+theorem hammingDistance_wreathPerm_blockConst (Y : FiniteModel) (m : ℕ)
+    [NeZero m] {L : Type*} (β : Y → L) (c : L → ZMod m)
+    (d : Y → ZMod m) (σ : Equiv.Perm Y) :
+    hammingDistance (wreathModel Y m) (wreathPerm Y m d σ)
+        (wreathPerm Y m (fun y ↦ d y + c (β y)) σ)
+      = ((Finset.univ.filter fun y : Y ↦ c (β y) ≠ 0).card : ℝ)
+        / Fintype.card Y := by
+  classical
+  rw [hammingDistance_wreathPerm]
+  have hset : (Finset.univ.filter fun y : Y ↦
+      ¬ (σ y = σ y ∧ d y = d y + c (β y)))
+      = Finset.univ.filter fun y : Y ↦ c (β y) ≠ 0 := by
+    ext y
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, ne_eq]
+    constructor
+    · intro h hz
+      exact h (by rw [hz, add_zero])
+    · intro hne heq
+      exact hne (by linear_combination -heq)
+  rw [hset]
+
 end NonsoficGroupsExist

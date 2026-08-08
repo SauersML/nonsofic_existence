@@ -2622,6 +2622,16 @@ CountableNonsoficGroupExists
         1 - (1 - hammingDistance Y p q) ^ k
 ```
 
+## `NonsoficGroupsExist.hammingDistance_wreathPerm_blockConst`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] {L : Type u_1} (β : Y.carrier → L)
+  (c : L → ZMod m) (d : Y.carrier → ZMod m) (σ : Equiv.Perm Y.carrier),
+  hammingDistance (wreathModel Y m) (wreathPerm Y m d σ)
+      (wreathPerm Y m (fun y => d y + c (β y)) σ) =
+    ↑{y | c (β y) ≠ 0}.card / ↑(Fintype.card Y.carrier)
+```
+
 ## `NonsoficGroupsExist.hammingLength`
 
 ```lean
@@ -3005,12 +3015,6 @@ CountableNonsoficGroupExists
   U ∈ Matrix.unitaryGroup Y.carrier ℂ →
     V ∈ Matrix.unitaryGroup Y.carrier ℂ →
       ∀ {c : ℂ}, U * V = c • (V * U) → c ^ Fintype.card Y.carrier = 1
-```
-
-## `NonsoficGroupsExist.pow_val_add_one`
-
-```lean
-∀ {q : ℕ}, 1 < q → ∀ {ζ : ℂ}, ζ ^ q = 1 → ∀ (i : ZMod q), ζ ^ (i + 1).val = ζ * ζ ^ i.val
 ```
 
 ## `NonsoficGroupsExist.powerPerm`
