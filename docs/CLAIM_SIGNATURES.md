@@ -2973,10 +2973,16 @@ CountableNonsoficGroupExists
 ∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
 ```
 
-## `NonsoficGroupsExist.re_pow_four`
+## `NonsoficGroupsExist.re_nonpos_of_pow_four_eq_one`
 
 ```lean
-∀ (z : ℂ), Complex.normSq z = 1 → (z ^ 4).re = 8 * z.re ^ 4 - 8 * z.re ^ 2 + 1
+∀ {z : ℂ}, z ^ 4 = 1 → z ≠ 1 → z.re ≤ 0
+```
+
+## `NonsoficGroupsExist.re_nonpos_of_pow_three_eq_one`
+
+```lean
+∀ {z : ℂ}, z ^ 3 = 1 → z ≠ 1 → z.re ≤ 0
 ```
 
 ## `NonsoficGroupsExist.re_pow_max_ge`
@@ -2985,16 +2991,10 @@ CountableNonsoficGroupExists
 ∀ (z : ℂ), Complex.normSq z = 1 → 3 / 10 ≤ max (max z.re (z ^ 2).re) (max (z ^ 3).re (z ^ 4).re)
 ```
 
-## `NonsoficGroupsExist.re_pow_three`
+## `NonsoficGroupsExist.re_pow_max_sharp`
 
 ```lean
-∀ (z : ℂ), Complex.normSq z = 1 → (z ^ 3).re = 4 * z.re ^ 3 - 3 * z.re
-```
-
-## `NonsoficGroupsExist.re_pow_two`
-
-```lean
-∀ (z : ℂ), Complex.normSq z = 1 → (z ^ 2).re = 2 * z.re ^ 2 - 1
+∃ z, Complex.normSq z = 1 ∧ max (max z.re (z ^ 2).re) (max (z ^ 3).re (z ^ 4).re) = (√5 - 1) / 4
 ```
 
 ## `NonsoficGroupsExist.refineComponent`
