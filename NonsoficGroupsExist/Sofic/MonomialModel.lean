@@ -301,4 +301,95 @@ theorem hammingDistance_wreathPerm_one (Y : FiniteModel) (m : ℕ) [NeZero m]
   rw [← wreathPerm_one Y m, hammingDistance_wreathPerm]
   rfl
 
+/-! ## Untwisting as a criterion for soficity -/
+
+/-- Untwisting is a homomorphism: the monomial group law is
+`(d, σ) · (e, τ) = (y ↦ e y + d (τ y), σ τ)`. -/
+theorem wreathPerm_mul (Y : FiniteModel) (m : ℕ) [NeZero m]
+    (d e : Y → ZMod m) (σ τ : Equiv.Perm Y) :
+    wreathPerm Y m (fun y ↦ e y + d (τ y)) (σ * τ)
+      = wreathPerm Y m d σ * wreathPerm Y m e τ := by
+  ext p
+  · simp [Equiv.Perm.mul_apply]
+  · show p.2 + (e p.1 + d (τ p.1)) = p.2 + e p.1 + d (τ p.1)
+    rw [add_assoc]
+
+/-- A monomial model whose multiplicative defect is measured *combinatorially*
+-- permutation and phase must agree outside a set of density `ε` -- and whose
+separation is scarcity of pairs agreeing in both.  These are exactly the two
+quantities `hammingDistance_wreathPerm` computes. -/
+structure MonomialSoficData (G : Type*) [Group G] (F : Finset G) (ε : ℝ)
+    (m : ℕ) where
+  carrier : FiniteModel
+  nonempty : 0 < Fintype.card carrier
+  perm : G → Equiv.Perm carrier
+  phase : G → carrier → ZMod m
+  multiplicative : ∀ g ∈ F, ∀ h ∈ F,
+    ((Finset.univ.filter fun y : carrier ↦
+        ¬ (perm (g * h) y = (perm g * perm h) y ∧
+           phase (g * h) y = phase h y + phase g (perm h y))).card : ℝ)
+      / Fintype.card carrier ≤ ε
+  separated : ∀ g ∈ F, ∀ h ∈ F, g ≠ h →
+    ((Finset.univ.filter fun y : carrier ↦
+        perm g y = perm h y ∧ phase g y = phase h y).card : ℝ)
+      / Fintype.card carrier ≤ ε
+
+/-- A closed inhabitant, so `MonomialSoficData` is not a certificate nothing
+satisfies: the one-point model of the trivial group with a single phase. -/
+noncomputable def trivialMonomialSoficData (F : Finset PUnit) :
+    MonomialSoficData PUnit F 0 1 where
+  carrier := ⟨PUnit, inferInstance, inferInstance⟩
+  nonempty := by simp
+  perm := fun _ ↦ 1
+  phase := fun _ _ ↦ 0
+  multiplicative := by
+    intro g _ h _
+    simp
+  separated := by
+    intro g _ h _ hne
+    exact absurd (Subsingleton.elim g h) hne
+
+/-- **The untwisting criterion.**  A monomial model whose data are
+combinatorially multiplicative and combinatorially separated *is* a permutation
+model, on `m` times as many points.  This is the positive half of the
+untwisting story: the torus can always be removed, and this is exactly what a
+model must satisfy for the removal to preserve both laws. -/
+theorem soficModel_of_monomial {G : Type*} [Group G] {F : Finset G} {ε : ℝ}
+    {m : ℕ} [NeZero m] (D : MonomialSoficData G F ε m) :
+    Nonempty (SoficModel G F ε) := by
+  classical
+  refine ⟨{
+    carrier := wreathModel D.carrier m
+    nonempty := ?_
+    map := fun g ↦ wreathPerm D.carrier m (D.phase g) (D.perm g)
+    multiplicative := ?_
+    separated := ?_ }⟩
+  · show 0 < Fintype.card (D.carrier × ZMod m)
+    rw [Fintype.card_prod, ZMod.card]
+    exact Nat.mul_pos D.nonempty (Nat.pos_of_ne_zero (NeZero.ne m))
+  · intro g hg h hh
+    have hmul : wreathPerm D.carrier m (D.phase g) (D.perm g)
+        * wreathPerm D.carrier m (D.phase h) (D.perm h)
+        = wreathPerm D.carrier m
+            (fun y ↦ D.phase h y + D.phase g (D.perm h y))
+            (D.perm g * D.perm h) := (wreathPerm_mul _ _ _ _ _ _).symm
+    rw [hmul, hammingDistance_wreathPerm]
+    exact D.multiplicative g hg h hh
+  · intro g hg h hh hne
+    rw [hammingDistance_wreathPerm]
+    have hsplit : (Finset.univ.filter fun y : D.carrier ↦
+          ¬ (D.perm g y = D.perm h y ∧ D.phase g y = D.phase h y)).card
+        + (Finset.univ.filter fun y : D.carrier ↦
+          D.perm g y = D.perm h y ∧ D.phase g y = D.phase h y).card
+        = Fintype.card D.carrier := by
+      rw [add_comm, Finset.card_filter_add_card_filter_not, Finset.card_univ]
+    have hc : (0 : ℝ) < (Fintype.card D.carrier : ℝ) := by
+      exact_mod_cast D.nonempty
+    have hsep := D.separated g hg h hh hne
+    rw [div_le_iff₀ hc] at hsep
+    rw [le_div_iff₀ hc]
+    have hcast := congrArg (fun n : ℕ ↦ (n : ℝ)) hsplit
+    push_cast at hcast
+    linarith
+
 end NonsoficGroupsExist

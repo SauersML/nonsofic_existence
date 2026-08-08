@@ -1778,6 +1778,12 @@ AsymptoticScale → (ℕ → FiniteMultiGraph) → Prop
 ∀ {R : Type u_1} [inst : Ring R], (MatrixDiagonalization.stableUnits R).Normal
 ```
 
+## `NonsoficGroupsExist.MonomialSoficData`
+
+```lean
+(G : Type u_1) → [Group G] → Finset G → ℝ → ℕ → Type (max 1 u_1)
+```
+
 ## `NonsoficGroupsExist.NonScalarModel`
 
 ```lean
@@ -3295,6 +3301,13 @@ CountableNonsoficGroupExists
                 ComponentRefinement X P Q q y
 ```
 
+## `NonsoficGroupsExist.soficModel_of_monomial`
+
+```lean
+∀ {G : Type u_1} [inst : Group G] {F : Finset G} {ε : ℝ} {m : ℕ} [NeZero m]
+  (D : MonomialSoficData G F ε m), Nonempty (SoficModel G F ε)
+```
+
 ## `NonsoficGroupsExist.sq_sum_le_card_mul_sum_sq`
 
 ```lean
@@ -3372,6 +3385,12 @@ CountableNonsoficGroupExists
   (tensorPow A k).trace = A.trace ^ k
 ```
 
+## `NonsoficGroupsExist.trivialMonomialSoficData`
+
+```lean
+(F : Finset PUnit.{u_1 + 1}) → MonomialSoficData PUnit.{u_1 + 1} F 0 1
+```
+
 ## `NonsoficGroupsExist.trivialNonScalarModel`
 
 ```lean
@@ -3433,6 +3452,14 @@ CountableNonsoficGroupExists
 (Y : FiniteModel) →
   (m : ℕ) →
     [NeZero m] → (Y.carrier → ZMod m) → Equiv.Perm Y.carrier → Equiv.Perm (Y.carrier × ZMod m)
+```
+
+## `NonsoficGroupsExist.wreathPerm_mul`
+
+```lean
+∀ (Y : FiniteModel) (m : ℕ) [inst : NeZero m] (d e : Y.carrier → ZMod m)
+  (σ τ : Equiv.Perm Y.carrier),
+  wreathPerm Y m (fun y => e y + d (τ y)) (σ * τ) = wreathPerm Y m d σ * wreathPerm Y m e τ
 ```
 
 ## `NonsoficGroupsExist.wreathPerm_one`
