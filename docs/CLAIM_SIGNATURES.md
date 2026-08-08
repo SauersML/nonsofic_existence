@@ -3384,13 +3384,18 @@ CountableNonsoficGroupExists
         HasKazhdanPropertyT ↥(UniversalLeavittEL m) ∧ ¬IsSofic ↥(UniversalLeavittEL m)
 ```
 
-## `NonsoficGroupsExist.untwist_full_separation_witness`
+## `NonsoficGroupsExist.untwist_full_separation_witness_even`
 
 ```lean
-∃ Y d e,
-  (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
-    normTrace Y (monomialMatrix Y d 1) = 0 ∧
-      hammingDistance (wreathModel Y 4) (wreathPerm Y 4 e 1) 1 = 1
+∀ (m : ℕ) [inst : NeZero m],
+  4 ≤ m →
+    2 ∣ m →
+      ∀ (ζ : ℂ),
+        Complex.normSq ζ = 1 →
+          ∃ Y d e,
+            (∀ (i : Y.carrier), Complex.normSq (d i) = 1) ∧
+              normTrace Y (monomialMatrix Y d 1) = 0 ∧
+                hammingDistance (wreathModel Y m) (wreathPerm Y m e 1) 1 = 1
 ```
 
 ## `NonsoficGroupsExist.untwist_half_separation_witness`
