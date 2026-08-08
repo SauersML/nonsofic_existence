@@ -384,4 +384,48 @@ theorem isHyperlinearWeak_trivial_one :
   isHyperlinearWeak_of_isHyperlinear (by norm_num)
     (isHyperlinear_of_finite (PUnit : Type))
 
+/-! ## The reduction discharges the countability hypothesis
+
+`exists_hyperlinearApproximation_of_isHyperlinear` carries a `[Countable G]`
+hypothesis, needed to exhaust the group by finite test sets.  The reduction makes
+that hypothesis free of charge: a finitely generated group is countable, being a
+surjective image of a free group on finitely many generators, so a counterexample
+may be taken countable.
+
+That matters for citing the ultraproduct picture at all.  Radulescu's
+characterization of hyperlinearity is stated for countable groups, and without
+the reduction one would have to say the general case is not covered by it.
+-/
+
+/-- A finitely generated group is countable. -/
+theorem countable_of_fg (h : Group.FG G) : Countable G := by
+  classical
+  obtain ⟨S, hS⟩ := Group.fg_def.mp h
+  haveI : Finite ↥(S : Set G) := S.finite_toSet.to_subtype
+  haveI : Countable (FreeGroup ↥(S : Set G)) :=
+    inferInstanceAs (Countable (Quot <| @FreeGroup.Red.Step ↥(S : Set G)))
+  have hsurj : Function.Surjective (FreeGroup.lift (fun x : ↥(S : Set G) ↦ (x : G))) := by
+    intro g
+    have hsub : Subgroup.closure (S : Set G)
+        ≤ (FreeGroup.lift (fun x : ↥(S : Set G) ↦ (x : G))).range := by
+      rw [Subgroup.closure_le]
+      intro x hx
+      exact ⟨FreeGroup.of ⟨x, hx⟩, by simp⟩
+    exact hsub (by rw [hS]; trivial)
+  exact hsurj.countable
+
+/-- **A counterexample may be taken countable**, so the countability hypothesis
+of the ultraproduct picture costs nothing. -/
+theorem exists_counterexample_iff_exists_countable :
+    (∃ (H : Type) (_ : Group H), IsHyperlinear H ∧ ¬ IsSofic H)
+      ↔ (∃ (H : Type) (_ : Group H), Countable H ∧ IsHyperlinear H
+          ∧ ¬ IsSofic H) := by
+  rw [exists_counterexample_iff_exists_fg]
+  constructor
+  · rintro ⟨H, hH, hfg, hhyp, hns⟩
+    exact ⟨H, hH, countable_of_fg hfg, hhyp, hns⟩
+  · rintro ⟨H, hH, hc, hhyp, hns⟩
+    rw [← exists_counterexample_iff_exists_fg]
+    exact ⟨H, hH, hhyp, hns⟩
+
 end NonsoficGroupsExist

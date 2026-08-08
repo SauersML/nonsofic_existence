@@ -2442,6 +2442,12 @@ CountableNonsoficGroupExists
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
 ```
 
+## `NonsoficGroupsExist.exists_counterexample_iff_exists_countable`
+
+```lean
+(∃ H x, IsHyperlinear H ∧ ¬IsSofic H) ↔ ∃ H x, Countable H ∧ IsHyperlinear H ∧ ¬IsSofic H
+```
+
 ## `NonsoficGroupsExist.exists_counterexample_iff_exists_fg_not_residuallyFinite`
 
 ```lean
@@ -2890,12 +2896,6 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ {G : Type} [inst : Group G] {δ : ℝ}, δ < 2 → IsHyperlinear G → IsHyperlinearWeak G δ
-```
-
-## `NonsoficGroupsExist.isHyperlinear_iff_productRestricted`
-
-```lean
-∀ (G : Type u_1) [inst : Group G], IsHyperlinear G ↔ IsHyperlinearProductRestricted G
 ```
 
 ## `NonsoficGroupsExist.isHyperlinear_of_injective`
