@@ -2635,6 +2635,17 @@ CountableNonsoficGroupExists
   IsLEF (PresentedGroup ↑rels) → ∀ (g : PresentedGroup ↑rels), g ≠ 1 → ∃ n φ, φ g ≠ 1
 ```
 
+## `NonsoficGroupsExist.fixedDensity_le_of_re_pos`
+
+```lean
+∀ (Y : FiniteModel) (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier) {c : ℝ},
+  0 < c →
+    (∀ (y : Y.carrier), σ y = y → c ≤ (d y).re) →
+      ∀ {ε : ℝ},
+        (normTrace Y (monomialMatrix Y d σ)).re ≤ ε →
+          0 < Fintype.card Y.carrier → fixedDensity Y σ ≤ ε / c
+```
+
 ## `NonsoficGroupsExist.fixedSet`
 
 ```lean
@@ -3051,14 +3062,6 @@ CountableNonsoficGroupExists
   ¬IsSofic G →
     (∀ (i : ι), 0 < Fintype.card (X i).carrier) →
       ∀ (f : G →* UniversalSofic 𝒰 X), ¬Function.Injective ⇑f
-```
-
-## `NonsoficGroupsExist.normTrace_monomial_of_phase_trivial`
-
-```lean
-∀ (Y : FiniteModel) (d : Y.carrier → ℂ) (σ : Equiv.Perm Y.carrier),
-  (∀ (y : Y.carrier), σ y = y → d y = 1) →
-    normTrace Y (monomialMatrix Y d σ) = ↑(fixedDensity Y σ)
 ```
 
 ## `NonsoficGroupsExist.normTrace_permMatrix`
