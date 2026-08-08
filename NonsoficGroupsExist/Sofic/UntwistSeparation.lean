@@ -1609,4 +1609,83 @@ theorem card_fixed_commutator_constraint_tight :
     rw [hfix, htr, Finset.card_univ]
     norm_num
 
+
+/-! ## The scope of all of this: monomial models only
+
+Everything in this file, and in `PhaseCorrection`, `ScalarClass`,
+`RationalCharacter` and `NoRounding`, is about *monomial* models -- permutation
+matrices carrying diagonal phases.  That is the right class for the sofic side,
+since `isSofic_iff_monomial` shows soficity is equivalent to monomial
+approximability.  It is **not** the right class for the hyperlinear side:
+hyperlinearity supplies arbitrary unitaries, and the monomial matrices are a
+proper subgroup of `U(n)`.
+
+The witness below makes that concrete rather than leaving it as a caveat.  So a
+group could be hyperlinear through models that are nowhere near monomial, and
+none of the phase results would apply to it.  What justifies the restriction in
+the one case where it is justified is external: Thom's microstates are monomial
+because every finite-dimensional unitary representation of `K` kills its
+divisible centre, which is `DivisibleInvisible`, not anything proved here.
+-/
+
+/-- **A unitary need not be monomial.**  The two-point Hadamard matrix is
+unitary and has two nonzero entries in a row, which no monomial matrix has.  So
+the monomial group is a proper subgroup of the unitaries, and the phase results
+constrain a restricted class of models. -/
+theorem exists_unitary_not_monomial :
+    ∃ (Y : FiniteModel) (U : Matrix Y Y ℂ), U ∈ Matrix.unitaryGroup Y ℂ
+      ∧ ∀ (d : Y → ℂ) (σ : Equiv.Perm Y), U ≠ monomialMatrix Y d σ := by
+  classical
+  have h2 : Real.sqrt 2 * Real.sqrt 2 = 2 := Real.mul_self_sqrt (by norm_num)
+  have hs : Real.sqrt 2 ≠ 0 := by
+    intro h
+    rw [h] at h2
+    norm_num at h2
+  set c : ℂ := (((Real.sqrt 2)⁻¹ : ℝ) : ℂ) with hc
+  have hcc : c ^ 2 = 1 / 2 := by
+    rw [hc, ← Complex.ofReal_pow]
+    have hr : ((Real.sqrt 2)⁻¹ : ℝ) ^ 2 = 1 / 2 := by
+      rw [inv_pow, pow_two, h2]
+      norm_num
+    rw [hr]
+    push_cast
+    ring
+  have hcne : c ≠ 0 := by
+    rw [hc]
+    simp [hs]
+  have hconj : (starRingEnd ℂ) c = c := by
+    rw [hc]
+    exact Complex.conj_ofReal _
+  refine ⟨(⟨Bool, inferInstance, inferInstance⟩ : FiniteModel),
+    (fun i j ↦ if i = true ∧ j = true then -c else c), ?_, ?_⟩
+  · rw [Matrix.mem_unitaryGroup_iff]
+    ext i j
+    rw [Matrix.mul_apply, Matrix.one_apply]
+    rcases i with _ | _ <;> rcases j with _ | _
+    · simp only [Fintype.sum_bool, Matrix.star_apply]
+      norm_num [hconj]
+      linear_combination 2 * hcc
+    · simp only [Fintype.sum_bool, Matrix.star_apply]
+      norm_num [hconj]
+    · simp only [Fintype.sum_bool, Matrix.star_apply]
+      norm_num [hconj]
+    · simp only [Fintype.sum_bool, Matrix.star_apply]
+      norm_num [hconj]
+      linear_combination 2 * hcc
+  · intro d σ hcon
+    have h1 := congrFun (congrFun hcon false) false
+    have h3 := congrFun (congrFun hcon false) true
+    rw [monomialMatrix_apply] at h1 h3
+    have hzero : c = 0 := by
+      by_cases hsig : σ false = false
+      · rw [hsig] at h3
+        simpa using h3
+      · have hsig' : σ false = true := by
+          cases hb : σ false
+          · exact absurd hb hsig
+          · rfl
+        rw [hsig'] at h1
+        simpa using h1
+    exact hcne hzero
+
 end NonsoficGroupsExist

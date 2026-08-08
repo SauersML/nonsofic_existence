@@ -467,6 +467,21 @@ where all three hold simultaneously — two points, trivial action, trivial
 phases — and there the inequality is an **equality**, both sides `4`.  The chain
 is neither vacuous nor lossy at its extreme.
 
+### Scope
+
+Every result in §§6a–6e is about **monomial** models.  That is the right class
+for the sofic side — soficity *is* combinatorial monomial approximability (§5) —
+but not for the hyperlinear side, which supplies arbitrary unitaries.  The
+monomial matrices are a proper subgroup of `U(n)`: the two-point Hadamard matrix
+is unitary and has two nonzero entries in a row, which no monomial matrix has
+(`exists_unitary_not_monomial`).
+
+So a group could be hyperlinear through models nowhere near monomial, and none
+of these results would apply.  What justifies the restriction in the one case
+where it is justified is external — Thom's microstates are monomial because
+every finite-dimensional unitary representation of `K` kills its divisible
+centre (§4) — not anything proved in §§6a–6e.
+
 The extreme case needs no pigeonhole (`untwist_separation_undetermined`).  On
 the *same* `σ`, constant phase `1` untwists to separation exactly `1`; constant
 phase `0` untwists to exactly `1 − F`.  The two monomial matrices differ by a
