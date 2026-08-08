@@ -2327,6 +2327,13 @@ CountableNonsoficGroupExists
   2 < n → Group.FG ↥(elementaryGroup (Fin n) R)
 ```
 
+## `NonsoficGroupsExist.eq_one_of_finite_divisible`
+
+```lean
+∀ {D : Type u_1} [inst : Group D] [Finite D],
+  (∀ (n : ℕ), 0 < n → ∀ (d : D), ∃ e, e ^ n = d) → ∀ (d : D), d = 1
+```
+
 ## `NonsoficGroupsExist.eq_top_of_permHom_trivial`
 
 ```lean
@@ -2783,6 +2790,13 @@ CountableNonsoficGroupExists
   a ≠ 0 → Function.Injective (lampEmbedding a)
 ```
 
+## `NonsoficGroupsExist.map_eq_one_of_divisible`
+
+```lean
+∀ {D : Type u_1} {B : Type u_2} [inst : Group D] [inst_1 : Group B] [Finite B],
+  (∀ (n : ℕ), 0 < n → ∀ (d : D), ∃ e, e ^ n = d) → ∀ (f : D →* B) (d : D), f d = 1
+```
+
 ## `NonsoficGroupsExist.matching_injective`
 
 ```lean
@@ -2971,6 +2985,18 @@ CountableNonsoficGroupExists
 
 ```lean
 ∀ (l k : RankFour.Index), ∃ i, i ≠ l ∧ i ≠ k
+```
+
+## `NonsoficGroupsExist.rat_divisible`
+
+```lean
+∀ (n : ℕ), 0 < n → ∀ (q : ℚ), ∃ r, n • r = q
+```
+
+## `NonsoficGroupsExist.rat_map_eq_zero`
+
+```lean
+∀ {B : Type u_1} [inst : AddGroup B] [Finite B] (f : ℚ →+ B) (q : ℚ), f q = 0
 ```
 
 ## `NonsoficGroupsExist.re_nonpos_of_pow_four_eq_one`
