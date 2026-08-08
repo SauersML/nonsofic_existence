@@ -2394,6 +2394,24 @@ CountableNonsoficGroupExists
   (i j : ι) (h : i ≠ j), ∃ a, a ≠ 0 ∧ φ (elGen i j h a) = 1
 ```
 
+## `NonsoficGroupsExist.exists_re_normTrace_pow_ge`
+
+```lean
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      1 - 1 / 1000000 ≤ Complex.normSq (normTrace Y U) →
+        ∃ l, 1 ≤ l ∧ l ≤ 4 ∧ 1 / 4 ≤ (normTrace Y (U ^ l)).re
+```
+
+## `NonsoficGroupsExist.exists_re_pow_ge_of_normSq_near_one`
+
+```lean
+∀ {z : ℂ},
+  Complex.normSq z ≤ 1 →
+    1 - 1 / 1000 ≤ Complex.normSq z → ∃ l, 1 ≤ l ∧ l ≤ 4 ∧ 299 / 1000 ≤ (z ^ l).re
+```
+
 ## `NonsoficGroupsExist.exists_residuallyFinite_group_with_non_residuallyFinite_quotient`
 
 ```lean
@@ -2685,6 +2703,27 @@ CountableNonsoficGroupExists
     ∀ (A : Matrix Y.carrier Y.carrier ℂ), hsNormSq Y (A * V) = hsNormSq Y A
 ```
 
+## `NonsoficGroupsExist.hsNormSq_pow_four_sub_le`
+
+```lean
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      hsNormSq Y (U ^ 4 - normTrace Y U ^ 4 • 1) ≤ 22 * (1 - Complex.normSq (normTrace Y U))
+```
+
+## `NonsoficGroupsExist.hsNormSq_pow_succ_sub_le`
+
+```lean
+∀ (Y : FiniteModel) {U : Matrix Y.carrier Y.carrier ℂ},
+  U ∈ Matrix.unitaryGroup Y.carrier ℂ →
+    0 < Fintype.card Y.carrier →
+      ∀ (l : ℕ),
+        hsNormSq Y (U ^ (l + 1) - normTrace Y U ^ (l + 1) • 1) ≤
+          2 * hsNormSq Y (U - normTrace Y U • 1) +
+            2 * hsNormSq Y (U ^ l - normTrace Y U ^ l • 1)
+```
+
 ## `NonsoficGroupsExist.hsNormSq_smul`
 
 ```lean
@@ -2924,6 +2963,19 @@ CountableNonsoficGroupExists
 ∀ (Y : FiniteModel) (σ : Equiv.Perm Y.carrier),
   0 < Fintype.card Y.carrier →
     normTrace Y (Equiv.Perm.permMatrix ℂ σ) = ↑(1 - hammingDistance Y σ 1)
+```
+
+## `NonsoficGroupsExist.normTrace_smul_one`
+
+```lean
+∀ (Y : FiniteModel), 0 < Fintype.card Y.carrier → ∀ (c : ℂ), normTrace Y (c • 1) = c
+```
+
+## `NonsoficGroupsExist.normTrace_sub`
+
+```lean
+∀ (Y : FiniteModel) (A B : Matrix Y.carrier Y.carrier ℂ),
+  normTrace Y (A - B) = normTrace Y A - normTrace Y B
 ```
 
 ## `NonsoficGroupsExist.normTrace_tensorPow`

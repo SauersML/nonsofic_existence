@@ -69,6 +69,7 @@ CITED_OUTSIDE_AXIOM_REPORT = frozenset({
     "HyperlinearScalar",
     "MonomialModel",
     "PhaseOrder",
+    "PhasePropagation",
     "CommutantRigidity",
     "KunSpectralCounterexample",
     "SoficAmplification",
