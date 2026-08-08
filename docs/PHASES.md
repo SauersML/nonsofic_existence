@@ -820,8 +820,12 @@ for `K`: these groups arise as central quotients of groups known to be sofic, an
 **whether soficity passes to central quotients is itself unsettled**.  So the
 difficulty is not finding a suitable group; it is that no method distinguishes
 the sofic ones among them.  Cornulier's group is not special in this respect —
-its property (T) was wanted for a different application.  (Not formalized: a
-reading of where the difficulty sits.)
+its property (T) was wanted for a different application.  The **unrestricted** version is not unsettled, and this
+development answers it: soficity does not pass to arbitrary quotients
+(`exists_sofic_with_nonsofic_quotient`) — every group is a quotient of a free
+group, free groups are sofic, and Theorem A supplies a nonsofic group.  So the
+central hypothesis is the right restriction to ask about rather than a
+convenience.  (The rest of this paragraph is a reading, not a result.)
 
 **What is missing, precisely.**  Every result here constrains models.  Deciding
 Question 3.4 negatively requires showing some particular hyperlinear group

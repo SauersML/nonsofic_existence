@@ -2,6 +2,7 @@ import NonsoficGroupsExist.Leavitt.UniversalCompressionSetup
 import NonsoficGroupsExist.Leavitt.UniversalPropertyT
 import NonsoficGroupsExist.Criterion.CriterionAssembly
 import NonsoficGroupsExist.Sofic.SoficTransfer
+import NonsoficGroupsExist.Sofic.FreeGroupResiduallyFinite
 import NonsoficGroupsExist.Leavitt.UniversalLeavittOver
 import NonsoficGroupsExist.PropertyT.FiniteTypeCharacteristicTwoPropertyT
 import NonsoficGroupsExist.Leavitt.FiniteFieldLeavitt
@@ -240,5 +241,32 @@ theorem exists_infinite_finitelyPresented_nonsofic_ambient_cover :
           Function.Surjective π := by
   exact exists_infinite_finitelyPresented_cover_of_not_isSofic
     universalLeavittEL4_not_isSofic
+
+/-! ## Soficity does not pass to quotients
+
+Remark `rem:thomK` observes that the candidate groups for Question 3.4 arise as
+central quotients of sofic groups, and that whether soficity survives such a
+quotient is unsettled.  The *unrestricted* question is not unsettled, and this
+development already answers it: soficity does not pass to arbitrary quotients.
+
+Every group is a quotient of a free group, free groups are sofic
+(`isSofic_freeGroup`), and by Theorem A a nonsofic group exists.  So some sofic
+group has a nonsofic quotient.  That is why the central hypothesis is the right
+restriction to be asking about, rather than a convenience: without it the
+question has a negative answer for reasons that have nothing to do with
+hyperlinearity.
+-/
+
+/-- **Soficity is not preserved by quotients.**  A corollary of Theorem A: every
+group is a quotient of a free group, and free groups are sofic, so the nonsofic
+group of `nonsofic_groups_exist` is a nonsofic quotient of a sofic one. -/
+theorem exists_sofic_with_nonsofic_quotient :
+    ∃ (G : Type) (_ : Group G) (H : Type) (_ : Group H) (f : G →* H),
+      Function.Surjective f ∧ IsSofic G ∧ ¬ IsSofic H := by
+  obtain ⟨H, hH, hnsofic⟩ := nonsofic_groups_exist
+  refine ⟨FreeGroup H, inferInstance, H, hH, FreeGroup.lift id, ?_,
+    isSofic_freeGroup H, hnsofic⟩
+  intro h
+  exact ⟨FreeGroup.of h, by simp⟩
 
 end NonsoficGroupsExist
